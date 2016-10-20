@@ -35,4 +35,19 @@
         <servlet-name>jersey-servlet</servlet-name>
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
+
+    <context-param>
+        <param-name>MONGODB_HOST</param-name><param-value>172.17.0.2</param-value>
+    </context-param>
+    <context-param>
+        <param-name>MONGODB_DB</param-name><param-value>mydatabase</param-value>
+    </context-param>
+    <context-param>
+        <param-name>MONGODB_USR</param-name><param-value>user</param-value>
+    </context-param>
+    <context-param>
+        <param-name>MONGODB_PWD</param-name><param-value>mypass</param-value>
+    </context-param>
+    <listener><listener-class>org.radarcns.listner.MongoDBContextListener</listener-class></listener>
+
 </web-app>
