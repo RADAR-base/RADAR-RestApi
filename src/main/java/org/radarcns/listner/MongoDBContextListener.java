@@ -2,7 +2,6 @@ package org.radarcns.listner;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
-import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
 
 import org.bson.Document;
@@ -29,7 +28,10 @@ public class MongoDBContextListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         MongoClient mongo = (MongoClient) sce.getServletContext().getAttribute("MONGO_CLIENT");
-        mongo.close();
+
+        if(mongo != null) {
+            mongo.close();
+        }
     }
 
     @Override
@@ -40,6 +42,7 @@ public class MongoDBContextListener implements ServletContextListener {
 
             if (checkMongoConnection(mongoClient)) {
                 sce.getServletContext().setAttribute("MONGO_CLIENT", mongoClient);
+                logger.info("MongoDB connection established");
             }
         }
         catch (com.mongodb.MongoSocketOpenException e){
@@ -51,25 +54,35 @@ public class MongoDBContextListener implements ServletContextListener {
     }
 
     private boolean checkMongoConnection(MongoClient mongoClient){
+        Boolean flag = false;
         try {
             mongoClient.getDatabase("admin").runCommand(new Document("ping", 1));
-            return true;
+            flag = true;
         } catch (Exception e) {
             mongoClient.close();
             logger.info("Error during connection test",e);
         }
 
-        return false;
+        logger.info("MongoDB connection id {}",flag.toString());
+
+        return flag;
     }
 
     private List<ServerAddress> getMongoDbServer(ServletContextEvent sce){
         //MONGODB_HOST is a comma separated list of all mongo db instances
-        String paramWebXml = sce.getServletContext().getInitParameter("MONGODB_HOST");
-        List<String> values = Arrays.asList(paramWebXml.split(","));
+        String serverWebXml = sce.getServletContext().getInitParameter("MONGODB_HOST");
+        List<String> servers = Arrays.asList(serverWebXml.split(","));
+
+        /*String portWebXml = sce.getServletContext().getInitParameter("MONGODB_PORT");
+        List<String> ports = Arrays.asList(portWebXml.split(","));*/
+
+        /*if(servers.size() != ports.size()){
+            throw new InvalidParameterException("Server list and port list have different cardinality");
+        }*/
 
         final List<ServerAddress> result = new LinkedList<>();
-        for (String value: values){
-            result.add(new ServerAddress(value));
+        for (int i=0; i<servers.size(); i++){
+            result.add(new ServerAddress(servers.get(i)));
         }
 
         return result;
