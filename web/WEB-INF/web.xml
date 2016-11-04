@@ -17,7 +17,7 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
-    <servlet>
+   <servlet>
         <servlet-name>Jersey2Config</servlet-name>
         <servlet-class>io.swagger.jersey.config.JerseyJaxrsConfig</servlet-class>
         <init-param>
@@ -26,7 +26,7 @@
         </init-param>
         <init-param>
             <param-name>swagger.api.basepath</param-name>
-            <param-value>http://localhost:8080/radar/api</param-value>
+            <param-value>http://radar-rest-api.eu-west-1.elasticbeanstalk.com/api</param-value>
         </init-param>
         <load-on-startup>2</load-on-startup>
     </servlet>
@@ -37,16 +37,16 @@
     </servlet-mapping>
 
     <context-param>
-        <param-name>MONGODB_HOST</param-name><param-value>172.17.0.2</param-value>
+        <param-name>MONGODB_HOST</param-name><param-value>ec2-54-246-185-250.eu-west-1.compute.amazonaws.com</param-value>
     </context-param>
     <context-param>
-        <param-name>MONGODB_DB</param-name><param-value>mydatabase</param-value>
+        <param-name>MONGODB_DB</param-name><param-value>hotstorage</param-value>
     </context-param>
     <context-param>
-        <param-name>MONGODB_USR</param-name><param-value>user</param-value>
+        <param-name>MONGODB_USR</param-name><param-value>restapi</param-value>
     </context-param>
     <context-param>
-        <param-name>MONGODB_PWD</param-name><param-value>mypass</param-value>
+        <param-name>MONGODB_PWD</param-name><param-value>radar</param-value>
     </context-param>
     <listener><listener-class>org.radarcns.listner.MongoDBContextListener</listener-class></listener>
 

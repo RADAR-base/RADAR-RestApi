@@ -8,7 +8,6 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +15,8 @@ import java.util.List;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Created by Francesco Nobilia on 19/10/2016.
@@ -40,7 +41,7 @@ public class MongoDBContextListener implements ServletContextListener {
         try {
             mongoClient = new MongoClient(getMongoDbServer(sce), getMongoDbCredential(sce));
 
-            if (checkMongoConnection(mongoClient)) {
+            if (checkMongoConnection(mongoClient,sce.getServletContext().getInitParameter("MONGODB_DB"))) {
                 sce.getServletContext().setAttribute("MONGO_CLIENT", mongoClient);
                 logger.info("MongoDB connection established");
             }
@@ -53,10 +54,10 @@ public class MongoDBContextListener implements ServletContextListener {
 
     }
 
-    private boolean checkMongoConnection(MongoClient mongoClient){
+    private boolean checkMongoConnection(MongoClient mongoClient, String dbName){
         Boolean flag = false;
         try {
-            mongoClient.getDatabase("admin").runCommand(new Document("ping", 1));
+            mongoClient.getDatabase(dbName).runCommand(new Document("ping", 1));
             flag = true;
         } catch (Exception e) {
             mongoClient.close();
@@ -89,17 +90,10 @@ public class MongoDBContextListener implements ServletContextListener {
     }
 
     private List<MongoCredential> getMongoDbCredential(ServletContextEvent sce){
-        List<MongoCredential> credentials = new ArrayList<>();
-
-        credentials.add(
-                MongoCredential.createMongoCRCredential(
-                        sce.getServletContext().getInitParameter("MONGODB_USR"),
-                        sce.getServletContext().getInitParameter("MONGODB_DB"),
-                        sce.getServletContext().getInitParameter("MONGODB_PWD").toCharArray()
-                )
-        );
-
-        return credentials;
+        return singletonList(MongoCredential.createCredential(
+                    sce.getServletContext().getInitParameter("MONGODB_USR"),
+                    sce.getServletContext().getInitParameter("MONGODB_DB"),
+                    sce.getServletContext().getInitParameter("MONGODB_PWD").toCharArray()));
     }
 
 }

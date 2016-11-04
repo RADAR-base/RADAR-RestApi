@@ -29,7 +29,7 @@ public class Statistics {
     public Response checkPatientDevices(@PathParam("userID") String userID) {
         MongoClient mongoClient = (MongoClient) context.getAttribute("MONGO_CLIENT");
         MongoDatabase database = mongoClient.getDatabase(context.getInitParameter("MONGODB_DB"));
-        MongoCollection<Document> collection = database.getCollection("monitor");
+        MongoCollection<Document> collection = database.getCollection("heartrate");
 
         String json = MongodbDAO.findDocumentByUser(userID,collection);
 
