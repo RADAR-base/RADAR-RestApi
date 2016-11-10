@@ -1,0 +1,69 @@
+plugins {
+  // Apply the java plugin to add support for Java
+  id 'java'
+  id 'idea'
+  id 'com.commercehub.gradle.plugin.avro-base' version '0.8.0'
+  id 'war'
+}
+
+war {
+  archiveName = 'radar.war'
+}
+
+targetCompatibility = '1.7'
+sourceCompatibility = '1.7'
+
+ext.tomcat = '8.0.37'
+ext.logback = '1.1.7'
+ext.jersey = '2.22.1'
+ext.json='20160810'
+ext.swagger='1.5.0'
+ext.mongodb='3.3.0'
+ext.avro='1.7.7'
+ext.jackson='2.8.4'
+ext.snakeyaml='1.17'
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+  // Use 'jcenter' for resolving your dependencies.
+  // You can declare any Maven/Ivy/file repository here.
+  jcenter()
+  maven {
+    url 'http://packages.confluent.io/maven/'
+  }
+}
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+  // The production code runs on tomcat 8.0.37
+  providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
+
+  // The production code uses the SLF4J logging API at compile time
+  compile group: 'ch.qos.logback', name:'logback-classic', version: logback
+
+  compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
+  compile group: 'org.json', name: 'json', version: json
+  compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
+  compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
+  compile group: 'ch.qos.logback', name: 'logback-classic', version: logback
+  compile group: 'org.apache.avro', name: 'avro', version: avro
+  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: jackson
+  compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
+}
+
+task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
+  source("src/main/resources/avro")
+  outputDir = file("build/avro")
+}
+
+compileJava.source(generateAvro.outputs)
+
+idea {
+  module {
+    sourceDirs += file("build/avro")
+  }
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '3.0'
+}
