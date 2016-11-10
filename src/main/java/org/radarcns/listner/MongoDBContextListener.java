@@ -5,6 +5,7 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 
 import org.bson.Document;
+import org.radarcns.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,11 +39,18 @@ public class MongoDBContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         MongoClient mongoClient = null;
-        try {
-            mongoClient = new MongoClient(getMongoDbServer(sce), getMongoDbCredential(sce));
 
-            if (checkMongoConnection(mongoClient,sce.getServletContext().getInitParameter("MONGODB_DB"))) {
+        Properties prop = new Properties();
+
+        try {
+
+            List<MongoCredential> credentials = prop.getMongoUsers();
+
+            mongoClient = new MongoClient(prop.getMongoHosts(),credentials);
+
+            if (checkMongoConnection(mongoClient,credentials)) {
                 sce.getServletContext().setAttribute("MONGO_CLIENT", mongoClient);
+
                 logger.info("MongoDB connection established");
             }
         }
@@ -50,50 +58,32 @@ public class MongoDBContextListener implements ServletContextListener {
             if(mongoClient != null) {
                 mongoClient.close();
             }
+
+            logger.error(e.getMessage());
         }
 
     }
 
-    private boolean checkMongoConnection(MongoClient mongoClient, String dbName){
-        Boolean flag = false;
+    private boolean checkMongoConnection(MongoClient mongoClient, List<MongoCredential> credentials){
+        Boolean flag = true;
         try {
-            mongoClient.getDatabase(dbName).runCommand(new Document("ping", 1));
-            flag = true;
+            for(MongoCredential user : credentials) {
+                mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
+            }
+
         } catch (Exception e) {
-            mongoClient.close();
-            logger.info("Error during connection test",e);
+            flag = false;
+
+            if(mongoClient != null) {
+                mongoClient.close();
+            }
+
+            logger.error("Error during connection test",e);
         }
 
-        logger.info("MongoDB connection id {}",flag.toString());
+        logger.info("MongoDB connection is {}",flag.toString());
 
         return flag;
-    }
-
-    private List<ServerAddress> getMongoDbServer(ServletContextEvent sce){
-        //MONGODB_HOST is a comma separated list of all mongo db instances
-        String serverWebXml = sce.getServletContext().getInitParameter("MONGODB_HOST");
-        List<String> servers = Arrays.asList(serverWebXml.split(","));
-
-        /*String portWebXml = sce.getServletContext().getInitParameter("MONGODB_PORT");
-        List<String> ports = Arrays.asList(portWebXml.split(","));*/
-
-        /*if(servers.size() != ports.size()){
-            throw new InvalidParameterException("Server list and port list have different cardinality");
-        }*/
-
-        final List<ServerAddress> result = new LinkedList<>();
-        for (int i=0; i<servers.size(); i++){
-            result.add(new ServerAddress(servers.get(i)));
-        }
-
-        return result;
-    }
-
-    private List<MongoCredential> getMongoDbCredential(ServletContextEvent sce){
-        return singletonList(MongoCredential.createCredential(
-                    sce.getServletContext().getInitParameter("MONGODB_USR"),
-                    sce.getServletContext().getInitParameter("MONGODB_DB"),
-                    sce.getServletContext().getInitParameter("MONGODB_PWD").toCharArray()));
     }
 
 }

@@ -9,3 +9,10 @@
 # Maven
 log/
 target/
+
+# Gradle
+.gradle/
+.gradletasknamecache
+
+# Build
+/build/
