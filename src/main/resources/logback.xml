@@ -15,8 +15,11 @@
     </appender>
 
     <logger name="org.radarcns.listner.MongoDBContextListener" level="TRACE"/>
-    <logger name="org.radarcns.config.Properties" level="TRACE"/>
-    <logger name="org.radarcns.config.RadarConfig" level="TRACE"/>
+    <logger name="org.radarcns.config.Properties" level="ERROR"/>
+    <logger name="org.radarcns.config.RadarConfig" level="ERROR"/>
+    <logger name="org.radarcns.dao.MongoHeartRateDAO" level="TRACE"/>
+    <logger name="org.radarcns.dao.MongoDAO" level="TRACE"/>
+    <logger name="org.radarcns.util.AvroConverter" level="ERROR"/>
 
     <root level="error">
         <appender-ref ref="FILE" />
