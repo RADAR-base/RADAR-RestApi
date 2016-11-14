@@ -1,20 +1,23 @@
 # RADAR-CNS REST-API
 
-A REST-FULL Service using Tomcat 8.0.37, MongoDb 3.2.10 and Jersey 2.
+A REST-FULL Service using Tomcat 8.0.37, MongoDb 3.2.10, Swagger 2.0, Apache Avro 1.7.7 and Jersey 2.
 
 Thi project implents the downstream REST API for the RADAR-CNS project'
 
 ## Setup
 
-Before deploying the war file copy the radar.yml file into `/usr/local/tomcat/conf/`. If your installation uses a different path you have to modify the variable `pathFile` in `org.radarcns.config.Properties` After that
+Before deploying the war file edit the `radar.yml` config file and then copy it into `/usr/local/tomcat/conf/`. If your installation uses a different path you need to modify the variable `pathFile` in `org.radarcns.config.Properties` After that
 - Run `./gradlew build`
 - Copy the radar.war located at `build/libs/` in `/usr/local/tomcat/webapp/`
-- Stop tomcat
-- Start tomcat
 
-The application log file is located at `/usr/local/tomcat/log/radar-restapi.log`
+The application log file is located at `/usr/local/tomcat/log/radar-restapi.log`. You need to modify this location, update the file tag in `/resources/logback.xml`
 
 The api documentation is located at `<your-server-address>:<port>/radar/api/swagger.json`
+
+## Dev Environment
+Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json) to see documentation of dev deploy instance.
+
+Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/HeartRate/avg/user) to see some mock data.
 
 ## Contributing
 

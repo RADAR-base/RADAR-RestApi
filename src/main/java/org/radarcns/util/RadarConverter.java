@@ -2,7 +2,6 @@ package org.radarcns.util;
 
 import org.radarcns.avro.DescriptiveStatistic;
 import org.radarcns.dao.MongoDAO;
-import org.radarcns.dao.MongoHeartRateDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +32,8 @@ public class RadarConverter {
             case max: return DescriptiveStatistic.maximum;
             case min: return DescriptiveStatistic.minimum;
             case sum: return DescriptiveStatistic.sum;
+            case quartile: return DescriptiveStatistic.quartiles;
+            case median: return DescriptiveStatistic.median;
             default: logger.info("No translation for {}",stat); return null;
         }
     }

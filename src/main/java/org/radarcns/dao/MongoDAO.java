@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.function.BooleanSupplier;
 
 import javax.servlet.ServletContext;
 
@@ -30,7 +29,7 @@ public class MongoDAO {
 
     //Enumerate all possible topics
     public enum Stat {
-        avg("avg"), count("count"), iqr("iqr"), max("max"), min("min"), quartile("quartile"), sum("sum");
+        avg("avg"), count("count"), iqr("iqr"), max("max"), median("quartile"), min("min"), quartile("quartile"), sum("sum");
 
         private final String param;
 

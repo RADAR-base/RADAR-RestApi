@@ -1,6 +1,5 @@
 package org.radarcns.util;
 
-import org.radarcns.dao.MongoHeartRateDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,10 @@ public class SwaggerBootstrap extends HttpServlet {
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setVersion("1.0.0");
         beanConfig.setSchemes(new String[]{"http"});
+
         beanConfig.setHost("localhost:8080");
+        //beanConfig.setHost("radar-restapi.eu-west-1.elasticbeanstalk.com");
+
         beanConfig.setBasePath("/api");
         beanConfig.setResourcePackage("org.radarcns.webapp");
 

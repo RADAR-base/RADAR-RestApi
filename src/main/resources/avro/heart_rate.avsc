@@ -3,7 +3,7 @@
   "name": "HeartRate",
   "doc": "Heart Rate resulting from data aggregation.",
   "fields": [
-    {"name": "heart_rate", "type": "HeartRateValue"},
+    {"name": "heart_rate", "type": [ "HeartRateValue" , "Quartiles" ]},
     {"name": "effective_time_frame", "type": "EffectiveTimeFrame"},
     {"name": "descriptive_statistic", "type": "DescriptiveStatistic"}
   ]

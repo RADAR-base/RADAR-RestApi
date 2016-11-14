@@ -9,6 +9,7 @@
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>/usr/local/tomcat/logs/radar-restapi.log</file>
+        <!--file>/usr/share/tomcat8/logs/radar-restapi.log</file-->
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>%date{yyyy-MM-dd HH:mm:ss,UTC} UTC [%thread] %-5level %logger - %msg%n</Pattern>
         </layout>
@@ -18,7 +19,7 @@
     <logger name="org.radarcns.config.RadarConfig" level="ERROR"/>
 
     <logger name="org.radarcns.dao.MongoDAO" level="ERROR"/>
-    <logger name="org.radarcns.dao.MongoHeartRateDAO" level="INFO"/>
+    <logger name="org.radarcns.dao.MongoHeartRateDAO" level="DEBUG"/>
 
     <logger name="org.radarcns.listner.MongoDBContextListener" level="INFO"/>
 

@@ -1,9 +1,7 @@
 package org.radarcns.dao;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 
 import org.bson.Document;
 import org.radarcns.avro.DescriptiveStatistic;
@@ -12,11 +10,14 @@ import org.radarcns.avro.HeartRate;
 import org.radarcns.avro.HeartRateDataSet;
 import org.radarcns.avro.HeartRateItem;
 import org.radarcns.avro.HeartRateValue;
+import org.radarcns.avro.Quartiles;
+import org.radarcns.avro.QuartilesItem;
 import org.radarcns.avro.Unit;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -84,7 +85,7 @@ public class MongoHeartRateDAO {
         Date start = null;
         Date end = null;
 
-        LinkedList<HeartRateItem> list = new LinkedList<>();
+        LinkedList<Object> list = new LinkedList<>();
 
         if(!cursor.hasNext()){
             logger.info("Empty cursor");
@@ -102,7 +103,24 @@ public class MongoHeartRateDAO {
 
             EffectiveTimeFrame etf = new EffectiveTimeFrame(RadarConverter.getISO8601(doc.getDate("start")),RadarConverter.getISO8601(doc.getDate("end")));
 
-            list.addLast(new HeartRateItem(doc.getDouble(field),etf));
+            if(stat.equals(DescriptiveStatistic.median) || stat.equals(DescriptiveStatistic.quartiles)){
+
+                ArrayList<Document> quartiles_list = (ArrayList<Document>) doc.get(field);
+
+                if(stat.equals(DescriptiveStatistic.quartiles)) {
+                    list.addLast(new QuartilesItem(
+                                quartiles_list.get(0).getDouble("25"),
+                                quartiles_list.get(1).getDouble("50"),
+                                quartiles_list.get(2).getDouble("75"),etf));
+                }
+                else if(stat.equals(DescriptiveStatistic.median)){
+                    list.addLast(new HeartRateItem(quartiles_list.get(1).getDouble("50"),etf));
+                }
+
+            }
+            else{
+                list.addLast(new HeartRateItem(doc.getDouble(field),etf));
+            }
         }
 
         cursor.close();
@@ -131,7 +149,28 @@ public class MongoHeartRateDAO {
             Document doc = cursor.next();
 
             EffectiveTimeFrame etf = new EffectiveTimeFrame(RadarConverter.getISO8601(doc.getDate("start")),RadarConverter.getISO8601(doc.getDate("end")));
-            HeartRateValue hrv = new HeartRateValue(doc.getDouble(field),unit);
+
+            Object hrv = null;
+
+            if(stat.equals(DescriptiveStatistic.median) || stat.equals(DescriptiveStatistic.quartiles)){
+
+                ArrayList<Document> quartiles_list = (ArrayList<Document>) doc.get(field);
+
+                if(stat.equals(DescriptiveStatistic.quartiles)) {
+                    hrv = new Quartiles(
+                                    quartiles_list.get(0).getDouble("25"),
+                                    quartiles_list.get(1).getDouble("50"),
+                                    quartiles_list.get(2).getDouble("75"),
+                                    Unit.beats_per_min);
+                }
+                else if(stat.equals(DescriptiveStatistic.median)){
+                    hrv = new HeartRateValue(quartiles_list.get(1).getDouble("50"),unit);
+                }
+
+            }
+            else{
+                hrv = new HeartRateValue(doc.getDouble(field),unit);
+            }
 
             hr = new HeartRate(hrv,etf,stat);
         }

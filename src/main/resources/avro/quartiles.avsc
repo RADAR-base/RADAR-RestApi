@@ -1,0 +1,11 @@
+{"namespace": "org.radarcns.avro",
+  "type": "record",
+  "name": "Quartiles",
+  "doc": "List of quartiles",
+  "fields": [
+    {"name": "first", "type": "double"},
+    {"name": "second", "type": "double"},
+    {"name": "third", "type": "double"},
+    {"name": "unit", "type": "Unit"}
+  ]
+}

@@ -35,7 +35,7 @@ public class HeartRateApp {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{stat}/RT/{userID}")
+    @Path("/RT/{stat}/{userID}")
     @ApiOperation(
             value = "Return a Heart Rate values",
             notes = "Return the last seen Heart rate value of type stat for the given userID")
