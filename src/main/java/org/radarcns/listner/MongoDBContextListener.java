@@ -2,22 +2,17 @@ package org.radarcns.listner;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
 
 import org.bson.Document;
 import org.radarcns.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-
-import static java.util.Collections.singletonList;
 
 /**
  * Created by Francesco Nobilia on 19/10/2016.
@@ -25,7 +20,7 @@ import static java.util.Collections.singletonList;
 @WebListener
 public class MongoDBContextListener implements ServletContextListener {
 
-    Logger logger = LoggerFactory.getLogger(MongoDBContextListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(MongoDBContextListener.class);
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {

@@ -18,7 +18,7 @@ import static java.util.Collections.singletonList;
  */
 public class RadarConfig {
 
-    Logger logger = LoggerFactory.getLogger(RadarConfig.class);
+    private final Logger logger = LoggerFactory.getLogger(RadarConfig.class);
 
     private Date released;
     private String version;
