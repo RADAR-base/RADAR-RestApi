@@ -2,6 +2,9 @@ package org.radarcns.webapp;
 
 import com.mongodb.MongoClient;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -19,6 +22,9 @@ import io.swagger.annotations.ApiResponses;
 @Api
 @Path("/")
 public class ServiceStatusRADAR {
+
+    private static Logger logger = LoggerFactory.getLogger(ServiceStatusRADAR.class);
+
     @Context ServletContext context;
 
     @GET
@@ -39,7 +45,7 @@ public class ServiceStatusRADAR {
     }
 
     @GET
-    @Path("/db/status")
+    @Path("/status/db")
     @ApiOperation(
             value = "Get Status",
             notes = "Check and return the healthy of each architecture components")

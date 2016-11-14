@@ -1,7 +1,9 @@
 package org.radarcns.dao;
 
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 
 import org.bson.Document;
 import org.radarcns.avro.DescriptiveStatistic;
@@ -18,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.LinkedList;
 
+import javax.servlet.ServletContext;
+
 import static org.radarcns.dao.MongoDAO.findDocumentByUser;
 import static org.radarcns.dao.MongoDAO.findDocumentByUserAndWindow;
 
@@ -26,56 +30,70 @@ import static org.radarcns.dao.MongoDAO.findDocumentByUserAndWindow;
  */
 public class MongoHeartRateDAO {
 
-    public static Logger logger = LoggerFactory.getLogger(MongoHeartRateDAO.class);
+    private static final Logger logger = LoggerFactory.getLogger(MongoHeartRateDAO.class);
 
-    /*public static String findDocumentByUserTest(String user, MongoCollection<Document> collection) {
+    /**
+     * @param user is the userID
+     * @param stat is the required statistical value
+     * @param context is the servlet context needed to retrieve the mongoDb client istance
+     * @return the last seen HR stat for the given UserID, otherwise null
+     */
+    public static HeartRate valueRTByUser(String user, MongoDAO.Stat stat, ServletContext context) {
 
-        FindIterable<Document> result = collection.find(eq("user",user));
+        MongoCursor<Document> cursor = findDocumentByUser(user,"end",-1,1,getCollection(context));
 
-        List<Statistic> list = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
+        return getValue(stat.getParam(),RadarConverter.getDescriptiveStatistic(stat),Unit.beats_per_min,cursor);
+    }
 
-        String encodeJSON = "";
+    /**
+     * @param user is the userID
+     * @param stat is the required statistical value
+     * @param context is the servlet context needed to retrieve the mongoDb client istance
+     * @return all HR dataset for the given userID, otherwise null
+     */
+    public static HeartRateDataSet valueByUser(String user, MongoDAO.Stat stat, ServletContext context) {
 
-        MongoCursor<Document> cursor = result.iterator();
-        try {
-            while (cursor.hasNext()) {
+        MongoCursor<Document> cursor = findDocumentByUser(user,"start",1,null,getCollection(context));
 
-                String temp = cursor.next().toJson();
-                System.out.println(temp);
+        return getDataSet(stat.getParam(),RadarConverter.getDescriptiveStatistic(stat),Unit.beats_per_min,cursor);
+    }
 
-                list.add(mapper.readValue(temp,Statistic.class));
-            }
+    /**
+     * @param user is the userID
+     * @param stat is the required statistical value
+     * @param start is time window start point in millisecond
+     * @param end  is time window end point in millisecond
+     * @param context is the servlet context needed to retrieve the mongoDb client istance
+     * @return all HR dataset for the given userID, otherwise null
+     */
+    public static HeartRateDataSet valueByUserWindow(String user, MongoDAO.Stat stat, Long start, Long end, ServletContext context) {
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            mapper.writeValue(out, list);
+        MongoCursor<Document> cursor = findDocumentByUserAndWindow(user,start,end,getCollection(context));
 
-            byte[] data = out.toByteArray();
-            encodeJSON = new String(data);
-        }
-        catch (IOException e){
-            logger.error(e.getMessage());
-        }
-        finally {
-            cursor.close();
-        }
+        return getDataSet(stat.getParam(),RadarConverter.getDescriptiveStatistic(stat),Unit.beats_per_min,cursor);
+    }
 
-        return encodeJSON;
-    }*/
-
-    public static HeartRateDataSet avgByUser(String user, MongoCollection<Document> collection) {
-
-        MongoCursor<Document> cursor = findDocumentByUser(user,"start",1,collection);
-
+    /**
+     * @param field is the mongodb field that has to be extracted
+     * @param stat is the statistical functional represented by the extracted field
+     * @param unit is the unit of the extracted value
+     * @param cursor the mongoD cursor
+     * @return a HearRate dataset for the given input, otherwise null
+     */
+    private static HeartRateDataSet getDataSet(String field, DescriptiveStatistic stat, Unit unit, MongoCursor<Document> cursor){
         Date start = null;
         Date end = null;
 
         LinkedList<HeartRateItem> list = new LinkedList<>();
 
+        if(!cursor.hasNext()){
+            logger.info("Empty cursor");
+            return null;
+        }
+
         while (cursor.hasNext()) {
 
             Document doc = cursor.next();
-            logger.debug(doc.toJson().toString());
 
             if(start == null){
                 start = doc.getDate("start");
@@ -84,36 +102,55 @@ public class MongoHeartRateDAO {
 
             EffectiveTimeFrame etf = new EffectiveTimeFrame(RadarConverter.getISO8601(doc.getDate("start")),RadarConverter.getISO8601(doc.getDate("end")));
 
-            list.addLast(new HeartRateItem(doc.getDouble("avg"),etf));
+            list.addLast(new HeartRateItem(doc.getDouble(field),etf));
         }
+
+        cursor.close();
 
         EffectiveTimeFrame etf = new EffectiveTimeFrame(RadarConverter.getISO8601(start),RadarConverter.getISO8601(end));
 
-        HeartRateDataSet hrd = new HeartRateDataSet(list,etf,DescriptiveStatistic.average,Unit.beats_per_min);
+        HeartRateDataSet hrd = new HeartRateDataSet(list,etf,stat,unit);
+
+        logger.info("Found {} value",list.size());
 
         return hrd;
     }
 
-    public static HeartRate avgByUserWindow(String user, Long start, Long end, MongoCollection<Document> collection) {
+    /**
+     * @param field is the mongodb field that has to be extracted
+     * @param stat is the statistical functional represented by the extracted field
+     * @param unit is the unit of the extracted value
+     * @param cursor the mongoD cursor
+     * @return a HearRate single value for the given input, otherwise null
+     */
+    private static HeartRate getValue(String field, DescriptiveStatistic stat, Unit unit, MongoCursor<Document> cursor){
+        HeartRate hr = null;
 
-        MongoCursor<Document> cursor = findDocumentByUserAndWindow(user,start,end,collection);
-
-        while (cursor.hasNext()) {
+        if (cursor.hasNext()) {
 
             Document doc = cursor.next();
 
-            logger.debug(doc.toJson());
-
-            HeartRateValue hrv = new HeartRateValue(doc.getDouble("avg"), Unit.beats_per_min);
-
             EffectiveTimeFrame etf = new EffectiveTimeFrame(RadarConverter.getISO8601(doc.getDate("start")),RadarConverter.getISO8601(doc.getDate("end")));
+            HeartRateValue hrv = new HeartRateValue(doc.getDouble(field),unit);
 
-            HeartRate hr = new HeartRate(hrv, etf, DescriptiveStatistic.average);
-
-            return hr;
+            hr = new HeartRate(hrv,etf,stat);
         }
 
-        return null;
+        cursor.close();
+
+        if(hr == null) {
+            logger.info("No HR value found");
+        }
+
+        return hr;
+    }
+
+    /**
+     * @param context is the servelet context needed to retrieve the mongodb client instance
+     * @return the HearRate MongoDb collection
+     */
+    private static MongoCollection<Document> getCollection(ServletContext context){
+        return MongoDAO.getCollection(context,"heartrate");
     }
 
 }

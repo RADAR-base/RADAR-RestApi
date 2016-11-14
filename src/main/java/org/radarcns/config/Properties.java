@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class Properties {
 
-    Logger logger = LoggerFactory.getLogger(Properties.class);
+    private final Logger logger = LoggerFactory.getLogger(Properties.class);
 
     private RadarConfig config;
 

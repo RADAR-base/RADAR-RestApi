@@ -20,7 +20,7 @@ import javax.servlet.annotation.WebListener;
 @WebListener
 public class MongoDBContextListener implements ServletContextListener {
 
-    Logger logger = LoggerFactory.getLogger(MongoDBContextListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(MongoDBContextListener.class);
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
