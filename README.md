@@ -22,10 +22,10 @@ Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/HeartRate/a
 ## Clients
 Swagger provides a tool to automatically generate a client in several programming language.
 - Access this [link](http://editor.swagger.io)
-- Click on `File / Import URL` and paste `http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json` the click on `Import`
+- Click on `File / Import URL`
+- Paste `http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json` 
+- Click on `Import`
 - Click on `Generate Client` and select your programming language
-
-
 
 ## Contributing
 
