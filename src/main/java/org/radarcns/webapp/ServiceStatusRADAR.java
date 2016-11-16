@@ -48,7 +48,7 @@ public class ServiceStatusRADAR {
     @Path("/status/db")
     @ApiOperation(
             value = "Get Status",
-            notes = "Check and return the healthy of each architecture components")
+            notes = "Check and return the db connection healthy")
     @ApiResponses(value = {
             @ApiResponse(code = 503, message = "Service not available"),
             @ApiResponse(code = 200, message = "Service available")})

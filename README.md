@@ -19,6 +19,14 @@ Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.jso
 
 Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/HeartRate/avg/user) to see some mock data.
 
+## Clients
+Swagger provides a tool to automatically generate a client in several programming language.
+- Access this [link](http://editor.swagger.io)
+- Click on `File / Import URL`
+- Paste `http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json` 
+- Click on `Import`
+- Click on `Generate Client` and select your programming language
+
 ## Contributing
 
 Code should be formatted using the [Google Java Code Style Guide](https://google.github.io/styleguide/javaguide.html). If you want to contribute a feature or fix, please make a pull request
