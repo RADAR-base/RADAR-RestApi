@@ -1,4 +1,4 @@
-{"namespace": "org.radarcns.avro",
+{"namespace": "org.radarcns.avro.restapi.avro",
   "type": "record",
   "name": "Message",
   "doc": "Message for 204 HTTP Response",

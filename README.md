@@ -11,13 +11,14 @@ Before deploying the war file edit the `radar.yml` config file and then copy it 
 - Copy the radar.war located at `build/libs/` in `/usr/local/tomcat/webapp/`
 
 The application log file is located at `/usr/local/tomcat/log/radar-restapi.log`. You need to modify this location, update the file tag in `/resources/logback.xml`
+The log `rolling policy` entails you have a folder named `archived` under your log pah. If you do not have it, you must create it before running the project.
 
 The api documentation is located at `<your-server-address>:<port>/radar/api/swagger.json`
 
 ## Dev Environment
 Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json) to see documentation of dev deploy instance.
 
-Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/HeartRate/avg/user) to see some mock data.
+Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/HR/avg/user) to see some mock data.
 
 ## Clients
 Swagger provides a tool to automatically generate a client in several programming language.

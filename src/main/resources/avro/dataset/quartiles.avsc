@@ -1,11 +1,10 @@
-{"namespace": "org.radarcns.avro",
+{"namespace": "org.radarcns.avro.restapi.dataset",
   "type": "record",
   "name": "Quartiles",
   "doc": "List of quartiles",
   "fields": [
     {"name": "first", "type": "double"},
     {"name": "second", "type": "double"},
-    {"name": "third", "type": "double"},
-    {"name": "unit", "type": "Unit"}
+    {"name": "third", "type": "double"}
   ]
 }

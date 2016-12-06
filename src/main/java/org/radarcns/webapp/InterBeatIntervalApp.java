@@ -1,7 +1,7 @@
 package org.radarcns.webapp;
 
 import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.dao.mongo.HeartRateDAO;
+import org.radarcns.dao.mongo.InterBeatIntervalDAO;
 import org.radarcns.dao.mongo.util.MongoDAO;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
@@ -25,12 +25,12 @@ import io.swagger.annotations.ApiResponses;
  * Created by Francesco Nobilia on 18/10/2016.
  */
 @Api
-@Path("/HR")
-public class HeartRateApp {
+@Path("/IBI")
+public class InterBeatIntervalApp {
 
-    private static Logger logger = LoggerFactory.getLogger(HeartRateApp.class);
+    private static Logger logger = LoggerFactory.getLogger(InterBeatIntervalApp.class);
 
-    private final String sensorName = "heart_rate";
+    private final String sensorName = "inter_beat_interval";
 
     @Context ServletContext context;
 
@@ -38,23 +38,23 @@ public class HeartRateApp {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/RT/{stat}/{userID}")
     @ApiOperation(
-            value = "Return a Heart Rate values",
-            notes = "Return the last seen Heart rate value of type stat for the given userID")
+            value = "Return an Inter Beat Interval values",
+            notes = "Return the last seen Inter Beat Interval value of type stat for the given userID")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen heart_rate.avsc value for the required statistic function")})
+            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen inter_beat_interval.avsc value for the required statistic function")})
     public Response getRealTimeUser(
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset hr = HeartRateDAO.getInstance().valueRTByUser(userID, stat, context);
+            Dataset ibi = InterBeatIntervalDAO.getInstance().valueRTByUser(userID, stat, context);
 
-            if (hr.getDataset().isEmpty()) {
+            if (ibi.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(hr,hr.getDataset().size(),sensorName);
+            return ResponseHandler.getJsonResponse(ibi,ibi.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -66,23 +66,23 @@ public class HeartRateApp {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{stat}/{userID}")
     @ApiOperation(
-            value = "Return a dataset of Heart Rate values",
+            value = "Return a dataset of Inter Beat Interval values",
             notes = "Return a dataset for the given userID of type stat")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all available heart_rate.avsc values for the required statistic function")})
+            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all available inter_beat_interval.avsc values for the required statistic function")})
     public Response getAllByUser(
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset hr = HeartRateDAO.getInstance().valueByUser(userID, stat, context);
+            Dataset ibi = InterBeatIntervalDAO.getInstance().valueByUser(userID, stat, context);
 
-            if (hr.getDataset().isEmpty()) {
+            if (ibi.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(hr,hr.getDataset().size(),sensorName);
+            return ResponseHandler.getJsonResponse(ibi,ibi.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -94,25 +94,25 @@ public class HeartRateApp {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{stat}/{userID}/{start}/{end}")
     @ApiOperation(
-            value = "Return a dataset of Heart Rate values",
+            value = "Return a dataset of Inter Beat Interval values",
             notes = "Return a dataset of type stat for the given userID with data belonging to the time window [start - end]")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all heart_rate.avsc values belonging to the time window [start - end] for the required statistic function")})
+            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all inter_beat_interval.avsc values belonging to the time window [start - end] for the required statistic function")})
     public Response getByUserForWindow(
             @PathParam("userID") String userID,
             @PathParam("start") long start,
             @PathParam("end") long end,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset hr = HeartRateDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
+            Dataset ibi = InterBeatIntervalDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
 
-            if (hr.getDataset().isEmpty()) {
+            if (ibi.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(hr,hr.getDataset().size(),sensorName);
+            return ResponseHandler.getJsonResponse(ibi,ibi.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);

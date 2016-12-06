@@ -23,7 +23,7 @@ public class Properties {
     private RadarConfig config;
 
     private String pathFile = "/usr/local/tomcat/conf/";
-    //private String pathFile = "/usr/share/tomcat8/conf/";
+//    private String pathFile = "/usr/share/tomcat8/conf/";
 
     private String nameFile = "radar.yml";
 
