@@ -1,7 +1,7 @@
 package org.radarcns.util;
 
-import org.radarcns.avro.DescriptiveStatistic;
-import org.radarcns.dao.MongoDAO;
+import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.dao.mongo.util.MongoDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

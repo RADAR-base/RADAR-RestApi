@@ -22,6 +22,7 @@ ext.mongodb='3.3.0'
 ext.avro='1.7.7'
 ext.jackson='2.8.4'
 ext.snakeyaml='1.17'
+ext.jerseymedia = '2.24'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -49,6 +50,10 @@ dependencies {
   compile group: 'org.apache.avro', name: 'avro', version: avro
   compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: jackson
   compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
+  compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
+  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-avro', version: '2.8.5'
+
+  testCompile 'junit:junit:4.12'
 }
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
@@ -66,4 +71,8 @@ idea {
 
 task wrapper(type: Wrapper) {
   gradleVersion = '3.0'
+}
+
+test {
+  testLogging.showStandardStreams = true
 }

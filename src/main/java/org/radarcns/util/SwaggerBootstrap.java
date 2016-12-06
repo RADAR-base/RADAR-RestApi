@@ -26,7 +26,7 @@ public class SwaggerBootstrap extends HttpServlet {
         beanConfig.setSchemes(new String[]{"http"});
 
         beanConfig.setHost("localhost:8080");
-        //beanConfig.setHost("radar-restapi.eu-west-1.elasticbeanstalk.com");
+//        beanConfig.setHost("radar-restapi.eu-west-1.elasticbeanstalk.com");
 
         beanConfig.setBasePath("/api");
         beanConfig.setResourcePackage("org.radarcns.webapp");

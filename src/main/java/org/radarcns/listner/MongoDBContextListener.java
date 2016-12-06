@@ -76,7 +76,7 @@ public class MongoDBContextListener implements ServletContextListener {
             logger.error("Error during connection test",e);
         }
 
-        logger.info("MongoDB connection is {}",flag.toString());
+        logger.debug("MongoDB connection is {}",flag.toString());
 
         return flag;
     }

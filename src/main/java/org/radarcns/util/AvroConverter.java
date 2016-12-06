@@ -35,6 +35,17 @@ public class AvroConverter {
 
     private static Logger logger = LoggerFactory.getLogger(AvroConverter.class);
 
+    public static JsonNode avroToJsonNode(SpecificRecord record){
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readTree(record.toString());
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+
+        return null;
+    }
+
     /**
      * Returns an encoded JSON string for the given Avro object.
      *
@@ -48,14 +59,12 @@ public class AvroConverter {
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             JsonEncoder encoder = EncoderFactory.get().jsonEncoder(record.getSchema(), os);
-            DatumWriter<SpecificRecord> writer = new GenericDatumWriter<>();
-            if (record instanceof SpecificRecord) {
-                writer = new SpecificDatumWriter<>();
-            }
+
+            DatumWriter<SpecificRecord> writer = new SpecificDatumWriter<>();
 
             writer.setSchema(record.getSchema());
 
-                writer.write(record, encoder);
+            writer.write(record, encoder);
 
             encoder.flush();
             String jsonString = new String(os.toByteArray(), Charset.forName("UTF-8"));
@@ -134,7 +143,7 @@ public class AvroConverter {
         return new String(output.toByteArray(), "UTF-8");
     }
 
-    public byte[] avroObjToBytes(Object activity) throws IOException {
+    public static byte[] avroObjToBytes(Object activity) throws IOException {
         Schema schema = ReflectData.get().getSchema(activity.getClass());
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ReflectDatumWriter< Object > reflectDatumWriter = new ReflectDatumWriter< Object >(schema);
@@ -144,7 +153,7 @@ public class AvroConverter {
         return outputStream.toByteArray();
     }
 
-    public < T > T bytesToAvroObj(Class< T > returnType, byte[] bytes) throws IOException {
+    public static < T > T bytesToAvroObj(Class< T > returnType, byte[] bytes) throws IOException {
         Schema schema = ReflectData.get().getSchema(returnType);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         ReflectDatumReader< T > reflectDatumReader = new ReflectDatumReader< T >(schema);

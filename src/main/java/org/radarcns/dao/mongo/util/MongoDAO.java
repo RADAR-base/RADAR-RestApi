@@ -1,4 +1,4 @@
-package org.radarcns.dao;
+package org.radarcns.dao.mongo.util;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -27,7 +27,9 @@ public class MongoDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(MongoDAO.class);
 
-    //Enumerate all possible topics
+    /**
+     * @return all available statistic functions
+     */
     public enum Stat {
         avg("avg"), count("count"), iqr("iqr"), max("max"), median("quartile"), min("min"), quartile("quartile"), sum("sum");
 
@@ -42,6 +44,13 @@ public class MongoDAO {
         }
     }
 
+    /**
+     * @param user is the userID
+     * @param start is the start time of the queried timewindow
+     * @param end is the end time of the queried timewindow
+     * @param collection is the MongoDB that will be queried
+     * @return a MongoDB cursor containing all documents between start and end for the given UserID and MongoDB collection
+     */
     protected static MongoCursor<Document> findDocumentByUserAndWindow(String user, Long start, Long end, MongoCollection<Document> collection){
         FindIterable<Document> result = collection.find(
                 Filters.and(
@@ -52,12 +61,24 @@ public class MongoDAO {
         return result.iterator();
     }
 
+    /**
+     * @param user is the userID
+     * @param collection is the MongoDB that will be queried
+     * @return a MongoDB cursor containing all documents for the given UserID and MongoDB collection
+     */
     protected static MongoCursor<Document> findDocumentByUser(String user, MongoCollection<Document> collection){
         FindIterable<Document> result = collection.find(eq("user",user));
 
         return result.iterator();
     }
 
+    /**
+     * @param user is the userID
+     * @param sortBy states the way in which documents have to be sorted. It is optional
+     * @param limit is the number of document that will be retrieved
+     * @param collection is the MongoDB that will be queried
+     * @return a MongoDB cursor containing all documents between start and end for the given UserID and MongoDB collection
+     */
     protected static MongoCursor<Document> findDocumentByUser(String user, String sortBy, int order, Integer limit, MongoCollection<Document> collection){
         FindIterable<Document> result;
 
@@ -72,6 +93,11 @@ public class MongoDAO {
         return result.iterator();
     }
 
+    /**
+     * @param context the application context maintaining the MongoDB client
+     * @param collection is the name of the returned connection
+     * @return a MongoDB cursor containing all documents between start and end for the given UserID and MongoDB collection
+     */
     public static MongoCollection<Document> getCollection(ServletContext context, String collection){
         MongoClient mongoClient = (MongoClient) context.getAttribute("MONGO_CLIENT");
         MongoDatabase database = mongoClient.getDatabase("hotstorage");

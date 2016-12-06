@@ -1,7 +1,10 @@
 package org.radarcns.util;
 
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.avro.Message;
+import org.radarcns.avro.restapi.avro.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +26,20 @@ public class ResponseHandler {
             obj = new Message("No data for this input");
         }
 
-        String json = AvroConverter.avroObjToJsonString(obj);
+        JsonNode json = AvroConverter.avroToJsonNode(obj);
 
-        logger.info("[{}] {}",code,json);
+        logger.info("[{}] {}",code,json.toString());
 
         return Response.status(code).entity(json).build();
+    }
+
+    public static Response getJsonErrorResponse(String message){
+        SpecificRecord obj = new Message(message);
+
+        JsonNode json = AvroConverter.avroToJsonNode(obj);
+
+        logger.info("[{}] {}",500,json);
+
+        return Response.status(500).entity(json).build();
     }
 }
