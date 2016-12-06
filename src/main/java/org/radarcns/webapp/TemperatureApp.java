@@ -30,6 +30,8 @@ public class TemperatureApp {
 
     private static Logger logger = LoggerFactory.getLogger(TemperatureApp.class);
 
+    private final String sensorName = "temperature";
+
     @Context ServletContext context;
 
     @GET
@@ -46,13 +48,13 @@ public class TemperatureApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = TemperatureDAO.getInstance().valueRTByUser(userID, stat, context);
+            Dataset temp = TemperatureDAO.getInstance().valueRTByUser(userID, stat, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (temp.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(temp,temp.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -74,13 +76,13 @@ public class TemperatureApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = TemperatureDAO.getInstance().valueByUser(userID, stat, context);
+            Dataset temp = TemperatureDAO.getInstance().valueByUser(userID, stat, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (temp.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(temp,temp.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -104,13 +106,13 @@ public class TemperatureApp {
             @PathParam("end") long end,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = TemperatureDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
+            Dataset temp = TemperatureDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (temp.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(temp,temp.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);

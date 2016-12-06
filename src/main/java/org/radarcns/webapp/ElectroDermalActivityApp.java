@@ -30,6 +30,8 @@ public class ElectroDermalActivityApp {
 
     private static Logger logger = LoggerFactory.getLogger(ElectroDermalActivityApp.class);
 
+    private final String sensorName = "electrodermal_activity";
+
     @Context ServletContext context;
 
     @GET
@@ -46,13 +48,13 @@ public class ElectroDermalActivityApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = ElectrodermalActivityDAO.getInstance().valueRTByUser(userID, stat, context);
+            Dataset eda = ElectrodermalActivityDAO.getInstance().valueRTByUser(userID, stat, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (eda.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(eda,eda.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -74,13 +76,13 @@ public class ElectroDermalActivityApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = ElectrodermalActivityDAO.getInstance().valueByUser(userID, stat, context);
+            Dataset eda = ElectrodermalActivityDAO.getInstance().valueByUser(userID, stat, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (eda.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(eda,eda.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -104,13 +106,13 @@ public class ElectroDermalActivityApp {
             @PathParam("end") long end,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = ElectrodermalActivityDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
+            Dataset eda = ElectrodermalActivityDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (eda.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(eda,eda.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);

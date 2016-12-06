@@ -30,6 +30,8 @@ public class BatteryApp {
 
     private static Logger logger = LoggerFactory.getLogger(BatteryApp.class);
 
+    private final String sensorName = "battery";
+
     @Context ServletContext context;
 
     @GET
@@ -46,13 +48,13 @@ public class BatteryApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = BatteryDAO.getInstance().valueRTByUser(userID, stat, context);
+            Dataset battery = BatteryDAO.getInstance().valueRTByUser(userID, stat, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (battery.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(battery,battery.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -74,13 +76,13 @@ public class BatteryApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = BatteryDAO.getInstance().valueByUser(userID, stat, context);
+            Dataset battery = BatteryDAO.getInstance().valueByUser(userID, stat, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (battery.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(battery,battery.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -104,13 +106,13 @@ public class BatteryApp {
             @PathParam("end") long end,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = BatteryDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
+            Dataset battery = BatteryDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (battery.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(battery,battery.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);

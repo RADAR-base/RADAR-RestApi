@@ -30,6 +30,8 @@ public class BloodVolumePulseApp {
 
     private static Logger logger = LoggerFactory.getLogger(BloodVolumePulseApp.class);
 
+    private final String sensorName = "blood_volume_pulse";
+
     @Context ServletContext context;
 
     @GET
@@ -46,13 +48,13 @@ public class BloodVolumePulseApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = BloodVolumePulseDAO.getInstance().valueRTByUser(userID, stat, context);
+            Dataset bvp = BloodVolumePulseDAO.getInstance().valueRTByUser(userID, stat, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (bvp.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(bvp,bvp.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -74,13 +76,13 @@ public class BloodVolumePulseApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = BloodVolumePulseDAO.getInstance().valueByUser(userID, stat, context);
+            Dataset bvp = BloodVolumePulseDAO.getInstance().valueByUser(userID, stat, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (bvp.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(bvp,bvp.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -104,13 +106,13 @@ public class BloodVolumePulseApp {
             @PathParam("end") long end,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = BloodVolumePulseDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
+            Dataset bvp = BloodVolumePulseDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (bvp.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(bvp,bvp.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);

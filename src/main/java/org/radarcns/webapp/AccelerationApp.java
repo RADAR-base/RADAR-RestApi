@@ -52,7 +52,7 @@ public class AccelerationApp {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(acc,acc.getDataset().size(),"acceleration");
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -80,7 +80,7 @@ public class AccelerationApp {
                 logger.info("No data for the user {}",userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(acc,acc.getDataset().size(),"acceleration");
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -111,7 +111,7 @@ public class AccelerationApp {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(acc,acc.getDataset().size(),"acceleration");
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);

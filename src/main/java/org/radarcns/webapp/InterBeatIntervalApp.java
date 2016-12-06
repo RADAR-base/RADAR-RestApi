@@ -30,6 +30,8 @@ public class InterBeatIntervalApp {
 
     private static Logger logger = LoggerFactory.getLogger(InterBeatIntervalApp.class);
 
+    private final String sensorName = "inter_beat_interval";
+
     @Context ServletContext context;
 
     @GET
@@ -46,13 +48,13 @@ public class InterBeatIntervalApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = InterBeatIntervalDAO.getInstance().valueRTByUser(userID, stat, context);
+            Dataset ibi = InterBeatIntervalDAO.getInstance().valueRTByUser(userID, stat, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (ibi.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(ibi,ibi.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -74,13 +76,13 @@ public class InterBeatIntervalApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = InterBeatIntervalDAO.getInstance().valueByUser(userID, stat, context);
+            Dataset ibi = InterBeatIntervalDAO.getInstance().valueByUser(userID, stat, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (ibi.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(ibi,ibi.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -104,13 +106,13 @@ public class InterBeatIntervalApp {
             @PathParam("end") long end,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = InterBeatIntervalDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
+            Dataset ibi = InterBeatIntervalDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
 
-            if (acc.getDataset().isEmpty()) {
+            if (ibi.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(acc);
+            return ResponseHandler.getJsonResponse(ibi,ibi.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);

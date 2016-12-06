@@ -30,6 +30,8 @@ public class HeartRateApp {
 
     private static Logger logger = LoggerFactory.getLogger(HeartRateApp.class);
 
+    private final String sensorName = "heart_rate";
+
     @Context ServletContext context;
 
     @GET
@@ -52,7 +54,7 @@ public class HeartRateApp {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(hr);
+            return ResponseHandler.getJsonResponse(hr,hr.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -74,13 +76,13 @@ public class HeartRateApp {
             @PathParam("userID") String userID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset hrd = HeartRateDAO.getInstance().valueByUser(userID, stat, context);
+            Dataset hr = HeartRateDAO.getInstance().valueByUser(userID, stat, context);
 
-            if (hrd.getDataset().isEmpty()) {
+            if (hr.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(hrd);
+            return ResponseHandler.getJsonResponse(hr,hr.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
@@ -104,13 +106,13 @@ public class HeartRateApp {
             @PathParam("end") long end,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset hrd = HeartRateDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
+            Dataset hr = HeartRateDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
 
-            if (hrd.getDataset().isEmpty()) {
+            if (hr.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
             }
 
-            return ResponseHandler.getJsonResponse(hrd);
+            return ResponseHandler.getJsonResponse(hr,hr.getDataset().size(),sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
