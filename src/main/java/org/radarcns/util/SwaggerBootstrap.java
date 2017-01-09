@@ -25,7 +25,9 @@ public class SwaggerBootstrap extends HttpServlet {
         beanConfig.setTitle("RADAR-CNS Downstream REST APIs");
         beanConfig.setSchemes(new String[]{"http"});
 
+        /** Docker **/
         beanConfig.setHost("localhost:8080");
+        /** Amazon ECS **/
 //        beanConfig.setHost("radar-restapi.eu-west-1.elasticbeanstalk.com");
 
         beanConfig.setBasePath("/api");

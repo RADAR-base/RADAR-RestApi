@@ -22,7 +22,9 @@ public class Properties {
 
     private RadarConfig config;
 
+    /** Docker **/
     private String pathFile = "/usr/local/tomcat/conf/";
+    /** ECS **/
 //    private String pathFile = "/usr/share/tomcat8/conf/";
 
     private String nameFile = "radar.yml";

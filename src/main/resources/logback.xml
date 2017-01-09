@@ -8,15 +8,17 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>/usr/local/tomcat/logs/radar-restapi.log</file>
-        <!--file>/usr/share/tomcat8/logs/radar-restapi.log</file-->
+        <!--file>/usr/local/tomcat/logs/radar-restapi.log</file-->
+        <file>/usr/share/tomcat8/logs/radar-restapi.log</file>
 
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>%date{yyyy-MM-dd HH:mm:ss,UTC} UTC [%thread] %-5level %logger - %msg%n</Pattern>
         </layout>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Docker -->
             <fileNamePattern>/usr/local/tomcat/logs/archived/radar-restapi.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- Amazon -->
             <!--fileNamePattern>/usr/share/tomcat8/logs/archived/radar-restapi.%d{yyyy-MM-dd}.%i.log</fileNamePattern-->
 
             <timeBasedFileNamingAndTriggeringPolicy

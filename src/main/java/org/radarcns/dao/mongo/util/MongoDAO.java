@@ -46,46 +46,45 @@ public class MongoDAO {
 
     /**
      * @param user is the userID
+     * @param source is the sourceID
      * @param start is the start time of the queried timewindow
      * @param end is the end time of the queried timewindow
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents between start and end for the given UserID and MongoDB collection
+     * @return a MongoDB cursor containing all documents between start and end for the given User,Source and MongoDB collection
      */
-    protected static MongoCursor<Document> findDocumentByUserAndWindow(String user, Long start, Long end, MongoCollection<Document> collection){
+    protected static MongoCursor<Document> findDocumentByUserSourceWindow(String user, String source, Long start, Long end, MongoCollection<Document> collection){
         FindIterable<Document> result = collection.find(
                 Filters.and(
                         eq("user",user),
+                        eq("source",source),
                         gte("start",new Date(start)),
-                        lte("end",new Date(end)))).sort(new BasicDBObject("start",1));;
+                        lte("end",new Date(end)))).sort(new BasicDBObject("start",1));
 
         return result.iterator();
     }
 
     /**
      * @param user is the userID
-     * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents for the given UserID and MongoDB collection
-     */
-    protected static MongoCursor<Document> findDocumentByUser(String user, MongoCollection<Document> collection){
-        FindIterable<Document> result = collection.find(eq("user",user));
-
-        return result.iterator();
-    }
-
-    /**
-     * @param user is the userID
+     * @param source is the sourceID
      * @param sortBy states the way in which documents have to be sorted. It is optional
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents between start and end for the given UserID and MongoDB collection
+     * @return a MongoDB cursor containing all documents for the given User,Source and MongoDB collection
      */
-    protected static MongoCursor<Document> findDocumentByUser(String user, String sortBy, int order, Integer limit, MongoCollection<Document> collection){
+    protected static MongoCursor<Document> findDocumentByUserSource(String user, String source, String sortBy, int order, Integer limit, MongoCollection<Document> collection){
         FindIterable<Document> result;
 
         if(sortBy == null)
-            result = collection.find(eq("user",user));
+            result = collection.find(
+                    Filters.and(
+                            eq("user",user),
+                            eq("source",source)));
         else
-            result = collection.find(eq("user",user)).sort(new BasicDBObject(sortBy,order));
+            result = collection.find(
+                    Filters.and(
+                        eq("user",user),
+                        eq("source",source))
+                    ).sort(new BasicDBObject(sortBy,order));
 
         if(limit != null)
             result = result.limit(limit);
@@ -96,7 +95,7 @@ public class MongoDAO {
     /**
      * @param context the application context maintaining the MongoDB client
      * @param collection is the name of the returned connection
-     * @return a MongoDB cursor containing all documents between start and end for the given UserID and MongoDB collection
+     * @return the MongoDB collection named collection
      */
     public static MongoCollection<Document> getCollection(ServletContext context, String collection){
         MongoClient mongoClient = (MongoClient) context.getAttribute("MONGO_CLIENT");

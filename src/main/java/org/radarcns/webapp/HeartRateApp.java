@@ -36,22 +36,23 @@ public class HeartRateApp {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/RT/{stat}/{userID}")
+    @Path("/RT/{stat}/{userID}/{sourceID}")
     @ApiOperation(
             value = "Return a Heart Rate values",
-            notes = "Return the last seen Heart rate value of type stat for the given userID")
+            notes = "Return the last seen Heart rate value of type stat for the given userID and sourceID")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen heart_rate.avsc value for the required statistic function")})
     public Response getRealTimeUser(
             @PathParam("userID") String userID,
+            @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset hr = HeartRateDAO.getInstance().valueRTByUser(userID, stat, context);
+            Dataset hr = HeartRateDAO.getInstance().valueRTByUserSource(userID, sourceID, stat, context);
 
             if (hr.getDataset().isEmpty()) {
-                logger.info("No data for the user {}", userID);
+                logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
             return ResponseHandler.getJsonResponse(hr,hr.getDataset().size(),sensorName);
@@ -64,22 +65,23 @@ public class HeartRateApp {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{stat}/{userID}")
+    @Path("/{stat}/{userID}/{sourceID}")
     @ApiOperation(
             value = "Return a dataset of Heart Rate values",
-            notes = "Return a dataset for the given userID of type stat")
+            notes = "Return a dataset for the given userID and sourceID of type stat")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all available heart_rate.avsc values for the required statistic function")})
     public Response getAllByUser(
             @PathParam("userID") String userID,
+            @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset hr = HeartRateDAO.getInstance().valueByUser(userID, stat, context);
+            Dataset hr = HeartRateDAO.getInstance().valueByUserSource(userID, sourceID, stat, context);
 
             if (hr.getDataset().isEmpty()) {
-                logger.info("No data for the user {}", userID);
+                logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
             return ResponseHandler.getJsonResponse(hr,hr.getDataset().size(),sensorName);
@@ -92,24 +94,25 @@ public class HeartRateApp {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{stat}/{userID}/{start}/{end}")
+    @Path("/{stat}/{userID}/{sourceID}/{start}/{end}")
     @ApiOperation(
             value = "Return a dataset of Heart Rate values",
-            notes = "Return a dataset of type stat for the given userID with data belonging to the time window [start - end]")
+            notes = "Return a dataset of type stat for the given userID and sourceID with data belonging to the time window [start - end]")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all heart_rate.avsc values belonging to the time window [start - end] for the required statistic function")})
     public Response getByUserForWindow(
             @PathParam("userID") String userID,
+            @PathParam("sourceID") String sourceID,
             @PathParam("start") long start,
             @PathParam("end") long end,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset hr = HeartRateDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
+            Dataset hr = HeartRateDAO.getInstance().valueByUserSourceWindow(userID, sourceID, stat, start, end, context);
 
             if (hr.getDataset().isEmpty()) {
-                logger.info("No data for the user {}", userID);
+                logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
             return ResponseHandler.getJsonResponse(hr,hr.getDataset().size(),sensorName);
