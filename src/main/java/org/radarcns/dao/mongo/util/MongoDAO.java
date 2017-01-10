@@ -16,9 +16,12 @@ import java.util.Date;
 
 import javax.servlet.ServletContext;
 
+import org.radarcns.config.Properties;
+
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lte;
+import static org.radarcns.listner.MongoDBContextListener.MONGO_CLIENT;
 
 /**
  * Created by Francesco Nobilia on 20/10/2016.
@@ -26,6 +29,11 @@ import static com.mongodb.client.model.Filters.lte;
 public class MongoDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(MongoDAO.class);
+
+    private static final String USER = "user";
+    private static final String SOURCE = "source";
+    private static final String START = "start";
+    private static final String END = "end";
 
     /**
      * @return all available statistic functions
@@ -55,10 +63,10 @@ public class MongoDAO {
     protected static MongoCursor<Document> findDocumentByUserSourceWindow(String user, String source, Long start, Long end, MongoCollection<Document> collection){
         FindIterable<Document> result = collection.find(
                 Filters.and(
-                        eq("user",user),
-                        eq("source",source),
-                        gte("start",new Date(start)),
-                        lte("end",new Date(end)))).sort(new BasicDBObject("start",1));
+                        eq(USER,user),
+                        eq(SOURCE,source),
+                        gte(START,new Date(start)),
+                        lte(END,new Date(end)))).sort(new BasicDBObject(START,1));
 
         return result.iterator();
     }
@@ -77,13 +85,13 @@ public class MongoDAO {
         if(sortBy == null)
             result = collection.find(
                     Filters.and(
-                            eq("user",user),
-                            eq("source",source)));
+                            eq(USER,user),
+                            eq(SOURCE,source)));
         else
             result = collection.find(
                     Filters.and(
-                        eq("user",user),
-                        eq("source",source))
+                        eq(USER,user),
+                        eq(SOURCE,source))
                     ).sort(new BasicDBObject(sortBy,order));
 
         if(limit != null)
@@ -98,8 +106,8 @@ public class MongoDAO {
      * @return the MongoDB collection named collection
      */
     public static MongoCollection<Document> getCollection(ServletContext context, String collection){
-        MongoClient mongoClient = (MongoClient) context.getAttribute("MONGO_CLIENT");
-        MongoDatabase database = mongoClient.getDatabase("hotstorage");
+        MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
+        MongoDatabase database = mongoClient.getDatabase(Properties.getInstance().getMongoDbName());
 
         return database.getCollection(collection);
     }

@@ -22,6 +22,12 @@ public class Properties {
 
     private RadarConfig config;
 
+    private static final Properties instance = new Properties();
+
+    public static Properties getInstance(){
+        return instance;
+    }
+
     /** Docker **/
     private String pathFile = "/usr/local/tomcat/conf/";
     /** ECS **/
@@ -29,11 +35,11 @@ public class Properties {
 
     private String nameFile = "radar.yml";
 
-    public Properties(){
+    private Properties(){
         try{
             Yaml yaml = new Yaml();
             InputStream in = Files.newInputStream(Paths.get(pathFile+nameFile));
-            this.config = yaml.loadAs( in, RadarConfig.class );
+            config = yaml.loadAs( in, RadarConfig.class );
         }
         catch (IOException ex){
             logger.error("Impossible load properties {}",ex.getMessage());
@@ -46,5 +52,9 @@ public class Properties {
 
     public List<MongoCredential> getMongoUsers() {
         return config.getMongoDBUser();
+    }
+
+    public String getMongoDbName() {
+        return config.getMongoUser().get("db");
     }
 }

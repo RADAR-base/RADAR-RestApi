@@ -3,6 +3,7 @@ package org.radarcns.webapp;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.dao.mongo.TemperatureDAO;
 import org.radarcns.dao.mongo.util.MongoDAO;
+import org.radarcns.security.Param;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,16 +50,18 @@ public class TemperatureApp {
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
+            Param.isValidInput(userID, sourceID);
+
             Dataset temp = TemperatureDAO.getInstance().valueRTByUserSource(userID, sourceID, stat, context);
 
             if (temp.getDataset().isEmpty()) {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(temp,temp.getDataset().size(),sensorName);
+            return ResponseHandler.getJsonResponse(temp, sensorName);
         }
         catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
@@ -78,16 +81,18 @@ public class TemperatureApp {
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
+            Param.isValidInput(userID, sourceID);
+
             Dataset temp = TemperatureDAO.getInstance().valueByUserSource(userID, sourceID, stat, context);
 
             if (temp.getDataset().isEmpty()) {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(temp,temp.getDataset().size(),sensorName);
+            return ResponseHandler.getJsonResponse(temp, sensorName);
         }
         catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
@@ -105,20 +110,22 @@ public class TemperatureApp {
     public Response getByUserForWindow(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
+            @PathParam("stat") MongoDAO.Stat stat,
             @PathParam("start") long start,
-            @PathParam("end") long end,
-            @PathParam("stat") MongoDAO.Stat stat) {
+            @PathParam("end") long end) {
         try {
+            Param.isValidInput(userID, sourceID);
+
             Dataset temp = TemperatureDAO.getInstance().valueByUserSourceWindow(userID, sourceID, stat, start, end, context);
 
             if (temp.getDataset().isEmpty()) {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(temp,temp.getDataset().size(),sensorName);
+            return ResponseHandler.getJsonResponse(temp, sensorName);
         }
         catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }

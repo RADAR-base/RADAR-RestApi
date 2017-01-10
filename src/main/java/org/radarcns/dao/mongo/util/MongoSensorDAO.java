@@ -86,7 +86,7 @@ public abstract class MongoSensorDAO {
         if(!cursor.hasNext()){
             logger.info("Empty cursor");
             cursor.close();
-            return null;
+            return new Dataset(null, list);
         }
 
         while (cursor.hasNext()) {
