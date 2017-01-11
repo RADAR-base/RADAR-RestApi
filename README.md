@@ -1,5 +1,7 @@
 # RADAR-CNS REST-API
 
+[![Build Status](https://travis-ci.org/RADAR-CNS/RADAR-RestApi.svg?branch=master)](https://travis-ci.org/RADAR-CNS/RADAR-RestApi)
+
 A REST-FULL Service using Tomcat 8.0.37, MongoDb 3.2.10, Swagger 2.0, Apache Avro 1.7.7 and Jersey 2.
 
 Thi project implents the downstream REST API for the RADAR-CNS project'
