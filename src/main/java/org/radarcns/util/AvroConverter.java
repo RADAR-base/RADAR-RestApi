@@ -3,32 +3,11 @@ package org.radarcns.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileStream;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.io.DatumReader;
-import org.apache.avro.io.DatumWriter;
-import org.apache.avro.io.Decoder;
-import org.apache.avro.io.DecoderFactory;
-import org.apache.avro.io.Encoder;
-import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.io.JsonEncoder;
-import org.apache.avro.reflect.ReflectData;
-import org.apache.avro.reflect.ReflectDatumReader;
-import org.apache.avro.reflect.ReflectDatumWriter;
-import org.apache.avro.specific.SpecificDatumWriter;
+import java.io.IOException;
+import java.util.Iterator;
 import org.apache.avro.specific.SpecificRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Iterator;
 
 /**
  * Created by Francesco Nobilia on 11/11/2016.
@@ -41,6 +20,7 @@ public class AvroConverter {
      * Returns an encoded JSON object for the given Avro object.
      *
      * @param record is the record to encode
+     * @param sensor name used to fix the json field name
      * @return the JSON object representing this Avro object.
      *
      * @throws IOException if there is an error.
@@ -68,12 +48,20 @@ public class AvroConverter {
         }
     }
 
+    /**
+     * Returns an encoded JSON object for the given Avro object.
+     *
+     * @param record is the record to encode
+     * @return the JSON object representing this Avro object.
+     *
+     * @throws IOException if there is an error.
+     */
     public static JsonNode avroToJsonNode(SpecificRecord record){
         try {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readTree(record.toString());
         } catch (IOException e) {
-            logger.error("Imposible to generate error message",e);
+            logger.error("Impossible to generate error message", e);
         }
 
         return null;

@@ -3,20 +3,24 @@
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+            <Pattern>%date{yyyy-MM-dd HH:mm:ss,UTC} UTC [%thread] %-5level %logger:%line - %msg%n</Pattern>
         </layout>
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <!-- Docker -->
         <file>/usr/local/tomcat/logs/radar-restapi.log</file>
+        <!-- Amazon -->
         <!--file>/usr/share/tomcat8/logs/radar-restapi.log</file-->
 
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>%date{yyyy-MM-dd HH:mm:ss,UTC} UTC [%thread] %-5level %logger - %msg%n</Pattern>
+            <Pattern>%date{yyyy-MM-dd HH:mm:ss,UTC} UTC [%thread] %-5level %logger:%line - %msg%n</Pattern>
         </layout>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Docker -->
             <fileNamePattern>/usr/local/tomcat/logs/archived/radar-restapi.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- Amazon -->
             <!--fileNamePattern>/usr/share/tomcat8/logs/archived/radar-restapi.%d{yyyy-MM-dd}.%i.log</fileNamePattern-->
 
             <timeBasedFileNamingAndTriggeringPolicy
@@ -27,6 +31,6 @@
     </appender>
 
     <root level="info">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
     </root>
 </configuration>

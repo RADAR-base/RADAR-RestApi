@@ -10,3 +10,6 @@ mongoUser:
     usr:
     pwd:
     db:
+
+
+# move to env variable

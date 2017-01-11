@@ -2,17 +2,14 @@ package org.radarcns.listner;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
-
+import java.util.List;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import org.bson.Document;
 import org.radarcns.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 
 /**
  * Created by Francesco Nobilia on 19/10/2016.
@@ -22,9 +19,11 @@ public class MongoDBContextListener implements ServletContextListener {
 
     private static final Logger logger = LoggerFactory.getLogger(MongoDBContextListener.class);
 
+    public static final String MONGO_CLIENT = "MONGO_CLIENT";
+
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        MongoClient mongo = (MongoClient) sce.getServletContext().getAttribute("MONGO_CLIENT");
+        MongoClient mongo = (MongoClient) sce.getServletContext().getAttribute(MONGO_CLIENT);
 
         if(mongo != null) {
             mongo.close();
@@ -35,16 +34,13 @@ public class MongoDBContextListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         MongoClient mongoClient = null;
 
-        Properties prop = new Properties();
-
         try {
+            List<MongoCredential> credentials = Properties.getInstance().getMongoUsers();
 
-            List<MongoCredential> credentials = prop.getMongoUsers();
-
-            mongoClient = new MongoClient(prop.getMongoHosts(),credentials);
+            mongoClient = new MongoClient(Properties.getInstance().getMongoHosts(),credentials);
 
             if (checkMongoConnection(mongoClient,credentials)) {
-                sce.getServletContext().setAttribute("MONGO_CLIENT", mongoClient);
+                sce.getServletContext().setAttribute(MONGO_CLIENT, mongoClient);
 
                 logger.info("MongoDB connection established");
             }

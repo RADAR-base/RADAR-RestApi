@@ -1,12 +1,9 @@
 package org.radarcns.webapp;
 
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.dao.mongo.TemperatureDAO;
-import org.radarcns.dao.mongo.util.MongoDAO;
-import org.radarcns.util.ResponseHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -15,11 +12,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.header.Unit;
+import org.radarcns.dao.mongo.TemperatureDAO;
+import org.radarcns.dao.mongo.util.MongoDAO;
+import org.radarcns.security.Param;
+import org.radarcns.util.ResponseHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 18/10/2016.
@@ -36,86 +36,95 @@ public class TemperatureApp {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/RT/{stat}/{userID}")
+    @Path("/RT/{stat}/{userID}/{sourceID}")
     @ApiOperation(
             value = "Return an Temperature values",
-            notes = "Return the last seen Temperature value of type stat for the given userID")
+            notes = "Return the last seen Temperature value of type stat for the given userID and sourceID")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen temperature.avsc value for the required statistic function")})
     public Response getRealTimeUser(
             @PathParam("userID") String userID,
+            @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset temp = TemperatureDAO.getInstance().valueRTByUser(userID, stat, context);
+            Param.isValidInput(userID, sourceID);
+
+            Dataset temp = TemperatureDAO.getInstance().valueRTByUserSource(userID, sourceID, Unit.celsius, stat, context);
 
             if (temp.getDataset().isEmpty()) {
-                logger.info("No data for the user {}", userID);
+                logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(temp,temp.getDataset().size(),sensorName);
+            return ResponseHandler.getJsonResponse(temp, sensorName);
         }
         catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{stat}/{userID}")
+    @Path("/{stat}/{userID}/{sourceID}")
     @ApiOperation(
             value = "Return a dataset of Temperature values",
-            notes = "Return a dataset for the given userID of type stat")
+            notes = "Return a dataset for the given userID and sourceID of type stat")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all available temperature.avsc values for the required statistic function")})
     public Response getAllByUser(
             @PathParam("userID") String userID,
+            @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset temp = TemperatureDAO.getInstance().valueByUser(userID, stat, context);
+            Param.isValidInput(userID, sourceID);
+
+            Dataset temp = TemperatureDAO.getInstance().valueByUserSource(userID, sourceID, Unit.celsius, stat, context);
 
             if (temp.getDataset().isEmpty()) {
-                logger.info("No data for the user {}", userID);
+                logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(temp,temp.getDataset().size(),sensorName);
+            return ResponseHandler.getJsonResponse(temp, sensorName);
         }
         catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{stat}/{userID}/{start}/{end}")
+    @Path("/{stat}/{userID}/{sourceID}/{start}/{end}")
     @ApiOperation(
             value = "Return a dataset of Temperature values",
-            notes = "Return a dataset of type stat for the given userID with data belonging to the time window [start - end]")
+            notes = "Return a dataset of type stat for the given userID and sourceID with data belonging to the time window [start - end]")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all temperature.avsc values belonging to the time window [start - end] for the required statistic function")})
     public Response getByUserForWindow(
             @PathParam("userID") String userID,
+            @PathParam("sourceID") String sourceID,
+            @PathParam("stat") MongoDAO.Stat stat,
             @PathParam("start") long start,
-            @PathParam("end") long end,
-            @PathParam("stat") MongoDAO.Stat stat) {
+            @PathParam("end") long end) {
         try {
-            Dataset temp = TemperatureDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
+            Param.isValidInput(userID, sourceID);
+
+            Dataset temp = TemperatureDAO.getInstance().valueByUserSourceWindow(userID, sourceID, Unit.celsius, stat, start, end, context);
 
             if (temp.getDataset().isEmpty()) {
-                logger.info("No data for the user {}", userID);
+                logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(temp,temp.getDataset().size(),sensorName);
+            return ResponseHandler.getJsonResponse(temp, sensorName);
         }
         catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
