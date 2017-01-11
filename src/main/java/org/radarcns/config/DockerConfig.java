@@ -4,10 +4,9 @@ import static java.util.Collections.singletonList;
 
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
-import java.util.Date;
+import java.security.InvalidParameterException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,7 @@ public class DockerConfig implements RadarConfig{
             final String value = System.getenv(param);
             if (value == null) {
                 logger.error("{} is null", param);
-                throw new NullPointerException(param + "cannot be null");
+                throw new InvalidParameterException(param + "cannot be null");
             }
             return value;
         }
