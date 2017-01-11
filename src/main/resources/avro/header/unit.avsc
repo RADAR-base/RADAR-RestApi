@@ -2,5 +2,5 @@
   "type": "enum",
   "name": "Unit",
   "doc": "Set of units",
-  "symbols": [ "beats_per_min" , "g"]
+  "symbols": [ "beats_per_min" , "celsius", "dimensionless", "g", "hz", "microsiemens", "sec", "nW", "percentage"]
 }

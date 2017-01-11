@@ -1,5 +1,6 @@
 package org.radarcns.dao.mongo;
 
+import java.util.ArrayList;
 import org.bson.Document;
 import org.radarcns.avro.restapi.dataset.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
@@ -7,8 +8,6 @@ import org.radarcns.avro.restapi.sensor.Battery;
 import org.radarcns.dao.mongo.util.MongoSensorDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
 
 /**
  * Created by Francesco Nobilia on 20/10/2016.

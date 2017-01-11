@@ -1,12 +1,9 @@
 package org.radarcns.webapp;
 
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.dao.mongo.AccelerationDAO;
-import org.radarcns.dao.mongo.util.MongoDAO;
-import org.radarcns.util.ResponseHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -15,11 +12,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.header.Unit;
+import org.radarcns.dao.mongo.AccelerationDAO;
+import org.radarcns.dao.mongo.util.MongoDAO;
+import org.radarcns.security.Param;
+import org.radarcns.util.ResponseHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 18/10/2016.
@@ -34,87 +34,95 @@ public class AccelerationApp {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/RT/{stat}/{userID}")
+    @Path("/RT/{stat}/{userID}/{sourceID}")
     @ApiOperation(
             value = "Return an Acceleration values",
-            notes = "Return the last seen Acceleration value of type stat for the given userID")
+            notes = "Return the last seen Acceleration value of type stat for the given userID and sourceID")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen acceleration.avsc value for the required statistic function")})
     public Response getRealTimeUser(
             @PathParam("userID") String userID,
+            @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try {
-            Dataset acc = AccelerationDAO.getInstance().valueRTByUser(userID, stat, context);
+            Param.isValidInput(userID, sourceID);
+
+            Dataset acc = AccelerationDAO.getInstance().valueRTByUserSource(userID, sourceID, Unit.g, stat, context);
 
             if (acc.getDataset().isEmpty()) {
-                logger.info("No data for the user {}", userID);
+                logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(acc,acc.getDataset().size(),"acceleration");
+            return ResponseHandler.getJsonResponse(acc, "acceleration");
         }
         catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{stat}/{userID}")
+    @Path("/{stat}/{userID}/{sourceID}")
     @ApiOperation(
             value = "Return a dataset of Acceleration values",
-            notes = "Return a dataset for the given userID of type stat")
+            notes = "Return a dataset for the given userID and sourceID of type stat")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all available acceleration.avsc values for the required statistic function")})
     public Response getAllByUser(
             @PathParam("userID") String userID,
+            @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoDAO.Stat stat) {
         try{
-            Dataset acc = AccelerationDAO.getInstance().valueByUser(userID, stat, context);
+            Param.isValidInput(userID, sourceID);
+
+            Dataset acc = AccelerationDAO.getInstance().valueByUserSource(userID, sourceID, Unit.g, stat, context);
 
             if(acc.getDataset().isEmpty()){
-                logger.info("No data for the user {}",userID);
+                logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(acc,acc.getDataset().size(),"acceleration");
+            return ResponseHandler.getJsonResponse(acc, "acceleration");
         }
         catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{stat}/{userID}/{start}/{end}")
+    @Path("/{stat}/{userID}/{sourceID}/{start}/{end}")
     @ApiOperation(
             value = "Return a dataset of Acceleration values",
-            notes = "Return a dataset of type stat for the given userID with data belonging to the time window [start - end]")
+            notes = "Return a dataset of type stat for the given userID and sourceID with data belonging to the time window [start - end]")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all acceleration.avsc values belonging to the time window [start - end] for the required statistic function")})
     public Response getByUserForWindow(
             @PathParam("userID") String userID,
+            @PathParam("sourceID") String sourceID,
+            @PathParam("stat") MongoDAO.Stat stat,
             @PathParam("start") long start,
-            @PathParam("end") long end,
-            @PathParam("stat") MongoDAO.Stat stat) {
+            @PathParam("end") long end) {
         try {
+            Param.isValidInput(userID, sourceID);
 
-            Dataset acc = AccelerationDAO.getInstance().valueByUserWindow(userID, stat, start, end, context);
+            Dataset acc = AccelerationDAO.getInstance().valueByUserSourceWindow(userID, sourceID, Unit.g, stat, start, end, context);
 
             if (acc.getDataset().isEmpty()) {
-                logger.info("No data for the user {}", userID);
+                logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(acc,acc.getDataset().size(),"acceleration");
+            return ResponseHandler.getJsonResponse(acc, "acceleration");
         }
         catch (Exception e){
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
