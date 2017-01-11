@@ -55,10 +55,10 @@ public class Empatica {
         logger.info("[TEMP] count:{} perc:{}", tempCount, tempPerc);
 
         double countMex = accCount + batCount + bvpCount + edaCount + hrCount + ibiCount + tempCount;
-        double avgPerc = (accPerc + batPerc + bvpPerc + edaPerc + hrPerc + ibiPerc + tempPerc) / 7d;
+        double avgPerc = (accPerc + batPerc + bvpPerc + edaPerc + hrPerc + ibiPerc + tempPerc) / 7.0;
         logger.info("[DEVICE] count:{} perc:{}", countMex, avgPerc);
 
-        Device device = new Device("Empatica E4", getStatus(avgPerc), (int)countMex);
+        Device device = new Device("Empatica E4", getStatus(avgPerc), (int)countMex, 1.0 - avgPerc);
 
         return device;
     }

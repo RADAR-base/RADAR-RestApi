@@ -40,7 +40,7 @@ public class DeviceStatus {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen acceleration.avsc value for the required statistic function")})
-    public Response getRealTimeUser(
+    public Response getRTStatByUserDevice(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID) {
         try {

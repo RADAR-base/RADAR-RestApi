@@ -5,6 +5,7 @@
   "fields": [
     {"name": "name", "type": "string"},
     {"name": "status", "type": "org.radarcns.avro.restapi.device.Status"},
-    {"name": "received_message", "type": "int"}
+    {"name": "received_message", "type": "int"},
+    {"name": "message_loss", "type": "double"}
   ]
 }
