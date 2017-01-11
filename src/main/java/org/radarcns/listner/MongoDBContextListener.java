@@ -35,7 +35,7 @@ public class MongoDBContextListener implements ServletContextListener {
         MongoClient mongoClient = null;
 
         try {
-            List<MongoCredential> credentials = Properties.getInstance().getMongoUsers();
+            List<MongoCredential> credentials = Properties.getInstance().getMongoDBCredential();
 
             mongoClient = new MongoClient(Properties.getInstance().getMongoHosts(),credentials);
 

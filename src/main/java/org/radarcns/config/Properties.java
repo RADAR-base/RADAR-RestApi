@@ -18,12 +18,9 @@ public class Properties {
 
     private final Logger logger = LoggerFactory.getLogger(Properties.class);
 
-    /** Docker **/
-    private String pathFile = "/usr/local/tomcat/conf/";
-    /** ECS **/
-//    private String pathFile = "/usr/share/tomcat8/conf/";
-
-    private String nameFile = "radar.yml";
+    /** Useful for AWS deploy **/
+    private String PATH_FILE = "/usr/share/tomcat8/conf/";
+    private String NAME_FILE = "radar.yml";
 
     private RadarConfig config;
 
@@ -34,13 +31,34 @@ public class Properties {
     }
 
     private Properties(){
+        initDockerConfig();
+
+        if(config == null){
+            initYamlConfig();
+        }
+    }
+
+    private void initDockerConfig(){
+        try{
+            config = new DockerConfig();
+
+            logger.info("Properties fetched from env variables");
+        }
+        catch (Exception ex){
+            logger.warn("Impossible load Docker properties", ex);
+        }
+    }
+
+    private void initYamlConfig(){
         try{
             Yaml yaml = new Yaml();
-            InputStream in = Files.newInputStream(Paths.get(pathFile+nameFile));
-            config = yaml.loadAs( in, RadarConfig.class );
+            InputStream in = Files.newInputStream(Paths.get(PATH_FILE + NAME_FILE));
+            config = yaml.loadAs( in, YamlConfig.class );
+
+            logger.info("Properties fetched from .yml file");
         }
         catch (IOException ex){
-            logger.error("Impossible load properties {}",ex.getMessage());
+            logger.warn("Impossible load Yaml properties", ex);
         }
     }
 
@@ -48,11 +66,11 @@ public class Properties {
         return config.getMongoDBHosts();
     }
 
-    public List<MongoCredential> getMongoUsers() {
-        return config.getMongoDBUser();
+    public List<MongoCredential> getMongoDBCredential() {
+        return config.getMongoDBCredential();
     }
 
     public String getMongoDbName() {
-        return config.getMongoUser().get("db");
+        return config.getMongoDbName();
     }
 }
