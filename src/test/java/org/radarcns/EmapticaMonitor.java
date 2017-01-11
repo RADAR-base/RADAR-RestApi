@@ -2,8 +2,6 @@ package org.radarcns;
 
 import static org.junit.Assert.assertEquals;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import org.junit.Test;
 import org.radarcns.avro.restapi.device.Status;
 import org.radarcns.monitor.Empatica;

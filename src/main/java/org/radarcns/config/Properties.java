@@ -18,6 +18,13 @@ public class Properties {
 
     private final Logger logger = LoggerFactory.getLogger(Properties.class);
 
+    /** Docker **/
+    private String pathFile = "/usr/local/tomcat/conf/";
+    /** ECS **/
+//    private String pathFile = "/usr/share/tomcat8/conf/";
+
+    private String nameFile = "radar.yml";
+
     private RadarConfig config;
 
     private static final Properties instance = new Properties();
@@ -25,13 +32,6 @@ public class Properties {
     public static Properties getInstance(){
         return instance;
     }
-
-    /** Docker **/
-    private String pathFile = "/usr/local/tomcat/conf/";
-    /** ECS **/
-//    private String pathFile = "/usr/share/tomcat8/conf/";
-
-    private String nameFile = "radar.yml";
 
     private Properties(){
         try{

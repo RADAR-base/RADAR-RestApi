@@ -32,7 +32,7 @@ public class BatteryApp {
 
     private final String sensorName = "battery";
 
-    @Context ServletContext context;
+    @Context private ServletContext context;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

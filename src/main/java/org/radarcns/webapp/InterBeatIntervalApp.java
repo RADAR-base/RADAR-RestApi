@@ -32,7 +32,7 @@ public class InterBeatIntervalApp {
 
     private final String sensorName = "inter_beat_interval";
 
-    @Context ServletContext context;
+    @Context private ServletContext context;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

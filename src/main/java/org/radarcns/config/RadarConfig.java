@@ -8,22 +8,18 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 10/11/2016.
  */
 public class RadarConfig {
 
-    private final Logger logger = LoggerFactory.getLogger(RadarConfig.class);
+//    private final Logger logger = LoggerFactory.getLogger(RadarConfig.class);
 
     private Date released;
     private String version;
     private Map<String,String> mongoHosts;
     private Map<String,String> mongoUser;
-
-    public RadarConfig(){};
 
     public Date getReleased() {
         return released;
