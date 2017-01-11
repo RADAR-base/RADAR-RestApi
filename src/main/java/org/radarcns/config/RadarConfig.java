@@ -1,17 +1,15 @@
 package org.radarcns.config;
 
+import static java.util.Collections.singletonList;
+
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import static java.util.Collections.singletonList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 10/11/2016.

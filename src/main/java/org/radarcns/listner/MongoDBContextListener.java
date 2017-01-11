@@ -2,17 +2,14 @@ package org.radarcns.listner;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
-
+import java.util.List;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import org.bson.Document;
 import org.radarcns.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 
 /**
  * Created by Francesco Nobilia on 19/10/2016.

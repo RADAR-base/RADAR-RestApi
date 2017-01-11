@@ -1,5 +1,10 @@
 package org.radarcns.dao.mongo.util;
 
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lte;
+import static org.radarcns.listner.MongoDBContextListener.MONGO_CLIENT;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
@@ -7,21 +12,12 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-
+import java.util.Date;
+import javax.servlet.ServletContext;
 import org.bson.Document;
+import org.radarcns.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Date;
-
-import javax.servlet.ServletContext;
-
-import org.radarcns.config.Properties;
-
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.gte;
-import static com.mongodb.client.model.Filters.lte;
-import static org.radarcns.listner.MongoDBContextListener.MONGO_CLIENT;
 
 /**
  * Created by Francesco Nobilia on 20/10/2016.

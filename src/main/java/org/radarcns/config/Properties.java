@@ -2,16 +2,14 @@ package org.radarcns.config;
 
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Created by Francesco Nobilia on 10/11/2016.

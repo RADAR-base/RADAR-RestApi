@@ -1,13 +1,11 @@
 package org.radarcns.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.swagger.jaxrs.config.BeanConfig;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-
-import io.swagger.jaxrs.config.BeanConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 14/11/2016.

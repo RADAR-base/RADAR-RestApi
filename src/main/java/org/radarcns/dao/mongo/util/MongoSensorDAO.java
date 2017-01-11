@@ -2,7 +2,9 @@ package org.radarcns.dao.mongo.util;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-
+import java.util.Date;
+import java.util.LinkedList;
+import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
@@ -14,11 +16,6 @@ import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-import java.util.LinkedList;
-
-import javax.servlet.ServletContext;
-
 /**
  * Created by Francesco Nobilia on 20/10/2016.
  */
@@ -29,45 +26,67 @@ public abstract class MongoSensorDAO {
     /**
      * @param user is the userID
      * @param source is the sourceID
+     * @param unit is the measurement unit
      * @param stat is the required statistical value
      * @param context is the servlet context needed to retrieve the mongoDb client istance
      * @return the last seen sensor value stat for the given user and source, otherwise null
      */
-    public Dataset valueRTByUserSource(String user, String source, MongoDAO.Stat stat, ServletContext context) {
+    public Dataset valueRTByUserSource(String user, String source, Unit unit, MongoDAO.Stat stat, ServletContext context) {
 
         MongoCursor<Document> cursor = MongoDAO.findDocumentByUserSource(user, source, "end", -1, 1, getCollection(context));
 
-        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), Unit.beats_per_min,cursor);
+        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), unit, cursor);
     }
 
     /**
      * @param user is the userID
      * @param source is the sourceID
+     * @param unit is the measurement unit
      * @param stat is the required statistical value
      * @param context is the servlet context needed to retrieve the mongoDb client istance
      * @return sensor dataset for the given user and source, otherwise null
      */
-    public Dataset valueByUserSource(String user, String source, MongoDAO.Stat stat, ServletContext context) {
+    public Dataset valueByUserSource(String user, String source, Unit unit, MongoDAO.Stat stat, ServletContext context) {
 
         MongoCursor<Document> cursor = MongoDAO.findDocumentByUserSource(user, source,"start", 1, null, getCollection(context));
 
-        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), Unit.beats_per_min, cursor);
+        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), unit, cursor);
     }
 
     /**
      * @param user is the userID
      * @param source is the sourceID
+     * @param unit is the measurement unit
      * @param stat is the required statistical value
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
      * @param context is the servlet context needed to retrieve the mongoDb client istance
      * @return sensor dataset for the given user and source within the start and end time window, otherwise null
      */
-    public Dataset valueByUserSourceWindow(String user, String source, MongoDAO.Stat stat, Long start, Long end, ServletContext context) {
+    public Dataset valueByUserSourceWindow(String user, String source, Unit unit, MongoDAO.Stat stat, Long start, Long end, ServletContext context) {
 
         MongoCursor<Document> cursor = MongoDAO.findDocumentByUserSourceWindow(user, source, start, end, getCollection(context));
 
-        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), Unit.beats_per_min, cursor);
+        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), unit, cursor);
+    }
+
+    /**
+     * @param user is the userID
+     * @param source is the sourceID
+     * @param start is time window start point in millisecond
+     * @param end  is time window end point in millisecond
+     * @param context is the servlet context needed to retrieve the mongoDb client istance
+     * @return sensor dataset for the given user and source within the start and end time window, otherwise null
+     */
+    public double countSamplesByUserSourceWindow(String user, String source, Long start, Long end, ServletContext context) {
+        double count = 0;
+        MongoCursor<Document> cursor = MongoDAO.findDocumentByUserSourceWindow(user, source, start, end, getCollection(context));
+
+        while (cursor.hasNext()) {
+            count += cursor.next().getDouble("count");
+        }
+
+        return count;
     }
 
     /**

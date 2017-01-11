@@ -1,0 +1,6 @@
+{"namespace": "org.radarcns.avro.restapi.device",
+  "type": "enum",
+  "name": "Status",
+  "doc": "Set of device status",
+  "symbols": [ "fine" , "ok", "warning", "bad", "disconnected"]
+}

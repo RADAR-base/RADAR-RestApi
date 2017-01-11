@@ -2,16 +2,13 @@ package org.radarcns.util;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
-
+import java.io.IOException;
+import javax.ws.rs.core.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.avro.restapi.avro.Message;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-
-import javax.ws.rs.core.Response;
 
 /**
  * Created by Francesco Nobilia on 14/11/2016.
@@ -37,10 +34,18 @@ public class ResponseHandler {
         JsonNode json = AvroConverter.avroToJsonNode(obj,sensor);
 
         logger.info("{}",json.toString());
-
         logger.info("[{}] {} records",code,size);
 
         return Response.status(code).entity(json).build();
+    }
+
+    public static Response getJsonResponse(SpecificRecord obj) throws IOException {
+        JsonNode json = AvroConverter.avroToJsonNode(obj);
+
+        logger.info("{}",json.toString());
+        logger.info("[{}] {} records",200,obj);
+
+        return Response.status(200).entity(json).build();
     }
 
     public static Response getJsonErrorResponse(String message){

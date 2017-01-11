@@ -1,14 +1,13 @@
 package org.radarcns.util;
 
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.dao.mongo.util.MongoDAO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.dao.mongo.util.MongoDAO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 27/10/2016.

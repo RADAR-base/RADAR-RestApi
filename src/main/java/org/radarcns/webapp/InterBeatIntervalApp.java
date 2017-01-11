@@ -1,13 +1,9 @@
 package org.radarcns.webapp;
 
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.dao.mongo.InterBeatIntervalDAO;
-import org.radarcns.dao.mongo.util.MongoDAO;
-import org.radarcns.security.Param;
-import org.radarcns.util.ResponseHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -16,11 +12,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.header.Unit;
+import org.radarcns.dao.mongo.InterBeatIntervalDAO;
+import org.radarcns.dao.mongo.util.MongoDAO;
+import org.radarcns.security.Param;
+import org.radarcns.util.ResponseHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 18/10/2016.
@@ -52,7 +51,7 @@ public class InterBeatIntervalApp {
         try {
             Param.isValidInput(userID, sourceID);
 
-            Dataset ibi = InterBeatIntervalDAO.getInstance().valueRTByUserSource(userID, sourceID, stat, context);
+            Dataset ibi = InterBeatIntervalDAO.getInstance().valueRTByUserSource(userID, sourceID, Unit.sec, stat, context);
 
             if (ibi.getDataset().isEmpty()) {
                 logger.info("No data for the user {}", userID);
@@ -83,7 +82,7 @@ public class InterBeatIntervalApp {
         try {
             Param.isValidInput(userID, sourceID);
 
-            Dataset ibi = InterBeatIntervalDAO.getInstance().valueByUserSource(userID, sourceID, stat, context);
+            Dataset ibi = InterBeatIntervalDAO.getInstance().valueByUserSource(userID, sourceID, Unit.sec, stat, context);
 
             if (ibi.getDataset().isEmpty()) {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
@@ -116,7 +115,7 @@ public class InterBeatIntervalApp {
         try {
             Param.isValidInput(userID, sourceID);
 
-            Dataset ibi = InterBeatIntervalDAO.getInstance().valueByUserSourceWindow(userID, sourceID, stat, start, end, context);
+            Dataset ibi = InterBeatIntervalDAO.getInstance().valueByUserSourceWindow(userID, sourceID, Unit.sec, stat, start, end, context);
 
             if (ibi.getDataset().isEmpty()) {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
