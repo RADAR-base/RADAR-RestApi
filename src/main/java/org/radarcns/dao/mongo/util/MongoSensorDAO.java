@@ -2,6 +2,7 @@ package org.radarcns.dao.mongo.util;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import java.net.ConnectException;
 import java.util.Date;
 import java.util.LinkedList;
 import javax.servlet.ServletContext;
@@ -31,7 +32,7 @@ public abstract class MongoSensorDAO {
      * @param context is the servlet context needed to retrieve the mongoDb client istance
      * @return the last seen sensor value stat for the given user and source, otherwise null
      */
-    public Dataset valueRTByUserSource(String user, String source, Unit unit, MongoDAO.Stat stat, ServletContext context) {
+    public Dataset valueRTByUserSource(String user, String source, Unit unit, MongoDAO.Stat stat, ServletContext context) throws ConnectException{
 
         MongoCursor<Document> cursor = MongoDAO.findDocumentByUserSource(user, source, "end", -1, 1, getCollection(context));
 
@@ -46,7 +47,7 @@ public abstract class MongoSensorDAO {
      * @param context is the servlet context needed to retrieve the mongoDb client istance
      * @return sensor dataset for the given user and source, otherwise null
      */
-    public Dataset valueByUserSource(String user, String source, Unit unit, MongoDAO.Stat stat, ServletContext context) {
+    public Dataset valueByUserSource(String user, String source, Unit unit, MongoDAO.Stat stat, ServletContext context) throws ConnectException{
 
         MongoCursor<Document> cursor = MongoDAO.findDocumentByUserSource(user, source,"start", 1, null, getCollection(context));
 
@@ -63,7 +64,7 @@ public abstract class MongoSensorDAO {
      * @param context is the servlet context needed to retrieve the mongoDb client istance
      * @return sensor dataset for the given user and source within the start and end time window, otherwise null
      */
-    public Dataset valueByUserSourceWindow(String user, String source, Unit unit, MongoDAO.Stat stat, Long start, Long end, ServletContext context) {
+    public Dataset valueByUserSourceWindow(String user, String source, Unit unit, MongoDAO.Stat stat, Long start, Long end, ServletContext context) throws ConnectException{
 
         MongoCursor<Document> cursor = MongoDAO.findDocumentByUserSourceWindow(user, source, start, end, getCollection(context));
 
@@ -78,7 +79,7 @@ public abstract class MongoSensorDAO {
      * @param context is the servlet context needed to retrieve the mongoDb client istance
      * @return sensor dataset for the given user and source within the start and end time window, otherwise null
      */
-    public double countSamplesByUserSourceWindow(String user, String source, Long start, Long end, ServletContext context) {
+    public double countSamplesByUserSourceWindow(String user, String source, Long start, Long end, ServletContext context) throws ConnectException{
         double count = 0;
         MongoCursor<Document> cursor = MongoDAO.findDocumentByUserSourceWindow(user, source, start, end, getCollection(context));
 
@@ -141,7 +142,7 @@ public abstract class MongoSensorDAO {
      * @param context is the servelet context needed to retrieve the mongodb client instance
      * @return the MongoDb collection
      */
-    private MongoCollection<Document> getCollection(ServletContext context){
+    private MongoCollection<Document> getCollection(ServletContext context) throws ConnectException {
         return MongoDAO.getCollection(context,getCollectionName());
     }
 
