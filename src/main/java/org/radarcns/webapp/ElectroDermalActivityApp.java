@@ -32,7 +32,7 @@ public class ElectroDermalActivityApp {
 
     private final String sensorName = "electrodermal_activity";
 
-    @Context ServletContext context;
+    @Context private ServletContext context;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

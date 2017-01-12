@@ -32,7 +32,7 @@ public class TemperatureApp {
 
     private final String sensorName = "temperature";
 
-    @Context ServletContext context;
+    @Context private ServletContext context;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

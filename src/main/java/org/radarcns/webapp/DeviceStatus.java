@@ -28,7 +28,7 @@ public class DeviceStatus {
 
     private static Logger logger = LoggerFactory.getLogger(DeviceStatus.class);
 
-    @Context ServletContext context;
+    @Context private ServletContext context;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

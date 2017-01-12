@@ -32,7 +32,7 @@ public class BloodVolumePulseApp {
 
     private final String sensorName = "blood_volume_pulse";
 
-    @Context ServletContext context;
+    @Context private ServletContext context;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

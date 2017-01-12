@@ -81,3 +81,12 @@ test {
     events 'passed'
   }
 }
+
+task copyWar {
+  copy {
+    from 'build/libs/' + war.archiveName
+    into projectDir.absolutePath
+  }
+}
+
+build.finalizedBy copyWar

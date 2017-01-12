@@ -30,7 +30,9 @@ public class AccelerationApp {
 
     private static Logger logger = LoggerFactory.getLogger(AccelerationApp.class);
 
-    @Context ServletContext context;
+    private final String sensorName = "acceleration";
+
+    @Context private ServletContext context;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -55,7 +57,7 @@ public class AccelerationApp {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(acc, "acceleration");
+            return ResponseHandler.getJsonResponse(acc, sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
@@ -86,7 +88,7 @@ public class AccelerationApp {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(acc, "acceleration");
+            return ResponseHandler.getJsonResponse(acc, sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
@@ -119,7 +121,7 @@ public class AccelerationApp {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(acc, "acceleration");
+            return ResponseHandler.getJsonResponse(acc, sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);

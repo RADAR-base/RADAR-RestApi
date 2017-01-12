@@ -32,7 +32,7 @@ public class HeartRateApp {
 
     private final String sensorName = "heart_rate";
 
-    @Context ServletContext context;
+    @Context private ServletContext context;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

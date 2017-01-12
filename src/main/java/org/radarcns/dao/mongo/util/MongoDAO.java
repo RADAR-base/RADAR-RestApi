@@ -12,19 +12,19 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import java.net.ConnectException;
 import java.util.Date;
 import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.config.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.radarcns.listner.MongoDBContextListener;
 
 /**
  * Created by Francesco Nobilia on 20/10/2016.
  */
 public class MongoDAO {
 
-    private static final Logger logger = LoggerFactory.getLogger(MongoDAO.class);
+//    private static final Logger logger = LoggerFactory.getLogger(MongoDAO.class);
 
     private static final String USER = "user";
     private static final String SOURCE = "source";
@@ -99,9 +99,14 @@ public class MongoDAO {
     /**
      * @param context the application context maintaining the MongoDB client
      * @param collection is the name of the returned connection
-     * @return the MongoDB collection named collection
+     * @return the MongoDB collection named collection. If the MongoDB client is null, it first tries to establish a new connection and then return.
+     * @throws ConnectException if MongoDB cannot be reached
      */
-    public static MongoCollection<Document> getCollection(ServletContext context, String collection){
+    public static MongoCollection<Document> getCollection(ServletContext context, String collection) throws ConnectException {
+        if(context.getAttribute(MONGO_CLIENT) == null){
+            MongoDBContextListener.recoverOrThrow(context);
+        }
+
         MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
         MongoDatabase database = mongoClient.getDatabase(Properties.getInstance().getMongoDbName());
 

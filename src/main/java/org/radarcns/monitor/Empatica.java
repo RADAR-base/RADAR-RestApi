@@ -1,5 +1,6 @@
 package org.radarcns.monitor;
 
+import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.device.Device;
 import org.radarcns.avro.restapi.device.Status;
@@ -22,7 +23,7 @@ public class Empatica {
 
     private final static long WINDOW = 30000;
 
-    public static Device monitor(String user, String source, ServletContext context){
+    public static Device monitor(String user, String source, ServletContext context) throws ConnectException {
         long end = System.currentTimeMillis();
         long start = end - 30000;
 
