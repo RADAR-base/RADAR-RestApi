@@ -103,6 +103,8 @@ public class MongoDAO {
      * @throws ConnectException if MongoDB cannot be reached
      */
     public static MongoCollection<Document> getCollection(ServletContext context, String collection) throws ConnectException {
+        MongoDBContextListener.testConnection(context);
+
         if(context.getAttribute(MONGO_CLIENT) == null){
             MongoDBContextListener.recoverOrThrow(context);
         }
