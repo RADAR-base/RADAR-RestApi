@@ -75,6 +75,6 @@ public class AccelerationDAO extends MongoSensorDAO {
 
     @Override
     protected String getCollectionName() {
-        return "acceleration";
+        return "android_empatica_e4_acceleration_output";
     }
 }

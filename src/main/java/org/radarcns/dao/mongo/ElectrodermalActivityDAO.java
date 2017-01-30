@@ -49,6 +49,6 @@ public class ElectrodermalActivityDAO extends MongoSensorDAO {
 
     @Override
     protected String getCollectionName() {
-        return "electrodermal_activity";
+        return "android_empatica_e4_electrodermal_activity_output";
     }
 }

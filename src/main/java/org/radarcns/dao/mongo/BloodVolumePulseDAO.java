@@ -49,6 +49,6 @@ public class BloodVolumePulseDAO extends MongoSensorDAO {
 
     @Override
     protected String getCollectionName() {
-        return "blood_volume_pulse";
+        return "android_empatica_e4_blood_volume_pulse_output";
     }
 }

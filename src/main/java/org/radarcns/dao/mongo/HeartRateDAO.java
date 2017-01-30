@@ -49,6 +49,6 @@ public class HeartRateDAO extends MongoSensorDAO {
 
     @Override
     protected String getCollectionName() {
-        return "heartrate";
+        return "android_empatica_e4_heartrate_output";
     }
 }
