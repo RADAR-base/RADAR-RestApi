@@ -41,8 +41,8 @@ public class RadarConverter {
         if (places < 0) throw new IllegalArgumentException();
 
         long factor = (long) Math.pow(10, places);
-        value = value * factor;
-        long tmp = Math.round(value);
+        double valueTemp = value * factor;
+        long tmp = Math.round(valueTemp);
         return (double) tmp / factor;
     }
 

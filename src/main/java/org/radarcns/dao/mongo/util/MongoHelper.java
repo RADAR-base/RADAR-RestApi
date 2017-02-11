@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MongoHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
+    //private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
 
     private static final String USER = "user";
     private static final String SOURCE = "source";
@@ -112,7 +112,7 @@ public class MongoHelper {
      * @return a MongoDB cursor containing all distinct sources for the given User and MongoDB collection
      */
     public static MongoCursor<String> findAllSourceByUser(String user, MongoCollection<Document> collection){
-        return collection.distinct("source", String.class).filter(Filters.eq(USER,user)).iterator();
+        return collection.distinct("source", String.class).filter(eq(USER,user)).iterator();
     }
 
     /**

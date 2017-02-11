@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AndroidDAO {
 
-    private final Logger logger = LoggerFactory.getLogger(AndroidDAO.class);
+    //private final Logger logger = LoggerFactory.getLogger(AndroidDAO.class);
 
     private final static AndroidDAO instance = new AndroidDAO();
 
