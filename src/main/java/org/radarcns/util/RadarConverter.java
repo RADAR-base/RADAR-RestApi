@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.dao.mongo.util.MongoDAO;
+import org.radarcns.dao.mongo.util.MongoHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ public class RadarConverter {
         return df.format(value);
     }
 
-    public static DescriptiveStatistic getDescriptiveStatistic(MongoDAO.Stat stat){
+    public static DescriptiveStatistic getDescriptiveStatistic(MongoHelper.Stat stat){
         switch (stat){
             case avg: return DescriptiveStatistic.average;
             case count: return DescriptiveStatistic.count;
@@ -35,6 +35,15 @@ public class RadarConverter {
             case median: return DescriptiveStatistic.median;
             default: logger.info("No translation for {}",stat); return null;
         }
+    }
+
+    public static double roundDouble(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
     }
 
 }

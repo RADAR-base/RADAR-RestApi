@@ -3,6 +3,7 @@ package org.radarcns.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.avro.restapi.avro.Message;
@@ -17,8 +18,7 @@ public class ResponseHandler {
 
     private static Logger logger = LoggerFactory.getLogger(ResponseHandler.class);
 
-    public static Response getJsonResponse(Dataset dataset, String sensor) throws IOException {
-
+    public static Response getJsonResponse(HttpServletRequest request, Dataset dataset, String sensor) throws IOException {
         int code = 200;
         int size = 0;
         SpecificRecord obj = dataset;
@@ -33,32 +33,38 @@ public class ResponseHandler {
 
         JsonNode json = AvroConverter.avroToJsonNode(obj,sensor);
 
-        logger.info("{}",json.toString());
-        logger.info("[{}] {} records",code,size);
+        logger.debug("{}",json.toString());
+        logger.debug("[{}] {} records",code,size);
+
+        logger.info("[{}] {}", code, request.getRequestURI());
 
         return Response.status(code).entity(json).build();
     }
 
-    public static Response getJsonResponse(SpecificRecord obj) throws IOException {
+    public static Response getJsonResponse(HttpServletRequest request, SpecificRecord obj) throws IOException {
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
-        logger.info("{}",json.toString());
-        logger.info("[{}] {} records",200,obj);
+        logger.debug("{}",json.toString());
+        logger.debug("[{}] {}",200,obj);
+
+        logger.info("[{}] {}", 200, request.getRequestURI());
 
         return Response.status(200).entity(json).build();
     }
 
-    public static Response getJsonErrorResponse(String message){
+    public static Response getJsonErrorResponse(HttpServletRequest request, String message){
         SpecificRecord obj = new Message(message);
 
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
         if(json == null){
-            logger.info("[{}] {}",500,json);
+            logger.debug("[{}] {}",500,json);
+            logger.info("[{}] {}", 500, request.getRequestURI());
             return Response.status(500).entity("Internal error!").build();
         }
         else{
-            logger.info("[{}] {}",500,json);
+            logger.debug("[{}] {}",500,json);
+            logger.info("[{}] {}", 500, request.getRequestURI());
             return Response.status(500).entity(json).build();
         }
     }

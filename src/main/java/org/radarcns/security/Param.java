@@ -26,11 +26,15 @@ public class Param {
     }
 
     public static boolean isUser(String input){
-        return isAlphaNumeric(input);
+        return true;
+        // TODO: 10/02/2017 define user id with android team
+        //return isAlphaNumeric(input);
     }
 
     public static boolean isSource(String input){
-        return isMacAddress(input);
+        return true;
+        // TODO: 10/02/2017 define source id with android team
+        //return isMacAddress(input);
     }
 
     public static void isValidInput(String user, String source){

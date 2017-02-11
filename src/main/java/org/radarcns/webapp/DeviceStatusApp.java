@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -24,22 +25,25 @@ import org.slf4j.LoggerFactory;
  */
 @Api
 @Path("/Device")
-public class DeviceStatus {
+public class DeviceStatusApp {
 
-    private static Logger logger = LoggerFactory.getLogger(DeviceStatus.class);
+    private static Logger logger = LoggerFactory.getLogger(DeviceStatusApp.class);
 
     @Context private ServletContext context;
+    @Context private HttpServletRequest request;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/Status/{userID}/{sourceID}")
     @ApiOperation(
-            value = "Return an Acceleration values",
-            notes = "Return the last seen Acceleration value of type stat for the given userID and sourceID")
+            value = "Return a Device values",
+            notes = "Using the last seen values of each device sensors, it computes the sender"
+                + "status for the given userID and sourceID")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
                     "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen acceleration.avsc value for the required statistic function")})
+            @ApiResponse(code = 200, message = "Return a device.avsc object containing last"
+                + "computed status")})
     public Response getRTStatByUserDevice(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID) {
@@ -48,11 +52,11 @@ public class DeviceStatus {
 
             Device device = Empatica.monitor(userID, sourceID, context);
 
-            return ResponseHandler.getJsonResponse(device);
+            return ResponseHandler.getJsonResponse(request, device);
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
 }
