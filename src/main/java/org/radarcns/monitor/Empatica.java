@@ -84,7 +84,7 @@ public class Empatica {
     }
 
     private static double getPercentage(double count, double expected){
-        return (1.0 * count) / expected;
+        return count / expected;
     }
 
     private static Status getStatus(double percentage){

@@ -37,7 +37,7 @@ public class DeviceStatusApp {
     @Path("/Status/{userID}/{sourceID}")
     @ApiOperation(
             value = "Return a Device values",
-            notes = "Using the last seen values of each device sensors, it computes the sender"
+            notes = "Using the device sensors values arrived within last 60sec, it computes the sender"
                 + "status for the given userID and sourceID")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
