@@ -7,7 +7,10 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.avro.restapi.app.Application;
+import org.radarcns.avro.restapi.app.ServerStatus;
+import org.radarcns.config.RadarConfig;
 import org.radarcns.dao.mongo.util.MongoAppDAO;
+import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +30,8 @@ public class AndroidDAO {
     private MongoAppDAO server = new MongoAppDAO() {
         @Override
         protected Application getApplication(Document doc) {
-            return new Application(doc.getString("clientIP"),
-                new Double(-1.0), doc.getString("serverStatus"));
-            // TODO: 09/02/2017 define enumerator for server status. Ask Android team
+            return new Application(doc.getString("clientIP"), new Double(-1.0),
+                RadarConverter.getServerStatus(doc.getString("serverStatus")));
         }
 
         @Override
@@ -41,7 +43,7 @@ public class AndroidDAO {
     private MongoAppDAO uptime = new MongoAppDAO() {
         @Override
         protected Application getApplication(Document doc) {
-            return new Application("",doc.getDouble("applicationUptime"),"");
+            return new Application("",doc.getDouble("applicationUptime"), ServerStatus.UNKNOWN);
         }
 
         @Override

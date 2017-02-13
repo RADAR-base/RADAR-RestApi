@@ -2,5 +2,5 @@
   "type": "enum",
   "name": "Status",
   "doc": "Set of device status",
-  "symbols": [ "fine" , "ok", "warning", "bad", "disconnected"]
+  "symbols": [ "FINE" , "OK", "WARNING", "BAD", "DISCONNECTED"]
 }

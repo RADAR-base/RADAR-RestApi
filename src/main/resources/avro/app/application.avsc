@@ -5,6 +5,6 @@
   "fields": [
     {"name": "ip", "type": "string"},
     {"name": "uptime", "type": "double"},
-    {"name": "server_status", "type": "string"}
+    {"name": "server_status", "type": "ServerStatus"}
   ]
 }

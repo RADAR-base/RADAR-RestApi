@@ -4,8 +4,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.security.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +46,26 @@ public class RadarConverter {
         double valueTemp = value * factor;
         long tmp = Math.round(valueTemp);
         return (double) tmp / factor;
+    }
+
+    public static ServerStatus getServerStatus(String value){
+        value = value.toUpperCase();
+        if (Param.isNullOrEmpty(value)){
+            return ServerStatus.UNKNOWN;
+        }
+        else if(value.equals(ServerStatus.CONNECTED.toString())){
+            return ServerStatus.CONNECTED;
+        }
+        else if(value.equals(ServerStatus.DISCONNECTED.toString())){
+            return ServerStatus.DISCONNECTED;
+        }
+        else if(value.equals(ServerStatus.UNKNOWN.toString())){
+            return ServerStatus.UNKNOWN;
+        }
+        else{
+            logger.warn("Unsupported ServerStatus. Value is {}", value);
+            return ServerStatus.UNKNOWN;
+        }
     }
 
 }
