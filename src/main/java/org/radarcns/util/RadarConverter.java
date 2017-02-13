@@ -49,17 +49,18 @@ public class RadarConverter {
     }
 
     public static ServerStatus getServerStatus(String value){
-        value = value.toUpperCase();
         if (Param.isNullOrEmpty(value)){
             return ServerStatus.UNKNOWN;
         }
-        else if(value.equals(ServerStatus.CONNECTED.toString())){
+
+        String temp = value.toUpperCase();
+        if(temp.equals(ServerStatus.CONNECTED.toString())){
             return ServerStatus.CONNECTED;
         }
-        else if(value.equals(ServerStatus.DISCONNECTED.toString())){
+        else if(temp.equals(ServerStatus.DISCONNECTED.toString())){
             return ServerStatus.DISCONNECTED;
         }
-        else if(value.equals(ServerStatus.UNKNOWN.toString())){
+        else if(temp.equals(ServerStatus.UNKNOWN.toString())){
             return ServerStatus.UNKNOWN;
         }
         else{

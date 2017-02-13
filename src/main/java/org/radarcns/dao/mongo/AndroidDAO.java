@@ -8,11 +8,8 @@ import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.avro.restapi.app.ServerStatus;
-import org.radarcns.config.RadarConfig;
 import org.radarcns.dao.mongo.util.MongoAppDAO;
 import org.radarcns.util.RadarConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 20/10/2016.

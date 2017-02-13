@@ -18,8 +18,6 @@ import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.config.Properties;
 import org.radarcns.listner.MongoDBContextListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 20/10/2016.
