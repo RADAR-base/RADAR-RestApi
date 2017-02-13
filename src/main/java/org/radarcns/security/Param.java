@@ -25,12 +25,16 @@ public class Param {
         return !isNullOrEmpty(input) && input.matches("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$");
     }
 
+    public static boolean isAlphaNumericAndSpecials(String input){
+        return !isNullOrEmpty(input) && input.matches("^[a-zA-Z0-9-_./:#@-]*$");
+    }
+
     public static boolean isUser(String input){
-        return isAlphaNumeric(input);
+        return isAlphaNumericAndSpecials(input);
     }
 
     public static boolean isSource(String input){
-        return isMacAddress(input);
+        return isAlphaNumericAndSpecials(input);
     }
 
     public static void isValidInput(String user, String source){

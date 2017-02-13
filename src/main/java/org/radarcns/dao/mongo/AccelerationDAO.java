@@ -74,7 +74,12 @@ public class AccelerationDAO extends MongoSensorDAO {
     }
 
     @Override
+    protected double extractCount(Document doc){
+        return (doc.getDouble("x") + doc.getDouble("y") + doc.getDouble("z"))/3.0d;
+    }
+
+    @Override
     protected String getCollectionName() {
-        return "acceleration";
+        return "android_empatica_e4_acceleration_output";
     }
 }

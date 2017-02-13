@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -15,7 +16,7 @@ import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.Unit;
 import org.radarcns.dao.mongo.HeartRateDAO;
-import org.radarcns.dao.mongo.util.MongoDAO;
+import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.security.Param;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class HeartRateApp {
     private final String sensorName = "heart_rate";
 
     @Context private ServletContext context;
+    @Context private HttpServletRequest request;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -47,7 +49,7 @@ public class HeartRateApp {
     public Response getRealTimeUser(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
-            @PathParam("stat") MongoDAO.Stat stat) {
+            @PathParam("stat") MongoHelper.Stat stat) {
         try {
             Dataset hr = HeartRateDAO.getInstance().valueRTByUserSource(userID, sourceID, Unit.hz, stat, context);
 
@@ -55,11 +57,11 @@ public class HeartRateApp {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(hr, sensorName);
+            return ResponseHandler.getJsonResponse(request, hr, sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
 
@@ -76,7 +78,7 @@ public class HeartRateApp {
     public Response getAllByUser(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
-            @PathParam("stat") MongoDAO.Stat stat) {
+            @PathParam("stat") MongoHelper.Stat stat) {
         try {
             Param.isValidInput(userID, sourceID);
 
@@ -86,11 +88,11 @@ public class HeartRateApp {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(hr, sensorName);
+            return ResponseHandler.getJsonResponse(request, hr, sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
 
@@ -107,7 +109,7 @@ public class HeartRateApp {
     public Response getByUserForWindow(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
-            @PathParam("stat") MongoDAO.Stat stat,
+            @PathParam("stat") MongoHelper.Stat stat,
             @PathParam("start") long start,
             @PathParam("end") long end) {
         try {
@@ -119,11 +121,11 @@ public class HeartRateApp {
                 logger.info("No data for the user {} with source {}", userID, sourceID);
             }
 
-            return ResponseHandler.getJsonResponse(hr, sensorName);
+            return ResponseHandler.getJsonResponse(request, hr, sensorName);
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getJsonErrorResponse("Your request cannot be completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be completed. If this error persists, please contact the service administrator.");
         }
     }
 

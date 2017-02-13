@@ -49,6 +49,6 @@ public class BatteryDAO extends MongoSensorDAO {
 
     @Override
     protected String getCollectionName() {
-        return "battery_level";
+        return "android_empatica_e4_battery_level_output";
     }
 }

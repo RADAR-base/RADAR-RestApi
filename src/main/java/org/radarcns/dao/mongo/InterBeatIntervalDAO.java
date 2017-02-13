@@ -49,6 +49,6 @@ public class InterBeatIntervalDAO extends MongoSensorDAO {
 
     @Override
     protected String getCollectionName() {
-        return "inter_beat_interval";
+        return "android_empatica_e4_inter_beat_interval_output";
     }
 }

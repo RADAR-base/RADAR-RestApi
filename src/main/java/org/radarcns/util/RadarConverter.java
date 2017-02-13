@@ -4,8 +4,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.dao.mongo.util.MongoDAO;
+import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.security.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +25,7 @@ public class RadarConverter {
         return df.format(value);
     }
 
-    public static DescriptiveStatistic getDescriptiveStatistic(MongoDAO.Stat stat){
+    public static DescriptiveStatistic getDescriptiveStatistic(MongoHelper.Stat stat){
         switch (stat){
             case avg: return DescriptiveStatistic.average;
             case count: return DescriptiveStatistic.count;
@@ -34,6 +36,36 @@ public class RadarConverter {
             case quartile: return DescriptiveStatistic.quartiles;
             case median: return DescriptiveStatistic.median;
             default: logger.info("No translation for {}",stat); return null;
+        }
+    }
+
+    public static double roundDouble(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        long factor = (long) Math.pow(10, places);
+        double valueTemp = value * factor;
+        long tmp = Math.round(valueTemp);
+        return (double) tmp / factor;
+    }
+
+    public static ServerStatus getServerStatus(String value){
+        if (Param.isNullOrEmpty(value)){
+            return ServerStatus.UNKNOWN;
+        }
+
+        String temp = value.toUpperCase();
+        if(temp.equals(ServerStatus.CONNECTED.toString())){
+            return ServerStatus.CONNECTED;
+        }
+        else if(temp.equals(ServerStatus.DISCONNECTED.toString())){
+            return ServerStatus.DISCONNECTED;
+        }
+        else if(temp.equals(ServerStatus.UNKNOWN.toString())){
+            return ServerStatus.UNKNOWN;
+        }
+        else{
+            logger.warn("Unsupported ServerStatus. Value is {}", value);
+            return ServerStatus.UNKNOWN;
         }
     }
 

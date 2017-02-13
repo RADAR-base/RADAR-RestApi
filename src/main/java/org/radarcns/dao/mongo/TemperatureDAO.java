@@ -49,6 +49,6 @@ public class TemperatureDAO extends MongoSensorDAO {
 
     @Override
     protected String getCollectionName() {
-        return "temperature";
+        return "android_empatica_e4_temperature_output";
     }
 }

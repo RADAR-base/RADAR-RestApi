@@ -104,8 +104,6 @@ public class MongoDBContextListener implements ServletContextListener {
                 logger.error("The connection with MongoDb cannot be established", e);
             }
 
-            logger.info("MongoDB connection is {}",flag.toString());
-
             if (flag.booleanValue()) {
                 context.setAttribute(MONGO_CLIENT, mongoClient);
 
@@ -125,7 +123,38 @@ public class MongoDBContextListener implements ServletContextListener {
             throw new ConnectException("The connection with MongoDb cannot be established");
         }
 
+        logger.info("MongoDB connection is {}", flag.toString());
 
+    }
+
+    public static boolean testConnection(ServletContext context) throws ConnectException{
+        boolean flag = false;
+
+        MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
+
+        if(mongoClient == null){
+            return false;
+        }
+
+        try {
+            for(MongoCredential user : Properties.getInstance().getMongoDBCredential()) {
+                mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
+            }
+
+            flag = true;
+
+        } catch (Exception e) {
+            if(mongoClient != null) {
+                mongoClient.close();
+            }
+
+            context.setAttribute(MONGO_CLIENT, null);
+            logger.error("The connection with MongoDb cannot be established", e);
+        }
+
+        logger.debug("MongoDB connection is {}", flag);
+
+        return false;
     }
 
 }
