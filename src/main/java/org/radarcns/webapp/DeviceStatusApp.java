@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -16,12 +17,13 @@ import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.device.Device;
 import org.radarcns.monitor.Empatica;
 import org.radarcns.security.Param;
+import org.radarcns.util.AvroConverter;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by Francesco Nobilia on 18/10/2016.
+ * Device status web-app
  */
 @Api
 @Path("/Device")
@@ -32,31 +34,72 @@ public class DeviceStatusApp {
     @Context private ServletContext context;
     @Context private HttpServletRequest request;
 
+    /******************************************* STATUS *******************************************/
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/Status/{userID}/{sourceID}")
     @ApiOperation(
-            value = "Return a Device values",
-            notes = "Using the device sensors values arrived within last 60sec, it computes the sender"
+        value = "Return a Device values",
+        notes = "Using the device sensors values arrived within last 60sec, it computes the sender"
                 + "status for the given userID and sourceID")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-                    "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a device.avsc object containing last"
-                + "computed status")})
-    public Response getRTStatByUserDevice(
+        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
+            "there is a message.avsc object with more details"),
+        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
+                "there is a message.avsc object with more details"),
+        @ApiResponse(code = 200, message = "Return a device.avsc object containing last"
+            + "computed status")})
+    public Response getRTStatByUserDeviceJson(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID) {
         try {
-            Param.isValidInput(userID, sourceID);
-
-            Device device = Empatica.monitor(userID, sourceID, context);
-
-            return ResponseHandler.getJsonResponse(request, device);
+            return ResponseHandler.getJsonResponse(request,
+                getRTStatByUserDeviceWorker(userID, sourceID));
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
+                + "completed. If this error persists, please contact the service administrator.");
         }
+    }
+
+    @GET
+    @Produces(AvroConverter.MEDIA_TYPE)
+    @Path("/AVRO/Status/{userID}/{sourceID}")
+    @ApiOperation(
+        value = "Return a Device values",
+        notes = "Using the device sensors values arrived within last 60sec, it computes the sender"
+            + "status for the given userID and sourceID")
+    @ApiResponses(value = {
+        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
+            "there is a a byte array serialising a message.avsc object with more details"),
+        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
+            "there is a a byte array serialising a message.avsc object with more details"),
+        @ApiResponse(code = 200, message = "Return a byte array serialising device.avsc object"
+            + "containing last computed status")})
+    public Response getRTStatByUserDeviceAvro(
+        @PathParam("userID") String userID,
+        @PathParam("sourceID") String sourceID) {
+        try {
+            return ResponseHandler.getAvroResponse(request,
+                getRTStatByUserDeviceWorker(userID, sourceID));
+        }
+        catch (Exception e){
+            logger.error(e.getMessage(), e);
+            return ResponseHandler.getAvroErrorResponse(request, "Your request cannot be"
+                + "completed. If this error persists, please contact the service administrator.");
+        }
+    }
+
+    /**
+     * Actual implementation of AVRO and JSON getRTStatByUserDevice
+     **/
+    private Device getRTStatByUserDeviceWorker(String userID, String sourceID)
+        throws ConnectException {
+        Param.isValidInput(userID, sourceID);
+
+        Device device = Empatica.monitor(userID, sourceID, context);
+
+        return device;
     }
 }

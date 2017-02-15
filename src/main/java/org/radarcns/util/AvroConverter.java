@@ -3,8 +3,18 @@ package org.radarcns.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import org.apache.avro.Schema;
+import org.apache.avro.io.DatumReader;
+import org.apache.avro.io.DatumWriter;
+import org.apache.avro.io.Decoder;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.Encoder;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +23,8 @@ import org.slf4j.LoggerFactory;
  * Created by Francesco Nobilia on 11/11/2016.
  */
 public class AvroConverter {
+
+    public static final String MEDIA_TYPE = "avro/binary";
 
     private static Logger logger = LoggerFactory.getLogger(AvroConverter.class);
 
@@ -67,6 +79,42 @@ public class AvroConverter {
         return null;
     }
 
+    /**
+     * Returns a byte array version of the given record.
+     *
+     * @param record is the record to encode
+     * @return the byte array representing this Avro object.
+     *
+     * @throws IOException
+     */
+    public static <K extends SpecificRecord> byte[] avroToAvroByte(K record) throws IOException {
+
+        DatumWriter<K> writer = new SpecificDatumWriter<>(record.getSchema());
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        Encoder encoder = EncoderFactory.get().binaryEncoder(output, null);
+
+        writer.write(record, encoder);
+
+        encoder.flush();
+        return output.toByteArray();
+    }
+
+    /**
+     * Returns a byte array version of the given record.
+     *
+     * @param input is the byte array that has to be deserialised
+     * @param schema to serialise
+     * @return the deserialised record
+     *
+     * @throws IOException
+     */
+    public static <K extends SpecificRecord> K avroByteToAvro(byte[] input, Schema schema) throws IOException {
+
+        DatumReader<K> reader = new SpecificDatumReader<>(schema);
+        Decoder decoder = DecoderFactory.get().binaryDecoder(input, null);
+
+        return reader.read(null, decoder);
+    }
 /*
 
     *//**

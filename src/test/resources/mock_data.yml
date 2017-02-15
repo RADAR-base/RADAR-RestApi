@@ -1,0 +1,43 @@
+data:
+  - topic: topic1
+    rest_call: /Acc/{stat}/{userID}/{sourceID}
+    file: /Users/francesco/Repositories/RADAR-RestApi/src/test/resources/acc.csv
+    key_schema: org.radarcns.key.MeasurementKey
+    value_schema: org.radarcns.empatica.EmpaticaE4Acceleration
+    values_to_test: "x, y, z"
+  - topic: topic1
+    rest_call: "/B/{stat}/{userID}/{sourceID}"
+    file: /Users/francesco/Repositories/RADAR-RestApi/src/test/resources/battery.csv
+    key_schema: org.radarcns.key.MeasurementKey
+    value_schema: org.radarcns.empatica.EmpaticaE4BatteryLevel
+    values_to_test: "batteryLevel"
+  - topic: topic1
+    rest_call: "/BVP/{stat}/{userID}/{sourceID}"
+    file: bvp.csv
+    key_schema: org.radarcns.key.MeasurementKey
+    value_schema: org.radarcns.empatica.EmpaticaE4BloodVolumePulse
+    values_to_test: "bloodVolumePulse"
+  - topic: topic1
+    rest_call: "/EDA/{stat}/{userID}/{sourceID}"
+    file: eda.csv
+    key_schema: org.radarcns.key.MeasurementKey
+    value_schema: org.radarcns.empatica.EmpaticaE4ElectroDermalActivity
+    values_to_test: "electroDermalActivity"
+  - topic: topic1
+    rest_call: "/HR/{stat}/{userID}/{sourceID}"
+    file: ibi.csv
+    key_schema: org.radarcns.key.MeasurementKey
+    value_schema: org.radarcns.empatica.EmpaticaE4InterBeatInterval
+    values_to_test: "interBeatInterval"
+  - topic: topic1
+    rest_call: "/IBI/{stat}/{userID}/{sourceID}"
+    file: ibi.csv
+    key_schema: org.radarcns.key.MeasurementKey
+    value_schema: org.radarcns.empatica.EmpaticaE4InterBeatInterval
+    values_to_test: "interBeatInterval"
+  - topic: topic1
+    rest_call: "/T/{stat}/{userID}/{sourceID}"
+    file: temperature.csv
+    key_schema: org.radarcns.key.MeasurementKey
+    value_schema: org.radarcns.empatica.EmpaticaE4Temperature
+    values_to_test: "temperature"

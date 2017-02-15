@@ -25,6 +25,8 @@ ext.snakeyaml='1.17'
 ext.jerseymedia = '2.24'
 ext.dataformat = '2.8.5'
 ext.junitVersion = '4.12'
+ext.openCsvVersion = '3.9'
+ext.mathVersion = '3.0'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -56,6 +58,8 @@ dependencies {
   compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-avro', version: dataformat
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
+  testCompile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
+  testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
 }
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
