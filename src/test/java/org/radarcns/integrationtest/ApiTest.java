@@ -8,12 +8,6 @@ import org.apache.avro.specific.SpecificRecord;
 import org.junit.Before;
 import org.junit.Test;
 import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.Unit;
-import org.radarcns.avro.restapi.sensor.HeartRate;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integrationtest.collector.ExpectedValue;
@@ -67,10 +61,6 @@ public class ApiTest {
                         RadarConverter.getDescriptiveStatistic(stat), config);
 
                     SpecificRecord response = client.doGetRequest(url);
-
-                    result.getDataset().forEach((v)->logger.info(v.getEffectiveTimeFrame().toString()));
-                    logger.info("---------------");
-                    ((Dataset) response).getDataset().forEach((v)->logger.info(v.getEffectiveTimeFrame().toString()));
 
                     assertEquals(true, ExpectedValue.compareDatasets(result, response));
                 }

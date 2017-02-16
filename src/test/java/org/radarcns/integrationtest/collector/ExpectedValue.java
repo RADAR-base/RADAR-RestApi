@@ -284,7 +284,10 @@ public abstract class ExpectedValue<V> {
             throw new IllegalArgumentException("Null values cannot be compared");
         }
 
-        if ( !(expected instanceof Dataset) || !(test instanceof Dataset) ) return false;
+        if ( !(expected instanceof Dataset) || !(test instanceof Dataset) ) {
+            logger.info("Inputs are not instance of {}", Dataset.class.getCanonicalName());
+            return false;
+        }
 
         Dataset dataA = (Dataset) expected;
         Dataset dataB = (Dataset) test;
@@ -366,7 +369,7 @@ public abstract class ExpectedValue<V> {
                     }
                 }
             } else if ( (valueA.getSchema().getName().equals("Battery") &&
-                itemB.getSchema().getName().equals("Battery")) || (
+                valueB.getSchema().getName().equals("Battery")) || (
                 valueA.getSchema().getName().equals("BloodVolumePulse") &&
                     valueB.getSchema().getName().equals("BloodVolumePulse")) || (
                 valueA.getSchema().getName().equals("ElectroDermalActivity") &&

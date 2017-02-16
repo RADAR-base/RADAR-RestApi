@@ -17,7 +17,6 @@ import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.user.Cohort;
 import org.radarcns.avro.restapi.user.Patient;
 import org.radarcns.dao.mongo.UserDAO;
-import org.radarcns.util.AvroConverter;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

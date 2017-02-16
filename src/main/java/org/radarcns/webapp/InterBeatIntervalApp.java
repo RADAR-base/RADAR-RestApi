@@ -19,7 +19,6 @@ import org.radarcns.avro.restapi.header.Unit;
 import org.radarcns.dao.mongo.InterBeatIntervalDAO;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.security.Param;
-import org.radarcns.util.AvroConverter;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

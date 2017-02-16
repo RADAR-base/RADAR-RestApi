@@ -17,7 +17,6 @@ import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.device.Device;
 import org.radarcns.monitor.Empatica;
 import org.radarcns.security.Param;
-import org.radarcns.util.AvroConverter;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

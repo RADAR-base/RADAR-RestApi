@@ -1,6 +1,7 @@
 package org.radarcns.util;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -23,6 +24,13 @@ public class RadarConverter {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         df.setTimeZone(tz);
         return df.format(value);
+    }
+
+    public static Date getISO8601(String value) throws ParseException {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(tz);
+        return df.parse(value);
     }
 
     public static DescriptiveStatistic getDescriptiveStatistic(MongoHelper.Stat stat){

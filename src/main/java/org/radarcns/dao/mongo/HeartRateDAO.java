@@ -29,10 +29,10 @@ public class HeartRateDAO extends MongoSensorDAO {
             ArrayList<Document> quartiles_list = (ArrayList<Document>) doc.get(field);
 
             if(stat.equals(DescriptiveStatistic.quartiles)) {
-                return new Quartiles(
+                return new HeartRate(new Quartiles(
                         quartiles_list.get(0).getDouble("25"),
                         quartiles_list.get(1).getDouble("50"),
-                        quartiles_list.get(2).getDouble("75"));
+                        quartiles_list.get(2).getDouble("75")));
             }
             else if(stat.equals(DescriptiveStatistic.median)){
                 return new HeartRate(quartiles_list.get(1).getDouble("50"));

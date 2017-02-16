@@ -77,8 +77,6 @@ public class ResponseHandler {
         Status status = Status.OK;
         byte[] array = new byte[1];
 
-        logger.info(obj.getSchema().getName());
-
         if(obj.getSchema().getName().equals("Dataset") && ((Dataset) obj).getDataset().isEmpty()){
             status = Status.NO_CONTENT;
         }
@@ -87,7 +85,7 @@ public class ResponseHandler {
             logger.debug("[{}] {} records", status.getStatusCode(), size);
 
             array = AvroConverter.avroToAvroByte(obj);
-            logger.info("Array of size {}", array.length);
+            logger.debug("Array of size {}", array.length);
         }
 
         logger.info("[{}] {}", status.getStatusCode(), request.getRequestURI());

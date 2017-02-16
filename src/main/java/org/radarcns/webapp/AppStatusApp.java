@@ -17,7 +17,6 @@ import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.dao.mongo.AndroidDAO;
 import org.radarcns.security.Param;
-import org.radarcns.util.AvroConverter;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -289,7 +289,8 @@ public class Parser {
     }
 
     private Long getTimestamp(String value){
-        return Long.parseLong(value.substring(0, value.indexOf(".")));
+        long longValue = Long.parseLong(value.substring(0, value.indexOf("."))) * 1000;
+        return Long.valueOf(longValue);
     }
 
     private void existOrThrow(String key){
