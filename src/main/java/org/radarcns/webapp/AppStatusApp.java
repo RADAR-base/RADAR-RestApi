@@ -63,16 +63,14 @@ public class AppStatusApp {
     }
 
     @GET
-    @Produces(AvroConverter.MEDIA_TYPE)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/Status/{userID}/{sourceID}")
     @ApiOperation(
         value = "Return an Applications status",
         notes = "The Android application periodically updates its current status")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
+        @ApiResponse(code = 500, message = "An error occurs while executing"),
+        @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
             + "received status")})
     public Response getRTStatByUserDeviceAvro(
@@ -84,8 +82,7 @@ public class AppStatusApp {
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getAvroErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 

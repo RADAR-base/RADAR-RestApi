@@ -4,7 +4,10 @@ package org.radarcns.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.avro.restapi.avro.Message;
 import org.radarcns.avro.restapi.dataset.Dataset;
@@ -71,54 +74,35 @@ public class ResponseHandler {
         }
     }
 
-    public static Response getAvroResponse(HttpServletRequest request, Dataset dataset) throws IOException {
-        int code = 200;
-        int size = 0;
-        SpecificRecord obj = dataset;
+    public static Response getAvroResponse(HttpServletRequest request, SpecificRecord obj) throws IOException {
+        Status status = Status.OK;
+        byte[] array = new byte[1];
 
-        if(dataset.getDataset().isEmpty()){
-            code = 204;
-            obj = new Message("No data for this input");
+        logger.info(obj.getSchema().getName());
+
+        if(obj.getSchema().getName().equals("Dataset") && ((Dataset) obj).getDataset().isEmpty()){
+            status = Status.NO_CONTENT;
         }
         else{
-            size = dataset.getDataset().size();
+            int size = ((Dataset) obj).getDataset().size();
+            logger.debug("[{}] {} records", status.getStatusCode(), size);
+
+            array = AvroConverter.avroToAvroByte(obj);
+            logger.info("Array of size {}", array.length);
         }
 
-        byte[] array = AvroConverter.avroToAvroByte(obj);
+        logger.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        logger.debug("Array of size {}", array.length);
-        logger.debug("[{}] {} records", code, size);
-
-        logger.info("[{}] {}", code, request.getRequestURI());
-
-        return Response.status(code).entity(array).build();
-    }
-
-    public static Response getAvroResponse(HttpServletRequest request, SpecificRecord obj)
-        throws IOException {
-        byte[] array = AvroConverter.avroToAvroByte(obj);
-
-        logger.debug("Array of size {}", array.length);
-        logger.debug("[{}] {}",200,obj);
-
-        logger.info("[{}] {}", 200, request.getRequestURI());
-
-        return Response.status(200).entity(array).build();
-    }
-
-    public static Response getAvroErrorResponse(HttpServletRequest request, String message){
-        SpecificRecord obj = new Message(message);
-
-        try {
-            byte[] array = AvroConverter.avroToAvroByte(obj);
-
-            logger.debug("[{}] Array of size {}", 500, array.length);
-            logger.info("[{}] {}", 500, request.getRequestURI());
-            return Response.status(500).entity(array).build();
-        } catch (IOException e) {
-            logger.debug("[{}] Error generating Avro message", 500);
-            logger.info("[{}] {}", 500, request.getRequestURI());
-            return Response.status(500).entity("Internal error!").build();
+        switch (status){
+            case OK: return Response.ok(array, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
+            case NO_CONTENT: return Response.noContent().build();
         }
+
+        return Response.serverError().build();
+    }
+
+    public static Response getAvroErrorResponse(HttpServletRequest request){
+        logger.info("[{}] {}", 500, request.getRequestURI());
+        return Response.serverError().build();
     }
 }

@@ -59,16 +59,14 @@ public class UserApp {
     }
 
     @GET
-    @Produces(AvroConverter.MEDIA_TYPE)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/GetAllPatients")
     @ApiOperation(
         value = "Return a list of users",
         notes = "Each user can have multiple sourceID associated with him")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
+        @ApiResponse(code = 500, message = "An error occurs while executing"),
+        @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a byte array serialising a list of"
             + "user.avsc objects")})
     public Response getAllPatientsAvro(){
@@ -77,8 +75,7 @@ public class UserApp {
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getAvroErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 
@@ -118,16 +115,14 @@ public class UserApp {
     }
 
     @GET
-    @Produces(AvroConverter.MEDIA_TYPE)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/GetAllSources/{userID}")
     @ApiOperation(
         value = "Return a User value",
         notes = "Return all known sources associated with the give userID")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
+        @ApiResponse(code = 500, message = "An error occurs while executing"),
+        @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a user.avsc object")})
     public Response getAllSourcesAvro(
         @PathParam("userID") String userID
@@ -137,8 +132,7 @@ public class UserApp {
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getAvroErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 

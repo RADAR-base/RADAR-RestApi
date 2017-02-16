@@ -69,17 +69,15 @@ public class ElectroDermalActivityApp {
     }
 
     @GET
-    @Produces(AvroConverter.MEDIA_TYPE)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/RT/{stat}/{userID}/{sourceID}")
     @ApiOperation(
         value = "Return an ElectroDermal Activity values",
         notes = "Return the last seen ElectroDermal Activity value of type stat for the given"
             + "userID and sourceID")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
+        @ApiResponse(code = 500, message = "An error occurs while executing"),
+        @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing last seen electrodermal_activity.avsc value for the required statistic"
             + "function")})
@@ -93,8 +91,7 @@ public class ElectroDermalActivityApp {
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getAvroErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 
@@ -145,16 +142,14 @@ public class ElectroDermalActivityApp {
     }
 
     @GET
-    @Produces(AvroConverter.MEDIA_TYPE)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/{stat}/{userID}/{sourceID}")
     @ApiOperation(
         value = "Return a dataset of ElectroDermal Activity values",
         notes = "Return a dataset for the given userID and sourceID of type stat")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
+        @ApiResponse(code = 500, message = "An error occurs while executing"),
+        @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "available electrodermal_activity.avsc values for the required statistic function")})
     public Response getAllByUserAvro(
@@ -167,8 +162,7 @@ public class ElectroDermalActivityApp {
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 
@@ -223,17 +217,15 @@ public class ElectroDermalActivityApp {
     }
 
     @GET
-    @Produces(AvroConverter.MEDIA_TYPE)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/{stat}/{userID}/{sourceID}/{start}/{end}")
     @ApiOperation(
         value = "Return a dataset of ElectroDermal Activity values",
         notes = "Return a dataset of type stat for the given userID and sourceID with data"
             + "belonging to the time window [start - end]")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-            "there is a a byte array serialising a message.avsc object with more details"),
+        @ApiResponse(code = 500, message = "An error occurs while executing"),
+        @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "electrodermal_activity.avsc values belonging to the time window [start - end]"
             + "for the required statistic function")})
@@ -249,8 +241,7 @@ public class ElectroDermalActivityApp {
         }
         catch (Exception e){
             logger.error(e.getMessage(), e);
-            return ResponseHandler.getAvroErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+            return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 

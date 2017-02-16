@@ -24,8 +24,6 @@ import org.slf4j.LoggerFactory;
  */
 public class AvroConverter {
 
-    public static final String MEDIA_TYPE = "avro/binary";
-
     private static Logger logger = LoggerFactory.getLogger(AvroConverter.class);
 
     /**

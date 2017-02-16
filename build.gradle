@@ -13,20 +13,22 @@ war {
 targetCompatibility = '1.7'
 sourceCompatibility = '1.7'
 
-ext.tomcat = '8.0.37'
-ext.logback = '1.1.7'
-ext.jersey = '2.22.1'
-ext.json='20160810'
-ext.swagger='1.5.0'
-ext.mongodb='3.3.0'
 ext.avro='1.7.7'
-ext.jackson='2.8.4'
-ext.snakeyaml='1.17'
-ext.jerseymedia = '2.24'
 ext.dataformat = '2.8.5'
+ext.jackson='2.8.4'
+ext.jersey = '2.22.1'
+ext.jerseymedia = '2.24'
+ext.json='20160810'
 ext.junitVersion = '4.12'
-ext.openCsvVersion = '3.9'
+ext.logback = '1.1.7'
 ext.mathVersion = '3.0'
+ext.mongodb='3.3.0'
+ext.okhttpVersion = '3.5.0'
+ext.okioVersion = '1.11.0'
+ext.openCsvVersion = '3.9'
+ext.snakeyaml='1.17'
+ext.swagger='1.5.0'
+ext.tomcat = '8.0.37'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -60,6 +62,8 @@ dependencies {
   testCompile group: 'junit', name: 'junit', version: junitVersion
   testCompile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
   testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
+  testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
+  testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
 }
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {

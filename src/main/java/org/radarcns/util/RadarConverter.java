@@ -7,6 +7,7 @@ import java.util.TimeZone;
 import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.security.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,20 @@ public class RadarConverter {
             case sum: return DescriptiveStatistic.sum;
             case quartile: return DescriptiveStatistic.quartiles;
             case median: return DescriptiveStatistic.median;
+            default: logger.info("No translation for {}",stat); return null;
+        }
+    }
+
+    public static MongoHelper.Stat getDescriptiveStatistic(DescriptiveStatistic stat){
+        switch (stat){
+            case average: return MongoHelper.Stat.avg;
+            case count: return MongoHelper.Stat.count;
+            case interquartile_range: return MongoHelper.Stat.iqr;
+            case maximum: return MongoHelper.Stat.max;
+            case minimum: return MongoHelper.Stat.min;
+            case sum: return MongoHelper.Stat.sum;
+            case quartiles: return MongoHelper.Stat.quartile;
+            case median: return MongoHelper.Stat.median;
             default: logger.info("No translation for {}",stat); return null;
         }
     }
