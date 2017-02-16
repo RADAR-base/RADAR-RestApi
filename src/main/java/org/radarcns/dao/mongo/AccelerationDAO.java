@@ -25,11 +25,6 @@ public class AccelerationDAO extends MongoSensorDAO {
     @Override
     protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat) {
         if(stat.equals(DescriptiveStatistic.median) || stat.equals(DescriptiveStatistic.quartiles)){
-
-            logger.info(doc.toJson());
-
-            logger.info(field);
-
             Document component = (Document) doc.get(field);
 
             ArrayList<Document> x = (ArrayList<Document>) component.get("x");
