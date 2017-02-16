@@ -48,7 +48,7 @@ public class AppStatusApp {
             "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
             + "received status")})
-    public Response getRTStatByUserDeviceJson(
+    public Response getRTStatByUserDeviceJsonAppStatus(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID) {
         try {
@@ -73,7 +73,7 @@ public class AppStatusApp {
         @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
             + "received status")})
-    public Response getRTStatByUserDeviceAvro(
+    public Response getRTStatByUserDeviceAvroAppStatus(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID) {
         try {

@@ -32,7 +32,7 @@ public class ApiGenericTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiGenericTest.class);
 
-    private final boolean TEST = true;
+    private final boolean TEST = false;
 
     private final String USER_AGENT = "Mozilla/5.0";
     private final String SERVER = "http://52.210.59.174:8080/";

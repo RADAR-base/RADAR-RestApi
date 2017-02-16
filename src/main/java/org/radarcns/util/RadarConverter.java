@@ -7,7 +7,6 @@ import java.util.TimeZone;
 import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.security.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

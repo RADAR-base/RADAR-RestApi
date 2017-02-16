@@ -47,7 +47,7 @@ public class UserApp {
         @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
             "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a list of user.avsc objects")})
-    public Response getAllPatientsJson(){
+    public Response getAllPatientsJsonUser(){
         try {
             return ResponseHandler.getJsonResponse(request, getAllPatientsWorker());
         }
@@ -69,7 +69,7 @@ public class UserApp {
         @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a byte array serialising a list of"
             + "user.avsc objects")})
-    public Response getAllPatientsAvro(){
+    public Response getAllPatientsAvroUser(){
         try {
             return ResponseHandler.getAvroResponse(request, getAllPatientsWorker());
         }
@@ -101,7 +101,7 @@ public class UserApp {
         @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
             "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a user.avsc object")})
-    public Response getAllSourcesJson(
+    public Response getAllSourcesJsonUser(
         @PathParam("userID") String userID
     ){
         try {
@@ -124,7 +124,7 @@ public class UserApp {
         @ApiResponse(code = 500, message = "An error occurs while executing"),
         @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a user.avsc object")})
-    public Response getAllSourcesAvro(
+    public Response getAllSourcesAvroUser(
         @PathParam("userID") String userID
     ){
         try {

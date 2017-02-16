@@ -4,7 +4,6 @@ package org.radarcns.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -96,13 +95,12 @@ public class ResponseHandler {
         switch (status){
             case OK: return Response.ok(array, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
             case NO_CONTENT: return Response.noContent().build();
+            default: return Response.serverError().build();
         }
-
-        return Response.serverError().build();
     }
 
     public static Response getAvroErrorResponse(HttpServletRequest request){
-        logger.info("[{}] {}", 500, request.getRequestURI());
+        logger.info("[{}] {}", Status.INTERNAL_SERVER_ERROR, request.getRequestURI());
         return Response.serverError().build();
     }
 }

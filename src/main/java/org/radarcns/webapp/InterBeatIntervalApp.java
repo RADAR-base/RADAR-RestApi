@@ -53,7 +53,7 @@ public class InterBeatIntervalApp {
                 "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
             + "inter_beat_interval.avsc value for the required statistic function")})
-    public Response getRealTimeUserJson(
+    public Response getRealTimeUserJsonIBI(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -80,7 +80,7 @@ public class InterBeatIntervalApp {
         @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
             + "inter_beat_interval.avsc value for the required statistic function")})
-    public Response getRealTimeUserAvro(
+    public Response getRealTimeUserAvroIBI(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -125,7 +125,7 @@ public class InterBeatIntervalApp {
                 "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "available inter_beat_interval.avsc values for the required statistic function")})
-    public Response getAllByUserJson(
+    public Response getAllByUserJsonIBI(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -152,7 +152,7 @@ public class InterBeatIntervalApp {
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing all available inter_beat_interval.avsc values for the required statistic"
             + "function")})
-    public Response getAllByUserAvro(
+    public Response getAllByUserAvroIBI(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -199,7 +199,7 @@ public class InterBeatIntervalApp {
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "inter_beat_interval.avsc values belonging to the time window [start - end] for"
             + "the required statistic function")})
-    public Response getByUserForWindowJson(
+    public Response getByUserForWindowJsonIBI(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat,
@@ -229,7 +229,7 @@ public class InterBeatIntervalApp {
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "inter_beat_interval.avsc values belonging to the time window [start - end] for"
             + "the required statistic function")})
-    public Response getByUserForWindowAvro(
+    public Response getByUserForWindowAvroIBI(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat,

@@ -53,7 +53,7 @@ public class ElectroDermalActivityApp {
                 "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
             + "electrodermal_activity.avsc value for the required statistic function")})
-    public Response getRealTimeUserJson(
+    public Response getRealTimeUserJsonEDA(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -81,7 +81,7 @@ public class ElectroDermalActivityApp {
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing last seen electrodermal_activity.avsc value for the required statistic"
             + "function")})
-    public Response getRealTimeUserAvro(
+    public Response getRealTimeUserAvroEDA(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -126,7 +126,7 @@ public class ElectroDermalActivityApp {
             "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "available electrodermal_activity.avsc values for the required statistic function")})
-    public Response getAllByUserJson(
+    public Response getAllByUserJsonEDA(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -152,7 +152,7 @@ public class ElectroDermalActivityApp {
         @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "available electrodermal_activity.avsc values for the required statistic function")})
-    public Response getAllByUserAvro(
+    public Response getAllByUserAvroEDA(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -199,7 +199,7 @@ public class ElectroDermalActivityApp {
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "electrodermal_activity.avsc values belonging to the time window [start - end]"
             + "for the required statistic function")})
-    public Response getByUserForWindowJson(
+    public Response getByUserForWindowJsonEDA(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat,
@@ -229,7 +229,7 @@ public class ElectroDermalActivityApp {
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "electrodermal_activity.avsc values belonging to the time window [start - end]"
             + "for the required statistic function")})
-    public Response getByUserForWindowAvro(
+    public Response getByUserForWindowAvroEDA(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat,

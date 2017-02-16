@@ -53,7 +53,7 @@ public class TemperatureApp {
                 "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
             + "temperature.avsc value for the required statistic function")})
-    public Response getRealTimeUserJson(
+    public Response getRealTimeUserJsonTemperature(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -80,7 +80,7 @@ public class TemperatureApp {
         @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing last seen temperature.avsc value for the required statistic function")})
-    public Response getRealTimeUserAvro(
+    public Response getRealTimeUserAvroTemperature(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -125,7 +125,7 @@ public class TemperatureApp {
                 "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "available temperature.avsc values for the required statistic function")})
-    public Response getAllByUserJson(
+    public Response getAllByUserJsonTemperature(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -152,7 +152,7 @@ public class TemperatureApp {
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing all available temperature.avsc values for the required statistic"
             + "function")})
-    public Response getAllByUserAvro(
+    public Response getAllByUserAvroTemperature(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -199,7 +199,7 @@ public class TemperatureApp {
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "temperature.avsc values belonging to the time window [start - end] for the"
             + "required statistic function")})
-    public Response getByUserForWindowJson(
+    public Response getByUserForWindowJsonTemperature(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat,
@@ -229,7 +229,7 @@ public class TemperatureApp {
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing all temperature.avsc values belonging to the time window [start - end]"
             + "for the required statistic function")})
-    public Response getByUserForWindowAvro(
+    public Response getByUserForWindowAvroTemperature(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat,

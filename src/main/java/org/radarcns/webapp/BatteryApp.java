@@ -53,7 +53,7 @@ public class BatteryApp {
             "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
             + "battery.avsc value for the required statistic function")})
-    public Response getRealTimeUserJson(
+    public Response getRealTimeUserJsonBattery(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -80,7 +80,7 @@ public class BatteryApp {
         @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing last seen battery.avsc value for the required statistic function")})
-    public Response getRealTimeUserAvro(
+    public Response getRealTimeUserAvroBattery(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -125,7 +125,7 @@ public class BatteryApp {
                 "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "available battery.avsc values for the required statistic function")})
-    public Response getAllByUserJson(
+    public Response getAllByUserJsonBattery(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -151,7 +151,7 @@ public class BatteryApp {
         @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing all available battery.avsc values for the required statistic function")})
-    public Response getAllByUserAvro(
+    public Response getAllByUserAvroBattery(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -198,7 +198,7 @@ public class BatteryApp {
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "battery.avsc values belonging to the time window [start - end] for the required"
             + "statistic function")})
-    public Response getByUserForWindowJson(
+    public Response getByUserForWindowJsonBattery(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat,
@@ -228,7 +228,7 @@ public class BatteryApp {
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing all battery.avsc values belonging to the time window [start - end] for"
             + "the required statistic function")})
-    public Response getByUserForWindowAvro(
+    public Response getByUserForWindowAvroBattery(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat,

@@ -53,7 +53,7 @@ public class HeartRateApp {
                 "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
             + "heart_rate.avsc value for the required statistic function")})
-    public Response getRealTimeUserJson(
+    public Response getRealTimeUserJsonHR(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -80,7 +80,7 @@ public class HeartRateApp {
         @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing last seen heart_rate.avsc value for the required statistic function")})
-    public Response getRealTimeUserAvro(
+    public Response getRealTimeUserAvroHR(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -123,7 +123,7 @@ public class HeartRateApp {
                 "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "available heart_rate.avsc values for the required statistic function")})
-    public Response getAllByUserJson(
+    public Response getAllByUserJsonHR(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -149,7 +149,7 @@ public class HeartRateApp {
         @ApiResponse(code = 204, message = "No value for the given parameters"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "available heart_rate.avsc values for the required statistic function")})
-    public Response getAllByUserAvro(
+    public Response getAllByUserAvroHR(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -195,7 +195,7 @@ public class HeartRateApp {
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "heart_rate.avsc values belonging to the time window [start - end] for the"
             + "required statistic function")})
-    public Response getByUserForWindowJson(
+    public Response getByUserForWindowJsonHR(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat,
@@ -225,7 +225,7 @@ public class HeartRateApp {
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing all heart_rate.avsc values belonging to the time window [start - end] for"
             + "the required statistic function")})
-    public Response getByUserForWindowAvro(
+    public Response getByUserForWindowAvroHR(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat,

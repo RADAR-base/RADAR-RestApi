@@ -53,7 +53,7 @@ public class BloodVolumePulseApp {
                 "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
             + "blood_volume_pulse.avsc value for the required statistic function")})
-    public Response getRealTimeUserJson(
+    public Response getRealTimeUserJsonBVP(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -81,7 +81,7 @@ public class BloodVolumePulseApp {
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing last seen blood_volume_pulse.avsc value for the required statistic"
             + "function")})
-    public Response getRealTimeUserAvro(
+    public Response getRealTimeUserAvroBVP(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -126,7 +126,7 @@ public class BloodVolumePulseApp {
                 "there is a message.avsc object with more details"),
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "available blood_volume_pulse.avsc values for the required statistic function")})
-    public Response getAllByUserJson(
+    public Response getAllByUserJsonBVP(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat) {
@@ -153,7 +153,7 @@ public class BloodVolumePulseApp {
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing all available blood_volume_pulse.avsc values for the required statistic"
             + "function")})
-    public Response getAllByUserAvro(
+    public Response getAllByUserAvroBVP(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat) {
@@ -200,7 +200,7 @@ public class BloodVolumePulseApp {
         @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
             + "blood_volume_pulse.avsc values belonging to the time window [start - end] for"
             + "the required statistic function")})
-    public Response getByUserForWindowJson(
+    public Response getByUserForWindowJsonBVP(
             @PathParam("userID") String userID,
             @PathParam("sourceID") String sourceID,
             @PathParam("stat") MongoHelper.Stat stat,
@@ -230,7 +230,7 @@ public class BloodVolumePulseApp {
         @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
             + "containing all blood_volume_pulse.avsc values belonging to the time window"
             + "[start - end] for the required statistic function")})
-    public Response getByUserForWindowAvro(
+    public Response getByUserForWindowAvroBVP(
         @PathParam("userID") String userID,
         @PathParam("sourceID") String sourceID,
         @PathParam("stat") MongoHelper.Stat stat,
