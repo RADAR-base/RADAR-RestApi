@@ -1,18 +1,16 @@
 package org.radarcns.integrationtest.collector;
 
+
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by francesco on 14/02/2017.
  */
-public class ExpectedArrayValue {
+public class ExpectedArrayValue extends ExpectedValue<DoubleArrayCollector>{
 
-    //Timewindow length in milliseconds
-    private long DURATION = 10000;
-
-    private Long lastTimestamp;
-    private DoubleArrayCollector lastValue;
-    private final HashMap<Long, DoubleArrayCollector> series;
+    private static final Logger logger = LoggerFactory.getLogger(ExpectedArrayValue.class);
 
     public ExpectedArrayValue(){
         series = new HashMap<>();
@@ -41,15 +39,6 @@ public class ExpectedArrayValue {
             lastValue.add(array);
             series.put(startTimeWindow, lastValue);
         }
-    }
-
-    public String toString(){
-        String result = "";
-        for ( Long interval : series.keySet() ){
-            result += interval.toString() + "-" + (interval + DURATION) + '\t' +
-                series.get(interval).toString() + "\n";
-        }
-        return result;
     }
 
 }

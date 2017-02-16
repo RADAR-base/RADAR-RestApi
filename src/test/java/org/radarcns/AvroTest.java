@@ -2,15 +2,9 @@ package org.radarcns;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Random;
-import org.apache.avro.specific.SpecificRecord;
-import org.bson.Document;
 import org.junit.Test;
 import org.radarcns.avro.restapi.avro.Message;
 import org.radarcns.avro.restapi.dataset.Dataset;

@@ -5,14 +5,7 @@ import java.util.HashMap;
 /**
  * Created by francesco on 14/02/2017.
  */
-public class ExpectedDoubleValue {
-
-    //Timewindow length in milliseconds
-    private long DURATION = 10000;
-
-    private Long lastTimestamp;
-    private DoubleValueCollector lastValue;
-    private final HashMap<Long, DoubleValueCollector> series;
+public class ExpectedDoubleValue extends ExpectedValue<DoubleValueCollector>{
 
     public ExpectedDoubleValue(){
         series = new HashMap<>();
@@ -32,14 +25,4 @@ public class ExpectedDoubleValue {
             series.put(startTimeWindow, lastValue);
         }
     }
-
-    public String toString(){
-        String result = "";
-        for ( Long interval : series.keySet() ){
-            result += interval.toString() + "-" + (interval + DURATION) + '\t' +
-                series.get(interval).toString() + "\n";
-        }
-        return result;
-    }
-
 }

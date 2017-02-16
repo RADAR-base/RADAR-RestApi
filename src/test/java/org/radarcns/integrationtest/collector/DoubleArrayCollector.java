@@ -46,6 +46,10 @@ public class DoubleArrayCollector {
         return this;
     }
 
+    public DoubleValueCollector[] getCollectors() {
+        return collectors;
+    }
+
     @Override
     public String toString() {
         return Arrays.toString(collectors);

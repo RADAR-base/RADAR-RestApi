@@ -154,7 +154,7 @@ public class Parser {
         return expecedType;
     }
 
-    private ExpectedType getExpectedType(MockDataConfig config){
+    public static ExpectedType getExpectedType(MockDataConfig config){
         if ( config.getValuesToTest().contains(",") ) {
             return ExpectedType.ARRAY;
         }
@@ -208,7 +208,7 @@ public class Parser {
         throw new IllegalArgumentException("Illegale expected Type " + expecedType.getValue());
     }
 
-    private void getHeader() throws IOException{
+    public void getHeader() throws IOException{
         String[] header = csvReader.readNext();
 
         for (int i = 0; i < header.length; i++) {

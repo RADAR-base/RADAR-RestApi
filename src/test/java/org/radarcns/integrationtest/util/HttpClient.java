@@ -1,9 +1,14 @@
 package org.radarcns.integrationtest.util;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.apache.avro.specific.SpecificRecord;
+import org.radarcns.avro.restapi.avro.Message;
+import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,33 +23,27 @@ public class HttpClient {
     private final String SERVER = "http://52.210.59.174:8080/";
     private final String PATH = "radar/api/";
 
-    private int request(String url) throws Exception {
+    private final long CONNECTION_TIMEOUT = 30;
 
-        logger.info(url);
+    private final OkHttpClient httpClient;
 
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+    public HttpClient(){
+        httpClient = new OkHttpClient.Builder()
+            .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+            .build();
+    }
 
-        con.setRequestMethod("GET");
-        con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("content-type", "application/json");
+    public SpecificRecord doGetRequest(String url) throws IOException {
+        Request request = new Request.Builder().header("User-Agent", USER_AGENT).url(url).build();
+        Response response = httpClient.newCall(request).execute();
 
-        BufferedReader br = null;
-        if (200 <= con.getResponseCode() && con.getResponseCode() <= 299) {
-            br = new BufferedReader(new InputStreamReader((con.getInputStream())));
-        } else {
-            br = new BufferedReader(new InputStreamReader((con.getErrorStream())));
+        if ( response.code() == 200 ){
+            return AvroConverter.avroByteToAvro(response.body().bytes(), Dataset.getClassSchema());
         }
 
-        StringBuilder result = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            result.append(line);
-        }
-        br.close();
-        logger.info(result.toString());
-
-        return con.getResponseCode();
+        return AvroConverter.avroByteToAvro(response.body().bytes(), Message.getClassSchema());
     }
 
 }
