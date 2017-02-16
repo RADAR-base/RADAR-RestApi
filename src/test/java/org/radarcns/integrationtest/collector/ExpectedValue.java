@@ -4,9 +4,12 @@ import static org.radarcns.avro.restapi.header.DescriptiveStatistic.quartiles;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.dataset.Quartiles;
@@ -24,11 +27,16 @@ import org.radarcns.avro.restapi.sensor.Temperature;
 import org.radarcns.integrationtest.config.MockDataConfig;
 import org.radarcns.integrationtest.util.Parser;
 import org.radarcns.integrationtest.util.Parser.ExpectedType;
+import org.radarcns.util.RadarConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by francesco on 15/02/2017.
  */
 public abstract class ExpectedValue<V> {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExpectedValue.class);
 
     //Timewindow length in milliseconds
     protected long DURATION = 10000;
@@ -44,15 +52,16 @@ public abstract class ExpectedValue<V> {
         List<Long> windows = new ArrayList<>(series.keySet());
         java.util.Collections.sort(windows);
 
-        EffectiveTimeFrame eft = new EffectiveTimeFrame(windows.get(0).toString(),
-            Long.toString(windows.get(windows.size() - 1) + DURATION));
+        EffectiveTimeFrame eft = new EffectiveTimeFrame(
+            RadarConverter.getISO8601(new Date(windows.get(0))),
+            RadarConverter.getISO8601(new Date(windows.get(windows.size() - 1) + DURATION)));
 
         return eft;
     }
 
     public EffectiveTimeFrame getEffectiveTimeFrame(Long value){
-        return new EffectiveTimeFrame(value.toString(),
-            Long.toString(value + DURATION));
+        return new EffectiveTimeFrame(RadarConverter.getISO8601(new Date(value)),
+            RadarConverter.getISO8601(new Date(value + DURATION)));
     }
 
     public Header getHeader(DescriptiveStatistic statistic, Unit unit){
@@ -60,10 +69,14 @@ public abstract class ExpectedValue<V> {
     }
 
     public List<Item> getItem(DescriptiveStatistic statistic, MockDataConfig config){
+
+        List<Long> keys = new LinkedList<>(series.keySet());
+        Collections.sort(keys);
+
         ExpectedType type = Parser.getExpectedType(config);
         switch (type) {
-            case ARRAY: return getArrayItems(series.keySet(), statistic, config);
-            case DOUBLE: return getSingletonItems(series.keySet(), statistic, config);
+            case ARRAY: return getArrayItems(keys, statistic, config);
+            case DOUBLE: return getSingletonItems(keys, statistic, config);
             default:
                 throw new IllegalArgumentException("Cannot type " + type.getValue());
         }
@@ -90,7 +103,6 @@ public abstract class ExpectedValue<V> {
                     content = new Acceleration(statValues.get(0), statValues.get(1),
                         statValues.get(2));
                 }
-
                 items.add(new Item(content, getEffectiveTimeFrame(key)));
             } else {
                 throw new IllegalArgumentException(config.getRestCall() +
@@ -222,7 +234,7 @@ public abstract class ExpectedValue<V> {
         if (config.getRestCall().contains("/Acc/")) {
             unit = Unit.g;
         } else if (config.getRestCall().contains("/B/")) {
-            unit = Unit.dimensionless;
+            unit = Unit.percentage;
         } else if (config.getRestCall().contains("/BVP/")) {
             unit = Unit.nW;
         } else if (config.getRestCall().contains("/EDA/")) {
@@ -265,6 +277,151 @@ public abstract class ExpectedValue<V> {
                 series.get(interval).toString() + "\n";
         }
         return result;
+    }
+
+    public static boolean compareDatasets(Object expected, Object test){
+        if ( expected == null || test == null ) {
+            throw new IllegalArgumentException("Null values cannot be compared");
+        }
+
+        if ( !(expected instanceof Dataset) || !(test instanceof Dataset) ) return false;
+
+        Dataset dataA = (Dataset) expected;
+        Dataset dataB = (Dataset) test;
+
+        Header headerA = dataA.getHeader();
+        Header headerB = dataB.getHeader();
+
+        if ( !headerA.getDescriptiveStatistic().name().equals(
+            headerB.getDescriptiveStatistic().name()) ) {
+            logger.info("Different DescriptiveStatistic. Expected: {} - Find: {}",
+                headerA.getDescriptiveStatistic().name(),
+                headerB.getDescriptiveStatistic().name());
+            return false;
+        }
+
+        if ( !headerA.getUnit().name().equals(headerB.getUnit().name()) ) {
+            logger.info("Different Unit. Expected: {} - Find: {}",
+                headerA.getUnit().name(), headerB.getUnit().name());
+            return false;
+        }
+
+        if ( !headerA.getDescriptiveStatistic().name().equals(
+            headerB.getDescriptiveStatistic().name()) ) {
+            logger.info("Different DescriptiveStatistic. Expected: {} - Find: {}",
+                headerA.getDescriptiveStatistic().name(),
+                headerB.getDescriptiveStatistic().name());
+            return false;
+        }
+
+        if( !compareEffectiveTimeFrame(headerA.getEffectiveTimeFrame(),
+            headerB.getEffectiveTimeFrame()) ){
+            logger.info("Different EffectiveTimeFrame. Expected: {} - Find: {}",
+                headerA.getEffectiveTimeFrame().toString(),
+                headerB.getEffectiveTimeFrame().toString());
+            return false;
+        }
+
+        List<Item> listA = dataA.getDataset();
+        List<Item> listB = dataB.getDataset();
+        if ( listA.size() != listB.size() ) {
+            logger.info("Dataset with different size. Expected: {} - Find: {}", listA.size(),
+                listB.size());
+            return false;
+        }
+
+        for ( int i=0; i<listA.size(); i++ ) {
+            Item itemA = listA.get(i);
+            Item itemB = listB.get(i);
+
+            if( !compareEffectiveTimeFrame(itemA.getEffectiveTimeFrame(),
+                itemB.getEffectiveTimeFrame()) ){
+                logger.info("Different EffectiveTimeFrame. Expected: {} - Find: {}",
+                    itemA.getEffectiveTimeFrame().toString(),
+                    itemB.getEffectiveTimeFrame().toString());
+                return false;
+            }
+
+            SpecificRecord valueA = (SpecificRecord)itemA.getValue();
+            SpecificRecord valueB = (SpecificRecord)itemB.getValue();
+            if (valueA.getSchema().getName().equals("Acceleration") &&
+                valueB.getSchema().getName().equals("Acceleration")) {
+                Acceleration accA = (Acceleration) valueA;
+                Acceleration accB = (Acceleration) valueB;
+                if (headerA.getDescriptiveStatistic().name().equals(
+                    DescriptiveStatistic.quartiles.name())) {
+                    if ( !( compareQuartiles((Quartiles) accA.getX(), (Quartiles) accB.getX()) &&
+                        compareQuartiles((Quartiles) accA.getY(), (Quartiles) accB.getY()) &&
+                        compareQuartiles((Quartiles) accA.getZ(), (Quartiles) accB.getZ()) ) ) {
+                        logger.info("Different Quartiles. Expected: {} - Find: {}",
+                            accA.toString(), accB.toString());
+                        return false;
+                    }
+                } else {
+                    if ( !( accA.getX().equals(accB.getX()) && accA.getY().equals(accB.getY()) &&
+                        accA.getZ().equals(accB.getZ()) ) ) {
+                        logger.info("Different Values. Expected: {} - Find: {}",
+                            accA.toString(), accB.toString());
+                        return false;
+                    }
+                }
+            } else if ( (valueA.getSchema().getName().equals("Battery") &&
+                itemB.getSchema().getName().equals("Battery")) || (
+                valueA.getSchema().getName().equals("BloodVolumePulse") &&
+                    valueB.getSchema().getName().equals("BloodVolumePulse")) || (
+                valueA.getSchema().getName().equals("ElectroDermalActivity") &&
+                    valueB.getSchema().getName().equals("ElectroDermalActivity")) || (
+                valueA.getSchema().getName().equals("HeartRate") &&
+                    valueB.getSchema().getName().equals("HeartRate")) || (
+                valueA.getSchema().getName().equals("InterBeatInterval") &&
+                    valueB.getSchema().getName().equals("InterBeatInterval")) || (
+                valueA.getSchema().getName().equals("Temperature") &&
+                    valueB.getSchema().getName().equals("Temperature")) ) {
+                if (headerA.getDescriptiveStatistic().name().equals(
+                    DescriptiveStatistic.quartiles.name())) {
+                    Quartiles quartilesA = (Quartiles) valueA.get(
+                        valueA.getSchema().getField("value").pos());
+                    Quartiles quartilesB = (Quartiles) valueB.get(
+                        valueB.getSchema().getField("value").pos());
+                    if ( !compareQuartiles(quartilesA, quartilesB) ) {
+                        logger.info("Different Quartiles. Expected: {} - Find: {}",
+                            valueA.toString(), valueB.toString());
+                        return false;
+                    }
+                } else {
+                    Double doubleA = (Double) valueA.get(
+                        valueA.getSchema().getField("value").pos());
+                    Double doubleB = (Double) valueB.get(
+                        valueB.getSchema().getField("value").pos());
+                    if ( !doubleA.equals(doubleB) ) {
+                        logger.info("Different Values. Expected: {} - Find: {}",
+                            valueA.toString(), valueB.toString());
+                        return false;
+                    }
+                }
+            } else {
+                throw new IllegalArgumentException(valueA.getSchema().getName() + " and " +
+                    valueA.getSchema().getName() + " are not supported test cases");
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean compareEffectiveTimeFrame(EffectiveTimeFrame etfa, EffectiveTimeFrame etfb) {
+        if ( etfa.getStartDateTime().equals(etfb.getStartDateTime()) &&
+            etfa.getEndDateTime().equals(etfb.getEndDateTime()) ) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean compareQuartiles(Quartiles a, Quartiles b) {
+        if ( a.getFirst().equals(b.getFirst()) && a.getSecond().equals(b.getSecond()) &&
+            a.getThird().equals(b.getThird()) ) {
+            return true;
+        }
+        return false;
     }
 
 }

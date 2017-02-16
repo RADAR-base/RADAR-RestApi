@@ -4,11 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import org.apache.avro.specific.SpecificRecord;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.avro.restapi.avro.Message;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
@@ -36,7 +34,7 @@ public class ApiTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiTest.class);
 
-    private final boolean TEST = false;
+    private final boolean TEST = true;
     private List<MockDataConfig> configs;
 
     @Before
@@ -63,67 +61,21 @@ public class ApiTest {
                 for ( MongoHelper.Stat stat : Stat.values() ) {
                     String url = URLGenerator.generate(expected.getUser(), expected.getSource(),
                         RadarConverter.getDescriptiveStatistic(stat), config);
+                    logger.info(url);
 
                     Dataset result = expected.getDataset(
                         RadarConverter.getDescriptiveStatistic(stat), config);
 
                     SpecificRecord response = client.doGetRequest(url);
 
-                    assertEquals(true, compare(result, response));
+                    result.getDataset().forEach((v)->logger.info(v.getEffectiveTimeFrame().toString()));
+                    logger.info("---------------");
+                    ((Dataset) response).getDataset().forEach((v)->logger.info(v.getEffectiveTimeFrame().toString()));
+
+                    assertEquals(true, ExpectedValue.compareDatasets(result, response));
                 }
             }
         }
-    }
-
-    private boolean compare(Dataset a, Object test){
-        if ( !(test instanceof Dataset) ) return false;
-        Dataset b = (Dataset) test;
-
-        if ( a == null && b == null ) {
-            return true;
-        }
-        else if ( a != null && b != null ) {
-            Header ha = a.getHeader();
-            Header hb = b.getHeader();
-
-            DescriptiveStatistic dsa = ha.getDescriptiveStatistic();
-            DescriptiveStatistic dsb = hb.getDescriptiveStatistic();
-            if ( dsa.name().equals(dsb.name().toString()) ) {
-
-                Unit ua = ha.getUnit();
-                Unit ub = hb.getUnit();
-                if ( ua.name().equals(ub.name().toString()) ) {
-
-                    EffectiveTimeFrame etfa = ha.getEffectiveTimeFrame();
-                    EffectiveTimeFrame etfb = hb.getEffectiveTimeFrame();
-                    if ( etfa.getStartDateTime().equals(etfb.getStartDateTime()) &&
-                        etfa.getEndDateTime().equals(etfb.getEndDateTime()) ) {
-
-                        if ( a.getDataset().size() == b.getDataset().size() ){
-                            for (int i=0; i<a.getDataset().size(); i++) {
-                                Item ia = a.getDataset().get(i);
-                                Item ib = b.getDataset().get(i);
-
-                                etfa = ia.getEffectiveTimeFrame();
-                                etfb = ib.getEffectiveTimeFrame();
-                                if ( etfa.getStartDateTime().equals(etfb.getStartDateTime()) &&
-                                    etfa.getEndDateTime().equals(etfb.getEndDateTime()) ) {
-
-                                    HeartRate hra = (HeartRate) ia.getValue();
-                                    HeartRate hrb = (HeartRate) ib.getValue();
-
-                                    if ( hra.getValue().equals(hrb.getValue()) ) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 
 }

@@ -6,21 +6,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.junit.Test;
-import org.radarcns.avro.restapi.avro.Message;
 import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.Unit;
-import org.radarcns.avro.restapi.sensor.HeartRate;
-import org.radarcns.integrationtest.util.HttpClient;
 import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,11 +86,9 @@ public class ApiGenericTest {
         byte[] array = response.body().bytes();
         logger.info("Received {} bytes", array.length);
 
-//        if ( response.code() == 200 ){
-//            logger.info(AvroConverter.avroByteToAvro(array, Dataset.getClassSchema()).toString());
-//        }
-
-        logger.info(AvroConverter.avroByteToAvro(array, Message.getClassSchema()).toString());
+        if ( response.code() == 200 ){
+            logger.info(AvroConverter.avroByteToAvro(array, Dataset.getClassSchema()).toString());
+        }
 
         return response.code();
     }

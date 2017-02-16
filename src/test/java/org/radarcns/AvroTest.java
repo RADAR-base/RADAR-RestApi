@@ -13,7 +13,9 @@ import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.Unit;
+import org.radarcns.avro.restapi.sensor.Acceleration;
 import org.radarcns.avro.restapi.sensor.HeartRate;
+import org.radarcns.integrationtest.collector.ExpectedValue;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
@@ -26,7 +28,7 @@ public class AvroTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AvroTest.class);
 
-    private final boolean TEST = true;
+    private final boolean TEST = false;
 
     @Test
     public void testMessage() throws Exception {
@@ -38,7 +40,6 @@ public class AvroTest {
         }
     }
 
-
     @Test
     public void testDataset() throws Exception {
         if( TEST ) {
@@ -46,11 +47,10 @@ public class AvroTest {
             byte[] bytes = AvroConverter.avroToAvroByte(dataset);
             Dataset test = AvroConverter.avroByteToAvro(bytes, Dataset.getClassSchema());
 
-            assertEquals(true, equals(dataset, test));
-            assertEquals(false, equals(getRandomDataset(), test));
+            assertEquals(true, ExpectedValue.compareDatasets(dataset, test));
+            assertEquals(false, ExpectedValue.compareDatasets(getRandomDataset(), test));
         }
     }
-
 
     private Dataset getRandomDataset(){
         Random random = new Random();
@@ -80,53 +80,5 @@ public class AvroTest {
         Dataset hrd = new Dataset(header,list);
 
         return hrd;
-    }
-
-    private boolean equals(Dataset a, Dataset b){
-        if ( a == null && b == null ) {
-            return true;
-        }
-        else if ( a != null && b != null ) {
-            Header ha = a.getHeader();
-            Header hb = b.getHeader();
-
-            DescriptiveStatistic dsa = ha.getDescriptiveStatistic();
-            DescriptiveStatistic dsb = hb.getDescriptiveStatistic();
-            if ( dsa.name().equals(dsb.name().toString()) ) {
-
-                Unit ua = ha.getUnit();
-                Unit ub = hb.getUnit();
-                if ( ua.name().equals(ub.name().toString()) ) {
-
-                    EffectiveTimeFrame etfa = ha.getEffectiveTimeFrame();
-                    EffectiveTimeFrame etfb = hb.getEffectiveTimeFrame();
-                    if ( etfa.getStartDateTime().equals(etfb.getStartDateTime()) &&
-                        etfa.getEndDateTime().equals(etfb.getEndDateTime()) ) {
-
-                        if ( a.getDataset().size() == b.getDataset().size() ){
-                            for (int i=0; i<a.getDataset().size(); i++) {
-                                Item ia = a.getDataset().get(i);
-                                Item ib = b.getDataset().get(i);
-
-                                etfa = ia.getEffectiveTimeFrame();
-                                etfb = ib.getEffectiveTimeFrame();
-                                if ( etfa.getStartDateTime().equals(etfb.getStartDateTime()) &&
-                                    etfa.getEndDateTime().equals(etfb.getEndDateTime()) ) {
-
-                                    HeartRate hra = (HeartRate) ia.getValue();
-                                    HeartRate hrb = (HeartRate) ib.getValue();
-
-                                    if ( hra.getValue().equals(hrb.getValue()) ) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 }

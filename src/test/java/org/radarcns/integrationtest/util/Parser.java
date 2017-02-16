@@ -284,7 +284,7 @@ public class Parser {
     }
 
     private Long getStartTimeWindow(String value){
-        long longValue = (Long.parseLong(value.substring(0, value.indexOf("."))) / 10000) * 10000;
+        long longValue = (Long.parseLong(value.substring(0, value.indexOf("."))) / 10) * 10000;
         return Long.valueOf(longValue);
     }
 
