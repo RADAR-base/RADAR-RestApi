@@ -13,7 +13,8 @@ import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integrationtest.collector.ExpectedValue;
 import org.radarcns.integrationtest.config.MockConfig;
 import org.radarcns.integrationtest.config.MockDataConfig;
-import org.radarcns.integrationtest.util.CSVValidator;
+import org.radarcns.integrationtest.cvs.CSVGenerator;
+import org.radarcns.integrationtest.cvs.CSVValidator;
 import org.radarcns.integrationtest.util.HttpClient;
 import org.radarcns.integrationtest.util.MockAggregator;
 import org.radarcns.integrationtest.util.URLGenerator;
@@ -35,6 +36,10 @@ public class ApiTest {
     public void runBeforeTestMethod() throws Exception{
         if( TEST ) {
             configs = MockConfig.load(getClass().getClassLoader()).getData();
+
+//            for ( MockDataConfig config : configs ) {
+//                CSVGenerator.generate(config, 5);
+//            }
 
             // Validate input
             for ( MockDataConfig config : configs ) {
@@ -64,7 +69,7 @@ public class ApiTest {
                     SpecificRecord response = client.doGetRequest(url);
 
                     assertEquals(true, ExpectedValue.compareDatasets(result, response,
-                        0.0000001));
+                        0.0000001, false));
                 }
             }
         }

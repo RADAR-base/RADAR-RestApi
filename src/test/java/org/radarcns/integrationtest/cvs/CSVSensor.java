@@ -1,4 +1,4 @@
-package org.radarcns.integrationtest.util;
+package org.radarcns.integrationtest.cvs;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -17,7 +17,7 @@ public abstract class CSVSensor {
     private String sourceID;
     private Double currentTime;
 
-    private static final Logger logger = LoggerFactory.getLogger(CSVSensor.class);
+    //private static final Logger logger = LoggerFactory.getLogger(CSVSensor.class);
 
     public CSVSensor(List<String> headers) {
         this(headers, null, null,
@@ -66,7 +66,7 @@ public abstract class CSVSensor {
             Collectors.joining(",")) + "\n";
     }
 
-    abstract String nextValue();
+    public abstract String nextValue();
 
     public static Double getRandomDouble(){
         return ThreadLocalRandom.current().nextDouble();

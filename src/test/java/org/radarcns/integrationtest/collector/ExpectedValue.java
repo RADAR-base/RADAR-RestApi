@@ -49,8 +49,6 @@ public abstract class ExpectedValue<V> {
     //Timewindow length in milliseconds
     protected long DURATION = TimeUnit.SECONDS.toMillis(10);
 
-    private static final int PRECISION = 7;
-
     protected String user;
     protected String source;
 
@@ -289,13 +287,16 @@ public abstract class ExpectedValue<V> {
         return result;
     }
 
-    public static boolean compareDatasets(Object expected, Object test, double tolerance){
+    public static boolean compareDatasets(Object expected, Object test, double tolerance,
+        boolean verbose){
         if ( expected == null || test == null ) {
             throw new IllegalArgumentException("Null values cannot be compared");
         }
 
         if ( !(expected instanceof Dataset) || !(test instanceof Dataset) ) {
-            logger.info("Inputs are not instance of {}", Dataset.class.getCanonicalName());
+            if (verbose) {
+                logger.info("Inputs are not instance of {}", Dataset.class.getCanonicalName());
+            }
             return false;
         }
 
@@ -307,43 +308,61 @@ public abstract class ExpectedValue<V> {
 
         if ( !headerA.getDescriptiveStatistic().name().equals(
             headerB.getDescriptiveStatistic().name()) ) {
-            logger.info("Different DescriptiveStatistic. Expected: {} - Find: {}",
-                headerA.getDescriptiveStatistic().name(),
-                headerB.getDescriptiveStatistic().name());
+            if (verbose) {
+                logger.info("Different DescriptiveStatistic. Expected: {} - Find: {}",
+                    headerA.getDescriptiveStatistic().name(),
+                    headerB.getDescriptiveStatistic().name());
+            }
             return false;
         }
 
         if ( !headerA.getUnit().name().equals(headerB.getUnit().name()) ) {
-            logger.info("Different Unit. Expected: {} - Find: {}",
-                headerA.getUnit().name(), headerB.getUnit().name());
+            if (verbose) {
+                logger.info("Different Unit. Expected: {} - Find: {}",
+                    headerA.getUnit().name(), headerB.getUnit().name());
+            }
             return false;
         }
 
         if ( !headerA.getDescriptiveStatistic().name().equals(
             headerB.getDescriptiveStatistic().name()) ) {
-            logger.info("Different DescriptiveStatistic. Expected: {} - Find: {}",
-                headerA.getDescriptiveStatistic().name(),
-                headerB.getDescriptiveStatistic().name());
+            if (verbose) {
+                logger.info("Different DescriptiveStatistic. Expected: {} - Find: {}",
+                    headerA.getDescriptiveStatistic().name(),
+                    headerB.getDescriptiveStatistic().name());
+            }
             return false;
         }
 
         if( !compareEffectiveTimeFrame(headerA.getEffectiveTimeFrame(),
             headerB.getEffectiveTimeFrame()) ){
-            logger.info("Different EffectiveTimeFrame. Expected: {} - Find: {}",
-                headerA.getEffectiveTimeFrame().toString(),
-                headerB.getEffectiveTimeFrame().toString());
+            if (verbose) {
+                logger.info("Different EffectiveTimeFrame. Expected: {} - Find: {}",
+                    headerA.getEffectiveTimeFrame().toString(),
+                    headerB.getEffectiveTimeFrame().toString());
+            }
             return false;
         }
 
-        List<Item> listA = dataA.getDataset();
-        List<Item> listB = dataB.getDataset();
-        if ( listA.size() != listB.size() ) {
-            logger.info("Dataset with different size. Expected: {} - Find: {}", listA.size(),
-                listB.size());
+        return compareItems(dataA.getDataset(), dataB.getDataset(), headerA, headerB, tolerance,
+            verbose);
+    }
 
-            listA.forEach((v)->logger.info(v.toString()));
-            logger.info("--------------------------------------");
-            listB.forEach((v)->logger.info(v.toString()));
+    private static boolean compareItems(List<Item> listA, List<Item> listB, Header headerA,
+        Header headerB, double tolerance, boolean verbose){
+        if ( listA.size() != listB.size() ) {
+            if (verbose) {
+                logger.info("Dataset with different size. Expected: {} - Find: {}", listA.size(),
+                    listB.size());
+
+                for (Item item : listA) {
+                    logger.info(item.toString());
+                }
+                logger.info("--------------------------------------");
+                for (Item item : listB) {
+                    logger.info(item.toString());
+                }
+            }
 
             return false;
         }
@@ -354,9 +373,11 @@ public abstract class ExpectedValue<V> {
 
             if( !compareEffectiveTimeFrame(itemA.getEffectiveTimeFrame(),
                 itemB.getEffectiveTimeFrame()) ){
-                logger.info("Different EffectiveTimeFrame. Expected: {} - Find: {}",
-                    itemA.getEffectiveTimeFrame().toString(),
-                    itemB.getEffectiveTimeFrame().toString());
+                if (verbose) {
+                    logger.info("Different EffectiveTimeFrame. Expected: {} - Find: {}",
+                        itemA.getEffectiveTimeFrame().toString(),
+                        itemB.getEffectiveTimeFrame().toString());
+                }
                 return false;
             }
 
@@ -371,22 +392,29 @@ public abstract class ExpectedValue<V> {
                     if ( !( compareQuartiles((Quartiles) accA.getX(), (Quartiles) accB.getX(),
                         tolerance) && compareQuartiles((Quartiles) accA.getY(),
                         (Quartiles) accB.getY(), tolerance) && compareQuartiles(
-                            (Quartiles) accA.getZ(), (Quartiles) accB.getZ(), tolerance) ) ) {
-                        logger.info("Different Quartiles. Expected: {} - Find: {}",
-                            accA.toString(), accB.toString());
+                        (Quartiles) accA.getZ(), (Quartiles) accB.getZ(), tolerance) ) ) {
+                        if (verbose) {
+                            logger.info("Different Quartiles. Expected: {} - Find: {}",
+                                accA.toString(), accB.toString());
+                        }
                         return false;
                     }
                 } else {
                     if ( !( accA.getX().equals(accB.getX()) && accA.getY().equals(accB.getY()) &&
                         accA.getZ().equals(accB.getZ()) ) ) {
 
-                        boolean toleranceA =  (1d - (Double)accB.getX() / (Double)accA.getX()) < tolerance;
-                        boolean toleranceB =  (1d - (Double)accB.getY() / (Double)accA.getY()) < tolerance;
-                        boolean toleranceC =  (1d - (Double)accB.getZ() / (Double)accA.getZ()) < tolerance;
+                        boolean toleranceA = isPassable((Double)accB.getX(), (Double)accA.getX(),
+                            tolerance);
+                        boolean toleranceB = isPassable((Double)accB.getY(), (Double)accA.getY(),
+                            tolerance);
+                        boolean toleranceC = isPassable((Double)accB.getZ(), (Double)accA.getZ(),
+                            tolerance);
 
                         if ( !(toleranceA && toleranceB && toleranceC) ) {
-                            logger.info("Different Values. Expected: {} - Find: {}",
-                                accA.toString(), accB.toString());
+                            if (verbose) {
+                                logger.info("Different Values. Expected: {} - Find: {}",
+                                    accA.toString(), accB.toString());
+                            }
                             return false;
                         }
                     }
@@ -410,8 +438,10 @@ public abstract class ExpectedValue<V> {
                     Quartiles quartilesB = (Quartiles) valueB.get(
                         valueB.getSchema().getField("value").pos());
                     if ( !compareQuartiles(quartilesA, quartilesB, tolerance) ) {
-                        logger.info("Different Quartiles. Expected: {} - Find: {}",
-                            valueA.toString(), valueB.toString());
+                        if (verbose) {
+                            logger.info("Different Quartiles. Expected: {} - Find: {}",
+                                valueA.toString(), valueB.toString());
+                        }
                         return false;
                     }
                 } else {
@@ -419,12 +449,8 @@ public abstract class ExpectedValue<V> {
                         valueA.getSchema().getField("value").pos());
                     Double doubleB = (Double) valueB.get(
                         valueB.getSchema().getField("value").pos());
-                    if ( !doubleA.equals(doubleB) ) {
-                        if ( !((1d - doubleA / doubleB) < tolerance) ) {
-                            logger.info("Different Values. Expected: {} - Find: {}",
-                                valueA.toString(), valueB.toString());
-                            return false;
-                        }
+                    if ( !doubleA.equals(doubleB) && !isPassable(doubleA, doubleB, tolerance)) {
+                        return false;
                     }
                 }
             } else {
@@ -434,6 +460,25 @@ public abstract class ExpectedValue<V> {
         }
 
         return true;
+    }
+
+    private static boolean isPassable(Double a, Double b, double tolerance){
+        if ( tolerance == 0.0 ) {
+            return a.equals(b);
+        }
+
+        if ( a > b ) {
+//            logger.info("[1] A:{} B:{} ratio:{} isPassable:{}", a, b, ( 1.0 - a/b ),
+//                tolerance >= ( 1.0 - a/b ));
+            return tolerance >= ( 1.0 - a/b );
+        } else if ( b > a ) {
+//            logger.info("[2] A:{} B:{} ratio:{} isPassable:{}", a, b, ( 1.0 - b/a ),
+//                tolerance >= ( 1.0 - b/a ));
+            return tolerance >= ( 1.0 - b/a );
+        }
+        else {
+            return a.equals(b);
+        }
     }
 
     private static boolean compareEffectiveTimeFrame(EffectiveTimeFrame etfa, EffectiveTimeFrame etfb) {
@@ -450,24 +495,30 @@ public abstract class ExpectedValue<V> {
             return true;
         }
 
-        boolean toleranceA =  (1d - a.getFirst() / b.getFirst()) < tolerance;
-        boolean toleranceB =  (1d - a.getSecond() / b.getSecond()) < tolerance;
-        boolean toleranceC =  (1d - a.getThird() / b.getThird()) < tolerance;
+        boolean toleranceA = isPassable(a.getFirst(), b.getFirst(), tolerance);
+        boolean toleranceB = isPassable(a.getSecond(), b.getSecond(), tolerance);
+        boolean toleranceC = isPassable(a.getThird(), b.getThird(), tolerance);
 
-        if ( !(toleranceA && toleranceB && toleranceC) ) {
-            return false;
-        }
-
-        return true;
+        return toleranceA && toleranceB && toleranceC;
     }
 
-    private static double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
+    public static int getExponent (double value) {
+        int count = 0;
+        if ( value > 1.0 ) {
+            double temp = 1.0;
+            while ( value > temp ) {
+                temp = temp * 10.0;
+                count++;
+            }
+        } else {
+            double temp = 1.0;
+            while ( temp > value ) {
+                temp = temp / 10.0;
+                count++;
+            }
+        }
 
-        long factor = (long) Math.pow(10, places);
-        value = value * factor;
-        long tmp = Math.round(value);
-        return (double) tmp / factor;
+        return count;
     }
 
 }

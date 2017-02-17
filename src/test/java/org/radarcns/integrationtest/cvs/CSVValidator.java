@@ -1,9 +1,10 @@
-package org.radarcns.integrationtest.util;
+package org.radarcns.integrationtest.cvs;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import org.radarcns.integrationtest.config.MockDataConfig;
+import org.radarcns.integrationtest.util.Parser;
 import org.radarcns.integrationtest.util.Parser.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

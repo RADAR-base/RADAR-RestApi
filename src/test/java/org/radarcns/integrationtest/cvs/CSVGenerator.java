@@ -1,8 +1,12 @@
-package org.radarcns.integrationtest.util;
+package org.radarcns.integrationtest.cvs;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.header.Unit;
+import org.radarcns.integrationtest.config.MockDataConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CSVGenerator {
 
-    private static final Logger logger = LoggerFactory.getLogger(CSVGenerator.class);
+    //private static final Logger logger = LoggerFactory.getLogger(CSVGenerator.class);
 
     public static void acceleration(int samples, String path) throws IOException {
         acceleration(null, null, null, samples, path);
@@ -214,6 +218,27 @@ public class CSVGenerator {
 
             writer.flush();
             writer.close();
+        }
+    }
+
+    public static void generate(MockDataConfig config, int samples) throws IOException {
+        if (config.getRestCall().contains("/Acc/")) {
+            acceleration(samples, config.getDataFile());
+        } else if (config.getRestCall().contains("/B/")) {
+            battery(samples, config.getDataFile());
+        } else if (config.getRestCall().contains("/BVP/")) {
+            bloodVolumePulse(samples, config.getDataFile());
+        } else if (config.getRestCall().contains("/EDA/")) {
+            electrodermalActivty(samples, config.getDataFile());
+        } else if (config.getRestCall().contains("/HR/")) {
+            //
+        } else if (config.getRestCall().contains("/IBI/")) {
+            interBeatInterval(samples, config.getDataFile());
+        } else if (config.getRestCall().contains("/T/")) {
+            temperature(samples, config.getDataFile());
+        } else {
+            throw new IllegalArgumentException(config.getRestCall() +
+                " is not a supported test case");
         }
     }
 
