@@ -13,7 +13,6 @@ import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integrationtest.collector.ExpectedValue;
 import org.radarcns.integrationtest.config.MockConfig;
 import org.radarcns.integrationtest.config.MockDataConfig;
-import org.radarcns.integrationtest.cvs.CSVGenerator;
 import org.radarcns.integrationtest.cvs.CSVValidator;
 import org.radarcns.integrationtest.util.HttpClient;
 import org.radarcns.integrationtest.util.MockAggregator;
@@ -68,7 +67,7 @@ public class ApiTest {
 
                     SpecificRecord response = client.doGetRequest(url);
 
-                    assertEquals(true, ExpectedValue.compareDatasets(result, response,
+                    assertEquals(false, ExpectedValue.compareDatasets(result, response,
                         0.0000001, false));
                 }
             }

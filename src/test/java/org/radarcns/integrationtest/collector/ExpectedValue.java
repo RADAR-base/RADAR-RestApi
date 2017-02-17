@@ -344,12 +344,11 @@ public abstract class ExpectedValue<V> {
             return false;
         }
 
-        return compareItems(dataA.getDataset(), dataB.getDataset(), headerA, headerB, tolerance,
+        return compareItems(dataA.getDataset(), dataB.getDataset(), headerA, tolerance,
             verbose);
     }
 
-    private static boolean compareItems(List<Item> listA, List<Item> listB, Header headerA,
-        Header headerB, double tolerance, boolean verbose){
+    private static boolean compareItems(List<Item> listA, List<Item> listB, Header header, double tolerance, boolean verbose){
         if ( listA.size() != listB.size() ) {
             if (verbose) {
                 logger.info("Dataset with different size. Expected: {} - Find: {}", listA.size(),
@@ -387,7 +386,7 @@ public abstract class ExpectedValue<V> {
                 valueB.getSchema().getName().equals("Acceleration")) {
                 Acceleration accA = (Acceleration) valueA;
                 Acceleration accB = (Acceleration) valueB;
-                if (headerA.getDescriptiveStatistic().name().equals(
+                if (header.getDescriptiveStatistic().name().equals(
                     DescriptiveStatistic.quartiles.name())) {
                     if ( !( compareQuartiles((Quartiles) accA.getX(), (Quartiles) accB.getX(),
                         tolerance) && compareQuartiles((Quartiles) accA.getY(),
@@ -431,7 +430,7 @@ public abstract class ExpectedValue<V> {
                     valueB.getSchema().getName().equals("InterBeatInterval")) || (
                 valueA.getSchema().getName().equals("Temperature") &&
                     valueB.getSchema().getName().equals("Temperature")) ) {
-                if (headerA.getDescriptiveStatistic().name().equals(
+                if (header.getDescriptiveStatistic().name().equals(
                     DescriptiveStatistic.quartiles.name())) {
                     Quartiles quartilesA = (Quartiles) valueA.get(
                         valueA.getSchema().getField("value").pos());

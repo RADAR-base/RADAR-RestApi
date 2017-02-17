@@ -3,12 +3,7 @@ package org.radarcns.integrationtest.cvs;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.Unit;
 import org.radarcns.integrationtest.config.MockDataConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by francesco on 17/02/2017.
@@ -231,7 +226,8 @@ public class CSVGenerator {
         } else if (config.getRestCall().contains("/EDA/")) {
             electrodermalActivty(samples, config.getDataFile());
         } else if (config.getRestCall().contains("/HR/")) {
-            //
+            throw new IllegalArgumentException(config.getRestCall() +
+                " is not a supported test case");
         } else if (config.getRestCall().contains("/IBI/")) {
             interBeatInterval(samples, config.getDataFile());
         } else if (config.getRestCall().contains("/T/")) {

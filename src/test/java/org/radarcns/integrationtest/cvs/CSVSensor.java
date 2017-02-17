@@ -3,10 +3,7 @@ package org.radarcns.integrationtest.cvs;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import org.radarcns.security.Param;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by francesco on 17/02/2017.
@@ -62,8 +59,12 @@ public abstract class CSVSensor {
     }
 
     public String getHeaders(){
-        return headers.stream().collect(
-            Collectors.joining(",")) + "\n";
+        String result = "";
+        for (String header : headers) {
+            result += header+",";
+        }
+
+        return result.substring(0, result.length()-1) + '\n';
     }
 
     public abstract String nextValue();

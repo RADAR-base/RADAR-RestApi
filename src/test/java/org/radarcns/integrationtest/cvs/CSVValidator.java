@@ -33,7 +33,7 @@ public class CSVValidator {
                 mex = "It is possible to test only one user at time.";
             } else if ( !last.get(Variable.SOURCE).toString().equals(map.get(Variable.SOURCE).toString()) ) {
                 mex = "It is possible to test only one source at time.";
-            } else if ( !( ((Long)last.get(Variable.TIMESTAMP)).longValue() <= ((Long)map.get(Variable.TIMESTAMP)).longValue() ) ) {
+            } else if ( !( ((Long)map.get(Variable.TIMESTAMP)).longValue() >= ((Long)last.get(Variable.TIMESTAMP)).longValue() ) ) {
                 mex = Variable.TIMESTAMP.toString() + " must increase raw by raw.";
             } else if ( map.get(Variable.VALUE) == null ) {
                 mex = Variable.VALUE.toString() + "value to test must be specified.";
