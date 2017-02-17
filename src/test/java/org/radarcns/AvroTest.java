@@ -28,7 +28,7 @@ public class AvroTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AvroTest.class);
 
-    private final boolean TEST = true;
+    private final boolean TEST = false;
 
     @Test
     public void testMessage() throws Exception {

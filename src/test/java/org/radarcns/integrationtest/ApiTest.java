@@ -28,7 +28,7 @@ public class ApiTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiTest.class);
 
-    private final boolean TEST = true;
+    private final boolean TEST = false;
     private List<MockDataConfig> configs;
 
     @Before
