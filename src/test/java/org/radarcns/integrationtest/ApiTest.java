@@ -52,6 +52,7 @@ public class ApiTest {
 
             for ( MockDataConfig config : map.keySet() ) {
                 ExpectedValue expected = map.get(config);
+
                 for ( MongoHelper.Stat stat : Stat.values() ) {
                     String url = URLGenerator.generate(expected.getUser(), expected.getSource(),
                         RadarConverter.getDescriptiveStatistic(stat), config);
@@ -62,7 +63,8 @@ public class ApiTest {
 
                     SpecificRecord response = client.doGetRequest(url);
 
-                    assertEquals(true, ExpectedValue.compareDatasets(result, response));
+                    assertEquals(true, ExpectedValue.compareDatasets(result, response,
+                        0.0000001));
                 }
             }
         }

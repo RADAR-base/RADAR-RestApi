@@ -1,6 +1,13 @@
 package org.radarcns.integrationtest.collector;
 
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.average;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.count;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.interquartile_range;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.maximum;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.median;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.minimum;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.quartiles;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.sum;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
@@ -39,7 +47,9 @@ public abstract class ExpectedValue<V> {
     private static final Logger logger = LoggerFactory.getLogger(ExpectedValue.class);
 
     //Timewindow length in milliseconds
-    protected long DURATION = 10000;
+    protected long DURATION = TimeUnit.SECONDS.toMillis(10);
+
+    private static final int PRECISION = 7;
 
     protected String user;
     protected String source;
@@ -183,14 +193,14 @@ public abstract class ExpectedValue<V> {
         List<List<Double>> quartileList = new ArrayList<>(len);
 
         for (DoubleValueCollector collector : collectors) {
-            minList.add(collector.getMin());
-            maxList.add(collector.getMax());
-            sumList.add(collector.getSum());
-            countList.add(collector.getCount());
-            avgList.add(collector.getAvg());
-            iqrList.add(collector.getIqr());
-            quartileList.add(collector.getQuartile());
-            medList.add(collector.getQuartile().get(1));
+            minList.add((Double) getStat(minimum, collector));
+            maxList.add((Double) getStat(maximum, collector));
+            sumList.add((Double) getStat(sum, collector));
+            countList.add((Double) getStat(count, collector));
+            avgList.add((Double) getStat(average, collector));
+            iqrList.add((Double) getStat(interquartile_range, collector));
+            quartileList.add((List<Double>) getStat(quartiles, collector));
+            medList.add((Double) getStat(median, collector));
         }
 
         switch (statistic) {
@@ -217,7 +227,7 @@ public abstract class ExpectedValue<V> {
             case maximum: return collector.getMax();
             case median: return collector.getQuartile().get(1);
             case minimum: return collector.getMin();
-            case quartiles: return collector.getQuartile();
+            case quartiles:return collector.getQuartile();
             case sum: return collector.getSum();
             default: throw new IllegalArgumentException(
                 statistic.toString() + " is not supported");
@@ -279,7 +289,7 @@ public abstract class ExpectedValue<V> {
         return result;
     }
 
-    public static boolean compareDatasets(Object expected, Object test){
+    public static boolean compareDatasets(Object expected, Object test, double tolerance){
         if ( expected == null || test == null ) {
             throw new IllegalArgumentException("Null values cannot be compared");
         }
@@ -330,6 +340,11 @@ public abstract class ExpectedValue<V> {
         if ( listA.size() != listB.size() ) {
             logger.info("Dataset with different size. Expected: {} - Find: {}", listA.size(),
                 listB.size());
+
+            listA.forEach((v)->logger.info(v.toString()));
+            logger.info("--------------------------------------");
+            listB.forEach((v)->logger.info(v.toString()));
+
             return false;
         }
 
@@ -353,9 +368,10 @@ public abstract class ExpectedValue<V> {
                 Acceleration accB = (Acceleration) valueB;
                 if (headerA.getDescriptiveStatistic().name().equals(
                     DescriptiveStatistic.quartiles.name())) {
-                    if ( !( compareQuartiles((Quartiles) accA.getX(), (Quartiles) accB.getX()) &&
-                        compareQuartiles((Quartiles) accA.getY(), (Quartiles) accB.getY()) &&
-                        compareQuartiles((Quartiles) accA.getZ(), (Quartiles) accB.getZ()) ) ) {
+                    if ( !( compareQuartiles((Quartiles) accA.getX(), (Quartiles) accB.getX(),
+                        tolerance) && compareQuartiles((Quartiles) accA.getY(),
+                        (Quartiles) accB.getY(), tolerance) && compareQuartiles(
+                            (Quartiles) accA.getZ(), (Quartiles) accB.getZ(), tolerance) ) ) {
                         logger.info("Different Quartiles. Expected: {} - Find: {}",
                             accA.toString(), accB.toString());
                         return false;
@@ -363,9 +379,16 @@ public abstract class ExpectedValue<V> {
                 } else {
                     if ( !( accA.getX().equals(accB.getX()) && accA.getY().equals(accB.getY()) &&
                         accA.getZ().equals(accB.getZ()) ) ) {
-                        logger.info("Different Values. Expected: {} - Find: {}",
-                            accA.toString(), accB.toString());
-                        return false;
+
+                        boolean toleranceA =  (1d - (Double)accB.getX() / (Double)accA.getX()) < tolerance;
+                        boolean toleranceB =  (1d - (Double)accB.getY() / (Double)accA.getY()) < tolerance;
+                        boolean toleranceC =  (1d - (Double)accB.getZ() / (Double)accA.getZ()) < tolerance;
+
+                        if ( !(toleranceA && toleranceB && toleranceC) ) {
+                            logger.info("Different Values. Expected: {} - Find: {}",
+                                accA.toString(), accB.toString());
+                            return false;
+                        }
                     }
                 }
             } else if ( (valueA.getSchema().getName().equals("Battery") &&
@@ -386,7 +409,7 @@ public abstract class ExpectedValue<V> {
                         valueA.getSchema().getField("value").pos());
                     Quartiles quartilesB = (Quartiles) valueB.get(
                         valueB.getSchema().getField("value").pos());
-                    if ( !compareQuartiles(quartilesA, quartilesB) ) {
+                    if ( !compareQuartiles(quartilesA, quartilesB, tolerance) ) {
                         logger.info("Different Quartiles. Expected: {} - Find: {}",
                             valueA.toString(), valueB.toString());
                         return false;
@@ -397,9 +420,11 @@ public abstract class ExpectedValue<V> {
                     Double doubleB = (Double) valueB.get(
                         valueB.getSchema().getField("value").pos());
                     if ( !doubleA.equals(doubleB) ) {
-                        logger.info("Different Values. Expected: {} - Find: {}",
-                            valueA.toString(), valueB.toString());
-                        return false;
+                        if ( !((1d - doubleA / doubleB) < tolerance) ) {
+                            logger.info("Different Values. Expected: {} - Find: {}",
+                                valueA.toString(), valueB.toString());
+                            return false;
+                        }
                     }
                 }
             } else {
@@ -419,12 +444,30 @@ public abstract class ExpectedValue<V> {
         return false;
     }
 
-    private static boolean compareQuartiles(Quartiles a, Quartiles b) {
+    private static boolean compareQuartiles(Quartiles a, Quartiles b, double tolerance) {
         if ( a.getFirst().equals(b.getFirst()) && a.getSecond().equals(b.getSecond()) &&
             a.getThird().equals(b.getThird()) ) {
             return true;
         }
-        return false;
+
+        boolean toleranceA =  (1d - a.getFirst() / b.getFirst()) < tolerance;
+        boolean toleranceB =  (1d - a.getSecond() / b.getSecond()) < tolerance;
+        boolean toleranceC =  (1d - a.getThird() / b.getThird()) < tolerance;
+
+        if ( !(toleranceA && toleranceB && toleranceC) ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
     }
 
 }

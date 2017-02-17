@@ -23,7 +23,7 @@ public class ExpectedDoubleValue extends ExpectedValue<DoubleValueCollector>{
             lastValue.add(value);
         }
         else {
-            lastTimestamp = timestamp;
+            lastTimestamp = startTimeWindow;
             lastValue = new DoubleValueCollector();
             lastValue.add(value);
             series.put(startTimeWindow, lastValue);

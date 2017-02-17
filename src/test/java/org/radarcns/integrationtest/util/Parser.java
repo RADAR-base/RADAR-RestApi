@@ -284,13 +284,13 @@ public class Parser {
     }
 
     private Long getStartTimeWindow(String value){
-        long longValue = (Long.parseLong(value.substring(0, value.indexOf("."))) / 10) * 10000;
-        return Long.valueOf(longValue);
+        Double timeDouble = Double.parseDouble(value) / 10d;
+        return timeDouble.longValue() * 10000;
     }
 
     private Long getTimestamp(String value){
-        long longValue = Long.parseLong(value.substring(0, value.indexOf("."))) * 1000;
-        return Long.valueOf(longValue);
+        Double timeDouble  = Double.valueOf(value) * 1000d;
+        return timeDouble.longValue();
     }
 
     private void existOrThrow(String key){
