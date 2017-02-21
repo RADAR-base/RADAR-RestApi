@@ -12,15 +12,16 @@ import org.radarcns.dao.mongo.util.MongoAppDAO;
 import org.radarcns.util.RadarConverter;
 
 /**
- * Created by Francesco Nobilia on 20/10/2016.
+ * Data Access Object for Android App Status values.
  */
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class AndroidDAO {
 
     //private final Logger logger = LoggerFactory.getLogger(AndroidDAO.class);
 
-    private final static AndroidDAO instance = new AndroidDAO();
+    private static final AndroidDAO instance = new AndroidDAO();
 
-    public static AndroidDAO getInstance(){
+    public static AndroidDAO getInstance() {
         return instance;
     }
 
@@ -40,7 +41,8 @@ public class AndroidDAO {
     private MongoAppDAO uptime = new MongoAppDAO() {
         @Override
         protected Application getApplication(Document doc) {
-            return new Application("",doc.getDouble("applicationUptime"), ServerStatus.UNKNOWN);
+            return new Application("",doc.getDouble("applicationUptime"),
+                ServerStatus.UNKNOWN);
         }
 
         @Override
@@ -49,14 +51,44 @@ public class AndroidDAO {
         }
     };
 
+    //TODO integrate the counter topic
+    /*private MongoAppDAO counter = new MongoAppDAO() {
+        @Override
+        protected Application getApplication(Document doc) {
+            return new Application("",doc.getDouble(""),
+                ServerStatus.UNKNOWN);
+        }
+
+        @Override
+        protected String getCollectionName() {
+            return "";
+        }
+    };*/
+
+    /**
+     * Computes the Android App Status realign on different collection.
+     *
+     * @param user identifier
+     * @param source identifier
+     * @param context useful to retrieves the MongoDB cliet
+     * @return {@code Application} representing the status of the related Android App
+     * @throws ConnectException if MongoDb is not available
+     */
     public Application getStatus(String user, String source, ServletContext context)
-        throws ConnectException {
+            throws ConnectException {
         Application app = server.valueByUserSource(user, source, context);
         app.setUptime(uptime.valueByUserSource(user, source, context).getUptime());
 
         return app;
     }
 
+    /**
+     * Finds all users.
+     *
+     * @return all distinct userIDs for the given collection, otherwise an empty Collection
+     *
+     * @throws ConnectException if MongoDb is not available
+     */
     public Collection<String> findAllUser(ServletContext context) throws ConnectException {
         Set<String> users = new HashSet<>();
 
@@ -66,8 +98,16 @@ public class AndroidDAO {
         return users;
     }
 
+    /**
+     * Finds all sources for the given user.
+     *
+     * @param user is the userID
+     * @return all distinct sourceIDs for the given collection, otherwise empty Collection
+     *
+     * @throws ConnectException if MongoDb is not available
+     */
     public Collection<String> findAllSoucesByUser(String user, ServletContext context)
-        throws ConnectException {
+            throws ConnectException {
         Set<String> users = new HashSet<>();
 
         users.addAll(server.findAllSoucesByUser(user, context));

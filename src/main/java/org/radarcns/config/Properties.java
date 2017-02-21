@@ -12,62 +12,62 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * Created by Francesco Nobilia on 10/11/2016.
+ * Properties handler.
  */
 public class Properties {
 
     private final Logger logger = LoggerFactory.getLogger(Properties.class);
 
-    /** Useful for AWS deploy **/
-    private String PATH_FILE = "/usr/share/tomcat8/conf/";
-    private String NAME_FILE = "radar.yml";
+    // Useful for AWS deploy
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    private static final String PATH_FILE = "/usr/share/tomcat8/conf/";
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    private static final String NAME_FILE = "radar.yml";
 
     private RadarConfig config;
 
     private static final Properties instance = new Properties();
 
-    public static Properties getInstance(){
+    public static Properties getInstance() {
         return instance;
     }
 
-    private Properties(){
+    private Properties() {
         initDockerConfig();
 
-        if(config == null){
+        if (config == null) {
             initYamlConfig();
         }
     }
 
-    private void initDockerConfig(){
-        try{
+    private void initDockerConfig() {
+        try {
             config = new DockerConfig();
 
             logger.info("Properties fetched from env variables");
-        }
-        catch (Exception ex){
+        } catch (Exception ex) {
             logger.warn("Impossible load Docker properties", ex);
         }
     }
 
-    private void initYamlConfig(){
-        try{
+    private void initYamlConfig() {
+        try {
             Yaml yaml = new Yaml();
             InputStream in = Files.newInputStream(Paths.get(PATH_FILE + NAME_FILE));
-            config = yaml.loadAs( in, YamlConfig.class );
+            config = yaml.loadAs(in, YamlConfig.class);
 
             logger.info("Properties fetched from .yml file");
-        }
-        catch (IOException ex){
+        } catch (IOException ex) {
             logger.warn("Impossible load Yaml properties", ex);
         }
     }
 
     public List<ServerAddress> getMongoHosts() {
-        return config.getMongoDBHosts();
+        return config.getMongoDbHosts();
     }
 
-    public List<MongoCredential> getMongoDBCredential() {
-        return config.getMongoDBCredential();
+    public List<MongoCredential> getMongoDbCredential() {
+        return config.getMongoDbCredential();
     }
 
     public String getMongoDbName() {

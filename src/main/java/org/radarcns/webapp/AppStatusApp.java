@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Android Application Status web-app
+ * Android application status web-app. Function set to access Android app status information.
  */
 @Api
 @Path("/Android")
@@ -33,66 +33,74 @@ public class AppStatusApp {
     @Context private ServletContext context;
     @Context private HttpServletRequest request;
 
-    /******************************************* STATUS *******************************************/
+    //--------------------------------------------------------------------------------------------//
+    //                                    REAL-TIME FUNCTIONS                                     //
+    //--------------------------------------------------------------------------------------------//
+    /**
+     * JSON function that returns the status app of the given user.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/Status/{userID}/{sourceID}")
     @ApiOperation(
-        value = "Return an Applications status",
-        notes = "The Android application periodically updates its current status")
+            value = "Return an Applications status",
+            notes = "The Android application periodically updates its current status")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-            "there is a message.avsc object with more details"),
-        @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
-            + "received status")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
+                + "received status")})
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStatByUserDeviceJsonAppStatus(
-        @PathParam("userID") String userID,
-        @PathParam("sourceID") String sourceID) {
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getRTStatByUserDeviceWorker(userID, sourceID));
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(), e);
+                getRTStatByUserDeviceWorker(user, source));
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
                 + "completed. If this error persists, please contact the service administrator.");
         }
     }
 
+    /**
+     * AVRO function that returns the status app of the given user.
+     */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/Status/{userID}/{sourceID}")
     @ApiOperation(
-        value = "Return an Applications status",
-        notes = "The Android application periodically updates its current status")
+            value = "Return an Applications status",
+            notes = "The Android application periodically updates its current status")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing"),
-        @ApiResponse(code = 204, message = "No value for the given parameters"),
-        @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
-            + "received status")})
+            @ApiResponse(code = 500, message = "An error occurs while executing"),
+            @ApiResponse(code = 204, message = "No value for the given parameters"),
+            @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
+                + "received status")})
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStatByUserDeviceAvroAppStatus(
-        @PathParam("userID") String userID,
-        @PathParam("sourceID") String sourceID) {
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRTStatByUserDeviceWorker(userID, sourceID));
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(), e);
+                getRTStatByUserDeviceWorker(user, source));
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 
     /**
-     * Actual implementation of AVRO and JSON getRealTimeUser
+     * Actual implementation of AVRO and JSON getRealTimeUser.
      **/
-    private Application getRTStatByUserDeviceWorker(String userID, String sourceID)
-        throws ConnectException {
-        Param.isValidInput(userID, sourceID);
+    private Application getRTStatByUserDeviceWorker(String user, String source)
+            throws ConnectException {
+        Param.isValidInput(user, source);
 
-        Application application = AndroidDAO.getInstance().getStatus(userID, sourceID, context);
+        Application application = AndroidDAO.getInstance().getStatus(user, source, context);
 
         return application;
     }

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
  * Created by Francesco Nobilia on 19/10/2016.
  */
 @WebListener
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class MongoDBContextListener implements ServletContextListener {
 
     private static final Logger logger = LoggerFactory.getLogger(MongoDBContextListener.class);
@@ -27,7 +28,7 @@ public class MongoDBContextListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent sce) {
         MongoClient mongo = (MongoClient) sce.getServletContext().getAttribute(MONGO_CLIENT);
 
-        if(mongo != null) {
+        if (mongo != null) {
             mongo.close();
         }
     }
@@ -37,7 +38,7 @@ public class MongoDBContextListener implements ServletContextListener {
         MongoClient mongoClient = null;
 
         try {
-            List<MongoCredential> credentials = Properties.getInstance().getMongoDBCredential();
+            List<MongoCredential> credentials = Properties.getInstance().getMongoDbCredential();
 
             mongoClient = new MongoClient(Properties.getInstance().getMongoHosts(),credentials);
 
@@ -46,31 +47,39 @@ public class MongoDBContextListener implements ServletContextListener {
 
                 logger.info("MongoDB connection established");
             }
-        }
-        catch (com.mongodb.MongoSocketOpenException e){
-            if(mongoClient != null) {
+        } catch (com.mongodb.MongoSocketOpenException exec) {
+            if (mongoClient != null) {
                 mongoClient.close();
             }
 
-            logger.error(e.getMessage());
+            logger.error(exec.getMessage());
         }
     }
 
-    private boolean checkMongoConnection(MongoClient mongoClient, List<MongoCredential> credentials){
+    /**
+     * Checks if with the given client and credential is it possible to establish a connection
+     *      towards the MongoDB host.
+     *
+     * @param mongoClient client for MongoDB
+     * @param credentials username, password and host
+     * @return {@code true} if the connection can be established false otherwise
+     */
+    private boolean checkMongoConnection(MongoClient mongoClient,
+            List<MongoCredential> credentials) {
         Boolean flag = true;
         try {
-            for(MongoCredential user : credentials) {
+            for (MongoCredential user : credentials) {
                 mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
             }
 
-        } catch (Exception e) {
+        } catch (Exception exec) {
             flag = false;
 
-            if(mongoClient != null) {
+            if (mongoClient != null) {
                 mongoClient.close();
             }
 
-            logger.error("Error during connection test",e);
+            logger.error("Error during connection test",exec);
         }
 
         logger.info("MongoDB connection is {}",flag.toString());
@@ -78,47 +87,50 @@ public class MongoDBContextListener implements ServletContextListener {
         return flag;
     }
 
-    public static void recoverOrThrow(ServletContext context) throws ConnectException{
+    /**
+     * Tries to recover the connection with MongoDB.
+     *
+     * @param context useful to retrieve and store the MongoDb client
+     * @throws ConnectException if the connection cannot be established
+     */
+    public static void recoverOrThrow(ServletContext context) throws ConnectException {
         logger.warn("Try to reconnect to MongoDB");
 
         MongoClient mongoClient = null;
         Boolean flag = true;
 
         try {
-            List<MongoCredential> credentials = Properties.getInstance().getMongoDBCredential();
+            List<MongoCredential> credentials = Properties.getInstance().getMongoDbCredential();
 
             mongoClient = new MongoClient(Properties.getInstance().getMongoHosts(),credentials);
 
             try {
-                for(MongoCredential user : credentials) {
+                for (MongoCredential user : credentials) {
                     mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
                 }
-
-            } catch (Exception e) {
+            } catch (Exception exec) {
                 flag = false;
 
-                if(mongoClient != null) {
+                if (mongoClient != null) {
                     mongoClient.close();
                 }
 
-                logger.error("The connection with MongoDb cannot be established", e);
+                logger.error("The connection with MongoDb cannot be established", exec);
             }
 
             if (flag.booleanValue()) {
                 context.setAttribute(MONGO_CLIENT, mongoClient);
 
                 logger.info("MongoDB connection established");
-            }
-            else{
+            } else {
                 throw new ConnectException("The connection with MongoDb cannot be established");
             }
-        }
-        catch (com.mongodb.MongoSocketOpenException e){
-            if(mongoClient != null) {
+        } catch (com.mongodb.MongoSocketOpenException exec) {
+            if (mongoClient != null) {
                 mongoClient.close();
             }
 
-            logger.error(e.getMessage());
+            logger.error(exec.getMessage());
 
             throw new ConnectException("The connection with MongoDb cannot be established");
         }
@@ -127,29 +139,36 @@ public class MongoDBContextListener implements ServletContextListener {
 
     }
 
-    public static boolean testConnection(ServletContext context) throws ConnectException{
+    /**
+     * Verifies if the required database can be pinged.
+     *
+     * @param context useful to retrieve and the MongoDb client
+     * @return {@cod true} if the required database can be ping, {@code false} otherwise
+     * @throws ConnectException if the MongoDB client is faulty
+     */
+    public static boolean testConnection(ServletContext context) throws ConnectException {
         boolean flag = false;
 
         MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
 
-        if(mongoClient == null){
+        if (mongoClient == null) {
             return false;
         }
 
         try {
-            for(MongoCredential user : Properties.getInstance().getMongoDBCredential()) {
+            for (MongoCredential user : Properties.getInstance().getMongoDbCredential()) {
                 mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
             }
 
             flag = true;
 
-        } catch (Exception e) {
-            if(mongoClient != null) {
+        } catch (Exception exec) {
+            if (mongoClient != null) {
                 mongoClient.close();
             }
 
             context.setAttribute(MONGO_CLIENT, null);
-            logger.error("The connection with MongoDb cannot be established", e);
+            logger.error("The connection with MongoDb cannot be established", exec);
         }
 
         logger.debug("MongoDB connection is {}", flag);

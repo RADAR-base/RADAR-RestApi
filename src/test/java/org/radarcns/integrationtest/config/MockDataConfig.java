@@ -17,6 +17,10 @@ public class MockDataConfig {
     @JsonProperty("values_to_test")
     private String valuesToTest;
 
+    /**
+     * @return Comma Separated Values {@code File}.
+     **/
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public File getCVSFile() throws NoSuchFileException {
         File directDataFile = new File(dataFile);
         if (directDataFile.exists()) {

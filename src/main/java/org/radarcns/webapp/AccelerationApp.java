@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Accelerator sensor web-app
+ * Accelerator sensor web-app.. Function set to access acceleration data.
  */
 @Api
 @Path("/Acc")
@@ -37,152 +37,170 @@ public class AccelerationApp {
     @Context private ServletContext context;
     @Context private HttpServletRequest request;
 
-    /********************************************* RT *********************************************/
+    //--------------------------------------------------------------------------------------------//
+    //                                    REAL-TIME FUNCTIONS                                     //
+    //--------------------------------------------------------------------------------------------//
+    /**
+     * JSON function that returns the last seen Battery level if available.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/RT/{stat}/{userID}/{sourceID}")
     @ApiOperation(
-        value = "Return an Acceleration values",
-        notes = "Return the last seen Acceleration value of type stat for the given userID and"
+            value = "Return an Acceleration values",
+            notes = "Return the last seen Acceleration value of type stat for the given userID and"
                 + "sourceID")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-                "there is a message.avsc object with more details"),
-        @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen" +
-            "acceleration.avsc value for the required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
+                + "acceleration.avsc value for the required statistic function")})
     public Response getRealTimeUserJsonAcceleration(
-            @PathParam("userID") String userID,
-            @PathParam("sourceID") String sourceID,
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
             @PathParam("stat") MongoHelper.Stat stat) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getRealTimeUserWorker(userID, sourceID, stat), sensorName);
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(), e);
+                getRealTimeUserWorker(user, source, stat), sensorName);
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
                 + "completed. If this error persists, please contact the service administrator.");
         }
     }
 
+    /**
+     * AVRO function that returns the last seen Battery level if available.
+     */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/RT/{stat}/{userID}/{sourceID}")
     @ApiOperation(
-        value = "Return an Acceleration values",
-        notes = "Return the last seen Acceleration value of type stat for the given userID and"
+            value = "Return an Acceleration values",
+            notes = "Return the last seen Acceleration value of type stat for the given userID and"
             + "sourceID")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing"),
-        @ApiResponse(code = 204, message = "No value for the given parameters"),
-        @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
-            + "containing last seen acceleration.avsc value for the required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing"),
+            @ApiResponse(code = 204, message = "No value for the given parameters"),
+            @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
+                + "object containing last seen acceleration.avsc value for the required statistic"
+                + "function")})
     public Response getRealTimeUserAvroAcceleration(
-        @PathParam("userID") String userID,
-        @PathParam("sourceID") String sourceID,
-        @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
+            @PathParam("stat") MongoHelper.Stat stat) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRealTimeUserWorker(userID, sourceID, stat));
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(), e);
+                getRealTimeUserWorker(user, source, stat));
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 
     /**
-     * Actual implementation of AVRO and JSON getRealTimeUser
+     * Actual implementation of AVRO and JSON getRealTimeUser.
      **/
-    private Dataset getRealTimeUserWorker(String userID, String sourceID, MongoHelper.Stat stat)
-        throws ConnectException {
-        Param.isValidInput(userID, sourceID);
+    private Dataset getRealTimeUserWorker(String user, String source, MongoHelper.Stat stat)
+            throws ConnectException {
+        Param.isValidInput(user, source);
 
-        Dataset acc = AccelerationDAO.getInstance().valueRTByUserSource(userID, sourceID,
-            Unit.g, stat, context);
+        Dataset acc = AccelerationDAO.getInstance().valueRTByUserSource(user, source,
+                Unit.g, stat, context);
 
         if (acc.getDataset().isEmpty()) {
-            logger.info("No data for the user {} with source {}", userID, sourceID);
+            logger.info("No data for the user {} with source {}", user, source);
         }
 
         return acc;
     }
 
-    /*************************************** WHOLE DATASET ****************************************/
+    //--------------------------------------------------------------------------------------------//
+    //                                   WHOLE-DATA FUNCTIONS                                     //
+    //--------------------------------------------------------------------------------------------//
+    /**
+     * JSON function that returns all available Battery level samples.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{stat}/{userID}/{sourceID}")
     @ApiOperation(
-        value = "Return a dataset of Acceleration values",
-        notes = "Return a dataset for the given userID and sourceID of type stat")
+            value = "Return a dataset of Acceleration values",
+            notes = "Return a dataset for the given userID and sourceID of type stat")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-                "there is a message.avsc object with more details"),
-        @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
-            + "available acceleration.avsc values for the required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body there"
+                + "is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
+                + "available acceleration.avsc values for the required statistic function")})
     public Response getAllByUserJsonAcceleration(
-            @PathParam("userID") String userID,
-            @PathParam("sourceID") String sourceID,
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
             @PathParam("stat") MongoHelper.Stat stat) {
-        try{
+        try {
             return ResponseHandler.getJsonResponse(request,
-                getAllByUserWorker(userID, sourceID, stat), sensorName);
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(), e);
+                getAllByUserWorker(user, source, stat), sensorName);
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
                 + "completed. If this error persists, please contact the service administrator.");
         }
     }
 
+    /**
+     * AVRO function that returns all available Battery level samples.
+     */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/{stat}/{userID}/{sourceID}")
     @ApiOperation(
-        value = "Return a dataset of Acceleration values",
-        notes = "Return a dataset for the given userID and sourceID of type stat")
+            value = "Return a dataset of Acceleration values",
+            notes = "Return a dataset for the given userID and sourceID of type stat")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing"),
-        @ApiResponse(code = 204, message = "No value for the given parameters"),
-        @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
-            + "containing all available acceleration.avsc values for the required statistic"
-            + "function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing"),
+            @ApiResponse(code = 204, message = "No value for the given parameters"),
+            @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
+                + "object containing all available acceleration.avsc values for the required"
+                + "statistic function")})
     public Response getAllByUserAvroAcceleration(
-        @PathParam("userID") String userID,
-        @PathParam("sourceID") String sourceID,
-        @PathParam("stat") MongoHelper.Stat stat) {
-        try{
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
+            @PathParam("stat") MongoHelper.Stat stat) {
+        try {
             return ResponseHandler.getAvroResponse(request,
-                getAllByUserWorker(userID, sourceID, stat));
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(), e);
+                getAllByUserWorker(user, source, stat));
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 
     /**
-     * Actual implementation of AVRO and JSON getAllByUser
+     * Actual implementation of AVRO and JSON getAllByUser.
      **/
-    private Dataset getAllByUserWorker( String userID, String sourceID, MongoHelper.Stat stat )
-        throws ConnectException {
-        Param.isValidInput(userID, sourceID);
+    private Dataset getAllByUserWorker(String user, String source, MongoHelper.Stat stat)
+            throws ConnectException {
+        Param.isValidInput(user, source);
 
-        Dataset acc = AccelerationDAO.getInstance().valueByUserSource(userID, sourceID, Unit.g,
-            stat, context);
+        Dataset acc = AccelerationDAO.getInstance().valueByUserSource(user, source, Unit.g,
+                stat, context);
 
-        if(acc.getDataset().isEmpty()){
-            logger.info("No data for the user {} with source {}", userID, sourceID);
+        if (acc.getDataset().isEmpty()) {
+            logger.info("No data for the user {} with source {}", user, source);
         }
 
         return acc;
     }
 
-    /************************************* WINDOWED DATASET ***************************************/
+    //--------------------------------------------------------------------------------------------//
+    //                                 WINDOWED-DATA FUNCTIONS                                    //
+    //--------------------------------------------------------------------------------------------//
+    /**
+     * JSON function that returns all Battery level inside the time-window [start-end].
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{stat}/{userID}/{sourceID}/{start}/{end}")
@@ -191,71 +209,72 @@ public class AccelerationApp {
             notes = "Return a dataset of type stat for the given userID and sourceID with data"
                 + "belonging to the time window [start - end]")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-            "there is a message.avsc object with more details"),
-        @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
-            + "acceleration.avsc values belonging to the time window [start - end] for the"
-            + "required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
+                + "acceleration.avsc values belonging to the time window [start - end] for the"
+                + "required statistic function")})
     public Response getByUserForWindowJsonAcceleration(
-            @PathParam("userID") String userID,
-            @PathParam("sourceID") String sourceID,
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
             @PathParam("stat") MongoHelper.Stat stat,
             @PathParam("start") long start,
             @PathParam("end") long end) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getByUserForWindowWorker(userID, sourceID, stat, start, end), sensorName);
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(), e);
+                getByUserForWindowWorker(user, source, stat, start, end), sensorName);
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
                 + "completed. If this error persists, please contact the service administrator.");
         }
     }
 
+    /**
+     * AVRO function that returns all Battery level inside the time-window [start-end].
+     */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/{stat}/{userID}/{sourceID}/{start}/{end}")
     @ApiOperation(
-        value = "Return a dataset of Acceleration values",
-        notes = "Return a dataset of type stat for the given userID and sourceID with data"
-            + "belonging to the time window [start - end]")
+            value = "Return a dataset of Acceleration values",
+            notes = "Return a dataset of type stat for the given userID and sourceID with data"
+                + "belonging to the time window [start - end]")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing"),
-        @ApiResponse(code = 204, message = "No value for the given parameters"),
-        @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
-            + "containing all acceleration.avsc values belonging to the time window [start - end]"
-            + "for the required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing"),
+            @ApiResponse(code = 204, message = "No value for the given parameters"),
+            @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
+                + "object containing all acceleration.avsc values belonging to the time window"
+                + "[start - end] for the required statistic function")})
     public Response getByUserForWindowAvroAcceleration(
-        @PathParam("userID") String userID,
-        @PathParam("sourceID") String sourceID,
-        @PathParam("stat") MongoHelper.Stat stat,
-        @PathParam("start") long start,
-        @PathParam("end") long end) {
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
+            @PathParam("stat") MongoHelper.Stat stat,
+            @PathParam("start") long start,
+            @PathParam("end") long end) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getByUserForWindowWorker(userID, sourceID, stat, start, end));
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(), e);
+                getByUserForWindowWorker(user, source, stat, start, end));
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 
     /**
-     * Actual implementation of AVRO and JSON getByUserForWindow
+     * Actual implementation of AVRO and JSON getByUserForWindow.
      **/
-    private Dataset getByUserForWindowWorker(String userID, String sourceID, MongoHelper.Stat stat,
-        long start, long end) throws ConnectException {
-        Param.isValidInput(userID, sourceID);
+    private Dataset getByUserForWindowWorker(String user, String source, MongoHelper.Stat stat,
+            long start, long end) throws ConnectException {
+        Param.isValidInput(user, source);
 
-        Dataset acc = AccelerationDAO.getInstance().valueByUserSourceWindow(userID, sourceID,
-            Unit.g, stat, start, end, context);
+        Dataset acc = AccelerationDAO.getInstance().valueByUserSourceWindow(user, source,
+                Unit.g, stat, start, end, context);
 
         if (acc.getDataset().isEmpty()) {
-            logger.info("No data for the user {} with source {}", userID, sourceID);
+            logger.info("No data for the user {} with source {}", user, source);
         }
 
         return acc;

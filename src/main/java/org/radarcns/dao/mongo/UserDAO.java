@@ -10,10 +10,20 @@ import org.radarcns.avro.restapi.user.Cohort;
 import org.radarcns.avro.restapi.user.Patient;
 
 /**
- * Created by francesco on 09/02/2017.
+ * Data Access Object for user management.
  */
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class UserDAO {
 
+    /**
+     * Finds all users checking all available collections.
+     *
+     * @param context useful to retrieve the MongoDB client
+     * @return a study {@code Cohort}
+     * @throws ConnectException if MongoDB is not available
+     *
+     * @see {@link org.radarcns.avro.restapi.user.Cohort}
+     */
     public static Cohort findAllUser(ServletContext context) throws ConnectException {
 
         List<Patient> patients = new LinkedList<>();
@@ -35,7 +45,18 @@ public class UserDAO {
         return new Cohort(0, patients);
     }
 
-    public static Patient findAllSoucesByUser(String userID, ServletContext context) throws ConnectException {
+    /**
+     * Returns all available sources for the given patient.
+     *
+     * @param userID user identifier.
+     * @param context useful to retrieve the MongoDB client
+     * @return a {@code Patient} object
+     * @throws ConnectException if MongoDB is not available
+     *
+     * @see {@link org.radarcns.avro.restapi.user.Patient}
+     */
+    public static Patient findAllSoucesByUser(String userID, ServletContext context)
+            throws ConnectException {
         Set<String> sources = new HashSet<>();
         sources.addAll(AccelerationDAO.getInstance().findAllSoucesByUser(userID, context));
         sources.addAll(BatteryDAO.getInstance().findAllSoucesByUser(userID, context));

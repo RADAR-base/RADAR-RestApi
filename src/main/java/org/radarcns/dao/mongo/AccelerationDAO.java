@@ -10,28 +10,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by Francesco Nobilia on 20/10/2016.
+ * Data Access Object for Acceleration values.
  */
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class AccelerationDAO extends MongoSensorDAO {
 
     private final Logger logger = LoggerFactory.getLogger(AccelerationDAO.class);
 
-    private final static AccelerationDAO instance = new AccelerationDAO();
+    private static final AccelerationDAO instance = new AccelerationDAO();
 
-    public static AccelerationDAO getInstance(){
+    public static AccelerationDAO getInstance() {
         return instance;
     }
 
     @Override
     protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat) {
-        if(stat.equals(DescriptiveStatistic.median) || stat.equals(DescriptiveStatistic.quartiles)){
+        if (stat.equals(DescriptiveStatistic.median)
+                || stat.equals(DescriptiveStatistic.quartiles)) {
             Document component = (Document) doc.get(field);
 
+            @SuppressWarnings("checkstyle:LocalVariableName")
             ArrayList<Document> x = (ArrayList<Document>) component.get("x");
+            @SuppressWarnings("checkstyle:LocalVariableName")
             ArrayList<Document> y = (ArrayList<Document>) component.get("y");
+            @SuppressWarnings("checkstyle:LocalVariableName")
             ArrayList<Document> z = (ArrayList<Document>) component.get("z");
 
-            if(stat.equals(DescriptiveStatistic.quartiles)) {
+            if (stat.equals(DescriptiveStatistic.quartiles)) {
                 return new Acceleration(
                     new Quartiles(
                         x.get(0).getDouble("25"),
@@ -45,16 +50,14 @@ public class AccelerationDAO extends MongoSensorDAO {
                         z.get(0).getDouble("25"),
                         z.get(1).getDouble("50"),
                         z.get(2).getDouble("75")));
-            }
-            else if(stat.equals(DescriptiveStatistic.median)){
+            } else if (stat.equals(DescriptiveStatistic.median)) {
                 return new Acceleration(
                         x.get(1).getDouble("50"),
                         y.get(1).getDouble("50"),
                         z.get(1).getDouble("50"));
             }
 
-        }
-        else{
+        } else {
             logger.debug(doc.toJson());
             Document data = (Document) doc.get(field);
             logger.debug(data.toJson());
@@ -69,8 +72,8 @@ public class AccelerationDAO extends MongoSensorDAO {
     }
 
     @Override
-    protected double extractCount(Document doc){
-        return (doc.getDouble("x") + doc.getDouble("y") + doc.getDouble("z"))/3.0d;
+    protected double extractCount(Document doc ) {
+        return (doc.getDouble("x") + doc.getDouble("y") + doc.getDouble("z")) / 3.0d;
     }
 
     @Override

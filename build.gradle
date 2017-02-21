@@ -3,6 +3,9 @@ plugins {
   id 'java'
   id 'idea'
   id 'com.commercehub.gradle.plugin.avro-base' version '0.8.0'
+  id 'pmd'
+  id 'checkstyle'
+  id 'jacoco'
   id 'war'
 }
 
@@ -29,6 +32,12 @@ ext.openCsvVersion = '3.9'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.tomcat = '8.0.37'
+
+configurations {
+  codacy
+  provided
+  compile.extendsFrom provided
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -66,12 +75,66 @@ dependencies {
   testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
 }
 
+//---------------------------------------------------------------------------//
+// AVRO file manipulation                                                    //
+//---------------------------------------------------------------------------//
+
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
   source("src/main/resources/avro")
   outputDir = file("build/avro")
 }
 
+//---------------------------------------------------------------------------//
+// Packaging                                                                 //
+//---------------------------------------------------------------------------//
+
 compileJava.source(generateAvro.outputs)
+
+//---------------------------------------------------------------------------//
+// Style checking                                                            //
+//---------------------------------------------------------------------------//
+
+checkstyle {
+  toolVersion '6.16'
+}
+
+pmd {
+  ignoreFailures = true
+
+  toolVersion = '5.5.2'
+  ruleSets = []
+  ruleSetFiles = files("config/pmd/ruleset.xml")
+}
+
+
+pmdTest {
+  ruleSetFiles = files("config/pmd/test_ruleset.xml")
+}
+
+jacocoTestReport {
+  reports {
+    xml.enabled true
+    csv.enabled false
+    html.enabled false
+  }
+}
+
+task downloadDependencies(type: Exec) {
+  configurations.testRuntime.files
+  configurations.codacy.files
+  configurations.jacocoAnt.files
+  commandLine 'echo', 'Downloaded all dependencies'
+}
+
+task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
+  main = 'com.codacy.CodacyCoverageReporter'
+  classpath = configurations.codacy
+  args = ['-l', 'Java', '-r', "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"]
+}
+
+//---------------------------------------------------------------------------//
+// Build system metadata                                                     //
+//---------------------------------------------------------------------------//
 
 idea {
   module {

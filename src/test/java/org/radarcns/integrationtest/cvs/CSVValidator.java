@@ -9,15 +9,23 @@ import org.radarcns.integrationtest.util.Parser.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 /**
- * Created by francesco on 15/02/2017.
+ * CSV files must be validate before using since MockAggregator can handle only files containing
+ *      unique User_ID and Source_ID and having increasing timestamp at each raw.
  */
 public class CSVValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(CSVValidator.class);
 
+    /**
+     * Verify whether the CSV file can be used or not.
+     * @param config configuration item containing the CSV file path.
+     * @throws IllegalArgumentException if the CSV file does not respect the constrains.
+     */
     public static void validate(MockDataConfig config)
-        throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
+            InvocationTargetException {
 
         Parser parser = new Parser(config);
 
@@ -26,14 +34,16 @@ public class CSVValidator {
 
         Map<Variable, Object> map = parser.next();
         Map<Variable, Object> last = map;
-        while (map != null){
+        while (map != null) {
             line++;
 
-            if( !last.get(Variable.USER).toString().equals(map.get(Variable.USER).toString()) ) {
+            if (!last.get(Variable.USER).toString().equals(map.get(Variable.USER).toString())) {
                 mex = "It is possible to test only one user at time.";
-            } else if ( !last.get(Variable.SOURCE).toString().equals(map.get(Variable.SOURCE).toString()) ) {
+            } else if ( !last.get(Variable.SOURCE).toString().equals(
+                    map.get(Variable.SOURCE).toString()) ) {
                 mex = "It is possible to test only one source at time.";
-            } else if ( !( ((Long)map.get(Variable.TIMESTAMP)).longValue() >= ((Long)last.get(Variable.TIMESTAMP)).longValue() ) ) {
+            } else if ( !( ((Long)map.get(Variable.TIMESTAMP)).longValue()
+                    >= ((Long)last.get(Variable.TIMESTAMP)).longValue() ) ) {
                 mex = Variable.TIMESTAMP.toString() + " must increase raw by raw.";
             } else if ( map.get(Variable.VALUE) == null ) {
                 mex = Variable.VALUE.toString() + "value to test must be specified.";

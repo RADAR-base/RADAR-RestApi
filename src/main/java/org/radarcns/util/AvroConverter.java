@@ -30,6 +30,25 @@ public class AvroConverter {
      * Returns an encoded JSON object for the given Avro object.
      *
      * @param record is the record to encode
+     * @return the JSON object representing this Avro object.
+     *
+     * @throws IOException if there is an error.
+     */
+    public static JsonNode avroToJsonNode(SpecificRecord record) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readTree(record.toString());
+        } catch (IOException exec) {
+            logger.error("Impossible to generate error message", exec);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns an encoded JSON object for the given Avro object.
+     *
+     * @param record is the record to encode
      * @param sensor name used to fix the json field name
      * @return the JSON object representing this Avro object.
      *
@@ -44,12 +63,20 @@ public class AvroConverter {
         return dataset;
     }
 
-    private static void setSensorName(JsonNode node, String sensor){
-        if(node.has("dataset")){
+    /**
+     * Returns an encoded JSON object for the given Avro object. The automatic item names are
+     * replaced with the input String.
+     *
+     * @param node object serialised in JSON
+     * @param sensor name that has to be replaced
+     * @return the JSON object representing this Avro object
+     */
+    private static void setSensorName(JsonNode node, String sensor) {
+        if (node.has("dataset")) {
             JsonNode dataset = node.get("dataset");
 
             Iterator<JsonNode> it = dataset.elements();
-            while (it.hasNext()){
+            while (it.hasNext()) {
                 JsonNode son = it.next();
 
                 ((ObjectNode) son).set(sensor,son.get("value"));
@@ -59,34 +86,16 @@ public class AvroConverter {
     }
 
     /**
-     * Returns an encoded JSON object for the given Avro object.
-     *
-     * @param record is the record to encode
-     * @return the JSON object representing this Avro object.
-     *
-     * @throws IOException if there is an error.
-     */
-    public static JsonNode avroToJsonNode(SpecificRecord record){
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readTree(record.toString());
-        } catch (IOException e) {
-            logger.error("Impossible to generate error message", e);
-        }
-
-        return null;
-    }
-
-    /**
      * Returns a byte array version of the given record.
      *
      * @param record is the record to encode
      * @return the byte array representing this Avro object.
      *
-     * @throws IOException
+     * @throws IOException due to {@code DatumWriter}
+     *
+     * @see {@link org.apache.avro.io.DatumWriter}
      */
     public static <K extends SpecificRecord> byte[] avroToAvroByte(K record) throws IOException {
-
         DatumWriter<K> writer = new SpecificDatumWriter<>(record.getSchema());
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         Encoder encoder = EncoderFactory.get().binaryEncoder(output, null);
@@ -104,26 +113,20 @@ public class AvroConverter {
      * @param schema to serialise
      * @return the deserialised record
      *
-     * @throws IOException
+     * @throws IOException due to {@code DatumReader}
+     *
+     * @see {@link org.apache.avro.io.DatumReader}
      */
-    public static <K extends SpecificRecord> K avroByteToAvro(byte[] input, Schema schema) throws IOException {
-
+    public static <K extends SpecificRecord> K avroByteToAvro(byte[] input, Schema schema)
+            throws IOException {
         DatumReader<K> reader = new SpecificDatumReader<>(schema);
         Decoder decoder = DecoderFactory.get().binaryDecoder(input, null);
 
         return reader.read(null, decoder);
     }
-/*
 
-    *//**
-     * Returns an encoded JSON string for the given Avro object.
-     *
-     * @param record is the record to encode
-     * @return the JSON string representing this Avro object.
-     *
-     * @throws IOException if there is an error.
-     *//*
-    public static String avroObjToJsonString(SpecificRecord record){
+
+     /*public static String avroObjToJsonString(SpecificRecord record){
         try {
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -148,14 +151,7 @@ public class AvroConverter {
         return null;
     }
 
-    *//**
-     * Returns an encoded JSON object for the given Avro object.
-     *
-     * @param record is the record to encode
-     * @return the JSON object representing this Avro object.
-     *
-     * @throws IOException if there is an error.
-     *//*
+    *//*
     public static JsonNode avroObjToJsonNode(SpecificRecord record){
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -166,17 +162,7 @@ public class AvroConverter {
 
         return null;
     }
-
-
-
-    *//**
-     * Convert JSON to avro binary array.
-     *
-     * @param json
-     * @param schema
-     * @return
-     * @throws IOException
-     *//*
+    *//*
     public static byte[] jsonToAvroByte(String json, Schema schema) throws IOException {
         DatumReader<Object> reader = new GenericDatumReader<>(schema);
         GenericDatumWriter<Object> writer = new GenericDatumWriter<>(schema);
@@ -188,16 +174,7 @@ public class AvroConverter {
         encoder.flush();
         return output.toByteArray();
     }
-
-
-    *//**
-     * Convert Avro binary byte array back to JSON String.
-     *
-     * @param avro
-     * @param schema
-     * @return
-     * @throws IOException
-     *//*
+    *//*
     public static String avroByteToJson(byte[] avro, Schema schema) throws IOException {
         boolean pretty = false;
         GenericDatumReader<Object> reader = new GenericDatumReader<>(schema);
@@ -212,16 +189,6 @@ public class AvroConverter {
         return new String(output.toByteArray(), "UTF-8");
     }
 
-    public static byte[] avroObjToBytes(Object activity) throws IOException {
-        Schema schema = ReflectData.get().getSchema(activity.getClass());
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ReflectDatumWriter< Object > reflectDatumWriter = new ReflectDatumWriter< Object >(schema);
-        DataFileWriter< Object > writer = new DataFileWriter< Object >(reflectDatumWriter).create(schema, outputStream);
-        writer.append(activity);
-        writer.close();
-        return outputStream.toByteArray();
-    }
-
     public static < T > T bytesToAvroObj(Class< T > returnType, byte[] bytes) throws IOException {
         Schema schema = ReflectData.get().getSchema(returnType);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
@@ -232,7 +199,6 @@ public class AvroConverter {
         inputStream.close();
         return ( T ) activity;
     }
-
     */
 
 }

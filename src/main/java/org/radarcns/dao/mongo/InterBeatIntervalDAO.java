@@ -10,36 +10,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by Francesco Nobilia on 20/10/2016.
+ * Data Access Object for temperature values.
  */
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class InterBeatIntervalDAO extends MongoSensorDAO {
 
     private final Logger logger = LoggerFactory.getLogger(InterBeatIntervalDAO.class);
 
-    private final static InterBeatIntervalDAO instance = new InterBeatIntervalDAO();
+    private static final InterBeatIntervalDAO instance = new InterBeatIntervalDAO();
 
-    public static InterBeatIntervalDAO getInstance(){
+    public static InterBeatIntervalDAO getInstance() {
         return instance;
     }
 
     @Override
     protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat) {
-        if(stat.equals(DescriptiveStatistic.median) || stat.equals(DescriptiveStatistic.quartiles)){
+        if (stat.equals(DescriptiveStatistic.median)
+                || stat.equals(DescriptiveStatistic.quartiles)) {
 
-            ArrayList<Document> quartiles_list = (ArrayList<Document>) doc.get(field);
+            ArrayList<Document> quartilesList = (ArrayList<Document>) doc.get(field);
 
-            if(stat.equals(DescriptiveStatistic.quartiles)) {
+            if (stat.equals(DescriptiveStatistic.quartiles)) {
                 return new InterBeatInterval(new Quartiles(
-                        quartiles_list.get(0).getDouble("25"),
-                        quartiles_list.get(1).getDouble("50"),
-                        quartiles_list.get(2).getDouble("75")));
-            }
-            else if(stat.equals(DescriptiveStatistic.median)){
-                return new InterBeatInterval(quartiles_list.get(1).getDouble("50"));
+                        quartilesList.get(0).getDouble("25"),
+                        quartilesList.get(1).getDouble("50"),
+                        quartilesList.get(2).getDouble("75")));
+            } else if (stat.equals(DescriptiveStatistic.median)) {
+                return new InterBeatInterval(quartilesList.get(1).getDouble("50"));
             }
 
-        }
-        else{
+        } else {
             return new InterBeatInterval(doc.getDouble(field));
         }
 

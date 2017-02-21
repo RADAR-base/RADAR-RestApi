@@ -5,12 +5,12 @@ import com.mongodb.ServerAddress;
 import java.util.List;
 
 /**
- * Created by Francesco Nobilia on 11/01/2017.
+ * Configuration abstraction.
  */
 public interface RadarConfig {
-    List<ServerAddress> getMongoDBHosts();
+    List<ServerAddress> getMongoDbHosts();
 
-    List<MongoCredential> getMongoDBCredential();
+    List<MongoCredential> getMongoDbCredential();
 
     String getMongoDbName();
 }

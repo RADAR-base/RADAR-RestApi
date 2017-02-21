@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Photoplethysmograph sensor web-app
+ * Photoplethysmograph sensor web-app. Function set to access Photoplethysmograph sensor values.
  */
 @Api
 @Path("/BVP")
@@ -37,226 +37,250 @@ public class BloodVolumePulseApp {
     @Context private ServletContext context;
     @Context private HttpServletRequest request;
 
-    /********************************************* RT *********************************************/
+    //--------------------------------------------------------------------------------------------//
+    //                                    REAL-TIME FUNCTIONS                                     //
+    //--------------------------------------------------------------------------------------------//
+    /**
+     * JSON function that returns the last seen Blood Volume value if available.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/RT/{stat}/{userID}/{sourceID}")
     @ApiOperation(
-        value = "Return a BloodVolumePulse level values",
-        notes = "Return the last seen BloodVolumePulse level value of type stat for the given"
+            value = "Return a BloodVolumePulse level values",
+            notes = "Return the last seen BloodVolumePulse level value of type stat for the given"
                 + "userID and sourceID")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-                "there is a message.avsc object with more details"),
-        @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
-            + "blood_volume_pulse.avsc value for the required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
+                + "blood_volume_pulse.avsc value for the required statistic function")})
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRealTimeUserJsonBVP(
-            @PathParam("userID") String userID,
-            @PathParam("sourceID") String sourceID,
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
             @PathParam("stat") MongoHelper.Stat stat) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getRealTimeUserWorker(userID, sourceID, stat), sensorName);
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(), e);
+                getRealTimeUserWorker(user, source, stat), sensorName);
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
                 + "completed. If this error persists, please contact the service administrator.");
         }
     }
 
+    /**
+     * AVRO function that returns the last seen Blood Volume value if available.
+     */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/RT/{stat}/{userID}/{sourceID}")
     @ApiOperation(
-        value = "Return a BloodVolumePulse level values",
-        notes = "Return the last seen BloodVolumePulse level value of type stat for the given"
+            value = "Return a BloodVolumePulse level values",
+            notes = "Return the last seen BloodVolumePulse level value of type stat for the given"
             + "userID and sourceID")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing"),
-        @ApiResponse(code = 204, message = "No value for the given parameters"),
-        @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
-            + "containing last seen blood_volume_pulse.avsc value for the required statistic"
-            + "function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing"),
+            @ApiResponse(code = 204, message = "No value for the given parameters"),
+            @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
+                + "object containing last seen blood_volume_pulse.avsc value for the required"
+                + "statistic function")})
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRealTimeUserAvroBVP(
-        @PathParam("userID") String userID,
-        @PathParam("sourceID") String sourceID,
-        @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
+            @PathParam("stat") MongoHelper.Stat stat) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRealTimeUserWorker(userID, sourceID, stat));
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(), e);
+                getRealTimeUserWorker(user, source, stat));
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 
     /**
-     * Actual implementation of AVRO and JSON getRealTimeUser
+     * Actual implementation of AVRO and JSON getRealTimeUser.
      **/
-    private Dataset getRealTimeUserWorker(String userID, String sourceID, MongoHelper.Stat stat)
-        throws ConnectException {
-        Param.isValidInput(userID, sourceID);
+    private Dataset getRealTimeUserWorker(String user, String source, MongoHelper.Stat stat)
+            throws ConnectException {
+        Param.isValidInput(user, source);
 
-        Dataset bvp = BloodVolumePulseDAO.getInstance().valueRTByUserSource(userID, sourceID,
-            Unit.nW, stat, context);
+        Dataset bvp = BloodVolumePulseDAO.getInstance().valueRTByUserSource(user, source,
+                Unit.nW, stat, context);
 
         if (bvp.getDataset().isEmpty()) {
-            logger.info("No data for the user {} with source {}", userID, sourceID);
+            logger.info("No data for the user {} with source {}", user, source);
         }
 
         return bvp;
     }
 
-    /*************************************** WHOLE DATASET ****************************************/
+    //--------------------------------------------------------------------------------------------//
+    //                                   WHOLE-DATA FUNCTIONS                                     //
+    //--------------------------------------------------------------------------------------------//
+    /**
+     * JSON function that returns all available Blood Volume samples.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{stat}/{userID}/{sourceID}")
     @ApiOperation(
-        value = "Return a dataset of BloodVolumePulse level values",
-        notes = "Return a dataset for the given userID and sourceID of type stat")
+            value = "Return a dataset of BloodVolumePulse level values",
+            notes = "Return a dataset for the given userID and sourceID of type stat")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-                "there is a message.avsc object with more details"),
-        @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
-            + "available blood_volume_pulse.avsc values for the required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
+                + "available blood_volume_pulse.avsc values for the required statistic function")})
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getAllByUserJsonBVP(
-            @PathParam("userID") String userID,
-            @PathParam("sourceID") String sourceID,
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
             @PathParam("stat") MongoHelper.Stat stat) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getAllByUserWorker(userID, sourceID, stat), sensorName);
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(),e);
+                getAllByUserWorker(user, source, stat), sensorName);
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(),exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
                 + "completed. If this error persists, please contact the service administrator.");
         }
     }
 
+    /**
+     * AVRO function that returns all available Blood Volume samples.
+     */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/{stat}/{userID}/{sourceID}")
     @ApiOperation(
-        value = "Return a dataset of BloodVolumePulse level values",
-        notes = "Return a dataset for the given userID and sourceID of type stat")
+            value = "Return a dataset of BloodVolumePulse level values",
+            notes = "Return a dataset for the given userID and sourceID of type stat")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing"),
-        @ApiResponse(code = 204, message = "No value for the given parameters"),
-        @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
-            + "containing all available blood_volume_pulse.avsc values for the required statistic"
-            + "function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing"),
+            @ApiResponse(code = 204, message = "No value for the given parameters"),
+            @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
+                + "object containing all available blood_volume_pulse.avsc values for the required"
+                + "statistic function")})
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getAllByUserAvroBVP(
-        @PathParam("userID") String userID,
-        @PathParam("sourceID") String sourceID,
-        @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
+            @PathParam("stat") MongoHelper.Stat stat) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getAllByUserWorker(userID, sourceID, stat));
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(),e);
+                getAllByUserWorker(user, source, stat));
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(),exec);
             return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 
     /**
-     * Actual implementation of AVRO and JSON getAllByUser
+     * Actual implementation of AVRO and JSON getAllByUser.
      **/
-    private Dataset getAllByUserWorker( String userID, String sourceID, MongoHelper.Stat stat )
-        throws ConnectException {
-        Param.isValidInput(userID, sourceID);
+    private Dataset getAllByUserWorker(String user, String source, MongoHelper.Stat stat)
+            throws ConnectException {
+        Param.isValidInput(user, source);
 
-        Dataset bvp = BloodVolumePulseDAO.getInstance().valueByUserSource(userID, sourceID,
-            Unit.nW, stat, context);
+        Dataset bvp = BloodVolumePulseDAO.getInstance().valueByUserSource(user, source,
+                Unit.nW, stat, context);
 
         if (bvp.getDataset().isEmpty()) {
-            logger.info("No data for the user {} with source {}", userID, sourceID);
+            logger.info("No data for the user {} with source {}", user, source);
         }
 
         return bvp;
     }
 
-    /************************************* WINDOWED DATASET ***************************************/
+    //--------------------------------------------------------------------------------------------//
+    //                                 WINDOWED-DATA FUNCTIONS                                    //
+    //--------------------------------------------------------------------------------------------//
+    /**
+     * JSON function that returns all Blood Volume samples inside the time-window [start-end].
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{stat}/{userID}/{sourceID}/{start}/{end}")
     @ApiOperation(
-        value = "Return a dataset of BloodVolumePulse level values",
-        notes = "Return a dataset of type stat for the given userID and sourceID with data"
+            value = "Return a dataset of BloodVolumePulse level values",
+            notes = "Return a dataset of type stat for the given userID and sourceID with data"
                 + "belonging to the time window [start - end]")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body" +
-            "there is a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body" +
-                "there is a message.avsc object with more details"),
-        @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
-            + "blood_volume_pulse.avsc values belonging to the time window [start - end] for"
-            + "the required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
+                + "blood_volume_pulse.avsc values belonging to the time window [start - end] for"
+                + "the required statistic function")})
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getByUserForWindowJsonBVP(
-            @PathParam("userID") String userID,
-            @PathParam("sourceID") String sourceID,
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
             @PathParam("stat") MongoHelper.Stat stat,
             @PathParam("start") long start,
             @PathParam("end") long end) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getByUserForWindowWorker(userID, sourceID, stat, start, end), sensorName);
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(),e);
+                getByUserForWindowWorker(user, source, stat, start, end), sensorName);
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(),exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
                 + "completed. If this error persists, please contact the service administrator.");
         }
     }
 
+    /**
+     * AVRO function that returns all Blood Volume samples inside the time-window [start-end].
+     */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/AVRO/{stat}/{userID}/{sourceID}/{start}/{end}")
     @ApiOperation(
-        value = "Return a dataset of BloodVolumePulse level values",
-        notes = "Return a dataset of type stat for the given userID and sourceID with data"
-            + "belonging to the time window [start - end]")
+            value = "Return a dataset of BloodVolumePulse level values",
+            notes = "Return a dataset of type stat for the given userID and sourceID with data"
+                + "belonging to the time window [start - end]")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing"),
-        @ApiResponse(code = 204, message = "No value for the given parameters"),
-        @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc object"
-            + "containing all blood_volume_pulse.avsc values belonging to the time window"
-            + "[start - end] for the required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing"),
+            @ApiResponse(code = 204, message = "No value for the given parameters"),
+            @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
+                + "object containing all blood_volume_pulse.avsc values belonging to the time"
+                + "window [start - end] for the required statistic function")})
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getByUserForWindowAvroBVP(
-        @PathParam("userID") String userID,
-        @PathParam("sourceID") String sourceID,
-        @PathParam("stat") MongoHelper.Stat stat,
-        @PathParam("start") long start,
-        @PathParam("end") long end) {
+            @PathParam("userID") String user,
+            @PathParam("sourceID") String source,
+            @PathParam("stat") MongoHelper.Stat stat,
+            @PathParam("start") long start,
+            @PathParam("end") long end) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getByUserForWindowWorker(userID, sourceID, stat, start, end));
-        }
-        catch (Exception e){
-            logger.error(e.getMessage(),e);
+                getByUserForWindowWorker(user, source, stat, start, end));
+        } catch (Exception exec) {
+            logger.error(exec.getMessage(),exec);
             return ResponseHandler.getAvroErrorResponse(request);
         }
     }
 
     /**
-     * Actual implementation of AVRO and JSON getByUserForWindow
+     * Actual implementation of AVRO and JSON getByUserForWindow.
      **/
-    private Dataset getByUserForWindowWorker(String userID, String sourceID, MongoHelper.Stat stat,
-        long start, long end) throws ConnectException {
-        Param.isValidInput(userID, sourceID);
+    private Dataset getByUserForWindowWorker(String user, String source, MongoHelper.Stat stat,
+            long start, long end) throws ConnectException {
+        Param.isValidInput(user, source);
 
-        Dataset bvp = BloodVolumePulseDAO.getInstance().valueByUserSourceWindow(userID,
-            sourceID, Unit.nW, stat, start, end, context);
+        Dataset bvp = BloodVolumePulseDAO.getInstance().valueByUserSourceWindow(user,
+                source, Unit.nW, stat, start, end, context);
 
         if (bvp.getDataset().isEmpty()) {
-            logger.info("No data for the user {} with source {}", userID, sourceID);
+            logger.info("No data for the user {} with source {}", user, source);
         }
 
         return bvp;

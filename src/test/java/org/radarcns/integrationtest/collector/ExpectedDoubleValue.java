@@ -1,28 +1,36 @@
 package org.radarcns.integrationtest.collector;
 
 import java.util.HashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Created by francesco on 14/02/2017.
+ * {@code ExpectedValue} represented as {@code Double}.
+ *      @see {@link ExpectedValue}
  */
-public class ExpectedDoubleValue extends ExpectedValue<DoubleValueCollector>{
+public class ExpectedDoubleValue extends ExpectedValue<DoubleValueCollector> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExpectedDoubleValue.class);
+    //private static final Logger logger = LoggerFactory.getLogger(ExpectedDoubleValue.class);
 
-    public ExpectedDoubleValue(){
+    /**
+     * Constructor.
+     **/
+    public ExpectedDoubleValue() {
         series = new HashMap<>();
 
         lastTimestamp = 0L;
         lastValue = new DoubleValueCollector();
     }
 
-    public void add(Long startTimeWindow, Long timestamp, double value){
-        if ( timestamp < lastTimestamp + DURATION ) {
+    /**
+     * It adds a new value the simulation taking into account if it belongs to an existing time
+     *      window or not.
+     * @param startTimeWindow timeZero for a time window that has this sample as initil value
+     * @param timestamp time associated with the value
+     * @param value sample value
+     **/
+    public void add(Long startTimeWindow, Long timestamp, double value) {
+        if (timestamp < lastTimestamp + DURATION) {
             lastValue.add(value);
-        }
-        else {
+        } else {
             lastTimestamp = startTimeWindow;
             lastValue = new DoubleValueCollector();
             lastValue.add(value);

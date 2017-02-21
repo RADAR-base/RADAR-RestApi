@@ -11,19 +11,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
 import org.apache.avro.specific.SpecificData;
-import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.integrationtest.config.MockDataConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Created by francesco on 14/02/2017.
+ * Starting from a CVS file, this parser generates a map containing all available fields
+ * @see {@link org.radarcns.integrationtest.util.Parser.Variable}. The {@link Parser.Variable#VALUE}
+ *      field can contain either a Double or an array of Doubles.
  */
 public class Parser {
 
-    /** Information returned by the Parser. */
+    /**
+     * Enumerator containing all fields returned by the next function @see {@link Parser#next()}.
+     **/
     public enum Variable {
         USER("userId"),
         SOURCE("sourceId"),
@@ -43,17 +43,28 @@ public class Parser {
         }
 
         @Override
+        @SuppressWarnings("checkstyle:JavadocMethod")
         public String toString() {
             return this.getValue();
         }
 
+        /**
+         * @param value representing a {@code Variable} item
+         * @return the {@code Variable} that matches the input.
+         **/
         public static Variable getEnum(String value) {
-            for(Variable v : values())
-                if(v.getValue().equalsIgnoreCase(value)) return v;
+            for (Variable v : values()) {
+                if (v.getValue().equalsIgnoreCase(value)) {
+                    return v;
+                }
+            }
             throw new IllegalArgumentException();
         }
 
-        public static List<Variable> toList(){
+        /**
+         * @return a {@code List} of Variables.
+         **/
+        public static List<Variable> toList() {
             return new ArrayList<Variable>() {
                 {
                     add(USER);
@@ -67,7 +78,12 @@ public class Parser {
         }
     }
 
-    /** The type of a Expected Values. */
+    /**
+     * Enumerator containing all possible
+     * {@link org.radarcns.integrationtest.collector.ExpectedValue} implementations.
+     * @see {@link org.radarcns.integrationtest.collector.ExpectedArrayValue}
+     * @see {@link org.radarcns.integrationtest.collector.ExpectedDoubleValue}
+     **/
     public enum ExpectedType {
         ARRAY("org.radarcns.integrationtest.collector.ExpectedArrayValue"),
         DOUBLE("org.radarcns.integrationtest.collector.ExpectedDoubleValue");
@@ -87,9 +103,17 @@ public class Parser {
             return this.getValue();
         }
 
+        /**
+         * Return the {@code ExpectedType} associated to the input String.
+         * @param value representing an {@code ExpectedType} item
+         * @return the {@code ExpectedType} that matches the input
+         **/
         public static ExpectedType getEnum(String value) {
-            for(ExpectedType v : values())
-                if(v.getValue().equalsIgnoreCase(value)) return v;
+            for (ExpectedType v : values()) {
+                if (v.getValue().equalsIgnoreCase(value)) {
+                    return v;
+                }
+            }
             throw new IllegalArgumentException();
         }
     }
@@ -107,8 +131,12 @@ public class Parser {
 
     private final MockDataConfig config;
 
-    private static final Logger logger = LoggerFactory.getLogger(Parser.class);
+    //private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
+    /**
+     * Constructor that initialises the {@code CSVReader} and computes the {@code ExpectedType}.
+     * @param config containing the CSV file path that has to be parsed
+     **/
     public Parser(MockDataConfig config)
         throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
         IllegalAccessException, IOException {
@@ -131,14 +159,18 @@ public class Parser {
         expecedType = getExpectedType(config);
     }
 
-    public HashMap<Variable, Object> next() throws IOException {
+    /**
+     * @return {@code Map} of key {@link Parser.Variable} and value Object computed by the
+     *      next available raw of CSV file.
+     **/
+    public Map<Variable, Object> next() throws IOException {
         HashMap<Variable, Object> map = null;
 
         String[] rawValues = csvReader.readNext();
         if (rawValues != null) {
             map = new HashMap<>();
 
-            for (Variable var : Variable.toList()){
+            for (Variable var : Variable.toList()) {
                 map.put(var, computeValue(rawValues, var, config));
             }
         }
@@ -146,15 +178,25 @@ public class Parser {
         return map;
     }
 
+    /**
+     * Close the {@code Parser} closing the CSV reader.
+     **/
     public void close() throws IOException {
         csvReader.close();
     }
 
+    /**
+     * @return {@code ExpectedType} type precomputed during the instantiation.
+     **/
     public ExpectedType getExpecedType() {
         return expecedType;
     }
 
-    public static ExpectedType getExpectedType(MockDataConfig config){
+    /**
+     * @param config parameters used to compute the returned value.
+     * @return the {@code ExpectedType} type based on the input.
+     **/
+    public static ExpectedType getExpectedType(MockDataConfig config) {
         if ( config.getValuesToTest().contains(",") ) {
             return ExpectedType.ARRAY;
         }
@@ -162,6 +204,11 @@ public class Parser {
         return ExpectedType.DOUBLE;
     }
 
+    /**
+     * @param rawValues array of Strings containing data parsed from the CSV file.
+     * @param var variable that has to be extracted from the raw data.
+     * @return an {@code Object} representing the required variable.
+     **/
     private Object computeValue(String[] rawValues, Variable var, MockDataConfig config) {
         switch (var) {
             case USER:
@@ -185,19 +232,25 @@ public class Parser {
         }
     }
 
-    private Object extractValue(String[] rawValues, MockDataConfig config){
-        if( expecedType.equals(ExpectedType.DOUBLE) ) {
+    /**
+     * @param rawValues array of Strings containing data parsed from the CSV file.
+     * @param config states the variable name that has to be parsed.
+     * @return either a {@code Double} or a {@code Double[]} according to the expected value type.
+     **/
+    //TODO use the Parser#parseValue function to verify if the associted Schema is representing the
+    // required field has a Double or a List<Double>
+    private Object extractValue(String[] rawValues, MockDataConfig config) {
+        if (expecedType.equals(ExpectedType.DOUBLE)) {
 
             existOrThrow(config.getValuesToTest());
 
             return Double.parseDouble(rawValues[headerMap.get(config.getValuesToTest())]);
-        }
-        else if ( expecedType.equals(ExpectedType.ARRAY) ) {
+        } else if (expecedType.equals(ExpectedType.ARRAY)) {
 
             String[] testCase = config.getValuesToTest().split(", ");
             Double[] value = new Double[testCase.length];
 
-            for(int i=0; i<testCase.length; i++){
+            for (int i = 0; i < testCase.length; i++) {
                 existOrThrow(testCase[i]);
                 value[i] = Double.parseDouble(rawValues[headerMap.get(testCase[i])]);
             }
@@ -208,7 +261,11 @@ public class Parser {
         throw new IllegalArgumentException("Illegale expected Type " + expecedType.getValue());
     }
 
-    public void getHeader() throws IOException{
+    /**
+     * Initialise the {@code HashMap} useful for converting a variable name to the relative index
+     *  in the raw data array.
+     **/
+    public void getHeader() throws IOException {
         String[] header = csvReader.readNext();
 
         for (int i = 0; i < header.length; i++) {
@@ -216,18 +273,11 @@ public class Parser {
         }
     }
 
-    private SpecificRecord parseRecord(String[] rawValues, Class<?> recordClass, Schema schema) {
-        SpecificRecord record = (SpecificRecord) SpecificData.newInstance(recordClass, schema);
-
-        for (Field field : schema.getFields()) {
-            String fieldString = rawValues[headerMap.get(field.name())];
-            Object fieldValue = parseValue(field.schema(), fieldString);
-            record.put(field.pos(), fieldValue);
-        }
-
-        return record;
-    }
-
+    /**
+     * @param schema Avro schema @see {@link org.apache.avro.Schema}.
+     * @param fieldString value that has to be deserialised.
+     * @return the input value instantiated according to the type stated by the {@code Schema}.
+     **/
     private Object parseValue(Schema schema, String fieldString) {
         switch (schema.getType()) {
             case INT:
@@ -250,9 +300,14 @@ public class Parser {
         }
     }
 
+    /**
+     * @param schema Avro schema. * @see {@link org.apache.avro.Schema}.
+     * @param fieldString value that has to be deserialised.
+     * @return the input value deserialised ad {@code List<Object>}.
+     **/
     private List<Object> parseArray(Schema schema, String fieldString) {
         if (fieldString.charAt(0) != '['
-            || fieldString.charAt(fieldString.length() - 1) != ']') {
+                || fieldString.charAt(fieldString.length() - 1) != ']') {
             throw new IllegalArgumentException("Array must be enclosed by brackets.");
         }
 
@@ -283,18 +338,32 @@ public class Parser {
         return ret;
     }
 
-    private Long getStartTimeWindow(String value){
+    /**
+     * @param value String value that has to be deserialised.
+     * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT representing the
+     *      initial time of a Kafka time window.
+     **/
+    private Long getStartTimeWindow(String value) {
         Double timeDouble = Double.parseDouble(value) / 10d;
         return timeDouble.longValue() * 10000;
     }
 
-    private Long getTimestamp(String value){
+    /**
+     * @param value String value that has to be deserialised.
+     * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT represented by this
+     *      String input.
+     **/
+    private Long getTimestamp(String value) {
         Double timeDouble  = Double.valueOf(value) * 1000d;
         return timeDouble.longValue();
     }
 
-    private void existOrThrow(String key){
-        if ( !headerMap.containsKey(key) ) {
+    /**
+     * @param key field name that has to be verified.
+     * @throws IllegalArgumentException if the headers map does not contain the input key.
+     **/
+    private void existOrThrow(String key) {
+        if (!headerMap.containsKey(key)) {
             throw new IllegalArgumentException("Headers does not contain " + key);
         }
     }

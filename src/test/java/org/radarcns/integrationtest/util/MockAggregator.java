@@ -13,14 +13,23 @@ import org.radarcns.integrationtest.util.Parser.ExpectedType;
 import org.radarcns.integrationtest.util.Parser.Variable;
 
 /**
- * Created by francesco on 15/02/2017.
+ * The MockAggregator simulates the behaviour of a Kafka Streams application based on time window.
+ * It supported accumulators are <ul>
+ *      <li>array of {@code Double}
+ *      <li>singleton {@code Double}
+ *  </ul>
  */
 public class MockAggregator {
 
+    /**
+     * @param parser class that reads a CVS file line by line returning an {@code Map} .
+     * @return {@code ExpectedArrayValue} the simulated results computed using the input parser.
+     * @see {@link org.radarcns.integrationtest.collector.ExpectedArrayValue}
+     **/
     public static ExpectedArrayValue simulateArrayCollector(Parser parser) throws IOException {
         ExpectedArrayValue eav = new ExpectedArrayValue();
 
-        HashMap<Variable, Object> record = parser.next();
+        Map<Variable, Object> record = parser.next();
 
         if (record != null) {
             eav.setUser((String) record.get(Variable.USER));
@@ -29,8 +38,8 @@ public class MockAggregator {
 
         while ( record != null ) {
             eav.add((Long) record.get(Variable.TIME_WINDOW),
-                (Long) record.get(Variable.TIMESTAMP),
-                (Double[]) record.get(Variable.VALUE));
+                    (Long) record.get(Variable.TIMESTAMP),
+                    (Double[]) record.get(Variable.VALUE));
 
             record = parser.next();
         }
@@ -40,20 +49,25 @@ public class MockAggregator {
         return eav;
     }
 
+    /**
+     * @param parser class that reads a CVS file line by line returning an {@code HashMap}.
+     * @return {@code ExpectedDoubleValue} the simulated results computed using the input parser.
+     * @see {@link org.radarcns.integrationtest.collector.ExpectedDoubleValue}
+     **/
     public static ExpectedDoubleValue simulateSingletonCollector(Parser parser) throws IOException {
         ExpectedDoubleValue edv = new ExpectedDoubleValue();
 
-        HashMap<Variable, Object> record = parser.next();
+        Map<Variable, Object> record = parser.next();
 
         if (record != null) {
             edv.setUser((String) record.get(Variable.USER));
             edv.setSource((String) record.get(Variable.SOURCE));
         }
 
-        while (record != null){
+        while (record != null) {
             edv.add((Long) record.get(Variable.TIME_WINDOW),
-                (Long) record.get(Variable.TIMESTAMP),
-                (Double) record.get(Variable.VALUE));
+                    (Long) record.get(Variable.TIMESTAMP),
+                    (Double) record.get(Variable.VALUE));
 
             record = parser.next();
         }
@@ -63,14 +77,21 @@ public class MockAggregator {
         return edv;
     }
 
+    /**
+     * Given a list of configurations, it simulates all of them that has
+     *      {@link Parser.ExpectedType#DOUBLE} as expected type.
+     * @param configs list containing all configurations that have to be tested.
+     * @return {@code Map} of key {@code MockDataConfig} and value {@code ExpectedValue}.
+     * @see {@link org.radarcns.integrationtest.collector.ExpectedDoubleValue}.
+     **/
     public static Map<MockDataConfig, ExpectedValue> simulateSingleton(List<MockDataConfig> configs)
         throws ClassNotFoundException, NoSuchMethodException, IOException, IllegalAccessException,
         InvocationTargetException {
         Map<MockDataConfig, ExpectedValue> exepctedValue = new HashMap<>();
 
-        for ( MockDataConfig config : configs ) {
+        for (MockDataConfig config : configs) {
             Parser parser =  new Parser(config);
-            if ( parser.getExpecedType().equals(ExpectedType.DOUBLE) ){
+            if (parser.getExpecedType().equals(ExpectedType.DOUBLE)) {
                 exepctedValue.put(config, MockAggregator.simulateSingletonCollector(parser));
             }
         }
@@ -78,14 +99,21 @@ public class MockAggregator {
         return exepctedValue;
     }
 
+    /**
+     * Given a list of configurations, it simulates all of them that has
+     *      {@link Parser.ExpectedType#ARRAY} as expected type.
+     * @param configs list containing all configurations that have to be tested.
+     * @return {@code Map} of key {@code MockDataConfig} and value {@code ExpectedValue}.
+     * @see {@link org.radarcns.integrationtest.collector.ExpectedDoubleValue}.
+     **/
     public static  Map<MockDataConfig, ExpectedValue> simulateArray(List<MockDataConfig> configs)
         throws ClassNotFoundException, NoSuchMethodException, IOException, IllegalAccessException,
         InvocationTargetException {
         Map<MockDataConfig, ExpectedValue> exepctedValue = new HashMap<>();
 
-        for ( MockDataConfig config : configs ) {
+        for (MockDataConfig config : configs) {
             Parser parser =  new Parser(config);
-            if ( parser.getExpecedType().equals(ExpectedType.ARRAY) ){
+            if (parser.getExpecedType().equals(ExpectedType.ARRAY)) {
                 exepctedValue.put(config, MockAggregator.simulateArrayCollector(parser));
             }
         }
@@ -93,6 +121,12 @@ public class MockAggregator {
         return exepctedValue;
     }
 
+    /**
+     * Given a list of configurations, it simulates all possible test case scenarios.
+     * @param configs list containing all configurations that have to be tested.
+     * @return {@code Map} of key {@code MockDataConfig} and value {@code ExpectedValue}.
+     * @see {@link org.radarcns.integrationtest.collector.ExpectedDoubleValue}.
+     **/
     public static Map<MockDataConfig, ExpectedValue> getSimulations(List<MockDataConfig> configs)
         throws ClassNotFoundException, NoSuchMethodException, IOException, IllegalAccessException,
         InvocationTargetException {

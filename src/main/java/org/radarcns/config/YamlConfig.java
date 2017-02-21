@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Francesco Nobilia on 10/11/2016.
+ * Yaml deserializer.
  */
-public class YamlConfig implements RadarConfig{
+public class YamlConfig implements RadarConfig {
 
-//    private final Logger logger = LoggerFactory.getLogger(YamlConfig.class);
+    //private final Logger logger = LoggerFactory.getLogger(YamlConfig.class);
 
     private Date released;
     private String version;
@@ -53,18 +53,27 @@ public class YamlConfig implements RadarConfig{
         this.mongoUser = mongoUser;
     }
 
-    public List<ServerAddress> getMongoDBHosts(){
+    /**
+     * @return {@code List<ServerAddress>} stating all available MongoDB instances.
+     */
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    public List<ServerAddress> getMongoDbHosts() {
 
         List<ServerAddress> mongoHostsTemp = new LinkedList<>();
-        for(String key : mongoHosts.keySet()){
+        for (String key : mongoHosts.keySet()) {
             mongoHostsTemp.add(new ServerAddress(key,Integer.valueOf(mongoHosts.get(key))));
         }
 
         return mongoHostsTemp;
     }
 
-    public List<MongoCredential> getMongoDBCredential(){
-        return singletonList(MongoCredential.createCredential(mongoUser.get("usr"), mongoUser.get("db"), mongoUser.get("pwd").toCharArray()));
+    /**
+     * @return {@code List<MongoCredential>} stating all available MongoDB credential.
+     */
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    public List<MongoCredential> getMongoDbCredential() {
+        return singletonList(MongoCredential.createCredential(mongoUser.get("usr"),
+                mongoUser.get("db"), mongoUser.get("pwd").toCharArray()));
     }
 
     public String getMongoDbName() {

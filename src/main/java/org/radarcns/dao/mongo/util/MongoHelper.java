@@ -20,7 +20,7 @@ import org.radarcns.config.Properties;
 import org.radarcns.listner.MongoDBContextListener;
 
 /**
- * Created by Francesco Nobilia on 20/10/2016.
+ * Generic MongoDB helper.
  */
 public class MongoHelper {
 
@@ -32,10 +32,11 @@ public class MongoHelper {
     private static final String END = "end";
 
     /**
-     * @return all available statistic functions
+     * Enumerate all available statistical values.
      */
     public enum Stat {
-        avg("avg"), count("count"), iqr("iqr"), max("max"), median("quartile"), min("min"), quartile("quartile"), sum("sum");
+        avg("avg"), count("count"), iqr("iqr"), max("max"), median("quartile"), min("min"),
+        quartile("quartile"), sum("sum");
 
         private final String param;
 
@@ -49,14 +50,18 @@ public class MongoHelper {
     }
 
     /**
+     * Finds all Documents within [start-end] belonging to the given user for the give source.
+     *
      * @param user is the userID
      * @param source is the sourceID
      * @param start is the start time of the queried timewindow
      * @param end is the end time of the queried timewindow
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents between start and end for the given User,Source and MongoDB collection
+     * @return a MongoDB cursor containing all documents between start and end for the given User,
+     *      Source and MongoDB collection
      */
-    protected static MongoCursor<Document> findDocumentByUserSourceWindow(String user, String source, Long start, Long end, MongoCollection<Document> collection){
+    protected static MongoCursor<Document> findDocumentByUserSourceWindow(String user,
+            String source, Long start, Long end, MongoCollection<Document> collection) {
         FindIterable<Document> result = collection.find(
                 Filters.and(
                         eq(USER,user),
@@ -68,61 +73,78 @@ public class MongoHelper {
     }
 
     /**
+     * Finds all Documents belonging to the given user for the give source.
+     *
      * @param user is the userID
      * @param source is the sourceID
      * @param sortBy states the way in which documents have to be sorted. It is optional
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents for the given User,Source and MongoDB collection
+     * @return a MongoDB cursor containing all documents for the given User,Source and MongoDB
+     *      collection
      */
-    protected static MongoCursor<Document> findDocumentByUserSource(String user, String source, String sortBy, int order, Integer limit, MongoCollection<Document> collection){
+    protected static MongoCursor<Document> findDocumentByUserSource(String user, String source,
+            String sortBy, int order, Integer limit, MongoCollection<Document> collection) {
         FindIterable<Document> result;
 
-        if(sortBy == null)
+        if (sortBy == null) {
             result = collection.find(
-                    Filters.and(
-                            eq(USER,user),
-                            eq(SOURCE,source)));
-        else
+                Filters.and(
+                    eq(USER, user),
+                    eq(SOURCE, source)));
+        } else {
             result = collection.find(
-                    Filters.and(
-                        eq(USER,user),
-                        eq(SOURCE,source))
-                    ).sort(new BasicDBObject(sortBy,order));
+                Filters.and(
+                    eq(USER, user),
+                    eq(SOURCE, source))
+            ).sort(new BasicDBObject(sortBy, order));
+        }
 
-        if(limit != null)
+        if (limit != null) {
             result = result.limit(limit);
+        }
 
         return result.iterator();
     }
 
     /**
+     * Finds all users.
+     *
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all distinct users for the given MongoDB collection
      */
-    public static MongoCursor<String> findAllUser(MongoCollection<Document> collection){
+    public static MongoCursor<String> findAllUser(MongoCollection<Document> collection) {
         return collection.distinct("user", String.class).iterator();
     }
 
     /**
+     * Finds all sources for the given user.
+     *
      * @param user is the userID
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all distinct sources for the given User and MongoDB collection
+     * @return a MongoDB cursor containing all distinct sources for the given User and MongoDB
+     *      collection
      */
-    public static MongoCursor<String> findAllSourceByUser(String user, MongoCollection<Document> collection){
-        return collection.distinct("source", String.class).filter(eq(USER,user)).iterator();
+    public static MongoCursor<String> findAllSourceByUser(String user,
+                MongoCollection<Document> collection) {
+        return collection.distinct("source", String.class)
+                .filter(eq(USER,user)).iterator();
     }
 
     /**
+     * Returns the needed MongoDB collection.
+     *
      * @param context the application context maintaining the MongoDB client
      * @param collection is the name of the returned connection
-     * @return the MongoDB collection named collection. If the MongoDB client is null, it first tries to establish a new connection and then return.
+     * @return the MongoDB collection named collection. If the MongoDB client is null, it first
+     *      tries to establish a new connection and then return.
      * @throws ConnectException if MongoDB cannot be reached
      */
-    public static MongoCollection<Document> getCollection(ServletContext context, String collection) throws ConnectException {
+    public static MongoCollection<Document> getCollection(ServletContext context, String collection)
+            throws ConnectException {
         MongoDBContextListener.testConnection(context);
 
-        if(context.getAttribute(MONGO_CLIENT) == null){
+        if (context.getAttribute(MONGO_CLIENT) == null) {
             MongoDBContextListener.recoverOrThrow(context);
         }
 
