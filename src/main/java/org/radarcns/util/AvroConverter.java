@@ -126,7 +126,7 @@ public class AvroConverter {
     }
 
 
-     /*public static String avroObjToJsonString(SpecificRecord record){
+      /*public static String avroObjToJsonString(SpecificRecord record){
         try {
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();

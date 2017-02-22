@@ -15,10 +15,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.Unit;
 import org.radarcns.dao.mongo.TemperatureDAO;
-import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.security.Param;
+import org.radarcns.util.RadarConverter;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class TemperatureApp {
     public Response getRealTimeUserJsonTemperature(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("stat") DescriptiveStatistic stat) {
         try {
             return ResponseHandler.getJsonResponse(request,
                 getRealTimeUserWorker(user, source, stat), sensorName);
@@ -90,7 +91,7 @@ public class TemperatureApp {
     public Response getRealTimeUserAvroTemperature(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("stat") DescriptiveStatistic stat) {
         try {
             return ResponseHandler.getAvroResponse(request,
                 getRealTimeUserWorker(user, source, stat));
@@ -103,12 +104,12 @@ public class TemperatureApp {
     /**
      * Actual implementation of AVRO and JSON getRealTimeUser.
      **/
-    private Dataset getRealTimeUserWorker(String user, String source, MongoHelper.Stat stat)
+    private Dataset getRealTimeUserWorker(String user, String source, DescriptiveStatistic stat)
         throws ConnectException {
         Param.isValidInput(user, source);
 
         Dataset temp = TemperatureDAO.getInstance().valueRTByUserSource(user, source,
-                Unit.celsius, stat, context);
+                Unit.celsius, RadarConverter.getMongoStat(stat), context);
 
         if (temp.getDataset().isEmpty()) {
             logger.debug("No data for the user {} with source {}", user, source);
@@ -139,7 +140,7 @@ public class TemperatureApp {
     public Response getAllByUserJsonTemperature(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("stat") DescriptiveStatistic stat) {
         try {
             return ResponseHandler.getJsonResponse(request,
                 getAllByUserWorker(user, source, stat), sensorName);
@@ -168,7 +169,7 @@ public class TemperatureApp {
     public Response getAllByUserAvroTemperature(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("stat") DescriptiveStatistic stat) {
         try {
             return ResponseHandler.getAvroResponse(request,
                 getAllByUserWorker(user, source, stat));
@@ -181,12 +182,12 @@ public class TemperatureApp {
     /**
      * Actual implementation of AVRO and JSON getAllByUser.
      **/
-    private Dataset getAllByUserWorker( String user, String source, MongoHelper.Stat stat )
+    private Dataset getAllByUserWorker( String user, String source, DescriptiveStatistic stat )
         throws ConnectException {
         Param.isValidInput(user, source);
 
         Dataset temp = TemperatureDAO.getInstance().valueByUserSource(user, source,
-                Unit.celsius, stat, context);
+                Unit.celsius, RadarConverter.getMongoStat(stat), context);
 
         if (temp.getDataset().isEmpty()) {
             logger.debug("No data for the user {} with source {}", user, source);
@@ -219,7 +220,7 @@ public class TemperatureApp {
     public Response getByUserForWindowJsonTemperature(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat,
+            @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("start") long start,
             @PathParam("end") long end) {
         try {
@@ -251,7 +252,7 @@ public class TemperatureApp {
     public Response getByUserForWindowAvroTemperature(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat,
+            @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("start") long start,
             @PathParam("end") long end) {
         try {
@@ -266,12 +267,12 @@ public class TemperatureApp {
     /**
      * Actual implementation of AVRO and JSON getByUserForWindow.
      **/
-    private Dataset getByUserForWindowWorker(String user, String source, MongoHelper.Stat stat,
+    private Dataset getByUserForWindowWorker(String user, String source, DescriptiveStatistic stat,
             long start, long end) throws ConnectException {
         Param.isValidInput(user, source);
 
         Dataset temp = TemperatureDAO.getInstance().valueByUserSourceWindow(user, source,
-                Unit.celsius, stat, start, end, context);
+                Unit.celsius, RadarConverter.getMongoStat(stat), start, end, context);
 
         if (temp.getDataset().isEmpty()) {
             logger.debug("No data for the user {} with source {}", user, source);

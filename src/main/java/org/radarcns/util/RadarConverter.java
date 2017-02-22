@@ -68,7 +68,7 @@ public class RadarConverter {
     /**
      * It converts a {@code DescriptiveStatistic} to {@code MongoHelper.Stat}.
      **/
-    public static MongoHelper.Stat getDescriptiveStatistic(DescriptiveStatistic stat) {
+    public static MongoHelper.Stat getMongoStat(DescriptiveStatistic stat) {
         switch (stat) {
             case average: return MongoHelper.Stat.avg;
             case count: return MongoHelper.Stat.count;

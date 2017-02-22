@@ -39,7 +39,7 @@ public class URLGenerator {
         testPath = testPath.replace(USER_PLACEHOLDER, user);
         testPath = testPath.replace(SOURCE_PLACEHOLDER, source);
 
-        Stat[] statFunctions = MongoHelper.Stat.values();
+        DescriptiveStatistic[] statFunctions = DescriptiveStatistic.values();
         for (int i = 0; i < statFunctions.length; i++) {
             list.add(SERVER + PATH + testPath.replace(STAT_PLACEHOLDER, statFunctions[i].name()));
         }
@@ -62,8 +62,6 @@ public class URLGenerator {
         testPath = testPath.replace(USER_PLACEHOLDER, user);
         testPath = testPath.replace(SOURCE_PLACEHOLDER, source);
 
-        MongoHelper.Stat statistic = RadarConverter.getDescriptiveStatistic(stat);
-
-        return SERVER + PATH + testPath.replace(STAT_PLACEHOLDER, statistic.name());
+        return SERVER + PATH + testPath.replace(STAT_PLACEHOLDER, stat.name());
     }
 }

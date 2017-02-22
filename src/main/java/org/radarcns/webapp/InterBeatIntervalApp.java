@@ -15,10 +15,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.Unit;
 import org.radarcns.dao.mongo.InterBeatIntervalDAO;
-import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.security.Param;
+import org.radarcns.util.RadarConverter;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,7 @@ public class InterBeatIntervalApp {
     public Response getRealTimeUserJsonIBI(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("stat") DescriptiveStatistic stat) {
         try {
             return ResponseHandler.getJsonResponse(request,
                 getRealTimeUserWorker(user, source, stat), sensorName);
@@ -91,7 +92,7 @@ public class InterBeatIntervalApp {
     public Response getRealTimeUserAvroIBI(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("stat") DescriptiveStatistic stat) {
         try {
             return ResponseHandler.getAvroResponse(request,
                 getRealTimeUserWorker(user, source, stat));
@@ -104,12 +105,12 @@ public class InterBeatIntervalApp {
     /**
      * Actual implementation of AVRO and JSON getRealTimeUser.
      **/
-    private Dataset getRealTimeUserWorker(String user, String source, MongoHelper.Stat stat)
+    private Dataset getRealTimeUserWorker(String user, String source, DescriptiveStatistic stat)
         throws ConnectException {
         Param.isValidInput(user, source);
 
         Dataset ibi = InterBeatIntervalDAO.getInstance().valueRTByUserSource(user, source,
-                Unit.sec, stat, context);
+                Unit.sec, RadarConverter.getMongoStat(stat), context);
 
         if (ibi.getDataset().isEmpty()) {
             logger.debug("No data for the user {}", user);
@@ -141,7 +142,7 @@ public class InterBeatIntervalApp {
     public Response getAllByUserJsonIBI(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("stat") DescriptiveStatistic stat) {
         try {
             return ResponseHandler.getJsonResponse(request,
                 getAllByUserWorker(user, source, stat), sensorName);
@@ -171,7 +172,7 @@ public class InterBeatIntervalApp {
     public Response getAllByUserAvroIBI(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat) {
+            @PathParam("stat") DescriptiveStatistic stat) {
         try {
             return ResponseHandler.getAvroResponse(request,
                 getAllByUserWorker(user, source, stat));
@@ -184,12 +185,12 @@ public class InterBeatIntervalApp {
     /**
      * Actual implementation of AVRO and JSON getAllByUser.
      **/
-    private Dataset getAllByUserWorker(String user, String source, MongoHelper.Stat stat)
+    private Dataset getAllByUserWorker(String user, String source, DescriptiveStatistic stat)
         throws ConnectException {
         Param.isValidInput(user, source);
 
         Dataset ibi = InterBeatIntervalDAO.getInstance().valueByUserSource(user, source,
-                Unit.sec, stat, context);
+                Unit.sec, RadarConverter.getMongoStat(stat), context);
 
         if (ibi.getDataset().isEmpty()) {
             logger.debug("No data for the user {} with source {}", user, source);
@@ -224,7 +225,7 @@ public class InterBeatIntervalApp {
     public Response getByUserForWindowJsonIBI(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat,
+            @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("start") long start,
             @PathParam("end") long end) {
         try {
@@ -258,7 +259,7 @@ public class InterBeatIntervalApp {
     public Response getByUserForWindowAvroIBI(
             @PathParam("userID") String user,
             @PathParam("sourceID") String source,
-            @PathParam("stat") MongoHelper.Stat stat,
+            @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("start") long start,
             @PathParam("end") long end) {
         try {
@@ -273,12 +274,12 @@ public class InterBeatIntervalApp {
     /**
      * Actual implementation of AVRO and JSON getByUserForWindow.
      **/
-    private Dataset getByUserForWindowWorker(String user, String source, MongoHelper.Stat stat,
+    private Dataset getByUserForWindowWorker(String user, String source, DescriptiveStatistic stat,
             long start, long end) throws ConnectException {
         Param.isValidInput(user, source);
 
         Dataset ibi = InterBeatIntervalDAO.getInstance().valueByUserSourceWindow(user, source,
-                Unit.sec, stat, start, end, context);
+                Unit.sec, RadarConverter.getMongoStat(stat), start, end, context);
 
         if (ibi.getDataset().isEmpty()) {
             logger.debug("No data for the user {} with source {}", user, source);
