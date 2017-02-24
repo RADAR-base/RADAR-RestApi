@@ -22,3 +22,5 @@ target/
 # Integration Test
 src/test/resources/*.csv
 src/test/resources/*.log
+src/test/resources/*.jar
+src/test/resources/*.yml
