@@ -181,7 +181,7 @@ public abstract class MongoSensorDAO extends MongoDAO {
 
         Dataset hrd = new Dataset(header,list);
 
-        logger.info("Found {} value",list.size());
+        logger.debug("Found {} value",list.size());
 
         return hrd;
     }

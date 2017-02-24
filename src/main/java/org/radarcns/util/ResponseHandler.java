@@ -128,7 +128,8 @@ public class ResponseHandler {
      * @return the response error code
      **/
     public static Response getAvroErrorResponse(HttpServletRequest request) {
-        logger.info("[{}] {}", Status.INTERNAL_SERVER_ERROR, request.getRequestURI());
+        logger.info("[{}] {}", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                request.getRequestURI());
         return Response.serverError().build();
     }
 }
