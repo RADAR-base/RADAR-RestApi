@@ -118,12 +118,6 @@ public class Parser {
         }
     }
 
-    private final Schema keySchema;
-    private final Class<?> keyClass;
-
-    private final Schema valueSchema;
-    private final Class<?> valueClass;
-
     private final CSVReader csvReader;
     private final Map<String, Integer> headerMap;
 
@@ -143,12 +137,13 @@ public class Parser {
 
         this.config = config;
 
-        keyClass = Class.forName(config.getKeySchema());
-        keySchema = (Schema) keyClass.getMethod("getClassSchema").invoke(null);
+        Class<?> keyClass = Class.forName(config.getKeySchema());
+        Schema keySchema = (Schema) keyClass.getMethod("getClassSchema").invoke(null);
         SpecificData.newInstance(keyClass, keySchema);
 
-        valueClass = Class.forName(config.getValueSchema());
-        valueSchema = (Schema) valueClass.getMethod("getClassSchema").invoke(null);
+        Class<?> valueClass = Class.forName(config.getValueSchema());
+        Schema valueSchema = (Schema) valueClass.getMethod("getClassSchema")
+                .invoke(null);
         SpecificData.newInstance(valueClass, valueSchema);
 
         csvReader = new CSVReader(new FileReader(config.getCVSFile()));

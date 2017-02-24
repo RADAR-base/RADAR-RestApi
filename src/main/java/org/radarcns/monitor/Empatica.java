@@ -118,11 +118,11 @@ public class Empatica {
     private static Status getStatus(double percentage) {
         if (percentage > 0.95) {
             return Status.FINE;
-        } else if ((percentage > 0.80) && (percentage <= 0.95)) {
+        } else if (percentage > 0.80 && percentage <= 0.95) {
             return Status.OK;
-        } else if ((percentage > 0.50) && (percentage <= 0.80)) {
+        } else if (percentage > 0.50 && percentage <= 0.80) {
             return Status.WARNING;
-        } else if ((percentage > 0.0) && (percentage <= 0.50)) {
+        } else if (percentage > 0.0 && percentage <= 0.50) {
             return Status.BAD;
         } else {
             return Status.DISCONNECTED;

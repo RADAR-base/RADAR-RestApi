@@ -15,66 +15,85 @@ import org.slf4j.LoggerFactory;
  */
 public class DockerConfig implements RadarConfig {
 
-    private final Logger logger = LoggerFactory.getLogger(DockerConfig.class);
+    /** Logger. **/
+    private static final Logger LOGGER = LoggerFactory.getLogger(DockerConfig.class);
+    /** Placeholder MongoDb user. **/
+    private static final String MONGODB_USER = "MONGODB_USER";
+    /** Placeholder MongoDb password. **/
+    private static final String MONGODB_PASS = "MONGODB_PASS";
+    /** Placeholder MongoDb database. **/
+    private static final String MONGODB_DATABASE = "MONGODB_DATABASE";
+    /** Placeholder MongoDb host. **/
+    private static final String MONGODB_HOST = "MONGODB_HOST";
 
-    @SuppressWarnings({"checkstyle:AbbreviationAsWordInName", "checkstyle:MemberName"})
-    private final String MONGODB_USER = "MONGODB_USER";
-    @SuppressWarnings({"checkstyle:AbbreviationAsWordInName", "checkstyle:MemberName"})
-    private final String MONGODB_PASS = "MONGODB_PASS";
-    @SuppressWarnings({"checkstyle:AbbreviationAsWordInName", "checkstyle:MemberName"})
-    private final String MONGODB_DATABASE = "MONGODB_DATABASE";
-    @SuppressWarnings({"checkstyle:AbbreviationAsWordInName", "checkstyle:MemberName"})
-    private final String MONGODB_HOST = "MONGODB_HOST";
-
-    private final String dbName;
-    private final List<ServerAddress> mongoHost;
-    private final List<MongoCredential> mongoCredentials;
+    /** MongoDb database name. **/
+    private final String mongoDbName;
+    /** List of MongoDb host. **/
+    private final List<ServerAddress> mongoDbHosts;
+    /** List of MongoDb credential. **/
+    private final List<MongoCredential> mongoDbCredentials;
 
     /**
      * Constructor.
      */
-    public DockerConfig() {
-        dbName = getOrThrow(MONGODB_DATABASE);
+    public DockerConfig() throws InvalidParameterException {
+        mongoDbName = getOrThrow(MONGODB_DATABASE);
 
-        mongoCredentials = singletonList(MongoCredential.createCredential(
+        mongoDbCredentials = singletonList(MongoCredential.createCredential(
             getOrThrow(MONGODB_USER),
             getOrThrow(MONGODB_DATABASE),
             getOrThrow(MONGODB_PASS).toCharArray()));
 
-        mongoHost = new LinkedList<>();
+        mongoDbHosts = new LinkedList<>();
 
-        String mongoHostParam = getOrThrow(MONGODB_HOST);
-        String[] hostsTemp = mongoHostParam.split(", ");
+        final String mongoHostParam = getOrThrow(MONGODB_HOST);
+        final String[] hostsTemp = mongoHostParam.split(", ");
         for (int i = 0; i < hostsTemp.length; i++) {
-            String[] value = hostsTemp[i].split(":");
-            mongoHost.add(new ServerAddress(value[0], Integer.valueOf(value[1])));
+            final String[] value = hostsTemp[i].split(":");
+            mongoDbHosts.add(new ServerAddress(value[0], Integer.valueOf(value[1])));
         }
     }
 
-    private String getOrThrow(String param) {
-        try {
-            final String value = System.getenv(param);
-            if (value == null) {
-                logger.error("{} is null", param);
-                throw new InvalidParameterException(param + "cannot be null");
-            }
-            return value;
-        } catch (Exception exec) {
-            logger.error("Error loading {}", param, exec);
+    /**
+     * Returns the required parameter or throws an execption.
+     * @return environment variable named param
+     * @throws InvalidParameterException if param does not exist
+     */
+    private String getOrThrow(final String param) {
+        final String value = System.getenv(param);
+
+        if (value == null) {
+            LOGGER.error("Error loading parameter. {} is null", param);
+            throw new InvalidParameterException(param + "cannot be null");
         }
 
-        return null;
+        return value;
     }
 
+    /**
+     * Returns a String representing the MongoDB database name.
+     * @return MongoDB database name as String
+     */
+    @Override
     public String getMongoDbName() {
-        return dbName;
+        return this.mongoDbName;
     }
 
+    /**
+     * Returns the list of all known MongoDB instances.
+     * @return MongoDB instances as List
+     */
+    @Override
     public List<ServerAddress> getMongoDbHosts() {
-        return mongoHost;
+        return this.mongoDbHosts;
     }
 
-    public List<MongoCredential> getMongoDbCredential() {
-        return mongoCredentials;
+    /**
+     * Returns the list of all known MongoDB credentials.
+     * @return MongoDB credentials as List
+     */
+    @Override
+    public List<MongoCredential> getMongoDbCredentials() {
+        return this.mongoDbCredentials;
     }
 }

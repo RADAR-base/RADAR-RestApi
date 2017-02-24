@@ -17,6 +17,7 @@ targetCompatibility = '1.7'
 sourceCompatibility = '1.7'
 
 ext.avro='1.7.7'
+ext.codacyVersion = '1.0.10'
 ext.dataformat = '2.8.5'
 ext.jackson='2.8.4'
 ext.jersey = '2.22.1'
@@ -29,6 +30,7 @@ ext.mongodb='3.3.0'
 ext.okhttpVersion = '3.5.0'
 ext.okioVersion = '1.11.0'
 ext.openCsvVersion = '3.9'
+ext.radarCommon = '0.1'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.tomcat = '8.0.37'
@@ -44,9 +46,10 @@ repositories {
   // Use 'jcenter' for resolving your dependencies.
   // You can declare any Maven/Ivy/file repository here.
   jcenter()
-  maven {
-    url 'http://packages.confluent.io/maven/'
-  }
+  maven { url 'http://packages.confluent.io/maven/' }
+  maven { url 'https://jitpack.io' }
+  maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
+  maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -67,12 +70,15 @@ dependencies {
   compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
   compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
   compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-avro', version: dataformat
+  compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
   testCompile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
   testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
   testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
+
+  codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }
 
 //---------------------------------------------------------------------------//
@@ -80,7 +86,7 @@ dependencies {
 //---------------------------------------------------------------------------//
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
-  source("src/main/resources/avro")
+  source("schemas/restapi")
   outputDir = file("build/avro")
 }
 

@@ -25,8 +25,8 @@ public abstract class MongoAppDAO extends MongoDAO {
      * @return the last seen status update for the given user and source, otherwise null
      */
     //TODO add an Application as input that can be used as a "reuse" (see DatumReader#read).
-    public Application valueByUserSource(String user, String source, ServletContext context)
-            throws ConnectException {
+    public Application valueByUserSource(String user, String source, Application app,
+            ServletContext context) throws ConnectException {
 
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSource(user, source, null, -1, 1,
@@ -41,9 +41,13 @@ public abstract class MongoAppDAO extends MongoDAO {
         Document doc = cursor.next();
         cursor.close();
 
-        return getApplication(doc);
+        if (app == null) {
+            app = new Application();
+        }
+
+        return getApplication(doc, app);
     }
 
-    protected abstract Application getApplication(Document doc);
+    protected abstract Application getApplication(Document doc, Application app);
 
 }

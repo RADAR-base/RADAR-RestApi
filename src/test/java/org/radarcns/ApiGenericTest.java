@@ -65,9 +65,9 @@ public class ApiGenericTest {
 
         BufferedReader br = null;
         if (200 <= con.getResponseCode() && con.getResponseCode() <= 299) {
-            br = new BufferedReader(new InputStreamReader((con.getInputStream())));
+            br = new BufferedReader(new InputStreamReader(con.getInputStream()));
         } else {
-            br = new BufferedReader(new InputStreamReader((con.getErrorStream())));
+            br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
         }
 
         StringBuilder result = new StringBuilder();

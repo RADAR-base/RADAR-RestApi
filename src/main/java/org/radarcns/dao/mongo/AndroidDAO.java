@@ -27,9 +27,12 @@ public class AndroidDAO {
 
     private MongoAppDAO server = new MongoAppDAO() {
         @Override
-        protected Application getApplication(Document doc) {
-            return new Application(doc.getString("clientIP"), new Double(-1.0),
-                RadarConverter.getServerStatus(doc.getString("serverStatus")));
+        protected Application getApplication(Document doc, Application app) {
+
+            app.setIpAddress(doc.getString("ipAddress"));
+            app.setServerStatus(RadarConverter.getServerStatus(doc.getString("serverStatus")));
+
+            return app;
         }
 
         @Override
@@ -40,9 +43,10 @@ public class AndroidDAO {
 
     private MongoAppDAO uptime = new MongoAppDAO() {
         @Override
-        protected Application getApplication(Document doc) {
-            return new Application("",doc.getDouble("applicationUptime"),
-                ServerStatus.UNKNOWN);
+        protected Application getApplication(Document doc, Application app) {
+            app.setUptime(doc.getDouble("uptime"));
+
+            return app;
         }
 
         @Override
@@ -51,19 +55,21 @@ public class AndroidDAO {
         }
     };
 
-    //TODO integrate the counter topic
-    /*private MongoAppDAO counter = new MongoAppDAO() {
+    private MongoAppDAO recordCounter = new MongoAppDAO() {
         @Override
-        protected Application getApplication(Document doc) {
-            return new Application("",doc.getDouble(""),
-                ServerStatus.UNKNOWN);
+        protected Application getApplication(Document doc, Application app) {
+            app.setRecordsCached(doc.getInteger("recordsCached"));
+            app.setRecordsCached(doc.getInteger("recordsSent"));
+            app.setRecordsCached(doc.getInteger("recordsUnsent"));
+
+            return app;
         }
 
         @Override
         protected String getCollectionName() {
-            return "";
+            return "application_status_record_counts";
         }
-    };*/
+    };
 
     /**
      * Computes the Android App Status realign on different collection.
@@ -76,8 +82,10 @@ public class AndroidDAO {
      */
     public Application getStatus(String user, String source, ServletContext context)
             throws ConnectException {
-        Application app = server.valueByUserSource(user, source, context);
-        app.setUptime(uptime.valueByUserSource(user, source, context).getUptime());
+
+        Application app = server.valueByUserSource(user, source, null, context);
+        uptime.valueByUserSource(user, source, app, context);
+        recordCounter.valueByUserSource(user, source, app, context);
 
         return app;
     }

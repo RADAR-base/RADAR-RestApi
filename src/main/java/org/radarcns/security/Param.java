@@ -6,7 +6,7 @@ package org.radarcns.security;
 public class Param {
 
     public static boolean isNullOrEmpty(String input) {
-        return (input == null) || input.trim().isEmpty();
+        return input == null || input.trim().isEmpty();
     }
 
     public static boolean isNumeric(String input) {
