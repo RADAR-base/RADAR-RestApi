@@ -18,3 +18,7 @@ target/
 # Build
 /build/
 *.war
+
+# Integration Test
+src/test/resources/*.csv
+src/test/resources/*.log

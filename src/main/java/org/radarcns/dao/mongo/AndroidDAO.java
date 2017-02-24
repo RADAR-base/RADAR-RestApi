@@ -37,7 +37,7 @@ public class AndroidDAO {
 
         @Override
         protected String getCollectionName() {
-            return "application_status_server";
+            return "application_server_status";
         }
     };
 
@@ -51,7 +51,7 @@ public class AndroidDAO {
 
         @Override
         protected String getCollectionName() {
-            return "application_status_uptime";
+            return "application_uptime";
         }
     };
 
@@ -67,7 +67,7 @@ public class AndroidDAO {
 
         @Override
         protected String getCollectionName() {
-            return "application_status_record_counts";
+            return "application_record_counts";
         }
     };
 
