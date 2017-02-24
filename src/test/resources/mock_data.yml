@@ -1,43 +1,37 @@
 data:
-  - topic: topic1
-    rest_call: /Acc/{stat}/{userID}/{sourceID}
+  - topic: android_empatica_e4_acceleration
+    rest_call: /Acc/AVRO/{stat}/{user}/{source}
     file: /Users/francesco/Repositories/RADAR-RestApi/src/test/resources/acc.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4Acceleration
     values_to_test: "x, y, z"
-  - topic: topic1
-    rest_call: "/B/{stat}/{userID}/{sourceID}"
+  - topic: android_empatica_e4_battery_level
+    rest_call: /B/AVRO/{stat}/{user}/{source}
     file: /Users/francesco/Repositories/RADAR-RestApi/src/test/resources/battery.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4BatteryLevel
     values_to_test: "batteryLevel"
-  - topic: topic1
-    rest_call: "/BVP/{stat}/{userID}/{sourceID}"
-    file: bvp.csv
+  - topic: android_empatica_e4_blood_volume_pulse
+    rest_call: /BVP/AVRO/{stat}/{user}/{source}
+    file: /Users/francesco/Repositories/RADAR-RestApi/src/test/resources/bvp.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4BloodVolumePulse
     values_to_test: "bloodVolumePulse"
-  - topic: topic1
-    rest_call: "/EDA/{stat}/{userID}/{sourceID}"
-    file: eda.csv
+  - topic: android_empatica_e4_electrodermal_activity
+    rest_call: /EDA/AVRO/{stat}/{user}/{source}
+    file: /Users/francesco/Repositories/RADAR-RestApi/src/test/resources/eda.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4ElectroDermalActivity
     values_to_test: "electroDermalActivity"
-  - topic: topic1
-    rest_call: "/HR/{stat}/{userID}/{sourceID}"
-    file: ibi.csv
+  - topic: android_empatica_e4_inter_beat_interval
+    rest_call: /IBI/AVRO/{stat}/{user}/{source}
+    file: /Users/francesco/Repositories/RADAR-RestApi/src/test/resources/ibi.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4InterBeatInterval
     values_to_test: "interBeatInterval"
-  - topic: topic1
-    rest_call: "/IBI/{stat}/{userID}/{sourceID}"
-    file: ibi.csv
-    key_schema: org.radarcns.key.MeasurementKey
-    value_schema: org.radarcns.empatica.EmpaticaE4InterBeatInterval
-    values_to_test: "interBeatInterval"
-  - topic: topic1
-    rest_call: "/T/{stat}/{userID}/{sourceID}"
-    file: temperature.csv
+  - topic: android_empatica_e4_temperature
+    rest_call: /T/AVRO/{stat}/{user}/{source}
+    file: /Users/francesco/Repositories/RADAR-RestApi/src/test/resources/temp.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4Temperature
     values_to_test: "temperature"

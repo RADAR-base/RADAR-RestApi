@@ -2,6 +2,10 @@ package org.radarcns.integrationtest;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 import org.apache.avro.specific.SpecificRecord;
@@ -30,6 +34,8 @@ public class ApiTest {
 
     @SuppressWarnings({"checkstyle:AbbreviationAsWordInName","checkstyle:MemberName"})
     private final boolean TEST = false;
+//    private final String RESOURCES_PATH =
+//            "/Users/francesco/Repositories/RADAR-RestApi/src/test/resources/";
     private List<MockDataConfig> configs;
 
     /**
@@ -41,9 +47,9 @@ public class ApiTest {
         if (TEST) {
             configs = MockConfig.load(getClass().getClassLoader()).getData();
 
-            //for ( MockDataConfig config : configs ) {
-            //    CSVGenerator.generate(config, 5);
-            //}
+//            for ( MockDataConfig config : configs ) {
+//                CSVGenerator.generate(config, 5);
+//            }
 
             // Validate input
             for (MockDataConfig config : configs) {
@@ -90,6 +96,38 @@ public class ApiTest {
                 }
             }
         }
+    }
+
+    /**
+     * Converts {@code InputStream} to {@code String}.
+     */
+    private static String getStringFromInputStream(InputStream is) {
+
+        BufferedReader br = null;
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        try {
+
+            br = new BufferedReader(new InputStreamReader(is));
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return sb.toString();
+
     }
 
 }

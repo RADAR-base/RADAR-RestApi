@@ -3,10 +3,7 @@ package org.radarcns.integrationtest.util;
 import java.util.LinkedList;
 import java.util.List;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integrationtest.config.MockDataConfig;
-import org.radarcns.util.RadarConverter;
 
 /**
  * URL generator for the HTTP client.
@@ -16,8 +13,8 @@ public class URLGenerator {
 
     //private static final Logger logger = LoggerFactory.getLogger(URLGenerator.class);
 
-    private static final String USER_PLACEHOLDER = "{userID}";
-    private static final String SOURCE_PLACEHOLDER = "{sourceID}";
+    private static final String USER_PLACEHOLDER = "{user}";
+    private static final String SOURCE_PLACEHOLDER = "{source}";
     private static final String STAT_PLACEHOLDER = "{stat}";
 
     private static final String SERVER = "http://52.210.59.174:8080/";
