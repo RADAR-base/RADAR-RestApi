@@ -89,7 +89,7 @@ public class UserApp {
      * Actual implementation of AVRO and JSON getAllPatients.
      **/
     private Cohort getAllPatientsWorker() throws ConnectException {
-        Cohort cohort = UserDAO.findAllUser(context);
+        Cohort cohort = UserDAO.findAllUsers(context);
 
         return cohort;
     }

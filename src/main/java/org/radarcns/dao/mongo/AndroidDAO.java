@@ -8,8 +8,11 @@ import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.avro.restapi.app.ServerStatus;
+import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.dao.mongo.util.MongoAppDAO;
 import org.radarcns.util.RadarConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Data Access Object for Android App Status values.
@@ -17,7 +20,7 @@ import org.radarcns.util.RadarConverter;
 @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class AndroidDAO {
 
-    //private final Logger logger = LoggerFactory.getLogger(AndroidDAO.class);
+    private final Logger logger = LoggerFactory.getLogger(AndroidDAO.class);
 
     private static final AndroidDAO instance = new AndroidDAO();
 
@@ -28,8 +31,7 @@ public class AndroidDAO {
     private MongoAppDAO server = new MongoAppDAO() {
         @Override
         protected Application getApplication(Document doc, Application app) {
-
-            app.setIpAddress(doc.getString("ipAddress"));
+            app.setIpAddress(doc.getString("clientIP"));
             app.setServerStatus(RadarConverter.getServerStatus(doc.getString("serverStatus")));
 
             return app;
@@ -44,7 +46,7 @@ public class AndroidDAO {
     private MongoAppDAO uptime = new MongoAppDAO() {
         @Override
         protected Application getApplication(Document doc, Application app) {
-            app.setUptime(doc.getDouble("uptime"));
+            app.setUptime(doc.getDouble("applicationUptime"));
 
             return app;
         }
@@ -59,8 +61,8 @@ public class AndroidDAO {
         @Override
         protected Application getApplication(Document doc, Application app) {
             app.setRecordsCached(doc.getInteger("recordsCached"));
-            app.setRecordsCached(doc.getInteger("recordsSent"));
-            app.setRecordsCached(doc.getInteger("recordsUnsent"));
+            app.setRecordsSent(doc.getInteger("recordsSent"));
+            app.setRecordsUnsent(doc.getInteger("recordsUnsent"));
 
             return app;
         }
@@ -102,6 +104,7 @@ public class AndroidDAO {
 
         users.addAll(server.findAllUser(context));
         users.addAll(uptime.findAllUser(context));
+        users.addAll(recordCounter.findAllUser(context));
 
         return users;
     }
@@ -114,12 +117,13 @@ public class AndroidDAO {
      *
      * @throws ConnectException if MongoDb is not available
      */
-    public Collection<String> findAllSoucesByUser(String user, ServletContext context)
+    public Collection<Source> findAllSoucesByUser(String user, ServletContext context)
             throws ConnectException {
-        Set<String> users = new HashSet<>();
+        Set<Source> users = new HashSet<>();
 
         users.addAll(server.findAllSoucesByUser(user, context));
         users.addAll(uptime.findAllSoucesByUser(user, context));
+        users.addAll(recordCounter.findAllSoucesByUser(user, context));
 
         return users;
     }

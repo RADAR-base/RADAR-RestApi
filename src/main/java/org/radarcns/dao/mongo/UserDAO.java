@@ -6,14 +6,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
+import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.user.Cohort;
 import org.radarcns.avro.restapi.user.Patient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Data Access Object for user management.
  */
 @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class UserDAO {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
 
     /**
      * Finds all users checking all available collections.
@@ -24,7 +29,7 @@ public class UserDAO {
      *
      * @see {@link org.radarcns.avro.restapi.user.Cohort}
      */
-    public static Cohort findAllUser(ServletContext context) throws ConnectException {
+    public static Cohort findAllUsers(ServletContext context) throws ConnectException {
 
         List<Patient> patients = new LinkedList<>();
 
@@ -57,7 +62,8 @@ public class UserDAO {
      */
     public static Patient findAllSoucesByUser(String userID, ServletContext context)
             throws ConnectException {
-        Set<String> sources = new HashSet<>();
+        Set<Source> sources = new HashSet<>();
+
         sources.addAll(AccelerationDAO.getInstance().findAllSoucesByUser(userID, context));
         sources.addAll(BatteryDAO.getInstance().findAllSoucesByUser(userID, context));
         sources.addAll(BloodVolumePulseDAO.getInstance().findAllSoucesByUser(userID, context));

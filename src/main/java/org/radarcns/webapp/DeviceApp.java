@@ -14,7 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.radarcns.avro.restapi.device.Device;
+import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.monitor.Empatica;
 import org.radarcns.security.Param;
 import org.radarcns.util.ResponseHandler;
@@ -26,15 +26,15 @@ import org.slf4j.LoggerFactory;
  */
 @Api
 @Path("/Device")
-public class DeviceStatusApp {
+public class DeviceApp {
 
-    private static Logger logger = LoggerFactory.getLogger(DeviceStatusApp.class);
+    private static Logger logger = LoggerFactory.getLogger(DeviceApp.class);
 
     @Context private ServletContext context;
     @Context private HttpServletRequest request;
 
     //--------------------------------------------------------------------------------------------//
-    //                                    REAL-TIME FUNCTIONS                                     //
+    //                                      STATUS FUNCTIONS                                      //
     //--------------------------------------------------------------------------------------------//
     /**
      * JSON function that returns the status of the given sensor.
@@ -43,7 +43,7 @@ public class DeviceStatusApp {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/Status/{userID}/{sourceID}")
     @ApiOperation(
-            value = "Return a Device values",
+            value = "Return a Source values",
             notes = "Using the device sensors values arrived within last 60sec, it computes the"
                 + "sender status for the given userID and sourceID")
     @ApiResponses(value = {
@@ -51,7 +51,7 @@ public class DeviceStatusApp {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a device.avsc object containing last"
+            @ApiResponse(code = 200, message = "Return a source.avsc object containing last"
                 + "computed status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStatByUserDeviceJsonDevStatus(
@@ -59,7 +59,7 @@ public class DeviceStatusApp {
             @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getRTStatByUserDeviceWorker(user, source));
+                getRTStatByUserSourceWorker(user, source));
         } catch (Exception exec) {
             logger.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -80,7 +80,7 @@ public class DeviceStatusApp {
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a byte array serialising device.avsc object"
+            @ApiResponse(code = 200, message = "Return a byte array serialising source.avsc object"
                 + "containing last computed status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStatByUserDeviceAvroDevStatus(
@@ -88,7 +88,7 @@ public class DeviceStatusApp {
             @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRTStatByUserDeviceWorker(user, source));
+                getRTStatByUserSourceWorker(user, source));
         } catch (Exception exec) {
             logger.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -98,11 +98,11 @@ public class DeviceStatusApp {
     /**
      * Actual implementation of AVRO and JSON getRTStatByUserDevice.
      **/
-    private Device getRTStatByUserDeviceWorker(String user, String source)
+    private Source getRTStatByUserSourceWorker(String user, String source)
         throws ConnectException {
         Param.isValidInput(user, source);
 
-        Device device = Empatica.monitor(user, source, context);
+        Source device = Empatica.monitor(user, source, context);
 
         return device;
     }

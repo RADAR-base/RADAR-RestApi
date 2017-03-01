@@ -4,10 +4,12 @@ import java.net.ConnectException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.ServletContext;
-import org.radarcns.avro.restapi.device.Device;
-import org.radarcns.avro.restapi.device.SensorStatus;
-import org.radarcns.avro.restapi.device.Sensors;
-import org.radarcns.avro.restapi.device.Status;
+import org.radarcns.avro.restapi.source.Sensor;
+import org.radarcns.avro.restapi.source.Sensors;
+import org.radarcns.avro.restapi.source.Source;
+import org.radarcns.avro.restapi.source.SourceSummary;
+import org.radarcns.avro.restapi.source.Sources;
+import org.radarcns.avro.restapi.source.States;
 import org.radarcns.dao.mongo.AccelerationDAO;
 import org.radarcns.dao.mongo.BatteryDAO;
 import org.radarcns.dao.mongo.BloodVolumePulseDAO;
@@ -34,55 +36,55 @@ public class Empatica {
      * @return {@code Device} representing an Empatica device
      * @throws ConnectException if the connection with MongoDb is faulty
      *
-     * @see {@link org.radarcns.avro.restapi.device.Device}
+     * @see {@link org.radarcns.avro.restapi.source.Source}
      */
-    public static Device monitor(String user, String source, ServletContext context)
+    public static Source monitor(String user, String source, ServletContext context)
             throws ConnectException {
         long end = (System.currentTimeMillis() / 10000) * 10000;
         long start = end - 60000;
 
-        List<SensorStatus> sensors = new LinkedList<>();
+        List<Sensor> sensors = new LinkedList<>();
 
         double accCount = AccelerationDAO.getInstance().countSamplesByUserSourceWindow(user, source,
                 start, end, context);
         double accPerc = getPercentage(accCount, 32.0);
-        sensors.add(new SensorStatus(Sensors.ACC, getStatus(accPerc), (int)accCount,
+        sensors.add(new Sensor(Sensors.ACC, getStatus(accPerc), (int)accCount,
                 RadarConverter.roundDouble(1.0 - accPerc, 2)));
 
         double batCount = BatteryDAO.getInstance().countSamplesByUserSourceWindow(user, source,
                 start, end, context);
         double batPerc = getPercentage(batCount, 1.0);
-        sensors.add(new SensorStatus(Sensors.BAT, getStatus(batPerc), (int)batCount,
+        sensors.add(new Sensor(Sensors.BAT, getStatus(batPerc), (int)batCount,
                 RadarConverter.roundDouble(1.0 - batPerc, 2)));
 
         double bvpCount = BloodVolumePulseDAO.getInstance().countSamplesByUserSourceWindow(user,
                 source, start, end, context);
         double bvpPerc = getPercentage(bvpCount, 64.0);
-        sensors.add(new SensorStatus(Sensors.BVP, getStatus(bvpPerc), (int)bvpCount,
+        sensors.add(new Sensor(Sensors.BVP, getStatus(bvpPerc), (int)bvpCount,
                 RadarConverter.roundDouble(1.0 - bvpPerc, 2)));
 
         double edaCount = ElectrodermalActivityDAO.getInstance().countSamplesByUserSourceWindow(
                 user, source, start, end, context);
         double edaPerc = getPercentage(edaCount, 4.0);
-        sensors.add(new SensorStatus(Sensors.EDA, getStatus(edaPerc), (int)edaCount,
+        sensors.add(new Sensor(Sensors.EDA, getStatus(edaPerc), (int)edaCount,
                 RadarConverter.roundDouble(1.0 - edaPerc, 2)));
 
         double ibiCount = InterBeatIntervalDAO.getInstance().countSamplesByUserSourceWindow(user,
                 source, start, end, context);
         double ibiPerc = getPercentage(ibiCount, 1.0);
-        sensors.add(new SensorStatus(Sensors.IBI, getStatus(ibiPerc), (int)ibiCount,
+        sensors.add(new Sensor(Sensors.IBI, getStatus(ibiPerc), (int)ibiCount,
                 RadarConverter.roundDouble(1.0 - ibiPerc, 2)));
 
         double hrCount = HeartRateDAO.getInstance().countSamplesByUserSourceWindow(user, source,
                 start, end, context);
         double hrPerc = getPercentage(hrCount, 1.0);
-        sensors.add(new SensorStatus(Sensors.HR, getStatus(hrPerc), (int)hrCount,
+        sensors.add(new Sensor(Sensors.HR, getStatus(hrPerc), (int)hrCount,
                 RadarConverter.roundDouble(1.0 - hrPerc, 2)));
 
         double tempCount = TemperatureDAO.getInstance().countSamplesByUserSourceWindow(user, source,
                 start, end, context);
         double tempPerc = getPercentage(tempCount, 4.0);
-        sensors.add(new SensorStatus(Sensors.TEMP, getStatus(tempPerc), (int)tempCount,
+        sensors.add(new Sensor(Sensors.TEMP, getStatus(tempPerc), (int)tempCount,
                 RadarConverter.roundDouble(1.0 - tempPerc, 2)));
 
         double countMex = accCount + batCount + bvpCount + edaCount + hrCount + ibiCount
@@ -90,8 +92,10 @@ public class Empatica {
         double avgPerc = (accPerc + batPerc + bvpPerc + edaPerc + hrPerc + ibiPerc + tempPerc)
                 / 7.0;
 
-        Device device = new Device("Empatica", getStatus(avgPerc), (int)countMex,
+        SourceSummary sourceState = new SourceSummary(getStatus(avgPerc), (int)countMex,
                 RadarConverter.roundDouble(1.0 - avgPerc, 2), sensors);
+
+        Source device = new Source(source, Sources.Empatica, sourceState);
 
         return device;
     }
@@ -103,7 +107,7 @@ public class Empatica {
      * @param expected expected messages
      * @return the ratio of count over expected
      */
-    private static double getPercentage(double count, double expected) {
+    public static double getPercentage(double count, double expected) {
         return count / expected;
     }
 
@@ -113,19 +117,19 @@ public class Empatica {
      * @param percentage numerical value that has to be converted int Status
      * @return the current {@code Status}
      *
-     * @see {@link org.radarcns.avro.restapi.device.Status}
+     * @see {@link org.radarcns.avro.restapi.source.States}
      */
-    private static Status getStatus(double percentage) {
+    public static States getStatus(double percentage) {
         if (percentage > 0.95) {
-            return Status.FINE;
+            return States.FINE;
         } else if (percentage > 0.80 && percentage <= 0.95) {
-            return Status.OK;
-        } else if (percentage > 0.50 && percentage <= 0.80) {
-            return Status.WARNING;
-        } else if (percentage > 0.0 && percentage <= 0.50) {
-            return Status.BAD;
+            return States.OK;
+        } else if (percentage > 0.0 && percentage <= 0.80) {
+            return States.WARNING;
+        } else if (percentage == 0.0 ) {
+            return States.DISCONNECTED;
         } else {
-            return Status.DISCONNECTED;
+            return States.UNKNOWN;
         }
     }
 }

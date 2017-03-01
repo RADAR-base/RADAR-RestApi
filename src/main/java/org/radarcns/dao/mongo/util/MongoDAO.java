@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.servlet.ServletContext;
 import org.bson.Document;
+import org.radarcns.avro.restapi.source.Source;
+import org.radarcns.avro.restapi.source.Sources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,22 +48,43 @@ public abstract class MongoDAO {
      * @param user is the userID
      * @return all distinct sourceIDs for the given collection, otherwise empty Collection
      */
-    public Collection<String> findAllSoucesByUser(String user, ServletContext context)
+    public Collection<Source> findAllSoucesByUser(String user, ServletContext context)
             throws ConnectException {
         MongoCursor<String> cursor = MongoHelper.findAllSourceByUser(user, getCollection(context));
 
-        ArrayList<String> list = new ArrayList<>();
+        ArrayList<Source> list = new ArrayList<>();
 
         if (!cursor.hasNext()) {
             logger.debug("Empty cursor");
         }
 
         while (cursor.hasNext()) {
-            list.add(cursor.next());
+            list.add(new Source(cursor.next(), getSourceType(), null));
         }
 
         cursor.close();
         return list;
+    }
+
+    /**
+     * Extract the sensor type from the MongoDB collection.
+     *
+     * @return the source type
+     */
+    private Sources getSourceType() {
+        String name = getCollectionName();
+
+        if (name.toLowerCase().contains("empatica")) {
+            return Sources.Empatica;
+        } else if (name.toLowerCase().contains("application")) {
+            return Sources.Android;
+        } else if (name.toLowerCase().contains("pebble")) {
+            return Sources.Pebble;
+        } else if (name.toLowerCase().contains("biovotion")) {
+            return Sources.Biovotion;
+        }
+
+        return Sources.Unknown;
     }
 
     /**
