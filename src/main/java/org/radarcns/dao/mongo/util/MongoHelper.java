@@ -31,6 +31,10 @@ public class MongoHelper {
     private static final String START = "start";
     private static final String END = "end";
 
+    public static final String SOURCE_TYPE = "sourceType";
+
+    public static final String DEVICE_CATALOG = "radar_device_catalog";
+
     /**
      * Enumerate all available statistical values.
      */
@@ -58,7 +62,7 @@ public class MongoHelper {
      * @param end is the end time of the queried timewindow
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents between start and end for the given User,
-     *      Source and MongoDB collection
+     *      SourceDefinition and MongoDB collection
      */
     protected static MongoCursor<Document> findDocumentByUserSourceWindow(String user,
             String source, Long start, Long end, MongoCollection<Document> collection) {
@@ -80,7 +84,7 @@ public class MongoHelper {
      * @param sortBy states the way in which documents have to be sorted. It is optional
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents for the given User,Source and MongoDB
+     * @return a MongoDB cursor containing all documents for the given User,SourceDefinition and MongoDB
      *      collection
      */
     protected static MongoCursor<Document> findDocumentByUserSource(String user, String source,
@@ -96,6 +100,38 @@ public class MongoHelper {
             result = collection.find(
                 Filters.and(
                     eq(USER, user),
+                    eq(SOURCE, source))
+            ).sort(new BasicDBObject(sortBy, order));
+        }
+
+        if (limit != null) {
+            result = result.limit(limit);
+        }
+
+        return result.iterator();
+    }
+
+    /**
+     * Finds all Documents belonging to the given source.
+     *
+     * @param source is the sourceID
+     * @param sortBy states the way in which documents have to be sorted. It is optional
+     * @param limit is the number of document that will be retrieved
+     * @param collection is the MongoDB that will be queried
+     * @return a MongoDB cursor containing all documents for the given SourceDefinition and MongoDB
+     *      collection
+     */
+    protected static MongoCursor<Document> findDocumentBySource(String source,
+            String sortBy, int order, Integer limit, MongoCollection<Document> collection) {
+        FindIterable<Document> result;
+
+        if (sortBy == null) {
+            result = collection.find(
+                Filters.and(
+                    eq(SOURCE, source)));
+        } else {
+            result = collection.find(
+                Filters.and(
                     eq(SOURCE, source))
             ).sort(new BasicDBObject(sortBy, order));
         }
@@ -152,5 +188,36 @@ public class MongoHelper {
         MongoDatabase database = mongoClient.getDatabase(Properties.getInstance().getMongoDbName());
 
         return database.getCollection(collection);
+    }
+
+    /**
+     * Returns the needed MongoDB collection.
+     *
+     * @param client the MongoDB client
+     * @param collection is the name of the returned connection
+     * @return the MongoDB collection named collection.
+     */
+    public static MongoCollection<Document> getCollection(MongoClient client, String collection) {
+        MongoDatabase database = client.getDatabase(Properties.getInstance().getMongoDbName());
+
+        return database.getCollection(collection);
+    }
+
+    /**
+     * Returns the MongoDB client initialised upon start-up.
+     *
+     * @param context the application context maintaining the MongoDB client
+     * @return If the MongoDB client is null, it first tries to establish a new connection and then
+     *          return.
+     * @throws ConnectException if MongoDB cannot be reached
+     */
+    public static MongoClient getClient(ServletContext context) throws ConnectException {
+        MongoDBContextListener.testConnection(context);
+
+        if (context.getAttribute(MONGO_CLIENT) == null) {
+            MongoDBContextListener.recoverOrThrow(context);
+        }
+
+        return (MongoClient) context.getAttribute(MONGO_CLIENT);
     }
 }

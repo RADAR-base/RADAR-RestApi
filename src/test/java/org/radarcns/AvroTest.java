@@ -15,7 +15,7 @@ import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.Unit;
 import org.radarcns.avro.restapi.sensor.Acceleration;
-import org.radarcns.integrationtest.collector.ExpectedValue;
+import org.radarcns.old.collector.ExpectedValue;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
 

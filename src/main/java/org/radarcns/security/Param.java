@@ -5,6 +5,9 @@ package org.radarcns.security;
  */
 public class Param {
 
+    private static final String USER = "user";
+    private static final String SOURCE = "source";
+
     public static boolean isNullOrEmpty(String input) {
         return input == null || input.trim().isEmpty();
     }
@@ -45,4 +48,38 @@ public class Param {
             throw new IllegalArgumentException("Parameters do not respect REGEXs");
         }
     }
+
+    /**
+     * Given a userID, it checks if they are valid input or not.
+     **/
+    public static void isValidUser(String user) {
+        validOrThrow(user, USER);
+    }
+
+    /**
+     * Given a sourceID, it checks if they are valid input or not.
+     **/
+    public static void isValidSource(String source) {
+        validOrThrow(source, SOURCE);
+    }
+
+    /**
+     * Checks against the REGEX whether the input parameter is valid or not.
+     **/
+    public static void validOrThrow(String value, String param) throws IllegalArgumentException {
+        boolean test;
+
+        switch (param) {
+            case USER:      test = isUser(value);
+                            break;
+            case SOURCE:    test = isSource(value);
+                            break;
+            default: throw new UnsupportedOperationException(param + " is not supported yet.");
+        }
+
+        if (!test) {
+            throw new IllegalArgumentException(param + "parameter does not respect REGEXs");
+        }
+    }
+
 }

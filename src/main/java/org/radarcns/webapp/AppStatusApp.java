@@ -1,5 +1,6 @@
 package org.radarcns.webapp;
 
+import com.mongodb.MongoClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.dao.mongo.AndroidDAO;
+import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.security.Param;
 import org.radarcns.util.ResponseHandler;
 import org.slf4j.Logger;
@@ -100,7 +102,9 @@ public class AppStatusApp {
             throws ConnectException {
         Param.isValidInput(user, source);
 
-        Application application = AndroidDAO.getInstance().getStatus(user, source, context);
+        MongoClient client = MongoHelper.getClient(context);
+
+        Application application = AndroidDAO.getInstance().getStatus(user, source, client);
 
         return application;
     }

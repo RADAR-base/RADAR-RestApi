@@ -64,7 +64,7 @@ public class MongoDBContextListener implements ServletContextListener {
      * @param credentials username, password and host
      * @return {@code true} if the connection can be established false otherwise
      */
-    private boolean checkMongoConnection(MongoClient mongoClient,
+    public static boolean checkMongoConnection(MongoClient mongoClient,
             List<MongoCredential> credentials) {
         Boolean flag = true;
         try {

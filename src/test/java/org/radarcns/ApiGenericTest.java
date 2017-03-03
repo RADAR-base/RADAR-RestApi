@@ -2,6 +2,7 @@ package org.radarcns;
 
 import static org.junit.Assert.assertEquals;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -15,7 +16,6 @@ import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Generic Test to consume REST API function is JSON.
@@ -25,7 +25,7 @@ public class ApiGenericTest {
     private static final Logger logger = LoggerFactory.getLogger(ApiGenericTest.class);
 
     @SuppressWarnings({"checkstyle:AbbreviationAsWordInName","checkstyle:MemberName"})
-    private final boolean TEST = false;
+    private final boolean TEST = true;
 
     @SuppressWarnings({"checkstyle:AbbreviationAsWordInName","checkstyle:MemberName"})
     private final String USER_AGENT = "Mozilla/5.0";
@@ -42,11 +42,11 @@ public class ApiGenericTest {
         if (TEST) {
             //assertEquals(200, requestAvro("http://52.210.59.174:8080/radar/api/Acc/AVRO/count/a/b"));
 
-            //assertEquals(200, request(SERVER + PATH + "User/GetAllPatients"));
+            assertEquals(200, request(SERVER + PATH + "User/GetAllPatients"));
             //assertEquals(200, request(SERVER + PATH + "User/GetAllSources/KCLTest0"));
             //assertEquals(200, request(SERVER + PATH + "Android/Status/UserID_0/SourceID_0"));
-            //assertEquals(200, request(SERVER + PATH + "Device/Status/KCLTest0/00:07:80:1F:52:F3"));
-            assertEquals(200, request(SERVER + PATH + "Android/Status/KCLTest0/aee3b9f7-db8b-4a9c-9198-2e1906d90a9e"));
+            //assertEquals(200, request(SERVER + PATH + "SourceDefinition/Status/KCLTest0/00:07:80:1F:52:F3"));
+            //assertEquals(200, request(SERVER + PATH + "Android/Status/KCLTest0/aee3b9f7-db8b-4a9c-9198-2e1906d90a9e"));
             //assertEquals(200, request(SERVER + PATH + "Acc/RT/count/UserID_0/SourceID_0"));
         }
     }

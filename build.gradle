@@ -37,6 +37,8 @@ ext.tomcat = '8.0.37'
 
 configurations {
   codacy
+  integrationTestCompile.extendsFrom testCompile
+  integrationTestRuntime.extendsFrom testRuntime
   provided
   compile.extendsFrom provided
 }
@@ -117,27 +119,6 @@ pmdTest {
   ruleSetFiles = files("config/pmd/test_ruleset.xml")
 }
 
-jacocoTestReport {
-  reports {
-    xml.enabled true
-    csv.enabled false
-    html.enabled false
-  }
-}
-
-task downloadDependencies(type: Exec) {
-  configurations.testRuntime.files
-  configurations.codacy.files
-  configurations.jacocoAnt.files
-  commandLine 'echo', 'Downloaded all dependencies'
-}
-
-task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
-  main = 'com.codacy.CodacyCoverageReporter'
-  classpath = configurations.codacy
-  args = ['-l', 'Java', '-r', "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"]
-}
-
 //---------------------------------------------------------------------------//
 // Build system metadata                                                     //
 //---------------------------------------------------------------------------//
@@ -152,9 +133,62 @@ task wrapper(type: Wrapper) {
   gradleVersion = '3.0'
 }
 
+sourceSets {
+  integrationTest {
+    java {
+      compileClasspath += main.output
+      runtimeClasspath += main.output
+    }
+    resources {
+      srcDir 'src/integrationTest/resources'
+    }
+  }
+}
+
 test {
   testLogging {
     // Show that tests are run in the command-line output
     events 'passed'
   }
+}
+
+def runDocker = false
+task integrationTest(type: Test) {
+  description = "Run integration tests (located in src/integrationTest/...)."
+
+  testClassesDir = sourceSets.integrationTest.output.classesDir
+  classpath = sourceSets.integrationTest.runtimeClasspath
+
+  // This is not needed, but I like to see which tests have run
+  testLogging {
+    events "passed", "skipped", "failed"
+  }
+}
+
+task createMongDb(type: Exec) {
+  if (runDocker) {
+    println "==> Starting Docker ... "
+    commandLine 'docker-compose', '-f', "${projectDir}/src/integrationTest/docker-compose.yml", 'up', '-d'
+  } else {
+    commandLine 'echo', ''
+  }
+}
+
+task deleteMongoDb(type: Exec) {
+  if (runDocker) {
+    commandLine 'docker-compose', '-f', "${projectDir}/src/integrationTest/docker-compose.yml", 'down'
+    println "==> Stopping Docker ... "
+    runDocker = false
+  } else {
+    commandLine 'echo', ''
+  }
+}
+
+integrationTest.doFirst {
+  runDocker = true
+  tasks.createMongDb.execute()
+}
+
+integrationTest.finalizedBy {
+  tasks.deleteMongoDb.execute()
 }

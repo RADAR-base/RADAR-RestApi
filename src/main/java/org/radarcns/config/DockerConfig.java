@@ -64,7 +64,7 @@ public class DockerConfig implements RadarConfig {
 
         if (value == null) {
             LOGGER.error("Error loading parameter. {} is null", param);
-            throw new InvalidParameterException(param + "cannot be null");
+            throw new InvalidParameterException(param + " cannot be null");
         }
 
         return value;

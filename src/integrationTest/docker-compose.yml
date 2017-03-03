@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+
+    #----------------------------------------#
+    #            RADAR Hot Storage           #
+    #----------------------------------------#
+    hotstorage:
+      image: radarcns/radar-hotstorage:0.1
+      ports:
+        - "27017:27017"
+        - "28017:28017"
+      environment:
+        RADAR_USER: restapi
+        RADAR_PWD: radar
+        RADAR_DB: hotstorage

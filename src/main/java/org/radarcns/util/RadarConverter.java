@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.sensor.SensorType;
+import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.security.Param;
 import org.slf4j.Logger;
@@ -20,7 +22,7 @@ public class RadarConverter {
     private static Logger logger = LoggerFactory.getLogger(RadarConverter.class);
 
     /**
-     * Convert java Date to ISO8601 String.
+     * Converts java Date to ISO8601 String.
      * @param value input {@code Date} that has to be converted
      * @return a {@code String} representing a date in ISO8601 format
      * @see <a href="http://www.iso.org/iso/home/standards/iso8601.htm>ISO8601 specification</a>
@@ -34,7 +36,7 @@ public class RadarConverter {
     }
 
     /**
-     * Convert ISO8601 {@code String} to java {@code Date}.
+     * Converts ISO8601 {@code String} to java {@code Date}.
      * @param value input {@code String} formatted in ISO8601
      * @return {@code Date} object according to the given input
      * @see <a href="http://www.iso.org/iso/home/standards/iso8601.htm>ISO8601 specification</a>
@@ -48,43 +50,43 @@ public class RadarConverter {
     }
 
     /**
-     * It converts a {@code MongoHelper.Stat} to {@code DescriptiveStatistic}.
+     * Converts a {@code MongoHelper.Stat} to {@code DescriptiveStatistic}.
      **/
     public static DescriptiveStatistic getDescriptiveStatistic(MongoHelper.Stat stat) {
         switch (stat) {
-            case avg: return DescriptiveStatistic.average;
-            case count: return DescriptiveStatistic.count;
-            case iqr: return DescriptiveStatistic.interquartile_range;
-            case max: return DescriptiveStatistic.maximum;
-            case min: return DescriptiveStatistic.minimum;
-            case sum: return DescriptiveStatistic.sum;
-            case quartile: return DescriptiveStatistic.quartiles;
-            case median: return DescriptiveStatistic.median;
-            default: logger.info("No translation for {}",stat);
-                    return null;
+            case avg: return DescriptiveStatistic.AVERAGE;
+            case count: return DescriptiveStatistic.COUNT;
+            case iqr: return DescriptiveStatistic.INTERQUARTILE_RANGE;
+            case max: return DescriptiveStatistic.MAXIMUM;
+            case min: return DescriptiveStatistic.MINIMUM;
+            case sum: return DescriptiveStatistic.SUM;
+            case quartile: return DescriptiveStatistic.QUARTILES;
+            case median: return DescriptiveStatistic.MEDIAN;
+            default: throw new IllegalArgumentException("MongoHelper.Stat type cannot be"
+                + "converted. " + stat.name() + "is unknown");
         }
     }
 
     /**
-     * It converts a {@code DescriptiveStatistic} to {@code MongoHelper.Stat}.
+     * Converts a {@code DescriptiveStatistic} to {@code MongoHelper.Stat}.
      **/
     public static MongoHelper.Stat getMongoStat(DescriptiveStatistic stat) {
         switch (stat) {
-            case average: return MongoHelper.Stat.avg;
-            case count: return MongoHelper.Stat.count;
-            case interquartile_range: return MongoHelper.Stat.iqr;
-            case maximum: return MongoHelper.Stat.max;
-            case minimum: return MongoHelper.Stat.min;
-            case sum: return MongoHelper.Stat.sum;
-            case quartiles: return MongoHelper.Stat.quartile;
-            case median: return MongoHelper.Stat.median;
-            default: logger.info("No translation for {}",stat);
-                    return null;
+            case AVERAGE: return MongoHelper.Stat.avg;
+            case COUNT: return MongoHelper.Stat.count;
+            case INTERQUARTILE_RANGE: return MongoHelper.Stat.iqr;
+            case MAXIMUM: return MongoHelper.Stat.max;
+            case MINIMUM: return MongoHelper.Stat.min;
+            case SUM: return MongoHelper.Stat.sum;
+            case QUARTILES: return MongoHelper.Stat.quartile;
+            case MEDIAN: return MongoHelper.Stat.median;
+            default: throw new IllegalArgumentException("DescriptiveStatistic type cannot be"
+                    + "converted. " + stat.name() + "is unknown");
         }
     }
 
     /**
-     * It rounds a double input.
+     * Rounds a double input.
      * @param value input
      * @param places the required decimal places precision
      **/
@@ -100,7 +102,7 @@ public class RadarConverter {
     }
 
     /**
-     * It converts the input String in Server Status.
+     * Converts the input String in Server Status.
      **/
     public static ServerStatus getServerStatus(String value) {
         if (Param.isNullOrEmpty(value)) {
@@ -118,6 +120,36 @@ public class RadarConverter {
             logger.warn("Unsupported ServerStatus. Value is {}", value);
             return ServerStatus.UNKNOWN;
         }
+    }
+
+    /**
+     * Converts the SensorType to the related sensor name used to convert AVRO to JSON.
+     **/
+    public static String getSensorName(SensorType sensor) {
+        switch (sensor) {
+            case ACC: return "acceleration";
+            case BAT: return "battery";
+            case BVP: return "blood_volume_pulse";
+            case EDA: return "electrodermal_activity";
+            case HR: return "heart_rate";
+            case IBI: return "inter_beat_interval";
+            case TEMP: return "temperature";
+            default: throw new IllegalArgumentException("Sensor type cannot be converted. "
+                    + sensor.name() + "is unknown");
+        }
+    }
+
+    /**
+     * Converts a String to the related source type.
+     **/
+    public static SourceType getSourceType(String value) {
+        for (SourceType source : SourceType.values()) {
+            if (source.name().toLowerCase().equals(value.toLowerCase())) {
+                return source;
+            }
+        }
+
+        throw new IllegalArgumentException(value + " cannot be converted to SourceDefinition type");
     }
 
 }
