@@ -1,13 +1,13 @@
 package org.radarcns.old.collector;
 
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.average;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.count;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.interquartile_range;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.maximum;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.median;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.minimum;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.quartiles;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.sum;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.AVERAGE;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MAXIMUM;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MEDIAN;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MINIMUM;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.SUM;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +24,7 @@ import org.radarcns.avro.restapi.dataset.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.Unit;
+import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.sensor.Acceleration;
 import org.radarcns.avro.restapi.sensor.Battery;
 import org.radarcns.avro.restapi.sensor.BloodVolumePulse;
@@ -136,7 +136,7 @@ public abstract class ExpectedValue<V> {
             if (config.getRestCall().contains("/Acc/")) {
                 Object content;
 
-                if (statistic.name().equals(quartiles.name())) {
+                if (statistic.name().equals(QUARTILES.name())) {
                     List<List<Double>> statValues = (List<List<Double>>) getStat(statistic,
                             dac.getCollectors());
                     content = new Acceleration(getQuartile(statValues.get(0)),
@@ -175,37 +175,37 @@ public abstract class ExpectedValue<V> {
             Object content = getStat(statistic, dac);
 
             if (config.getRestCall().contains("/B/")) {
-                if (statistic.name().equals(quartiles.name())) {
+                if (statistic.name().equals(QUARTILES.name())) {
                     content = new Battery(getQuartile((List<Double>) content));
                 } else {
                     content = new Battery(content);
                 }
             } else if (config.getRestCall().contains("/BVP/")) {
-                if (statistic.name().equals(quartiles.name())) {
+                if (statistic.name().equals(QUARTILES.name())) {
                     content = new BloodVolumePulse(getQuartile((List<Double>) content));
                 } else {
                     content = new BloodVolumePulse(content);
                 }
             } else if (config.getRestCall().contains("/EDA/")) {
-                if (statistic.name().equals(quartiles.name())) {
+                if (statistic.name().equals(QUARTILES.name())) {
                     content = new ElectroDermalActivity(getQuartile((List<Double>) content));
                 } else {
                     content = new ElectroDermalActivity(content);
                 }
             } else if (config.getRestCall().contains("/HR/")) {
-                if (statistic.name().equals(quartiles.name())) {
+                if (statistic.name().equals(QUARTILES.name())) {
                     content = new HeartRate(getQuartile((List<Double>) content));
                 } else {
                     content = new HeartRate(content);
                 }
             } else if (config.getRestCall().contains("/IBI/")) {
-                if (statistic.name().equals(quartiles.name())) {
+                if (statistic.name().equals(QUARTILES.name())) {
                     content = new InterBeatInterval(getQuartile((List<Double>) content));
                 } else {
                     content = new InterBeatInterval(content);
                 }
             } else if (config.getRestCall().contains("/T/")) {
-                if (statistic.name().equals(quartiles.name())) {
+                if (statistic.name().equals(QUARTILES.name())) {
                     content = new Temperature(getQuartile((List<Double>) content));
                 } else {
                     content = new Temperature(content);
@@ -244,25 +244,25 @@ public abstract class ExpectedValue<V> {
         List<List<Double>> quartileList = new ArrayList<>(len);
 
         for (DoubleValueCollector collector : collectors) {
-            minList.add((Double) getStat(minimum, collector));
-            maxList.add((Double) getStat(maximum, collector));
-            sumList.add((Double) getStat(sum, collector));
-            countList.add((Double) getStat(count, collector));
-            avgList.add((Double) getStat(average, collector));
-            iqrList.add((Double) getStat(interquartile_range, collector));
-            quartileList.add((List<Double>) getStat(quartiles, collector));
-            medList.add((Double) getStat(median, collector));
+            minList.add((Double) getStat(MINIMUM, collector));
+            maxList.add((Double) getStat(MAXIMUM, collector));
+            sumList.add((Double) getStat(SUM, collector));
+            countList.add((Double) getStat(COUNT, collector));
+            avgList.add((Double) getStat(AVERAGE, collector));
+            iqrList.add((Double) getStat(INTERQUARTILE_RANGE, collector));
+            quartileList.add((List<Double>) getStat(QUARTILES, collector));
+            medList.add((Double) getStat(MEDIAN, collector));
         }
 
         switch (statistic) {
-            case average: return avgList;
-            case count: return countList;
-            case interquartile_range: return iqrList;
-            case maximum: return maxList;
-            case median: return medList;
-            case minimum: return minList;
-            case quartiles: return quartileList;
-            case sum: return sumList;
+            case AVERAGE: return avgList;
+            case COUNT: return countList;
+            case INTERQUARTILE_RANGE: return iqrList;
+            case MAXIMUM: return maxList;
+            case MEDIAN: return medList;
+            case MINIMUM: return minList;
+            case QUARTILES: return quartileList;
+            case SUM: return sumList;
             default: throw new IllegalArgumentException(
                 statistic.toString() + " is not supported");
         }
@@ -280,14 +280,14 @@ public abstract class ExpectedValue<V> {
             DoubleValueCollector collector) {
 
         switch (statistic) {
-            case average: return collector.getAvg();
-            case count: return collector.getCount();
-            case interquartile_range: return collector.getIqr();
-            case maximum: return collector.getMax();
-            case median: return collector.getQuartile().get(1);
-            case minimum: return collector.getMin();
-            case quartiles: return collector.getQuartile();
-            case sum: return collector.getSum();
+            case AVERAGE: return collector.getAvg();
+            case COUNT: return collector.getCount();
+            case INTERQUARTILE_RANGE: return collector.getIqr();
+            case MAXIMUM: return collector.getMax();
+            case MEDIAN: return collector.getQuartile().get(1);
+            case MINIMUM: return collector.getMin();
+            case QUARTILES: return collector.getQuartile();
+            case SUM: return collector.getSum();
             default: throw new IllegalArgumentException(
                 statistic.toString() + " is not supported");
         }
@@ -313,19 +313,19 @@ public abstract class ExpectedValue<V> {
         Unit unit;
 
         if (config.getRestCall().contains("/Acc/")) {
-            unit = Unit.g;
+            unit = Unit.G;
         } else if (config.getRestCall().contains("/B/")) {
-            unit = Unit.percentage;
+            unit = Unit.PERCENTAGE;
         } else if (config.getRestCall().contains("/BVP/")) {
-            unit = Unit.nW;
+            unit = Unit.NW;
         } else if (config.getRestCall().contains("/EDA/")) {
-            unit = Unit.microsiemens;
+            unit = Unit.MICROSIEMENS;
         } else if (config.getRestCall().contains("/HR/")) {
-            unit = Unit.hz;
+            unit = Unit.HZ;
         } else if (config.getRestCall().contains("/IBI/")) {
-            unit = Unit.sec;
+            unit = Unit.SEC;
         } else if (config.getRestCall().contains("/T/")) {
-            unit = Unit.celsius;
+            unit = Unit.CELSIUS;
         } else {
             throw new IllegalArgumentException(config.getRestCall()
                 + " is not a supported test case");
@@ -481,7 +481,7 @@ public abstract class ExpectedValue<V> {
                 Acceleration accA = (Acceleration) valueA;
                 Acceleration accB = (Acceleration) valueB;
                 if (header.getDescriptiveStatistic().name().equals(
-                        DescriptiveStatistic.quartiles.name())) {
+                        DescriptiveStatistic.QUARTILES.name())) {
                     if (!( compareQuartiles((Quartiles) accA.getX(), (Quartiles) accB.getX(),
                             tolerance) && compareQuartiles((Quartiles) accA.getY(),
                             (Quartiles) accB.getY(), tolerance) && compareQuartiles(
@@ -525,7 +525,7 @@ public abstract class ExpectedValue<V> {
                     || (valueA.getSchema().getName().equals("Temperature")
                     && valueB.getSchema().getName().equals("Temperature"))) {
                 if (header.getDescriptiveStatistic().name().equals(
-                        DescriptiveStatistic.quartiles.name())) {
+                        DescriptiveStatistic.QUARTILES.name())) {
                     Quartiles quartilesA = (Quartiles) valueA.get(
                             valueA.getSchema().getField("value").pos());
                     Quartiles quartilesB = (Quartiles) valueB.get(

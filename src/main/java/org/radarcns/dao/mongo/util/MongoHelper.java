@@ -26,11 +26,11 @@ public class MongoHelper {
 
     //private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
 
-    private static final String USER = "user";
-    private static final String SOURCE = "source";
-    private static final String START = "start";
-    private static final String END = "end";
-
+    public static final String ID = "_id";
+    public static final String USER = "user";
+    public static final String SOURCE = "source";
+    public static final String START = "start";
+    public static final String END = "end";
     public static final String SOURCE_TYPE = "sourceType";
 
     public static final String DEVICE_CATALOG = "radar_device_catalog";
@@ -139,7 +139,37 @@ public class MongoHelper {
         if (limit != null) {
             result = result.limit(limit);
         }
+        return result.iterator();
+    }
 
+    /**
+     * Finds document with the given ID.
+     *
+     * @param id Document _id
+     * @param sortBy states the way in which documents have to be sorted. It is optional
+     * @param limit is the number of document that will be retrieved
+     * @param collection is the MongoDB that will be queried
+     * @return a MongoDB cursor containing all documents for the given SourceDefinition and MongoDB
+     *      collection
+     */
+    protected static MongoCursor<Document> findDocumentById(String id, String sortBy, int order,
+            Integer limit, MongoCollection<Document> collection) {
+        FindIterable<Document> result;
+
+        if (sortBy == null) {
+            result = collection.find(
+                Filters.and(
+                    eq(ID, id)));
+        } else {
+            result = collection.find(
+                Filters.and(
+                    eq(ID, id))
+            ).sort(new BasicDBObject(sortBy, order));
+        }
+
+        if (limit != null) {
+            result = result.limit(limit);
+        }
         return result.iterator();
     }
 

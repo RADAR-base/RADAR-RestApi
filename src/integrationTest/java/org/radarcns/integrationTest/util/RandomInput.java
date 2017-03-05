@@ -1,12 +1,17 @@
 package org.radarcns.integrationTest.util;
 
+import static org.radarcns.dao.mongo.AndroidDAO.RECORD_COLLECTION;
+import static org.radarcns.dao.mongo.AndroidDAO.STATUS_COLLECTION;
+import static org.radarcns.dao.mongo.AndroidDAO.UPTIME_COLLECTION;
+
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections.map.HashedMap;
 import org.bson.Document;
+import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.sensor.SensorType;
@@ -22,8 +27,11 @@ public class RandomInput {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RandomInput.class);
 
-    private static final Map<SourceType, Dataset> datesets = new HashMap<>();
-    private static final Map<SourceType, List<Document>> documents = new HashMap<>();
+    public static final String DATASET = "dataset";
+    public static final String DOCUMENTS = "documents";
+
+    private static Dataset dataset = null;
+    private static List<Document> documents = null;
 
     private static void randomDoubleValue(String user, String source,
             SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
@@ -40,8 +48,23 @@ public class RandomInput {
                     ThreadLocalRandom.current().nextInt(1,12));
         }
 
-        datesets.put(sourceType, instance.getDataset(stat, sourceType, sensorType));
-        documents.put(sourceType, instance.getDocuments());
+        dataset = instance.getDataset(stat, sourceType, sensorType);
+        documents = instance.getDocuments();
+    }
+
+    public static Map<String, Object> getDatasetAndDocumentsRandom(String user, String source,
+        SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
+        throws InstantiationException, IllegalAccessException {
+        switch (sourceType) {
+            case ANDROID: break;
+            case BIOVOTION: break;
+            case EMPATICA: return getBoth(user, source, sourceType, sensorType, stat,samples);
+            case PEBBLE: break;
+            default: break;
+        }
+
+        throw new UnsupportedOperationException(sourceType.name() + " is not"
+            + " currently supported.");
     }
 
     public static Dataset getDatasetRandom(String user, String source,
@@ -50,7 +73,7 @@ public class RandomInput {
         switch (sourceType) {
             case ANDROID: break;
             case BIOVOTION: break;
-            case EMPATICA: return getDataset(user, source, sourceType, sensorType, stat, samples);
+            case EMPATICA: getDataset(user, source, sourceType, sensorType, stat,samples);
             case PEBBLE: break;
             default: break;
         }
@@ -77,21 +100,84 @@ public class RandomInput {
     private static Dataset getDataset(String user, String source,
             SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
             throws InstantiationException, IllegalAccessException {
-        if (datesets.get(sourceType) == null) {
-            randomDoubleValue(user, source, sourceType, sensorType, stat, samples);
-        }
-
-        return datesets.get(sourceType);
+        randomDoubleValue(user, source, sourceType, sensorType, stat, samples);
+        return dataset;
     }
 
     private static List<Document> getDocument(String user, String source,
             SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
             throws InstantiationException, IllegalAccessException {
-        if (documents.get(sourceType) == null) {
-            randomDoubleValue(user, source, sourceType, sensorType, stat, samples);
-        }
+        randomDoubleValue(user, source, sourceType, sensorType, stat, samples);
 
-        return documents.get(sourceType);
+        return documents;
+    }
+
+    private static Map<String, Object> getBoth(String user, String source,
+        SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
+        throws InstantiationException, IllegalAccessException {
+        randomDoubleValue(user, source, sourceType, sensorType, stat, samples);
+
+        Map<String, Object> map = new HashedMap();
+        map.put(DATASET, dataset);
+        map.put(DOCUMENTS, documents);
+        return map;
+    }
+
+    public static Map<String, Document> getRandomApplicationStatus(String user, String source) {
+        String ipAdress = getRandomIp();
+        ServerStatus serverStatus = ServerStatus.values()[
+                ThreadLocalRandom.current().nextInt(0, ServerStatus.values().length)];
+        Double uptime = ThreadLocalRandom.current().nextDouble();
+        int recordsCached = ThreadLocalRandom.current().nextInt();
+        int recordsSent = ThreadLocalRandom.current().nextInt();
+        int recordsUnsent = ThreadLocalRandom.current().nextInt();
+
+        return getRandomApplicationStatus(user, source, ipAdress, serverStatus, uptime,
+                recordsCached, recordsSent, recordsUnsent);
+    }
+
+    public static Map<String, Document> getRandomApplicationStatus(String user, String source,
+            String ipAddress, ServerStatus serverStatus, Double uptime, int recordsCached,
+            int recordsSent, int recordsUnsent) {
+        String id = user + "-" + source;
+
+        Document uptimeDoc = new Document("_id", id)
+            .append("user", user)
+            .append("source", source)
+            .append("applicationUptime", uptime);
+
+        Document statusDoc = new Document("_id", id)
+            .append("user", user)
+            .append("source", source)
+            .append("clientIP", ipAddress)
+            .append("serverStatus", serverStatus.toString());
+
+        Document recordsDoc = new Document("_id", id)
+            .append("user", user)
+            .append("source", source)
+            .append("recordsCached", recordsCached)
+            .append("recordsSent", recordsSent)
+            .append("recordsUnsent", recordsUnsent);
+
+        Map<String, Document> documents = new HashedMap();
+        documents.put(STATUS_COLLECTION, statusDoc);
+        documents.put(RECORD_COLLECTION, recordsDoc);
+        documents.put(UPTIME_COLLECTION, uptimeDoc);
+        return documents;
+    }
+
+    public static String getRandomIp() {
+        long ip = ThreadLocalRandom.current().nextLong();
+        StringBuilder result = new StringBuilder(15);
+
+        for (int i = 0; i < 4; i++) {
+            result.insert(0,Long.toString(ip & 0xff));
+            if (i < 3) {
+                result.insert(0,'.');
+            }
+            ip = ip >> 8;
+        }
+        return result.toString();
     }
 
 }

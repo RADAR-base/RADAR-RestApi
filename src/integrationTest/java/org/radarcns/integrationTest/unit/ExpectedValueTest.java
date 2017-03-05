@@ -5,8 +5,8 @@ import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HR;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
 import org.bson.Document;
 import org.junit.Test;
 import org.radarcns.avro.restapi.dataset.Dataset;
@@ -36,17 +36,14 @@ public class ExpectedValueTest {
         Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
             Properties.NAME_FILE).getPath());
 
-        List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, EMPATICA, HR, COUNT, SAMPLES);
-        Dataset dataset = RandomInput.getDatasetRandom(USER, SOURCE, EMPATICA, HR, COUNT, SAMPLES);
+        Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(USER, SOURCE,
+            EMPATICA, HR, COUNT, SAMPLES);
 
-//        ObjectMapper mapper = new ObjectMapper();
-//        Object json = mapper.readValue(dataset.toString(), Object.class);
-//        String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-//        logger.info(indented);
+        List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
+        Dataset dataset = (Dataset) map.get(RandomInput.DATASET);
 
         int count = 0;
         for (Document doc : docs) {
-//            logger.info(doc.toJson());
             count += doc.getDouble("count").intValue();
         }
         assertEquals(SAMPLES, count);

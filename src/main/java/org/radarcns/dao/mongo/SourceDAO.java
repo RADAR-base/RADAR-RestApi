@@ -40,7 +40,7 @@ public class SourceDAO {
             }
 
             if (type != null) {
-                MongoDAO.witeSourceType(source, type, client);
+                MongoDAO.writeSourceType(source, type, client);
             }
         }
 

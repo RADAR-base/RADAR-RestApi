@@ -4,6 +4,8 @@ import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import org.bson.Document;
 import org.radarcns.avro.restapi.app.Application;
@@ -22,6 +24,10 @@ public class AndroidDAO {
 
     private final Logger logger = LoggerFactory.getLogger(AndroidDAO.class);
 
+    public static final String STATUS_COLLECTION = "application_server_status";
+    public static final String UPTIME_COLLECTION = "application_uptime";
+    public static final String RECORD_COLLECTION = "application_record_counts";
+
     private static final AndroidDAO instance = new AndroidDAO();
 
     public static AndroidDAO getInstance() {
@@ -39,7 +45,7 @@ public class AndroidDAO {
 
         @Override
         public String getAndroidCollection() {
-            return "application_server_status";
+            return STATUS_COLLECTION;
         }
     };
 
@@ -53,7 +59,7 @@ public class AndroidDAO {
 
         @Override
         public String getAndroidCollection() {
-            return "application_uptime";
+            return UPTIME_COLLECTION;
         }
     };
 
@@ -69,7 +75,7 @@ public class AndroidDAO {
 
         @Override
         public String getAndroidCollection() {
-            return "application_record_counts";
+            return RECORD_COLLECTION;
         }
     };
 
@@ -151,5 +157,17 @@ public class AndroidDAO {
         }
 
         return type;
+    }
+
+    /**
+     * Returns all mongoDb collections used by this DAO.
+     * @return list of String
+     */
+    public List<String> getCollections() {
+        List<String> list = new LinkedList<>();
+        list.add(server.getAndroidCollection());
+        list.add(uptime.getAndroidCollection());
+        list.add(recordCounter.getAndroidCollection());
+        return list;
     }
 }

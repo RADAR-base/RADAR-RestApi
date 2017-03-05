@@ -96,9 +96,7 @@ public abstract class MongoDAO {
 
             if (!cursor.hasNext()) {
                 logger.debug("Empty cursor");
-            }
-
-            while (cursor.hasNext()) {
+            } else {
                 type = getSourceType(collection);
             }
 
@@ -138,7 +136,7 @@ public abstract class MongoDAO {
             throws ConnectException {
         SourceType type = null;
 
-        MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(source, null,
+        MongoCursor<Document> cursor = MongoHelper.findDocumentById(source, null,
                 0, 1, MongoHelper.getCollection(client, MongoHelper.DEVICE_CATALOG));
 
         if (!cursor.hasNext()) {
@@ -166,13 +164,9 @@ public abstract class MongoDAO {
      * @throws ConnectException if MongoDB is not available
      * @throws MongoException if something goes wrong with the write
      */
-    public static void witeSourceType(String source, SourceType type, MongoClient client)
+    public static void writeSourceType(String source, SourceType type, MongoClient client)
             throws ConnectException, MongoException {
-
-        MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(source, null,
-                0, 1, MongoHelper.getCollection(client, MongoHelper.DEVICE_CATALOG));
-
-        Document doc = new Document().append("_id", source).append(SOURCE_TYPE, type);
+        Document doc = new Document().append("_id", source).append(SOURCE_TYPE, type.toString());
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 MongoHelper.DEVICE_CATALOG);

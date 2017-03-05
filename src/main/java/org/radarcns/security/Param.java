@@ -5,8 +5,8 @@ package org.radarcns.security;
  */
 public class Param {
 
-    private static final String USER = "user";
-    private static final String SOURCE = "source";
+    public static final String USER = "user";
+    public static final String SOURCE = "source";
 
     public static boolean isNullOrEmpty(String input) {
         return input == null || input.trim().isEmpty();

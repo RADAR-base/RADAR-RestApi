@@ -152,7 +152,6 @@ test {
   }
 }
 
-def runDocker = false
 task integrationTest(type: Test) {
   description = "Run integration tests (located in src/integrationTest/...)."
 
@@ -163,32 +162,4 @@ task integrationTest(type: Test) {
   testLogging {
     events "passed", "skipped", "failed"
   }
-}
-
-task createMongDb(type: Exec) {
-  if (runDocker) {
-    println "==> Starting Docker ... "
-    commandLine 'docker-compose', '-f', "${projectDir}/src/integrationTest/docker-compose.yml", 'up', '-d'
-  } else {
-    commandLine 'echo', ''
-  }
-}
-
-task deleteMongoDb(type: Exec) {
-  if (runDocker) {
-    commandLine 'docker-compose', '-f', "${projectDir}/src/integrationTest/docker-compose.yml", 'down'
-    println "==> Stopping Docker ... "
-    runDocker = false
-  } else {
-    commandLine 'echo', ''
-  }
-}
-
-integrationTest.doFirst {
-  runDocker = true
-  tasks.createMongDb.execute()
-}
-
-integrationTest.finalizedBy {
-  tasks.deleteMongoDb.execute()
 }

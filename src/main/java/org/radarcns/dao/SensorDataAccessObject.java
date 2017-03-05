@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.sensor.Sensor;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.source.Source;
@@ -251,5 +252,13 @@ public class SensorDataAccessObject {
         }
 
         return type;
+    }
+
+    /**
+     * Returns the singleton.
+     * @return the singleton {@code SensorDataAccessObject} instance
+     */
+    public String getCollectionName(SourceType sourceType, SensorType sensorType) {
+        return hooks.get(sensorType).getCollectionName(sourceType);
     }
 }

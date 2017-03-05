@@ -13,7 +13,7 @@ import org.radarcns.avro.restapi.dataset.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.Unit;
+import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.sensor.Acceleration;
 import org.radarcns.old.collector.ExpectedValue;
 import org.radarcns.util.AvroConverter;
@@ -110,7 +110,7 @@ public class AvroTest {
 
         etf = new EffectiveTimeFrame(RadarConverter.getISO8601(start),
                 RadarConverter.getISO8601(endEvent));
-        Header header = new Header(DescriptiveStatistic.quartiles, Unit.hz, etf);
+        Header header = new Header(DescriptiveStatistic.QUARTILES, Unit.HZ, etf);
 
         Dataset hrd = new Dataset(header,list);
 
