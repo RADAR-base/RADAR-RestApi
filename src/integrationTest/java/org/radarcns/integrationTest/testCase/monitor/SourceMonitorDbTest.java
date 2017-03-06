@@ -90,6 +90,7 @@ public class SourceMonitorDbTest {
     }
 
     public void dropAndClose(MongoClient client) {
+        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
         for (SensorType sensorType : definition.getSensorTypes()) {
             Utility.dropCollection(client,

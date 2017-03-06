@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * User web-app. Function set to access users information.
  */
 @Api
-@Path("/User")
+@Path("/user")
 public class UserApp {
 
     private static Logger logger = LoggerFactory.getLogger(UserApp.class);

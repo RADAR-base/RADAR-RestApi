@@ -1,4 +1,4 @@
-package org.radarcns.integrationTest.testCase.dao.sensor;
+package org.radarcns.integrationTest.testCase.webapp;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -8,7 +8,9 @@ import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import java.io.IOException;
 import java.util.List;
+import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
@@ -19,18 +21,21 @@ import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.SensorDataAccessObject;
+import org.radarcns.dao.mongo.AndroidDAO;
 import org.radarcns.dao.mongo.sensor.HeartRateDAO;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integrationTest.util.RandomInput;
 import org.radarcns.integrationTest.util.Utility;
+import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
 
 /**
- * UserDao Test.
+ * Created by francesco on 06/03/2017.
  */
-public class HeartRateDaoTest {
+public class SensorAppTest {
 
-    //private static final Logger logger = LoggerFactory.getLogger(SourceDaoTest.class);
+    private final String SERVER = "http://localhost:8080/";
+    private final String PATH = "radar/api/";
 
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";
@@ -39,7 +44,14 @@ public class HeartRateDaoTest {
     private static final int SAMPLES = 10;
 
     @Test
-    public void valueRTByUserSourceTest() throws Exception {
+    public void getRealtimeTest()
+        throws IOException, IllegalAccessException, InstantiationException {
+        String path = "sensor/avro/realTime/{sensor}/{stat}/{userID}/{sourceID}";
+        path = path.replace("{sensor}", SENSOR_TYPE.name());
+        path = path.replace("{stat}", COUNT.name());
+        path = path.replace("{userID}", USER);
+        path = path.replace("{sourceID}", SOURCE);
+
         Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
             Properties.NAME_FILE).getPath());
 
@@ -52,12 +64,19 @@ public class HeartRateDaoTest {
             COUNT, SAMPLES, false);
 
         collection.insertMany(docs);
-
-        Dataset actual = HeartRateDAO.getInstance().valueRTByUserSource(USER, SOURCE, Unit.HZ,
-                RadarConverter.getMongoStat(COUNT), collection);
 
         Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
-                RadarConverter.getMongoStat(COUNT), Unit.HZ, HeartRate.class);
+            RadarConverter.getMongoStat(COUNT), Unit.HZ, HeartRate.class);
+
+        Dataset actual = null;
+
+        Response response = Utility.makeRequest(SERVER + PATH + path);
+        assertEquals(200, response.code());
+
+        if (response.code() == 200) {
+            actual = AvroConverter.avroByteToAvro(response.body().bytes(),
+                    Dataset.getClassSchema());
+        }
 
         assertEquals(expected, actual);
 
@@ -65,7 +84,14 @@ public class HeartRateDaoTest {
     }
 
     @Test
-    public void valueByUserSourceTest() throws Exception {
+    public void getAllByUserTest()
+        throws IOException, IllegalAccessException, InstantiationException {
+        String path = "sensor/avro/{sensor}/{stat}/{userID}/{sourceID}";
+        path = path.replace("{sensor}", SENSOR_TYPE.name());
+        path = path.replace("{stat}", COUNT.name());
+        path = path.replace("{userID}", USER);
+        path = path.replace("{sourceID}", SOURCE);
+
         Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
             Properties.NAME_FILE).getPath());
 
@@ -79,11 +105,18 @@ public class HeartRateDaoTest {
 
         collection.insertMany(docs);
 
-        Dataset actual = HeartRateDAO.getInstance().valueByUserSource(USER, SOURCE, Unit.HZ,
-            RadarConverter.getMongoStat(COUNT), collection);
+        Dataset expected = Utility.convertDocToDataset(docs, RadarConverter.getMongoStat(COUNT),
+                Unit.HZ, HeartRate.class);
 
-        Dataset expected = Utility.convertDocToDataset(docs,
-            RadarConverter.getMongoStat(COUNT), Unit.HZ, HeartRate.class);
+        Dataset actual = null;
+
+        Response response = Utility.makeRequest(SERVER + PATH + path);
+        assertEquals(200, response.code());
+
+        if (response.code() == 200) {
+            actual = AvroConverter.avroByteToAvro(response.body().bytes(),
+                Dataset.getClassSchema());
+        }
 
         assertEquals(expected, actual);
 
@@ -91,7 +124,14 @@ public class HeartRateDaoTest {
     }
 
     @Test
-    public void valueByUserSourceWindowTest() throws Exception {
+    public void getRealtimeTest200()
+        throws IOException, IllegalAccessException, InstantiationException {
+        String path = "sensor/avro/{sensor}/{stat}/{userID}/{sourceID}/{start}/{end}";
+        path = path.replace("{sensor}", SENSOR_TYPE.name());
+        path = path.replace("{stat}", COUNT.name());
+        path = path.replace("{userID}", USER);
+        path = path.replace("{sourceID}", SOURCE);
+
         Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
             Properties.NAME_FILE).getPath());
 
@@ -112,50 +152,24 @@ public class HeartRateDaoTest {
 
         long start = docs.get(index - 1).getDate(MongoHelper.START).getTime();
         long end = docs.get(index + 1).getDate(MongoHelper.END).getTime();
-
-        Dataset actual = HeartRateDAO.getInstance().valueByUserSourceWindow(USER, SOURCE, Unit.HZ,
-            RadarConverter.getMongoStat(COUNT), start, end, collection);
 
         Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
             RadarConverter.getMongoStat(COUNT), Unit.HZ, HeartRate.class);
 
+        path = path.replace("{start}", String.valueOf(start));
+        path = path.replace("{end}", String.valueOf(end));
+
+        Dataset actual = null;
+
+        Response response = Utility.makeRequest(SERVER + PATH + path);
+        assertEquals(200, response.code());
+
+        if (response.code() == 200) {
+            actual = AvroConverter.avroByteToAvro(response.body().bytes(),
+                Dataset.getClassSchema());
+        }
+
         assertEquals(expected, actual);
-
-        dropAndClose(client);
-    }
-
-    @Test
-    public void countSamplesByUserSourceWindowTest() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
-
-        MongoClient client = Utility.getMongoClient();
-
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-            HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
-
-        List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-            COUNT, SAMPLES, false);
-        while (docs.size() < 6) {
-            docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
-        }
-        collection.insertMany(docs);
-
-        int index = Math.max(3, docs.size() / 2);
-
-        long start = docs.get(index - 1).getDate(MongoHelper.START).getTime();
-        long end = docs.get(index + 1).getDate(MongoHelper.END).getTime();
-
-        double actual = HeartRateDAO.getInstance().countSamplesByUserSourceWindow(
-            USER, SOURCE, start, end, collection);
-
-        double expected = 0;
-        for (Document doc : docs.subList(index - 1, index + 2)) {
-            expected += doc.getDouble("count");
-        }
-
-        assertEquals(expected, actual, 0);
 
         dropAndClose(client);
     }
@@ -168,7 +182,9 @@ public class HeartRateDaoTest {
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         Utility.dropCollection(client,
-                SensorDataAccessObject.getInstance().getCollectionName(SOURCE_TYPE, SENSOR_TYPE));
+            SensorDataAccessObject.getInstance().getCollectionName(SOURCE_TYPE, SENSOR_TYPE));
+        Utility.dropCollection(client, AndroidDAO.getInstance().getCollections());
         client.close();
     }
+
 }

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * Android application status web-app. Function set to access Android app status information.
  */
 @Api
-@Path("/Android")
+@Path("/android")
 public class AppStatusApp {
 
     private static Logger logger = LoggerFactory.getLogger(AppStatusApp.class);
@@ -43,7 +43,7 @@ public class AppStatusApp {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/Status/{userID}/{sourceID}")
+    @Path("/status/{userID}/{sourceID}")
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")
@@ -73,7 +73,7 @@ public class AppStatusApp {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/AVRO/Status/{userID}/{sourceID}")
+    @Path("/avro/status/{userID}/{sourceID}")
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")

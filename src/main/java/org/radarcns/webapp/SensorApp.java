@@ -56,7 +56,7 @@ public class SensorApp {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
                 + "acceleration.avsc value for the required statistic function")})
-    public Response getRealTimeUserJsonAcceleration(
+    public Response getRealTimeUserJson(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("userID") String user,
@@ -88,7 +88,7 @@ public class SensorApp {
             @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
                 + "object containing last seen acceleration.avsc value for the required statistic"
                 + "function")})
-    public Response getRealTimeUserAvroAcceleration(
+    public Response getRealTimeUserAvro(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("userID") String user,
@@ -138,7 +138,7 @@ public class SensorApp {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
                 + "available acceleration.avsc values for the required statistic function")})
-    public Response getAllByUserJsonAcceleration(
+    public Response getAllByUserJson(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("userID") String user,
@@ -169,7 +169,7 @@ public class SensorApp {
             @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
                 + "object containing all available acceleration.avsc values for the required"
                 + "statistic function")})
-    public Response getAllByUserAvroAcceleration(
+    public Response getAllByUserAvro(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("userID") String user,
@@ -221,7 +221,7 @@ public class SensorApp {
             @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
                 + "acceleration.avsc values belonging to the time window [start - end] for the"
                 + "required statistic function")})
-    public Response getByUserForWindowJsonAcceleration(
+    public Response getByUserForWindowJson(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("userID") String user,
@@ -255,7 +255,7 @@ public class SensorApp {
             @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
                 + "object containing all acceleration.avsc values belonging to the time window"
                 + "[start - end] for the required statistic function")})
-    public Response getByUserForWindowAvroAcceleration(
+    public Response getByUserForWindowAvro(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("userID") String user,

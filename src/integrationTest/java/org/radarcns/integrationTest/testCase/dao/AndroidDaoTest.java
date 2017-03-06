@@ -132,6 +132,7 @@ public class AndroidDaoTest {
     }
 
     public void dropAndClose(MongoClient client) {
+        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         Utility.dropCollection(client, AndroidDAO.getInstance().getCollections());
 
         client.close();

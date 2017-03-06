@@ -228,6 +228,23 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 }
 
 //---------------------------------------------------------------------------//
+// Prepare WAR for Integration Test                                          //
+//---------------------------------------------------------------------------//
+task copyWarForIntegration(type: Copy) {
+  from war.archivePath
+  into "${projectDir}/src/integrationTest/image"
+}
+
+task removeWar(type: Delete) {
+  delete "${projectDir}/src/integrationTest/image/${war.getArchiveName()}"
+}
+
+war.dependsOn(removeWar)
+war.finalizedBy copyWarForIntegration
+
+clean.dependsOn(removeWar)
+
+//---------------------------------------------------------------------------//
 // Build system metadata                                                     //
 //---------------------------------------------------------------------------//
 

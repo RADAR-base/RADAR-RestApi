@@ -132,6 +132,7 @@ public class UserDaoTest {
     }
 
     public void dropAndClose(MongoClient client) {
+        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         Utility.dropCollection(client, HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
         Utility.dropCollection(client, AndroidDAO.getInstance().getCollections());
         client.close();

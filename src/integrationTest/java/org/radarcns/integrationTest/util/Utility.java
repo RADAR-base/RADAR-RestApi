@@ -1,12 +1,22 @@
 package org.radarcns.integrationTest.util;
 
+import static org.radarcns.dao.mongo.AndroidDAO.RECORD_COLLECTION;
+import static org.radarcns.dao.mongo.AndroidDAO.STATUS_COLLECTION;
+import static org.radarcns.dao.mongo.AndroidDAO.UPTIME_COLLECTION;
+
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
+import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
@@ -74,6 +84,16 @@ public class Utility {
         }
     }
 
+    /**
+     * Generates a Dataset using the input documents.
+     * @param docs list of Documents that has to be coverted
+     * @param stat filed extracted from the document
+     * @param unit measurement unit useful to generate the dataset's header
+     * @param recordClass class used compute the Item
+     * @return a Dataset rep all required document
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
     public static Dataset convertDocToDataset(List<Document> docs, Stat stat, Unit unit,
             Class<? extends SpecificRecord> recordClass)
         throws IllegalAccessException, InstantiationException {
@@ -98,5 +118,38 @@ public class Utility {
 
         Header header = new Header(RadarConverter.getDescriptiveStatistic(stat), unit, eftHeader);
         return new Dataset(header, itemList);
+    }
+
+    /**
+     * Makes an HTTP request to given URL.
+     * @param url end-point
+     * @return HTTP Response
+     * @throws IOException
+     */
+    public static Response makeRequest(String url) throws IOException {
+        OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .build();
+
+        Request request = new Request.Builder()
+                    .header("User-Agent", "Mozilla/5.0")
+                    .url(url)
+                    .build();
+
+        return client.newCall(request).execute();
+    }
+
+    public static Application convertDocToApplication(Map<String, Document> documents) {
+        return new Application(
+            documents.get(STATUS_COLLECTION).getString("clientIP"),
+            documents.get(UPTIME_COLLECTION).getDouble("applicationUptime"),
+            RadarConverter.getServerStatus(
+                    documents.get(STATUS_COLLECTION).getString("serverStatus")),
+            documents.get(RECORD_COLLECTION).getInteger("recordsCached"),
+            documents.get(RECORD_COLLECTION).getInteger("recordsSent"),
+            documents.get(RECORD_COLLECTION).getInteger("recordsUnsent")
+        );
     }
 }

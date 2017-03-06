@@ -1,7 +1,6 @@
 version: '2'
 
 services:
-
     #----------------------------------------#
     #            RADAR Hot Storage           #
     #----------------------------------------#
@@ -14,3 +13,19 @@ services:
         RADAR_USER: restapi
         RADAR_PWD: radar
         RADAR_DB: hotstorage
+
+    #----------------------------------------#
+    #             RADAR Rest Api             #
+    #----------------------------------------#
+    rest-api:
+      build: image
+      image: radarcns/radar-restapi:0.1
+      depends_on:
+        - hotstorage
+      ports:
+        - "8080:8080"
+      environment:
+        MONGODB_USER: restapi
+        MONGODB_PASS: radar
+        MONGODB_DATABASE: hotstorage
+        MONGODB_HOST: hotstorage:27017

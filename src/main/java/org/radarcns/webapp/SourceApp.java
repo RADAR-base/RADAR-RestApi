@@ -112,6 +112,10 @@ public class SourceApp {
 
         SourceType sourceType = SourceDAO.getSourceType(source, client);
 
+        if (sourceType == null) {
+            return null;
+        }
+
         Source device = Monitors.getInstance().getState(user, source, sourceType, client);
 
         return device;
@@ -193,7 +197,7 @@ public class SourceApp {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/GetAllSources/{userID}")
+    @Path("/getAllSources/{userID}")
     @ApiOperation(
             value = "Return a User value",
             notes = "Return all known sources associated with the give userID")
@@ -219,7 +223,7 @@ public class SourceApp {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/AVRO/GetAllSources/{userID}")
+    @Path("/avro/getAllSources/{userID}")
     @ApiOperation(
             value = "Return a User value",
             notes = "Return all known sources associated with the give userID")
