@@ -132,6 +132,42 @@ pmdTest {
 // Testing                                                                   //
 //---------------------------------------------------------------------------//
 
+tasks.matching {it instanceof Test}.all {
+  def stdout = new LinkedList<String>()
+  beforeTest { TestDescriptor td ->
+    stdout.clear()
+  }
+
+  onOutput { TestDescriptor td, TestOutputEvent toe ->
+    stdout.addAll(toe.getMessage().split('(?m)$'))
+    while (stdout.size() > 100) {
+      stdout.remove()
+    }
+  }
+
+  afterTest { TestDescriptor td, TestResult tr ->
+    if (tr.resultType == TestResult.ResultType.FAILURE) {
+      println()
+      print("${td.className}.${td.name} FAILED")
+      if (stdout.empty) {
+        println(" without any output")
+      } else {
+        println(" with last 100 lines of output:")
+        println('=' * 100)
+        stdout.each { print(it) }
+        println('=' * 100)
+      }
+    }
+  }
+
+  testLogging {
+    showExceptions = true
+    showCauses = true
+    showStackTraces = true
+    exceptionFormat "full"
+  }
+}
+
 sourceSets {
   integrationTest {
     java {
@@ -163,7 +199,7 @@ task integrationTest(type: Test) {
   }
 }
 
-check.dependsOn integrationTestClasses
+check.dependsOn integrationTest
 
 //---------------------------------------------------------------------------//
 // Code coverage and codacy                                                  //

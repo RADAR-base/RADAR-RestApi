@@ -5,6 +5,7 @@ import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HR;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
@@ -62,5 +63,4 @@ public class ExpectedValueTest {
 
         assertEquals(true, ExpectedValue.compareEffectiveTimeFrame(window1, window2));
     }
-
 }
