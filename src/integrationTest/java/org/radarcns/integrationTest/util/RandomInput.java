@@ -16,6 +16,7 @@ import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.integrationTest.aggregator.ExpectedArrayValue;
 import org.radarcns.integrationTest.aggregator.ExpectedDoubleValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +34,8 @@ public class RandomInput {
     private static Dataset dataset = null;
     private static List<Document> documents = null;
 
-    private static void randomDoubleValue(String user, String source,
-            SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
+    private static void randomDoubleValue(String user, String source, SourceType sourceType,
+            SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         ExpectedDoubleValue instance = new ExpectedDoubleValue(user, source);
 
@@ -44,8 +45,41 @@ public class RandomInput {
             instance.add(Utility.getStartTimeWindow(start), start,
                     ThreadLocalRandom.current().nextDouble());
 
-            start += TimeUnit.SECONDS.toMillis(
-                    ThreadLocalRandom.current().nextInt(1,12));
+            if (singleWindow) {
+                start += 1;
+            } else {
+                start += TimeUnit.SECONDS.toMillis(
+                    ThreadLocalRandom.current().nextLong(1, 15));
+            }
+        }
+
+        dataset = instance.getDataset(stat, sourceType, sensorType);
+        documents = instance.getDocuments();
+    }
+
+    private static void randomArrayValue(String user, String source, SourceType sourceType,
+            SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
+            throws InstantiationException, IllegalAccessException {
+        ExpectedArrayValue instance = new ExpectedArrayValue(user, source);
+
+        Long start = new Date().getTime();
+
+        Double[] array;
+        for (int i = 0; i < samples; i++) {
+
+            array = new Double[3];
+            array[0] = ThreadLocalRandom.current().nextDouble();
+            array[1] = ThreadLocalRandom.current().nextDouble();
+            array[2] = ThreadLocalRandom.current().nextDouble();
+
+            instance.add(Utility.getStartTimeWindow(start), start, array);
+
+            if (singleWindow) {
+                start += TimeUnit.SECONDS.toMillis(
+                    ThreadLocalRandom.current().nextInt(1, 12));
+            } else {
+                start += 1;
+            }
         }
 
         dataset = instance.getDataset(stat, sourceType, sensorType);
@@ -53,12 +87,14 @@ public class RandomInput {
     }
 
     public static Map<String, Object> getDatasetAndDocumentsRandom(String user, String source,
-        SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
-        throws InstantiationException, IllegalAccessException {
+            SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples,
+            boolean singleWindow)
+            throws InstantiationException, IllegalAccessException {
         switch (sourceType) {
             case ANDROID: break;
             case BIOVOTION: break;
-            case EMPATICA: return getBoth(user, source, sourceType, sensorType, stat,samples);
+            case EMPATICA: return getBoth(user, source, sourceType, sensorType, stat, samples,
+                    singleWindow);
             case PEBBLE: break;
             default: break;
         }
@@ -67,13 +103,14 @@ public class RandomInput {
             + " currently supported.");
     }
 
-    public static Dataset getDatasetRandom(String user, String source,
-            SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
+    public static Dataset getDatasetRandom(String user, String source, SourceType sourceType,
+            SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         switch (sourceType) {
             case ANDROID: break;
             case BIOVOTION: break;
-            case EMPATICA: getDataset(user, source, sourceType, sensorType, stat,samples);
+            case EMPATICA: getDataset(user, source, sourceType, sensorType, stat, samples,
+                    singleWindow);
             case PEBBLE: break;
             default: break;
         }
@@ -83,12 +120,14 @@ public class RandomInput {
     }
 
     public static List<Document> getDocumentsRandom(String user, String source,
-            SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
+            SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples,
+            boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         switch (sourceType) {
             case ANDROID: break;
             case BIOVOTION: break;
-            case EMPATICA: return getDocument(user, source, sourceType, sensorType, stat, samples);
+            case EMPATICA: return getDocument(user, source, sourceType, sensorType, stat, samples,
+                    singleWindow);
             case PEBBLE: break;
             default: break;
         }
@@ -97,30 +136,40 @@ public class RandomInput {
             + " currently supported.");
     }
 
-    private static Dataset getDataset(String user, String source,
-            SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
+    private static Dataset getDataset(String user, String source, SourceType sourceType,
+            SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
-        randomDoubleValue(user, source, sourceType, sensorType, stat, samples);
+        nextValue(user, source, sourceType, sensorType, stat, samples, singleWindow);
         return dataset;
     }
 
-    private static List<Document> getDocument(String user, String source,
-            SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
+    private static List<Document> getDocument(String user, String source, SourceType sourceType,
+            SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
-        randomDoubleValue(user, source, sourceType, sensorType, stat, samples);
-
+        nextValue(user, source, sourceType, sensorType, stat, samples, singleWindow);
         return documents;
     }
 
-    private static Map<String, Object> getBoth(String user, String source,
-        SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples)
-        throws InstantiationException, IllegalAccessException {
-        randomDoubleValue(user, source, sourceType, sensorType, stat, samples);
+    private static Map<String, Object> getBoth(String user, String source, SourceType sourceType,
+            SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
+            throws InstantiationException, IllegalAccessException {
+        nextValue(user, source, sourceType, sensorType, stat, samples, singleWindow);
 
         Map<String, Object> map = new HashedMap();
         map.put(DATASET, dataset);
         map.put(DOCUMENTS, documents);
         return map;
+    }
+
+    private static void nextValue(String user, String source, SourceType sourceType,
+            SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
+            throws IllegalAccessException, InstantiationException {
+        switch (sensorType) {
+            case ACC: randomArrayValue(user, source, sourceType, sensorType, stat, samples,
+                    singleWindow); break;
+            default: randomDoubleValue(user, source, sourceType, sensorType, stat, samples,
+                    singleWindow);
+        }
     }
 
     public static Map<String, Document> getRandomApplicationStatus(String user, String source) {

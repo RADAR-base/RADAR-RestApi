@@ -2,6 +2,7 @@ package org.radarcns.monitor;
 
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.radarcns.avro.restapi.sensor.Sensor;
@@ -41,9 +42,32 @@ public class SourceMonitor {
      */
     public Source getState(String user, String source, MongoClient client)
             throws ConnectException {
+
         long end = (System.currentTimeMillis() / 10000) * 10000;
         long start = end - 60000;
 
+        System.out.println("Start: " + RadarConverter.getISO8601(new Date(start)));
+        System.out.println("End: " + RadarConverter.getISO8601(new Date(end)));
+
+        return getState(user, source, start, end, client);
+    }
+
+    /**
+     * Checks the status for the given source counting the number of received messages and
+     *      checking whether it respects the sensor frequencies. There is a check for each sensor.
+     *
+     * @param user identifier
+     * @param source identifier
+     * @oaram start initial time that has to be monitored
+     * @param end final time that has to be monitored
+     * @param client is the MongoDB client
+     * @return {@code SourceDefinition} representing a source source
+     * @throws ConnectException if the connection with MongoDb is faulty
+     *
+     * @see {@link Source}
+     */
+    public Source getState(String user, String source, long start, long end, MongoClient client)
+            throws ConnectException {
         List<Sensor> sensorList = new LinkedList<>();
 
         double countTemp;
@@ -68,8 +92,8 @@ public class SourceMonitor {
 
         avgPerc = avgPerc / 7.0;
 
-        SourceSummary sourceState = new SourceSummary(getStatus(avgPerc), (int)countMex,
-                RadarConverter.roundDouble(1.0 - avgPerc, 2), sensorList);
+        SourceSummary sourceState = new SourceSummary(getStatus(1 - avgPerc),
+                (int)countMex, RadarConverter.roundDouble(avgPerc, 2), sensorList);
 
         Source device = new Source(source, specification.getType(), sourceState);
 
@@ -83,7 +107,7 @@ public class SourceMonitor {
      * @param expected expected messages
      * @return the ratio of count over expected
      */
-    public double getPercentage(double count, double expected) {
+    public static double getPercentage(double count, double expected) {
         return count / expected;
     }
 
@@ -95,7 +119,7 @@ public class SourceMonitor {
      *
      * @see {@link State}
      */
-    public State getStatus(double percentage) {
+    public static State getStatus(double percentage) {
         if (percentage > 0.95) {
             return State.FINE;
         } else if (percentage > 0.80 && percentage <= 0.95) {

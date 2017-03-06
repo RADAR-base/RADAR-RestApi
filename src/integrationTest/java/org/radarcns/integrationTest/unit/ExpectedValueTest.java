@@ -37,7 +37,7 @@ public class ExpectedValueTest {
             Properties.NAME_FILE).getPath());
 
         Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(USER, SOURCE,
-            EMPATICA, HR, COUNT, SAMPLES);
+            EMPATICA, HR, COUNT, SAMPLES, false);
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
         Dataset dataset = (Dataset) map.get(RandomInput.DATASET);

@@ -54,7 +54,7 @@ public class UserApp {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a list of user.avsc objects")})
     public Response getAllPatientsJsonUser(
-        @PathParam("studyID") String study
+            @PathParam("studyID") String study
     ) {
         try {
             return ResponseHandler.getJsonResponse(request, getAllPatientsWorker());
@@ -80,7 +80,7 @@ public class UserApp {
             @ApiResponse(code = 200, message = "Return a byte array serialising a list of"
                 + "user.avsc objects")})
     public Response getAllPatientsAvroUser(
-        @PathParam("studyID") String study
+            @PathParam("studyID") String study
     ) {
         try {
             return ResponseHandler.getAvroResponse(request, getAllPatientsWorker());

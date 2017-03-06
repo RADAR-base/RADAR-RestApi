@@ -49,7 +49,7 @@ public class UserDaoTest {
             HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
 
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, HR,
-            COUNT, SAMPLES));
+            COUNT, SAMPLES, false));
 
         Cohort cohort = UserDAO.findAllUsers(client);
 
@@ -69,9 +69,9 @@ public class UserDaoTest {
             HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE,
-            SOURCE_TYPE, HR, COUNT, SAMPLES);
+            SOURCE_TYPE, HR, COUNT, SAMPLES, false);
         docs.addAll(RandomInput.getDocumentsRandom(USER, SOURCE.concat("1"),
-            SOURCE_TYPE, HR, COUNT, SAMPLES));
+            SOURCE_TYPE, HR, COUNT, SAMPLES, false));
         collection.insertMany(docs);
 
         Cohort cohort = UserDAO.findAllUsers(client);
@@ -99,11 +99,11 @@ public class UserDaoTest {
         // USER1
         // SOURCE1 -> EMPATICA
         collection.insertMany(RandomInput.getDocumentsRandom(USER.concat("1"), SOURCE.concat("1"),
-                SOURCE_TYPE, HR, COUNT, SAMPLES));
+                SOURCE_TYPE, HR, COUNT, SAMPLES, false));
         // USER
         // SOURCE2 -> EMPATICA
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE.concat("2"), SOURCE_TYPE,
-            HR, COUNT, SAMPLES));
+            HR, COUNT, SAMPLES, false));
 
         Cohort cohort = UserDAO.findAllUsers(client);
 

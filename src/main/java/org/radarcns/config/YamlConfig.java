@@ -20,12 +20,12 @@ public class YamlConfig implements RadarConfig {
     private Date released;
     /** Release version. **/
     private String version;
-    /** MongoDb hosts **/
+    /** MongoDb hosts. **/
     private Map<String,String> mongoHosts;
-    /** MongoDb users **/
+    /** MongoDb users. **/
     private Map<String,String> mongoUser;
 
-    /** @return the release date. **/
+    /** Returns the release date. **/
     public Date getReleased() {
         return released;
     }
@@ -35,7 +35,7 @@ public class YamlConfig implements RadarConfig {
         this.released = released;
     }
 
-    /** @return the version number. **/
+    /** Returns the version number. **/
     public String getVersion() {
         return version;
     }
@@ -45,7 +45,7 @@ public class YamlConfig implements RadarConfig {
         this.version = version;
     }
 
-    /** @return MongoDb hosts. **/
+    /** Returns MongoDb hosts. **/
     public Map<String, String> getMongoHosts() {
         return mongoHosts;
     }
@@ -55,7 +55,7 @@ public class YamlConfig implements RadarConfig {
         this.mongoHosts = mongoHosts;
     }
 
-    /** @return MongoDb users. **/
+    /** Returns MongoDb users. **/
     public Map<String, String> getMongoUser() {
         return mongoUser;
     }

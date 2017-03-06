@@ -13,8 +13,6 @@ import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.dao.mongo.util.MongoAppDAO;
 import org.radarcns.util.RadarConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Data Access Object for Android App Status values.
@@ -22,7 +20,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class AndroidDAO {
 
-    private final Logger logger = LoggerFactory.getLogger(AndroidDAO.class);
+    //private final Logger LOGGER = LoggerFactory.getLogger(AndroidDAO.class);
 
     public static final String STATUS_COLLECTION = "application_server_status";
     public static final String UPTIME_COLLECTION = "application_uptime";

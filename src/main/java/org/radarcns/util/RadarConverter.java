@@ -1,10 +1,13 @@
 package org.radarcns.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.sensor.SensorType;
@@ -144,7 +147,7 @@ public class RadarConverter {
      **/
     public static SourceType getSourceType(String value) {
         for (SourceType source : SourceType.values()) {
-            if (source.name().toLowerCase().equals(value.toLowerCase())) {
+            if (source.name().equalsIgnoreCase(value)) {
                 return source;
             }
         }
@@ -152,4 +155,16 @@ public class RadarConverter {
         throw new IllegalArgumentException(value + " cannot be converted to SourceDefinition type");
     }
 
+    /**
+     * Converts AVRO objects in pretty JSON.
+     * @param record Specific Record that has to be converted
+     * @return String with the object serialised in pretty JSON
+     */
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    public static String getPrettyJSON(SpecificRecord record) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        Object json = mapper.readValue(record.toString(), Object.class);
+        String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+        return  indented;
+    }
 }

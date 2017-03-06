@@ -50,14 +50,14 @@ public abstract class ExpectedValue<V> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpectedValue.class);
 
     /**
-     * Enumerator containing all possible
-     * {@link org.radarcns.integrationTest.aggregator.ExpectedValue} implementations.
-     * @see {@link org.radarcns.integrationTest.aggregator.ExpectedArrayValue}
-     * @see {@link org.radarcns.integrationTest.aggregator.ExpectedDoubleValue}
+     * Enumerator containing all possible collector implementations. Useful to understand if
+     *      the current isntance is managing single doubles or arrays of doubles.
+     * @see {@link org.radarcns.integrationTest.aggregator.DoubleArrayCollector}
+     * @see {@link org.radarcns.integrationTest.aggregator.DoubleValueCollector}
      **/
     public enum ExpectedType {
-        ARRAY("org.radarcns.old.aggregator.ExpectedArrayValue"),
-        DOUBLE("org.radarcns.old.aggregator.ExpectedDoubleValue");
+        ARRAY("org.radarcns.integrationTest.aggregator.DoubleArrayCollector"),
+        DOUBLE("org.radarcns.integrationTest.aggregator.DoubleValueCollector");
 
         private String value;
 
@@ -166,7 +166,7 @@ public abstract class ExpectedValue<V> {
         List<Long> keys = new LinkedList<>(series.keySet());
         Collections.sort(keys);
 
-        switch (getExpectedType(sensorType)) {
+        switch (getExpectedType()) {
             case ARRAY: return getArrayItems(keys, statistic, sensorType);
             case DOUBLE: return getSingletonItems(keys, statistic, sensorType);
             default:
@@ -174,11 +174,14 @@ public abstract class ExpectedValue<V> {
         }
     }
 
-    public static ExpectedType getExpectedType(SensorType sensorType) {
-        switch (sensorType) {
-            case ACC: return ExpectedType.ARRAY;
-            default: return ExpectedType.DOUBLE;
+    public ExpectedType getExpectedType() {
+        for (ExpectedType expectedType : ExpectedType.values()) {
+            if (expectedType.getValue().equals(lastValue.getClass().getCanonicalName())) {
+                return expectedType;
+            }
         }
+
+        return null;
     }
 
     /**
@@ -385,28 +388,68 @@ public abstract class ExpectedValue<V> {
     }
 
     public List<Document> getDocuments() {
+        switch (getExpectedType()) {
+            case ARRAY: return getDocumentsByArray();
+            default: return getDocumentsBySingle();
+        }
+    }
+
+    private List<Document> getDocumentsBySingle() {
         LinkedList<Document> list = new LinkedList<>();
 
         List<Long> windows = new ArrayList<>(series.keySet());
         Collections.sort(windows);
 
-        DoubleValueCollector dac;
+        DoubleValueCollector doubleValueCollector;
         Long end;
         for (Long timestamp : windows) {
-            dac = (DoubleValueCollector) series.get(timestamp);
+            doubleValueCollector = (DoubleValueCollector) series.get(timestamp);
 
             end = timestamp + DURATION;
 
             list.add( new Document("_id", user + "-" + source + "-" + timestamp + "-" + end)
                 .append("user", user)
                 .append("source", source)
-                .append("min", getStatValue(MINIMUM, dac))
-                .append("max", getStatValue(MAXIMUM, dac))
-                .append("sum", getStatValue(SUM, dac))
-                .append("count", getStatValue(COUNT, dac))
-                .append("avg", getStatValue(AVERAGE, dac))
-                .append("quartile", extractQuartile((List<Double>) getStatValue(QUARTILES, dac)))
-                .append("iqr", getStatValue(INTERQUARTILE_RANGE, dac))
+                .append("min", getStatValue(MINIMUM, doubleValueCollector))
+                .append("max", getStatValue(MAXIMUM, doubleValueCollector))
+                .append("sum", getStatValue(SUM, doubleValueCollector))
+                .append("count", getStatValue(COUNT, doubleValueCollector))
+                .append("avg", getStatValue(AVERAGE, doubleValueCollector))
+                .append("quartile", extractQuartile((List<Double>) getStatValue(
+                        QUARTILES, doubleValueCollector)))
+                .append("iqr", getStatValue(INTERQUARTILE_RANGE, doubleValueCollector))
+                .append("start", new Date(timestamp))
+                .append("end", new Date(end)));
+        }
+
+        return list;
+    }
+
+    private List<Document> getDocumentsByArray() {
+        LinkedList<Document> list = new LinkedList<>();
+
+        List<Long> windows = new ArrayList<>(series.keySet());
+        Collections.sort(windows);
+
+        DoubleArrayCollector doubleArrayCollector;
+        Long end;
+        for (Long timestamp : windows) {
+            doubleArrayCollector = (DoubleArrayCollector) series.get(timestamp);
+
+            end = timestamp + DURATION;
+
+            list.add( new Document("_id", user + "-" + source + "-" + timestamp + "-" + end)
+                .append("user", user)
+                .append("source", source)
+                .append("min", getStatValue(MINIMUM, doubleArrayCollector.getCollectors()))
+                .append("max", getStatValue(MAXIMUM, doubleArrayCollector.getCollectors()))
+                .append("sum", getStatValue(SUM, doubleArrayCollector.getCollectors()))
+                .append("count", getStatValue(COUNT, doubleArrayCollector.getCollectors()))
+                .append("avg", getStatValue(AVERAGE, doubleArrayCollector.getCollectors()))
+                .append("quartile", extractQuartile((List<Double>) getStatValue(
+                        QUARTILES, doubleArrayCollector.getCollectors())))
+                .append("iqr", getStatValue(INTERQUARTILE_RANGE,
+                        doubleArrayCollector.getCollectors()))
                 .append("start", new Date(timestamp))
                 .append("end", new Date(end)));
         }

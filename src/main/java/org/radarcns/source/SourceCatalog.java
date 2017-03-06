@@ -11,6 +11,12 @@ public class SourceCatalog {
         private static final Empatica instance = new Empatica();
     }
 
+    /**
+     * Returns source's SourceDefinition.
+     * @param source sourceType involved in the interaction
+     * @return the SourceDefinition related to the input
+     * @see {@link SourceDefinition}
+     */
     public static SourceDefinition getInstance(SourceType source) {
         switch (source) {
             case ANDROID: break;

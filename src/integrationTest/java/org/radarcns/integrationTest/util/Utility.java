@@ -1,16 +1,22 @@
 package org.radarcns.integrationTest.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
-import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
+import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.dataset.Item;
+import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
+import org.radarcns.avro.restapi.header.Header;
+import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.listner.MongoDBContextListener;
+import org.radarcns.util.RadarConverter;
 
 /**
  * Created by francesco on 03/03/2017.
@@ -35,18 +41,6 @@ public class Utility {
     public static Long getStartTimeWindow(Long value) {
         Double timeDouble = value.doubleValue() / 10000d;
         return timeDouble.longValue() * 10000;
-    }
-
-    /**
-     * Converts AVRO objects in pretty JSON.
-     * @param record Specific Record that has to be converted
-     * @return String with the object serialised in pretty JSON
-     */
-    public static String getPrettyJSON(SpecificRecord record) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        Object json = mapper.readValue(record.toString(), Object.class);
-        String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-        return  indented;
     }
 
     /**
@@ -80,4 +74,29 @@ public class Utility {
         }
     }
 
+    public static Dataset convertDocToDataset(List<Document> docs, Stat stat, Unit unit,
+            Class<? extends SpecificRecord> recordClass)
+        throws IllegalAccessException, InstantiationException {
+        EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(
+            RadarConverter.getISO8601(docs.get(0).getDate("start")),
+            RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate("end")));
+
+        List<Item> itemList = new LinkedList<>();
+        for (Document doc : docs) {
+            SpecificRecord record = recordClass.newInstance();
+            switch (stat) {
+                case quartile:
+                    throw new UnsupportedOperationException("Not yet implemented");
+                default:
+                    record.put(record.getSchema().getField("value").pos(),
+                        doc.getDouble(stat.getParam()));
+            }
+            itemList.add(new Item(record, new EffectiveTimeFrame(
+                RadarConverter.getISO8601(doc.getDate("start")),
+                RadarConverter.getISO8601(doc.getDate("end")))));
+        }
+
+        Header header = new Header(RadarConverter.getDescriptiveStatistic(stat), unit, eftHeader);
+        return new Dataset(header, itemList);
+    }
 }

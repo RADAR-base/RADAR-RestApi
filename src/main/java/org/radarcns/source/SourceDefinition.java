@@ -11,7 +11,7 @@ import org.radarcns.avro.restapi.source.SourceSpecification;
 import org.radarcns.avro.restapi.source.SourceType;
 
 /**
- * Generic
+ * Generic Source Definition.
  */
 public abstract class SourceDefinition {
 
@@ -29,12 +29,14 @@ public abstract class SourceDefinition {
     }
 
     /**
+     * Returns Source Specification.
      * @return the source specification that is used to compute the state
      * @implSpec this function must be override by the subclass.
      */
     protected abstract Map<SensorType, SensorSpecification> setSpecification();
 
     /**
+     * Sets the instance's source type.
      * @return the source type taken into account by the monitor
      * @implSpec this function must be override by the subclass.
      */
@@ -52,8 +54,8 @@ public abstract class SourceDefinition {
 
         for (SensorType type : specification.keySet()) {
             sensors.add(new SensorSpecification(type,
-                specification.get(type).getFrequency(),
-                specification.get(type).getUnit()));
+                    specification.get(type).getFrequency(),
+                    specification.get(type).getUnit()));
         }
 
         return new SourceSpecification(sourceType, sensors);

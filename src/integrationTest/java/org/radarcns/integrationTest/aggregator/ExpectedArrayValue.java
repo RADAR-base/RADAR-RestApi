@@ -12,7 +12,8 @@ public class ExpectedArrayValue extends ExpectedValue<DoubleArrayCollector> {
     /**
      * Constructor.
      **/
-    public ExpectedArrayValue(String user, String source) throws InstantiationException, IllegalAccessException {
+    public ExpectedArrayValue(String user, String source)
+            throws InstantiationException, IllegalAccessException {
         super(user, source);
     }
 

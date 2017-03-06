@@ -19,17 +19,17 @@ public class Empatica extends SourceDefinition {
         frequencies.put(SensorType.ACC,
                 new SensorSpecification(SensorType.ACC, 32.0, Unit.G));
         frequencies.put(SensorType.BAT,
-            new SensorSpecification(SensorType.BAT, 1.0, Unit.PERCENTAGE));
+                new SensorSpecification(SensorType.BAT, 1.0, Unit.PERCENTAGE));
         frequencies.put(SensorType.BVP,
-            new SensorSpecification(SensorType.BVP, 64.0, Unit.NW));
+                new SensorSpecification(SensorType.BVP, 64.0, Unit.NW));
         frequencies.put(SensorType.EDA,
-            new SensorSpecification(SensorType.EDA, 4.0, Unit.MICROSIEMENS));
+                new SensorSpecification(SensorType.EDA, 4.0, Unit.MICROSIEMENS));
         frequencies.put(SensorType.HR,
-            new SensorSpecification(SensorType.HR, 1.0, Unit.HZ));
+                new SensorSpecification(SensorType.HR, 1.0, Unit.HZ));
         frequencies.put(SensorType.IBI,
-            new SensorSpecification(SensorType.IBI, 1.0, Unit.SEC));
+                new SensorSpecification(SensorType.IBI, 1.0, Unit.SEC));
         frequencies.put(SensorType.TEMP,
-            new SensorSpecification(SensorType.TEMP, 4.0, Unit.CELSIUS));
+                new SensorSpecification(SensorType.TEMP, 4.0, Unit.CELSIUS));
 
         return frequencies;
     }

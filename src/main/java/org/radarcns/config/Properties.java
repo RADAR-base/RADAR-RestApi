@@ -51,9 +51,7 @@ public final class Properties {
     }
 
     /**
-     * For testing purpose.
-     *
-     * Gives access to the singleton properties.
+     * Gives access to the singleton properties. ONLY FOR TEST PURPOSES.
      * @return Properties
      */
     //TODO review

@@ -8,7 +8,6 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.sensor.Sensor;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.source.Source;
@@ -145,28 +144,6 @@ public class SensorDataAccessObject {
         return sensorDao.valueByUserSourceWindow(user, source, unit,
             RadarConverter.getMongoStat(stat), start, end,
             MongoHelper.getCollection(context, sensorDao.getCollectionName(sourceType)));
-    }
-
-    /**
-     * Counts the received messages within the time-window [start-end] for the couple user source.
-     * @param user is the userID
-     * @param source is the sourceID
-     * @param start is time window start point in millisecond
-     * @param end  is time window end point in millisecond
-     * @param sensorType is the required sensor type
-     * @param context is the servlet context needed to retrieve the database client instance
-     * @return the number of received messages within the time-window [start-end].
-     */
-    public double countSamplesByUserSourceWindow(String user, String source, Long start, Long end,
-            SensorType sensorType, ServletContext context) throws ConnectException {
-        MongoSensorDAO sensorDao = hooks.get(sensorType);
-
-        MongoClient client = MongoHelper.getClient(context);
-
-        SourceType sourceType = SourceDAO.getSourceType(source, client);
-
-        return this.countSamplesByUserSourceWindow(user, source, start, end, sensorType,
-            sourceType, client);
     }
 
     /**

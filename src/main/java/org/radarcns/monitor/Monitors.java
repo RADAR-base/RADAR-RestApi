@@ -24,7 +24,8 @@ public class Monitors {
     private Monitors() {
         hooks = new HashMap<>();
 
-        hooks.put(SourceType.EMPATICA, new SourceMonitor(SourceCatalog.getInstance(SourceType.EMPATICA)));
+        hooks.put(SourceType.EMPATICA,
+                new SourceMonitor(SourceCatalog.getInstance(SourceType.EMPATICA)));
     }
 
     /**

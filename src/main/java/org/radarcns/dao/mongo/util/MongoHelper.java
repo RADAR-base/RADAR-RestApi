@@ -84,8 +84,8 @@ public class MongoHelper {
      * @param sortBy states the way in which documents have to be sorted. It is optional
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents for the given User,SourceDefinition and MongoDB
-     *      collection
+     * @return a MongoDB cursor containing all documents for the given User, SourceDefinition
+     *      and MongoDB collection
      */
     protected static MongoCursor<Document> findDocumentByUserSource(String user, String source,
             String sortBy, int order, Integer limit, MongoCollection<Document> collection) {

@@ -114,7 +114,7 @@ public class AndroidDaoTest {
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE.concat("1"), SOURCE_TYPE,
-                HR, COUNT, SAMPLES));
+                HR, COUNT, SAMPLES, false));
 
         assertEquals(ANDROID, AndroidDAO.getInstance().findSourceType(SOURCE, client));
 

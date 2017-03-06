@@ -49,7 +49,7 @@ public class SourceDaoTest {
             HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
 
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-            COUNT, SAMPLES));
+            COUNT, SAMPLES, false));
 
         assertEquals(SOURCE_TYPE, SourceDAO.getSourceType(SOURCE, client));
 
