@@ -22,6 +22,7 @@ before_install:
 script:
   - sudo docker-compose -f src/integrationTest/docker-compose.yml up -d
   - ./gradlew check
+  - cd src/integrationTest
   - sudo docker-compose down
 after_script:
   - ./gradlew sendCoverageToCodacy
