@@ -1,18 +1,18 @@
 package org.radarcns.dao.mongo;
 
+import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
-import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.avro.restapi.app.Application;
-import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.source.Source;
+import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.dao.mongo.util.MongoAppDAO;
 import org.radarcns.util.RadarConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Data Access Object for Android App Status values.
@@ -20,7 +20,11 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class AndroidDAO {
 
-    private final Logger logger = LoggerFactory.getLogger(AndroidDAO.class);
+    //private final Logger LOGGER = LoggerFactory.getLogger(AndroidDAO.class);
+
+    public static final String STATUS_COLLECTION = "application_server_status";
+    public static final String UPTIME_COLLECTION = "application_uptime";
+    public static final String RECORD_COLLECTION = "application_record_counts";
 
     private static final AndroidDAO instance = new AndroidDAO();
 
@@ -38,8 +42,8 @@ public class AndroidDAO {
         }
 
         @Override
-        protected String getCollectionName() {
-            return "application_server_status";
+        public String getAndroidCollection() {
+            return STATUS_COLLECTION;
         }
     };
 
@@ -52,8 +56,8 @@ public class AndroidDAO {
         }
 
         @Override
-        protected String getCollectionName() {
-            return "application_uptime";
+        public String getAndroidCollection() {
+            return UPTIME_COLLECTION;
         }
     };
 
@@ -68,8 +72,8 @@ public class AndroidDAO {
         }
 
         @Override
-        protected String getCollectionName() {
-            return "application_record_counts";
+        public String getAndroidCollection() {
+            return RECORD_COLLECTION;
         }
     };
 
@@ -78,16 +82,16 @@ public class AndroidDAO {
      *
      * @param user identifier
      * @param source identifier
-     * @param context useful to retrieves the MongoDB cliet
+     * @param client is the MongoDb client
      * @return {@code Application} representing the status of the related Android App
      * @throws ConnectException if MongoDb is not available
      */
-    public Application getStatus(String user, String source, ServletContext context)
+    public Application getStatus(String user, String source, MongoClient client)
             throws ConnectException {
 
-        Application app = server.valueByUserSource(user, source, null, context);
-        uptime.valueByUserSource(user, source, app, context);
-        recordCounter.valueByUserSource(user, source, app, context);
+        Application app = server.valueByUserSource(user, source, null, client);
+        uptime.valueByUserSource(user, source, app, client);
+        recordCounter.valueByUserSource(user, source, app, client);
 
         return app;
     }
@@ -99,12 +103,12 @@ public class AndroidDAO {
      *
      * @throws ConnectException if MongoDb is not available
      */
-    public Collection<String> findAllUser(ServletContext context) throws ConnectException {
+    public Collection<String> findAllUser(MongoClient client) throws ConnectException {
         Set<String> users = new HashSet<>();
 
-        users.addAll(server.findAllUser(context));
-        users.addAll(uptime.findAllUser(context));
-        users.addAll(recordCounter.findAllUser(context));
+        users.addAll(server.findAllUser(client));
+        users.addAll(uptime.findAllUser(client));
+        users.addAll(recordCounter.findAllUser(client));
 
         return users;
     }
@@ -117,14 +121,51 @@ public class AndroidDAO {
      *
      * @throws ConnectException if MongoDb is not available
      */
-    public Collection<Source> findAllSoucesByUser(String user, ServletContext context)
+    public Collection<Source> findAllSoucesByUser(String user, MongoClient client)
             throws ConnectException {
         Set<Source> users = new HashSet<>();
 
-        users.addAll(server.findAllSoucesByUser(user, context));
-        users.addAll(uptime.findAllSoucesByUser(user, context));
-        users.addAll(recordCounter.findAllSoucesByUser(user, context));
+        users.addAll(server.findAllSourcesByUser(user, client));
+        users.addAll(uptime.findAllSourcesByUser(user, client));
+        users.addAll(recordCounter.findAllSourcesByUser(user, client));
 
         return users;
+    }
+
+    /**
+     * Finds the source type for the given sourceID
+     *
+     * @param source SourceID
+     * @param client MongoDB client
+     * @return a study {@code SourceType}
+     *
+     * @throws ConnectException if MongoDB is not available
+     *
+     * @see {@link org.radarcns.avro.restapi.source.SourceType}
+     */
+    public SourceType findSourceType(String source, MongoClient client) throws ConnectException {
+        SourceType type = server.findSourceType(source, client);
+
+        if (type == null) {
+            type = uptime.findSourceType(source, client);
+        }
+
+        if (type == null) {
+            type = recordCounter.findSourceType(source, client);
+        }
+
+        return type;
+    }
+
+    /**
+     * Returns all mongoDb collections used by this DAO.
+     * @return list of String
+     */
+    public List<String> getCollections() {
+        List<String> list = new LinkedList<>();
+        list.add(server.getAndroidCollection());
+        list.add(uptime.getAndroidCollection());
+        list.add(recordCounter.getAndroidCollection());
+        return list;
     }
 }

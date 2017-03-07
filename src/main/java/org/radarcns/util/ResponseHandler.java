@@ -3,6 +3,7 @@ package org.radarcns.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -10,6 +11,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.avro.restapi.avro.Message;
 import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.user.Cohort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,23 +101,13 @@ public class ResponseHandler {
      **/
     public static Response getAvroResponse(HttpServletRequest request, SpecificRecord obj)
             throws IOException {
-        Status status = Status.OK;
-        byte[] array = new byte[1];
-
-        if (obj.getSchema().getName().equals("Dataset") && ((Dataset) obj).getDataset().isEmpty()) {
-            status = Status.NO_CONTENT;
-        } else {
-            int size = ((Dataset) obj).getDataset().size();
-            logger.debug("[{}] {} records", status.getStatusCode(), size);
-
-            array = AvroConverter.avroToAvroByte(obj);
-            logger.debug("Array of size {}", array.length);
-        }
-
+        Status status = getStatus(obj);
         logger.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
         switch (status) {
-            case OK: return Response.ok(array, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
+            case OK:
+                byte[] array = AvroConverter.avroToAvroByte(obj);
+                return Response.ok(array, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
             case NO_CONTENT: return Response.noContent().build();
             default: return Response.serverError().build();
         }
@@ -131,5 +123,31 @@ public class ResponseHandler {
         logger.info("[{}] {}", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 request.getRequestURI());
         return Response.serverError().build();
+    }
+
+    private static Status getStatus(SpecificRecord obj) throws UnsupportedEncodingException {
+        if (obj == null) {
+            return Status.NO_CONTENT;
+        }
+
+        switch (obj.getSchema().getName()) {
+            case "Cohort" :
+                if (((Cohort) obj).getPatients().isEmpty()) {
+                    return Status.NO_CONTENT;
+                }
+                break;
+            case "Dataset" :
+                if (((Dataset) obj).getDataset().isEmpty()) {
+                    return Status.NO_CONTENT;
+                }
+                break;
+            case "Application" : break;
+            case "Patient" : break;
+            case "Source" : break;
+            case "SourceSpecification" : break;
+            default: throw new UnsupportedEncodingException("SpecificRecord "
+                + obj.getSchema().getName() + " is not supported yet");
+        }
+        return Status.OK;
     }
 }

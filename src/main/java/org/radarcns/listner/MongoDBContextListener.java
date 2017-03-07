@@ -42,7 +42,7 @@ public class MongoDBContextListener implements ServletContextListener {
 
             mongoClient = new MongoClient(Properties.getInstance().getMongoHosts(),credentials);
 
-            if (checkMongoConnection(mongoClient,credentials)) {
+            if (checkMongoConnection(mongoClient)) {
                 sce.getServletContext().setAttribute(MONGO_CLIENT, mongoClient);
 
                 logger.info("MongoDB connection established");
@@ -61,14 +61,12 @@ public class MongoDBContextListener implements ServletContextListener {
      *      towards the MongoDB host.
      *
      * @param mongoClient client for MongoDB
-     * @param credentials username, password and host
      * @return {@code true} if the connection can be established false otherwise
      */
-    private boolean checkMongoConnection(MongoClient mongoClient,
-            List<MongoCredential> credentials) {
+    public static boolean checkMongoConnection(MongoClient mongoClient) {
         Boolean flag = true;
         try {
-            for (MongoCredential user : credentials) {
+            for (MongoCredential user : mongoClient.getCredentialsList()) {
                 mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
             }
 

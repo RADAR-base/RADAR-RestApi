@@ -26,6 +26,7 @@ ext.json='20160810'
 ext.junitVersion = '4.12'
 ext.logback = '1.1.7'
 ext.mathVersion = '3.0'
+ext.mokitoVersion ='1.10.19'
 ext.mongodb='3.3.0'
 ext.okhttpVersion = '3.5.0'
 ext.okioVersion = '1.11.0'
@@ -37,6 +38,8 @@ ext.tomcat = '8.0.37'
 
 configurations {
   codacy
+  integrationTestCompile.extendsFrom testCompile
+  integrationTestRuntime.extendsFrom testRuntime
   provided
   compile.extendsFrom provided
 }
@@ -77,6 +80,7 @@ dependencies {
   testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
   testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
+  testCompile group: 'org.mockito', name: 'mockito-all', version: mokitoVersion
 
   codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }
@@ -90,10 +94,6 @@ task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask)
   outputDir = file("build/avro")
 }
 
-//---------------------------------------------------------------------------//
-// Packaging                                                                 //
-//---------------------------------------------------------------------------//
-
 compileJava.source(generateAvro.outputs)
 
 //---------------------------------------------------------------------------//
@@ -101,13 +101,24 @@ compileJava.source(generateAvro.outputs)
 //---------------------------------------------------------------------------//
 
 checkstyle {
+  // codacy version
   toolVersion '6.16'
+  ignoreFailures true
+
+  // ignore tests
+  sourceSets = [sourceSets.main]
 }
 
 pmd {
+  // pmd version
+  toolVersion = '5.5.2'
   ignoreFailures = true
 
-  toolVersion = '5.5.2'
+  // ignore tests
+  sourceSets = [sourceSets.main]
+
+  consoleOutput = true
+
   ruleSets = []
   ruleSetFiles = files("config/pmd/ruleset.xml")
 }
@@ -117,11 +128,89 @@ pmdTest {
   ruleSetFiles = files("config/pmd/test_ruleset.xml")
 }
 
+//---------------------------------------------------------------------------//
+// Testing                                                                   //
+//---------------------------------------------------------------------------//
+
+tasks.matching {it instanceof Test}.all {
+  def stdout = new LinkedList<String>()
+  beforeTest { TestDescriptor td ->
+    stdout.clear()
+  }
+
+  onOutput { TestDescriptor td, TestOutputEvent toe ->
+    stdout.addAll(toe.getMessage().split('(?m)$'))
+    while (stdout.size() > 100) {
+      stdout.remove()
+    }
+  }
+
+  afterTest { TestDescriptor td, TestResult tr ->
+    if (tr.resultType == TestResult.ResultType.FAILURE) {
+      println()
+      print("${td.className}.${td.name} FAILED")
+      if (stdout.empty) {
+        println(" without any output")
+      } else {
+        println(" with last 100 lines of output:")
+        println('=' * 100)
+        stdout.each { print(it) }
+        println('=' * 100)
+      }
+    }
+  }
+
+  testLogging {
+    showExceptions = true
+    showCauses = true
+    showStackTraces = true
+    exceptionFormat "full"
+  }
+}
+
+sourceSets {
+  integrationTest {
+    java {
+      compileClasspath += main.output
+      runtimeClasspath += main.output
+    }
+    resources {
+      srcDir 'src/integrationTest/resources'
+    }
+  }
+}
+
+test {
+  testLogging {
+    // Show that tests are run in the command-line output
+    events "skipped", "failed"
+  }
+}
+
+task integrationTest(type: Test) {
+  description = "Run integration tests (located in src/integrationTest/...)."
+
+  testClassesDir = sourceSets.integrationTest.output.classesDir
+  classpath = sourceSets.integrationTest.runtimeClasspath
+
+  // This is not needed, but I like to see which tests have run
+  testLogging {
+    events "skipped", "failed"
+  }
+}
+
+check.dependsOn integrationTest
+
+//---------------------------------------------------------------------------//
+// Code coverage and codacy                                                  //
+//---------------------------------------------------------------------------//
+
 jacocoTestReport {
+  executionData test, integrationTest
   reports {
     xml.enabled true
     csv.enabled false
-    html.enabled false
+    html.enabled true
   }
 }
 
@@ -139,6 +228,23 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 }
 
 //---------------------------------------------------------------------------//
+// Prepare WAR for Integration Test                                          //
+//---------------------------------------------------------------------------//
+task copyWarForIntegration(type: Copy) {
+  from war.archivePath
+  into "${projectDir}/src/integrationTest/image"
+}
+
+task removeWar(type: Delete) {
+  delete "${projectDir}/src/integrationTest/image/${war.getArchiveName()}"
+}
+
+war.dependsOn(removeWar)
+war.finalizedBy copyWarForIntegration
+
+clean.dependsOn(removeWar)
+
+//---------------------------------------------------------------------------//
 // Build system metadata                                                     //
 //---------------------------------------------------------------------------//
 
@@ -150,11 +256,4 @@ idea {
 
 task wrapper(type: Wrapper) {
   gradleVersion = '3.0'
-}
-
-test {
-  testLogging {
-    // Show that tests are run in the command-line output
-    events 'passed'
-  }
 }

@@ -1,16 +1,14 @@
 package org.radarcns.dao.mongo;
 
+import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import javax.servlet.ServletContext;
-import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.user.Cohort;
 import org.radarcns.avro.restapi.user.Patient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.radarcns.dao.SensorDataAccessObject;
 
 /**
  * Data Access Object for user management.
@@ -18,62 +16,31 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class UserDAO {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
+    //private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
 
     /**
      * Finds all users checking all available collections.
      *
-     * @param context useful to retrieve the MongoDB client
+     * @param client MongoDB client
      * @return a study {@code Cohort}
      * @throws ConnectException if MongoDB is not available
      *
      * @see {@link org.radarcns.avro.restapi.user.Cohort}
      */
-    public static Cohort findAllUsers(ServletContext context) throws ConnectException {
+    public static Cohort findAllUsers(MongoClient client) throws ConnectException {
 
         List<Patient> patients = new LinkedList<>();
 
-        Set<String> users = new HashSet<>();
-        users.addAll(AccelerationDAO.getInstance().findAllUser(context));
-        users.addAll(BatteryDAO.getInstance().findAllUser(context));
-        users.addAll(BloodVolumePulseDAO.getInstance().findAllUser(context));
-        users.addAll(ElectrodermalActivityDAO.getInstance().findAllUser(context));
-        users.addAll(HeartRateDAO.getInstance().findAllUser(context));
-        users.addAll(InterBeatIntervalDAO.getInstance().findAllUser(context));
-        users.addAll(TemperatureDAO.getInstance().findAllUser(context));
-        users.addAll(AndroidDAO.getInstance().findAllUser(context));
+        Set<String> users = new HashSet<>(
+                SensorDataAccessObject.getInstance().findAllUsers(client));
+
+        users.addAll(AndroidDAO.getInstance().findAllUser(client));
 
         for (String user : users) {
-            patients.add(findAllSoucesByUser(user, context));
+            patients.add(SourceDAO.findAllSoucesByUser(user, client));
         }
 
         return new Cohort(0, patients);
-    }
-
-    /**
-     * Returns all available sources for the given patient.
-     *
-     * @param userID user identifier.
-     * @param context useful to retrieve the MongoDB client
-     * @return a {@code Patient} object
-     * @throws ConnectException if MongoDB is not available
-     *
-     * @see {@link org.radarcns.avro.restapi.user.Patient}
-     */
-    public static Patient findAllSoucesByUser(String userID, ServletContext context)
-            throws ConnectException {
-        Set<Source> sources = new HashSet<>();
-
-        sources.addAll(AccelerationDAO.getInstance().findAllSoucesByUser(userID, context));
-        sources.addAll(BatteryDAO.getInstance().findAllSoucesByUser(userID, context));
-        sources.addAll(BloodVolumePulseDAO.getInstance().findAllSoucesByUser(userID, context));
-        sources.addAll(ElectrodermalActivityDAO.getInstance().findAllSoucesByUser(userID, context));
-        sources.addAll(HeartRateDAO.getInstance().findAllSoucesByUser(userID, context));
-        sources.addAll(InterBeatIntervalDAO.getInstance().findAllSoucesByUser(userID, context));
-        sources.addAll(TemperatureDAO.getInstance().findAllSoucesByUser(userID, context));
-        sources.addAll(AndroidDAO.getInstance().findAllSoucesByUser(userID, context));
-
-        return new Patient(userID, new LinkedList<>(sources));
     }
 
 }

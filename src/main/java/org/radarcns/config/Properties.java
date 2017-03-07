@@ -24,27 +24,51 @@ public final class Properties {
     /** Path to the configuration file for AWS deploy. **/
     private static final String PATH_FILE = "/usr/share/tomcat8/conf/";
     /** Config file name. **/
-    private static final String NAME_FILE = "radar.yml";
+    public static final String NAME_FILE = "radar.yml";
 
     /** Interface to access properties. **/
     private static RadarConfig config;
 
+    /** Baypass singleto . **/
+    private static boolean bypass;
+
     /** Singleton. **/
-    private static final Properties INSTANCE = new Properties();
+    private static final Properties INSTANCE = new Properties(PATH_FILE + NAME_FILE);
+
+    /** Test instance. **/
+    private static Properties instanceTest;
 
     /**
      * Gives access to the singleton properties.
      * @return Properties
      */
     public static Properties getInstance() {
+        if (bypass) {
+            return instanceTest;
+        }
+
         return INSTANCE;
     }
 
-    private Properties() {
+    /**
+     * Gives access to the singleton properties. ONLY FOR TEST PURPOSES.
+     * @return Properties
+     */
+    //TODO review
+    public static synchronized Properties getInstanceTest(String path) {
+        if (instanceTest == null) {
+            bypass = true;
+            instanceTest = new Properties(path);
+        }
+
+        return instanceTest;
+    }
+
+    private Properties(String path) {
         initDockerConfig();
 
         if (config == null) {
-            initYamlConfig();
+            initYamlConfig(path);
         }
     }
 
@@ -58,10 +82,10 @@ public final class Properties {
         }
     }
 
-    private void initYamlConfig() {
+    private void initYamlConfig(String path) {
         try {
             final Yaml yaml = new Yaml();
-            final InputStream input = Files.newInputStream(Paths.get(PATH_FILE + NAME_FILE));
+            final InputStream input = Files.newInputStream(Paths.get(path));
             config = yaml.loadAs(input, YamlConfig.class);
 
             LOGGER.info("Properties fetched from .yml file");

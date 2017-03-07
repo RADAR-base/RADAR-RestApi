@@ -1,0 +1,13 @@
+version: 1.0
+released: 2016-11-10
+
+# Mongodb hosts
+mongoHosts:
+    localhost: 27017
+    #54.246.185.250: 27017
+
+# Mongodb User
+mongoUser:
+    usr: restapi
+    pwd: radar
+    db: hotstorage

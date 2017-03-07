@@ -1,17 +1,18 @@
 package org.radarcns.dao.mongo.util;
 
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
 import java.util.Date;
 import java.util.LinkedList;
-import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.Unit;
+import org.radarcns.avro.restapi.sensor.Unit;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,18 +32,18 @@ public abstract class MongoSensorDAO extends MongoDAO {
      * @param source is the sourceID
      * @param unit is the measurement unit
      * @param stat is the required statistical value
-     * @param context is the servlet context needed to retrieve the mongoDb client instance
+     * @param collection is the mongoDb collection that has to be queried
      * @return the last seen sensor value stat for the given user and source, otherwise
      *      empty dataset
      *
      * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Dataset valueRTByUserSource(String user, String source, Unit unit, MongoHelper.Stat stat,
-            ServletContext context) throws ConnectException {
+    public Dataset valueRTByUserSource(String user, String source, Unit unit, Stat stat,
+            MongoCollection<Document> collection) throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSource(user, source, "end", -1, 1,
-                getCollection(context));
+                collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), unit,
             cursor);
@@ -55,16 +56,16 @@ public abstract class MongoSensorDAO extends MongoDAO {
      * @param source is the sourceID
      * @param unit is the measurement unit
      * @param stat is the required statistical value
-     * @param context is the servlet context needed to retrieve the mongoDb client instance
+     * @param collection is the mongoDb collection that has to be queried
      * @return sensor dataset for the given user and source, otherwise empty dataset
      *
      * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
      */
     public Dataset valueByUserSource(String user, String source, Unit unit, MongoHelper.Stat stat,
-            ServletContext context) throws ConnectException {
+            MongoCollection<Document> collection) throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSource(user, source,"start", 1, null,
-                getCollection(context));
+                collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), unit,
             cursor);
@@ -79,17 +80,17 @@ public abstract class MongoSensorDAO extends MongoDAO {
      * @param stat is the required statistical value
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
-     * @param context is the servlet context needed to retrieve the mongoDb client instance
+     * @param collection is the mongoDb collection that has to be queried
      * @return sensor dataset for the given user and source within the start and end time window,
      *      otherwise empty dataset
      *
      * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
      */
     public Dataset valueByUserSourceWindow(String user, String source, Unit unit,
-            MongoHelper.Stat stat, Long start, Long end, ServletContext context)
+            MongoHelper.Stat stat, Long start, Long end, MongoCollection<Document> collection)
             throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSourceWindow(user, source, start, end, getCollection(context));
+                .findDocumentByUserSourceWindow(user, source, start, end, collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), unit,
                 cursor);
@@ -101,14 +102,14 @@ public abstract class MongoSensorDAO extends MongoDAO {
      * @param source is the sourceID
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
-     * @param context is the servlet context needed to retrieve the mongoDb client instance
+     * @param collection is the mongoDb collection that has to be queried
      * @return the number of received messages within the time-window [start-end].
      */
     public double countSamplesByUserSourceWindow(String user, String source, Long start, Long end,
-            ServletContext context) throws ConnectException {
+            MongoCollection<Document> collection) throws ConnectException {
         double count = 0;
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSourceWindow(user, source, start, end, getCollection(context));
+                .findDocumentByUserSourceWindow(user, source, start, end, collection);
 
         if (!cursor.hasNext()) {
             logger.debug("Empty cursor");
@@ -194,7 +195,7 @@ public abstract class MongoSensorDAO extends MongoDAO {
      * @return the required Object
      */
     protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat) {
-        throw new UnsupportedOperationException("This function must be override by the ");
+        throw new UnsupportedOperationException("This function must be override by the subclass");
     }
 
     /**
@@ -205,7 +206,7 @@ public abstract class MongoSensorDAO extends MongoDAO {
      * @return the count value
      */
     protected double extractCount(Document doc) {
-        throw new UnsupportedOperationException("This function must be override by the ");
+        throw new UnsupportedOperationException("This function must be override by the subclass");
     }
 
 }
