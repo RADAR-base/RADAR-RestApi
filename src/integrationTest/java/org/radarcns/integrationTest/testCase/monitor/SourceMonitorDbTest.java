@@ -100,7 +100,8 @@ public class SourceMonitorDbTest {
         client.close();
     }
 
-    private Source getSource (int window, double percentage, MongoClient client) throws ConnectException {
+    private Source getSource (int window, double percentage, MongoClient client)
+            throws ConnectException {
         long timestamp = System.currentTimeMillis();
 
         Map<SensorType, Integer> count = new HashMap<>();
@@ -111,21 +112,14 @@ public class SourceMonitorDbTest {
         SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
         for (int i = 0; i < window; i++) {
             for (SensorType sensorType : definition.getSensorTypes()) {
-                collection = MongoHelper.getCollection(client,
-                    SensorDataAccessObject.getInstance()
-                        .getCollectionName(SOURCE_TYPE, sensorType));
-
                 messages = reducedMessage(
-                    definition.getFrequency(sensorType).intValue(), percentage) / window;
+                    definition.getFrequency(sensorType).intValue() * 60, percentage)
+                        / window;
 
-                Document doc;
-                if (sensorType.name().equals(sensorType.ACC)) {
-                    doc = getDocumentsByArray(messages, start, end);
-                    collection.insertOne(doc);
-                } else {
-                    doc = getDocumentsBySingle(messages, start, end);
-                    collection.insertOne(doc);
-                }
+                insertDoc(sensorType, messages, start, end,
+                    MongoHelper.getCollection(client,
+                        SensorDataAccessObject.getInstance()
+                            .getCollectionName(SOURCE_TYPE, sensorType)));
 
                 if (count.containsKey(sensorType)) {
                     count.put(sensorType, count.get(sensorType) + messages);
@@ -142,28 +136,33 @@ public class SourceMonitorDbTest {
         for (SensorType sensorType : count.keySet()) {
             int sendMessages = count.containsKey(sensorType) ? count.get(sensorType) : 0;
             messages = reducedMessage(
-                definition.getFrequency(sensorType).intValue(), percentage) - sendMessages;
+                definition.getFrequency(sensorType).intValue() * 60, percentage)
+                    - sendMessages;
 
             if (messages > 0) {
-                collection = MongoHelper.getCollection(client,
+                insertDoc(sensorType, messages, start, end,
+                    MongoHelper.getCollection(client,
                     SensorDataAccessObject.getInstance()
-                        .getCollectionName(SOURCE_TYPE, sensorType));
-                Document doc;
-                if (sensorType.name().equals(sensorType.ACC)) {
-                    doc = getDocumentsByArray(messages, start, end);
-                    collection.insertOne(doc);
-                } else {
-                    doc = getDocumentsBySingle(messages, start, end);
-                    collection.insertOne(doc);
-                }
+                        .getCollectionName(SOURCE_TYPE, sensorType)));
             }
         }
 
         return new SourceMonitor(new Empatica()).getState(USER, SOURCE, timestamp, end, client);
     }
 
+    private static void insertDoc(SensorType sensorType, int messages, long start, long end,
+            MongoCollection collection) {
+        Document doc;
+        if (sensorType.name().equals(sensorType.ACC)) {
+            doc = getDocumentsByArray(messages, start, end);
+        } else {
+            doc = getDocumentsBySingle(messages, start, end);
+        }
+        collection.insertOne(doc);
+    }
 
-    private Document getDocumentsBySingle(int samples, long start, long end) {
+
+    private static Document getDocumentsBySingle(int samples, long start, long end) {
         return new Document("_id", USER + "-" + SOURCE + "-" + start + "-"+ end)
             .append("user", USER)
             .append("source", SOURCE)
@@ -178,7 +177,7 @@ public class SourceMonitorDbTest {
             .append("end", new Date(end));
     }
 
-    private Document getDocumentsByArray(int samples, long start, long end) {
+    private static Document getDocumentsByArray(int samples, long start, long end) {
         return new Document("_id", USER + "-" + SOURCE + "-" + start + "-"+ end)
             .append("user", USER)
             .append("source", SOURCE)
@@ -213,7 +212,7 @@ public class SourceMonitorDbTest {
         });
     }
 
-    private int reducedMessage(double frequency, double reduction) {
+    public static int reducedMessage(double frequency, double reduction) {
 
         if (frequency == 1.0 && reduction == 1.0) {
             return 0;

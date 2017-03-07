@@ -77,7 +77,7 @@ public class SourceMonitor {
             countTemp = SensorDataAccessObject.getInstance().countSamplesByUserSourceWindow(
                 user, source, start, end, type, specification.getType(), client);
 
-            percentTemp = getPercentage(countTemp, specification.getFrequency(type));
+            percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);
 
             sensorList.add(new Sensor(type, getStatus(percentTemp), (int)countTemp,
                     RadarConverter.roundDouble(1.0 - percentTemp, 2)));
