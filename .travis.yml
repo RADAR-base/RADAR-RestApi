@@ -33,6 +33,5 @@ script:
   - ./gradlew check
 
 after_script:
-  - cd src/integrationTest
-  - sudo docker-compose down
+  - sudo docker-compose -f src/integrationTest/docker-compose.yml down
   - ./gradlew sendCoverageToCodacy
