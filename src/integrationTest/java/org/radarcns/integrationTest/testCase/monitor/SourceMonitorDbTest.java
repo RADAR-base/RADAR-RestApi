@@ -153,7 +153,7 @@ public class SourceMonitorDbTest {
     private static void insertDoc(SensorType sensorType, int messages, long start, long end,
             MongoCollection collection) {
         Document doc;
-        if (sensorType.name().equals(sensorType.ACC)) {
+        if (sensorType.name().equals(sensorType.ACCELEROMETER)) {
             doc = getDocumentsByArray(messages, start, end);
         } else {
             doc = getDocumentsBySingle(messages, start, end);

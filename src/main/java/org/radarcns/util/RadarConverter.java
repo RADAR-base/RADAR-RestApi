@@ -130,13 +130,13 @@ public class RadarConverter {
      **/
     public static String getSensorName(SensorType sensor) {
         switch (sensor) {
-            case ACC: return "acceleration";
-            case BAT: return "battery";
-            case BVP: return "blood_volume_pulse";
-            case EDA: return "electrodermal_activity";
-            case HR: return "heart_rate";
-            case IBI: return "inter_beat_interval";
-            case TEMP: return "temperature";
+            case ACCELEROMETER: return "acceleration";
+            case BATTERY: return "battery";
+            case BLOOD_VOLUME_PULSE: return "blood_volume_pulse";
+            case ELECTRODERMAL_ACTIVITY: return "electrodermal_activity";
+            case HEART_RATE: return "heart_rate";
+            case INTER_BEAT_INTERVAL: return "inter_beat_interval";
+            case THERMOMETER: return "temperature";
             default: throw new IllegalArgumentException("Sensor type cannot be converted. "
                     + sensor.name() + "is unknown");
         }

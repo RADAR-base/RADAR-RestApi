@@ -3,7 +3,7 @@ package org.radarcns.integrationTest.testCase.webapp;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HR;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
 import com.mongodb.MongoClient;
@@ -40,7 +40,7 @@ public class SensorAppTest {
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
-    private static final SensorType SENSOR_TYPE = HR;
+    private static final SensorType SENSOR_TYPE = HEART_RATE;
     private static final int SAMPLES = 10;
 
     @Test
@@ -66,7 +66,7 @@ public class SensorAppTest {
         collection.insertMany(docs);
 
         Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
-            RadarConverter.getMongoStat(COUNT), Unit.HZ, HeartRate.class);
+            RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, HeartRate.class);
 
         Dataset actual = null;
 
@@ -106,7 +106,7 @@ public class SensorAppTest {
         collection.insertMany(docs);
 
         Dataset expected = Utility.convertDocToDataset(docs, RadarConverter.getMongoStat(COUNT),
-                Unit.HZ, HeartRate.class);
+                Unit.BEATS_PER_MIN, HeartRate.class);
 
         Dataset actual = null;
 
@@ -154,7 +154,7 @@ public class SensorAppTest {
         long end = docs.get(index + 1).getDate(MongoHelper.END).getTime();
 
         Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
-            RadarConverter.getMongoStat(COUNT), Unit.HZ, HeartRate.class);
+            RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, HeartRate.class);
 
         path = path.replace("{start}", String.valueOf(start));
         path = path.replace("{end}", String.valueOf(end));

@@ -201,7 +201,7 @@ public abstract class ExpectedValue<V> {
             DoubleArrayCollector dac = (DoubleArrayCollector) series.get(key);
 
             switch (sensor) {
-                case ACC:
+                case ACCELEROMETER:
                     Object content;
 
                     if (statistic.name().equals(QUARTILES.name())) {
@@ -270,13 +270,13 @@ public abstract class ExpectedValue<V> {
 
     public Class getSensorClass(SensorType sensor) {
         switch (sensor) {
-            case ACC: return Acceleration.class;
-            case BAT: return Battery.class;
-            case BVP: return BloodVolumePulse.class;
-            case EDA: return ElectroDermalActivity.class;
-            case IBI: return InterBeatInterval.class;
-            case HR: return HeartRate.class;
-            case TEMP: return Temperature.class;
+            case ACCELEROMETER: return Acceleration.class;
+            case BATTERY: return Battery.class;
+            case BLOOD_VOLUME_PULSE: return BloodVolumePulse.class;
+            case ELECTRODERMAL_ACTIVITY: return ElectroDermalActivity.class;
+            case INTER_BEAT_INTERVAL: return InterBeatInterval.class;
+            case HEART_RATE: return HeartRate.class;
+            case THERMOMETER: return Temperature.class;
             default: throw new IllegalArgumentException(sensor.name()
                         + " is not a supported test case");
         }

@@ -2,7 +2,7 @@ package org.radarcns.integrationTest.unit;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HR;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
 import java.util.List;
@@ -37,7 +37,7 @@ public class ExpectedValueTest {
             Properties.NAME_FILE).getPath());
 
         Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(USER, SOURCE,
-            EMPATICA, HR, COUNT, SAMPLES, false);
+            EMPATICA, HEART_RATE, COUNT, SAMPLES, false);
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
         Dataset dataset = (Dataset) map.get(RandomInput.DATASET);

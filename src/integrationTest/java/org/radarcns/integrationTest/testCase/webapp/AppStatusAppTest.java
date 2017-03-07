@@ -2,7 +2,7 @@ package org.radarcns.integrationTest.testCase.webapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HR;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
 import com.mongodb.MongoClient;
@@ -36,7 +36,7 @@ public class AppStatusAppTest {
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
-    private static final SensorType SENSOR_TYPE = HR;
+    private static final SensorType SENSOR_TYPE = HEART_RATE;
     private static final int SAMPLES = 10;
 
     @Test

@@ -2,7 +2,7 @@ package org.radarcns.integrationTest.testCase.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HR;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
@@ -12,6 +12,7 @@ import java.util.List;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
+import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.avro.restapi.user.Cohort;
@@ -36,6 +37,7 @@ public class UserDaoTest {
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
+    private static final SensorType SENSOR_TYPE = HEART_RATE;
     private static final int SAMPLES = 10;
 
     @Test
@@ -48,7 +50,7 @@ public class UserDaoTest {
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
             HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
 
-        collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, HR,
+        collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
             COUNT, SAMPLES, false));
 
         Cohort cohort = UserDAO.findAllUsers(client);
@@ -69,9 +71,9 @@ public class UserDaoTest {
             HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE,
-            SOURCE_TYPE, HR, COUNT, SAMPLES, false);
+            SOURCE_TYPE, SENSOR_TYPE, COUNT, SAMPLES, false);
         docs.addAll(RandomInput.getDocumentsRandom(USER, SOURCE.concat("1"),
-            SOURCE_TYPE, HR, COUNT, SAMPLES, false));
+            SOURCE_TYPE, SENSOR_TYPE, COUNT, SAMPLES, false));
         collection.insertMany(docs);
 
         Cohort cohort = UserDAO.findAllUsers(client);
@@ -99,11 +101,11 @@ public class UserDaoTest {
         // USER1
         // SOURCE1 -> EMPATICA
         collection.insertMany(RandomInput.getDocumentsRandom(USER.concat("1"), SOURCE.concat("1"),
-                SOURCE_TYPE, HR, COUNT, SAMPLES, false));
+                SOURCE_TYPE, SENSOR_TYPE, COUNT, SAMPLES, false));
         // USER
         // SOURCE2 -> EMPATICA
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE.concat("2"), SOURCE_TYPE,
-            HR, COUNT, SAMPLES, false));
+            SENSOR_TYPE, COUNT, SAMPLES, false));
 
         Cohort cohort = UserDAO.findAllUsers(client);
 

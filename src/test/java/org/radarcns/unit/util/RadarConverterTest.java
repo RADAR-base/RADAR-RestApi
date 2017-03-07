@@ -9,13 +9,13 @@ import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MEDIAN;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MINIMUM;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.SUM;
-import static org.radarcns.avro.restapi.sensor.SensorType.ACC;
-import static org.radarcns.avro.restapi.sensor.SensorType.BAT;
-import static org.radarcns.avro.restapi.sensor.SensorType.BVP;
-import static org.radarcns.avro.restapi.sensor.SensorType.EDA;
-import static org.radarcns.avro.restapi.sensor.SensorType.HR;
-import static org.radarcns.avro.restapi.sensor.SensorType.IBI;
-import static org.radarcns.avro.restapi.sensor.SensorType.TEMP;
+import static org.radarcns.avro.restapi.sensor.SensorType.ACCELEROMETER;
+import static org.radarcns.avro.restapi.sensor.SensorType.BATTERY;
+import static org.radarcns.avro.restapi.sensor.SensorType.BLOOD_VOLUME_PULSE;
+import static org.radarcns.avro.restapi.sensor.SensorType.ELECTRODERMAL_ACTIVITY;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
+import static org.radarcns.avro.restapi.sensor.SensorType.INTER_BEAT_INTERVAL;
+import static org.radarcns.avro.restapi.sensor.SensorType.THERMOMETER;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -115,13 +115,16 @@ public class RadarConverterTest {
 
     @Test
     public void getSensorNameTest() {
-        assertEquals("acceleration", RadarConverter.getSensorName(ACC));
-        assertEquals("battery", RadarConverter.getSensorName(BAT));
-        assertEquals("blood_volume_pulse", RadarConverter.getSensorName(BVP));
-        assertEquals("electrodermal_activity", RadarConverter.getSensorName(EDA));
-        assertEquals("heart_rate", RadarConverter.getSensorName(HR));
-        assertEquals("inter_beat_interval", RadarConverter.getSensorName(IBI));
-        assertEquals("temperature", RadarConverter.getSensorName(TEMP));
+        assertEquals("acceleration", RadarConverter.getSensorName(ACCELEROMETER));
+        assertEquals("battery", RadarConverter.getSensorName(BATTERY));
+        assertEquals("blood_volume_pulse",
+                RadarConverter.getSensorName(BLOOD_VOLUME_PULSE));
+        assertEquals("electrodermal_activity",
+                RadarConverter.getSensorName(ELECTRODERMAL_ACTIVITY));
+        assertEquals("heart_rate", RadarConverter.getSensorName(HEART_RATE));
+        assertEquals("inter_beat_interval",
+                RadarConverter.getSensorName(INTER_BEAT_INTERVAL));
+        assertEquals("temperature", RadarConverter.getSensorName(THERMOMETER));
     }
 
     @Test( expected = IllegalArgumentException.class)

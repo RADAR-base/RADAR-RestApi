@@ -165,8 +165,8 @@ public class RandomInput {
             SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
             throws IllegalAccessException, InstantiationException {
         switch (sensorType) {
-            case ACC: randomArrayValue(user, source, sourceType, sensorType, stat, samples,
-                    singleWindow); break;
+            case ACCELEROMETER: randomArrayValue(user, source, sourceType, sensorType, stat,
+                    samples, singleWindow); break;
             default: randomDoubleValue(user, source, sourceType, sensorType, stat, samples,
                     singleWindow);
         }

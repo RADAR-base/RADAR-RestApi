@@ -43,13 +43,13 @@ public class SensorDataAccessObject {
     private SensorDataAccessObject() {
         hooks = new HashMap<>();
 
-        hooks.put(SensorType.ACC, AccelerationDAO.getInstance());
-        hooks.put(SensorType.BAT, BatteryDAO.getInstance());
-        hooks.put(SensorType.BVP, BloodVolumePulseDAO.getInstance());
-        hooks.put(SensorType.EDA, ElectrodermalActivityDAO.getInstance());
-        hooks.put(SensorType.HR, HeartRateDAO.getInstance());
-        hooks.put(SensorType.IBI, InterBeatIntervalDAO.getInstance());
-        hooks.put(SensorType.TEMP, TemperatureDAO.getInstance());
+        hooks.put(SensorType.ACCELEROMETER, AccelerationDAO.getInstance());
+        hooks.put(SensorType.BATTERY, BatteryDAO.getInstance());
+        hooks.put(SensorType.BLOOD_VOLUME_PULSE, BloodVolumePulseDAO.getInstance());
+        hooks.put(SensorType.ELECTRODERMAL_ACTIVITY, ElectrodermalActivityDAO.getInstance());
+        hooks.put(SensorType.HEART_RATE, HeartRateDAO.getInstance());
+        hooks.put(SensorType.INTER_BEAT_INTERVAL, InterBeatIntervalDAO.getInstance());
+        hooks.put(SensorType.THERMOMETER, TemperatureDAO.getInstance());
     }
 
     /**

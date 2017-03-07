@@ -54,6 +54,7 @@ public abstract class SourceDefinition {
 
         for (SensorType type : specification.keySet()) {
             sensors.add(new SensorSpecification(type,
+                    specification.get(type).getDataType(),
                     specification.get(type).getFrequency(),
                     specification.get(type).getUnit()));
         }

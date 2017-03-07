@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import javax.servlet.ServletException;
 import org.junit.Test;
+import org.radarcns.avro.restapi.sensor.DataType;
 import org.radarcns.avro.restapi.sensor.SensorSpecification;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.sensor.Unit;
@@ -23,20 +24,27 @@ public class MonitorsTest {
         SourceSpecification spec = Monitors.getInstance().getSpecification(SourceType.EMPATICA);
 
         HashMap<SensorType, SensorSpecification> sensors =  new HashMap<>();
-        sensors.put(SensorType.ACC,
-                new SensorSpecification(SensorType.ACC, 32.0, Unit.G));
-        sensors.put(SensorType.TEMP,
-                new SensorSpecification(SensorType.TEMP, 4.0, Unit.CELSIUS));
-        sensors.put(SensorType.EDA,
-                new SensorSpecification(SensorType.EDA, 4.0, Unit.MICROSIEMENS));
-        sensors.put(SensorType.IBI,
-                new SensorSpecification(SensorType.IBI, 1.0, Unit.SEC));
-        sensors.put(SensorType.BVP,
-                new SensorSpecification(SensorType.BVP, 64.0, Unit.NW));
-        sensors.put(SensorType.BAT,
-                new SensorSpecification(SensorType.BAT, 1.0, Unit.PERCENTAGE));
-        sensors.put(SensorType.HR,
-                new SensorSpecification(SensorType.HR, 1.0, Unit.HZ));
+        sensors.put(SensorType.ACCELEROMETER,
+                new SensorSpecification(SensorType.ACCELEROMETER, DataType.RAW,
+                    32.0, Unit.G));
+        sensors.put(SensorType.THERMOMETER,
+                new SensorSpecification(SensorType.THERMOMETER, DataType.RAW,
+                    4.0, Unit.CELSIUS));
+        sensors.put(SensorType.ELECTRODERMAL_ACTIVITY,
+                new SensorSpecification(SensorType.ELECTRODERMAL_ACTIVITY, DataType.RAW,
+                    4.0, Unit.MICROSIEMENS));
+        sensors.put(SensorType.INTER_BEAT_INTERVAL,
+                new SensorSpecification(SensorType.INTER_BEAT_INTERVAL, DataType.VENDOR,
+                    1.0, Unit.SECOND));
+        sensors.put(SensorType.BLOOD_VOLUME_PULSE,
+                new SensorSpecification(SensorType.BLOOD_VOLUME_PULSE, DataType.RAW,
+                    64.0, Unit.NANOWATT));
+        sensors.put(SensorType.BATTERY,
+                new SensorSpecification(SensorType.BATTERY, DataType.RAW,
+                    1.0, Unit.PERCENTAGE));
+        sensors.put(SensorType.HEART_RATE,
+                new SensorSpecification(SensorType.HEART_RATE, DataType.RADAR,
+                    1.0, Unit.BEATS_PER_MIN));
 
         for (SensorSpecification sensorSpec : spec.getSensors()) {
             SensorSpecification tmp = sensors.get(sensorSpec.getName());

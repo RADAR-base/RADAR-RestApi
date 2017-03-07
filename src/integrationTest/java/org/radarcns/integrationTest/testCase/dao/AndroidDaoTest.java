@@ -2,7 +2,7 @@ package org.radarcns.integrationTest.testCase.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HR;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 import static org.radarcns.integrationTest.util.RandomInput.getRandomIp;
@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.avro.restapi.app.ServerStatus;
+import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.mongo.AndroidDAO;
@@ -33,6 +34,7 @@ public class AndroidDaoTest {
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
+    private static final SensorType SENSOR_TYPE = HEART_RATE;
     private static final int SAMPLES = 10;
 
     @Test
@@ -114,7 +116,7 @@ public class AndroidDaoTest {
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE.concat("1"), SOURCE_TYPE,
-                HR, COUNT, SAMPLES, false));
+                SENSOR_TYPE, COUNT, SAMPLES, false));
 
         assertEquals(ANDROID, AndroidDAO.getInstance().findSourceType(SOURCE, client));
 
