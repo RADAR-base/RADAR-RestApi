@@ -1,6 +1,7 @@
 package org.radarcns.source;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,10 +51,10 @@ public abstract class SourceDefinition {
      * @see {@link SourceSpecification}
      */
     public SourceSpecification getSpecification() {
-        List<SensorSpecification> sensors = new LinkedList<>();
+        Map<String, SensorSpecification> sensors = new HashMap();
 
         for (SensorType type : specification.keySet()) {
-            sensors.add(new SensorSpecification(type,
+            sensors.put(type.name(), new SensorSpecification(type,
                     specification.get(type).getDataType(),
                     specification.get(type).getFrequency(),
                     specification.get(type).getUnit()));

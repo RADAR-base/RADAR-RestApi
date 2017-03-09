@@ -3,8 +3,10 @@ package org.radarcns.monitor;
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.radarcns.avro.restapi.sensor.Sensor;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.Source;
@@ -68,7 +70,7 @@ public class SourceMonitor {
      */
     public Source getState(String user, String source, long start, long end, MongoClient client)
             throws ConnectException {
-        List<Sensor> sensorList = new LinkedList<>();
+        Map<String, Sensor> sensorMap = new HashMap<>();
 
         double countTemp;
         double percentTemp;
@@ -79,13 +81,13 @@ public class SourceMonitor {
 
             percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);
 
-            sensorList.add(new Sensor(type, getStatus(percentTemp), (int)countTemp,
+            sensorMap.put(type.name(), new Sensor(type, getStatus(percentTemp), (int)countTemp,
                     RadarConverter.roundDouble(1.0 - percentTemp, 2)));
         }
 
         double countMex = 0;
         double avgPerc = 0;
-        for (Sensor sensor : sensorList) {
+        for (Sensor sensor : sensorMap.values()) {
             countMex += sensor.getReceivedMessage();
             avgPerc += sensor.getMessageLoss();
         }
@@ -93,7 +95,7 @@ public class SourceMonitor {
         avgPerc = avgPerc / 7.0;
 
         SourceSummary sourceState = new SourceSummary(getStatus(1 - avgPerc),
-                (int)countMex, RadarConverter.roundDouble(avgPerc, 2), sensorList);
+                (int)countMex, RadarConverter.roundDouble(avgPerc, 2), sensorMap);
 
         Source device = new Source(source, specification.getType(), sourceState);
 

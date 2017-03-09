@@ -10,6 +10,8 @@ import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import okhttp3.Response;
 import org.bson.Document;
@@ -87,10 +89,11 @@ public class SourceAppTest {
             assertEquals(1.0, summary.getMessageLoss(), 0.0);
             assertEquals(0, summary.getReceivedMessage(), 0.0);
 
-            List<SensorSpecification> spec = Monitors.getInstance().getSpecification(
-                    SourceType.EMPATICA).getSensors();
+            //TODO
+            List<SensorSpecification> spec = new LinkedList<>(Monitors.getInstance().getSpecification(
+                    SourceType.EMPATICA).getSensors().values());
 
-            for (Sensor sensor : summary.getSensors()) {
+            for (Sensor sensor : summary.getSensors().values()) {
                 assertEquals(State.DISCONNECTED, sensor.getState());
                 assertEquals(1.0, sensor.getMessageLoss(), 0.0);
                 assertEquals(0, sensor.getReceivedMessage(), 0.0);
@@ -126,8 +129,9 @@ public class SourceAppTest {
         Response response = Utility.makeRequest(SERVER + PATH + path);
         assertEquals(200, response.code());
 
+        //TODO
         SourceSpecification expected = Monitors.getInstance().getSpecification(SourceType.EMPATICA);
-        List<SensorSpecification> listSensors = expected.getSensors();
+        List<SensorSpecification> listSensors = new LinkedList<>(expected.getSensors().values());
 
         SourceSpecification actual = null;
         if (response.code() == 200) {
@@ -135,7 +139,7 @@ public class SourceAppTest {
                     response.body().bytes(), SourceSpecification.getClassSchema());
         }
 
-        for (SensorSpecification sensorSpec : actual.getSensors()) {
+        for (SensorSpecification sensorSpec : actual.getSensors().values()) {
             for (int i = 0; i < listSensors.size(); i++) {
                 if (listSensors.get(i).getName().name().equalsIgnoreCase(
                     sensorSpec.getName().toString())) {

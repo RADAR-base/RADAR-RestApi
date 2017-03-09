@@ -46,7 +46,7 @@ public class MonitorsTest {
                 new SensorSpecification(SensorType.HEART_RATE, DataType.RADAR,
                     1.0, Unit.BEATS_PER_MIN));
 
-        for (SensorSpecification sensorSpec : spec.getSensors()) {
+        for (SensorSpecification sensorSpec : spec.getSensors().values()) {
             SensorSpecification tmp = sensors.get(sensorSpec.getName());
             if (tmp.getFrequency().compareTo(sensorSpec.getFrequency()) == 0) {
                 sensors.remove(sensorSpec.getName());
