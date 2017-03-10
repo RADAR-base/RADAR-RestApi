@@ -20,7 +20,7 @@ The api documentation is located at `<your-server-address>:<port>/radar/api/swag
 ## Dev Environment
 Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json) to see documentation of dev deploy instance.
 
-Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/HR/avg/user) to see some mock data.
+Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/user/getAllPatients/0) to see some mock data.
 
 ## Clients
 Swagger provides a tool to automatically generate a client in several programming language.
