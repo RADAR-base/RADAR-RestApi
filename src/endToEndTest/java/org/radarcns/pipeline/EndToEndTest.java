@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.junit.Test;
@@ -67,6 +68,8 @@ public class EndToEndTest {
         produceExpectedDataset();
 
         streamToKafka();
+
+        Thread.sleep(TimeUnit.MINUTES.toMillis(1));
 
         fetchRestApi();
     }
