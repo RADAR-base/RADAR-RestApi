@@ -34,7 +34,10 @@ import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.dataset.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.sensor.Acceleration;
 import org.radarcns.avro.restapi.sensor.SensorType;
+import org.radarcns.empatica.EmpaticaE4Acceleration;
+import org.radarcns.integration.aggregator.DoubleArrayCollector;
 import org.radarcns.integration.aggregator.ExpectedValue;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.pipeline.config.Config;
@@ -46,13 +49,13 @@ import org.radarcns.pipeline.mock.MockAggregator;
 import org.radarcns.pipeline.mock.Producer;
 import org.radarcns.pipeline.mock.config.MockDataConfig;
 import org.radarcns.util.AvroConverter;
+import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EndToEndTest {
 
     private static final Logger logger = LoggerFactory.getLogger(EndToEndTest.class);
-    private static final double MAGNITUDE = 0;
 
     private Producer producer;
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
@@ -147,13 +150,15 @@ public class EndToEndTest {
                         Dataset.getClassSchema());
                 }
 
-                assertDatasetEquals(datasets.get(config), actual, getEpsilon());
+                assertDatasetEquals(config.getSensorType(), datasets.get(config), actual,
+                        getEpsilon(config));
             }
 
         }
     }
 
-    private void assertDatasetEquals(Dataset expected, Dataset actual, double epsilon) {
+    private void assertDatasetEquals(SensorType sensorType, Dataset expected, Dataset actual,
+            double epsilon) {
 
 //        try {
 //            System.out.println(RadarConverter.getPrettyJSON(expected));
@@ -176,29 +181,66 @@ public class EndToEndTest {
             SpecificRecord expectedRecord = (SpecificRecord) expectedItem.getValue();
             SpecificRecord actualRecord = (SpecificRecord) actualItem.getValue();
 
-            int index = expectedRecord.getSchema().getField("value").pos();
-
-            switch (actual.getHeader().getDescriptiveStatistic()) {
-                case QUARTILES:
-                    Quartiles expectedQuartiles = ((Quartiles) expectedRecord.get(index));
-                    Quartiles actualQuartiles = ((Quartiles) actualRecord.get(index));
-
-                    assertEquals(expectedQuartiles.getFirst(), actualQuartiles.getFirst(), epsilon);
-                    assertEquals(expectedQuartiles.getSecond(),
-                            actualQuartiles.getSecond(), epsilon);
-                    assertEquals(expectedQuartiles.getThird(), actualQuartiles.getThird(), epsilon);
+            switch (sensorType) {
+                case ACCELEROMETER:
+                        compareAccelerationItem(expected.getHeader().getDescriptiveStatistic(),
+                            (Acceleration) expectedRecord, (Acceleration) actualRecord, epsilon);
                     break;
                 default:
-                    assertEquals((Double) expectedRecord.get(index),
-                            (Double) actualRecord.get(index), epsilon);
+                    compareSingletonItem(actual.getHeader().getDescriptiveStatistic(),
+                            expectedRecord, actualRecord, epsilon);
             }
         }
 
         assertEquals(false, actualItems.hasNext());
     }
 
-    private double getEpsilon() {
-        return MAGNITUDE == 0 ? 0.0 : Math.pow(10.0, -1.0 * MAGNITUDE);
+    private double getEpsilon(MockDataConfig config) {
+        return config.getMagnitude() == 0 ? 0.0 : Math.pow(10.0, -1.0 * config.getMagnitude());
+    }
+
+    private void compareSingletonItem(DescriptiveStatistic stat, SpecificRecord expectedRecord,
+            SpecificRecord actualRecord, double epsilon) {
+        int index = expectedRecord.getSchema().getField("value").pos();
+
+        switch (stat) {
+            case QUARTILES:
+                compareQuartiles(((Quartiles) expectedRecord.get(index)),
+                        ((Quartiles) actualRecord.get(index)), epsilon);
+                break;
+            default:
+                assertEquals((Double) expectedRecord.get(index),
+                    (Double) actualRecord.get(index), epsilon);
+        }
+    }
+
+    private void compareAccelerationItem(DescriptiveStatistic stat, Acceleration expectedRecord,
+            Acceleration actualRecord, double epsilon) {
+        switch (stat) {
+            case QUARTILES:
+                compareQuartiles(((Quartiles) expectedRecord.getX()),
+                    ((Quartiles) actualRecord.getX()), epsilon);
+                compareQuartiles(((Quartiles) expectedRecord.getY()),
+                    ((Quartiles) actualRecord.getY()), epsilon);
+                compareQuartiles(((Quartiles) expectedRecord.getZ()),
+                    ((Quartiles) actualRecord.getZ()), epsilon);
+                break;
+            default:
+                assertEquals(((Double) expectedRecord.getX()),
+                    ((Double) actualRecord.getX()), epsilon);
+                assertEquals(((Double) expectedRecord.getY()),
+                    ((Double) actualRecord.getY()), epsilon);
+                assertEquals(((Double) expectedRecord.getZ()),
+                    ((Double) actualRecord.getZ()), epsilon);
+        }
+    }
+
+    private void compareQuartiles(Quartiles expectedQuartiles, Quartiles actualQuartiles,
+            double epsilon) {
+        assertEquals(expectedQuartiles.getFirst(), actualQuartiles.getFirst(), epsilon);
+        assertEquals(expectedQuartiles.getSecond(),
+            actualQuartiles.getSecond(), epsilon);
+        assertEquals(expectedQuartiles.getThird(), actualQuartiles.getThird(), epsilon);
     }
 
 }

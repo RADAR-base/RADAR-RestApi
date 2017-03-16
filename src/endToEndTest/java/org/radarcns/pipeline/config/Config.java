@@ -18,9 +18,14 @@ package org.radarcns.pipeline.config;
 
 import java.io.File;
 import java.io.IOException;
+import org.radarcns.pipeline.EndToEndTest;
 import org.radarcns.pipeline.mock.config.MockConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Config {
+
+    private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
     public static final String PIPELINE_CONFIG = "pipeline.yml";
     public static final String MOCK_CONFIG = "mock_file.yml";
@@ -39,7 +44,7 @@ public class Config {
             try {
                 config =  new ConfigLoader().load(BaseFile.file, PipelineConfig.class);
             } catch (IOException exec) {
-                //Nothing to do
+                logger.error("PipelineConfig cannot be created. ", exec);
             }
 
             return config;
@@ -58,7 +63,7 @@ public class Config {
                         Config.class.getClassLoader().getResource(MOCK_CONFIG).getFile()
                     ), MockConfig.class);
             } catch (IOException exec) {
-                //Nothing to do
+                logger.error("MockConfig cannot be created. ", exec);
             }
 
             return config;

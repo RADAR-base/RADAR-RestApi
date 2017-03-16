@@ -26,6 +26,7 @@ public class MockDataConfig extends org.radarcns.mock.MockDataConfig {
     @JsonProperty("values_to_test")
     private String valuesToTest;
     private Double frequency;
+    private Long magnitude;
 
     public String getSensor() {
         return sensor;
@@ -69,5 +70,13 @@ public class MockDataConfig extends org.radarcns.mock.MockDataConfig {
 
     public File getCvsFile() {
         return super.getDataFile(Config.getBaseFile());
+    }
+
+    public Long getMagnitude() {
+        return magnitude;
+    }
+
+    public void setMagnitude(Long magnitude) {
+        this.magnitude = magnitude;
     }
 }
