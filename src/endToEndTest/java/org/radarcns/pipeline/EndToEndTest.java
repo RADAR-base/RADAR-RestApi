@@ -58,21 +58,15 @@ public class EndToEndTest {
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
     @Test
-    public void test() {
+    public void endToEnd() throws Exception {
+        produceInputFile();
 
-        List<Long> timestamps = Metronome.timestamps(24*60*60, 1, 64);
+        produceExpectedDataset();
+
+        streamToKafka();
+
+        fetchRestApi();
     }
-
-//    @Test
-//    public void endToEnd() throws Exception {
-////        produceInputFile();
-//
-//        produceExpectedDataset();
-//
-////        streamToKafka();
-//
-//        fetchRestApi();
-//    }
 
 
     private void produceInputFile()
