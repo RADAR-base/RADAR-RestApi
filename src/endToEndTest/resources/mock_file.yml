@@ -6,7 +6,7 @@ data:
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4Acceleration
     values_to_test: "x, y, z"
-    magnitude: 12
+    magnitude: 10
   - topic: android_empatica_e4_battery_level
     sensor: BATTERY
     frequency: 1.0
@@ -14,7 +14,7 @@ data:
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4BatteryLevel
     values_to_test: "batteryLevel"
-    magnitude: 12
+    magnitude: 10
   - topic: android_empatica_e4_blood_volume_pulse
     sensor: BLOOD_VOLUME_PULSE
     frequency: 64.0
@@ -30,7 +30,7 @@ data:
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4ElectroDermalActivity
     values_to_test: "electroDermalActivity"
-    magnitude: 12
+    magnitude: 10
   - topic: android_empatica_e4_inter_beat_interval
     sensor: INTER_BEAT_INTERVAL
     frequency: 1.0
@@ -38,7 +38,7 @@ data:
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4InterBeatInterval
     values_to_test: "interBeatInterval"
-    magnitude: 12
+    magnitude: 10
   - topic: android_empatica_e4_temperature
     sensor: THERMOMETER
     frequency: 4.0
@@ -46,6 +46,6 @@ data:
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4Temperature
     values_to_test: "temperature"
-    magnitude: 12
+    magnitude: 10
 
 # missing "HEART_RATE" use case
