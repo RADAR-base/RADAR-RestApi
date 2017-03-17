@@ -71,7 +71,7 @@ public class Metronome {
             throw new IllegalArgumentException("Frequency must be bigger than zero");
         }
 
-        if (baseFrequency <= frequency) {
+        if (baseFrequency < frequency) {
             throw new IllegalArgumentException("BaseFrequency cannot be smaller than frequency");
         }
     }

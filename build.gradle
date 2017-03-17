@@ -236,6 +236,13 @@ task endToEndTest(type: Test) {
   }
 }
 
+task setCredential << {
+  def file = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
+  file.text = file.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
+  file.text = file.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
+  file.text = file.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+}
+
 //---------------------------------------------------------------------------//
 // Code coverage and codacy                                                  //
 //---------------------------------------------------------------------------//
