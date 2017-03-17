@@ -240,6 +240,7 @@ task setRadarEnvironmentForDocker << {
   File volumes = new File("src/endToEndTest/dockerRadar/volumes")
   volumes.mkdir()
   String volumePath = volumes.getAbsolutePath()
+  
   def fileEnv = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
   fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumePath)
   fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
@@ -248,6 +249,8 @@ task setRadarEnvironmentForDocker << {
 
   def fileInstall = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh")
   fileInstall.text = fileInstall.text.replace('/usr/local/var/lib/docker', volumePath)
+
+  new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/smtp.env.template").renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/smtp.env")
 }
 
 //---------------------------------------------------------------------------//
