@@ -1,16 +1,19 @@
 rest_proxy:
   - protocol: http
-    host: localhost
+    # host: localhost
+    host: 52.210.59.174
     port: 8082
 
 schema_registry:
   - protocol: http
-    host: localhost
+    # host: localhost
+    host: 52.210.59.174
     port: 8081
 
 rest_api:
   - protocol: http
-    host: localhost
+    # host: localhost
+    host: 52.210.59.174
     port: 8080
 
 # Rest API web root
