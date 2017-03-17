@@ -109,10 +109,10 @@ sourceSets {
     java {
       compileClasspath += main.output + test.output
       runtimeClasspath += main.output + test.output
-      srcDir file('src/integration/java')
+      srcDir file('src/integrationTest/java')
     }
     resources {
-      srcDir 'src/integration/resources'
+      srcDir 'src/integrationTest/resources'
     }
   }
   endToEndTest {
@@ -207,7 +207,7 @@ test {
 }
 
 task integrationTest(type: Test) {
-  description = "Run integration tests (located in src/integration/...)."
+  description = "Run integration tests (located in src/integrationTest/...)."
 
   testClassesDir = sourceSets.integrationTest.output.classesDir
   classpath = sourceSets.integrationTest.runtimeClasspath
@@ -219,6 +219,22 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTest
+
+//---------------------------------------------------------------------------//
+// End to End Test                                                           //
+//---------------------------------------------------------------------------//
+
+task endToEndTest(type: Test) {
+  description = "Run end to end tests (located in src/endToEndTest/...)."
+
+  testClassesDir = sourceSets.endToEndTest.output.classesDir
+  classpath = sourceSets.endToEndTest.runtimeClasspath
+
+  // This is not needed, but I like to see which tests have run
+  testLogging {
+    events "skipped", "failed"
+  }
+}
 
 //---------------------------------------------------------------------------//
 // Code coverage and codacy                                                  //
@@ -251,11 +267,11 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 //---------------------------------------------------------------------------//
 task copyWarForIntegration(type: Copy) {
   from war.archivePath
-  into "${projectDir}/src/integration/image"
+  into "${projectDir}/src/integrationTest/image"
 }
 
 task removeWar(type: Delete) {
-  delete "${projectDir}/src/integration/image/${war.getArchiveName()}"
+  delete "${projectDir}/src/integrationTest/image/${war.getArchiveName()}"
 }
 
 war.dependsOn(removeWar)
