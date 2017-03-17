@@ -30,10 +30,11 @@ script:
   - ./gradlew war
   - sudo docker-compose -f src/integrationTest/docker-compose.yml up -d --build
   - sudo docker ps -a
-  - printf "####################\n# INTEGRATION TEST #\n####################\n"
+  - echo "INTEGRATION TEST"
   - ./gradlew check
   - sudo docker-compose -f src/integrationTest/docker-compose.yml down
-  - printf "###################\n# END TO END TEST #\n###################\n"
+  - echo "END TO END TEST"
+  - mkdir /home/radarVolumes
   - ./gradlew setCredential
   - sudo ./src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh
   - ./gradlew endToEndTest
