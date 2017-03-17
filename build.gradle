@@ -38,8 +38,12 @@ ext.tomcat = '8.0.37'
 
 configurations {
   codacy
+  //Integration test for REST API only
   integrationTestCompile.extendsFrom testCompile
   integrationTestRuntime.extendsFrom testRuntime
+  //End to end tests
+  endToEndTestCompile.extendsFrom testCompile
+  endToEndTestCompile.extendsFrom testRuntime
   provided
   compile.extendsFrom provided
 }
@@ -95,6 +99,33 @@ task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask)
 }
 
 compileJava.source(generateAvro.outputs)
+
+//---------------------------------------------------------------------------//
+// Source Set                                                                //
+//---------------------------------------------------------------------------//
+
+sourceSets {
+  integrationTest {
+    java {
+      compileClasspath += main.output + test.output
+      runtimeClasspath += main.output + test.output
+      srcDir file('src/integration/java')
+    }
+    resources {
+      srcDir 'src/integration/resources'
+    }
+  }
+  endToEndTest {
+    java {
+      compileClasspath += main.output + test.output + integrationTest.output
+      runtimeClasspath += main.output + test.output + integrationTest.output
+      srcDir file('src/endToEndTest/java')
+    }
+    resources {
+      srcDir 'src/endToEndTest/resources'
+    }
+  }
+}
 
 //---------------------------------------------------------------------------//
 // Style checking                                                            //
@@ -168,18 +199,6 @@ tasks.matching {it instanceof Test}.all {
   }
 }
 
-sourceSets {
-  integrationTest {
-    java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
-    }
-    resources {
-      srcDir 'src/integrationTest/resources'
-    }
-  }
-}
-
 test {
   testLogging {
     // Show that tests are run in the command-line output
@@ -188,7 +207,7 @@ test {
 }
 
 task integrationTest(type: Test) {
-  description = "Run integration tests (located in src/integrationTest/...)."
+  description = "Run integration tests (located in src/integration/...)."
 
   testClassesDir = sourceSets.integrationTest.output.classesDir
   classpath = sourceSets.integrationTest.runtimeClasspath
@@ -232,11 +251,11 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 //---------------------------------------------------------------------------//
 task copyWarForIntegration(type: Copy) {
   from war.archivePath
-  into "${projectDir}/src/integrationTest/image"
+  into "${projectDir}/src/integration/image"
 }
 
 task removeWar(type: Delete) {
-  delete "${projectDir}/src/integrationTest/image/${war.getArchiveName()}"
+  delete "${projectDir}/src/integration/image/${war.getArchiveName()}"
 }
 
 war.dependsOn(removeWar)

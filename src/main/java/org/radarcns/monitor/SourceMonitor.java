@@ -4,8 +4,6 @@ import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import org.radarcns.avro.restapi.sensor.Sensor;
 import org.radarcns.avro.restapi.sensor.SensorType;

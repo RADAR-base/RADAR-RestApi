@@ -54,6 +54,9 @@ public class EndToEndTest {
     private Producer producer;
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
+    // Latency expressed in second
+    private static final long LATENCY = 30;
+
     @Test
     public void endToEnd() throws Exception {
         produceInputFile();
@@ -62,11 +65,11 @@ public class EndToEndTest {
 
         streamToKafka();
 
-        Thread.sleep(TimeUnit.SECONDS.toMillis(30));
+        logger.info("Waiting data ({} seconds) ... ", LATENCY);
+        Thread.sleep(TimeUnit.SECONDS.toMillis(LATENCY));
 
         fetchRestApi();
     }
-
 
     private void produceInputFile()
         throws IOException, ClassNotFoundException, NoSuchMethodException,
@@ -78,7 +81,7 @@ public class EndToEndTest {
         }
     }
 
-    private void produceExpectedDataset() throws Exception{
+    private void produceExpectedDataset() throws Exception {
         logger.info("Computing expected dataset ...");
         int tastCase = Config.getMockConfig().getData().size();
 
@@ -101,7 +104,7 @@ public class EndToEndTest {
         for (DescriptiveStatistic stat : DescriptiveStatistic.values()) {
 
             if (stat.equals(DescriptiveStatistic.LOWER_QUARTILE)
-                || stat.equals(DescriptiveStatistic.UPPER_QUARTILE)) {
+                    || stat.equals(DescriptiveStatistic.UPPER_QUARTILE)) {
                 continue;
             }
 
@@ -155,14 +158,6 @@ public class EndToEndTest {
 
     private void assertDatasetEquals(SensorType sensorType, Dataset expected, Dataset actual,
             double epsilon) {
-
-//        try {
-//            System.out.println(RadarConverter.getPrettyJSON(expected));
-//            System.out.println(RadarConverter.getPrettyJSON(actual));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
         assertEquals(expected.getHeader(), actual.getHeader());
 
         Iterator<Item> expectedItems = expected.getDataset().iterator();
@@ -179,7 +174,7 @@ public class EndToEndTest {
 
             switch (sensorType) {
                 case ACCELEROMETER:
-                        compareAccelerationItem(expected.getHeader().getDescriptiveStatistic(),
+                    compareAccelerationItem(expected.getHeader().getDescriptiveStatistic(),
                             (Acceleration) expectedRecord, (Acceleration) actualRecord, epsilon);
                     break;
                 default:
@@ -206,7 +201,7 @@ public class EndToEndTest {
                 break;
             default:
                 assertEquals((Double) expectedRecord.get(index),
-                    (Double) actualRecord.get(index), epsilon);
+                        (Double) actualRecord.get(index), epsilon);
         }
     }
 
@@ -215,19 +210,19 @@ public class EndToEndTest {
         switch (stat) {
             case QUARTILES:
                 compareQuartiles(((Quartiles) expectedRecord.getX()),
-                    ((Quartiles) actualRecord.getX()), epsilon);
+                        ((Quartiles) actualRecord.getX()), epsilon);
                 compareQuartiles(((Quartiles) expectedRecord.getY()),
-                    ((Quartiles) actualRecord.getY()), epsilon);
+                        ((Quartiles) actualRecord.getY()), epsilon);
                 compareQuartiles(((Quartiles) expectedRecord.getZ()),
-                    ((Quartiles) actualRecord.getZ()), epsilon);
+                        ((Quartiles) actualRecord.getZ()), epsilon);
                 break;
             default:
                 assertEquals(((Double) expectedRecord.getX()),
-                    ((Double) actualRecord.getX()), epsilon);
+                        ((Double) actualRecord.getX()), epsilon);
                 assertEquals(((Double) expectedRecord.getY()),
-                    ((Double) actualRecord.getY()), epsilon);
+                        ((Double) actualRecord.getY()), epsilon);
                 assertEquals(((Double) expectedRecord.getZ()),
-                    ((Double) actualRecord.getZ()), epsilon);
+                        ((Double) actualRecord.getZ()), epsilon);
         }
     }
 
@@ -235,7 +230,7 @@ public class EndToEndTest {
             double epsilon) {
         assertEquals(expectedQuartiles.getFirst(), actualQuartiles.getFirst(), epsilon);
         assertEquals(expectedQuartiles.getSecond(),
-            actualQuartiles.getSecond(), epsilon);
+                actualQuartiles.getSecond(), epsilon);
         assertEquals(expectedQuartiles.getThird(), actualQuartiles.getThird(), epsilon);
     }
 

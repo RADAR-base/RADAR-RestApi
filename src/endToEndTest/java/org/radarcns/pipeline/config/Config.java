@@ -18,7 +18,6 @@ package org.radarcns.pipeline.config;
 
 import java.io.File;
 import java.io.IOException;
-import org.radarcns.pipeline.EndToEndTest;
 import org.radarcns.pipeline.mock.config.MockConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

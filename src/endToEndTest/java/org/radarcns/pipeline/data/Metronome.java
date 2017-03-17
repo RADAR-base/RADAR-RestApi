@@ -1,15 +1,8 @@
 package org.radarcns.pipeline.data;
 
-import java.sql.Time;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.radarcns.pipeline.EndToEndTest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*
  *  Copyright 2016 Kings College London and The Hyve
@@ -26,10 +19,22 @@ import org.slf4j.LoggerFactory;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Tool to simulate time.
+ */
 public class Metronome {
 
-    //private static final Logger logger = LoggerFactory.getLogger(Metronome.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(Metronome.class);
 
+    /**
+     * Computes timestamps for the given amount of samples with the given frequency.
+     * @param samples number of timestamp that has to be generated
+     * @param frequency number of samples that the sensor generates in 1 second
+     * @param baseFrequency used in case the sensor is on board a device with other sensors having
+     *      different frequencies. This must be the maximum between all supported frequencies.
+     * @return a list of timestamps
+     */
     public static List<Long> timestamps(int samples, int frequency, int baseFrequency) {
         checkInput(samples, frequency, baseFrequency);
 
@@ -54,6 +59,9 @@ public class Metronome {
         return timestamps;
     }
 
+    /**
+     * Checks whether the input parameters are valid input or not.
+     */
     private static void checkInput(int samples, int frequency, int baseFrequency) {
         if (samples < 0) {
             throw new IllegalArgumentException("The amount of samples must be positve");
@@ -63,7 +71,7 @@ public class Metronome {
             throw new IllegalArgumentException("Frequency must be bigger than zero");
         }
 
-        if (baseFrequency < frequency) {
+        if (baseFrequency <= frequency) {
             throw new IllegalArgumentException("BaseFrequency cannot be smaller than frequency");
         }
     }

@@ -274,7 +274,7 @@ public class CsvGenerator {
      *
      * @param config properties containing metadata to generate data
      * @param seconds simulation duration expressed in seconds
-     * @throws IOException
+     * @throws IOException in case configuration file cannot be retrieved
      */
     public static void generate(MockDataConfig config, Long seconds) throws IOException {
         File file = config.getDataFile(Config.getBaseFile());

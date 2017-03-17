@@ -16,13 +16,9 @@ package org.radarcns.pipeline.data;
  * limitations under the License.
  */
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import org.radarcns.pipeline.config.Config;
 import org.radarcns.security.Param;
 
 
@@ -97,6 +93,13 @@ public abstract class CsvSensor {
         return result.substring(0, result.length() - 1) + '\n';
     }
 
+    /**
+     * Simulates data of a sensor with the given frequency for a time interval specified by
+     *      duration.
+     * @param duration in seconds for the simulation
+     * @param frequency of the simulated sensor. Amount of messages generated in 1 second
+     * @return list containing simulated values
+     */
     public List<String> getValues(Long duration, int frequency) {
         List<String> list = new LinkedList<>();
 
@@ -105,17 +108,20 @@ public abstract class CsvSensor {
 
         for (Long time : timestamps) {
             list.add(getUser() + "," + getSource() + ","
-                + getTimestamp(getRandomRoundTripTime(time)) + "," + getTimestamp(time)
-                + "," + nextValue() + "\n");
+                    + getTimestamp(getRandomRoundTripTime(time)) + "," + getTimestamp(time)
+                    + "," + nextValue() + "\n");
         }
 
         return list;
     }
 
+    /**
+     * Returns the next value for the simulation.
+     */
     protected abstract String nextValue();
 
     /**
-     * Converts a timestamp in a string stating a timestamp expressed in double
+     * Converts a timestamp in a string stating a timestamp expressed in double.
      * @param time value that has to be converted
      * @return a string value representing a timestamp
      */

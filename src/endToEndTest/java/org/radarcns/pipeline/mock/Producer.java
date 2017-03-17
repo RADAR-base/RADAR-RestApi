@@ -82,8 +82,8 @@ public class Producer {
     /**
      * Starts all available mock devices.
      *
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException from more details, please check {@link MockFile#send()}
+     * @throws InterruptedException from more details, please check {@link MockFile#send()}
      */
     public void start() throws IOException, InterruptedException {
         for (String topic : files.keySet()) {
@@ -96,8 +96,8 @@ public class Producer {
     /**
      * Stops all available mock devices.
      *
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException from more details, please check {@link KafkaSender#close()}
+     * @throws InterruptedException from more details, please check {@link KafkaSender#close()}
      */
     public void shutdown() throws IOException, InterruptedException {
         logger.info("Closing channels");

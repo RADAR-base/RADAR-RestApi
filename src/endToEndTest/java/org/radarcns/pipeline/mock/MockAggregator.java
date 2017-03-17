@@ -66,8 +66,8 @@ public class MockAggregator {
 
         while ( record != null ) {
             eav.add((Long) record.get(Variable.TIME_WINDOW),
-                (Long) record.get(Variable.TIMESTAMP),
-                (Double[]) record.get(Variable.VALUE));
+                    (Long) record.get(Variable.TIMESTAMP),
+                    (Double[]) record.get(Variable.VALUE));
 
             record = parser.next();
         }
@@ -97,8 +97,8 @@ public class MockAggregator {
 
         while (record != null) {
             edv.add((Long) record.get(Variable.TIME_WINDOW),
-                (Long) record.get(Variable.TIMESTAMP),
-                (Double) record.get(Variable.VALUE));
+                    (Long) record.get(Variable.TIMESTAMP),
+                    (Double) record.get(Variable.VALUE));
 
             record = parser.next();
         }

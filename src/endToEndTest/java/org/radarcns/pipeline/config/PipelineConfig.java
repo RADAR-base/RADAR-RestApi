@@ -58,11 +58,17 @@ public class PipelineConfig {
         this.duration = duration;
     }
 
+    /**
+     * Returns the URL to access Schema Registry.
+     */
     public String getSchemaRegistryInstance() {
         ServerConfig server = schemaRegistry.get(0);
         return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort();
     }
 
+    /**
+     * Returns the URL to access REST Proxy.
+     */
     public String getRestProxyInstance() {
         ServerConfig server = restProxy.get(0);
         return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort();
@@ -76,6 +82,9 @@ public class PipelineConfig {
         this.apiWebRoot = apiWebRoot;
     }
 
+    /**
+     * Returns the URL to access RADAR-CNS REST API.
+     */
     public String getRestApiInstance() {
         ServerConfig server = restApi.get(0);
         return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort()
