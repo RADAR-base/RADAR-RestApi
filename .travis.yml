@@ -34,9 +34,9 @@ script:
   - ./gradlew check
   - sudo docker-compose -f src/integrationTest/docker-compose.yml down
   - echo "END TO END TEST"
-  - mkdir /home/radarVolumes
-  - ./gradlew setCredential
+  - ./gradlew setRadarEnvironmentForDocker
   - sudo ./src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh
+  - sudo docker ps -a
   - ./gradlew endToEndTest
   - sudo docker-compose -f src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/docker-compose.yml down
 
