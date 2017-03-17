@@ -61,7 +61,7 @@ public class EndToEndTest {
 
     @Test
     public void endToEnd() throws Exception {
-        //waitInfrastructure();
+        waitInfrastructure();
 
         produceInputFile();
 
