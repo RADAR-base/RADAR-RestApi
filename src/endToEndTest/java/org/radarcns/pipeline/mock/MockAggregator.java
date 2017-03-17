@@ -32,6 +32,8 @@ import org.radarcns.pipeline.config.Config;
 import org.radarcns.pipeline.data.Parser;
 import org.radarcns.pipeline.data.Parser.Variable;
 import org.radarcns.pipeline.mock.config.MockDataConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The MockAggregator simulates the behaviour of a Kafka Streams application based on time window.
@@ -41,6 +43,8 @@ import org.radarcns.pipeline.mock.config.MockDataConfig;
  *  </ul>
  */
 public class MockAggregator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockAggregator.class);
 
     /**
      * @param parser class that reads a CVS file line by line returning an {@code Map} .

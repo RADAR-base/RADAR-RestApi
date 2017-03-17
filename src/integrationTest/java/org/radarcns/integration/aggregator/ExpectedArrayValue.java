@@ -1,13 +1,16 @@
 package org.radarcns.integration.aggregator;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * {@code ExpectedValue} represented as {@code Double[]}.
  *      @see {@link ExpectedValue}
  */
 public class ExpectedArrayValue extends ExpectedValue<DoubleArrayCollector> {
 
-    //private static final Logger logger = LoggerFactory.getLogger(ExpectedArrayValue.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExpectedArrayValue.class);
 
     /**
      * Constructor.
@@ -42,10 +45,10 @@ public class ExpectedArrayValue extends ExpectedValue<DoubleArrayCollector> {
      * @param array sample value
      **/
     public void add(Long startTimeWindow, Long timestamp, double[] array) {
-        if ( timestamp < lastTimestamp + DURATION ) {
+        if (timestamp < lastTimestamp + DURATION) {
             lastValue.add(array);
         } else {
-            lastTimestamp = timestamp;
+            lastTimestamp = startTimeWindow;
             lastValue = new DoubleArrayCollector();
             lastValue.add(array);
             series.put(startTimeWindow, lastValue);

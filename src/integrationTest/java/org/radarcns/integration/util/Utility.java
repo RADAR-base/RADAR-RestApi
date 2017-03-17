@@ -7,6 +7,8 @@ import static org.radarcns.dao.mongo.AndroidDAO.UPTIME_COLLECTION;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -154,5 +156,15 @@ public class Utility {
             documents.get(RECORD_COLLECTION).getInteger("recordsSent"),
             documents.get(RECORD_COLLECTION).getInteger("recordsUnsent")
         );
+    }
+
+    /**
+     * Converts the give a timestamp to a Human readable date format.
+     * @param timestamp value in millisecond that has to be converted
+     * @return String representing a date
+     */
+    public static String timestampToString(long timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        return sdf.format(new Date(timestamp));
     }
 }

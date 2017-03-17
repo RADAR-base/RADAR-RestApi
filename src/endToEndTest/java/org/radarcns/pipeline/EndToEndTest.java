@@ -21,11 +21,8 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Response;
@@ -37,20 +34,16 @@ import org.radarcns.avro.restapi.dataset.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.sensor.Acceleration;
 import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.empatica.EmpaticaE4Acceleration;
-import org.radarcns.integration.aggregator.DoubleArrayCollector;
 import org.radarcns.integration.aggregator.ExpectedValue;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.pipeline.config.Config;
 import org.radarcns.pipeline.data.CsvGenerator;
 import org.radarcns.pipeline.data.CsvSensor;
 import org.radarcns.pipeline.data.CsvValidator;
-import org.radarcns.pipeline.data.Metronome;
 import org.radarcns.pipeline.mock.MockAggregator;
 import org.radarcns.pipeline.mock.Producer;
 import org.radarcns.pipeline.mock.config.MockDataConfig;
 import org.radarcns.util.AvroConverter;
-import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +62,7 @@ public class EndToEndTest {
 
         streamToKafka();
 
-        Thread.sleep(TimeUnit.MINUTES.toMillis(1));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(30));
 
         fetchRestApi();
     }

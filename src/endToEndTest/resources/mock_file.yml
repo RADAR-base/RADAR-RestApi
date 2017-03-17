@@ -22,7 +22,7 @@ data:
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4BloodVolumePulse
     values_to_test: "bloodVolumePulse"
-    magnitude: 11
+    magnitude: 10
   - topic: android_empatica_e4_electrodermal_activity
     sensor: ELECTRODERMAL_ACTIVITY
     frequency: 4.0
