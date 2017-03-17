@@ -61,7 +61,7 @@ public class EndToEndTest {
 
     @Test
     public void endToEnd() throws Exception {
-        waitInfrastructure();
+        //waitInfrastructure();
 
         produceInputFile();
 
@@ -75,7 +75,7 @@ public class EndToEndTest {
         fetchRestApi();
     }
 
-    private void waitInfrastructure() throws Exception{
+    private void waitInfrastructure() throws InterruptedException {
         LOGGER.info("Waiting infrastructure ... ");
         int retry = 60;
         long sleep = 1000;
@@ -104,23 +104,27 @@ public class EndToEndTest {
         for (int i = 0; i < retry; i++) {
             count = 0;
 
-            Response response = Utility.makeRequest(
-                    Config.getPipelineConfig().getRestProxyInstance() + "/topics");
+            Response response = null;
+            try {
+                response = Utility.makeRequest(
+                        Config.getPipelineConfig().getRestProxyInstance() + "/topics");
+                if (response.code() == 200) {
+                    String topics = response.body().string().toString();
+                    String[] topicArray = topics.substring(1, topics.length() - 1).replace("\"", "")
+                        .split(",");
 
-            if (response.code() == 200) {
-                String topics = response.body().string().toString();
-                String[] topicArray = topics.substring(1, topics.length() - 1).replace("\"", "")
-                    .split(",");
+                    for (String topic : topicArray) {
+                        if (expectedTopics.contains(topic)) {
+                            count++;
+                        }
+                    }
 
-                for (String topic : topicArray) {
-                    if (expectedTopics.contains(topic)) {
-                        count++;
+                    if (count == expectedTopics.size()) {
+                        break;
                     }
                 }
-
-                if (count == expectedTopics.size()) {
-                    break;
-                }
+            } catch (IOException exec) {
+                LOGGER.info("Error while waiting infrastructure", exec);
             }
 
             Thread.sleep(sleep * (i + 1));
