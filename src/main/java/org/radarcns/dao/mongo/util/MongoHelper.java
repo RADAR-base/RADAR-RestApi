@@ -3,7 +3,7 @@ package org.radarcns.dao.mongo.util;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lte;
-import static org.radarcns.listner.MongoDBContextListener.MONGO_CLIENT;
+import static org.radarcns.listener.MongoDBContextListener.MONGO_CLIENT;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -17,7 +17,7 @@ import java.util.Date;
 import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.config.Properties;
-import org.radarcns.listner.MongoDBContextListener;
+import org.radarcns.listener.MongoDBContextListener;
 
 /**
  * Generic MongoDB helper.

@@ -43,7 +43,7 @@ import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
-import org.radarcns.listner.MongoDBContextListener;
+import org.radarcns.listener.MongoDBContextListener;
 import org.radarcns.util.RadarConverter;
 
 public class Utility {

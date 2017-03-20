@@ -37,6 +37,6 @@
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
-    <listener><listener-class>org.radarcns.listner.MongoDBContextListener</listener-class></listener>
+    <listener><listener-class>org.radarcns.listener.MongoDBContextListener</listener-class></listener>
 
 </web-app>
