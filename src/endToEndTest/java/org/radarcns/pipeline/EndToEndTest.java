@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
+import org.bson.Document;
 import org.junit.Test;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
@@ -56,6 +58,8 @@ public class EndToEndTest {
     private Producer producer;
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
+    private Map<String, Collection<Document>> expectedDocument;
+
     // Latency expressed in second
     private static final long LATENCY = 30;
 
@@ -65,7 +69,12 @@ public class EndToEndTest {
 
         produceInputFile();
 
-        produceExpectedDataset();
+        Map<MockDataConfig, ExpectedValue> expectedValue = MockAggregator.getSimulations();
+
+        produceExpectedDataset(expectedValue);
+
+//        Map<MockDataConfig, Collection<Document>> expectedDuments =
+//            getExpecetedDocument(expectedValue);
 
         streamToKafka();
 
@@ -75,6 +84,9 @@ public class EndToEndTest {
         fetchRestApi();
     }
 
+    /**
+     * Checks if the test bed is ready to accept data.
+     */
     private void waitInfrastructure() throws InterruptedException {
         LOGGER.info("Waiting infrastructure ... ");
         int retry = 60;
@@ -133,6 +145,9 @@ public class EndToEndTest {
         assertEquals(expectedTopics.size(), count);
     }
 
+    /**
+     * Generates new random CSV files.
+     */
     private void produceInputFile()
         throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, ParseException, IllegalAccessException {
@@ -143,11 +158,16 @@ public class EndToEndTest {
         }
     }
 
-    private void produceExpectedDataset() throws Exception {
+    /**
+     * Starting from the expected values computed using the available CSV files, it computes all
+     *      the expected Datasets used to test REST-API.
+     * @see {@link org.radarcns.integration.aggregator.ExpectedValue}
+     */
+    private void produceExpectedDataset(Map<MockDataConfig, ExpectedValue> expectedValue)
+            throws Exception {
         LOGGER.info("Computing expected dataset ...");
         int tastCase = Config.getMockConfig().getData().size();
 
-        Map<MockDataConfig, ExpectedValue> expectedValue = MockAggregator.getSimulations();
         assertEquals(tastCase, expectedValue.size());
 
         expectedDataset = computeExpectedDataset(expectedValue);
@@ -159,6 +179,10 @@ public class EndToEndTest {
         }
     }
 
+    /**
+     * This is the actual generator of Datasets exploited by {@link #produceExpectedDataset(Map)}.
+     * @see {@link org.radarcns.integration.aggregator.ExpectedValue}
+     */
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> computeExpectedDataset(
             Map<MockDataConfig, ExpectedValue> expectedValue) throws Exception {
         Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> datasets = new HashMap<>();
@@ -176,6 +200,9 @@ public class EndToEndTest {
         return datasets;
     }
 
+    /**
+     * Streams data stored in CSV files into Kafka.
+     */
     private void streamToKafka() throws IOException, InterruptedException {
         LOGGER.info("Streaming data into Kafka ...");
         producer = new Producer();
@@ -183,6 +210,9 @@ public class EndToEndTest {
         producer.shutdown();
     }
 
+    /**
+     * Queries the REST-API for each statistical function and for each sensor.
+     */
     private void fetchRestApi() throws IOException {
         LOGGER.info("Fetching APIs ...");
 
@@ -212,14 +242,19 @@ public class EndToEndTest {
                 }
 
                 assertDatasetEquals(config.getSensorType(), datasets.get(config), actual,
-                        getEpsilon(config));
+                        getDelta(config));
             }
 
         }
     }
 
+    /**
+     * Checks if the two given datasets are equals. Double values are compared using a constant
+     *      representing the maximum delta for which both numbers are still considered equal.
+     * @see {@link Dataset}
+     */
     private void assertDatasetEquals(SensorType sensorType, Dataset expected, Dataset actual,
-            double epsilon) {
+            double delta) {
         assertEquals(expected.getHeader(), actual.getHeader());
 
         Iterator<Item> expectedItems = expected.getDataset().iterator();
@@ -237,63 +272,93 @@ public class EndToEndTest {
             switch (sensorType) {
                 case ACCELEROMETER:
                     compareAccelerationItem(expected.getHeader().getDescriptiveStatistic(),
-                            (Acceleration) expectedRecord, (Acceleration) actualRecord, epsilon);
+                            (Acceleration) expectedRecord, (Acceleration) actualRecord, delta);
                     break;
                 default:
                     compareSingletonItem(actual.getHeader().getDescriptiveStatistic(),
-                            expectedRecord, actualRecord, epsilon);
+                            expectedRecord, actualRecord, delta);
             }
         }
 
         assertEquals(false, actualItems.hasNext());
     }
 
-    private double getEpsilon(MockDataConfig config) {
+    private double getDelta(MockDataConfig config) {
         return config.getMagnitude() == 0 ? 0.0 : Math.pow(10.0, -1.0 * config.getMagnitude());
     }
 
+    /**
+     * Checks if the two given list of Item are equals. Double values are compared using a constant
+     *      representing the maximum delta for which both numbers are still considered equal.
+     * @see {@link Item}
+     */
     private void compareSingletonItem(DescriptiveStatistic stat, SpecificRecord expectedRecord,
-            SpecificRecord actualRecord, double epsilon) {
+            SpecificRecord actualRecord, double delta) {
         int index = expectedRecord.getSchema().getField("value").pos();
 
         switch (stat) {
             case QUARTILES:
                 compareQuartiles(((Quartiles) expectedRecord.get(index)),
-                        ((Quartiles) actualRecord.get(index)), epsilon);
+                        ((Quartiles) actualRecord.get(index)), delta);
                 break;
             default:
                 assertEquals((Double) expectedRecord.get(index),
-                        (Double) actualRecord.get(index), epsilon);
+                        (Double) actualRecord.get(index), delta);
         }
     }
 
+    /**
+     * Checks if the two given list of Item of type Acceleration values are equals. Double values
+     *      are compared using a constant representing the maximum delta for which both numbers are
+     *      still considered equal.
+     * @see {@link Item}
+     * @see {@link Acceleration}
+     */
     private void compareAccelerationItem(DescriptiveStatistic stat, Acceleration expectedRecord,
-            Acceleration actualRecord, double epsilon) {
+            Acceleration actualRecord, double delta) {
         switch (stat) {
             case QUARTILES:
                 compareQuartiles(((Quartiles) expectedRecord.getX()),
-                        ((Quartiles) actualRecord.getX()), epsilon);
+                        ((Quartiles) actualRecord.getX()), delta);
                 compareQuartiles(((Quartiles) expectedRecord.getY()),
-                        ((Quartiles) actualRecord.getY()), epsilon);
+                        ((Quartiles) actualRecord.getY()), delta);
                 compareQuartiles(((Quartiles) expectedRecord.getZ()),
-                        ((Quartiles) actualRecord.getZ()), epsilon);
+                        ((Quartiles) actualRecord.getZ()), delta);
                 break;
             default:
                 assertEquals(((Double) expectedRecord.getX()),
-                        ((Double) actualRecord.getX()), epsilon);
+                        ((Double) actualRecord.getX()), delta);
                 assertEquals(((Double) expectedRecord.getY()),
-                        ((Double) actualRecord.getY()), epsilon);
+                        ((Double) actualRecord.getY()), delta);
                 assertEquals(((Double) expectedRecord.getZ()),
-                        ((Double) actualRecord.getZ()), epsilon);
+                        ((Double) actualRecord.getZ()), delta);
         }
     }
 
+    /**
+     * Checks if the two given list of Item of Quartiles values are equals. Double values are
+     *      compared using a constant representing the maximum delta for which both numbers are
+     *      still considered equal.
+     * @see {@link Item}
+     * @see {@link Quartiles}
+     */
     private void compareQuartiles(Quartiles expectedQuartiles, Quartiles actualQuartiles,
-            double epsilon) {
-        assertEquals(expectedQuartiles.getFirst(), actualQuartiles.getFirst(), epsilon);
+            double delta) {
+        assertEquals(expectedQuartiles.getFirst(), actualQuartiles.getFirst(), delta);
         assertEquals(expectedQuartiles.getSecond(),
-                actualQuartiles.getSecond(), epsilon);
-        assertEquals(expectedQuartiles.getThird(), actualQuartiles.getThird(), epsilon);
+                actualQuartiles.getSecond(), delta);
+        assertEquals(expectedQuartiles.getThird(), actualQuartiles.getThird(), delta);
     }
+
+//    /**
+//     * Starting from the expected values computed using the available CSV files, it computes all
+//     *      the expected Collection of Bson Document that the MongoDb Connector have to be present
+//     *      in MongoDb.
+//     * @see {@link org.radarcns.integration.aggregator.ExpectedValue}
+//     */
+//    private Map<MockDataConfig, Collection<Document>> getExpecetedDocument(
+//            Map<MockDataConfig, ExpectedValue> expectedValue) {
+//        return MockAggregator.getExpecetedDocument(expectedValue);
+//    }
 
 }

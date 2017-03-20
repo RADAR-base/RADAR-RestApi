@@ -18,9 +18,11 @@ package org.radarcns.pipeline.mock;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bson.Document;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.source.SourceType;
@@ -169,12 +171,14 @@ public class MockAggregator {
     }
 
     /**
-     * Simulates all possible test case scenarios configured in mock-configuration.
+     * Simulates all possible test case scenarios configured in mock-configuration. For each sensor,
+     *      it generates one dataset per statistical function. The measurement units are taken from
+     *      an Empatica device.
      * @param expectedValue {@code Map} of key {@code MockDataConfig} and value
      *      {@code ExpectedValue} containing all expected values
      * @param stat statistical value that has be tested
      * @return {@code Map} of key {@code MockDataConfig} and value {@code Dataset}.
-     * @see {@link org.radarcns.integration.aggregator.ExpectedDoubleValue}.
+     * @see {@link org.radarcns.integration.aggregator.ExpectedValue}.
      **/
     public static Map<MockDataConfig, Dataset> getExpecetedDataset(
             Map<MockDataConfig, ExpectedValue> expectedValue, DescriptiveStatistic stat)
@@ -185,6 +189,25 @@ public class MockAggregator {
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedValue.get(config).getDataset(stat, SourceType.EMPATICA,
                     config.getSensorType()));
+        }
+
+        return map;
+    }
+
+    /**
+     * Simulates all possible test case scenarios configured in mock-configuration. For each sensor,
+     *      it generates the relative collection of Document that should be present in MongoDB.
+     * @param expectedValue {@code Map} of key {@code MockDataConfig} and value
+     *      {@code ExpectedValue} containing all expected values
+     * @return {@code Map} of key {@code MockDataConfig} and value {@code Collection<Document>}.
+     * @see {@link org.radarcns.integration.aggregator.ExpectedValue}.
+     **/
+    public static Map<MockDataConfig, Collection<Document>> getExpecetedDocument(
+        Map<MockDataConfig, ExpectedValue> expectedValue) {
+        Map<MockDataConfig, Collection<Document>> map = new HashMap<>();
+
+        for (MockDataConfig config : expectedValue.keySet()) {
+            map.put(config, expectedValue.get(config).getDocuments());
         }
 
         return map;
