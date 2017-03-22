@@ -1,0 +1,20 @@
+rest_proxy:
+  - protocol: http
+    host: localhost
+    port: 8082
+
+schema_registry:
+  - protocol: http
+    host: localhost
+    port: 8081
+
+rest_api:
+  - protocol: http
+    host: localhost
+    port: 8080
+
+# Rest API web root
+api_web_root: "/radar/api/"
+
+# time duration that mock data has to cover expressed in seconds.
+duration: 60

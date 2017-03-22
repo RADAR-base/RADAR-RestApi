@@ -31,15 +31,19 @@ ext.mongodb='3.3.0'
 ext.okhttpVersion = '3.5.0'
 ext.okioVersion = '1.11.0'
 ext.openCsvVersion = '3.9'
-ext.radarCommon = '0.1'
+ext.radarCommon = '0.1-alpha.4'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.tomcat = '8.0.37'
 
 configurations {
   codacy
+  //Integration test for REST API only
   integrationTestCompile.extendsFrom testCompile
   integrationTestRuntime.extendsFrom testRuntime
+  //End to end tests
+  endToEndTestCompile.extendsFrom testCompile
+  endToEndTestCompile.extendsFrom testRuntime
   provided
   compile.extendsFrom provided
 }
@@ -95,6 +99,33 @@ task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask)
 }
 
 compileJava.source(generateAvro.outputs)
+
+//---------------------------------------------------------------------------//
+// Source Set                                                                //
+//---------------------------------------------------------------------------//
+
+sourceSets {
+  integrationTest {
+    java {
+      compileClasspath += main.output + test.output
+      runtimeClasspath += main.output + test.output
+      srcDir file('src/integrationTest/java')
+    }
+    resources {
+      srcDir 'src/integrationTest/resources'
+    }
+  }
+  endToEndTest {
+    java {
+      compileClasspath += main.output + test.output + integrationTest.output
+      runtimeClasspath += main.output + test.output + integrationTest.output
+      srcDir file('src/endToEndTest/java')
+    }
+    resources {
+      srcDir 'src/endToEndTest/resources'
+    }
+  }
+}
 
 //---------------------------------------------------------------------------//
 // Style checking                                                            //
@@ -168,18 +199,6 @@ tasks.matching {it instanceof Test}.all {
   }
 }
 
-sourceSets {
-  integrationTest {
-    java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
-    }
-    resources {
-      srcDir 'src/integrationTest/resources'
-    }
-  }
-}
-
 test {
   testLogging {
     // Show that tests are run in the command-line output
@@ -200,6 +219,39 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTest
+
+//---------------------------------------------------------------------------//
+// End to End Test                                                           //
+//---------------------------------------------------------------------------//
+
+task endToEndTest(type: Test) {
+  description = "Run end to end tests (located in src/endToEndTest/...)."
+
+  testClassesDir = sourceSets.endToEndTest.output.classesDir
+  classpath = sourceSets.endToEndTest.runtimeClasspath
+
+  // This is not needed, but I like to see which tests have run
+  testLogging {
+    events "skipped", "failed"
+  }
+}
+
+task setRadarEnvironmentForDocker << {
+  File volumes = new File("src/endToEndTest/dockerRadar/volumes")
+  volumes.mkdir()
+  String volumePath = volumes.getAbsolutePath()
+  
+  def fileEnv = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
+  fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumePath)
+  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
+  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
+  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+
+  def fileInstall = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh")
+  fileInstall.text = fileInstall.text.replace('/usr/local/var/lib/docker', volumePath)
+
+  new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/smtp.env.template").renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/smtp.env")
+}
 
 //---------------------------------------------------------------------------//
 // Code coverage and codacy                                                  //
