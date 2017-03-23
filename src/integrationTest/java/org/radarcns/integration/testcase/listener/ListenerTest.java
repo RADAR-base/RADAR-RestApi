@@ -23,7 +23,7 @@ import com.mongodb.ServerAddress;
 import org.junit.Test;
 import org.radarcns.config.Properties;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.listner.MongoDBContextListener;
+import org.radarcns.listener.MongoDBContextListener;
 
 /**
  * MongoDBContextListener Test.
