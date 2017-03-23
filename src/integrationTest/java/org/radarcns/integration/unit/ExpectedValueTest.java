@@ -21,6 +21,7 @@ import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
@@ -49,8 +50,8 @@ public class ExpectedValueTest {
 
     @Test
     public void matchDatasetOnDocuments() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+                Properties.NAME_FILE).toURI()).toString());
 
         Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(USER, SOURCE,
             EMPATICA, HEART_RATE, COUNT, SAMPLES, false);

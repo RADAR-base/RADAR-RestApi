@@ -16,16 +16,8 @@ package org.radarcns.integration.testcase.webapp;
  * limitations under the License.
  */
 
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import java.io.IOException;
-import java.util.List;
 import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
@@ -45,6 +37,17 @@ import org.radarcns.integration.util.Utility;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
+import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+
 public class SensorAppTest {
 
     private final String SERVER = "http://localhost:8080/";
@@ -58,15 +61,15 @@ public class SensorAppTest {
 
     @Test
     public void getRealtimeTest()
-        throws IOException, IllegalAccessException, InstantiationException {
+        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = "sensor/avro/realTime/{sensor}/{stat}/{userID}/{sourceID}";
         path = path.replace("{sensor}", SENSOR_TYPE.name());
         path = path.replace("{stat}", COUNT.name());
         path = path.replace("{userID}", USER);
         path = path.replace("{sourceID}", SOURCE);
 
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -98,15 +101,15 @@ public class SensorAppTest {
 
     @Test
     public void getAllByUserTest()
-        throws IOException, IllegalAccessException, InstantiationException {
+        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = "sensor/avro/{sensor}/{stat}/{userID}/{sourceID}";
         path = path.replace("{sensor}", SENSOR_TYPE.name());
         path = path.replace("{stat}", COUNT.name());
         path = path.replace("{userID}", USER);
         path = path.replace("{sourceID}", SOURCE);
 
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -138,15 +141,15 @@ public class SensorAppTest {
 
     @Test
     public void getRealtimeTest200()
-        throws IOException, IllegalAccessException, InstantiationException {
+            throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = "sensor/avro/{sensor}/{stat}/{userID}/{sourceID}/{start}/{end}";
         path = path.replace("{sensor}", SENSOR_TYPE.name());
         path = path.replace("{stat}", COUNT.name());
         path = path.replace("{userID}", USER);
         path = path.replace("{sourceID}", SOURCE);
 
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
