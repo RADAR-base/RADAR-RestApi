@@ -1,16 +1,7 @@
 package org.radarcns.integration.testcase.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-
-import java.nio.file.Paths;
-import java.util.List;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
@@ -29,6 +20,15 @@ import org.radarcns.integration.util.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Paths;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
+import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
+import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+
 /**
  * UserDao Test.
  */
@@ -45,7 +45,7 @@ public class UserDaoTest {
     @Test
     public void findAllUserTest() throws Exception {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -66,7 +66,7 @@ public class UserDaoTest {
     @Test
     public void findAllUserTestDoubleSource() throws Exception {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
         MongoCollection<Document> collection = MongoHelper.getCollection(client,

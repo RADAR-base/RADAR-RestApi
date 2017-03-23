@@ -240,7 +240,7 @@ public class SourceMonitorDbTest {
 
     private MongoClient getClient() throws URISyntaxException {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
         return Utility.getMongoClient();
     }
 }

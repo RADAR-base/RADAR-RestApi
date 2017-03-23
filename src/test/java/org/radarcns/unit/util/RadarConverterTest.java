@@ -16,22 +16,11 @@ package org.radarcns.unit.util;
  * limitations under the License.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.AVERAGE;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MAXIMUM;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MEDIAN;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MINIMUM;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.SUM;
-import static org.radarcns.avro.restapi.sensor.SensorType.ACCELEROMETER;
-import static org.radarcns.avro.restapi.sensor.SensorType.BATTERY;
-import static org.radarcns.avro.restapi.sensor.SensorType.BLOOD_VOLUME_PULSE;
-import static org.radarcns.avro.restapi.sensor.SensorType.ELECTRODERMAL_ACTIVITY;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.sensor.SensorType.INTER_BEAT_INTERVAL;
-import static org.radarcns.avro.restapi.sensor.SensorType.THERMOMETER;
+import org.junit.Test;
+import org.radarcns.avro.restapi.app.ServerStatus;
+import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.util.RadarConverter;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -40,11 +29,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.junit.Test;
-import org.radarcns.avro.restapi.app.ServerStatus;
-import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
-import org.radarcns.util.RadarConverter;
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.*;
+import static org.radarcns.avro.restapi.sensor.SensorType.*;
 
 public class RadarConverterTest {
 
@@ -53,7 +40,8 @@ public class RadarConverterTest {
         Date date = new Date();
         Calendar calExpected = Calendar.getInstance();
         calExpected.setTime(date);
-        calExpected.setTimeZone(TimeZone.getTimeZone("UTC"));  // we will get UTC time from RadarConverter
+        // we will get UTC time from RadarConverter
+        calExpected.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         String dateString = RadarConverter.getISO8601(date);
 
@@ -76,7 +64,8 @@ public class RadarConverterTest {
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        cal.setTimeZone(TimeZone.getTimeZone("UTC"));  // we will get UTC time from RadarConverter
+      // we will get UTC time from RadarConverter
+        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         assertEquals(2017, cal.get(Calendar.YEAR));
         assertEquals(2, cal.get(Calendar.MONTH));

@@ -78,7 +78,7 @@ public class SourceAppTest {
     public void getStatusTest200()
         throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -173,7 +173,7 @@ public class SourceAppTest {
         path = path.replace("{userID}", USER);
 
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 

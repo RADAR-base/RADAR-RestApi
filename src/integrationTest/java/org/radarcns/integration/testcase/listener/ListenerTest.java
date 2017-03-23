@@ -37,7 +37,7 @@ public class ListenerTest {
     @Test
     public void testConnection() throws Exception {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 

@@ -16,18 +16,8 @@ package org.radarcns.integration.testcase.webapp;
  * limitations under the License.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-
 import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
@@ -45,6 +35,16 @@ import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.util.AvroConverter;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
+import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
+import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
 public class UserAppTest {
 
@@ -67,9 +67,9 @@ public class UserAppTest {
 
     @Test
     public void getAllPatientsTest200()
-        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
+            throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 

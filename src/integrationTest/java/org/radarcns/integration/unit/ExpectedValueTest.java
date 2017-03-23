@@ -51,7 +51,7 @@ public class ExpectedValueTest {
     @Test
     public void matchDatasetOnDocuments() throws Exception {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
 
         Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(USER, SOURCE,
             EMPATICA, HEART_RATE, COUNT, SAMPLES, false);

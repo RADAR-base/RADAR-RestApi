@@ -1,18 +1,7 @@
 package org.radarcns.integration.testcase.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-import static org.radarcns.integration.util.RandomInput.getRandomIp;
-
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-
-import java.nio.file.Paths;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadLocalRandom;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
@@ -26,6 +15,16 @@ import org.radarcns.dao.mongo.sensor.HeartRateDAO;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
+
+import java.nio.file.Paths;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
+import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
+import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.integration.util.RandomInput.getRandomIp;
 
 /**
  * UserDao Test.
@@ -43,7 +42,7 @@ public class AndroidDaoTest {
     @Test
     public void testStatus() throws Exception {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -73,7 +72,7 @@ public class AndroidDaoTest {
     @Test
     public void testFindAllUser() throws Exception {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -91,7 +90,7 @@ public class AndroidDaoTest {
     @Test
     public void testFindAllSoucesByUser() throws Exception {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -132,7 +131,7 @@ public class AndroidDaoTest {
     @After
     public void dropAndClose() throws Exception {
         Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).toURI()).toString());
+                Properties.NAME_FILE).toURI()).toString());
         dropAndClose(Utility.getMongoClient());
     }
 
