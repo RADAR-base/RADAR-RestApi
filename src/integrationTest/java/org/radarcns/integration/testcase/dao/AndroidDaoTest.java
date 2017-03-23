@@ -9,6 +9,9 @@ import static org.radarcns.integration.util.RandomInput.getRandomIp;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import org.bson.Document;
 import org.junit.After;
@@ -39,8 +42,8 @@ public class AndroidDaoTest {
 
     @Test
     public void testStatus() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -69,8 +72,8 @@ public class AndroidDaoTest {
 
     @Test
     public void testFindAllUser() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -87,8 +90,8 @@ public class AndroidDaoTest {
 
     @Test
     public void testFindAllSoucesByUser() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -105,8 +108,8 @@ public class AndroidDaoTest {
 
     @Test
     public void testFindSourceType() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -127,9 +130,9 @@ public class AndroidDaoTest {
     }
 
     @After
-    public void dropAndClose() {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+    public void dropAndClose() throws Exception {
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
         dropAndClose(Utility.getMongoClient());
     }
 

@@ -23,6 +23,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,7 +56,7 @@ public class SourceMonitorDbTest {
     private static int WINDOWS = 2;
 
     @Test
-    public void testGetStateFine() throws IOException {
+    public void testGetStateFine() throws IOException, URISyntaxException {
         MongoClient client = getClient();
 
         Source source = getSource(WINDOWS,0, client);
@@ -65,7 +67,7 @@ public class SourceMonitorDbTest {
     }
 
     @Test
-    public void testGetStateOk() throws ConnectException {
+    public void testGetStateOk() throws ConnectException, URISyntaxException {
         MongoClient client = getClient();
 
         Source source = getSource(WINDOWS, 0.05, client);
@@ -76,7 +78,7 @@ public class SourceMonitorDbTest {
     }
 
     @Test
-    public void testGetStateWarining() throws ConnectException {
+    public void testGetStateWarining() throws ConnectException, URISyntaxException {
         MongoClient client = getClient();
 
         Source source = getSource(WINDOWS, 0.50, client);
@@ -87,7 +89,7 @@ public class SourceMonitorDbTest {
     }
 
     @Test
-    public void testGetStateDisconnected() throws ConnectException {
+    public void testGetStateDisconnected() throws ConnectException, URISyntaxException {
         MongoClient client = getClient();
 
         Source source = getSource(WINDOWS, 1, client);
@@ -236,9 +238,9 @@ public class SourceMonitorDbTest {
         return Double.valueOf(frequency * (1 - reduction)).intValue();
     }
 
-    private MongoClient getClient() {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+    private MongoClient getClient() throws URISyntaxException {
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
         return Utility.getMongoClient();
     }
 }

@@ -25,6 +25,8 @@ import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 
+import java.nio.file.Paths;
+
 /**
  * UserDao Test.
  */
@@ -40,8 +42,8 @@ public class SourceDaoTest {
 
     @Test
     public void test() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 

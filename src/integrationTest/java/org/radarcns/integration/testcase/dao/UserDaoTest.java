@@ -8,6 +8,8 @@ import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+
+import java.nio.file.Paths;
 import java.util.List;
 import org.bson.Document;
 import org.junit.After;
@@ -42,8 +44,8 @@ public class UserDaoTest {
 
     @Test
     public void findAllUserTest() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -63,8 +65,8 @@ public class UserDaoTest {
 
     @Test
     public void findAllUserTestDoubleSource() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
@@ -86,8 +88,8 @@ public class UserDaoTest {
 
     @Test
     public void findAllUserTestDoubleUser() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+                Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 

@@ -24,6 +24,8 @@ import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.Map;
 import okhttp3.Response;
 import org.bson.Document;
@@ -63,9 +65,9 @@ public class AppStatusAppTest {
 
     @Test
     public void getStatusTest200()
-        throws IOException, IllegalAccessException, InstantiationException {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -97,9 +99,9 @@ public class AppStatusAppTest {
     }
 
     @After
-    public void dropAndClose() {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).getPath());
+    public void dropAndClose() throws URISyntaxException {
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+                Properties.NAME_FILE).toURI()).toString());
         dropAndClose(Utility.getMongoClient());
     }
 

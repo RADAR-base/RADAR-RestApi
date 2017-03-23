@@ -38,6 +38,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
+
 import org.junit.Test;
 import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.source.SourceType;
@@ -51,6 +53,7 @@ public class RadarConverterTest {
         Date date = new Date();
         Calendar calExpected = Calendar.getInstance();
         calExpected.setTime(date);
+        calExpected.setTimeZone(TimeZone.getTimeZone("UTC"));  // we will get UTC time from RadarConverter
 
         String dateString = RadarConverter.getISO8601(date);
 
@@ -73,6 +76,7 @@ public class RadarConverterTest {
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
+        cal.setTimeZone(TimeZone.getTimeZone("UTC"));  // we will get UTC time from RadarConverter
 
         assertEquals(2017, cal.get(Calendar.YEAR));
         assertEquals(2, cal.get(Calendar.MONTH));

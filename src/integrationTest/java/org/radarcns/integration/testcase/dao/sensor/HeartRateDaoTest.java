@@ -8,6 +8,8 @@ import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+
+import java.nio.file.Paths;
 import java.util.List;
 import org.bson.Document;
 import org.junit.After;
@@ -40,8 +42,8 @@ public class HeartRateDaoTest {
 
     @Test
     public void valueRTByUserSourceTest() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -66,8 +68,8 @@ public class HeartRateDaoTest {
 
     @Test
     public void valueByUserSourceTest() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -92,8 +94,8 @@ public class HeartRateDaoTest {
 
     @Test
     public void valueByUserSourceWindowTest() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -126,8 +128,8 @@ public class HeartRateDaoTest {
 
     @Test
     public void countSamplesByUserSourceWindowTest() throws Exception {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 

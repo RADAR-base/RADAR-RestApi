@@ -10,6 +10,8 @@ import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import okhttp3.Response;
@@ -74,9 +76,9 @@ public class SourceAppTest {
 
     @Test
     public void getStatusTest200()
-        throws IOException, IllegalAccessException, InstantiationException {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -166,12 +168,12 @@ public class SourceAppTest {
 
     @Test
     public void getAllSourcesTest()
-        throws IOException, IllegalAccessException, InstantiationException {
+        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = "source/avro/getAllSources/{userID}";
         path = path.replace("{userID}", USER);
 
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-            Properties.NAME_FILE).getPath());
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+            Properties.NAME_FILE).toURI()).toString());
 
         MongoClient client = Utility.getMongoClient();
 
@@ -213,9 +215,9 @@ public class SourceAppTest {
     }
 
     @After
-    public void dropAndClose() {
-        Properties.getInstanceTest(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).getPath());
+    public void dropAndClose() throws URISyntaxException {
+        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
+                Properties.NAME_FILE).toURI()).toString());
         dropAndClose(Utility.getMongoClient());
     }
 
