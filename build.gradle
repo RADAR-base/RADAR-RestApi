@@ -78,6 +78,7 @@ dependencies {
   compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
   compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-avro', version: dataformat
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
+  compile fileTree(dir: 'lib', include: ['*.jar'])
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
   testCompile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
