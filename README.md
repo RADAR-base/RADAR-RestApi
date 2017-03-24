@@ -60,7 +60,7 @@ To run the test:
 - `cd src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack`
 - `./install-radar-stack.sh`
 - `cd -`
-- `./gradlew endToEndTestr`
+- `./gradlew endToEndTest`
 - `cd -`
 - `./stop-radar-stack.sh`
 
