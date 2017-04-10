@@ -18,13 +18,10 @@ package org.radarcns.pipeline.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import org.radarcns.config.ServerConfig;
+import org.radarcns.mock.BasicMockConfig;
 
-public class PipelineConfig {
-    @JsonProperty("rest_proxy")
-    private List<ServerConfig> restProxy;
-
-    @JsonProperty("schema_registry")
-    private List<ServerConfig> schemaRegistry;
+public class PipelineConfig extends BasicMockConfig{
 
     @JsonProperty("rest_api")
     private List<ServerConfig> restApi;
@@ -34,44 +31,12 @@ public class PipelineConfig {
 
     private Long duration;
 
-    public List<ServerConfig> getRestProxy() {
-        return restProxy;
-    }
-
-    public void setRestProxy(List<ServerConfig> restProxy) {
-        this.restProxy = restProxy;
-    }
-
-    public List<ServerConfig> getSchemaRegistry() {
-        return schemaRegistry;
-    }
-
-    public void setSchemaRegistry(List<ServerConfig> schemaRegistry) {
-        this.schemaRegistry = schemaRegistry;
-    }
-
     public Long getDuration() {
         return duration;
     }
 
     public void setDuration(Long duration) {
         this.duration = duration;
-    }
-
-    /**
-     * Returns the URL to access Schema Registry.
-     */
-    public String getSchemaRegistryInstance() {
-        ServerConfig server = schemaRegistry.get(0);
-        return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort();
-    }
-
-    /**
-     * Returns the URL to access REST Proxy.
-     */
-    public String getRestProxyInstance() {
-        ServerConfig server = restProxy.get(0);
-        return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort();
     }
 
     public String getApiWebRoot() {

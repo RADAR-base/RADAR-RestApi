@@ -23,9 +23,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.radarcns.pipeline.config.Config;
-import org.radarcns.pipeline.data.Parser.Variable;
-import org.radarcns.pipeline.mock.config.MockDataConfig;
+import org.radarcns.integration.model.MockConfigToCsvParser;
+import org.radarcns.integration.model.MockConfigToCsvParser.Variable;
+import org.radarcns.mock.MockDataConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +42,11 @@ public class CsvValidator {
      * @param config configuration item containing the CSV file path.
      * @throws IllegalArgumentException if the CSV file does not respect the constrains.
      */
-    public static void validate(MockDataConfig config)
+    public static void validate(MockDataConfig config, Long duration)
         throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
         InvocationTargetException, ParseException {
 
-        Parser parser = new Parser(config);
+        MockConfigToCsvParser parser = new MockConfigToCsvParser(config);
 
         int line = 1;
         String mex = null;
@@ -89,14 +89,14 @@ public class CsvValidator {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
 
-        if (checkDuration(start, end)) {
+        if (checkDuration(start, end, duration)) {
             mex = config.getDataFile() + " is invalid. Data does not cover "
-                    + Config.getPipelineConfig().getDuration().longValue() + " seconds.";
+                    + duration.longValue() + " seconds.";
             logger.error(mex);
             throw new IllegalArgumentException(mex);
         }
 
-        if (line != (config.getFrequency() * Config.getPipelineConfig().getDuration() + 1)) {
+        if (line != (config.getFrequency() * duration + 1)) {
             mex = config.getDataFile() + " is invalid. CVS contains less messages tha expected.";
             logger.error(mex);
             throw new IllegalArgumentException(mex);
@@ -105,8 +105,8 @@ public class CsvValidator {
         parser.close();
     }
 
-    private static boolean checkDuration(Date start, Date end) {
-        long upperbound = Config.getPipelineConfig().getDuration().longValue() * 1000;
+    private static boolean checkDuration(Date start, Date end, Long duration) {
+        long upperbound = duration.longValue() * 1000;
         long lowerbound = upperbound - 1000;
 
         long interval = TimeUnit.MILLISECONDS.toSeconds(end.getTime() - start.getTime());
