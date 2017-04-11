@@ -17,7 +17,6 @@ package org.radarcns.pipeline;
  */
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,6 +72,7 @@ public class EndToEndTest {
     private static final long LATENCY = 30;
 
     private static class BaseFile {
+
         private static final File file = new File(
                 EndToEndTest.class.getClassLoader().getResource(PIPELINE_CONFIG).getFile());
     }
@@ -85,7 +85,8 @@ public class EndToEndTest {
 
         produceInputFile();
 
-        Map<MockDataConfig, ExpectedValue> expectedValue = MockAggregator.getSimulations(getPipelineConfig().getData());
+        Map<MockDataConfig, ExpectedValue> expectedValue = MockAggregator
+                .getSimulations(getPipelineConfig().getData());
 
         produceExpectedDataset(expectedValue);
 
@@ -111,11 +112,11 @@ public class EndToEndTest {
                         ), PipelineConfig.class);
             } catch (IOException e) {
                 e.printStackTrace();
-                assertTrue(false);
             }
         }
         return config;
     }
+
     /**
      * Checks if the test bed is ready to accept data.
      */
@@ -155,7 +156,7 @@ public class EndToEndTest {
                 if (response.code() == 200) {
                     String topics = response.body().string().toString();
                     String[] topicArray = topics.substring(1, topics.length() - 1).replace("\"", "")
-                        .split(",");
+                            .split(",");
 
                     for (String topic : topicArray) {
                         if (expectedTopics.contains(topic)) {
@@ -181,7 +182,7 @@ public class EndToEndTest {
      * Generates new random CSV files.
      */
     private void produceInputFile()
-        throws IOException, ClassNotFoundException, NoSuchMethodException,
+            throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, ParseException, IllegalAccessException {
         LOGGER.info("Generating CVS files ...");
         for (MockDataConfig config : getPipelineConfig().getData()) {
@@ -192,7 +193,8 @@ public class EndToEndTest {
 
     /**
      * Starting from the expected values computed using the available CSV files, it computes all
-     *      the expected Datasets used to test REST-API.
+     * the expected Datasets used to test REST-API.
+     *
      * @see {@link ExpectedValue}
      */
     private void produceExpectedDataset(Map<MockDataConfig, ExpectedValue> expectedValue)
@@ -213,6 +215,7 @@ public class EndToEndTest {
 
     /**
      * This is the actual generator of Datasets exploited by {@link #produceExpectedDataset(Map)}.
+     *
      * @see {@link ExpectedValue}
      */
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> computeExpectedDataset(
@@ -234,10 +237,11 @@ public class EndToEndTest {
 
     /**
      * Simulates all possible test case scenarios configured in mock-configuration. For each sensor,
-     *      it generates one dataset per statistical function. The measurement units are taken from
-     *      an Empatica device.
-     * @param expectedValue {@code Map} of key {@code MockDataConfig} and value
-     *      {@code ExpectedValue} containing all expected values
+     * it generates one dataset per statistical function. The measurement units are taken from
+     * an Empatica device.
+     *
+     * @param expectedValue {@code Map} of key {@code MockDataConfig} and value {@code
+     * ExpectedValue} containing all expected values
      * @param stat statistical value that has be tested
      * @return {@code Map} of key {@code MockDataConfig} and value {@code Dataset}.
      * @see {@link ExpectedValue}.
@@ -249,12 +253,14 @@ public class EndToEndTest {
         Map<MockDataConfig, Dataset> map = new HashMap<>();
 
         for (MockDataConfig config : expectedValue.keySet()) {
-            map.put(config, expectedDataSetFactory.getDataset(expectedValue.get(config), stat, SourceType.EMPATICA,
-                    getSensorType(config)));
+            map.put(config, expectedDataSetFactory
+                    .getDataset(expectedValue.get(config), stat, SourceType.EMPATICA,
+                            getSensorType(config)));
         }
 
         return map;
     }
+
     /**
      * Streams data stored in CSV files into Kafka.
      */
@@ -294,7 +300,7 @@ public class EndToEndTest {
 
                 if (response.code() == 200) {
                     actual = AvroConverter.avroByteToAvro(response.body().bytes(),
-                        Dataset.getClassSchema());
+                            Dataset.getClassSchema());
                 }
 
                 assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
@@ -306,7 +312,8 @@ public class EndToEndTest {
 
     /**
      * Checks if the two given datasets are equals. Double values are compared using a constant
-     *      representing the maximum delta for which both numbers are still considered equal.
+     * representing the maximum delta for which both numbers are still considered equal.
+     *
      * @see {@link Dataset}
      */
     private void assertDatasetEquals(SensorType sensorType, Dataset expected, Dataset actual,
@@ -345,7 +352,8 @@ public class EndToEndTest {
 
     /**
      * Checks if the two given list of Item are equals. Double values are compared using a constant
-     *      representing the maximum delta for which both numbers are still considered equal.
+     * representing the maximum delta for which both numbers are still considered equal.
+     *
      * @see {@link Item}
      */
     private void compareSingletonItem(DescriptiveStatistic stat, SpecificRecord expectedRecord,
@@ -365,8 +373,9 @@ public class EndToEndTest {
 
     /**
      * Checks if the two given list of Item of type Acceleration values are equals. Double values
-     *      are compared using a constant representing the maximum delta for which both numbers are
-     *      still considered equal.
+     * are compared using a constant representing the maximum delta for which both numbers are
+     * still considered equal.
+     *
      * @see {@link Item}
      * @see {@link Acceleration}
      */
@@ -393,8 +402,9 @@ public class EndToEndTest {
 
     /**
      * Checks if the two given list of Item of Quartiles values are equals. Double values are
-     *      compared using a constant representing the maximum delta for which both numbers are
-     *      still considered equal.
+     * compared using a constant representing the maximum delta for which both numbers are
+     * still considered equal.
+     *
      * @see {@link Item}
      * @see {@link Quartiles}
      */
@@ -421,12 +431,12 @@ public class EndToEndTest {
     /**
      * Converts sensor value string to SensorType.
      *
-     * @throws IllegalArgumentException if the specified sensor does not match any of the
-     *      already known ones
+     * @throws IllegalArgumentException if the specified sensor does not match any of the already
+     * known ones
      */
     public static SensorType getSensorType(MockDataConfig config) {
-        if(config.getSensor().equals("BATTERY_LEVEL"))
-        {
+
+        if (config.getSensor().equals("BATTERY_LEVEL")) {
             return SensorType.BATTERY;
         }
         for (SensorType type : SensorType.values()) {

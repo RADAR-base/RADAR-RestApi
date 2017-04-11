@@ -17,8 +17,6 @@ package org.radarcns.integration.unit;
  */
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
@@ -33,7 +31,6 @@ import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.sensor.HeartRate;
 import org.radarcns.config.Properties;
-import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
@@ -56,7 +53,7 @@ public class ExpectedValueTest {
                 Properties.NAME_FILE).toURI()).toString());
 
         Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(USER, SOURCE,
-            EMPATICA, HEART_RATE, COUNT, SAMPLES, false);
+                EMPATICA, HEART_RATE, COUNT, SAMPLES, false);
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
         Dataset dataset = (Dataset) map.get(RandomInput.DATASET);
@@ -74,8 +71,8 @@ public class ExpectedValueTest {
         assertEquals(SAMPLES, count);
 
         EffectiveTimeFrame window1 = new EffectiveTimeFrame(
-            RadarConverter.getISO8601(docs.get(0).getDate("start")),
-            RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate("end")));
+                RadarConverter.getISO8601(docs.get(0).getDate("start")),
+                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate("end")));
 
         EffectiveTimeFrame window2 = dataset.getHeader().getEffectiveTimeFrame();
 //        assertTrue(false);
@@ -84,14 +81,15 @@ public class ExpectedValueTest {
 
     /**
      * Compare two {@code EffectiveTimeFrame} values.
-     *      @see {@link org.radarcns.avro.restapi.header.EffectiveTimeFrame}
+     *
      * @param window1 first component that to has to be compared
      * @param window2 second component that to has to be compared
      * @return {@code true} if they match, false otherwise
+     * @see {@link org.radarcns.avro.restapi.header.EffectiveTimeFrame}
      **/
     public static boolean compareEffectiveTimeFrame(EffectiveTimeFrame window1,
-        EffectiveTimeFrame window2) {
+                EffectiveTimeFrame window2) {
         return window1.getStartDateTime().equals(window2.getStartDateTime())
-            && window1.getEndDateTime().equals(window2.getEndDateTime());
+                && window1.getEndDateTime().equals(window2.getEndDateTime());
     }
 }

@@ -21,7 +21,7 @@ import java.util.List;
 import org.radarcns.config.ServerConfig;
 import org.radarcns.mock.BasicMockConfig;
 
-public class PipelineConfig extends BasicMockConfig{
+public class PipelineConfig extends BasicMockConfig {
 
     @JsonProperty("rest_api")
     private List<ServerConfig> restApi;

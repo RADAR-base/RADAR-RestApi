@@ -211,7 +211,7 @@ public class ExpectedDocumentFactory {
         return quartile;
     }
 
-    public static List<Document> extractQuartile(List<Double> component) {
+    private static List<Document> extractQuartile(List<Double> component) {
         return Arrays.asList(new Document[]{
                 new Document("25", component.get(0)),
                 new Document("50", component.get(1)),
@@ -219,6 +219,11 @@ public class ExpectedDocumentFactory {
         });
     }
 
+    /**
+     * Produces {@link List} of {@link Document}s for given {@link ExpectedValue}
+     * @param expectedValue for test
+     * @return {@link List} of {@link Document}s
+     */
     public List<Document> produceExpectedData(ExpectedValue expectedValue) {
         switch (expectedValue.getExpectedType()) {
             case ARRAY:
