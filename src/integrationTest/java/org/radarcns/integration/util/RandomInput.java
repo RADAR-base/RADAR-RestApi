@@ -21,19 +21,19 @@ import static org.radarcns.dao.mongo.AndroidDAO.STATUS_COLLECTION;
 import static org.radarcns.dao.mongo.AndroidDAO.UPTIME_COLLECTION;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections.map.HashedMap;
 import org.bson.Document;
 import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.integration.aggregator.ExpectedArrayValue;
-import org.radarcns.integration.aggregator.ExpectedDoubleValue;
+import org.radarcns.integration.model.ExpectedArrayValue;
+import org.radarcns.integration.model.ExpectedDoubleValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +49,9 @@ public class RandomInput {
 
     private static Dataset dataset = null;
     private static List<Document> documents = null;
+
+    private static ExpectedDocumentFactory expectedDocumentFactory = new ExpectedDocumentFactory();
+    private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
 
     private static void randomDoubleValue(String user, String source, SourceType sourceType,
             SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
@@ -69,8 +72,8 @@ public class RandomInput {
             }
         }
 
-        dataset = instance.getDataset(stat, sourceType, sensorType);
-        documents = instance.getDocuments();
+        dataset = expectedDataSetFactory.getDataset(instance, stat, sourceType, sensorType);
+        documents = expectedDocumentFactory.produceExpectedData(instance);
     }
 
     private static void randomArrayValue(String user, String source, SourceType sourceType,
@@ -98,8 +101,8 @@ public class RandomInput {
             }
         }
 
-        dataset = instance.getDataset(stat, sourceType, sensorType);
-        documents = instance.getDocuments();
+        dataset = expectedDataSetFactory.getDataset(instance, stat, sourceType, sensorType);
+        documents = expectedDocumentFactory.produceExpectedData(instance);
     }
 
     public static Map<String, Object> getDatasetAndDocumentsRandom(String user, String source,
@@ -171,7 +174,7 @@ public class RandomInput {
             throws InstantiationException, IllegalAccessException {
         nextValue(user, source, sourceType, sensorType, stat, samples, singleWindow);
 
-        Map<String, Object> map = new HashedMap();
+        Map<String, Object> map = new HashMap();
         map.put(DATASET, dataset);
         map.put(DOCUMENTS, documents);
         return map;
@@ -224,7 +227,7 @@ public class RandomInput {
             .append("recordsSent", recordsSent)
             .append("recordsUnsent", recordsUnsent);
 
-        Map<String, Document> documents = new HashedMap();
+        Map<String, Document> documents = new HashMap<>();
         documents.put(STATUS_COLLECTION, statusDoc);
         documents.put(RECORD_COLLECTION, recordsDoc);
         documents.put(UPTIME_COLLECTION, uptimeDoc);

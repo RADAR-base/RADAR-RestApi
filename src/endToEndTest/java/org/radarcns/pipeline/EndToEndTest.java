@@ -18,6 +18,7 @@ package org.radarcns.pipeline;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
@@ -38,15 +39,18 @@ import org.radarcns.avro.restapi.dataset.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.sensor.Acceleration;
 import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.integration.aggregator.ExpectedValue;
+import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.config.YamlConfigLoader;
+import org.radarcns.integration.aggregator.MockAggregator;
+import org.radarcns.integration.model.ExpectedValue;
+import org.radarcns.integration.util.ExpectedDataSetFactory;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.pipeline.config.Config;
-import org.radarcns.pipeline.data.CsvGenerator;
-import org.radarcns.pipeline.data.CsvSensor;
+import org.radarcns.mock.CsvGenerator;
+import org.radarcns.mock.CsvSensorDataModel;
+import org.radarcns.mock.MockDataConfig;
+import org.radarcns.mock.MockProducer;
+import org.radarcns.pipeline.config.PipelineConfig;
 import org.radarcns.pipeline.data.CsvValidator;
-import org.radarcns.pipeline.mock.MockAggregator;
-import org.radarcns.pipeline.mock.Producer;
-import org.radarcns.pipeline.mock.config.MockDataConfig;
 import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,21 +59,34 @@ public class EndToEndTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EndToEndTest.class);
 
-    private Producer producer;
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
     private Map<String, Collection<Document>> expectedDocument;
 
+    private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
+
+    private static PipelineConfig config = null;
+
+    public static final String PIPELINE_CONFIG = "pipeline.yml";
     // Latency expressed in second
     private static final long LATENCY = 30;
 
+    private static class BaseFile {
+
+        private static final File file = new File(
+                EndToEndTest.class.getClassLoader().getResource(PIPELINE_CONFIG).getFile());
+    }
+
     @Test
     public void endToEnd() throws Exception {
+        getPipelineConfig();
+
         waitInfrastructure();
 
         produceInputFile();
 
-        Map<MockDataConfig, ExpectedValue> expectedValue = MockAggregator.getSimulations();
+        Map<MockDataConfig, ExpectedValue> expectedValue = MockAggregator
+                .getSimulations(getPipelineConfig().getData());
 
         produceExpectedDataset(expectedValue);
 
@@ -82,6 +99,22 @@ public class EndToEndTest {
         Thread.sleep(TimeUnit.SECONDS.toMillis(LATENCY));
 
         fetchRestApi();
+    }
+
+    private static PipelineConfig getPipelineConfig() {
+        if (config == null) {
+
+            try {
+                config = new YamlConfigLoader().load(
+                        new File(
+                                EndToEndTest.class.getClassLoader()
+                                        .getResource(PIPELINE_CONFIG).getFile()
+                        ), PipelineConfig.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return config;
     }
 
     /**
@@ -119,11 +152,11 @@ public class EndToEndTest {
             Response response = null;
             try {
                 response = Utility.makeRequest(
-                        Config.getPipelineConfig().getRestProxyInstance() + "/topics");
+                        getPipelineConfig().getRestProxy() + "/topics");
                 if (response.code() == 200) {
                     String topics = response.body().string().toString();
                     String[] topicArray = topics.substring(1, topics.length() - 1).replace("\"", "")
-                        .split(",");
+                            .split(",");
 
                     for (String topic : topicArray) {
                         if (expectedTopics.contains(topic)) {
@@ -149,24 +182,25 @@ public class EndToEndTest {
      * Generates new random CSV files.
      */
     private void produceInputFile()
-        throws IOException, ClassNotFoundException, NoSuchMethodException,
+            throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, ParseException, IllegalAccessException {
         LOGGER.info("Generating CVS files ...");
-        for (MockDataConfig config : Config.getMockConfig().getData()) {
-            CsvGenerator.generate(config, Config.getPipelineConfig().getDuration());
-            CsvValidator.validate(config);
+        for (MockDataConfig config : getPipelineConfig().getData()) {
+            CsvGenerator.generate(config, getPipelineConfig().getDuration(), BaseFile.file);
+            CsvValidator.validate(config, getPipelineConfig().getDuration());
         }
     }
 
     /**
      * Starting from the expected values computed using the available CSV files, it computes all
-     *      the expected Datasets used to test REST-API.
-     * @see {@link org.radarcns.integration.aggregator.ExpectedValue}
+     * the expected Datasets used to test REST-API.
+     *
+     * @see {@link ExpectedValue}
      */
     private void produceExpectedDataset(Map<MockDataConfig, ExpectedValue> expectedValue)
             throws Exception {
         LOGGER.info("Computing expected dataset ...");
-        int tastCase = Config.getMockConfig().getData().size();
+        int tastCase = getPipelineConfig().getData().size();
 
         assertEquals(tastCase, expectedValue.size());
 
@@ -181,7 +215,8 @@ public class EndToEndTest {
 
     /**
      * This is the actual generator of Datasets exploited by {@link #produceExpectedDataset(Map)}.
-     * @see {@link org.radarcns.integration.aggregator.ExpectedValue}
+     *
+     * @see {@link ExpectedValue}
      */
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> computeExpectedDataset(
             Map<MockDataConfig, ExpectedValue> expectedValue) throws Exception {
@@ -194,10 +229,36 @@ public class EndToEndTest {
                 continue;
             }
 
-            datasets.put(stat, MockAggregator.getExpecetedDataset(expectedValue, stat));
+            datasets.put(stat, getExpecetedDataset(expectedValue, stat));
         }
 
         return datasets;
+    }
+
+    /**
+     * Simulates all possible test case scenarios configured in mock-configuration. For each sensor,
+     * it generates one dataset per statistical function. The measurement units are taken from
+     * an Empatica device.
+     *
+     * @param expectedValue {@code Map} of key {@code MockDataConfig} and value {@code
+     * ExpectedValue} containing all expected values
+     * @param stat statistical value that has be tested
+     * @return {@code Map} of key {@code MockDataConfig} and value {@code Dataset}.
+     * @see {@link ExpectedValue}.
+     **/
+    public static Map<MockDataConfig, Dataset> getExpecetedDataset(
+            Map<MockDataConfig, ExpectedValue> expectedValue, DescriptiveStatistic stat)
+            throws ClassNotFoundException, NoSuchMethodException, IOException, IllegalAccessException,
+            InvocationTargetException, InstantiationException {
+        Map<MockDataConfig, Dataset> map = new HashMap<>();
+
+        for (MockDataConfig config : expectedValue.keySet()) {
+            map.put(config, expectedDataSetFactory
+                    .getDataset(expectedValue.get(config), stat, SourceType.EMPATICA,
+                            getSensorType(config)));
+        }
+
+        return map;
     }
 
     /**
@@ -205,7 +266,8 @@ public class EndToEndTest {
      */
     private void streamToKafka() throws IOException, InterruptedException {
         LOGGER.info("Streaming data into Kafka ...");
-        producer = new Producer();
+        MockProducer producer = new MockProducer(getPipelineConfig());
+        LOGGER.info("Streaming data into Kafka ...");
         producer.start();
         producer.shutdown();
     }
@@ -216,10 +278,10 @@ public class EndToEndTest {
     private void fetchRestApi() throws IOException {
         LOGGER.info("Fetching APIs ...");
 
-        String server = Config.getPipelineConfig().getRestApiInstance();
+        String server = getPipelineConfig().getRestApiInstance();
         String path = server + "sensor/avro/{sensor}/{stat}/{userID}/{sourceID}";
-        path = path.replace("{userID}", CsvSensor.userIdMock);
-        path = path.replace("{sourceID}", CsvSensor.sourceIdMock);
+        path = path.replace("{userID}", CsvSensorDataModel.USER_ID_MOCK);
+        path = path.replace("{sourceID}", CsvSensorDataModel.SOURCE_ID_MOCK);
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
             String pathStat = path.replace("{stat}", stat.name());
@@ -227,7 +289,7 @@ public class EndToEndTest {
             Map<MockDataConfig, Dataset> datasets = expectedDataset.get(stat);
 
             for (MockDataConfig config : datasets.keySet()) {
-                String pathSensor = pathStat.replace("{sensor}", config.getSensorType().name());
+                String pathSensor = pathStat.replace("{sensor}", getSensorType(config).name());
 
                 LOGGER.info("Requesting {}", pathSensor);
 
@@ -238,10 +300,10 @@ public class EndToEndTest {
 
                 if (response.code() == 200) {
                     actual = AvroConverter.avroByteToAvro(response.body().bytes(),
-                        Dataset.getClassSchema());
+                            Dataset.getClassSchema());
                 }
 
-                assertDatasetEquals(config.getSensorType(), datasets.get(config), actual,
+                assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
                         getDelta(config));
             }
 
@@ -250,7 +312,8 @@ public class EndToEndTest {
 
     /**
      * Checks if the two given datasets are equals. Double values are compared using a constant
-     *      representing the maximum delta for which both numbers are still considered equal.
+     * representing the maximum delta for which both numbers are still considered equal.
+     *
      * @see {@link Dataset}
      */
     private void assertDatasetEquals(SensorType sensorType, Dataset expected, Dataset actual,
@@ -289,7 +352,8 @@ public class EndToEndTest {
 
     /**
      * Checks if the two given list of Item are equals. Double values are compared using a constant
-     *      representing the maximum delta for which both numbers are still considered equal.
+     * representing the maximum delta for which both numbers are still considered equal.
+     *
      * @see {@link Item}
      */
     private void compareSingletonItem(DescriptiveStatistic stat, SpecificRecord expectedRecord,
@@ -309,8 +373,9 @@ public class EndToEndTest {
 
     /**
      * Checks if the two given list of Item of type Acceleration values are equals. Double values
-     *      are compared using a constant representing the maximum delta for which both numbers are
-     *      still considered equal.
+     * are compared using a constant representing the maximum delta for which both numbers are
+     * still considered equal.
+     *
      * @see {@link Item}
      * @see {@link Acceleration}
      */
@@ -337,8 +402,9 @@ public class EndToEndTest {
 
     /**
      * Checks if the two given list of Item of Quartiles values are equals. Double values are
-     *      compared using a constant representing the maximum delta for which both numbers are
-     *      still considered equal.
+     * compared using a constant representing the maximum delta for which both numbers are
+     * still considered equal.
+     *
      * @see {@link Item}
      * @see {@link Quartiles}
      */
@@ -361,4 +427,25 @@ public class EndToEndTest {
 //        return MockAggregator.getExpecetedDocument(expectedValue);
 //    }
 
+
+    /**
+     * Converts sensor value string to SensorType.
+     *
+     * @throws IllegalArgumentException if the specified sensor does not match any of the already
+     * known ones
+     */
+    public static SensorType getSensorType(MockDataConfig config) {
+
+        if (config.getSensor().equals("BATTERY_LEVEL")) {
+            return SensorType.BATTERY;
+        }
+        for (SensorType type : SensorType.values()) {
+
+            if (type.name().equalsIgnoreCase(config.getSensor())) {
+                return type;
+            }
+        }
+
+        throw new IllegalArgumentException(config.getSensor() + " unknown sensor");
+    }
 }

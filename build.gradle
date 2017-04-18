@@ -2,7 +2,6 @@ plugins {
   // Apply the java plugin to add support for Java
   id 'java'
   id 'idea'
-  id 'com.commercehub.gradle.plugin.avro-base' version '0.8.0'
   id 'pmd'
   id 'checkstyle'
   id 'jacoco'
@@ -31,10 +30,11 @@ ext.mongodb='3.3.0'
 ext.okhttpVersion = '3.5.0'
 ext.okioVersion = '1.11.0'
 ext.openCsvVersion = '3.9'
-ext.radarCommon = '0.1-alpha.4'
+ext.radarCommon = '0.3-SNAPSHOT'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.tomcat = '8.0.37'
+ext.schemaRestApiVersion = '0.1'
 
 configurations {
   codacy
@@ -42,8 +42,8 @@ configurations {
   integrationTestCompile.extendsFrom testCompile
   integrationTestRuntime.extendsFrom testRuntime
   //End to end tests
-  endToEndTestCompile.extendsFrom testCompile
-  endToEndTestCompile.extendsFrom testRuntime
+  endToEndTestCompile.extendsFrom integrationTestCompile
+  endToEndTestCompile.extendsFrom integrationTestRuntime
   provided
   compile.extendsFrom provided
 }
@@ -52,6 +52,8 @@ configurations {
 repositories {
   // Use 'jcenter' for resolving your dependencies.
   // You can declare any Maven/Ivy/file repository here.
+  // For working with dev-branchs
+  maven { url "${rootProject.projectDir}/libs" }
   jcenter()
   maven { url 'http://packages.confluent.io/maven/' }
   maven { url 'https://jitpack.io' }
@@ -63,6 +65,7 @@ repositories {
 dependencies {
   // The production code runs on tomcat 8.0.37
   providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
+  compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApiVersion
 
   // The production code uses the SLF4J logging API at compile time
   compile group: 'ch.qos.logback', name:'logback-classic', version: logback
@@ -71,7 +74,7 @@ dependencies {
   compile group: 'org.json', name: 'json', version: json
   compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
-  compile group: 'ch.qos.logback', name: 'logback-classic', version: logback
+//  compile group: 'ch.qos.logback', name: 'logback-classic', version: logback
   compile group: 'org.apache.avro', name: 'avro', version: avro
   compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: jackson
   compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
@@ -80,8 +83,10 @@ dependencies {
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
-  testCompile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
-  testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
+  integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
+
+//  testCompile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
+//  testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
   testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
   testCompile group: 'org.mockito', name: 'mockito-all', version: mokitoVersion
@@ -93,12 +98,12 @@ dependencies {
 // AVRO file manipulation                                                    //
 //---------------------------------------------------------------------------//
 
-task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
-  source("schemas/restapi")
-  outputDir = file("build/avro")
-}
-
-compileJava.source(generateAvro.outputs)
+//task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
+//  source("schemas/restapi")
+//  outputDir = file("build/avro")
+//}
+//
+//compileJava.source(generateAvro.outputs)
 
 //---------------------------------------------------------------------------//
 // Source Set                                                                //
