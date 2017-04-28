@@ -21,7 +21,6 @@ import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
@@ -30,7 +29,6 @@ import org.radarcns.avro.restapi.data.DoubleValue;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.config.api.Properties;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;

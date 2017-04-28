@@ -45,7 +45,6 @@ import org.radarcns.integration.util.Utility;
 import org.radarcns.monitor.SourceMonitor;
 import org.radarcns.source.SourceCatalog;
 import org.radarcns.source.SourceDefinition;
-import org.slf4j.LoggerFactory;
 
 public class SourceMonitorDbTest {
 

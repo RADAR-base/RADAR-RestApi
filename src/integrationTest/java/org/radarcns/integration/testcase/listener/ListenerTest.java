@@ -20,9 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
-import java.nio.file.Paths;
 import org.junit.Test;
-import org.radarcns.config.api.Properties;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.listener.MongoDBContextListener;
 

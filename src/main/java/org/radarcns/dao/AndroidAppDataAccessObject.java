@@ -31,15 +31,11 @@ import org.radarcns.dao.mongo.data.android.AndroidAppStatus;
 import org.radarcns.dao.mongo.data.android.AndroidRecordCounter;
 import org.radarcns.dao.mongo.data.android.AndroidServerStatus;
 import org.radarcns.dao.mongo.util.MongoAndroidApp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Data Access Object for Android App Status values.
  */
 public class AndroidAppDataAccessObject {
-
-    private final Logger LOGGER = LoggerFactory.getLogger(AndroidAppDataAccessObject.class);
 
     private static final AndroidAppDataAccessObject instance = new AndroidAppDataAccessObject();
 

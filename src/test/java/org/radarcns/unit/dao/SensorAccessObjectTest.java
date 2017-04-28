@@ -17,28 +17,9 @@ package org.radarcns.unit.dao;
  */
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.Unit.G;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import org.junit.Test;
-import org.radarcns.avro.restapi.avro.Message;
-import org.radarcns.avro.restapi.data.Acceleration;
-import org.radarcns.avro.restapi.data.DoubleValue;
-import org.radarcns.avro.restapi.data.Quartiles;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.util.AvroConverter;
-import org.radarcns.util.RadarConverter;
 
 public class SensorAccessObjectTest {
 

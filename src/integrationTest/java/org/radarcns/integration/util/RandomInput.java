@@ -34,8 +34,6 @@ import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.integration.model.ExpectedArrayValue;
 import org.radarcns.integration.model.ExpectedDoubleValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * All supported sources specifications.

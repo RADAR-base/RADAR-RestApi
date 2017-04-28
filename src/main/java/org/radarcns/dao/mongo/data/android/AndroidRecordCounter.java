@@ -3,7 +3,6 @@ package org.radarcns.dao.mongo.data.android;
 import org.bson.Document;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.dao.mongo.util.MongoAndroidApp;
-import org.slf4j.LoggerFactory;
 
 /*
  *  Copyright 2016 King's College London and The Hyve

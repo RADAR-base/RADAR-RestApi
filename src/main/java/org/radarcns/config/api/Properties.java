@@ -18,7 +18,6 @@ package org.radarcns.config.api;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.config.catalog.DeviceCatalog;
 import org.slf4j.Logger;

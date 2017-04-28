@@ -24,8 +24,6 @@ import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.dao.mongo.data.sensor.AccelerationFormat;
-import org.radarcns.dao.mongo.data.sensor.DoubleFormat;
 import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.model.ExpectedValue.StatType;
 import org.radarcns.source.SourceCatalog;

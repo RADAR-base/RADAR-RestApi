@@ -11,7 +11,6 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import okhttp3.Response;
