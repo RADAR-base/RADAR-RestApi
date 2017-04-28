@@ -59,7 +59,7 @@ public class AppStatusEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/status/{userID}/{sourceID}")
+    @Path("/status/{patientID}/{sourceID}")
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")
@@ -72,7 +72,7 @@ public class AppStatusEndPoint {
                 + "received status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStatByUserDeviceJsonAppStatus(
-            @PathParam("userID") String user,
+            @PathParam("patientID") String user,
             @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
@@ -89,7 +89,7 @@ public class AppStatusEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/status/{userID}/{sourceID}")
+    @Path("/avro/status/{patientID}/{sourceID}")
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")
@@ -100,7 +100,7 @@ public class AppStatusEndPoint {
                 + "received status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStatByUserDeviceAvroAppStatus(
-            @PathParam("userID") String user,
+            @PathParam("patientID") String user,
             @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getAvroResponse(request,

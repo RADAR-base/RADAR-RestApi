@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -31,7 +30,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
-import org.bson.Document;
 import org.junit.Test;
 import org.radarcns.avro.restapi.data.Acceleration;
 import org.radarcns.avro.restapi.data.Quartiles;
@@ -60,8 +58,6 @@ public class EndToEndTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(EndToEndTest.class);
 
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
-
-    private Map<String, Collection<Document>> expectedDocument;
 
     private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
 
@@ -338,6 +334,7 @@ public class EndToEndTest {
                 default:
                     compareSingletonItem(actual.getHeader().getDescriptiveStatistic(),
                             expectedRecord, actualRecord, delta);
+                    break;
             }
         }
 
@@ -366,6 +363,7 @@ public class EndToEndTest {
             default:
                 assertEquals((Double) expectedRecord.get(index),
                         (Double) actualRecord.get(index), delta);
+                break;
         }
     }
 
@@ -395,6 +393,7 @@ public class EndToEndTest {
                         ((Double) actualRecord.getY()), delta);
                 assertEquals(((Double) expectedRecord.getZ()),
                         ((Double) actualRecord.getZ()), delta);
+                break;
         }
     }
 

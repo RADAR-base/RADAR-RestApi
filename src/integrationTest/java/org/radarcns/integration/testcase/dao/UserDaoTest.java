@@ -24,15 +24,11 @@ import org.radarcns.dao.UserDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * UserDao Test.
  */
 public class UserDaoTest {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserDaoTest.class);
 
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";

@@ -72,7 +72,7 @@ public class AppStatusEndPointTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         List<Document> list = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-            COUNT, SAMPLES, false);
+                COUNT, SAMPLES, false);
 
         collection.insertMany(list);
 

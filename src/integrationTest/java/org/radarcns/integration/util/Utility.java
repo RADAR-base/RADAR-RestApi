@@ -133,6 +133,7 @@ public class Utility {
                 default:
                     record.put(record.getSchema().getField("value").pos(),
                             doc.getDouble(stat.getParam()));
+                    break;
             }
             itemList.add(new Item(record, RadarConverter.getISO8601(doc.getDate("start"))));
         }

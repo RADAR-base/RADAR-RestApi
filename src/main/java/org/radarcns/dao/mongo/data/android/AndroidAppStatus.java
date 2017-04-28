@@ -23,8 +23,6 @@ public class AndroidAppStatus extends MongoAndroidApp {
 
     public static final String UPTIME_COLLECTION = "application_uptime";
 
-    public AndroidAppStatus() {}
-
     //TODO take field names from schemas
     @Override
     protected Application getApplication(Document doc, Application app) {

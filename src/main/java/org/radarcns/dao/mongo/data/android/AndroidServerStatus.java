@@ -24,8 +24,6 @@ public class AndroidServerStatus extends MongoAndroidApp {
 
     public static final String STATUS_COLLECTION = "application_server_status";
 
-    public AndroidServerStatus() {}
-
     //TODO take field names from schemas
     @Override
     protected Application getApplication(Document doc, Application app) {

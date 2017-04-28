@@ -72,7 +72,7 @@ public class MongoDBContextListener implements ServletContextListener {
         } catch (java.lang.ExceptionInInitializerError exec) {
             LOGGER.error("Mongo Client cannot be initialised since Property cannot be initialised.",
                     exec);
-            throw new RuntimeException(exec);
+            throw new ExceptionInInitializerError(exec);
         }
     }
 

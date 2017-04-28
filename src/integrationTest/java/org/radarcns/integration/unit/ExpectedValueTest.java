@@ -31,15 +31,11 @@ import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.util.RadarConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * ExpectedValueTest Test.
  */
 public class ExpectedValueTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExpectedValueTest.class);
 
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";

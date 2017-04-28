@@ -101,7 +101,7 @@ public class SourceEndPointTest {
 
             List<SensorSpecification> spec = new LinkedList<>(
                     Monitors.getInstance().getSpecification(
-                        SourceType.EMPATICA).getSensors().values());
+                        EMPATICA).getSensors().values());
 
             for (Sensor sensor : summary.getSensors().values()) {
                 assertEquals(State.DISCONNECTED, sensor.getState());
@@ -140,7 +140,7 @@ public class SourceEndPointTest {
         Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
         assertEquals(200, response.code());
 
-        SourceSpecification expected = Monitors.getInstance().getSpecification(SourceType.EMPATICA);
+        SourceSpecification expected = Monitors.getInstance().getSpecification(EMPATICA);
         List<SensorSpecification> listSensors = new LinkedList<>(expected.getSensors().values());
 
         SourceSpecification actual = null;

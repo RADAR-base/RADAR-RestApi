@@ -45,10 +45,11 @@ public abstract class MongoAndroidApp extends MongoDataAccess {
         cursor.close();
 
         if (app == null) {
-            app = new Application();
+            return getApplication(doc, new Application());
         }
 
         return getApplication(doc, app);
+
     }
 
     protected abstract Application getApplication(Document doc, Application app);

@@ -25,15 +25,11 @@ import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.avro.restapi.user.Patient;
 import org.radarcns.dao.mongo.util.MongoDataAccess;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Data Access Object for user management.
  */
 public class SourceDataAccessObject {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SourceDataAccessObject.class);
 
     /**
      * Given a sourceID, it finds what is the associated source type.

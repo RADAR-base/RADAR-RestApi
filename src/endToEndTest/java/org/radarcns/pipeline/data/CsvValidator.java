@@ -19,7 +19,6 @@ package org.radarcns.pipeline.data;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -85,9 +84,6 @@ public class CsvValidator {
             map = parser.next();
             line++;
         }
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
 
         if (checkDuration(start, end, duration)) {
             mex = config.getDataFile() + " is invalid. Data does not cover "

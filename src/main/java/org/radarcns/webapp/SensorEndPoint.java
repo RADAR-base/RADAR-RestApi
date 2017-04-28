@@ -60,12 +60,12 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/realTime/{sensor}/{stat}/{interval}/{userID}/{sourceID}")
+    @Path("/realTime/{sensor}/{stat}/{interval}/{patientID}/{sourceID}")
     @ApiOperation(
             value = "Returns a dataset object formatted in JSON.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns the last computed result of type stat for the "
-                + "given userID, sourceID, and sensor. Data can be queried using different "
+                + "given patientID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in JSON.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body "
@@ -79,7 +79,7 @@ public class SensorEndPoint {
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("interval") TimeFrame interval,
-            @PathParam("userID") String user,
+            @PathParam("patientID") String user,
             @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
@@ -96,12 +96,12 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/realTime/{sensor}/{stat}/{interval}/{userID}/{sourceID}")
+    @Path("/avro/realTime/{sensor}/{stat}/{interval}/{patientID}/{sourceID}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns the last computed result of type stat for the "
-                + "given userID, sourceID, and sensor. Data can be queried using different "
+                + "given patientID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in Apache AVRO.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
@@ -113,7 +113,7 @@ public class SensorEndPoint {
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("interval") TimeFrame interval,
-            @PathParam("userID") String user,
+            @PathParam("patientID") String user,
             @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
@@ -149,12 +149,12 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{sensor}/{stat}/{interval}/{userID}/{sourceID}")
+    @Path("/{sensor}/{stat}/{interval}/{patientID}/{sourceID}")
     @ApiOperation(
             value = "Returns a dataset object formatted in JSON.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
-                + "given userID, sourceID, and sensor. Data can be queried using different "
+                + "given patientID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in JSON.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body there "
@@ -168,7 +168,7 @@ public class SensorEndPoint {
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("interval") TimeFrame interval,
-            @PathParam("userID") String user,
+            @PathParam("patientID") String user,
             @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
@@ -185,12 +185,12 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/{sensor}/{stat}/{interval}/{userID}/{sourceID}")
+    @Path("/avro/{sensor}/{stat}/{interval}/{patientID}/{sourceID}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
-                + "given userID, sourceID, and sensor. Data can be queried using different "
+                + "given patientID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in Apache AVRO.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing."),
@@ -202,7 +202,7 @@ public class SensorEndPoint {
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("interval") TimeFrame interval,
-            @PathParam("userID") String user,
+            @PathParam("patientID") String user,
             @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
@@ -238,12 +238,12 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{sensor}/{stat}/{interval}/{userID}/{sourceID}/{start}/{end}")
+    @Path("/{sensor}/{stat}/{interval}/{patientID}/{sourceID}/{start}/{end}")
     @ApiOperation(
             value = "Returns a dataset object formatted in JSON.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
-                + "given userID, sourceID, and sensor belonging to the time window [start - end]. "
+                + "given patientID, sourceID, and sensor belonging to the time window [start - end]. "
                 + "Data can be queried using different time-frame resolutions. The response is "
                 + "formatted in JSON.")
     @ApiResponses(value = {
@@ -257,7 +257,7 @@ public class SensorEndPoint {
     public Response getByUserForWindowJson(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
-            @PathParam("userID") String user,
+            @PathParam("patientID") String user,
             @PathParam("sourceID") String source,
             @PathParam("interval") TimeFrame interval,
             @PathParam("start") long start,
@@ -277,12 +277,12 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/{sensor}/{stat}/{interval}/{userID}/{sourceID}/{start}/{end}")
+    @Path("/avro/{sensor}/{stat}/{interval}/{patientID}/{sourceID}/{start}/{end}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
-                + "given userID, sourceID, and sensor belonging to the time window [start - end]. "
+                + "given patientID, sourceID, and sensor belonging to the time window [start - end]. "
                 + "Data can be queried using different time-frame resolutions. The response is "
                 + "formatted in Apache AVRO.")
     @ApiResponses(value = {
@@ -295,7 +295,7 @@ public class SensorEndPoint {
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
             @PathParam("interval") TimeFrame interval,
-            @PathParam("userID") String user,
+            @PathParam("patientID") String user,
             @PathParam("sourceID") String source,
             @PathParam("start") long start,
             @PathParam("end") long end) {

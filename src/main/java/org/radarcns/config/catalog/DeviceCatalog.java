@@ -30,10 +30,6 @@ public class DeviceCatalog {
     @JsonProperty("device_catalog")
     private Map<SourceType, DeviceItem> devices = new HashMap();
 
-    public DeviceCatalog() {
-        // POJO initializer
-    }
-
     public Map<SourceType, DeviceItem> getDevices() {
         return devices;
     }

@@ -63,11 +63,11 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/state/{userID}/{sourceID}")
+    @Path("/state/{patientID}/{sourceID}")
     @ApiOperation(
             value = "Return a SourceDefinition values",
             notes = "Using the source sensors values arrived within last 60sec, it computes the"
-                + "sender status for the given userID and sourceID")
+                + "sender status for the given patientID and sourceID")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
                 + "there is a message.avsc object with more details"),
@@ -77,7 +77,7 @@ public class SourceEndPoint {
                 + "computed status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStateByUserDeviceJsonDevStatus(
-            @PathParam("userID") String user,
+            @PathParam("patientID") String user,
             @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
@@ -94,11 +94,11 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/state/{userID}/{sourceID}")
+    @Path("/avro/state/{patientID}/{sourceID}")
     @ApiOperation(
             value = "Return a SourceDefinition values",
             notes = "Using the source sensors values arrived within last 60sec, it computes the"
-                + "sender status for the given userID and sourceID")
+                + "sender status for the given patientID and sourceID")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
@@ -106,7 +106,7 @@ public class SourceEndPoint {
                 + "containing last computed status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStateByUserDeviceAvroDevStatus(
-            @PathParam("userID") String user,
+            @PathParam("patientID") String user,
             @PathParam("sourceID") String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
@@ -213,10 +213,10 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/getAllSources/{userID}")
+    @Path("/getAllSources/{patientID}")
     @ApiOperation(
             value = "Return a User value",
-            notes = "Return all known sources associated with the give userID")
+            notes = "Return all known sources associated with the give patientID")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
                 + "there is a message.avsc object with more details"),
@@ -224,7 +224,7 @@ public class SourceEndPoint {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a user.avsc object")})
     public Response getAllSourcesJsonUser(
-            @PathParam("userID") String user) {
+            @PathParam("patientID") String user) {
         try {
             return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(user));
         } catch (Exception exec) {
@@ -239,16 +239,16 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/getAllSources/{userID}")
+    @Path("/avro/getAllSources/{patientID}")
     @ApiOperation(
             value = "Return a User value",
-            notes = "Return all known sources associated with the give userID")
+            notes = "Return all known sources associated with the give patientID")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a user.avsc object")})
     public Response getAllSourcesAvroUser(
-            @PathParam("userID") String user) {
+            @PathParam("patientID") String user) {
         try {
             return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(user));
         } catch (Exception exec) {

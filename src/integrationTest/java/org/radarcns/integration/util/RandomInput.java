@@ -200,6 +200,7 @@ public class RandomInput {
                 break;
             default: randomDoubleValue(user, source, sourceType, sensorType, stat, samples,
                                 singleWindow);
+                break;
         }
     }
 

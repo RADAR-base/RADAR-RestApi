@@ -60,6 +60,8 @@ public class SensorDataAccessObject {
         for (SensorType sensor : SourceCatalog.getInstance().getSupportedSensor()) {
             hooks.put(sensor, DataFormat.getMongoSensor(sensor));
         }
+
+        LOGGER.info("SensorDataAccessObject successfully loaded.");
     }
 
     /**

@@ -233,6 +233,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             default:
                 content = sampleClass.newInstance();
                 content.put(content.getSchema().getField("value").pos(), object);
+                break;
         }
 
         return content;

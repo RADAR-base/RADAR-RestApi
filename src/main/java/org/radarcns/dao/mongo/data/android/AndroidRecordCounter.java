@@ -23,8 +23,6 @@ public class AndroidRecordCounter extends MongoAndroidApp {
 
     public static final String RECORD_COLLECTION = "application_record_counts";
 
-    public AndroidRecordCounter() {}
-
     //TODO take field names from schemas
     @Override
     protected Application getApplication(Document doc, Application app) {
