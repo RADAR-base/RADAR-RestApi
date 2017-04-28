@@ -29,7 +29,7 @@ import java.util.List;
 import org.junit.Test;
 import org.radarcns.avro.restapi.avro.Message;
 import org.radarcns.avro.restapi.data.Acceleration;
-import org.radarcns.avro.restapi.data.DoubleValue;
+import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
@@ -58,8 +58,8 @@ public class AvroConverterTest {
         Header header = new Header(COUNT, G, TimeFrame.TEN_SECOND, etf);
 
         LinkedList<Item> item = new LinkedList<>();
-        item.add(new Item(new DoubleValue(1.0), RadarConverter.getISO8601(new Date())));
-        item.add(new Item(new DoubleValue(2.0), RadarConverter.getISO8601(new Date())));
+        item.add(new Item(new DoubleSample(1.0), RadarConverter.getISO8601(new Date())));
+        item.add(new Item(new DoubleSample(2.0), RadarConverter.getISO8601(new Date())));
         testCases.add(AvroConverter.avroToJsonNode(new Dataset(header, item)));
 
         item = new LinkedList<>();

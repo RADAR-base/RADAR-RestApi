@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.junit.Test;
-import org.radarcns.avro.restapi.data.DoubleValue;
+import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
@@ -57,7 +57,7 @@ public class ExpectedValueTest {
 
         count = 0;
         for (Item item : dataset.getDataset()) {
-            count += (Double) ((DoubleValue) item.get("sample")).getValue();
+            count += (Double) ((DoubleSample) item.get("sample")).getValue();
         }
         assertEquals(SAMPLES, count);
 

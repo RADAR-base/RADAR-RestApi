@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.avro.restapi.data.Acceleration;
-import org.radarcns.avro.restapi.data.DoubleValue;
+import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
@@ -244,17 +244,17 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             case ACCELEROMETER:
                 return Acceleration.class;
             case BATTERY:
-                return DoubleValue.class;
+                return DoubleSample.class;
             case BLOOD_VOLUME_PULSE:
-                return DoubleValue.class;
+                return DoubleSample.class;
             case ELECTRODERMAL_ACTIVITY:
-                return DoubleValue.class;
+                return DoubleSample.class;
             case INTER_BEAT_INTERVAL:
-                return DoubleValue.class;
+                return DoubleSample.class;
             case HEART_RATE:
-                return DoubleValue.class;
+                return DoubleSample.class;
             case THERMOMETER:
-                return DoubleValue.class;
+                return DoubleSample.class;
             default:
                 throw new IllegalArgumentException(sensor.name()
                         + " is not a supported test case");

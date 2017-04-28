@@ -12,7 +12,7 @@ import java.util.List;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
-import org.radarcns.avro.restapi.data.DoubleValue;
+import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
@@ -35,7 +35,7 @@ public class HeartRateDaoTest {
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
     private static final SensorType SENSOR_TYPE = HEART_RATE;
-    private static final Class ITEM = DoubleValue.class;
+    private static final Class ITEM = DoubleSample.class;
     private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
     private static final int SAMPLES = 10;
 

@@ -18,7 +18,7 @@ package org.radarcns.dao.mongo.data.sensor;
 
 import java.util.ArrayList;
 import org.bson.Document;
-import org.radarcns.avro.restapi.data.DoubleValue;
+import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.sensor.SensorType;
@@ -45,16 +45,16 @@ public class DoubleFormat extends MongoSensor {
             ArrayList<Document> quartilesList = (ArrayList<Document>) doc.get(field);
 
             if (stat.equals(DescriptiveStatistic.QUARTILES)) {
-                return new DoubleValue( new Quartiles(
+                return new DoubleSample( new Quartiles(
                         quartilesList.get(0).getDouble("25"),
                         quartilesList.get(1).getDouble("50"),
                         quartilesList.get(2).getDouble("75")));
             } else if (stat.equals(DescriptiveStatistic.MEDIAN)) {
-                return new DoubleValue(quartilesList.get(1).getDouble("50"));
+                return new DoubleSample(quartilesList.get(1).getDouble("50"));
             }
 
         } else {
-            return new DoubleValue(doc.getDouble(field));
+            return new DoubleSample(doc.getDouble(field));
         }
 
         LOGGER.warn("Returning null value for the tuple: <{},{},{}>",field,stat,doc.toJson());
