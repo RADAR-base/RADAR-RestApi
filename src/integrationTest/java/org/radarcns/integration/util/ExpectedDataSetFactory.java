@@ -12,22 +12,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.avro.specific.SpecificRecord;
+import org.radarcns.avro.restapi.data.Acceleration;
+import org.radarcns.avro.restapi.data.DoubleValue;
+import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.dataset.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.sensor.Acceleration;
-import org.radarcns.avro.restapi.sensor.Battery;
-import org.radarcns.avro.restapi.sensor.BloodVolumePulse;
-import org.radarcns.avro.restapi.sensor.ElectroDermalActivity;
-import org.radarcns.avro.restapi.sensor.HeartRate;
-import org.radarcns.avro.restapi.sensor.InterBeatInterval;
+import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Temperature;
 import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.dao.mongo.data.sensor.AccelerationFormat;
+import org.radarcns.dao.mongo.data.sensor.DoubleFormat;
 import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.model.ExpectedValue.StatType;
 import org.radarcns.source.SourceCatalog;
@@ -44,7 +42,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
     /**
      * Default constructor initializes the mapping between {@link DescriptiveStatistic} and {@link
-     * StatType}
+     * StatType}.
      */
     public ExpectedDataSetFactory() {
         statMap.put(DescriptiveStatistic.AVERAGE, StatType.AVERAGE);
@@ -62,7 +60,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param statistic function that has to be simulated
      * @param source the simulated source device
-     * @param sensor the simulated sensor of the source device
+     * @param sensor the simulated data of the source device
      * @return {@code Dataset} resulted by the simulation
      * @see {@link org.radarcns.avro.restapi.dataset.Dataset}
      **/
@@ -84,7 +82,8 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      **/
     public Header getHeader(ExpectedValue expectedValue,
             DescriptiveStatistic statistic, Unit unit) {
-        return new Header(statistic, unit, getEffectiveTimeFrame(expectedValue));
+        return new Header(statistic, unit, TimeFrame.TEN_SECOND,
+                getEffectiveTimeFrame(expectedValue));
     }
 
     /**
@@ -145,9 +144,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param keys {@code Collection} of timewindow initial time
      * @param statistic function that has to be simulated
-     * @param sensor @return {@code List<Item>} for a {@link org.radarcns.avro.restapi.dataset.Dataset}
-     * @see {@link org.radarcns.avro.restapi.dataset.Item} containg sensor data that can be
-     * represented as array of {@code Double}.
+     * @param sensor @return {@code List<Item>} for a
+     *      {@link org.radarcns.avro.restapi.dataset.Dataset}
+     * @see {@link org.radarcns.avro.restapi.dataset.Item} containg data data that can be
+     *      represented as array of {@code Double}.
      **/
     private List<Item> getArrayItems(ExpectedValue expectedValue,
             Collection<Long> keys, DescriptiveStatistic statistic,
@@ -174,7 +174,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                         content = new Acceleration(statValues.get(0), statValues.get(1),
                                 statValues.get(2));
                     }
-                    items.add(new Item(content, getEffectiveTimeFrame(key)));
+                    items.add(new Item(content, getEffectiveTimeFrame(key).getStartDateTime()));
                     break;
                 default:
                     throw new IllegalArgumentException(sensor.name()
@@ -188,7 +188,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     /**
      * @param list of {@code Double} values representing a quartile.
      * @return the value that has to be stored within a {@code Dataset} {@code Item}
-     * @see {@link org.radarcns.avro.restapi.dataset.Quartiles}.
+     * @see {@link org.radarcns.avro.restapi.data.Quartiles}.
      **/
     private Quartiles getQuartile(List<Double> list) {
         return new Quartiles(list.get(0), list.get(1), list.get(2));
@@ -199,9 +199,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param keys {@code Collection} of timewindow initial time
      * @param statistic function that has to be simulated
-     * @param sensor @return {@code List<Item>} for a {@link org.radarcns.avro.restapi.dataset.Dataset}
-     * @see {@link org.radarcns.avro.restapi.dataset.Item} containg sensor data that can be
-     * represented as {@code Double}.
+     * @param sensor @return {@code List<Item>} for a
+     *      {@link org.radarcns.avro.restapi.dataset.Dataset}
+     * @see {@link org.radarcns.avro.restapi.dataset.Item} containg data data that can be
+     *      represented as {@code Double}.
      **/
     private List<Item> getSingletonItems(ExpectedValue expectedValue,
             Collection<Long> keys, DescriptiveStatistic statistic,
@@ -214,7 +215,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             Object content = getContent(getStatValue(statMap.get(statistic), dac), statistic,
                     getSensorClass(sensor));
 
-            items.add(new Item(content, getEffectiveTimeFrame(key)));
+            items.add(new Item(content, getEffectiveTimeFrame(key).getStartDateTime()));
         }
 
         return items;
@@ -222,17 +223,17 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
 
     private <T extends SpecificRecord> T getContent(Object object, DescriptiveStatistic stat,
-            Class<T> tClass) throws IllegalAccessException, InstantiationException {
+            Class<T> sampleClass) throws IllegalAccessException, InstantiationException {
         T content;
 
         switch (stat) {
             case QUARTILES:
-                content = tClass.newInstance();
+                content = sampleClass.newInstance();
                 content.put(content.getSchema().getField("value").pos(),
                         getQuartile((List<Double>) object));
                 break;
             default:
-                content = tClass.newInstance();
+                content = sampleClass.newInstance();
                 content.put(content.getSchema().getField("value").pos(), object);
         }
 
@@ -244,17 +245,17 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             case ACCELEROMETER:
                 return Acceleration.class;
             case BATTERY:
-                return Battery.class;
+                return DoubleValue.class;
             case BLOOD_VOLUME_PULSE:
-                return BloodVolumePulse.class;
+                return DoubleValue.class;
             case ELECTRODERMAL_ACTIVITY:
-                return ElectroDermalActivity.class;
+                return DoubleValue.class;
             case INTER_BEAT_INTERVAL:
-                return InterBeatInterval.class;
+                return DoubleValue.class;
             case HEART_RATE:
-                return HeartRate.class;
+                return DoubleValue.class;
             case THERMOMETER:
-                return Temperature.class;
+                return DoubleValue.class;
             default:
                 throw new IllegalArgumentException(sensor.name()
                         + " is not a supported test case");

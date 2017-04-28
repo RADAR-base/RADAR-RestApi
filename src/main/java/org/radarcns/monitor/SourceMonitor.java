@@ -1,7 +1,7 @@
 package org.radarcns.monitor;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ *  Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class SourceMonitor {
 
     /**
      * Checks the status for the given source counting the number of received messages and
-     *      checking whether it respects the sensor frequencies. There is a check for each sensor.
+     *      checking whether it respects the data frequencies. There is a check for each data.
      *
      * @param user identifier
      * @param source identifier
@@ -70,7 +70,7 @@ public class SourceMonitor {
 
     /**
      * Checks the status for the given source counting the number of received messages and
-     *      checking whether it respects the sensor frequencies. There is a check for each sensor.
+     *      checking whether it respects the data frequencies. There is a check for each data.
      *
      * @param user identifier
      * @param source identifier

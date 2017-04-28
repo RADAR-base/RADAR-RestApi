@@ -1,7 +1,7 @@
 package org.radarcns.integration.testcase.monitor;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ *  Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,18 +33,19 @@ import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
+import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.avro.restapi.source.State;
-import org.radarcns.config.Properties;
+import org.radarcns.config.api.Properties;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.monitor.SourceMonitor;
-import org.radarcns.source.Empatica;
 import org.radarcns.source.SourceCatalog;
 import org.radarcns.source.SourceDefinition;
+import org.slf4j.LoggerFactory;
 
 public class SourceMonitorDbTest {
 
@@ -104,18 +104,22 @@ public class SourceMonitorDbTest {
         dropAndClose(Utility.getMongoClient());
     }
 
+    /** Drops all used collections to bring the database back to the initial state, and close the
+     *      database connection.
+     **/
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
         for (SensorType sensorType : definition.getSensorTypes()) {
             Utility.dropCollection(client,
-                SensorDataAccessObject.getInstance().getCollectionName(SOURCE_TYPE, sensorType));
+                    SensorDataAccessObject.getInstance().getCollectionName(
+                        SOURCE_TYPE, sensorType, TimeFrame.TEN_SECOND));
         }
 
         client.close();
     }
 
-    private Source getSource (int window, double percentage, MongoClient client)
+    private Source getSource(int window, double percentage, MongoClient client)
             throws ConnectException {
         long timestamp = System.currentTimeMillis();
 
@@ -123,7 +127,9 @@ public class SourceMonitorDbTest {
         long start = timestamp + TimeUnit.SECONDS.toMillis(10);
         long end = start + TimeUnit.SECONDS.toMillis(60 / (window + 1));
         int messages;
-        MongoCollection<Document> collection;
+
+        String collectionName;
+
         SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
         for (int i = 0; i < window; i++) {
             for (SensorType sensorType : definition.getSensorTypes()) {
@@ -131,10 +137,11 @@ public class SourceMonitorDbTest {
                     definition.getFrequency(sensorType).intValue() * 60, percentage)
                         / window;
 
+                collectionName = SensorDataAccessObject.getInstance().getCollectionName(
+                    SOURCE_TYPE, sensorType, TimeFrame.TEN_SECOND);
+
                 insertDoc(sensorType, messages, start, end,
-                    MongoHelper.getCollection(client,
-                        SensorDataAccessObject.getInstance()
-                            .getCollectionName(SOURCE_TYPE, sensorType)));
+                        MongoHelper.getCollection(client, collectionName));
 
                 if (count.containsKey(sensorType)) {
                     count.put(sensorType, count.get(sensorType) + messages);
@@ -156,13 +163,15 @@ public class SourceMonitorDbTest {
 
             if (messages > 0) {
                 insertDoc(sensorType, messages, start, end,
-                    MongoHelper.getCollection(client,
-                    SensorDataAccessObject.getInstance()
-                        .getCollectionName(SOURCE_TYPE, sensorType)));
+                        MongoHelper.getCollection(client,
+                            SensorDataAccessObject.getInstance().getCollectionName(SOURCE_TYPE,
+                                sensorType, TimeFrame.TEN_SECOND)));
             }
         }
 
-        return new SourceMonitor(new Empatica()).getState(USER, SOURCE, timestamp, end, client);
+        return new SourceMonitor(new SourceDefinition(EMPATICA,
+                Properties.getDeviceCatalog().getDevices().get(EMPATICA))).getState(
+                    USER, SOURCE, timestamp, end, client);
     }
 
     private static void insertDoc(SensorType sensorType, int messages, long start, long end,
@@ -178,7 +187,7 @@ public class SourceMonitorDbTest {
 
 
     private static Document getDocumentsBySingle(int samples, long start, long end) {
-        return new Document("_id", USER + "-" + SOURCE + "-" + start + "-"+ end)
+        return new Document("_id", USER + "-" + SOURCE + "-" + start + "-" + end)
             .append("user", USER)
             .append("source", SOURCE)
             .append("min", new Double(0))
@@ -193,7 +202,7 @@ public class SourceMonitorDbTest {
     }
 
     private static Document getDocumentsByArray(int samples, long start, long end) {
-        return new Document("_id", USER + "-" + SOURCE + "-" + start + "-"+ end)
+        return new Document("_id", USER + "-" + SOURCE + "-" + start + "-" + end)
             .append("user", USER)
             .append("source", SOURCE)
             .append("min", getValue(0))
@@ -227,8 +236,8 @@ public class SourceMonitorDbTest {
         });
     }
 
+    /** Reduces the frequency rate to mock a data loss. **/
     public static int reducedMessage(double frequency, double reduction) {
-
         if (frequency == 1.0 && reduction == 1.0) {
             return 0;
         } else if (frequency == 1.0) {
@@ -239,8 +248,6 @@ public class SourceMonitorDbTest {
     }
 
     private MongoClient getClient() throws URISyntaxException {
-        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).toURI()).toString());
         return Utility.getMongoClient();
     }
 }

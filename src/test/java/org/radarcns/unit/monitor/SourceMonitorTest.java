@@ -1,7 +1,7 @@
 package org.radarcns.unit.monitor;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ *  Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,80 @@ package org.radarcns.unit.monitor;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import org.junit.Test;
+import org.radarcns.avro.restapi.sensor.DataType;
+import org.radarcns.avro.restapi.sensor.SensorType;
+import org.radarcns.avro.restapi.sensor.Unit;
+import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.avro.restapi.source.State;
+import org.radarcns.config.catalog.DeviceItem;
+import org.radarcns.config.catalog.SensorCatalog;
+import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.monitor.SourceMonitor;
-import org.radarcns.source.Empatica;
+import org.radarcns.source.SourceDefinition;
 
 public class SourceMonitorTest {
 
     @Test
     public void getSourceTest() {
-        Empatica empatica = new Empatica();
+        List<SensorCatalog> sensors = new LinkedList<>();
+
+        sensors.add(new SensorCatalog(SensorType.ACCELEROMETER, 32.0, Unit.G, DataType.RAW,
+                DataFormat.ACCELERATION_FORMAT,
+                getCollections("android_empatica_e4_acceleration_output")));
+
+        sensors.add(new SensorCatalog(SensorType.BATTERY, 1.0, Unit.PERCENTAGE,
+                DataType.RAW, DataFormat.DOUBLE_FORMAT,
+                getCollections("android_empatica_e4_battery_level_output")));
+
+        sensors.add(new SensorCatalog(SensorType.BLOOD_VOLUME_PULSE, 64.0, Unit.NANOWATT,
+                DataType.RAW, DataFormat.DOUBLE_FORMAT,
+                getCollections("android_empatica_e4_blood_volume_pulse_output")));
+
+        sensors.add(new SensorCatalog(SensorType.ELECTRODERMAL_ACTIVITY, 4.0,
+                Unit.MICROSIEMENS, DataType.RAW, DataFormat.DOUBLE_FORMAT,
+                getCollections("android_empatica_e4_electrodermal_activity_output")));
+
+        sensors.add(new SensorCatalog(SensorType.HEART_RATE, 1.0, Unit.BEATS_PER_MIN,
+                DataType.RADAR, DataFormat.DOUBLE_FORMAT,
+                getCollections("android_empatica_e4_heartrate")));
+
+        sensors.add(new SensorCatalog(SensorType.INTER_BEAT_INTERVAL, 1.0,
+                Unit.BEATS_PER_MIN, DataType.RAW, DataFormat.DOUBLE_FORMAT,
+                getCollections("android_empatica_e4_inter_beat_interval_output")));
+
+        sensors.add(new SensorCatalog(SensorType.THERMOMETER, 4.0, Unit.CELSIUS,
+                DataType.RAW, DataFormat.DOUBLE_FORMAT,
+                getCollections("android_empatica_e4_inter_beat_interval_output")));
+
+
+        SourceDefinition empatica = new SourceDefinition(SourceType.EMPATICA,
+                new DeviceItem(sensors));
+
         SourceMonitor monitor = new SourceMonitor(empatica);
 
         assertEquals(empatica, monitor.getSource());
     }
 
+    private HashMap<String, String> getCollections(String prefix) {
+        HashMap<String, String> collections = new HashMap<>();
+
+        collections.put("10sec", prefix);
+        collections.put("30sec", prefix + "_30sec");
+        collections.put("1min", prefix + "_1min");
+        collections.put("10min", prefix + "_10min");
+        collections.put("1h", prefix + "_1h");
+        collections.put("1d", prefix + "_1d");
+        collections.put("1w", prefix + "_1w");
+
+        return collections;
+    }
+
     @Test
-    public void getStatusTest(){
+    public void getStatusTest() {
         assertEquals(State.FINE, SourceMonitor.getStatus(1d));
         assertEquals(State.FINE, SourceMonitor.getStatus(0.951));
 
@@ -52,17 +109,17 @@ public class SourceMonitorTest {
     }
 
     @Test
-    public void getPercentageTest(){
+    public void getPercentageTest() {
         assertEquals(1d, SourceMonitor.getPercentage(100d, 100d),
-            0d);
+                0d);
         assertEquals(0.95d, SourceMonitor.getPercentage(95d, 100d),
-            0d);
+                0d);
         assertEquals(0.50d, SourceMonitor.getPercentage(50d, 100d),
-            0d);
+                0d);
         assertEquals(0.1d, SourceMonitor.getPercentage(10d, 100d),
-            0d);
+                0d);
         assertEquals(0d, SourceMonitor.getPercentage(0d, 100d),
-            0d);
+                0d);
     }
 
 }

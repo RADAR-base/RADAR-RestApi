@@ -24,8 +24,5 @@ services:
         - hotstorage
       ports:
         - "8080:8080"
-      environment:
-        MONGODB_USER: restapi
-        MONGODB_PASS: radar
-        MONGODB_DATABASE: hotstorage
-        MONGODB_HOST: hotstorage:27017
+      volumes:
+        - "./resources:/usr/local/tomcat/conf/radar"

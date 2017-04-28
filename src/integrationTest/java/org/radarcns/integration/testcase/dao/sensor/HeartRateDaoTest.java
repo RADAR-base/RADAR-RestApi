@@ -1,31 +1,28 @@
 package org.radarcns.integration.testcase.dao.sensor;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import org.bson.Document;
-import org.junit.After;
-import org.junit.Test;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.sensor.HeartRate;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
-import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.config.Properties;
-import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.dao.mongo.sensor.HeartRateDAO;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.integration.util.RandomInput;
-import org.radarcns.integration.util.Utility;
-import org.radarcns.util.RadarConverter;
-
-import java.nio.file.Paths;
-import java.util.List;
-
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import java.util.List;
+import org.bson.Document;
+import org.junit.After;
+import org.junit.Test;
+import org.radarcns.avro.restapi.data.DoubleValue;
+import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.header.TimeFrame;
+import org.radarcns.avro.restapi.sensor.SensorType;
+import org.radarcns.avro.restapi.sensor.Unit;
+import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.dao.SensorDataAccessObject;
+import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.integration.util.RandomInput;
+import org.radarcns.integration.util.Utility;
+import org.radarcns.util.RadarConverter;
 
 /**
  * UserDao Test.
@@ -38,28 +35,29 @@ public class HeartRateDaoTest {
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
     private static final SensorType SENSOR_TYPE = HEART_RATE;
+    private static final Class ITEM = DoubleValue.class;
+    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test
-    public void valueRTByUserSourceTest() throws Exception {
-        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).toURI()).toString());
-
+    public void valueRealTimeByUserSourceTest() throws Exception {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
-            HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
+                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+                    SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-            COUNT, SAMPLES, false);
+                COUNT, SAMPLES, false);
 
         collection.insertMany(docs);
 
-        Dataset actual = HeartRateDAO.getInstance().valueRTByUserSource(USER, SOURCE,
-                Unit.BEATS_PER_MIN, RadarConverter.getMongoStat(COUNT), collection);
+        Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueRTByUserSource(
+                USER, SOURCE, Unit.BEATS_PER_MIN, RadarConverter.getMongoStat(COUNT), TIME_FRAME,
+                    collection);
 
         Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
-                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, HeartRate.class);
+                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
 
         assertEquals(expected, actual);
 
@@ -68,24 +66,23 @@ public class HeartRateDaoTest {
 
     @Test
     public void valueByUserSourceTest() throws Exception {
-        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).toURI()).toString());
-
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
-            HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
+                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+                    SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-            COUNT, SAMPLES, false);
+                COUNT, SAMPLES, false);
 
         collection.insertMany(docs);
 
-        Dataset actual = HeartRateDAO.getInstance().valueByUserSource(USER, SOURCE,
-            Unit.BEATS_PER_MIN, RadarConverter.getMongoStat(COUNT), collection);
+        Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueByUserSource(USER,
+                SOURCE, Unit.BEATS_PER_MIN, RadarConverter.getMongoStat(COUNT),
+                    TimeFrame.TEN_SECOND, collection);
 
         Dataset expected = Utility.convertDocToDataset(docs,
-            RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, HeartRate.class);
+                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
 
         assertEquals(expected, actual);
 
@@ -94,16 +91,14 @@ public class HeartRateDaoTest {
 
     @Test
     public void valueByUserSourceWindowTest() throws Exception {
-        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).toURI()).toString());
-
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
-            HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
+                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+                    SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-            COUNT, SAMPLES, false);
+                COUNT, SAMPLES, false);
         while (docs.size() < 6) {
             docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
                 COUNT, SAMPLES, false);
@@ -115,11 +110,12 @@ public class HeartRateDaoTest {
         long start = docs.get(index - 1).getDate(MongoHelper.START).getTime();
         long end = docs.get(index + 1).getDate(MongoHelper.END).getTime();
 
-        Dataset actual = HeartRateDAO.getInstance().valueByUserSourceWindow(USER, SOURCE,
-                Unit.BEATS_PER_MIN, RadarConverter.getMongoStat(COUNT), start, end, collection);
+        Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueByUserSourceWindow(
+                USER, SOURCE, Unit.BEATS_PER_MIN, RadarConverter.getMongoStat(COUNT), TIME_FRAME,
+                    start, end, collection);
 
         Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
-                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, HeartRate.class);
+                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
 
         assertEquals(expected, actual);
 
@@ -128,16 +124,14 @@ public class HeartRateDaoTest {
 
     @Test
     public void countSamplesByUserSourceWindowTest() throws Exception {
-        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).toURI()).toString());
-
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
-            HeartRateDAO.getInstance().getCollectionName(SOURCE_TYPE));
+                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+                    SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-            COUNT, SAMPLES, false);
+                COUNT, SAMPLES, false);
         while (docs.size() < 6) {
             docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
                 COUNT, SAMPLES, false);
@@ -149,8 +143,8 @@ public class HeartRateDaoTest {
         long start = docs.get(index - 1).getDate(MongoHelper.START).getTime();
         long end = docs.get(index + 1).getDate(MongoHelper.END).getTime();
 
-        double actual = HeartRateDAO.getInstance().countSamplesByUserSourceWindow(
-            USER, SOURCE, start, end, collection);
+        double actual = SensorDataAccessObject.getInstance(
+                SENSOR_TYPE).countSamplesByUserSourceWindow(USER, SOURCE, start, end, collection);
 
         double expected = 0;
         for (Document doc : docs.subList(index - 1, index + 2)) {
@@ -167,10 +161,14 @@ public class HeartRateDaoTest {
         dropAndClose(Utility.getMongoClient());
     }
 
+    /** Drops all used collections to bring the database back to the initial state, and close the
+     *      database connection.
+     **/
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         Utility.dropCollection(client,
-                SensorDataAccessObject.getInstance().getCollectionName(SOURCE_TYPE, SENSOR_TYPE));
+                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+                SOURCE_TYPE, TIME_FRAME));
         client.close();
     }
 }

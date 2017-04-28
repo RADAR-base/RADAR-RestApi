@@ -11,6 +11,10 @@ services:
 env:
   DOCKER_COMPOSE_VERSION: 1.9.0
 
+addons:
+  hosts:
+    - hotstorage
+
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/

@@ -17,6 +17,8 @@ MAINTAINER @fnobilia, @afolarin
 
 LABEL description="RADAR-CNS Rest Api docker container"
 
+RUN mkdir /usr/local/tomcat/conf/radar
+
 ADD ./radar.war /usr/local/tomcat/webapps/
 
 EXPOSE 8080

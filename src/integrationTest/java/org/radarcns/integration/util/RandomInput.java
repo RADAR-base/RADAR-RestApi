@@ -1,7 +1,7 @@
 package org.radarcns.integration.util;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ *  Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ package org.radarcns.integration.util;
  * limitations under the License.
  */
 
-import static org.radarcns.dao.mongo.AndroidDAO.RECORD_COLLECTION;
-import static org.radarcns.dao.mongo.AndroidDAO.STATUS_COLLECTION;
-import static org.radarcns.dao.mongo.AndroidDAO.UPTIME_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RandomInput {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RandomInput.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(RandomInput.class);
 
     public static final String DATASET = "dataset";
     public static final String DOCUMENTS = "documents";
@@ -105,6 +105,10 @@ public class RandomInput {
         documents = expectedDocumentFactory.produceExpectedData(instance);
     }
 
+    /**
+     * Returns a Map containing a {@code Dataset} and a {@code Collection<Document>} randomly
+     *      generated mocking the behaviour of the RADAR-CNS Platform.
+     */
     public static Map<String, Object> getDatasetAndDocumentsRandom(String user, String source,
             SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples,
             boolean singleWindow)
@@ -122,14 +126,18 @@ public class RandomInput {
             + " currently supported.");
     }
 
+    /**
+     * Returns a {@code Dataset} randomly generated that mocks the behaviour of
+     *      the RADAR-CNS Platform.
+     */
     public static Dataset getDatasetRandom(String user, String source, SourceType sourceType,
             SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         switch (sourceType) {
             case ANDROID: break;
             case BIOVOTION: break;
-            case EMPATICA: getDataset(user, source, sourceType, sensorType, stat, samples,
-                    singleWindow);
+            case EMPATICA: return getDataset(user, source, sourceType, sensorType, stat, samples,
+                            singleWindow);
             case PEBBLE: break;
             default: break;
         }
@@ -138,6 +146,10 @@ public class RandomInput {
             + " currently supported.");
     }
 
+    /**
+     * Returns a {@code Collection<Document>} randomly generated that mocks the behaviour of
+     *      the RADAR-CNS Platform.
+     */
     public static List<Document> getDocumentsRandom(String user, String source,
             SourceType sourceType, SensorType sensorType, DescriptiveStatistic stat, int samples,
             boolean singleWindow)
@@ -146,7 +158,7 @@ public class RandomInput {
             case ANDROID: break;
             case BIOVOTION: break;
             case EMPATICA: return getDocument(user, source, sourceType, sensorType, stat, samples,
-                    singleWindow);
+                            singleWindow);
             case PEBBLE: break;
             default: break;
         }
@@ -184,13 +196,18 @@ public class RandomInput {
             SensorType sensorType, DescriptiveStatistic stat, int samples, boolean singleWindow)
             throws IllegalAccessException, InstantiationException {
         switch (sensorType) {
-            case ACCELEROMETER: randomArrayValue(user, source, sourceType, sensorType, stat,
-                    samples, singleWindow); break;
+            case ACCELEROMETER:
+                randomArrayValue(user, source, sourceType, sensorType, stat, samples,
+                                singleWindow);
+                break;
             default: randomDoubleValue(user, source, sourceType, sensorType, stat, samples,
-                    singleWindow);
+                                singleWindow);
         }
     }
 
+    /** Generates and returns a randomly generated {@code ApplicationStatus} mocking data sent
+     *      by RADAR-CNS pRMT.
+     **/
     public static Map<String, Document> getRandomApplicationStatus(String user, String source) {
         String ipAdress = getRandomIp();
         ServerStatus serverStatus = ServerStatus.values()[
@@ -204,28 +221,29 @@ public class RandomInput {
                 recordsCached, recordsSent, recordsUnsent);
     }
 
+    /** Generates and returns a ApplicationStatus using the given inputs. **/
     public static Map<String, Document> getRandomApplicationStatus(String user, String source,
             String ipAddress, ServerStatus serverStatus, Double uptime, int recordsCached,
             int recordsSent, int recordsUnsent) {
         String id = user + "-" + source;
 
         Document uptimeDoc = new Document("_id", id)
-            .append("user", user)
-            .append("source", source)
-            .append("applicationUptime", uptime);
+                .append("user", user)
+                .append("source", source)
+                .append("applicationUptime", uptime);
 
         Document statusDoc = new Document("_id", id)
-            .append("user", user)
-            .append("source", source)
-            .append("clientIP", ipAddress)
-            .append("serverStatus", serverStatus.toString());
+                .append("user", user)
+                .append("source", source)
+                .append("clientIP", ipAddress)
+                .append("serverStatus", serverStatus.toString());
 
         Document recordsDoc = new Document("_id", id)
-            .append("user", user)
-            .append("source", source)
-            .append("recordsCached", recordsCached)
-            .append("recordsSent", recordsSent)
-            .append("recordsUnsent", recordsUnsent);
+                .append("user", user)
+                .append("source", source)
+                .append("recordsCached", recordsCached)
+                .append("recordsSent", recordsSent)
+                .append("recordsUnsent", recordsUnsent);
 
         Map<String, Document> documents = new HashMap<>();
         documents.put(STATUS_COLLECTION, statusDoc);
@@ -234,6 +252,7 @@ public class RandomInput {
         return documents;
     }
 
+    /** Returns a String representing a random IP address. **/
     public static String getRandomIp() {
         long ip = ThreadLocalRandom.current().nextLong();
         StringBuilder result = new StringBuilder(15);

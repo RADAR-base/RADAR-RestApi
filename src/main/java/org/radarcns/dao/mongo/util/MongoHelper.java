@@ -16,7 +16,7 @@ import java.net.ConnectException;
 import java.util.Date;
 import javax.servlet.ServletContext;
 import org.bson.Document;
-import org.radarcns.config.Properties;
+import org.radarcns.config.api.Properties;
 import org.radarcns.listener.MongoDBContextListener;
 
 /**
@@ -215,7 +215,8 @@ public class MongoHelper {
         }
 
         MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
-        MongoDatabase database = mongoClient.getDatabase(Properties.getInstance().getMongoDbName());
+        MongoDatabase database = mongoClient.getDatabase(
+                Properties.getApiConfig().getMongoDbName());
 
         return database.getCollection(collection);
     }
@@ -228,7 +229,7 @@ public class MongoHelper {
      * @return the MongoDB collection named collection.
      */
     public static MongoCollection<Document> getCollection(MongoClient client, String collection) {
-        MongoDatabase database = client.getDatabase(Properties.getInstance().getMongoDbName());
+        MongoDatabase database = client.getDatabase(Properties.getApiConfig().getMongoDbName());
 
         return database.getCollection(collection);
     }

@@ -1,7 +1,7 @@
 package org.radarcns.util;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ *  Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ public class RadarConverter {
     }
 
     /**
-     * Converts the SensorType to the related sensor name used to convert AVRO to JSON.
+     * Converts the SensorType to the related data name used to convert AVRO to JSON.
      **/
     public static String getSensorName(SensorType sensor) {
         switch (sensor) {

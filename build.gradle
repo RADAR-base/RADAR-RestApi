@@ -34,7 +34,7 @@ ext.radarCommon = '0.3-SNAPSHOT'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.tomcat = '8.0.37'
-ext.schemaRestApiVersion = '0.1'
+ext.schemaRestApiVersion = '0.1.1-SNAPSHOT'
 
 configurations {
   codacy
@@ -241,16 +241,18 @@ task endToEndTest(type: Test) {
   }
 }
 
+//Useful for E2E tests
 task setRadarEnvironmentForDocker << {
   File volumes = new File("src/endToEndTest/dockerRadar/volumes")
   volumes.mkdir()
   String volumePath = volumes.getAbsolutePath()
   
-  def fileEnv = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
+  def fileEnv = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/env.template")
   fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumePath)
   fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
   fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
   fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+  fileEnv.renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
 
   def fileInstall = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh")
   fileInstall.text = fileInstall.text.replace('/usr/local/var/lib/docker', volumePath)

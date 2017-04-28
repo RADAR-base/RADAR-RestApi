@@ -1,7 +1,7 @@
 package org.radarcns.unit.util;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ *  Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,17 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import org.junit.Test;
 import org.radarcns.avro.restapi.avro.Message;
+import org.radarcns.avro.restapi.data.Acceleration;
+import org.radarcns.avro.restapi.data.DoubleValue;
+import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.sensor.HeartRate;
+import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
 
@@ -46,26 +50,53 @@ public class AvroConverterTest {
 
     @Test
     public void avroToJsonNodeTest() throws IOException {
+        List<JsonNode> testCases = new LinkedList<>();
+
         EffectiveTimeFrame etf = new EffectiveTimeFrame(
-            RadarConverter.getISO8601(new Date()),
-            RadarConverter.getISO8601(new Date()));
-        Header header = new Header(COUNT, G, etf);
+                RadarConverter.getISO8601(new Date()),
+                RadarConverter.getISO8601(new Date()));
+        Header header = new Header(COUNT, G, TimeFrame.TEN_SECOND, etf);
 
         LinkedList<Item> item = new LinkedList<>();
-        item.add(new Item(new HeartRate(1.0), etf));
-        item.add(new Item(new HeartRate(2.0), etf));
+        item.add(new Item(new DoubleValue(1.0), RadarConverter.getISO8601(new Date())));
+        item.add(new Item(new DoubleValue(2.0), RadarConverter.getISO8601(new Date())));
+        testCases.add(AvroConverter.avroToJsonNode(new Dataset(header, item)));
 
-        Dataset dataset = new Dataset(header, item);
+        item = new LinkedList<>();
+        item.add(new Item(new Quartiles(1.0, 1.0, 1.0),
+                RadarConverter.getISO8601(new Date())));
+        item.add(new Item(new Quartiles(2.0, 2.0, 2.0),
+                RadarConverter.getISO8601(new Date())));
+        testCases.add(AvroConverter.avroToJsonNode(new Dataset(header, item)));
 
-        JsonNode jsonNode = AvroConverter.avroToJsonNode(dataset, "heart_rate");
+        item = new LinkedList<>();
+        item.add(new Item(new Acceleration(1.0, 1.0, 1.0),
+                RadarConverter.getISO8601(new Date())));
+        item.add(new Item(new Acceleration(2.0, 2.0, 2.0),
+                RadarConverter.getISO8601(new Date())));
+        testCases.add(AvroConverter.avroToJsonNode(new Dataset(header, item)));
 
-        Iterator<JsonNode> iterator = jsonNode.get("dataset").elements();
-        while (iterator.hasNext()) {
-            Iterator<String> names = iterator.next().fieldNames();
-            String eftString = names.next();
-            String sensor = names.next();
-            assertEquals("effectiveTimeFrame", eftString);
-            assertEquals("heart_rate", sensor);
+        item = new LinkedList<>();
+        item.add(new Item(new Acceleration(new Quartiles(1.0, 1.0, 1.0),
+                new Quartiles(1.0, 1.0, 1.0),
+                new Quartiles(1.0, 1.0, 1.0)),
+                RadarConverter.getISO8601(new Date())));
+        item.add(new Item(new Acceleration(new Quartiles(2.0, 2.0, 2.0),
+                new Quartiles(2.0, 2.0, 2.0),
+                new Quartiles(2.0, 2.0, 2.0)),
+                RadarConverter.getISO8601(new Date())));
+        testCases.add(AvroConverter.avroToJsonNode(new Dataset(header, item)));
+
+        for (JsonNode jsonNode : testCases) {
+            Iterator<JsonNode> iterator = jsonNode.get("dataset").elements();
+            while (iterator.hasNext()) {
+                Iterator<String> names = iterator.next().fieldNames();
+
+                String sample = names.next();
+                String startDateTime = names.next();
+                assertEquals("sample", sample);
+                assertEquals("startDateTime", startDateTime);
+            }
         }
     }
 

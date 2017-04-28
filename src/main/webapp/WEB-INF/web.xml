@@ -38,5 +38,6 @@
     </servlet-mapping>
 
     <listener><listener-class>org.radarcns.listener.MongoDBContextListener</listener-class></listener>
+    <listener><listener-class>org.radarcns.listener.SourceCatalogContextListener</listener-class></listener>
 
 </web-app>

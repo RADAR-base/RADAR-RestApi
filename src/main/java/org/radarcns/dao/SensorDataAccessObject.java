@@ -1,7 +1,7 @@
 package org.radarcns.dao;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ *  Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,28 +18,26 @@ package org.radarcns.dao;
 
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.dao.mongo.SourceDAO;
-import org.radarcns.dao.mongo.sensor.AccelerationDAO;
-import org.radarcns.dao.mongo.sensor.BatteryDAO;
-import org.radarcns.dao.mongo.sensor.BloodVolumePulseDAO;
-import org.radarcns.dao.mongo.sensor.ElectrodermalActivityDAO;
-import org.radarcns.dao.mongo.sensor.HeartRateDAO;
-import org.radarcns.dao.mongo.sensor.InterBeatIntervalDAO;
-import org.radarcns.dao.mongo.sensor.TemperatureDAO;
+import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.dao.mongo.util.MongoSensorDAO;
+import org.radarcns.dao.mongo.util.MongoSensor;
 import org.radarcns.source.SourceCatalog;
 import org.radarcns.util.RadarConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generic Data Accesss Object database independent.
@@ -47,40 +45,46 @@ import org.radarcns.util.RadarConverter;
 public class SensorDataAccessObject {
 
     /** Logger. **/
-    //private static final Logger LOGGER = LoggerFactory.getLogger(SensorDataAccessObject.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SensorDataAccessObject.class);
 
-    /** Map containing actual implementations of each sensor DAO. **/
-    private final HashMap<SensorType, MongoSensorDAO> hooks;
+    /** Map containing actual implementations of each data DAO. **/
+    private final Map<SensorType, MongoSensor> hooks;
 
-    /** Singleton instance. **/
-    private static SensorDataAccessObject instance;
+    /** Singleton INSTANCE. **/
+    private static SensorDataAccessObject INSTANCE;
 
     /** Constructor. **/
     private SensorDataAccessObject() {
         hooks = new HashMap<>();
 
-        hooks.put(SensorType.ACCELEROMETER, AccelerationDAO.getInstance());
-        hooks.put(SensorType.BATTERY, BatteryDAO.getInstance());
-        hooks.put(SensorType.BLOOD_VOLUME_PULSE, BloodVolumePulseDAO.getInstance());
-        hooks.put(SensorType.ELECTRODERMAL_ACTIVITY, ElectrodermalActivityDAO.getInstance());
-        hooks.put(SensorType.HEART_RATE, HeartRateDAO.getInstance());
-        hooks.put(SensorType.INTER_BEAT_INTERVAL, InterBeatIntervalDAO.getInstance());
-        hooks.put(SensorType.THERMOMETER, TemperatureDAO.getInstance());
+        for (SensorType sensor : SourceCatalog.getInstance().getSupportedSensor()) {
+            hooks.put(sensor, DataFormat.getMongoSensor(sensor));
+        }
     }
 
     /**
      * Static initializer.
      */
     static {
-        instance = new SensorDataAccessObject();
+        INSTANCE = new SensorDataAccessObject();
     }
 
     /**
      * Returns the singleton.
-     * @return the singleton {@code SensorDataAccessObject} instance
+     * @return the singleton {@code SensorDataAccessObject} INSTANCE
      */
     public static SensorDataAccessObject getInstance() {
-        return instance;
+        return INSTANCE;
+    }
+
+    /**
+     * Returns the singleton Data Access Object associated with the sensor for the given source.
+     *
+     * @param sensorType sensor of interest
+     * @return {@code MongoSensor} associated with the requested sensor for the given source
+     */
+    public static MongoSensor getInstance(SensorType sensorType) {
+        return INSTANCE.hooks.get(sensorType);
     }
 
     /**
@@ -89,24 +93,27 @@ public class SensorDataAccessObject {
      * @param user is the userID
      * @param source is the sourceID
      * @param stat is the required statistical value
-     * @param context is the servlet context needed to retrieve the database client instance
-     * @return the last seen sensor value stat for the given user and source, otherwise
+     * @param timeFrame time frame resolution
+     * @param sensorType is the required sensor type
+     * @param context is the servlet context needed to retrieve the database client INSTANCE
+     * @return the last seen data value stat for the given user and source, otherwise
      *      empty dataset
      *
      * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Dataset valueRTByUserSource(String user, String source, DescriptiveStatistic stat,
-            SensorType sensor, ServletContext context) throws ConnectException {
-        MongoSensorDAO sensorDao = hooks.get(sensor);
-
+            TimeFrame timeFrame, SensorType sensorType, ServletContext context)
+            throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
+        SourceType sourceType = SourceDataAccessObject.getSourceType(source, client);
+        Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
 
-        SourceType sourceType = SourceDAO.getSourceType(source, client);
-        Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensor);
+        MongoSensor sensorDao = hooks.get(sensorType);
 
         return sensorDao.valueRTByUserSource(user, source, unit, RadarConverter.getMongoStat(stat),
-                MongoHelper.getCollection(context, sensorDao.getCollectionName(sourceType)));
+                timeFrame, MongoHelper.getCollection(context,
+                        sensorDao.getCollectionName(sourceType, timeFrame)));
     }
 
     /**
@@ -115,22 +122,26 @@ public class SensorDataAccessObject {
      * @param user is the userID
      * @param source is the sourceID
      * @param stat is the required statistical value
-     * @param context is the servlet context needed to retrieve the database client instance
-     * @return sensor dataset for the given user and source, otherwise empty dataset
+     * @param timeFrame time frame resolution
+     * @param sensorType is the required sensor type
+     * @param context is the servlet context needed to retrieve the database client INSTANCE
+     * @return data dataset for the given user and source, otherwise empty dataset
      *
      * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
      */
     public Dataset valueByUserSource(String user, String source, DescriptiveStatistic stat,
-            SensorType sensor, ServletContext context) throws ConnectException {
-        MongoSensorDAO sensorDao = hooks.get(sensor);
-
+            TimeFrame timeFrame, SensorType sensorType, ServletContext context)
+            throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
 
-        SourceType sourceType = SourceDAO.getSourceType(source, client);
-        Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensor);
+        SourceType sourceType = SourceDataAccessObject.getSourceType(source, client);
+        Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
+
+        MongoSensor sensorDao = hooks.get(sensorType);
 
         return sensorDao.valueByUserSource(user, source, unit, RadarConverter.getMongoStat(stat),
-            MongoHelper.getCollection(context, sensorDao.getCollectionName(sourceType)));
+            timeFrame, MongoHelper.getCollection(
+                context, sensorDao.getCollectionName(sourceType, timeFrame)));
     }
 
     /**
@@ -139,27 +150,29 @@ public class SensorDataAccessObject {
      * @param user is the userID
      * @param source is the sourceID
      * @param stat is the required statistical value
+     * @param timeFrame time frame resolution
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
-     * @param context is the servlet context needed to retrieve the database client instance
-     * @return sensor dataset for the given user and source within the start and end time window,
+     * @param sensorType is the required sensor type
+     * @param context is the servlet context needed to retrieve the database client INSTANCE
+     * @return data dataset for the given user and source within the start and end time window,
      *      otherwise empty dataset
      *
      * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
      */
     public Dataset valueByUserSourceWindow(String user, String source, DescriptiveStatistic stat,
-            Long start, Long end, SensorType sensor, ServletContext context)
-            throws ConnectException {
-        MongoSensorDAO sensorDao = hooks.get(sensor);
-
+            TimeFrame timeFrame, Long start, Long end, SensorType sensorType,
+            ServletContext context) throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
 
-        SourceType sourceType = SourceDAO.getSourceType(source, client);
-        Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensor);
+        SourceType sourceType = SourceDataAccessObject.getSourceType(source, client);
+        Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
+
+        MongoSensor sensorDao = hooks.get(sensorType);
 
         return sensorDao.valueByUserSourceWindow(user, source, unit,
-            RadarConverter.getMongoStat(stat), start, end,
-            MongoHelper.getCollection(context, sensorDao.getCollectionName(sourceType)));
+            RadarConverter.getMongoStat(stat), timeFrame, start, end,
+            MongoHelper.getCollection(context, sensorDao.getCollectionName(sourceType, timeFrame)));
     }
 
     /**
@@ -175,10 +188,11 @@ public class SensorDataAccessObject {
     public double countSamplesByUserSourceWindow(String user, String source, Long start, Long end,
             SensorType sensorType, SourceType sourceType, MongoClient client)
             throws ConnectException {
-        MongoSensorDAO sensorDao = hooks.get(sensorType);
+        MongoSensor sensorDao = hooks.get(sensorType);
 
         return sensorDao.countSamplesByUserSourceWindow(user, source, start, end,
-            MongoHelper.getCollection(client, sensorDao.getCollectionName(sourceType)));
+                MongoHelper.getCollection(client,
+                sensorDao.getCollectionName(sourceType, TimeFrame.TEN_SECOND)));
     }
 
     /**
@@ -192,11 +206,9 @@ public class SensorDataAccessObject {
      */
     public Set<String> findAllUsers(MongoClient client) throws ConnectException {
         Set<String> users = new HashSet<>();
-        for (MongoSensorDAO dataAccessObject : hooks.values()) {
 
-
-
-            users.addAll(dataAccessObject.findAllUser(client));
+        for (MongoSensor mongoSensor : hooks.values()) {
+            users.addAll(mongoSensor.findAllUser(client));
         }
 
         return users;
@@ -212,12 +224,12 @@ public class SensorDataAccessObject {
      *
      * @see {@link org.radarcns.avro.restapi.user.Patient}
      */
-    public Set<Source> findAllSoucesByUser(String user, MongoClient client)
+    public Set<Source> findAllSourcesByUser(String user, MongoClient client)
         throws ConnectException {
         Set<Source> sources = new HashSet<>();
 
-        for (MongoSensorDAO dataAccessObject : hooks.values()) {
-            sources.addAll(dataAccessObject.findAllSourcesByUser(user, client));
+        for (MongoSensor mongoSensor : hooks.values()) {
+            sources.addAll(mongoSensor.findAllSourcesByUser(user, client));
         }
 
         return sources;
@@ -236,8 +248,9 @@ public class SensorDataAccessObject {
      */
     public SourceType findSourceType(String source, MongoClient client) throws ConnectException {
         SourceType type =  null;
-        for (MongoSensorDAO dataAccessObject : hooks.values()) {
-            type = dataAccessObject.findSourceType(source, client);
+
+        for (MongoSensor mongoSensor : hooks.values()) {
+            type = mongoSensor.findSourceType(source, client);
 
             if (type != null) {
                 return type;
@@ -249,9 +262,18 @@ public class SensorDataAccessObject {
 
     /**
      * Returns the singleton.
-     * @return the singleton {@code SensorDataAccessObject} instance
+     * @return the singleton {@code SensorDataAccessObject} INSTANCE
      */
-    public String getCollectionName(SourceType sourceType, SensorType sensorType) {
-        return hooks.get(sensorType).getCollectionName(sourceType);
+    public String getCollectionName(SourceType sourceType, SensorType sensorType,
+            TimeFrame timeFrame) {
+        return hooks.get(sensorType).getCollectionName(sourceType, timeFrame);
+    }
+
+    /**
+     * Returns all supported {@code SensorType}s.
+     * @return collection of all {@code SensorType} for which a Data Access Object has been defined.
+     */
+    public Collection<SensorType> getSupportedSensor() {
+        return hooks.keySet();
     }
 }
