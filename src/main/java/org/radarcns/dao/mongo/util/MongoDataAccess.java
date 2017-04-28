@@ -86,7 +86,7 @@ public abstract class MongoDataAccess {
      * @return source type for the given sourceID, otherwise null
      */
     public SourceType findSourceType(String source, MongoClient client)
-        throws ConnectException {
+            throws ConnectException {
         SourceType type;
 
         MongoCursor<Document> cursor;

@@ -227,7 +227,7 @@ public class SensorDataAccessObject {
      * @see {@link org.radarcns.avro.restapi.user.Patient}
      */
     public Set<Source> findAllSourcesByUser(String user, MongoClient client)
-        throws ConnectException {
+            throws ConnectException {
         Set<Source> sources = new HashSet<>();
 
         for (MongoSensor mongoSensor : hooks.values()) {

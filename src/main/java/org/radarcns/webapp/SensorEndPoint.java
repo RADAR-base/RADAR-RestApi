@@ -243,9 +243,9 @@ public class SensorEndPoint {
             value = "Returns a dataset object formatted in JSON.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
-                + "given patientID, sourceID, and sensor belonging to the time window [start - end]. "
-                + "Data can be queried using different time-frame resolutions. The response is "
-                + "formatted in JSON.")
+                + "given patientID, sourceID, and sensor belonging to the time window "
+                + "[start - end]. Data can be queried using different time-frame resolutions. "
+                + "The response is formatted in JSON.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body "
                 + "there is a message.avsc object with more details."),
@@ -282,9 +282,9 @@ public class SensorEndPoint {
             value = "Returns a dataset object formatted in Apache AVRO.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
-                + "given patientID, sourceID, and sensor belonging to the time window [start - end]. "
-                + "Data can be queried using different time-frame resolutions. The response is "
-                + "formatted in Apache AVRO.")
+                + "given patientID, sourceID, and sensor belonging to the time window "
+                + "[start - end]. Data can be queried using different time-frame resolutions. "
+                + "The response is formatted in Apache AVRO.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),

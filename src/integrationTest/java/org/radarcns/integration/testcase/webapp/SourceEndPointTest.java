@@ -74,7 +74,7 @@ public class SourceEndPointTest {
 
     @Test
     public void getStatusTest200()
-        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
+            throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
 
         MongoClient client = Utility.getMongoClient();
 

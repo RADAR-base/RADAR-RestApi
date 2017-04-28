@@ -58,7 +58,7 @@ public class SensorEndPointTest {
 
     @Test
     public void getRealtimeTest()
-        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
+            throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = "data/avro/realTime/{sensor}/{stat}/{interval}/{userID}/{sourceID}";
         path = path.replace("{sensor}", SENSOR_TYPE.name());
         path = path.replace("{stat}", COUNT.name());
@@ -97,7 +97,7 @@ public class SensorEndPointTest {
 
     @Test
     public void getAllByUserTest()
-        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
+            throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = "data/avro/{sensor}/{stat}/{interval}/{userID}/{sourceID}";
         path = path.replace("{sensor}", SENSOR_TYPE.name());
         path = path.replace("{stat}", COUNT.name());

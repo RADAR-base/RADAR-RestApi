@@ -121,7 +121,7 @@ public class SourceEndPoint {
      * Actual implementation of AVRO and JSON getRTStateByUserDevice.
      **/
     private Source getRTStateByUserSourceWorker(String user, String source)
-        throws ConnectException {
+            throws ConnectException {
         Param.isValidInput(user, source);
 
         MongoClient client = MongoHelper.getClient(context);

@@ -119,7 +119,7 @@ public class Utility {
      */
     public static Dataset convertDocToDataset(List<Document> docs, Stat stat, Unit unit,
             TimeFrame timeFrame, Class<? extends SpecificRecord> recordClass)
-        throws IllegalAccessException, InstantiationException {
+            throws IllegalAccessException, InstantiationException {
         EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(
                 RadarConverter.getISO8601(docs.get(0).getDate("start")),
                 RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate("end")));

@@ -93,7 +93,7 @@ public class Monitors {
      * @see {@link SourceSpecification}
      */
     public SourceSpecification getSpecification(SourceType sourceType)
-        throws ConnectException {
+            throws ConnectException {
         SourceMonitor monitor = hooks.get(sourceType);
 
         if (monitor == null) {
