@@ -62,16 +62,19 @@ public class SensorEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/realTime/{sensor}/{stat}/{interval}/{userID}/{sourceID}")
     @ApiOperation(
-            value = "Return an Acceleration values",
-            notes = "Return the last seen Acceleration value of type stat for the given userID and"
-                + "sourceID")
+            value = "Returns a dataset object formatted in JSON.",
+            notes = "Each collected sample is aggregated to provide near real-time statistical "
+                + "results. This end-point returns the last computed result of type stat for the "
+                + "given userID, sourceID, and sensor. Data can be queried using different "
+                + "time-frame resolutions. The response is formatted in JSON.")
     @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing last seen"
-                + "acceleration.avsc value for the required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body "
+                + "there is a message.avsc object with more details."),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body "
+                + "there is a message.avsc object with more details."),
+            @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing last "
+                + "computed sample for the given inputs formatted either Acceleration.avsc or "
+                + "DoubleValue.avsc")})
     public Response getRealTimeUserJson(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
@@ -83,7 +86,7 @@ public class SensorEndPoint {
                     getRealTimeUserWorker(user, source, sensor, stat, interval));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
+            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
                 + "completed. If this error persists, please contact the service administrator.");
         }
     }
@@ -95,15 +98,17 @@ public class SensorEndPoint {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/avro/realTime/{sensor}/{stat}/{interval}/{userID}/{sourceID}")
     @ApiOperation(
-            value = "Return an Acceleration values",
-            notes = "Return the last seen Acceleration value of type stat for the given userID and"
-            + "sourceID")
+            value = "Returns a dataset object formatted in Apache AVRO.",
+            notes = "Each collected sample is aggregated to provide near real-time statistical "
+                + "results. This end-point returns the last computed result of type stat for the "
+                + "given userID, sourceID, and sensor. Data can be queried using different "
+                + "time-frame resolutions. The response is formatted in Apache AVRO.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
-            @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
-                + "object containing last seen acceleration.avsc value for the required statistic"
-                + "function")})
+            @ApiResponse(code = 204, message = "No value for the given parameters."),
+            @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
+                + "object containing last computed sample for the given inputs formatted either "
+                + "Acceleration.avsc or DoubleValue.avsc")})
     public Response getRealTimeUserAvro(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
@@ -146,15 +151,19 @@ public class SensorEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{sensor}/{stat}/{interval}/{userID}/{sourceID}")
     @ApiOperation(
-            value = "Return a dataset of Acceleration values",
-            notes = "Return a dataset for the given userID and sourceID of type stat")
+            value = "Returns a dataset object formatted in JSON.",
+            notes = "Each collected sample is aggregated to provide near real-time statistical "
+                + "results. This end-point returns all available results of type stat for the "
+                + "given userID, sourceID, and sensor. Data can be queried using different "
+                + "time-frame resolutions. The response is formatted in JSON.")
     @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body there"
-                + "is a message.avsc object with more details"),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
-                + "available acceleration.avsc values for the required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body there "
+                + "is a message.avsc object with more details."),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body "
+                + "there is a message.avsc object with more details."),
+            @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing all "
+                + "available samples for the given inputs formatted either Acceleration.avsc or "
+                + "DoubleValue.avsc")})
     public Response getAllByUserJson(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
@@ -166,7 +175,7 @@ public class SensorEndPoint {
                 getAllByUserWorker(user, source, stat, interval, sensor));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
+            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
                 + "completed. If this error persists, please contact the service administrator.");
         }
     }
@@ -178,14 +187,17 @@ public class SensorEndPoint {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/avro/{sensor}/{stat}/{interval}/{userID}/{sourceID}")
     @ApiOperation(
-            value = "Return a dataset of Acceleration values",
-            notes = "Return a dataset for the given userID and sourceID of type stat")
+            value = "Returns a dataset object formatted in Apache AVRO.",
+            notes = "Each collected sample is aggregated to provide near real-time statistical "
+                + "results. This end-point returns all available results of type stat for the "
+                + "given userID, sourceID, and sensor. Data can be queried using different "
+                + "time-frame resolutions. The response is formatted in Apache AVRO.")
     @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing"),
-            @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
-                + "object containing all available acceleration.avsc values for the required"
-                + "statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing."),
+            @ApiResponse(code = 204, message = "No value for the given parameters."),
+            @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
+                + "object containing all available samples for the given inputs formatted either "
+                + "Acceleration.avsc or DoubleValue.avsc")})
     public Response getAllByUserAvro(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
@@ -228,17 +240,20 @@ public class SensorEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{sensor}/{stat}/{interval}/{userID}/{sourceID}/{start}/{end}")
     @ApiOperation(
-            value = "Return a dataset of Acceleration values",
-            notes = "Return a dataset of type stat for the given userID and sourceID with data"
-                + "belonging to the time window [start - end]")
+            value = "Returns a dataset object formatted in JSON.",
+            notes = "Each collected sample is aggregated to provide near real-time statistical "
+                + "results. This end-point returns all available results of type stat for the "
+                + "given userID, sourceID, and sensor belonging to the time window [start - end]. "
+                + "Data can be queried using different time-frame resolutions. The response is "
+                + "formatted in JSON.")
     @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a dataset.avsc object containing all"
-                + "acceleration.avsc values belonging to the time window [start - end] for the"
-                + "required statistic function")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body "
+                + "there is a message.avsc object with more details."),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body "
+                + "there is a message.avsc object with more details."),
+            @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing samples "
+                + "belonging to the time window [start - end] for the given inputs formatted "
+                + "either Acceleration.avsc or DoubleValue.avsc.")})
     public Response getByUserForWindowJson(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
@@ -264,15 +279,18 @@ public class SensorEndPoint {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/avro/{sensor}/{stat}/{interval}/{userID}/{sourceID}/{start}/{end}")
     @ApiOperation(
-            value = "Return a dataset of Acceleration values",
-            notes = "Return a dataset of type stat for the given userID and sourceID with data"
-                + "belonging to the time window [start - end]")
+            value = "Returns a dataset object formatted in Apache AVRO.",
+            notes = "Each collected sample is aggregated to provide near real-time statistical "
+                + "results. This end-point returns all available results of type stat for the "
+                + "given userID, sourceID, and sensor belonging to the time window [start - end]. "
+                + "Data can be queried using different time-frame resolutions. The response is "
+                + "formatted in Apache AVRO.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a byte array serialising a dataset.avsc"
-                + "object containing all acceleration.avsc values belonging to the time window"
-                + "[start - end] for the required statistic function")})
+            @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
+                + "object containing samples belonging to the time window [start - end] for the "
+                + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")})
     public Response getByUserForWindowAvro(
             @PathParam("sensor") SensorType sensor,
             @PathParam("stat") DescriptiveStatistic stat,
