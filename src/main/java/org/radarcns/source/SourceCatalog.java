@@ -68,7 +68,13 @@ public class SourceCatalog {
      * @return the singleton {@code SourceDefinition} instance
      */
     public static SourceDefinition getInstance(SourceType sourceType) {
-        return INSTANCE.sourceCatalog.get(sourceType);
+        SourceDefinition definition = INSTANCE.sourceCatalog.get(sourceType);
+
+        if (definition == null) {
+            throw new UnsupportedOperationException(sourceType.name() + " is not supported yet.");
+        }
+
+        return definition;
     }
 
     private SourceCatalog(DeviceCatalog catalog) throws ClassNotFoundException {
