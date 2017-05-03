@@ -37,20 +37,21 @@ before_install:
 script:
   - ./gradlew check
   - ./gradlew war
-  - sudo docker-compose -f src/integrationTest/docker-compose.yml up -d --build
+  - sudo $HOME/bin/docker-compose -f src/integrationTest/docker-compose.yml up -d --build
   - sudo docker ps -a
   - echo "INTEGRATION TEST"
   - ./gradlew integrationTest
-  - sudo docker-compose -f src/integrationTest/docker-compose.yml down
+  - sudo $HOME/bin/docker-compose -f src/integrationTest/docker-compose.yml down
   - echo "END TO END TEST"
   - ./gradlew setRadarEnvironmentForDocker
   - cd src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack
+  - sed -ie '$d' install-radar-stack.sh && printf '%s\n' 'sudo-linux $HOME/bin/docker-compose up --force-recreate -d' >> install-radar-stack.sh
   - sudo ./install-radar-stack.sh
   - sudo docker ps -a
   - cd -
   - ./gradlew endToEndTest
   - cd src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack
-  - sudo docker-compose -f docker-compose.yml down
+  - sudo $HOME/bin/docker-compose -f docker-compose.yml down
   - cd -
 
 after_script:
