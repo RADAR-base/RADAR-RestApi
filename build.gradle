@@ -257,7 +257,7 @@ task setRadarEnvironmentForDocker << {
   def fileInstall = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh")
   fileInstall.text = fileInstall.text.replace('/usr/local/var/lib/docker', volumePath)
 
-  new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/smtp.env.template").renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/smtp.env")
+  new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env.template").renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env")
 }
 
 //---------------------------------------------------------------------------//
