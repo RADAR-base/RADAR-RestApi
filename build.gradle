@@ -223,7 +223,7 @@ task integrationTest(type: Test) {
   }
 }
 
-check.dependsOn integrationTest
+//check.dependsOn integrationTest
 
 //---------------------------------------------------------------------------//
 // End to End Test                                                           //

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigTest.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(ConfigTest.class);
 
     private static PipelineConfig config = null;
 
