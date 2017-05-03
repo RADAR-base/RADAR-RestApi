@@ -52,7 +52,25 @@ public class PipelineConfig extends BasicMockConfig {
      */
     public String getRestApiInstance() {
         ServerConfig server = restApi.get(0);
-        return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort()
+
+        if (server.getPort() == 0) {
+            return server.getProtocol() + "://" + server.getHost() + getApiWebRoot();
+        } else {
+            return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort()
                 + getApiWebRoot();
+        }
+    }
+
+    /**
+     * Returns the URL to access RADAR-CNS REST-PROXY.
+     */
+    public String getRestProxyInstance() {
+        ServerConfig server = getRestProxy();
+
+        if (server.getPort() == 0) {
+            return server.getProtocol() + "://" + server.getHost();
+        } else {
+            return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort();
+        }
     }
 }

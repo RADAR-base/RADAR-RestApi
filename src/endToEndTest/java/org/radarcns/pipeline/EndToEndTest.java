@@ -273,7 +273,7 @@ public class EndToEndTest {
         LOGGER.info("Fetching APIs ...");
 
         String server = getPipelineConfig().getRestApiInstance();
-        String path = server + "data/avro/{data}/{stat}/{userID}/{sourceID}";
+        String path = server + "/data/avro/{data}/{stat}/{userID}/{sourceID}";
         path = path.replace("{userID}", CsvSensorDataModel.USER_ID_MOCK);
         path = path.replace("{sourceID}", CsvSensorDataModel.SOURCE_ID_MOCK);
 

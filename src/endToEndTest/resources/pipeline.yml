@@ -7,17 +7,17 @@ schema_registry:
 #=========================== Rest Proxy  ===============================#
 # if the producer_mode is rest, you must provide rest_proxy values
 rest_proxy:
-    host: localhost
-    port: 8082
+    host: localhost/kafka
+    port:
     protocol: http
 
 rest_api:
   - protocol: http
-    host: localhost
-    port: 8080
+    host: localhost/api
+    port:
 
 # Rest API web root
-api_web_root: "/radar/api/"
+api_web_root: "/radar/api"
 
 # time duration that mock data has to cover expressed in seconds.
 duration: 60
