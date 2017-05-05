@@ -36,6 +36,7 @@ import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.YamlConfigLoader;
@@ -146,7 +147,7 @@ public class EndToEndTest {
             Response response = null;
             try {
                 response = Utility.makeRequest(
-                        getPipelineConfig().getRestProxy() + "/topics");
+                        getPipelineConfig().getRestProxy().getUrlString() + "/topics");
                 if (response.code() == 200) {
                     String topics = response.body().string().toString();
                     String[] topicArray = topics.substring(1, topics.length() - 1).replace(
@@ -272,10 +273,12 @@ public class EndToEndTest {
     private void fetchRestApi() throws IOException {
         LOGGER.info("Fetching APIs ...");
 
-        String server = getPipelineConfig().getRestApiInstance();
-        String path = server + "/data/avro/{data}/{stat}/{userID}/{sourceID}";
+        String server = getPipelineConfig().getRestApi().getUrlString();
+        String path = server + "/data/avro/{data}/{stat}/{interval}/{userID}/{sourceID}";
         path = path.replace("{userID}", CsvSensorDataModel.USER_ID_MOCK);
         path = path.replace("{sourceID}", CsvSensorDataModel.SOURCE_ID_MOCK);
+
+        path = path.replace("{interval}", TimeFrame.TEN_SECOND.name());
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
             String pathStat = path.replace("{stat}", stat.name());

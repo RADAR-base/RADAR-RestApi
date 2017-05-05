@@ -41,10 +41,10 @@ import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.Unit;
-import org.radarcns.config.api.Properties;
+import org.radarcns.config.Properties;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
-import org.radarcns.listener.MongoDBContextListener;
+import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public class Utility {
         List<MongoCredential> credentials = Properties.getApiConfig().getMongoDbCredentials();
         MongoClient client = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),
                 credentials);
-        if (!MongoDBContextListener.checkMongoConnection(client)) {
+        if (!MongoDbContextListener.checkMongoConnection(client)) {
             client = null;
         }
 

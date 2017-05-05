@@ -3,7 +3,7 @@ package org.radarcns.dao.mongo.util;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lte;
-import static org.radarcns.listener.MongoDBContextListener.MONGO_CLIENT;
+import static org.radarcns.listener.MongoDbContextListener.MONGO_CLIENT;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -16,8 +16,8 @@ import java.net.ConnectException;
 import java.util.Date;
 import javax.servlet.ServletContext;
 import org.bson.Document;
-import org.radarcns.config.api.Properties;
-import org.radarcns.listener.MongoDBContextListener;
+import org.radarcns.config.Properties;
+import org.radarcns.listener.MongoDbContextListener;
 
 /**
  * Generic MongoDB helper.
@@ -208,10 +208,10 @@ public class MongoHelper {
      */
     public static MongoCollection<Document> getCollection(ServletContext context, String collection)
             throws ConnectException {
-        MongoDBContextListener.testConnection(context);
+        MongoDbContextListener.testConnection(context);
 
         if (context.getAttribute(MONGO_CLIENT) == null) {
-            MongoDBContextListener.recoverOrThrow(context);
+            MongoDbContextListener.recoverOrThrow(context);
         }
 
         MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
@@ -243,10 +243,10 @@ public class MongoHelper {
      * @throws ConnectException if MongoDB cannot be reached
      */
     public static MongoClient getClient(ServletContext context) throws ConnectException {
-        MongoDBContextListener.testConnection(context);
+        MongoDbContextListener.testConnection(context);
 
         if (context.getAttribute(MONGO_CLIENT) == null) {
-            MongoDBContextListener.recoverOrThrow(context);
+            MongoDbContextListener.recoverOrThrow(context);
         }
 
         return (MongoClient) context.getAttribute(MONGO_CLIENT);

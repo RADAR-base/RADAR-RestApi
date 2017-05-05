@@ -36,7 +36,7 @@ import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.avro.restapi.user.Cohort;
 import org.radarcns.avro.restapi.user.Patient;
-import org.radarcns.config.api.Properties;
+import org.radarcns.config.Properties;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;

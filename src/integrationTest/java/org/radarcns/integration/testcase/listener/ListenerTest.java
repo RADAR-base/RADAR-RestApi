@@ -22,10 +22,10 @@ import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import org.junit.Test;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.listener.MongoDBContextListener;
+import org.radarcns.listener.MongoDbContextListener;
 
 /**
- * MongoDBContextListener Test.
+ * MongoDbContextListener Test.
  */
 public class ListenerTest {
 
@@ -35,11 +35,11 @@ public class ListenerTest {
     public void testConnection() throws Exception {
         MongoClient client = Utility.getMongoClient();
 
-        assertEquals(true, MongoDBContextListener.checkMongoConnection(client));
+        assertEquals(true, MongoDbContextListener.checkMongoConnection(client));
 
         client = new MongoClient(new ServerAddress("localhosts", 27017),
                 client.getCredentialsList());
-        assertEquals(false, MongoDBContextListener.checkMongoConnection(client));
+        assertEquals(false, MongoDbContextListener.checkMongoConnection(client));
     }
 
 }

@@ -1,4 +1,4 @@
-package org.radarcns.config.api;
+package org.radarcns.config;
 
 /*
  *  Copyright 2016 King's College London and The Hyve
@@ -18,7 +18,7 @@ package org.radarcns.config.api;
 
 import java.io.File;
 import java.io.IOException;
-import org.radarcns.config.YamlConfigLoader;
+import org.radarcns.config.api.ApiConfig;
 import org.radarcns.config.catalog.DeviceCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

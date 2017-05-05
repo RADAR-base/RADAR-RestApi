@@ -17,17 +17,13 @@ package org.radarcns.pipeline.config;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
 import org.radarcns.config.ServerConfig;
 import org.radarcns.mock.BasicMockConfig;
 
 public class PipelineConfig extends BasicMockConfig {
 
     @JsonProperty("rest_api")
-    private List<ServerConfig> restApi;
-
-    @JsonProperty("api_web_root")
-    private String apiWebRoot;
+    private ServerConfig restApi;
 
     private Long duration;
 
@@ -39,38 +35,11 @@ public class PipelineConfig extends BasicMockConfig {
         this.duration = duration;
     }
 
-    public String getApiWebRoot() {
-        return apiWebRoot;
+    public ServerConfig getRestApi() {
+        return restApi;
     }
 
-    public void setApiWebRoot(String apiWebRoot) {
-        this.apiWebRoot = apiWebRoot;
-    }
-
-    /**
-     * Returns the URL to access RADAR-CNS REST API.
-     */
-    public String getRestApiInstance() {
-        ServerConfig server = restApi.get(0);
-
-        if (server.getPort() == 0) {
-            return server.getProtocol() + "://" + server.getHost() + getApiWebRoot();
-        } else {
-            return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort()
-                + getApiWebRoot();
-        }
-    }
-
-    /**
-     * Returns the URL to access RADAR-CNS REST-PROXY.
-     */
-    public String getRestProxyInstance() {
-        ServerConfig server = getRestProxy();
-
-        if (server.getPort() == 0) {
-            return server.getProtocol() + "://" + server.getHost();
-        } else {
-            return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort();
-        }
+    public void setRestApi(ServerConfig restApi) {
+        this.restApi = restApi;
     }
 }

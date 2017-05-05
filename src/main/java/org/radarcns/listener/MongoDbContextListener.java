@@ -25,18 +25,18 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import org.bson.Document;
-import org.radarcns.config.api.Properties;
+import org.radarcns.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by Francesco Nobilia on 19/10/2016.
+ * pon the web application initialisation, this Context Listener creates a MongoDb client that can
+ *      be reused by each call. A Mongo Client should be seen like a Thread Pool.
  */
 @WebListener
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-public class MongoDBContextListener implements ServletContextListener {
+public class MongoDbContextListener implements ServletContextListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBContextListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoDbContextListener.class);
 
     public static final String MONGO_CLIENT = "MONGO_CLIENT";
 

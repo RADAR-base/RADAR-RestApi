@@ -86,7 +86,7 @@ dependencies {
   integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
 
 //  testCompile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
-//  testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
+  testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
   testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
   testCompile group: 'org.mockito', name: 'mockito-all', version: mokitoVersion
@@ -242,22 +242,24 @@ task endToEndTest(type: Test) {
 }
 
 //Useful for E2E tests
-task setRadarEnvironmentForDocker << {
-  File volumes = new File("src/endToEndTest/dockerRadar/volumes")
-  volumes.mkdir()
-  String volumePath = volumes.getAbsolutePath()
-  
-  def fileEnv = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/env.template")
-  fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumePath)
-  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
-  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
-  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
-  fileEnv.renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
+task setRadarEnvironmentForDocker {
+  doLast {
+    File volumes = new File("src/endToEndTest/dockerRadar/volumes")
+    volumes.mkdir()
+    String volumePath = volumes.getAbsolutePath()
 
-  def fileInstall = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh")
-  fileInstall.text = fileInstall.text.replace('/usr/local/var/lib/docker', volumePath)
+    def fileEnv = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/env.template")
+    fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumePath)
+    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
+    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
+    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+    fileEnv.renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
 
-  new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env.template").renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env")
+    def fileInstall = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh")
+    fileInstall.text = fileInstall.text.replace('/usr/local/var/lib/docker', volumePath)
+
+    new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env.template").renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env")
+  }
 }
 
 //---------------------------------------------------------------------------//
