@@ -235,10 +235,19 @@ task endToEndTest(type: Test) {
   testClassesDir = sourceSets.endToEndTest.output.classesDir
   classpath = sourceSets.endToEndTest.runtimeClasspath
 
-  // This is not needed, but I like to see which tests have run
   testLogging {
-    events "skipped", "failed"
+    events "failed"
+    exceptionFormat "short"
+
+    debug {
+      events "started", "skipped", "failed"
+      exceptionFormat "full"
+    }
+
+    //info.events = ["failed", "skipped"]
   }
+
+  testLogging.showStandardStreams = true
 }
 
 //Useful for E2E tests
