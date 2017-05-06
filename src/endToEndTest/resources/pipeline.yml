@@ -1,22 +1,23 @@
-#=========================== Schema Registry ===========================#
+#=========================== Schema Registry ============================#
 #List of Schema Registry instances
 schema_registry:
   protocol: http
-  host: 52.210.59.174
+  host: localhost
   path: /schema
-#=========================== Rest Proxy  ===============================#
+#============================ Rest Proxy ================================#
 # if the producer_mode is rest, you must provide rest_proxy values
 rest_proxy:
   protocol: http
-  host: 52.210.59.174
+  host: localhost
   path: /kafka
 
-
+#============================= Rest API =================================#
 rest_api:
   protocol: http
-  host: 52.210.59.174
+  host: localhost
   path: /api
 
+#=============================== Test ===================================#
 # time duration that mock data has to cover expressed in seconds.
 duration: 60
 
