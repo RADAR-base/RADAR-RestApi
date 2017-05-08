@@ -147,7 +147,7 @@ public class EndToEndTest {
             Response response = null;
             try {
                 response = Utility.makeRequest(
-                        getPipelineConfig().getRestProxy().getUrlString() + "/topics");
+                        getPipelineConfig().getRestProxy().getUrlString() + "topics");
                 if (response.code() == 200) {
                     String topics = response.body().string().toString();
                     String[] topicArray = topics.substring(1, topics.length() - 1).replace(

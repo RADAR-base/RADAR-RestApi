@@ -3,13 +3,13 @@
 schema_registry:
   protocol: http
   host: localhost
-  path: /schema
+  path: /schema/
 #============================ Rest Proxy ================================#
 # if the producer_mode is rest, you must provide rest_proxy values
 rest_proxy:
   protocol: http
   host: localhost
-  path: /kafka
+  path: /kafka/
 
 #============================= Rest API =================================#
 rest_api:
