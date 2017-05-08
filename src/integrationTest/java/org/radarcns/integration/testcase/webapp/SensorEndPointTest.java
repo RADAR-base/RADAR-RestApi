@@ -45,8 +45,12 @@ import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SensorEndPointTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SensorEndPointTest.class);
 
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";
@@ -65,6 +69,8 @@ public class SensorEndPointTest {
         path = path.replace("{interval}", TIME_FRAME.name());
         path = path.replace("{userID}", USER);
         path = path.replace("{sourceID}", SOURCE);
+
+        LOGGER.info(path);
 
         MongoClient client = Utility.getMongoClient();
 
@@ -105,6 +111,8 @@ public class SensorEndPointTest {
         path = path.replace("{userID}", USER);
         path = path.replace("{sourceID}", SOURCE);
 
+        LOGGER.info(path);
+
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
@@ -143,6 +151,8 @@ public class SensorEndPointTest {
         path = path.replace("{interval}", TIME_FRAME.name());
         path = path.replace("{userID}", USER);
         path = path.replace("{sourceID}", SOURCE);
+
+        LOGGER.info(path);
 
         MongoClient client = Utility.getMongoClient();
 

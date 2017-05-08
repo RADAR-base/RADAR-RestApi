@@ -452,6 +452,8 @@ public class EndToEndTest {
      * @throws MalformedURLException if the used URL is malformed
      */
     private static void checkSwaggerConfig() throws MalformedURLException {
+        LOGGER.info("Checking Swagger ...");
+
         URL url = new URL(
                 config.getRestApi().getProtocol(),
                 config.getRestApi().getHost(),
@@ -469,6 +471,8 @@ public class EndToEndTest {
      *      downloaded file cannot be parsed.
      */
     private static void checkFrontendConfig() throws IOException {
+        LOGGER.info("Checking Frontend config ...");
+
         URL url = new URL(
                 config.getRestApi().getProtocol(),
                 config.getRestApi().getHost(),

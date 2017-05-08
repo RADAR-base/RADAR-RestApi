@@ -42,8 +42,12 @@ import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.util.AvroConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AppStatusEndPointTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppStatusEndPointTest.class);
 
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";
@@ -57,6 +61,8 @@ public class AppStatusEndPointTest {
         String path = "android/avro/status/{userID}/{sourceID}";
         path = path.replace("{userID}", USER);
         path = path.replace("{sourceID}", SOURCE);
+
+        LOGGER.info(path);
 
         assertEquals(204, Utility.makeRequest(Properties.getApiConfig().getApiUrl()
                 + path).code());
@@ -86,6 +92,8 @@ public class AppStatusEndPointTest {
         String path = "android/avro/status/{userID}/{sourceID}";
         path = path.replace("{userID}", USER.concat("1"));
         path = path.replace("{sourceID}", SOURCE.concat("1"));
+
+        LOGGER.info(path);
 
         Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
         assertEquals(200, response.code());

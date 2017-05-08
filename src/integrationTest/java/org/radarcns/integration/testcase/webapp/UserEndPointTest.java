@@ -43,8 +43,12 @@ import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.util.AvroConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserEndPointTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserEndPointTest.class);
 
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";
@@ -57,6 +61,8 @@ public class UserEndPointTest {
     public void getAllPatientsTest204() throws IOException {
         String path = "user/avro/getAllPatients/{studyID}";
         path = path.replace("{studyID}", "0");
+
+        LOGGER.info(path);
 
         assertEquals(204, Utility.makeRequest(Properties.getApiConfig().getApiUrl()
                 + path).code());
@@ -79,6 +85,8 @@ public class UserEndPointTest {
 
         String path = "user/avro/getAllPatients/{studyID}";
         path = path.replace("{studyID}", "0");
+
+        LOGGER.info(path);
 
         Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
         assertEquals(200, response.code());

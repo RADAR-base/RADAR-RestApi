@@ -36,6 +36,8 @@ import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.util.AvroConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2016 King's College London and The Hyve
@@ -55,6 +57,8 @@ import org.radarcns.util.AvroConverter;
 
 public class SourceEndPointTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SourceEndPointTest.class);
+
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
@@ -67,6 +71,8 @@ public class SourceEndPointTest {
         String path = "source/avro/state/{userID}/{sourceID}";
         path = path.replace("{userID}", USER);
         path = path.replace("{sourceID}", SOURCE);
+
+        LOGGER.info(path);
 
         assertEquals(204, Utility.makeRequest(Properties.getApiConfig().getApiUrl()
                 + path).code());
@@ -83,6 +89,8 @@ public class SourceEndPointTest {
         String path = "source/avro/state/{userID}/{sourceID}";
         path = path.replace("{userID}", USER);
         path = path.replace("{sourceID}", SOURCE);
+
+        LOGGER.info(path);
 
         Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
         assertEquals(200, response.code());
@@ -128,6 +136,8 @@ public class SourceEndPointTest {
         String path = "source/avro/specification/{sourceType}";
         path = path.replace("{sourceType}", BIOVOTION.toString());
 
+        LOGGER.info(path);
+
         assertEquals(500, Utility.makeRequest(Properties.getApiConfig().getApiUrl()
                 + path).code());
     }
@@ -136,6 +146,8 @@ public class SourceEndPointTest {
     public void getSpecificationTest200() throws IOException {
         String path = "source/avro/specification/{sourceType}";
         path = path.replace("{sourceType}", EMPATICA.toString());
+
+        LOGGER.info(path);
 
         Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
         assertEquals(200, response.code());
@@ -167,6 +179,8 @@ public class SourceEndPointTest {
         throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = "source/avro/getAllSources/{userID}";
         path = path.replace("{userID}", USER);
+
+        LOGGER.info(path);
 
         MongoClient client = Utility.getMongoClient();
 
