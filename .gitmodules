@@ -3,4 +3,4 @@
 	url = https://github.com/RADAR-CNS/RADAR-Docker.git
 [submodule "schemas"]
 	path = schemas
-	url = git:github.com/RADAR-CNS/RADAR-Schemas/tree/dashboard-config
+	url = https://github.com/RADAR-CNS/RADAR-Schemas.git
