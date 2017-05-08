@@ -22,7 +22,12 @@ import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COL
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -202,5 +207,32 @@ public class Utility {
      */
     public static Logger getLogger(Object obj) {
         return LoggerFactory.getLogger(obj.getClass());
+    }
+
+    /**
+     * Converts file content to java String.
+     * @param path location of the file to convert
+     * @return a String representing the file content
+     */
+    public static String fileToString(String path) throws IOException {
+        File file = new File(path);
+        if (!file.exists() || file.isDirectory()) {
+            throw new FileNotFoundException(path + " is not a valid file");
+        }
+
+        byte [] buffer = new byte[4096];
+        ByteArrayOutputStream outs = new ByteArrayOutputStream();
+        InputStream ins = new FileInputStream(file);
+
+        int read = 0;
+        while ((read = ins.read(buffer)) != -1 ) {
+            outs.write(buffer, 0, read);
+        }
+
+        ins.close();
+        outs.close();
+        byte [] fileBytes = outs.toByteArray();
+
+        return new String(fileBytes);
     }
 }

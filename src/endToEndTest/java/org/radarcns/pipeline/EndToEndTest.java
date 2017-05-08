@@ -17,10 +17,15 @@ package org.radarcns.pipeline;
  */
 
 import static org.junit.Assert.assertEquals;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.checkFrontEndConfig;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,6 +44,7 @@ import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.aggregator.MockAggregator;
 import org.radarcns.integration.model.ExpectedValue;
@@ -69,7 +75,6 @@ public class EndToEndTest {
     private static final long LATENCY = 30;
 
     private static class BaseFile {
-
         private static final File file = new File(
                 EndToEndTest.class.getClassLoader().getResource(PIPELINE_CONFIG).getFile());
     }
@@ -93,6 +98,10 @@ public class EndToEndTest {
         Thread.sleep(TimeUnit.SECONDS.toMillis(LATENCY));
 
         fetchRestApi();
+
+        checkSwaggerConfig();
+
+        checkFrontendConfig();
     }
 
     private static PipelineConfig getPipelineConfig() {
@@ -274,7 +283,7 @@ public class EndToEndTest {
         LOGGER.info("Fetching APIs ...");
 
         String server = getPipelineConfig().getRestApi().getUrlString();
-        String path = server + "/data/avro/{data}/{stat}/{interval}/{userID}/{sourceID}";
+        String path = server + "data/avro/{data}/{stat}/{interval}/{userID}/{sourceID}";
         path = path.replace("{userID}", CsvSensorDataModel.USER_ID_MOCK);
         path = path.replace("{sourceID}", CsvSensorDataModel.SOURCE_ID_MOCK);
 
@@ -435,5 +444,42 @@ public class EndToEndTest {
         }
 
         throw new IllegalArgumentException(config.getSensor() + " unknown data");
+    }
+
+    /**
+     * Checks the correctness of the generated swagger documentation making the request via NGINX.
+     *
+     * @throws MalformedURLException if the used URL is malformed
+     */
+    private static void checkSwaggerConfig() throws MalformedURLException {
+        URL url = new URL(
+                config.getRestApi().getProtocol(),
+                config.getRestApi().getHost(),
+                80,
+                config.getRestApi().getPath());
+
+        assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(url));
+    }
+
+    /**
+     * Checks the correctness of the deployed frontend configuration file making the request via
+     *      NGINX.
+     *
+     * @throws IOException either if the used URL is malformed or the response containing the
+     *      downloaded file cannot be parsed.
+     */
+    private static void checkFrontendConfig() throws IOException {
+        URL url = new URL(
+                config.getRestApi().getProtocol(),
+                config.getRestApi().getHost(),
+                80,
+                "/frontend/config/");
+
+        String actual = checkFrontEndConfig(url);
+
+        String expected = Utility.fileToString(
+                EndToEndTest.class.getClassLoader().getResource(CONFIG_JSON).getFile());
+
+        assertEquals(expected, actual);
     }
 }

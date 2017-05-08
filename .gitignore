@@ -19,7 +19,10 @@ target/
 /build/
 *.war
 
-# Integration Test
+# Test
 src/test/resources/*.csv
 src/test/resources/*.log
 src/test/resources/*.jar
+src/test/resources/*.json
+src/integrationTest/resources/*.json
+src/endToEndTest/resources/*.json

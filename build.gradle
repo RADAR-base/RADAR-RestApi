@@ -33,6 +33,7 @@ ext.openCsvVersion = '3.9'
 ext.radarCommon = '0.3-SNAPSHOT'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
+ext.swaggerParserVersion='1.0.24'
 ext.tomcat = '8.0.37'
 ext.schemaRestApiVersion = '0.1.1-SNAPSHOT'
 
@@ -90,6 +91,7 @@ dependencies {
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
   testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
   testCompile group: 'org.mockito', name: 'mockito-all', version: mokitoVersion
+  testCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParserVersion
 
   codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }
@@ -298,7 +300,39 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 }
 
 //---------------------------------------------------------------------------//
-// Prepare WAR for Integration Test                                          //
+// Prepare FRONT-END config file                                             //
+//---------------------------------------------------------------------------//
+task copyFrontendConfig(type: Copy) {
+  from "${projectDir}/schemas/restapi/config/config.json"
+  into "${projectDir}/src/main/webapp/frontend/"
+}
+
+task copyFrontendConfigIntegrationTest(type: Copy) {
+  from "${projectDir}/schemas/restapi/config/config.json"
+  into "${projectDir}/src/integrationTest/resources"
+}
+
+task copyFrontendConfigEndToEndTest(type: Copy) {
+  from "${projectDir}/schemas/restapi/config/config.json"
+  into "${projectDir}/src/endToEndTest/resources"
+}
+
+task removeFrontendConfig(type: Delete) {
+  delete "${projectDir}/src/main/webapp/frontend/"
+  delete "${projectDir}/src/integrationTest/resources/config.json"
+  delete "${projectDir}/src/endToEndTest/resources/config.json"
+}
+
+war.dependsOn(copyFrontendConfig)
+
+integrationTest.dependsOn(copyFrontendConfigIntegrationTest)
+
+endToEndTest.dependsOn(copyFrontendConfigEndToEndTest)
+
+clean.dependsOn(removeFrontendConfig)
+
+//---------------------------------------------------------------------------//
+// Prepare WAR                                                               //
 //---------------------------------------------------------------------------//
 task copyWarForIntegration(type: Copy) {
   from war.archivePath
@@ -310,6 +344,7 @@ task removeWar(type: Delete) {
 }
 
 war.dependsOn(removeWar)
+
 war.finalizedBy copyWarForIntegration
 
 clean.dependsOn(removeWar)

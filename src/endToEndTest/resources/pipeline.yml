@@ -15,7 +15,7 @@ rest_proxy:
 rest_api:
   protocol: http
   host: localhost
-  path: /api
+  path: /api/
 
 #=============================== Test ===================================#
 # time duration that mock data has to cover expressed in seconds.
