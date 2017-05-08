@@ -6,7 +6,7 @@ import org.radarcns.dao.mongo.util.MongoAndroidApp;
 import org.radarcns.util.RadarConverter;
 
 /*
- *  Copyright 2016 King's College London and The Hyve
+ * Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

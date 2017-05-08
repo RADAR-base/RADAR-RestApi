@@ -1,3 +1,5 @@
+package org.radarcns.integration.util;
+
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -13,9 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.radarcns.integration.util;
-
 
 import static org.radarcns.integration.model.ExpectedValue.DURATION;
 import static org.radarcns.integration.model.ExpectedValue.StatType.AVERAGE;
@@ -38,7 +37,6 @@ import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.model.ExpectedValue.StatType;
 import org.radarcns.stream.aggregator.DoubleArrayCollector;
 import org.radarcns.stream.aggregator.DoubleValueCollector;
-
 
 /**
  * It computes the expected Documents for a test case i.e. {@link ExpectedValue}.
