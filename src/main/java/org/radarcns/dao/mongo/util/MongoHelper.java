@@ -1,9 +1,25 @@
 package org.radarcns.dao.mongo.util;
 
+/*
+ * Copyright 2017 King's College London and The Hyve
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lte;
-import static org.radarcns.listener.MongoDBContextListener.MONGO_CLIENT;
+import static org.radarcns.listener.MongoDbContextListener.MONGO_CLIENT;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -17,7 +33,7 @@ import java.util.Date;
 import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.config.Properties;
-import org.radarcns.listener.MongoDBContextListener;
+import org.radarcns.listener.MongoDbContextListener;
 
 /**
  * Generic MongoDB helper.
@@ -208,14 +224,15 @@ public class MongoHelper {
      */
     public static MongoCollection<Document> getCollection(ServletContext context, String collection)
             throws ConnectException {
-        MongoDBContextListener.testConnection(context);
+        MongoDbContextListener.testConnection(context);
 
         if (context.getAttribute(MONGO_CLIENT) == null) {
-            MongoDBContextListener.recoverOrThrow(context);
+            MongoDbContextListener.recoverOrThrow(context);
         }
 
         MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
-        MongoDatabase database = mongoClient.getDatabase(Properties.getInstance().getMongoDbName());
+        MongoDatabase database = mongoClient.getDatabase(
+                Properties.getApiConfig().getMongoDbName());
 
         return database.getCollection(collection);
     }
@@ -228,7 +245,7 @@ public class MongoHelper {
      * @return the MongoDB collection named collection.
      */
     public static MongoCollection<Document> getCollection(MongoClient client, String collection) {
-        MongoDatabase database = client.getDatabase(Properties.getInstance().getMongoDbName());
+        MongoDatabase database = client.getDatabase(Properties.getApiConfig().getMongoDbName());
 
         return database.getCollection(collection);
     }
@@ -242,10 +259,10 @@ public class MongoHelper {
      * @throws ConnectException if MongoDB cannot be reached
      */
     public static MongoClient getClient(ServletContext context) throws ConnectException {
-        MongoDBContextListener.testConnection(context);
+        MongoDbContextListener.testConnection(context);
 
         if (context.getAttribute(MONGO_CLIENT) == null) {
-            MongoDBContextListener.recoverOrThrow(context);
+            MongoDbContextListener.recoverOrThrow(context);
         }
 
         return (MongoClient) context.getAttribute(MONGO_CLIENT);

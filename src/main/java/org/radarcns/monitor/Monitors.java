@@ -1,7 +1,7 @@
 package org.radarcns.monitor;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ * Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,21 +34,22 @@ public class Monitors {
     private final HashMap<SourceType, SourceMonitor> hooks;
 
     /** Singleton instance. **/
-    private static Monitors instance;
+    private static final Monitors INSTANCE;
 
     /** Constructo.r **/
-    private Monitors() {
+    private Monitors(SourceCatalog catalog) {
         hooks = new HashMap<>();
 
-        hooks.put(SourceType.EMPATICA,
-                new SourceMonitor(SourceCatalog.getInstance(SourceType.EMPATICA)));
+        for (SourceType sourceType : catalog.getSupportedSource()) {
+            hooks.put(sourceType, new SourceMonitor(catalog.getDefinition(sourceType)));
+        }
     }
 
     /**
      * Static initializer.
      */
     static {
-        instance = new Monitors();
+        INSTANCE = new Monitors(SourceCatalog.getInstance());
     }
 
     /**
@@ -56,12 +57,12 @@ public class Monitors {
      * @return the singleton {@code Monitors} instance
      */
     public static Monitors getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     /**
      * Checks the status for the given source counting the number of received messages and
-     *      checking whether it respects the sensor frequencies. There is a check for each sensor.
+     *      checking whether it respects the data frequencies. There is a check for each data.
      *
      * @param user identifier
      * @param source identifier
@@ -86,18 +87,18 @@ public class Monitors {
     /**
      * Returns the SourceDefinition Specification used by the monitor associated with the monitor.
      *
-     * @return {@code SourceSpecification} containing all sensor names and related frequencies
+     * @return {@code SourceSpecification} containing all data names and related frequencies
      *
      * @see {@link SensorSpecification}
      * @see {@link SourceSpecification}
      */
     public SourceSpecification getSpecification(SourceType sourceType)
-        throws ConnectException {
+            throws ConnectException {
         SourceMonitor monitor = hooks.get(sourceType);
 
         if (monitor == null) {
             throw new UnsupportedOperationException(sourceType.name()
-                + "is not currently supported");
+                + " is not currently supported");
         }
 
         return monitor.getSource().getSpecification();

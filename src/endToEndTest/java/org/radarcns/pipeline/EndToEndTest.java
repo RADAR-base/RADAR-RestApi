@@ -1,7 +1,7 @@
 package org.radarcns.pipeline;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ * Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,16 @@ package org.radarcns.pipeline;
  */
 
 import static org.junit.Assert.assertEquals;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.checkFrontEndConfig;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -31,15 +35,16 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
-import org.bson.Document;
 import org.junit.Test;
+import org.radarcns.avro.restapi.data.Acceleration;
+import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.dataset.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.sensor.Acceleration;
+import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.aggregator.MockAggregator;
 import org.radarcns.integration.model.ExpectedValue;
@@ -61,9 +66,9 @@ public class EndToEndTest {
 
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
-    private Map<String, Collection<Document>> expectedDocument;
-
     private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
+
+    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
 
     private static PipelineConfig config = null;
 
@@ -72,7 +77,6 @@ public class EndToEndTest {
     private static final long LATENCY = 30;
 
     private static class BaseFile {
-
         private static final File file = new File(
                 EndToEndTest.class.getClassLoader().getResource(PIPELINE_CONFIG).getFile());
     }
@@ -90,15 +94,16 @@ public class EndToEndTest {
 
         produceExpectedDataset(expectedValue);
 
-//        Map<MockDataConfig, Collection<Document>> expectedDuments =
-//            getExpecetedDocument(expectedValue);
-
         streamToKafka();
 
         LOGGER.info("Waiting data ({} seconds) ... ", LATENCY);
         Thread.sleep(TimeUnit.SECONDS.toMillis(LATENCY));
 
         fetchRestApi();
+
+        checkSwaggerConfig();
+
+        checkFrontendConfig();
     }
 
     private static PipelineConfig getPipelineConfig() {
@@ -110,8 +115,8 @@ public class EndToEndTest {
                                 EndToEndTest.class.getClassLoader()
                                         .getResource(PIPELINE_CONFIG).getFile()
                         ), PipelineConfig.class);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException exec) {
+                exec.printStackTrace();
             }
         }
         return config;
@@ -122,9 +127,6 @@ public class EndToEndTest {
      */
     private void waitInfrastructure() throws InterruptedException {
         LOGGER.info("Waiting infrastructure ... ");
-        int retry = 60;
-        long sleep = 1000;
-        int count = 0;
 
         List<String> expectedTopics = new LinkedList<>();
         expectedTopics.add("android_empatica_e4_acceleration");
@@ -146,17 +148,21 @@ public class EndToEndTest {
         expectedTopics.add("application_record_counts");
         expectedTopics.add("application_uptime");
 
+        int retry = 60;
+        long sleep = 1000;
+        int count = 0;
+
         for (int i = 0; i < retry; i++) {
             count = 0;
 
             Response response = null;
             try {
                 response = Utility.makeRequest(
-                        getPipelineConfig().getRestProxy() + "/topics");
+                        getPipelineConfig().getRestProxy().getUrlString() + "topics");
                 if (response.code() == 200) {
                     String topics = response.body().string().toString();
-                    String[] topicArray = topics.substring(1, topics.length() - 1).replace("\"", "")
-                            .split(",");
+                    String[] topicArray = topics.substring(1, topics.length() - 1).replace(
+                                "\"", "").split(",");
 
                     for (String topic : topicArray) {
                         if (expectedTopics.contains(topic)) {
@@ -236,7 +242,7 @@ public class EndToEndTest {
     }
 
     /**
-     * Simulates all possible test case scenarios configured in mock-configuration. For each sensor,
+     * Simulates all possible test case scenarios configured in mock-configuration. For each data,
      * it generates one dataset per statistical function. The measurement units are taken from
      * an Empatica device.
      *
@@ -248,14 +254,15 @@ public class EndToEndTest {
      **/
     public static Map<MockDataConfig, Dataset> getExpecetedDataset(
             Map<MockDataConfig, ExpectedValue> expectedValue, DescriptiveStatistic stat)
-            throws ClassNotFoundException, NoSuchMethodException, IOException, IllegalAccessException,
-            InvocationTargetException, InstantiationException {
+            throws ClassNotFoundException, NoSuchMethodException, IOException,
+            IllegalAccessException, InvocationTargetException, InstantiationException {
         Map<MockDataConfig, Dataset> map = new HashMap<>();
 
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory
-                    .getDataset(expectedValue.get(config), stat, SourceType.EMPATICA,
-                            getSensorType(config)));
+                    .getDataset(expectedValue.get(config), CsvSensorDataModel.USER_ID_MOCK,
+                        CsvSensorDataModel.SOURCE_ID_MOCK, SourceType.EMPATICA,
+                            getSensorType(config), stat, TIME_FRAME));
         }
 
         return map;
@@ -273,15 +280,17 @@ public class EndToEndTest {
     }
 
     /**
-     * Queries the REST-API for each statistical function and for each sensor.
+     * Queries the REST-API for each statistical function and for each data.
      */
     private void fetchRestApi() throws IOException {
         LOGGER.info("Fetching APIs ...");
 
-        String server = getPipelineConfig().getRestApiInstance();
-        String path = server + "sensor/avro/{sensor}/{stat}/{userID}/{sourceID}";
+        String server = getPipelineConfig().getRestApi().getUrlString();
+        String path = server + "data/avro/{data}/{stat}/{interval}/{userID}/{sourceID}";
         path = path.replace("{userID}", CsvSensorDataModel.USER_ID_MOCK);
         path = path.replace("{sourceID}", CsvSensorDataModel.SOURCE_ID_MOCK);
+
+        path = path.replace("{interval}", TimeFrame.TEN_SECOND.name());
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
             String pathStat = path.replace("{stat}", stat.name());
@@ -289,7 +298,7 @@ public class EndToEndTest {
             Map<MockDataConfig, Dataset> datasets = expectedDataset.get(stat);
 
             for (MockDataConfig config : datasets.keySet()) {
-                String pathSensor = pathStat.replace("{sensor}", getSensorType(config).name());
+                String pathSensor = pathStat.replace("{data}", getSensorType(config).name());
 
                 LOGGER.info("Requesting {}", pathSensor);
 
@@ -327,10 +336,10 @@ public class EndToEndTest {
             Item expectedItem = expectedItems.next();
             Item actualItem = actualItems.next();
 
-            assertEquals(expectedItem.getEffectiveTimeFrame(), actualItem.getEffectiveTimeFrame());
+            assertEquals(expectedItem.getStartDateTime(), actualItem.getStartDateTime());
 
-            SpecificRecord expectedRecord = (SpecificRecord) expectedItem.getValue();
-            SpecificRecord actualRecord = (SpecificRecord) actualItem.getValue();
+            SpecificRecord expectedRecord = (SpecificRecord) expectedItem.getSample();
+            SpecificRecord actualRecord = (SpecificRecord) actualItem.getSample();
 
             switch (sensorType) {
                 case ACCELEROMETER:
@@ -340,6 +349,7 @@ public class EndToEndTest {
                 default:
                     compareSingletonItem(actual.getHeader().getDescriptiveStatistic(),
                             expectedRecord, actualRecord, delta);
+                    break;
             }
         }
 
@@ -368,6 +378,7 @@ public class EndToEndTest {
             default:
                 assertEquals((Double) expectedRecord.get(index),
                         (Double) actualRecord.get(index), delta);
+                break;
         }
     }
 
@@ -397,6 +408,7 @@ public class EndToEndTest {
                         ((Double) actualRecord.getY()), delta);
                 assertEquals(((Double) expectedRecord.getZ()),
                         ((Double) actualRecord.getZ()), delta);
+                break;
         }
     }
 
@@ -416,26 +428,14 @@ public class EndToEndTest {
         assertEquals(expectedQuartiles.getThird(), actualQuartiles.getThird(), delta);
     }
 
-//    /**
-//     * Starting from the expected values computed using the available CSV files, it computes all
-//     *      the expected Collection of Bson Document that the MongoDb Connector have to be present
-//     *      in MongoDb.
-//     * @see {@link org.radarcns.integration.aggregator.ExpectedValue}
-//     */
-//    private Map<MockDataConfig, Collection<Document>> getExpecetedDocument(
-//            Map<MockDataConfig, ExpectedValue> expectedValue) {
-//        return MockAggregator.getExpecetedDocument(expectedValue);
-//    }
-
 
     /**
-     * Converts sensor value string to SensorType.
+     * Converts data value string to SensorType.
      *
-     * @throws IllegalArgumentException if the specified sensor does not match any of the already
-     * known ones
+     * @throws IllegalArgumentException if the specified data does not match any of the already
+     *          known ones
      */
     public static SensorType getSensorType(MockDataConfig config) {
-
         if (config.getSensor().equals("BATTERY_LEVEL")) {
             return SensorType.BATTERY;
         }
@@ -446,6 +446,47 @@ public class EndToEndTest {
             }
         }
 
-        throw new IllegalArgumentException(config.getSensor() + " unknown sensor");
+        throw new IllegalArgumentException(config.getSensor() + " unknown data");
+    }
+
+    /**
+     * Checks the correctness of the generated swagger documentation making the request via NGINX.
+     *
+     * @throws MalformedURLException if the used URL is malformed
+     */
+    private static void checkSwaggerConfig() throws MalformedURLException {
+        LOGGER.info("Checking Swagger ...");
+
+        URL url = new URL(
+                config.getRestApi().getProtocol(),
+                config.getRestApi().getHost(),
+                80,
+                config.getRestApi().getPath());
+
+        assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(url));
+    }
+
+    /**
+     * Checks the correctness of the deployed frontend configuration file making the request via
+     *      NGINX.
+     *
+     * @throws IOException either if the used URL is malformed or the response containing the
+     *      downloaded file cannot be parsed.
+     */
+    private static void checkFrontendConfig() throws IOException {
+        LOGGER.info("Checking Frontend config ...");
+
+        URL url = new URL(
+                config.getRestApi().getProtocol(),
+                config.getRestApi().getHost(),
+                80,
+                "/frontend/config/");
+
+        String actual = checkFrontEndConfig(url);
+
+        String expected = Utility.fileToString(
+                EndToEndTest.class.getClassLoader().getResource(CONFIG_JSON).getFile());
+
+        assertEquals(expected, actual);
     }
 }

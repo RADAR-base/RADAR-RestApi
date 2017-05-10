@@ -9,7 +9,11 @@ services:
   - docker
 
 env:
-  DOCKER_COMPOSE_VERSION: 1.9.0
+  DOCKER_COMPOSE_VERSION: 1.11.2
+
+addons:
+  hosts:
+    - hotstorage
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -21,28 +25,43 @@ cache:
     - $HOME/.gradle/wrapper/
 
 before_install:
-  - mkdir -p "$HOME/bin"
-  - export PATH="$PATH:$HOME/bin"
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > "$HOME/bin/docker-compose"
-  - chmod +x "$HOME/bin/docker-compose"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-engine
+  - docker --version
+  - mkdir -p "$HOME/bin";
+  - export PATH="$HOME/bin:$PATH";
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > "$HOME/bin/docker-compose";
+  - chmod +x "$HOME/bin/docker-compose";
+  - sudo $HOME/bin/docker-compose --version
 
 script:
+  - ./gradlew check
   - ./gradlew war
-  - sudo docker-compose -f src/integrationTest/docker-compose.yml up -d --build
+  - sudo $HOME/bin/docker-compose -f src/integrationTest/docker-compose.yml up -d --build
   - sudo docker ps -a
   - echo "INTEGRATION TEST"
-  - ./gradlew check
-  - sudo docker-compose -f src/integrationTest/docker-compose.yml down
+  - ./gradlew integrationTest
+  - sudo $HOME/bin/docker-compose -f src/integrationTest/docker-compose.yml down
   - echo "END TO END TEST"
   - ./gradlew setRadarEnvironmentForDocker
   - cd src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack
+  - sed -ie '$d' install-radar-stack.sh && printf '%s\n' 'sudo-linux $HOME/bin/docker-compose up --force-recreate -d' >> install-radar-stack.sh
   - sudo ./install-radar-stack.sh
   - sudo docker ps -a
   - cd -
   - ./gradlew endToEndTest
   - cd src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack
-  - sudo docker-compose -f docker-compose.yml down
+  - sudo $HOME/bin/docker-compose -f docker-compose.yml down
   - cd -
 
 after_script:
   - ./gradlew sendCoverageToCodacy
+
+deploy:
+  provider: releases
+  api_key: ${GH_TOKEN}
+  file:
+    - "build/libs/radar.war"
+  skip_cleanup: true
+  on:
+    tags: true

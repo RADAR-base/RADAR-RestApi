@@ -1,7 +1,7 @@
 package org.radarcns.pipeline.data;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ * Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.radarcns.pipeline.data;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -85,9 +84,6 @@ public class CsvValidator {
             map = parser.next();
             line++;
         }
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
 
         if (checkDuration(start, end, duration)) {
             mex = config.getDataFile() + " is invalid. Data does not cover "

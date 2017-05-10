@@ -1,7 +1,7 @@
 package org.radarcns.integration.testcase.listener;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ * Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,11 @@ import static org.junit.Assert.assertEquals;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import org.junit.Test;
-import org.radarcns.config.Properties;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.listener.MongoDBContextListener;
-
-import java.nio.file.Paths;
+import org.radarcns.listener.MongoDbContextListener;
 
 /**
- * MongoDBContextListener Test.
+ * MongoDbContextListener Test.
  */
 public class ListenerTest {
 
@@ -36,16 +33,13 @@ public class ListenerTest {
 
     @Test
     public void testConnection() throws Exception {
-        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).toURI()).toString());
-
         MongoClient client = Utility.getMongoClient();
 
-        assertEquals(true, MongoDBContextListener.checkMongoConnection(client));
+        assertEquals(true, MongoDbContextListener.checkMongoConnection(client));
 
         client = new MongoClient(new ServerAddress("localhosts", 27017),
                 client.getCredentialsList());
-        assertEquals(false, MongoDBContextListener.checkMongoConnection(client));
+        assertEquals(false, MongoDbContextListener.checkMongoConnection(client));
     }
 
 }

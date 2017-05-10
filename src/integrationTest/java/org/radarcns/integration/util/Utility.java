@@ -1,7 +1,7 @@
 package org.radarcns.integration.util;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ * Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,18 @@ package org.radarcns.integration.util;
  * limitations under the License.
  */
 
-import static org.radarcns.dao.mongo.AndroidDAO.RECORD_COLLECTION;
-import static org.radarcns.dao.mongo.AndroidDAO.STATUS_COLLECTION;
-import static org.radarcns.dao.mongo.AndroidDAO.UPTIME_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -39,12 +44,17 @@ import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
+import org.radarcns.avro.restapi.header.TimeFrame;
+import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.sensor.Unit;
+import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
-import org.radarcns.listener.MongoDBContextListener;
+import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.util.RadarConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Utility {
 
@@ -52,9 +62,10 @@ public class Utility {
      * Returns a MongoDB client using settings stored in the resource folder.
      */
     public static MongoClient getMongoClient() {
-        List<MongoCredential> credentials = Properties.getInstance().getMongoDbCredential();
-        MongoClient client = new MongoClient(Properties.getInstance().getMongoHosts(),credentials);
-        if (!MongoDBContextListener.checkMongoConnection(client)) {
+        List<MongoCredential> credentials = Properties.getApiConfig().getMongoDbCredentials();
+        MongoClient client = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),
+                credentials);
+        if (!MongoDbContextListener.checkMongoConnection(client)) {
             client = null;
         }
 
@@ -104,20 +115,22 @@ public class Utility {
 
     /**
      * Generates a Dataset using the input documents.
-     * @param docs list of Documents that has to be coverted
+     * @param docs list of Documents that has to be converted
      * @param stat filed extracted from the document
      * @param unit measurement unit useful to generate the dataset's header
+     * @param timeFrame time interval between two consecutive samples
      * @param recordClass class used compute the Item
      * @return a Dataset rep all required document
-     * @throws IllegalAccessException
-     * @throws InstantiationException
+     * @throws IllegalAccessException if the item class or its nullary constructor is not accessible
+     * @throws InstantiationException if item class cannot be instantiated
      */
-    public static Dataset convertDocToDataset(List<Document> docs, Stat stat, Unit unit,
-            Class<? extends SpecificRecord> recordClass)
-        throws IllegalAccessException, InstantiationException {
+    public static Dataset convertDocToDataset(List<Document> docs, String userId, String sourceId,
+            SourceType sourceType, SensorType sensorType, Stat stat, Unit unit, TimeFrame timeFrame,
+            Class<? extends SpecificRecord> recordClass) throws IllegalAccessException,
+            InstantiationException {
         EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(
-            RadarConverter.getISO8601(docs.get(0).getDate("start")),
-            RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate("end")));
+                RadarConverter.getISO8601(docs.get(0).getDate("start")),
+                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate("end")));
 
         List<Item> itemList = new LinkedList<>();
         for (Document doc : docs) {
@@ -127,14 +140,15 @@ public class Utility {
                     throw new UnsupportedOperationException("Not yet implemented");
                 default:
                     record.put(record.getSchema().getField("value").pos(),
-                        doc.getDouble(stat.getParam()));
+                            doc.getDouble(stat.getParam()));
+                    break;
             }
-            itemList.add(new Item(record, new EffectiveTimeFrame(
-                RadarConverter.getISO8601(doc.getDate("start")),
-                RadarConverter.getISO8601(doc.getDate("end")))));
+            itemList.add(new Item(record, RadarConverter.getISO8601(doc.getDate("start"))));
         }
 
-        Header header = new Header(RadarConverter.getDescriptiveStatistic(stat), unit, eftHeader);
+        Header header = new Header(userId, sourceId, sourceType, sensorType,
+                    RadarConverter.getDescriptiveStatistic(stat), unit, timeFrame, eftHeader);
+
         return new Dataset(header, itemList);
     }
 
@@ -142,7 +156,7 @@ public class Utility {
      * Makes an HTTP request to given URL.
      * @param url end-point
      * @return HTTP Response
-     * @throws IOException
+     * @throws IOException if the request could not be executed
      */
     public static Response makeRequest(String url) throws IOException {
         OkHttpClient client = new OkHttpClient.Builder()
@@ -160,10 +174,13 @@ public class Utility {
     }
 
     /**
-     * Converts Bson Document into an Application
-     * @param documents map
-     * @return
+     * Converts Bson Document into an Application.
+     * @param documents map containing variables to create the Application class
+     * @return an Application class
+     *
+     * @see Application
      */
+    //TODO take field names from schemas
     public static Application convertDocToApplication(Map<String, Document> documents) {
         return new Application(
             documents.get(STATUS_COLLECTION).getString("clientIP"),
@@ -184,5 +201,41 @@ public class Utility {
     public static String timestampToString(long timestamp) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         return sdf.format(new Date(timestamp));
+    }
+
+    /**
+     * Returns a logger for the given class.
+     * @param obj class for which the logger is required
+     * @return a Logger
+     */
+    public static Logger getLogger(Object obj) {
+        return LoggerFactory.getLogger(obj.getClass());
+    }
+
+    /**
+     * Converts file content to java String.
+     * @param path location of the file to convert
+     * @return a String representing the file content
+     */
+    public static String fileToString(String path) throws IOException {
+        File file = new File(path);
+        if (!file.exists() || file.isDirectory()) {
+            throw new FileNotFoundException(path + " is not a valid file");
+        }
+
+        byte [] buffer = new byte[4096];
+        ByteArrayOutputStream outs = new ByteArrayOutputStream();
+        InputStream ins = new FileInputStream(file);
+
+        int read = 0;
+        while ((read = ins.read(buffer)) != -1 ) {
+            outs.write(buffer, 0, read);
+        }
+
+        ins.close();
+        outs.close();
+        byte [] fileBytes = outs.toByteArray();
+
+        return new String(fileBytes);
     }
 }

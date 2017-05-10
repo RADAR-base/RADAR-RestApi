@@ -1,0 +1,20 @@
+version: 1.0
+released: 2016-11-10
+
+swagger_version: 1.0.0
+
+application_protocol: http, https, test,   test
+
+host: localhost:8080
+
+api_base_path: /api
+
+mongo_hosts:
+    localhost: 27017
+
+mongo_user:
+    usr: username
+    pwd: password
+    db: database
+
+device_catalog:

@@ -1,7 +1,7 @@
 package org.radarcns.util;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ * Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ResponseHandler {
 
-    private static Logger logger = LoggerFactory.getLogger(ResponseHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseHandler.class);
 
     /**
      * It serialises the {@code Dataset} in input in JSON and sets the suitable status code.
@@ -44,8 +44,8 @@ public class ResponseHandler {
      * @return the response content formatted in JSON
      * @see {@link org.radarcns.avro.restapi.dataset.Dataset}
      **/
-    public static Response getJsonResponse(HttpServletRequest request, Dataset dataset,
-            String sensor) throws IOException {
+    public static Response getJsonResponse(HttpServletRequest request, Dataset dataset)
+            throws IOException {
         int code = 200;
         int size = 0;
         SpecificRecord obj = dataset;
@@ -57,12 +57,12 @@ public class ResponseHandler {
             size = dataset.getDataset().size();
         }
 
-        JsonNode json = AvroConverter.avroToJsonNode(obj,sensor);
+        JsonNode json = AvroConverter.avroToJsonNode(obj);
 
-        logger.debug("{}",json.toString());
-        logger.debug("[{}] {} records",code,size);
+        LOGGER.debug("{}",json.toString());
+        LOGGER.debug("[{}] {} records",code,size);
 
-        logger.info("[{}] {}", code, request.getRequestURI());
+        LOGGER.info("[{}] {}", code, request.getRequestURI());
 
         return Response.status(code).entity(json).build();
     }
@@ -73,14 +73,14 @@ public class ResponseHandler {
      * @param obj request result
      * @return the response content formatted in JSON
      **/
-    public static Response getJsonResponse(HttpServletRequest request,SpecificRecord obj)
+    public static Response getJsonResponse(HttpServletRequest request, SpecificRecord obj)
             throws IOException {
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
-        logger.debug("{}",json.toString());
-        logger.debug("[{}] {}",200,obj);
+        LOGGER.debug("{}",json.toString());
+        LOGGER.debug("[{}] {}",200,obj);
 
-        logger.info("[{}] {}", 200, request.getRequestURI());
+        LOGGER.info("[{}] {}", 200, request.getRequestURI());
 
         return Response.status(200).entity(json).build();
     }
@@ -98,12 +98,12 @@ public class ResponseHandler {
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
         if (json == null) {
-            logger.debug("[{}] {}",500,json);
-            logger.info("[{}] {}", 500, request.getRequestURI());
+            LOGGER.debug("[{}] {}",500,json);
+            LOGGER.info("[{}] {}", 500, request.getRequestURI());
             return Response.status(500).entity("Internal error!").build();
         } else {
-            logger.debug("[{}] {}",500,json);
-            logger.info("[{}] {}", 500, request.getRequestURI());
+            LOGGER.debug("[{}] {}",500,json);
+            LOGGER.info("[{}] {}", 500, request.getRequestURI());
             return Response.status(500).entity(json).build();
         }
     }
@@ -117,7 +117,7 @@ public class ResponseHandler {
     public static Response getAvroResponse(HttpServletRequest request, SpecificRecord obj)
             throws IOException {
         Status status = getStatus(obj);
-        logger.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
+        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
         switch (status) {
             case OK:
@@ -135,7 +135,7 @@ public class ResponseHandler {
      * @return the response error code
      **/
     public static Response getAvroErrorResponse(HttpServletRequest request) {
-        logger.info("[{}] {}", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+        LOGGER.info("[{}] {}", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 request.getRequestURI());
         return Response.serverError().build();
     }

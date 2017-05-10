@@ -33,8 +33,9 @@ ext.openCsvVersion = '3.9'
 ext.radarCommon = '0.3-SNAPSHOT'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
+ext.swaggerParserVersion='1.0.24'
 ext.tomcat = '8.0.37'
-ext.schemaRestApiVersion = '0.1'
+ext.schemaRestApiVersion = '0.1.1-alpha.1'
 
 configurations {
   codacy
@@ -86,10 +87,11 @@ dependencies {
   integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
 
 //  testCompile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
-//  testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
+  testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
   testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
   testCompile group: 'org.mockito', name: 'mockito-all', version: mokitoVersion
+  testCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParserVersion
 
   codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }
@@ -223,7 +225,7 @@ task integrationTest(type: Test) {
   }
 }
 
-check.dependsOn integrationTest
+//check.dependsOn integrationTest
 
 //---------------------------------------------------------------------------//
 // End to End Test                                                           //
@@ -235,27 +237,40 @@ task endToEndTest(type: Test) {
   testClassesDir = sourceSets.endToEndTest.output.classesDir
   classpath = sourceSets.endToEndTest.runtimeClasspath
 
-  // This is not needed, but I like to see which tests have run
   testLogging {
-    events "skipped", "failed"
+    events "failed"
+    exceptionFormat "short"
+
+    debug {
+      events "started", "skipped", "failed"
+      exceptionFormat "full"
+    }
+
+    //info.events = ["failed", "skipped"]
   }
+
+  testLogging.showStandardStreams = true
 }
 
-task setRadarEnvironmentForDocker << {
-  File volumes = new File("src/endToEndTest/dockerRadar/volumes")
-  volumes.mkdir()
-  String volumePath = volumes.getAbsolutePath()
-  
-  def fileEnv = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
-  fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumePath)
-  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
-  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
-  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+//Useful for E2E tests
+task setRadarEnvironmentForDocker {
+  doLast {
+    File volumes = new File("src/endToEndTest/dockerRadar/volumes")
+    volumes.mkdir()
+    String volumePath = volumes.getAbsolutePath()
 
-  def fileInstall = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh")
-  fileInstall.text = fileInstall.text.replace('/usr/local/var/lib/docker', volumePath)
+    def fileEnv = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/env.template")
+    fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumePath)
+    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
+    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
+    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+    fileEnv.renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
 
-  new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/smtp.env.template").renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/smtp.env")
+    def fileInstall = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh")
+    fileInstall.text = fileInstall.text.replace('/usr/local/var/lib/docker', volumePath)
+
+    new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env.template").renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env")
+  }
 }
 
 //---------------------------------------------------------------------------//
@@ -285,7 +300,39 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 }
 
 //---------------------------------------------------------------------------//
-// Prepare WAR for Integration Test                                          //
+// Prepare FRONT-END config file                                             //
+//---------------------------------------------------------------------------//
+task copyFrontendConfig(type: Copy) {
+  from "${projectDir}/schemas/restapi/config/config.json"
+  into "${projectDir}/src/main/webapp/frontend/"
+}
+
+task copyFrontendConfigIntegrationTest(type: Copy) {
+  from "${projectDir}/schemas/restapi/config/config.json"
+  into "${projectDir}/src/integrationTest/resources"
+}
+
+task copyFrontendConfigEndToEndTest(type: Copy) {
+  from "${projectDir}/schemas/restapi/config/config.json"
+  into "${projectDir}/src/endToEndTest/resources"
+}
+
+task removeFrontendConfig(type: Delete) {
+  delete "${projectDir}/src/main/webapp/frontend/"
+  delete "${projectDir}/src/integrationTest/resources/config.json"
+  delete "${projectDir}/src/endToEndTest/resources/config.json"
+}
+
+war.dependsOn(copyFrontendConfig)
+
+integrationTest.dependsOn(copyFrontendConfigIntegrationTest)
+
+endToEndTest.dependsOn(copyFrontendConfigEndToEndTest)
+
+clean.dependsOn(removeFrontendConfig)
+
+//---------------------------------------------------------------------------//
+// Prepare WAR                                                               //
 //---------------------------------------------------------------------------//
 task copyWarForIntegration(type: Copy) {
   from war.archivePath
@@ -297,6 +344,7 @@ task removeWar(type: Delete) {
 }
 
 war.dependsOn(removeWar)
+
 war.finalizedBy copyWarForIntegration
 
 clean.dependsOn(removeWar)

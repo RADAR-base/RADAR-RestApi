@@ -1,7 +1,7 @@
 package org.radarcns.pipeline.config;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ * Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,13 @@ package org.radarcns.pipeline.config;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
 import org.radarcns.config.ServerConfig;
 import org.radarcns.mock.BasicMockConfig;
 
 public class PipelineConfig extends BasicMockConfig {
 
     @JsonProperty("rest_api")
-    private List<ServerConfig> restApi;
-
-    @JsonProperty("api_web_root")
-    private String apiWebRoot;
+    private ServerConfig restApi;
 
     private Long duration;
 
@@ -39,20 +35,11 @@ public class PipelineConfig extends BasicMockConfig {
         this.duration = duration;
     }
 
-    public String getApiWebRoot() {
-        return apiWebRoot;
+    public ServerConfig getRestApi() {
+        return restApi;
     }
 
-    public void setApiWebRoot(String apiWebRoot) {
-        this.apiWebRoot = apiWebRoot;
-    }
-
-    /**
-     * Returns the URL to access RADAR-CNS REST API.
-     */
-    public String getRestApiInstance() {
-        ServerConfig server = restApi.get(0);
-        return server.getProtocol() + "://" + server.getHost() + ":" + server.getPort()
-                + getApiWebRoot();
+    public void setRestApi(ServerConfig restApi) {
+        this.restApi = restApi;
     }
 }

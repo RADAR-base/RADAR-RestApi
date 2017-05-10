@@ -31,6 +31,18 @@ Swagger provides a tool to automatically generate a client in several programmin
 - Click on `Import`
 - Click on `Generate Client` and select your programming language
 
+## Integration test
+Useful for testing the integration between `RADAR-CNS Hotstorage` and `RADAR-CNS Rest API`. Before running the test, add `127.0.0.1	hotstorage` to the `hosts` file.
+To run the test:
+- `./gradlew clean`
+- `./gradlew build`
+- `cd src/integrationTest`
+- `docker-compose up -d --build`
+- `cd -`
+- `./gradlew integrationTest`
+- `cd -`
+- `docker-compose down`
+
 ## End to end test
 This project contains an end to end test for the RADAR-CNS platform covering:
 - `Confluent Rest-Proxy`
@@ -38,10 +50,10 @@ This project contains an end to end test for the RADAR-CNS platform covering:
 - `RADAR-CNS kafka streams application`
 - `RADAR-CNS MongoDb connector`
 - `RADAR-CNS Hotstorage`
-- `Radar Rest API`
+- `RADAR-CNS Rest API`
 
 Infrastructure settings are located at `src/endToEndTest/resources/pipeline.yml`.
-Test case settings are located at `src/endToEndTest/resources/mock_file.yml`. Each test case is specified as:
+Test case settings are located at `src/endToEndTest/resources/pipeline.yml`. Each test case is specified as:
 ```yaml
 - topic: android_empatica_e4_acceleration
   sensor: ACCELEROMETER
@@ -52,10 +64,14 @@ Test case settings are located at `src/endToEndTest/resources/mock_file.yml`. Ea
   values_to_test: "x, y, z"
   magnitude: 10
 ```
-The mock device will stream data stored in csv file called `file`. The landing topic is named `topic` with key `key_schema` and value `value_schema`. Data for the sensor type `sensor` are randomly generated according to the `frequency`: the number of messages generated per second. `value_to_test` are the variables which will be tested against the RESTfull service. Since we are comparing `double`s, `magnitude` states a negative power of 10 representing the maximum delta between expected and actual values for which both numbers are still considered equal.
+The test will generate random data and stream it to the landing topic specified by `topic` having for key `key_schema` and for value `value_schema`. Data for the sensor type `sensor` are randomly generated according to the `frequency`: number of messages generated per second. `value_to_test` are the variables list which will be tested against the RESTfull service. Since we are comparing `double`s, `magnitude` states a negative power of 10 representing the maximum delta between expected and actual values for which both numbers are still considered equal.
 
 To run the test:
 - `./gradlew clean`
+- `./gradlew build`
+- `cd src/integrationTest/image`
+- `docker image build .`
+- `cd -`
 - `./gradlew setRadarEnvironmentForDocker`
 - `cd src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack`
 - `./install-radar-stack.sh`

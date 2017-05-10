@@ -1,7 +1,7 @@
 package org.radarcns.integration.unit;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ * Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,52 +21,45 @@ import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.junit.Test;
+import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.avro.restapi.sensor.HeartRate;
-import org.radarcns.config.Properties;
+import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.util.RadarConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * ExpectedValueTest Test.
  */
 public class ExpectedValueTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExpectedValueTest.class);
-
     private static final String USER = "UserID_0";
     private static final String SOURCE = "SourceID_0";
+    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test
     public void matchDatasetOnDocuments() throws Exception {
-        Properties.getInstanceTest(Paths.get(this.getClass().getClassLoader().getResource(
-                Properties.NAME_FILE).toURI()).toString());
-
         Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(USER, SOURCE,
-                EMPATICA, HEART_RATE, COUNT, SAMPLES, false);
+                EMPATICA, HEART_RATE, COUNT, TIME_FRAME, SAMPLES, false);
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
-        Dataset dataset = (Dataset) map.get(RandomInput.DATASET);
-
         int count = 0;
         for (Document doc : docs) {
             count += doc.getDouble("count").intValue();
         }
         assertEquals(SAMPLES, count);
 
+        Dataset dataset = (Dataset) map.get(RandomInput.DATASET);
+
         count = 0;
         for (Item item : dataset.getDataset()) {
-            count += (Double) ((HeartRate) item.get("value")).getValue();
+            count += (Double) ((DoubleSample) item.get("sample")).getValue();
         }
         assertEquals(SAMPLES, count);
 
@@ -75,7 +68,6 @@ public class ExpectedValueTest {
                 RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate("end")));
 
         EffectiveTimeFrame window2 = dataset.getHeader().getEffectiveTimeFrame();
-//        assertTrue(false);
         assertEquals(true, compareEffectiveTimeFrame(window1, window2));
     }
 

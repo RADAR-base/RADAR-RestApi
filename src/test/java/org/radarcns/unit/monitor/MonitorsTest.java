@@ -1,7 +1,7 @@
 package org.radarcns.unit.monitor;
 
 /*
- *  Copyright 2016 Kings College London and The Hyve
+ * Copyright 2016 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,6 @@ public class MonitorsTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void test() throws ServletException, IOException {
-        SourceSpecification spec = Monitors.getInstance().getSpecification(SourceType.EMPATICA);
-
         HashMap<SensorType, SensorSpecification> sensors =  new HashMap<>();
         sensors.put(SensorType.ACCELEROMETER,
                 new SensorSpecification(SensorType.ACCELEROMETER, DataType.RAW,
@@ -58,6 +56,8 @@ public class MonitorsTest {
         sensors.put(SensorType.HEART_RATE,
                 new SensorSpecification(SensorType.HEART_RATE, DataType.RADAR,
                     1.0, Unit.BEATS_PER_MIN));
+
+        SourceSpecification spec = Monitors.getInstance().getSpecification(SourceType.EMPATICA);
 
         for (SensorSpecification sensorSpec : spec.getSensors().values()) {
             SensorSpecification tmp = sensors.get(sensorSpec.getName());

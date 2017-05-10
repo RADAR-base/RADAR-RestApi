@@ -1,24 +1,23 @@
-#=========================== Schema Registry ===========================#
+#=========================== Schema Registry ============================#
 #List of Schema Registry instances
 schema_registry:
-    host: localhost
-    port: 8081
-    protocol: http
-#=========================== Rest Proxy  ===============================#
+  protocol: http
+  host: localhost
+  path: /schema/
+#============================ Rest Proxy ================================#
 # if the producer_mode is rest, you must provide rest_proxy values
 rest_proxy:
-    host: localhost
-    port: 8082
-    protocol: http
+  protocol: http
+  host: localhost
+  path: /kafka/
 
+#============================= Rest API =================================#
 rest_api:
-  - protocol: http
-    host: localhost
-    port: 8080
+  protocol: http
+  host: localhost
+  path: /api/
 
-# Rest API web root
-api_web_root: "/radar/api/"
-
+#=============================== Test ===================================#
 # time duration that mock data has to cover expressed in seconds.
 duration: 60
 
