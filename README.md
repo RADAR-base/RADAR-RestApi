@@ -9,12 +9,15 @@ Thi project implents the downstream REST API for the RADAR-CNS project'
 ## Setup
 This project uses `git submodule`. When cloning, please use the command `git clone --recursive`. For already cloned repos, use `git submodule update --init --recursive` to update modules.
 
-Before deploying the war file edit the `radar.yml` config file and then copy it into `/usr/local/tomcat/conf/`. If your installation uses a different path you need to modify the variable `pathFile` in `org.radarcns.config.Properties` After that
-- Run `./gradlew build`
+To deploy the war do:
+- edit the `device-catalog.yml` configuration file and specify its location in `radar.yml`
+- edit the `radar.yml` config file and then copy it your config folder. Paths checked to find the config file are
+  - `/usr/share/tomcat8/conf/`
+  - `/usr/local/tomcat/conf/radar/`
+- run `./gradlew build`
 - Copy the radar.war located at `build/libs/` in `/usr/local/tomcat/webapp/`
 
-The application log file is located at `/usr/local/tomcat/log/radar-restapi.log`. You need to modify this location, update the file tag in `/resources/logback.xml`
-The log `rolling policy` entails you have a folder named `archived` under your log pah. If you do not have it, you must create it before running the project.
+By default, log messages are redirected to the `STDOUT`.
 
 The api documentation is located at `<your-server-address>:<port>/radar/api/swagger.json`
 
