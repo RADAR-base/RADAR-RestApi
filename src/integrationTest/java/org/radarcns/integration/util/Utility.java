@@ -45,7 +45,9 @@ import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
+import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.sensor.Unit;
+import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
@@ -122,9 +124,10 @@ public class Utility {
      * @throws IllegalAccessException if the item class or its nullary constructor is not accessible
      * @throws InstantiationException if item class cannot be instantiated
      */
-    public static Dataset convertDocToDataset(List<Document> docs, Stat stat, Unit unit,
-            TimeFrame timeFrame, Class<? extends SpecificRecord> recordClass)
-            throws IllegalAccessException, InstantiationException {
+    public static Dataset convertDocToDataset(List<Document> docs, String userId, String sourceId,
+            SourceType sourceType, SensorType sensorType, Stat stat, Unit unit, TimeFrame timeFrame,
+            Class<? extends SpecificRecord> recordClass) throws IllegalAccessException,
+            InstantiationException {
         EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(
                 RadarConverter.getISO8601(docs.get(0).getDate("start")),
                 RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate("end")));
@@ -143,8 +146,8 @@ public class Utility {
             itemList.add(new Item(record, RadarConverter.getISO8601(doc.getDate("start"))));
         }
 
-        Header header = new Header(RadarConverter.getDescriptiveStatistic(stat), unit, timeFrame,
-                    eftHeader);
+        Header header = new Header(userId, sourceId, sourceType, sensorType,
+                    RadarConverter.getDescriptiveStatistic(stat), unit, timeFrame, eftHeader);
 
         return new Dataset(header, itemList);
     }

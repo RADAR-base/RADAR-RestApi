@@ -18,7 +18,9 @@ package org.radarcns.unit.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.sensor.Unit.G;
+import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
@@ -55,7 +57,8 @@ public class AvroConverterTest {
         EffectiveTimeFrame etf = new EffectiveTimeFrame(
                 RadarConverter.getISO8601(new Date()),
                 RadarConverter.getISO8601(new Date()));
-        Header header = new Header(COUNT, G, TimeFrame.TEN_SECOND, etf);
+        Header header = new Header("User", "Source", EMPATICA, HEART_RATE,
+                COUNT, G, TimeFrame.TEN_SECOND, etf);
 
         LinkedList<Item> item = new LinkedList<>();
         item.add(new Item(new DoubleSample(1.0), RadarConverter.getISO8601(new Date())));

@@ -122,7 +122,7 @@ public class AndroidDaoTest {
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
                     SOURCE_TYPE, TIME_FRAME));
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE.concat("1"), SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, SAMPLES, false));
+                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
 
         assertEquals(ANDROID,
                 AndroidAppDataAccessObject.getInstance().findSourceType(SOURCE, client));

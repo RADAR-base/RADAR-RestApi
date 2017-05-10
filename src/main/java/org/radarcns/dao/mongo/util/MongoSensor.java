@@ -33,7 +33,6 @@ import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
@@ -108,9 +107,8 @@ public abstract class MongoSensor extends MongoDataAccess {
      *
      * @param user is the userID
      * @param source is the sourceID
-     * @param unit is the measurement unit
      * @param stat is the required statistical value
-     * @param timeFrame time interval between two consecutive samples
+     * @param header information used to provide the data context
      * @param collection is the mongoDb collection that has to be queried
      * @return the last seen data value stat for the given user and source, otherwise
      *      empty dataset
@@ -118,14 +116,14 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Dataset valueRTByUserSource(String user, String source, Unit unit, Stat stat,
-            TimeFrame timeFrame, MongoCollection<Document> collection) throws ConnectException {
+    public Dataset valueRTByUserSource(String user, String source, Header header, Stat stat,
+            MongoCollection<Document> collection) throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSource(user, source, "end", -1, 1,
                 collection);
 
-        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), unit,
-            timeFrame, cursor);
+        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
+                cursor);
     }
 
     /**
@@ -133,22 +131,21 @@ public abstract class MongoSensor extends MongoDataAccess {
      *
      * @param user is the userID
      * @param source is the sourceID
-     * @param unit is the measurement unit
+     * @param header information used to provide the data context
      * @param stat is the required statistical value
-     * @param timeFrame time interval between two consecutive samples
      * @param collection is the mongoDb collection that has to be queried
      * @return data dataset for the given user and source, otherwise empty dataset
      *
      * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
      */
-    public Dataset valueByUserSource(String user, String source, Unit unit, MongoHelper.Stat stat,
-            TimeFrame timeFrame, MongoCollection<Document> collection) throws ConnectException {
+    public Dataset valueByUserSource(String user, String source, Header header,
+            MongoHelper.Stat stat, MongoCollection<Document> collection) throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSource(user, source,"start", 1, null,
                 collection);
 
-        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), unit,
-            timeFrame, cursor);
+        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
+                cursor);
     }
 
     /**
@@ -156,9 +153,8 @@ public abstract class MongoSensor extends MongoDataAccess {
      *
      * @param user is the userID
      * @param source is the sourceID
-     * @param unit is the measurement unit
+     * @param header information used to provide the data context
      * @param stat is the required statistical value
-     * @param timeFrame time interval between two consecutive samples
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
      * @param collection is the mongoDb collection that has to be queried
@@ -167,14 +163,14 @@ public abstract class MongoSensor extends MongoDataAccess {
      *
      * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
      */
-    public Dataset valueByUserSourceWindow(String user, String source, Unit unit,
-            MongoHelper.Stat stat, TimeFrame timeFrame, Long start, Long end,
-            MongoCollection<Document> collection) throws ConnectException {
+    public Dataset valueByUserSourceWindow(String user, String source, Header header,
+            MongoHelper.Stat stat, Long start, Long end, MongoCollection<Document> collection)
+            throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSourceWindow(user, source, start, end, collection);
 
-        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), unit,
-                timeFrame, cursor);
+        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
+                cursor);
     }
 
     /**
@@ -212,19 +208,19 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Builds the required {@Code Dataset}.
+     * Builds the required {@link Dataset}. It adds the {@link EffectiveTimeFrame} to the given
+     *      {@link Header}.
      *
      * @param field is the mongodb field that has to be extracted
      * @param stat is the statistical functional represented by the extracted field
-     * @param unit is the unit of the extracted value
-     * @param timeFrame time interval between two consecutive samples
+     * @param header information to provide the context of the data set
      * @param cursor the mongoD cursor
      * @return data dataset for the given input, otherwise empty dataset
      *
-     * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
+     * @see Dataset;
      */
-    private Dataset getDataSet(String field, DescriptiveStatistic stat, Unit unit,
-            TimeFrame timeFrame, MongoCursor<Document> cursor) {
+    private Dataset getDataSet(String field, DescriptiveStatistic stat, Header header,
+            MongoCursor<Document> cursor) {
         Date start = null;
         Date end = null;
 
@@ -257,7 +253,7 @@ public abstract class MongoSensor extends MongoDataAccess {
                 RadarConverter.getISO8601(start),
                 RadarConverter.getISO8601(end));
 
-        Header header = new Header(stat, unit, timeFrame, etf);
+        header.setEffectiveTimeFrame(etf);
 
         Dataset hrd = new Dataset(header, list);
 

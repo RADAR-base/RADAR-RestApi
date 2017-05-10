@@ -189,7 +189,7 @@ public class SourceEndPointTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false));
+                COUNT, TIME_FRAME, SAMPLES, false));
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(USER, SOURCE.concat("1")));
 

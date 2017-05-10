@@ -79,12 +79,13 @@ public class SensorEndPointTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
+                COUNT, TIME_FRAME, SAMPLES, false);
 
         collection.insertMany(docs);
 
         Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
-                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
+                USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
+                Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
 
         Dataset actual = null;
 
@@ -120,12 +121,12 @@ public class SensorEndPointTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
+                COUNT, TIME_FRAME, SAMPLES, false);
 
         collection.insertMany(docs);
 
-        Dataset expected = Utility.convertDocToDataset(docs, RadarConverter.getMongoStat(COUNT),
-                Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
+        Dataset expected = Utility.convertDocToDataset(docs, USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
+                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
 
         Dataset actual = null;
 
@@ -161,10 +162,10 @@ public class SensorEndPointTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
+                COUNT, TIME_FRAME, SAMPLES, false);
         while (docs.size() < 6) {
             docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
+                COUNT, TIME_FRAME, SAMPLES, false);
         }
         collection.insertMany(docs);
 
@@ -177,7 +178,8 @@ public class SensorEndPointTest {
         path = path.replace("{end}", String.valueOf(end));
 
         Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
-                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
+                USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
+                Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
 
         Dataset actual = null;
 

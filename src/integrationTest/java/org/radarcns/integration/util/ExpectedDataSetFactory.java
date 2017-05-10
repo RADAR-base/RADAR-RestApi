@@ -38,7 +38,6 @@ import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.model.ExpectedValue.StatType;
@@ -72,31 +71,41 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     /**
      * It computes the {@code Dataset} resulted from the mock data.
      *
+     * @param expectedValue mock data used to test
+     * @param userId user identifier
+     * @param sourceId source identifier
+     * @param sourceType source that has to be simulated
+     * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
-     * @param source the simulated source device
-     * @param sensor the simulated data of the source device
+     * @param timeFrame time interval between two consecutive samples
      * @return {@code Dataset} resulted by the simulation
      * @see {@link org.radarcns.avro.restapi.dataset.Dataset}
      **/
-    public Dataset getDataset(ExpectedValue expectedValue, DescriptiveStatistic statistic,
-            SourceType source,
-            SensorType sensor) throws InstantiationException, IllegalAccessException {
-        return new Dataset(getHeader(expectedValue, statistic,
-                SourceCatalog.getInstance(source).getMeasurementUnit(sensor)),
-                getItem(expectedValue, statistic, sensor));
+    public Dataset getDataset(ExpectedValue expectedValue, String userId, String sourceId,
+            SourceType sourceType, SensorType sensorType, DescriptiveStatistic statistic,
+            TimeFrame timeFrame) throws InstantiationException, IllegalAccessException {
+        return new Dataset(getHeader(expectedValue, userId, sourceId, sourceType, sensorType,
+                statistic, timeFrame), getItem(expectedValue, statistic, sensorType));
     }
 
     /**
      * It generates the {@code Header} for the resulting {@code Dataset}.
      *
+     * @param expectedValue mock data used to test
+     * @param userId user identifier
+     * @param sourceId source identifier
+     * @param sourceType source that has to be simulated
+     * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
-     * @param unit values unit
+     * @param timeFrame time interval between two consecutive samples
      * @return {@link org.radarcns.avro.restapi.header.Header} for a {@link
      * org.radarcns.avro.restapi.dataset.Dataset}
      **/
-    public Header getHeader(ExpectedValue expectedValue,
-            DescriptiveStatistic statistic, Unit unit) {
-        return new Header(statistic, unit, TimeFrame.TEN_SECOND,
+    public Header getHeader(ExpectedValue expectedValue, String userId, String sourceId,
+            SourceType sourceType, SensorType sensorType, DescriptiveStatistic statistic,
+            TimeFrame timeFrame) {
+        return new Header(userId, sourceId, sourceType, sensorType, statistic,
+                SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType), timeFrame,
                 getEffectiveTimeFrame(expectedValue));
     }
 

@@ -30,6 +30,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.sensor.Unit;
@@ -51,6 +52,7 @@ public class HeartRateDaoTest {
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
     private static final SensorType SENSOR_TYPE = HEART_RATE;
+    private static final Unit UNIT = Unit.BEATS_PER_MIN;
     private static final Class ITEM = DoubleSample.class;
     private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
     private static final int SAMPLES = 10;
@@ -64,16 +66,19 @@ public class HeartRateDaoTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
+                COUNT, TIME_FRAME, SAMPLES, false);
 
         collection.insertMany(docs);
 
+        Header header = new Header(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
+                    Unit.BEATS_PER_MIN, TIME_FRAME, null);
+
         Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueRTByUserSource(
-                USER, SOURCE, Unit.BEATS_PER_MIN, RadarConverter.getMongoStat(COUNT), TIME_FRAME,
-                    collection);
+                USER, SOURCE, header, RadarConverter.getMongoStat(COUNT), collection);
 
         Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
-                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
+                USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), UNIT,
+                TIME_FRAME, ITEM);
 
         assertEquals(expected, actual);
 
@@ -89,16 +94,19 @@ public class HeartRateDaoTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
+                COUNT, TIME_FRAME, SAMPLES, false);
 
         collection.insertMany(docs);
 
+        Header header = new Header(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
+                Unit.BEATS_PER_MIN, TIME_FRAME, null);
+
         Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueByUserSource(USER,
-                SOURCE, Unit.BEATS_PER_MIN, RadarConverter.getMongoStat(COUNT),
-                    TimeFrame.TEN_SECOND, collection);
+                SOURCE, header, RadarConverter.getMongoStat(COUNT), collection);
 
         Dataset expected = Utility.convertDocToDataset(docs,
-                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
+                USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), UNIT,
+                TIME_FRAME, ITEM);
 
         assertEquals(expected, actual);
 
@@ -114,10 +122,10 @@ public class HeartRateDaoTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
+                COUNT, TIME_FRAME, SAMPLES, false);
         while (docs.size() < 6) {
             docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
+                COUNT, TIME_FRAME, SAMPLES, false);
         }
         collection.insertMany(docs);
 
@@ -126,12 +134,15 @@ public class HeartRateDaoTest {
         long start = docs.get(index - 1).getDate(MongoHelper.START).getTime();
         long end = docs.get(index + 1).getDate(MongoHelper.END).getTime();
 
+        Header header = new Header(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
+                Unit.BEATS_PER_MIN, TIME_FRAME, null);
+
         Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueByUserSourceWindow(
-                USER, SOURCE, Unit.BEATS_PER_MIN, RadarConverter.getMongoStat(COUNT), TIME_FRAME,
-                    start, end, collection);
+                USER, SOURCE, header, RadarConverter.getMongoStat(COUNT), start, end, collection);
 
         Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
-                RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
+                USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), UNIT,
+                TIME_FRAME, ITEM);
 
         assertEquals(expected, actual);
 
@@ -147,10 +158,10 @@ public class HeartRateDaoTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
+                COUNT, TIME_FRAME, SAMPLES, false);
         while (docs.size() < 6) {
             docs = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false);
+                COUNT, TIME_FRAME, SAMPLES, false);
         }
         collection.insertMany(docs);
 

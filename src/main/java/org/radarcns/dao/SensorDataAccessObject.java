@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.sensor.Unit;
@@ -111,10 +112,13 @@ public class SensorDataAccessObject {
         SourceType sourceType = SourceDataAccessObject.getSourceType(source, client);
         Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
 
+        Header header = new Header(user, source, sourceType, sensorType, stat, unit,
+                timeFrame, null);
+
         MongoSensor sensorDao = hooks.get(sensorType);
 
-        return sensorDao.valueRTByUserSource(user, source, unit, RadarConverter.getMongoStat(stat),
-                timeFrame, MongoHelper.getCollection(context,
+        return sensorDao.valueRTByUserSource(user, source, header,
+                    RadarConverter.getMongoStat(stat), MongoHelper.getCollection(context,
                         sensorDao.getCollectionName(sourceType, timeFrame)));
     }
 
@@ -139,11 +143,14 @@ public class SensorDataAccessObject {
         SourceType sourceType = SourceDataAccessObject.getSourceType(source, client);
         Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
 
+        Header header = new Header(user, source, sourceType, sensorType, stat, unit,
+                timeFrame, null);
+
         MongoSensor sensorDao = hooks.get(sensorType);
 
-        return sensorDao.valueByUserSource(user, source, unit, RadarConverter.getMongoStat(stat),
-            timeFrame, MongoHelper.getCollection(
-                context, sensorDao.getCollectionName(sourceType, timeFrame)));
+        return sensorDao.valueByUserSource(user, source, header, RadarConverter.getMongoStat(stat),
+                MongoHelper.getCollection(context, sensorDao.getCollectionName(
+                    sourceType, timeFrame)));
     }
 
     /**
@@ -170,11 +177,14 @@ public class SensorDataAccessObject {
         SourceType sourceType = SourceDataAccessObject.getSourceType(source, client);
         Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
 
+        Header header = new Header(user, source, sourceType, sensorType, stat, unit,
+                timeFrame, null);
+
         MongoSensor sensorDao = hooks.get(sensorType);
 
-        return sensorDao.valueByUserSourceWindow(user, source, unit,
-            RadarConverter.getMongoStat(stat), timeFrame, start, end,
-            MongoHelper.getCollection(context, sensorDao.getCollectionName(sourceType, timeFrame)));
+        return sensorDao.valueByUserSourceWindow(user, source, header,
+                RadarConverter.getMongoStat(stat), start, end, MongoHelper.getCollection(context,
+                    sensorDao.getCollectionName(sourceType, timeFrame)));
     }
 
     /**

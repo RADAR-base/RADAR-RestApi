@@ -35,7 +35,7 @@ ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.swaggerParserVersion='1.0.24'
 ext.tomcat = '8.0.37'
-ext.schemaRestApiVersion = '0.1.1-SNAPSHOT'
+ext.schemaRestApiVersion = '0.1.1-alpha.1'
 
 configurations {
   codacy

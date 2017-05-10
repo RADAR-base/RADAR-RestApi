@@ -68,6 +68,8 @@ public class EndToEndTest {
 
     private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
 
+    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
+
     private static PipelineConfig config = null;
 
     public static final String PIPELINE_CONFIG = "pipeline.yml";
@@ -258,8 +260,9 @@ public class EndToEndTest {
 
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory
-                    .getDataset(expectedValue.get(config), stat, SourceType.EMPATICA,
-                            getSensorType(config)));
+                    .getDataset(expectedValue.get(config), CsvSensorDataModel.USER_ID_MOCK,
+                        CsvSensorDataModel.SOURCE_ID_MOCK, SourceType.EMPATICA,
+                            getSensorType(config), stat, TIME_FRAME));
         }
 
         return map;

@@ -63,7 +63,7 @@ public class SourceDaoTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false));
+                COUNT, TIME_FRAME, SAMPLES, false));
 
         assertEquals(SOURCE_TYPE, SourceDataAccessObject.getSourceType(SOURCE, client));
 

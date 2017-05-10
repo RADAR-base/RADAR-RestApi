@@ -62,7 +62,7 @@ public class UserDaoTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, SAMPLES, false));
+                COUNT, TIME_FRAME, SAMPLES, false));
 
         Cohort cohort = UserDataAccessObject.findAllUsers(client);
 
@@ -81,9 +81,9 @@ public class UserDaoTest {
                     SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(USER, SOURCE,
-                SOURCE_TYPE, SENSOR_TYPE, COUNT, SAMPLES, false);
+                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
         docs.addAll(RandomInput.getDocumentsRandom(USER, SOURCE.concat("1"),
-                SOURCE_TYPE, SENSOR_TYPE, COUNT, SAMPLES, false));
+                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
         collection.insertMany(docs);
 
         Cohort cohort = UserDataAccessObject.findAllUsers(client);
@@ -109,11 +109,11 @@ public class UserDaoTest {
         // USER1
         // SOURCE1 -> EMPATICA
         collection.insertMany(RandomInput.getDocumentsRandom(USER.concat("1"), SOURCE.concat("1"),
-                SOURCE_TYPE, SENSOR_TYPE, COUNT, SAMPLES, false));
+                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
         // USER
         // SOURCE2 -> EMPATICA
         collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE.concat("2"), SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, SAMPLES, false));
+                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
 
         Cohort cohort = UserDataAccessObject.findAllUsers(client);
 

@@ -56,3 +56,12 @@ script:
 
 after_script:
   - ./gradlew sendCoverageToCodacy
+
+deploy:
+  provider: releases
+  api_key: ${GH_TOKEN}
+  file:
+    - "build/libs/radar.war"
+  skip_cleanup: true
+  on:
+    tags: true
