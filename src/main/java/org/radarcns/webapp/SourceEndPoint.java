@@ -16,6 +16,10 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+import static org.radarcns.webapp.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.Parameter.SOURCE_TYPE;
+import static org.radarcns.webapp.Parameter.SUBJECT_ID;
+
 import com.mongodb.MongoClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -63,7 +67,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/state/{patientID}/{sourceID}")
+    @Path("/state/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return a SourceDefinition values",
             notes = "Using the source sensors values arrived within last 60sec, it computes the"
@@ -77,8 +81,8 @@ public class SourceEndPoint {
                 + "computed status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStateByUserDeviceJsonDevStatus(
-            @PathParam("patientID") String user,
-            @PathParam("sourceID") String source) {
+            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
                 getRTStateByUserSourceWorker(user, source));
@@ -94,7 +98,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/state/{patientID}/{sourceID}")
+    @Path("/avro/state/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return a SourceDefinition values",
             notes = "Using the source sensors values arrived within last 60sec, it computes the"
@@ -106,8 +110,8 @@ public class SourceEndPoint {
                 + "containing last computed status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStateByUserDeviceAvroDevStatus(
-            @PathParam("patientID") String user,
-            @PathParam("sourceID") String source) {
+            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
                 getRTStateByUserSourceWorker(user, source));
@@ -145,7 +149,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/specification/{sourceType}")
+    @Path("/specification/{" + SOURCE_TYPE + "}")
     @ApiOperation(
             value = "Return a SourceDefinition specification",
             notes = "Return the data specification of all on-board sensors for the given"
@@ -159,7 +163,7 @@ public class SourceEndPoint {
                 + "containing last computed status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationJson(
-            @PathParam("sourceType") SourceType source) {
+            @PathParam(SOURCE_TYPE) SourceType source) {
         try {
             return ResponseHandler.getJsonResponse(request, getSourceSpecificationWorker(source));
         } catch (Exception exec) {
@@ -174,7 +178,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/specification/{sourceType}")
+    @Path("/avro/specification/{" + SOURCE_TYPE + "}")
     @ApiOperation(
             value = "Return a SourceDefinition specification",
             notes = "Return the data specification of all on-board sensors for the given"
@@ -186,7 +190,7 @@ public class SourceEndPoint {
                 + "containing last computed status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationAvro(
-            @PathParam("sourceType") SourceType source) {
+            @PathParam(SOURCE_TYPE) SourceType source) {
         try {
             return ResponseHandler.getAvroResponse(request, getSourceSpecificationWorker(source));
         } catch (Exception exec) {
@@ -213,7 +217,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/getAllSources/{patientID}")
+    @Path("/getAllSources/{" + SUBJECT_ID + "}")
     @ApiOperation(
             value = "Return a User value",
             notes = "Return all known sources associated with the give patientID")
@@ -224,7 +228,7 @@ public class SourceEndPoint {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a user.avsc object")})
     public Response getAllSourcesJsonUser(
-            @PathParam("patientID") String user) {
+            @PathParam(SUBJECT_ID) String user) {
         try {
             return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(user));
         } catch (Exception exec) {
@@ -239,7 +243,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/getAllSources/{patientID}")
+    @Path("/avro/getAllSources/{" + SUBJECT_ID + "}")
     @ApiOperation(
             value = "Return a User value",
             notes = "Return all known sources associated with the give patientID")
@@ -248,7 +252,7 @@ public class SourceEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a user.avsc object")})
     public Response getAllSourcesAvroUser(
-            @PathParam("patientID") String user) {
+            @PathParam(SUBJECT_ID) String user) {
         try {
             return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(user));
         } catch (Exception exec) {

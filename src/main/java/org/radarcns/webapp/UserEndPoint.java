@@ -16,6 +16,8 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+import static org.radarcns.webapp.Parameter.STUDY_ID;
+
 import com.mongodb.MongoClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -58,7 +60,7 @@ public class UserEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/getAllPatients/{studyID}")
+    @Path("/getAllPatients/{" + STUDY_ID + "}")
     @ApiOperation(
             value = "Return a list of users",
             notes = "Each user can have multiple sourceID associated with him")
@@ -69,7 +71,7 @@ public class UserEndPoint {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a list of user.avsc objects")})
     public Response getAllPatientsJsonUser(
-            @PathParam("studyID") String study
+            @PathParam(STUDY_ID) String study
     ) {
         try {
             return ResponseHandler.getJsonResponse(request, getAllPatientsWorker());
@@ -85,7 +87,7 @@ public class UserEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/getAllPatients/{studyID}")
+    @Path("/avro/getAllPatients/{" + STUDY_ID + "}")
     @ApiOperation(
             value = "Return a list of users",
             notes = "Each user can have multiple sourceID associated with him")
@@ -95,7 +97,7 @@ public class UserEndPoint {
             @ApiResponse(code = 200, message = "Return a byte array serialising a list of"
                 + "user.avsc objects")})
     public Response getAllPatientsAvroUser(
-            @PathParam("studyID") String study
+            @PathParam(STUDY_ID) String study
     ) {
         try {
             return ResponseHandler.getAvroResponse(request, getAllPatientsWorker());

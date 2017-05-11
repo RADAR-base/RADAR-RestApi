@@ -21,6 +21,13 @@ import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.webapp.Parameter.END;
+import static org.radarcns.webapp.Parameter.INTERVAL;
+import static org.radarcns.webapp.Parameter.SENSOR;
+import static org.radarcns.webapp.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.Parameter.START;
+import static org.radarcns.webapp.Parameter.STAT;
+import static org.radarcns.webapp.Parameter.SUBJECT_ID;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -63,12 +70,13 @@ public class SensorEndPointTest {
     @Test
     public void getRealtimeTest()
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = "data/avro/realTime/{sensor}/{stat}/{interval}/{userID}/{sourceID}";
-        path = path.replace("{sensor}", SENSOR_TYPE.name());
-        path = path.replace("{stat}", COUNT.name());
-        path = path.replace("{interval}", TIME_FRAME.name());
-        path = path.replace("{userID}", USER);
-        path = path.replace("{sourceID}", SOURCE);
+        String path = "data/avro/realTime/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL
+                + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
+        path = path.replace("{" + STAT + "}", COUNT.name());
+        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
+        path = path.replace("{" + SUBJECT_ID + "}", USER);
+        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
         LOGGER.info(path);
 
@@ -105,12 +113,13 @@ public class SensorEndPointTest {
     @Test
     public void getAllByUserTest()
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = "data/avro/{sensor}/{stat}/{interval}/{userID}/{sourceID}";
-        path = path.replace("{sensor}", SENSOR_TYPE.name());
-        path = path.replace("{stat}", COUNT.name());
-        path = path.replace("{interval}", TIME_FRAME.name());
-        path = path.replace("{userID}", USER);
-        path = path.replace("{sourceID}", SOURCE);
+        String path = "data/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+                + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
+        path = path.replace("{" + STAT + "}", COUNT.name());
+        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
+        path = path.replace("{" + SUBJECT_ID + "}", USER);
+        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
         LOGGER.info(path);
 
@@ -146,12 +155,13 @@ public class SensorEndPointTest {
     @Test
     public void getRealtimeTest200()
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = "data/avro/{sensor}/{stat}/{interval}/{userID}/{sourceID}/{start}/{end}";
-        path = path.replace("{sensor}", SENSOR_TYPE.name());
-        path = path.replace("{stat}", COUNT.name());
-        path = path.replace("{interval}", TIME_FRAME.name());
-        path = path.replace("{userID}", USER);
-        path = path.replace("{sourceID}", SOURCE);
+        String path = "data/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+                + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + START + "}/{" + END + "}";
+        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
+        path = path.replace("{" + STAT + "}", COUNT.name());
+        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
+        path = path.replace("{" + SUBJECT_ID + "}", USER);
+        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
         LOGGER.info(path);
 
@@ -174,8 +184,8 @@ public class SensorEndPointTest {
         long start = docs.get(index - 1).getDate(MongoHelper.START).getTime();
         long end = docs.get(index + 1).getDate(MongoHelper.END).getTime();
 
-        path = path.replace("{start}", String.valueOf(start));
-        path = path.replace("{end}", String.valueOf(end));
+        path = path.replace("{" + START + "}", String.valueOf(start));
+        path = path.replace("{" + END + "}", String.valueOf(end));
 
         Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
                 USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),

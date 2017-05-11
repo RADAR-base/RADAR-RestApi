@@ -28,6 +28,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -52,6 +54,7 @@ import org.radarcns.config.Properties;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.listener.MongoDbContextListener;
+import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +157,9 @@ public class Utility {
 
     /**
      * Makes an HTTP request to given URL.
+     *
      * @param url end-point
+     *
      * @return HTTP Response
      * @throws IOException if the request could not be executed
      */
@@ -166,9 +171,33 @@ public class Utility {
                 .build();
 
         Request request = new Request.Builder()
-                    .header("User-Agent", "Mozilla/5.0")
-                    .url(url)
-                    .build();
+                .header("User-Agent", "Mozilla/5.0")
+                .url(url)
+                .build();
+
+        return client.newCall(request).execute();
+    }
+
+    /**
+     * Makes an HTTP request to given URL without validating the SSL certificate.
+     *
+     * @param url end-point
+     *
+     * @return HTTP Response
+     * @throws IOException if the request could not be executed
+     */
+    public static Response makeUnsafeRequest(String url)
+        throws IOException, NoSuchAlgorithmException, KeyManagementException {
+        OkHttpClient client = RestClient.getUnsafeBuilder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+
+        Request request = new Request.Builder()
+                .header("User-Agent", "Mozilla/5.0")
+                .url(url)
+                .build();
 
         return client.newCall(request).execute();
     }

@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.webapp.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.Parameter.SUBJECT_ID;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -58,9 +60,9 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest204() throws IOException {
-        String path = "android/avro/status/{userID}/{sourceID}";
-        path = path.replace("{userID}", USER);
-        path = path.replace("{sourceID}", SOURCE);
+        String path = "android/avro/status/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+        path = path.replace("{" + SUBJECT_ID + "}", USER);
+        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
         LOGGER.info(path);
 
@@ -89,9 +91,9 @@ public class AppStatusEndPointTest {
 
         Application expected = Utility.convertDocToApplication(map);
 
-        String path = "android/avro/status/{userID}/{sourceID}";
-        path = path.replace("{userID}", USER.concat("1"));
-        path = path.replace("{sourceID}", SOURCE.concat("1"));
+        String path = "android/avro/status/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+        path = path.replace("{" + SUBJECT_ID + "}", USER.concat("1"));
+        path = path.replace("{" + SOURCE_ID + "}", SOURCE.concat("1"));
 
         LOGGER.info(path);
 

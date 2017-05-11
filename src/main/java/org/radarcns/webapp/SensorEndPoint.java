@@ -16,6 +16,14 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+import static org.radarcns.webapp.Parameter.END;
+import static org.radarcns.webapp.Parameter.INTERVAL;
+import static org.radarcns.webapp.Parameter.SENSOR;
+import static org.radarcns.webapp.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.Parameter.START;
+import static org.radarcns.webapp.Parameter.STAT;
+import static org.radarcns.webapp.Parameter.SUBJECT_ID;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -60,7 +68,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/realTime/{sensor}/{stat}/{interval}/{patientID}/{sourceID}")
+    @Path("/realTime/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID
+            + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in JSON.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
@@ -76,11 +85,11 @@ public class SensorEndPoint {
                 + "computed sample for the given inputs formatted either Acceleration.avsc or "
                 + "DoubleValue.avsc")})
     public Response getRealTimeUserJson(
-            @PathParam("sensor") SensorType sensor,
-            @PathParam("stat") DescriptiveStatistic stat,
-            @PathParam("interval") TimeFrame interval,
-            @PathParam("patientID") String user,
-            @PathParam("sourceID") String source) {
+            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(STAT) DescriptiveStatistic stat,
+            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
                     getRealTimeUserWorker(user, source, sensor, stat, interval));
@@ -96,7 +105,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/realTime/{sensor}/{stat}/{interval}/{patientID}/{sourceID}")
+    @Path("/avro/realTime/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID
+            + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
@@ -110,11 +120,11 @@ public class SensorEndPoint {
                 + "object containing last computed sample for the given inputs formatted either "
                 + "Acceleration.avsc or DoubleValue.avsc")})
     public Response getRealTimeUserAvro(
-            @PathParam("sensor") SensorType sensor,
-            @PathParam("stat") DescriptiveStatistic stat,
-            @PathParam("interval") TimeFrame interval,
-            @PathParam("patientID") String user,
-            @PathParam("sourceID") String source) {
+            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(STAT) DescriptiveStatistic stat,
+            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
                 getRealTimeUserWorker(user, source, sensor, stat, interval));
@@ -149,7 +159,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{sensor}/{stat}/{interval}/{patientID}/{sourceID}")
+    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+            + SOURCE_ID + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in JSON.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
@@ -165,11 +176,11 @@ public class SensorEndPoint {
                 + "available samples for the given inputs formatted either Acceleration.avsc or "
                 + "DoubleValue.avsc")})
     public Response getAllByUserJson(
-            @PathParam("sensor") SensorType sensor,
-            @PathParam("stat") DescriptiveStatistic stat,
-            @PathParam("interval") TimeFrame interval,
-            @PathParam("patientID") String user,
-            @PathParam("sourceID") String source) {
+            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(STAT) DescriptiveStatistic stat,
+            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
                 getAllByUserWorker(user, source, stat, interval, sensor));
@@ -185,7 +196,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/{sensor}/{stat}/{interval}/{patientID}/{sourceID}")
+    @Path("/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+            + SOURCE_ID + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
@@ -199,11 +211,11 @@ public class SensorEndPoint {
                 + "object containing all available samples for the given inputs formatted either "
                 + "Acceleration.avsc or DoubleValue.avsc")})
     public Response getAllByUserAvro(
-            @PathParam("sensor") SensorType sensor,
-            @PathParam("stat") DescriptiveStatistic stat,
-            @PathParam("interval") TimeFrame interval,
-            @PathParam("patientID") String user,
-            @PathParam("sourceID") String source) {
+            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(STAT) DescriptiveStatistic stat,
+            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
                 getAllByUserWorker(user, source, stat, interval, sensor));
@@ -238,7 +250,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{sensor}/{stat}/{interval}/{patientID}/{sourceID}/{start}/{end}")
+    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+            + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in JSON.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
@@ -255,13 +268,13 @@ public class SensorEndPoint {
                 + "belonging to the time window [start - end] for the given inputs formatted "
                 + "either Acceleration.avsc or DoubleValue.avsc.")})
     public Response getByUserForWindowJson(
-            @PathParam("sensor") SensorType sensor,
-            @PathParam("stat") DescriptiveStatistic stat,
-            @PathParam("patientID") String user,
-            @PathParam("sourceID") String source,
-            @PathParam("interval") TimeFrame interval,
-            @PathParam("start") long start,
-            @PathParam("end") long end) {
+            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(STAT) DescriptiveStatistic stat,
+            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SOURCE_ID) String source,
+            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(START) long start,
+            @PathParam(END) long end) {
         try {
             return ResponseHandler.getJsonResponse(request,
                 getByUserForWindowWorker(user, source, stat, interval, sensor, start, end));
@@ -277,7 +290,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/{sensor}/{stat}/{interval}/{patientID}/{sourceID}/{start}/{end}")
+    @Path("/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+            + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
@@ -292,13 +306,13 @@ public class SensorEndPoint {
                 + "object containing samples belonging to the time window [start - end] for the "
                 + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")})
     public Response getByUserForWindowAvro(
-            @PathParam("sensor") SensorType sensor,
-            @PathParam("stat") DescriptiveStatistic stat,
-            @PathParam("interval") TimeFrame interval,
-            @PathParam("patientID") String user,
-            @PathParam("sourceID") String source,
-            @PathParam("start") long start,
-            @PathParam("end") long end) {
+            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(STAT) DescriptiveStatistic stat,
+            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SOURCE_ID) String source,
+            @PathParam(START) long start,
+            @PathParam(END) long end) {
         try {
             return ResponseHandler.getAvroResponse(request,
                 getByUserForWindowWorker(user, source, stat, interval, sensor, start, end));

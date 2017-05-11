@@ -23,6 +23,8 @@ import io.swagger.parser.SwaggerParser;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import okhttp3.Response;
 import org.junit.Test;
 import org.radarcns.config.Properties;
@@ -42,7 +44,8 @@ public class ExposedConfigTest {
     private static final String SWAGGER_JSON = "swagger.json";
 
     @Test
-    public void checkFrontEndConfig() throws IOException {
+    public void checkFrontEndConfig()
+            throws IOException, NoSuchAlgorithmException, KeyManagementException {
         URL url = new URL(PROTOCOL, SERVER, PORT, "/radar/frontend/");
 
         String actual = checkFrontEndConfig(url);
@@ -71,7 +74,7 @@ public class ExposedConfigTest {
     /** Retrieves the exposed Swagger documentation. **/
     public static String getSwaggerBasePath(URL url) throws MalformedURLException {
         Swagger swagger = new SwaggerParser().read(
-                new URL(url, SWAGGER_JSON).toString().toString());
+                new URL(url, SWAGGER_JSON).toString());
 
         return swagger.getBasePath();
     }

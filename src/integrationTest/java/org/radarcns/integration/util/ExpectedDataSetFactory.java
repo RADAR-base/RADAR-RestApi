@@ -42,8 +42,8 @@ import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.model.ExpectedValue.StatType;
 import org.radarcns.source.SourceCatalog;
-import org.radarcns.stream.aggregator.DoubleArrayCollector;
-import org.radarcns.stream.aggregator.DoubleValueCollector;
+import org.radarcns.stream.collector.DoubleArrayCollector;
+import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -187,13 +187,13 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                     if (statistic.name().equals(QUARTILES.name())) {
                         List<List<Double>> statValues = (List<List<Double>>) getStatValue(
                                 statMap.get(statistic),
-                                dac.getCollectors());
+                                dac);
                         content = new Acceleration(getQuartile(statValues.get(0)),
                                 getQuartile(statValues.get(1)), getQuartile(statValues.get(2)));
                     } else {
                         List<Double> statValues = (List<Double>) getStatValue(
                                 statMap.get(statistic),
-                                dac.getCollectors());
+                                dac);
                         content = new Acceleration(statValues.get(0), statValues.get(1),
                                 statValues.get(2));
                     }

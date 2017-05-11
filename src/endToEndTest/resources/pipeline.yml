@@ -2,27 +2,27 @@
 #List of Schema Registry instances
 schema_registry:
   protocol: http
-  host: localhost
+  host: ec2-52-210-59-174.eu-west-1.compute.amazonaws.com
   path: /schema/
 #============================ Rest Proxy ================================#
 # if the producer_mode is rest, you must provide rest_proxy values
 rest_proxy:
   protocol: http
-  host: localhost
+  host: ec2-52-210-59-174.eu-west-1.compute.amazonaws.com
   path: /kafka/
 
 #============================= Rest API =================================#
 rest_api:
   protocol: http
-  host: localhost
+  host: ec2-52-210-59-174.eu-west-1.compute.amazonaws.com
   path: /api/
 
 #=============================== Test ===================================#
 # time duration that mock data has to cover expressed in seconds.
 duration: 60
 
-#Possible value are direct or rest
-producer_mode: rest
+#Possible value are direct, rest, unsafe
+producer_mode: unsafe
 
 data:
   - topic: android_empatica_e4_acceleration

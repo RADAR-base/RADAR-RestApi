@@ -21,6 +21,7 @@ import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.webapp.Parameter.STUDY_ID;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -59,8 +60,8 @@ public class UserEndPointTest {
 
     @Test
     public void getAllPatientsTest204() throws IOException {
-        String path = "user/avro/getAllPatients/{studyID}";
-        path = path.replace("{studyID}", "0");
+        String path = "user/avro/getAllPatients/{" + STUDY_ID + "}";
+        path = path.replace("{" + STUDY_ID + "}", "0");
 
         LOGGER.info(path);
 
@@ -83,8 +84,8 @@ public class UserEndPointTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(USER.concat("1"), SOURCE.concat("1")));
 
-        String path = "user/avro/getAllPatients/{studyID}";
-        path = path.replace("{studyID}", "0");
+        String path = "user/avro/getAllPatients/{" + STUDY_ID + "}";
+        path = path.replace("{" + STUDY_ID + "}", "0");
 
         LOGGER.info(path);
 

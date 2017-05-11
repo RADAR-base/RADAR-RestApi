@@ -21,10 +21,12 @@ import java.net.ConnectException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
@@ -109,7 +111,13 @@ public class SensorDataAccessObject {
             TimeFrame timeFrame, SensorType sensorType, ServletContext context)
             throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
+
         SourceType sourceType = SourceDataAccessObject.getSourceType(source, client);
+
+        if (sourceType == null) {
+            return new Dataset(null, new LinkedList<Item>());
+        }
+
         Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
 
         Header header = new Header(user, source, sourceType, sensorType, stat, unit,
@@ -141,6 +149,11 @@ public class SensorDataAccessObject {
         MongoClient client = MongoHelper.getClient(context);
 
         SourceType sourceType = SourceDataAccessObject.getSourceType(source, client);
+
+        if (sourceType == null) {
+            return new Dataset(null, new LinkedList<Item>());
+        }
+
         Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
 
         Header header = new Header(user, source, sourceType, sensorType, stat, unit,
@@ -175,6 +188,11 @@ public class SensorDataAccessObject {
         MongoClient client = MongoHelper.getClient(context);
 
         SourceType sourceType = SourceDataAccessObject.getSourceType(source, client);
+
+        if (sourceType == null) {
+            return new Dataset(null, new LinkedList<Item>());
+        }
+
         Unit unit = SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
 
         Header header = new Header(user, source, sourceType, sensorType, stat, unit,

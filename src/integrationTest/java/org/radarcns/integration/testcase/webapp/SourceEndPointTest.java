@@ -6,6 +6,8 @@ import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
 import static org.radarcns.avro.restapi.source.SourceType.BIOVOTION;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.webapp.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.Parameter.SUBJECT_ID;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -68,9 +70,9 @@ public class SourceEndPointTest {
 
     @Test
     public void getStatusTest204() throws IOException {
-        String path = "source/avro/state/{userID}/{sourceID}";
-        path = path.replace("{userID}", USER);
-        path = path.replace("{sourceID}", SOURCE);
+        String path = "source/avro/state/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+        path = path.replace("{" + SUBJECT_ID + "}", USER);
+        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
         LOGGER.info(path);
 
@@ -86,9 +88,9 @@ public class SourceEndPointTest {
 
         MongoDataAccess.writeSourceType(SOURCE, SOURCE_TYPE, client);
 
-        String path = "source/avro/state/{userID}/{sourceID}";
-        path = path.replace("{userID}", USER);
-        path = path.replace("{sourceID}", SOURCE);
+        String path = "source/avro/state/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+        path = path.replace("{" + SUBJECT_ID + "}", USER);
+        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
         LOGGER.info(path);
 
@@ -133,8 +135,8 @@ public class SourceEndPointTest {
 
     @Test
     public void getSpecificationTest500() throws IOException {
-        String path = "source/avro/specification/{sourceType}";
-        path = path.replace("{sourceType}", BIOVOTION.toString());
+        String path = "source/avro/specification/{" + SOURCE_TYPE + "}";
+        path = path.replace("{" + SOURCE_TYPE + "}", BIOVOTION.toString());
 
         LOGGER.info(path);
 
@@ -144,8 +146,8 @@ public class SourceEndPointTest {
 
     @Test
     public void getSpecificationTest200() throws IOException {
-        String path = "source/avro/specification/{sourceType}";
-        path = path.replace("{sourceType}", EMPATICA.toString());
+        String path = "source/avro/specification/{" + SOURCE_TYPE + "}";
+        path = path.replace("{" + SOURCE_TYPE + "}", EMPATICA.toString());
 
         LOGGER.info(path);
 
@@ -177,8 +179,8 @@ public class SourceEndPointTest {
     @Test
     public void getAllSourcesTest()
         throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = "source/avro/getAllSources/{userID}";
-        path = path.replace("{userID}", USER);
+        String path = "source/avro/getAllSources/{" + SUBJECT_ID + "}";
+        path = path.replace("{" + SUBJECT_ID + "}", USER);
 
         LOGGER.info(path);
 

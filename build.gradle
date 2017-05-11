@@ -31,6 +31,7 @@ ext.okhttpVersion = '3.5.0'
 ext.okioVersion = '1.11.0'
 ext.openCsvVersion = '3.9'
 ext.radarCommon = '0.3-SNAPSHOT'
+ext.radarStream = '0.1-alpha.3-SNAPSHOT'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.swaggerParserVersion='1.0.24'
@@ -85,6 +86,7 @@ dependencies {
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
   integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
+  integrationTestCompile group: 'org.radarcns' , name: 'radar-backend' , version: radarStream
 
 //  testCompile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
   testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
@@ -245,8 +247,6 @@ task endToEndTest(type: Test) {
       events "started", "skipped", "failed"
       exceptionFormat "full"
     }
-
-    //info.events = ["failed", "skipped"]
   }
 
   testLogging.showStandardStreams = true

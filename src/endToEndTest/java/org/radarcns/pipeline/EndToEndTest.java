@@ -18,14 +18,20 @@ package org.radarcns.pipeline;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.checkFrontEndConfig;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
+import static org.radarcns.webapp.Parameter.INTERVAL;
+import static org.radarcns.webapp.Parameter.SENSOR;
+import static org.radarcns.webapp.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.Parameter.STAT;
+import static org.radarcns.webapp.Parameter.SUBJECT_ID;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -157,7 +163,7 @@ public class EndToEndTest {
 
             Response response = null;
             try {
-                response = Utility.makeRequest(
+                response = Utility.makeUnsafeRequest(
                         getPipelineConfig().getRestProxy().getUrlString() + "topics");
                 if (response.code() == 200) {
                     String topics = response.body().string().toString();
@@ -175,6 +181,10 @@ public class EndToEndTest {
                     }
                 }
             } catch (IOException exec) {
+                LOGGER.info("Error while waiting infrastructure", exec);
+            } catch (NoSuchAlgorithmException exec) {
+                LOGGER.info("Error while waiting infrastructure", exec);
+            } catch (KeyManagementException exec) {
                 LOGGER.info("Error while waiting infrastructure", exec);
             }
 
@@ -282,27 +292,30 @@ public class EndToEndTest {
     /**
      * Queries the REST-API for each statistical function and for each data.
      */
-    private void fetchRestApi() throws IOException {
+    private void fetchRestApi() throws IOException, KeyManagementException,
+            NoSuchAlgorithmException {
         LOGGER.info("Fetching APIs ...");
 
         String server = getPipelineConfig().getRestApi().getUrlString();
-        String path = server + "data/avro/{data}/{stat}/{interval}/{userID}/{sourceID}";
-        path = path.replace("{userID}", CsvSensorDataModel.USER_ID_MOCK);
-        path = path.replace("{sourceID}", CsvSensorDataModel.SOURCE_ID_MOCK);
+        String path = server + "data/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+                + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+        path = path.replace("{" + SUBJECT_ID + "}", CsvSensorDataModel.USER_ID_MOCK);
+        path = path.replace("{" + SOURCE_ID + "}", CsvSensorDataModel.SOURCE_ID_MOCK);
 
-        path = path.replace("{interval}", TimeFrame.TEN_SECOND.name());
+        path = path.replace("{" + INTERVAL + "}", TimeFrame.TEN_SECOND.name());
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
-            String pathStat = path.replace("{stat}", stat.name());
+            String pathStat = path.replace("{" + STAT + "}", stat.name());
 
             Map<MockDataConfig, Dataset> datasets = expectedDataset.get(stat);
 
             for (MockDataConfig config : datasets.keySet()) {
-                String pathSensor = pathStat.replace("{data}", getSensorType(config).name());
+                String pathSensor = pathStat.replace("{" + SENSOR + "}",
+                        getSensorType(config).name());
 
                 LOGGER.info("Requesting {}", pathSensor);
 
-                Response response = Utility.makeRequest(pathSensor);
+                Response response = Utility.makeUnsafeRequest(pathSensor);
                 assertEquals(200, response.code());
 
                 Dataset actual = null;
@@ -473,7 +486,8 @@ public class EndToEndTest {
      * @throws IOException either if the used URL is malformed or the response containing the
      *      downloaded file cannot be parsed.
      */
-    private static void checkFrontendConfig() throws IOException {
+    private static void checkFrontendConfig()
+            throws IOException, NoSuchAlgorithmException, KeyManagementException {
         LOGGER.info("Checking Frontend config ...");
 
         URL url = new URL(
@@ -488,5 +502,15 @@ public class EndToEndTest {
                 EndToEndTest.class.getClassLoader().getResource(CONFIG_JSON).getFile());
 
         assertEquals(expected, actual);
+    }
+
+    /** Retrieves the exposed Frontedn config file. **/
+    public static String checkFrontEndConfig(URL url)
+            throws IOException, KeyManagementException, NoSuchAlgorithmException {
+        Response response = Utility.makeUnsafeRequest(new URL(url, CONFIG_JSON).toString());
+
+        assertEquals(200, response.code());
+
+        return response.body().string();
     }
 }

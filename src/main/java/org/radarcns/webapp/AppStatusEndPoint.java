@@ -16,6 +16,9 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+import static org.radarcns.webapp.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.Parameter.SUBJECT_ID;
+
 import com.mongodb.MongoClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -59,7 +62,7 @@ public class AppStatusEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/status/{patientID}/{sourceID}")
+    @Path("/status/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")
@@ -70,13 +73,12 @@ public class AppStatusEndPoint {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
                 + "received status")})
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Response getRTStatByUserDeviceJsonAppStatus(
-            @PathParam("patientID") String user,
-            @PathParam("sourceID") String source) {
+    public Response getRtStatByUserDeviceJsonAppStatus(
+            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getRTStatByUserDeviceWorker(user, source));
+                getRtStatByUserDeviceWorker(user, source));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -89,7 +91,7 @@ public class AppStatusEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/status/{patientID}/{sourceID}")
+    @Path("/avro/status/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")
@@ -98,13 +100,12 @@ public class AppStatusEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
                 + "received status")})
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Response getRTStatByUserDeviceAvroAppStatus(
-            @PathParam("patientID") String user,
-            @PathParam("sourceID") String source) {
+    public Response getRtStatByUserDeviceAvroAppStatus(
+            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRTStatByUserDeviceWorker(user, source));
+                getRtStatByUserDeviceWorker(user, source));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -114,7 +115,7 @@ public class AppStatusEndPoint {
     /**
      * Actual implementation of AVRO and JSON getRealTimeUser.
      **/
-    private Application getRTStatByUserDeviceWorker(String user, String source)
+    private Application getRtStatByUserDeviceWorker(String user, String source)
             throws ConnectException {
         Param.isValidInput(user, source);
 
