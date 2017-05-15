@@ -262,18 +262,27 @@ task setRadarEnvironmentForDocker {
     volumes.mkdir()
 
     def src = new File(envPath)
-    def fileEnv = new File(envPath + "tmp")
+    def fileEnv = new File(envPath + 'tmp')
     fileEnv << src.text
     fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumes.getAbsolutePath())
     fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
     fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
     fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
-    fileEnv.renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
+    fileEnv.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env')
 
     src = new File(smtpPath)
-    def fileSmtp = new File(smtpPath + "tmp")
+    def fileSmtp = new File(smtpPath + 'tmp')
     fileSmtp << src.text
-    fileSmtp.renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env")
+    fileSmtp.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env')
+  }
+}
+
+//Useful for Travis for running the correct version of docker-compose
+task setDockerCompose {
+  doLast {
+    def installScriptPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh'
+    def installScript = new File(installScriptPath)
+    installScript.text = installScript.text.replace('docker-compose', '$HOME/bin/docker-compose')
   }
 }
 
