@@ -313,9 +313,10 @@ public class EndToEndTest {
                 String pathSensor = pathStat.replace("{" + SENSOR + "}",
                         getSensorType(config).name());
 
-                LOGGER.info("Requesting {}", pathSensor);
-
                 Response response = Utility.makeUnsafeRequest(pathSensor);
+
+                LOGGER.info("[{}] Requesting {}", response.code(), pathSensor);
+
                 assertEquals(200, response.code());
 
                 Dataset actual = null;
