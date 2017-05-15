@@ -25,13 +25,13 @@ public class PipelineConfig extends BasicMockConfig {
     @JsonProperty("rest_api")
     private ServerConfig restApi;
 
-    private Long duration;
+    private long duration;
 
-    public Long getDuration() {
+    public long getDuration() {
         return duration;
     }
 
-    public void setDuration(Long duration) {
+    public void setDuration(long duration) {
         this.duration = duration;
     }
 
