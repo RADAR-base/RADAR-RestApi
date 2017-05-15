@@ -39,11 +39,11 @@ import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.integration.aggregator.DoubleArrayCollector;
+import org.radarcns.integration.aggregator.DoubleValueCollector;
 import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.model.ExpectedValue.StatType;
 import org.radarcns.source.SourceCatalog;
-import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -253,7 +253,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             case QUARTILES:
                 content = sampleClass.newInstance();
                 content.put(content.getSchema().getField("value").pos(),
-                        getQuartile((List<Double>) object));
+                    getQuartile((List<Double>) object));
                 break;
             default:
                 content = sampleClass.newInstance();

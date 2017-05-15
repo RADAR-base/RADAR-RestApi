@@ -33,11 +33,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.bson.Document;
+import org.radarcns.integration.aggregator.DoubleArrayCollector;
+import org.radarcns.integration.aggregator.DoubleValueCollector;
 import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.model.ExpectedValue.StatType;
-
-import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.stream.collector.DoubleValueCollector;
 
 /**
  * It computes the expected Documents for a test case i.e. {@link ExpectedValue}.
@@ -55,23 +54,45 @@ public class ExpectedDocumentFactory {
     public List<? extends Object> getStatValue(StatType statistic,
             DoubleArrayCollector collectors) {
 
+        int len = collectors.getCollectors().length;
+
+        List<Double> avgList = new ArrayList<>(len);
+        List<Double> countList = new ArrayList<>(len);
+        List<Double> iqrList = new ArrayList<>(len);
+        List<Double> maxList = new ArrayList<>(len);
+        List<Double> medList = new ArrayList<>(len);
+        List<Double> minList = new ArrayList<>(len);
+        List<Double> sumList = new ArrayList<>(len);
+        List<List<Double>> quartileList = new ArrayList<>(len);
+
+        for (DoubleValueCollector collector : collectors.getCollectors()) {
+            minList.add((Double) getStatValue(MINIMUM, collector));
+            maxList.add((Double) getStatValue(MAXIMUM, collector));
+            sumList.add((Double) getStatValue(SUM, collector));
+            countList.add((Double) getStatValue(COUNT, collector));
+            avgList.add((Double) getStatValue(AVERAGE, collector));
+            iqrList.add((Double) getStatValue(INTERQUARTILE_RANGE, collector));
+            quartileList.add((List<Double>) getStatValue(QUARTILES, collector));
+            medList.add((Double) getStatValue(MEDIAN, collector));
+        }
+
         switch (statistic) {
             case AVERAGE:
-                return collectors.convertToAvro().getAvg();
+                return avgList;
             case COUNT:
-                return collectors.convertToAvro().getCount();
+                return countList;
             case INTERQUARTILE_RANGE:
-                return collectors.convertToAvro().getIqr();
+                return iqrList;
             case MAXIMUM:
-                return collectors.convertToAvro().getMax();
+                return maxList;
             case MEDIAN:
-                return collectors.convertToAvro().getQuartile().get(1);
+                return medList;
             case MINIMUM:
-                return collectors.convertToAvro().getMin();
+                return minList;
             case QUARTILES:
-                return collectors.convertToAvro().getQuartile();
+                return quartileList;
             case SUM:
-                return collectors.convertToAvro().getSum();
+                return sumList;
             default:
                 throw new IllegalArgumentException(
                         statistic.toString() + " is not supported");
@@ -99,11 +120,15 @@ public class ExpectedDocumentFactory {
             case MAXIMUM:
                 return collector.getMax();
             case MEDIAN:
-                return collector.getQuartile().get(1);
+                return collector.getQuartile()[1];
             case MINIMUM:
                 return collector.getMin();
             case QUARTILES:
-                return collector.getQuartile();
+                List<Double> temp = new ArrayList<>();
+                for (int i=0; i<collector.getQuartile().length; i++) {
+                    temp.add(collector.getQuartile()[i]);
+                }
+                return temp;
             case SUM:
                 return collector.getSum();
             default:
