@@ -125,7 +125,7 @@ public class ExpectedDocumentFactory {
                 return collector.getMin();
             case QUARTILES:
                 List<Double> temp = new ArrayList<>();
-                for (int i=0; i<collector.getQuartile().length; i++) {
+                for (int i = 0; i < collector.getQuartile().length; i++) {
                     temp.add(collector.getQuartile()[i]);
                 }
                 return temp;

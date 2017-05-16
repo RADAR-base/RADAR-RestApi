@@ -253,7 +253,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             case QUARTILES:
                 content = sampleClass.newInstance();
                 content.put(content.getSchema().getField("value").pos(),
-                    getQuartile((List<Double>) object));
+                        getQuartile((List<Double>) object));
                 break;
             default:
                 content = sampleClass.newInstance();

@@ -18,6 +18,7 @@ package org.radarcns.pipeline;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.checkFrontEndConfig;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
 import static org.radarcns.webapp.Parameter.INTERVAL;
 import static org.radarcns.webapp.Parameter.SENSOR;
@@ -284,7 +285,6 @@ public class EndToEndTest {
     private void streamToKafka() throws IOException, InterruptedException {
         LOGGER.info("Streaming data into Kafka ...");
         MockProducer producer = new MockProducer(getPipelineConfig());
-        LOGGER.info("Streaming data into Kafka ...");
         producer.start();
         producer.shutdown();
     }
@@ -468,16 +468,13 @@ public class EndToEndTest {
      *
      * @throws MalformedURLException if the used URL is malformed
      */
-    private static void checkSwaggerConfig() throws MalformedURLException {
+    private static void checkSwaggerConfig()
+        throws IOException, NoSuchAlgorithmException, KeyManagementException {
         LOGGER.info("Checking Swagger ...");
 
-        URL url = new URL(
-                config.getRestApi().getProtocol(),
-                config.getRestApi().getHost(),
-                80,
-                config.getRestApi().getPath());
-
-        assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(url));
+        assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(
+                getPipelineConfig().getRestApi().getUrl(),
+                getPipelineConfig().getRestApi().isUnsafe()));
     }
 
     /**
@@ -494,24 +491,14 @@ public class EndToEndTest {
         URL url = new URL(
                 config.getRestApi().getProtocol(),
                 config.getRestApi().getHost(),
-                80,
+                config.getRestApi().getPort(),
                 "/frontend/config/");
 
-        String actual = checkFrontEndConfig(url);
+        String actual = checkFrontEndConfig(url, getPipelineConfig().getRestApi().isUnsafe());
 
         String expected = Utility.fileToString(
                 EndToEndTest.class.getClassLoader().getResource(CONFIG_JSON).getFile());
 
         assertEquals(expected, actual);
-    }
-
-    /** Retrieves the exposed Frontedn config file. **/
-    public static String checkFrontEndConfig(URL url)
-            throws IOException, KeyManagementException, NoSuchAlgorithmException {
-        Response response = Utility.makeUnsafeRequest(new URL(url, CONFIG_JSON).toString());
-
-        assertEquals(200, response.code());
-
-        return response.body().string();
     }
 }

@@ -77,7 +77,6 @@ dependencies {
   compile group: 'org.json', name: 'json', version: json
   compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
-//  compile group: 'ch.qos.logback', name: 'logback-classic', version: logback
   compile group: 'org.apache.avro', name: 'avro', version: avro
   compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: jackson
   compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
@@ -86,8 +85,7 @@ dependencies {
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
-  integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
-
+  testCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
   testCompile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasCommon
   testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
@@ -255,10 +253,11 @@ task endToEndTest(type: Test) {
 //Useful for E2E tests
 task setRadarEnvironmentForDocker {
   doLast {
-    def envPath = "src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/env.template"
-    def smtpPath = "src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env.template"
+    def envPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/env.template'
+    def smtpPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env.template'
+    def streamPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/'
 
-    File volumes = new File("src/endToEndTest/dockerRadar/volumes")
+    File volumes = new File('src/endToEndTest/dockerRadar/volumes')
     volumes.mkdir()
 
     def src = new File(envPath)
@@ -274,6 +273,11 @@ task setRadarEnvironmentForDocker {
     def fileSmtp = new File(smtpPath + 'tmp')
     fileSmtp << src.text
     fileSmtp.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env')
+
+    src = new File(streamPath + 'radar.yml.template')
+    def fileStream = new File(streamPath + 'radar.yml.template' + 'tmp')
+    fileStream << src.text
+    fileStream.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/' + 'radar.yml')
   }
 }
 
