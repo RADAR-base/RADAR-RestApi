@@ -51,8 +51,7 @@ public class ExpectedDocumentFactory {
      * @return the set of values that has to be stored within a {@code Dataset} {@code Item}
      * @see DoubleValueCollector
      **/
-    public List<?> getStatValue(StatType statistic,
-            DoubleArrayCollector collectors) {
+    public List<?> getStatValue(StatType statistic, DoubleArrayCollector collectors) {
 
         List<DoubleValueCollector> subCollectors = collectors.getCollectors();
         List<Object> subList = new ArrayList<>(subCollectors.size());
@@ -70,8 +69,7 @@ public class ExpectedDocumentFactory {
      * @return the value that has to be stored within a {@code Dataset} {@code Item}
      * @see DoubleValueCollector
      **/
-    public Object getStatValue(StatType statistic,
-            DoubleValueCollector collector) {
+    public Object getStatValue(StatType statistic, DoubleValueCollector collector) {
 
         switch (statistic) {
             case AVERAGE:
@@ -98,17 +96,17 @@ public class ExpectedDocumentFactory {
 
 
     private List<Document> getDocumentsBySingle(ExpectedValue<?> expectedValue) {
-        LinkedList<Document> list = new LinkedList<>();
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
 
-        DoubleValueCollector doubleValueCollector;
-        Long end;
-        for (Long timestamp : windows) {
-            doubleValueCollector = (DoubleValueCollector) expectedValue.getSeries().get(timestamp);
+        List<Document> list = new ArrayList<>(windows.size());
 
-            end = timestamp + DURATION;
+        for (Long timestamp : windows) {
+            DoubleValueCollector doubleValueCollector = (DoubleValueCollector) expectedValue
+                    .getSeries().get(timestamp);
+
+            long end = timestamp + DURATION;
 
             list.add(new Document("_id",
                     expectedValue.getKey().getUserId() + "-" + expectedValue.getKey().getSourceId()
@@ -131,17 +129,17 @@ public class ExpectedDocumentFactory {
     }
 
     private List<Document> getDocumentsByArray(ExpectedValue<?> expectedValue) {
-        LinkedList<Document> list = new LinkedList<>();
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
 
-        DoubleArrayCollector doubleArrayCollector;
-        Long end;
-        for (Long timestamp : windows) {
-            doubleArrayCollector = (DoubleArrayCollector) expectedValue.getSeries().get(timestamp);
+        List<Document> list = new ArrayList<>(windows.size());
 
-            end = timestamp + DURATION;
+        for (Long timestamp : windows) {
+            DoubleArrayCollector doubleArrayCollector = (DoubleArrayCollector) expectedValue
+                    .getSeries().get(timestamp);
+
+            long end = timestamp + DURATION;
 
             list.add(new Document("_id",
                     expectedValue.getKey().getUserId() + "-" + expectedValue.getKey().getSourceId()
