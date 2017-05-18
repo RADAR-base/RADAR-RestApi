@@ -42,7 +42,7 @@ public class ResponseHandler {
      * @param request HTTP request that has to be served
      * @param dataset request result
      * @return the response content formatted in JSON
-     * @see {@link org.radarcns.avro.restapi.dataset.Dataset}
+     * @see Dataset
      **/
     public static Response getJsonResponse(HttpServletRequest request, Dataset dataset)
             throws IOException {

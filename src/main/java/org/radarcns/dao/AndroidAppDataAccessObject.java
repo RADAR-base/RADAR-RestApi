@@ -118,7 +118,7 @@ public class AndroidAppDataAccessObject {
      *
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link org.radarcns.avro.restapi.source.SourceType}
+     * @see SourceType
      */
     public SourceType findSourceType(String source, MongoClient client) throws ConnectException {
         SourceType type = null;

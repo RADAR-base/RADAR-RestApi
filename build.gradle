@@ -12,8 +12,8 @@ war {
   archiveName = 'radar.war'
 }
 
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
+targetCompatibility = '1.8'
+sourceCompatibility = '1.8'
 
 ext.avro='1.7.7'
 ext.codacyVersion = '1.0.10'
@@ -30,7 +30,7 @@ ext.mongodb='3.3.0'
 ext.okhttpVersion = '3.5.0'
 ext.okioVersion = '1.11.0'
 ext.openCsvVersion = '3.9'
-ext.radarCommon = '0.3-SNAPSHOT'
+ext.radarCommon = '0.3'
 ext.radarStream = '0.1-alpha.3-SNAPSHOT'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
@@ -360,5 +360,5 @@ idea {
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '3.0'
+  gradleVersion = '3.4.1'
 }

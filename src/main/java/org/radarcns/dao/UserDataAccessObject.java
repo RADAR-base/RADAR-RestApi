@@ -40,7 +40,7 @@ public class UserDataAccessObject {
      * @return a study {@code Cohort}
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link org.radarcns.avro.restapi.user.Cohort}
+     * @see Cohort
      */
     public static Cohort findAllUsers(MongoClient client) throws ConnectException {
 

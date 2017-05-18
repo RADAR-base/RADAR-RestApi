@@ -47,8 +47,6 @@ public class AvroConverter {
      *
      * @param record is the record to encode
      * @return the JSON object representing this Avro object.
-     *
-     * @throws IOException if there is an error.
      */
     public static JsonNode avroToJsonNode(SpecificRecord record) {
         try {
@@ -62,46 +60,6 @@ public class AvroConverter {
     }
 
     /**
-     * Returns an encoded JSON object for the given Avro object.
-     *
-     * @param record is the record to encode
-     * @param sensor name used to fix the json field name
-     * @return the JSON object representing this Avro object.
-     *
-     * @throws IOException if there is an error.
-     */
-    public static JsonNode avroToJsonNode(SpecificRecord record, String sensor) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode dataset = mapper.readTree(record.toString());
-
-        setSensorName(dataset, sensor);
-
-        return dataset;
-    }
-
-    /**
-     * Returns an encoded JSON object for the given Avro object. The automatic item names are
-     * replaced with the input String.
-     *
-     * @param node object serialised in JSON
-     * @param sensor name that has to be replaced
-     * @return the JSON object representing this Avro object
-     */
-    private static void setSensorName(JsonNode node, String sensor) {
-        if (node.has("dataset")) {
-            JsonNode dataset = node.get("dataset");
-
-            Iterator<JsonNode> it = dataset.elements();
-            while (it.hasNext()) {
-                JsonNode son = it.next();
-
-                ((ObjectNode) son).set(sensor,son.get("value"));
-                ((ObjectNode) son).remove("value");
-            }
-        }
-    }
-
-    /**
      * Returns a byte array version of the given record.
      *
      * @param record is the record to encode
@@ -109,7 +67,7 @@ public class AvroConverter {
      *
      * @throws IOException due to {@code DatumWriter}
      *
-     * @see {@link org.apache.avro.io.DatumWriter}
+     * @see DatumWriter
      */
     public static <K extends SpecificRecord> byte[] avroToAvroByte(K record) throws IOException {
         DatumWriter<K> writer = new SpecificDatumWriter<>(record.getSchema());
@@ -131,7 +89,7 @@ public class AvroConverter {
      *
      * @throws IOException due to {@code DatumReader}
      *
-     * @see {@link org.apache.avro.io.DatumReader}
+     * @see DatumReader
      */
     public static <K extends SpecificRecord> K avroByteToAvro(byte[] input, Schema schema)
             throws IOException {

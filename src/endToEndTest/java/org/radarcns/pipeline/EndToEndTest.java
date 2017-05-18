@@ -33,6 +33,7 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -62,6 +63,7 @@ import org.radarcns.mock.MockDataConfig;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.pipeline.config.PipelineConfig;
 import org.radarcns.pipeline.data.CsvValidator;
+import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,7 +133,7 @@ public class EndToEndTest {
     /**
      * Checks if the test bed is ready to accept data.
      */
-    private void waitInfrastructure() throws InterruptedException {
+    private void waitInfrastructure() throws InterruptedException, MalformedURLException {
         LOGGER.info("Waiting infrastructure ... ");
 
         List<String> expectedTopics = new LinkedList<>();
@@ -156,42 +158,29 @@ public class EndToEndTest {
 
         int retry = 60;
         long sleep = 1000;
-        int count = 0;
 
+        RestClient client = new RestClient(getPipelineConfig().getRestProxy());
         for (int i = 0; i < retry; i++) {
-            count = 0;
-
-            Response response = null;
-            try {
-                response = Utility.makeUnsafeRequest(
-                        getPipelineConfig().getRestProxy().getUrlString() + "topics");
+            try (Response response = client.request("topics")){
                 if (response.code() == 200) {
-                    String topics = response.body().string().toString();
+                    String topics = response.body().string();
                     String[] topicArray = topics.substring(1, topics.length() - 1).replace(
                                 "\"", "").split(",");
 
-                    for (String topic : topicArray) {
-                        if (expectedTopics.contains(topic)) {
-                            count++;
-                        }
-                    }
+                    expectedTopics.removeAll(Arrays.asList(topicArray));
 
-                    if (count == expectedTopics.size()) {
+                    if (expectedTopics.isEmpty()) {
                         break;
                     }
                 }
-            } catch (IOException exec) {
-                LOGGER.info("Error while waiting infrastructure", exec);
-            } catch (NoSuchAlgorithmException exec) {
-                LOGGER.info("Error while waiting infrastructure", exec);
-            } catch (KeyManagementException exec) {
-                LOGGER.info("Error while waiting infrastructure", exec);
+            } catch (IOException ex) {
+                LOGGER.info("Error while waiting infrastructure", ex);
             }
 
             Thread.sleep(sleep * (i + 1));
         }
 
-        assertEquals(expectedTopics.size(), count);
+        assertEquals("missing " + expectedTopics, 0, expectedTopics.size());
     }
 
     /**
@@ -200,9 +189,9 @@ public class EndToEndTest {
     private void produceInputFile()
             throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, ParseException, IllegalAccessException {
-        LOGGER.info("Generating CVS files ...");
+        LOGGER.info("Generating CSV files ...");
         for (MockDataConfig config : getPipelineConfig().getData()) {
-            CsvGenerator.generate(config, getPipelineConfig().getDuration(), BaseFile.file);
+            new CsvGenerator().generate(config, getPipelineConfig().getDuration(), BaseFile.file);
             CsvValidator.validate(config, getPipelineConfig().getDuration());
         }
     }
@@ -211,28 +200,28 @@ public class EndToEndTest {
      * Starting from the expected values computed using the available CSV files, it computes all
      * the expected Datasets used to test REST-API.
      *
-     * @see {@link ExpectedValue}
+     * @see ExpectedValue
      */
     private void produceExpectedDataset(Map<MockDataConfig, ExpectedValue> expectedValue)
             throws Exception {
         LOGGER.info("Computing expected dataset ...");
-        int tastCase = getPipelineConfig().getData().size();
+        int size = getPipelineConfig().getData().size();
 
-        assertEquals(tastCase, expectedValue.size());
+        assertEquals(size, expectedValue.size());
 
         expectedDataset = computeExpectedDataset(expectedValue);
 
         assertEquals(DescriptiveStatistic.values().length - 2, expectedDataset.size());
 
         for (Map<MockDataConfig, Dataset> datasets : expectedDataset.values()) {
-            assertEquals(tastCase, datasets.size());
+            assertEquals(size, datasets.size());
         }
     }
 
     /**
      * This is the actual generator of Datasets exploited by {@link #produceExpectedDataset(Map)}.
      *
-     * @see {@link ExpectedValue}
+     * @see ExpectedValue
      */
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> computeExpectedDataset(
             Map<MockDataConfig, ExpectedValue> expectedValue) throws Exception {
@@ -245,7 +234,7 @@ public class EndToEndTest {
                 continue;
             }
 
-            datasets.put(stat, getExpecetedDataset(expectedValue, stat));
+            datasets.put(stat, getExpectedDataset(expectedValue, stat));
         }
 
         return datasets;
@@ -260,9 +249,9 @@ public class EndToEndTest {
      * ExpectedValue} containing all expected values
      * @param stat statistical value that has be tested
      * @return {@code Map} of key {@code MockDataConfig} and value {@code Dataset}.
-     * @see {@link ExpectedValue}.
+     * @see ExpectedValue
      **/
-    public static Map<MockDataConfig, Dataset> getExpecetedDataset(
+    public static Map<MockDataConfig, Dataset> getExpectedDataset(
             Map<MockDataConfig, ExpectedValue> expectedValue, DescriptiveStatistic stat)
             throws ClassNotFoundException, NoSuchMethodException, IOException,
             IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -296,13 +285,14 @@ public class EndToEndTest {
             NoSuchAlgorithmException {
         LOGGER.info("Fetching APIs ...");
 
-        String server = getPipelineConfig().getRestApi().getUrlString();
-        String path = server + "data/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+        String path = "data/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", CsvSensorDataModel.USER_ID_MOCK);
         path = path.replace("{" + SOURCE_ID + "}", CsvSensorDataModel.SOURCE_ID_MOCK);
 
         path = path.replace("{" + INTERVAL + "}", TimeFrame.TEN_SECOND.name());
+
+        RestClient client = new RestClient(getPipelineConfig().getRestApi());
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
             String pathStat = path.replace("{" + STAT + "}", stat.name());
@@ -315,20 +305,20 @@ public class EndToEndTest {
 
                 LOGGER.info("Requesting {}", pathSensor);
 
-                Response response = Utility.makeUnsafeRequest(pathSensor);
-                assertEquals(200, response.code());
+                try (Response response = client.request(pathSensor)) {
+                    assertEquals(200, response.code());
 
-                Dataset actual = null;
+                    Dataset actual = null;
 
-                if (response.code() == 200) {
-                    actual = AvroConverter.avroByteToAvro(response.body().bytes(),
-                            Dataset.getClassSchema());
+                    if (response.code() == 200) {
+                        actual = AvroConverter.avroByteToAvro(response.body().bytes(),
+                                Dataset.getClassSchema());
+                    }
+
+                    assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
+                            getDelta(config));
                 }
-
-                assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
-                        getDelta(config));
             }
-
         }
     }
 
@@ -336,7 +326,7 @@ public class EndToEndTest {
      * Checks if the two given datasets are equals. Double values are compared using a constant
      * representing the maximum delta for which both numbers are still considered equal.
      *
-     * @see {@link Dataset}
+     * @see Dataset
      */
     private void assertDatasetEquals(SensorType sensorType, Dataset expected, Dataset actual,
             double delta) {
@@ -370,14 +360,14 @@ public class EndToEndTest {
     }
 
     private double getDelta(MockDataConfig config) {
-        return config.getMagnitude() == 0 ? 0.0 : Math.pow(10.0, -1.0 * config.getMagnitude());
+        return config.getMaximumDifference();
     }
 
     /**
      * Checks if the two given list of Item are equals. Double values are compared using a constant
      * representing the maximum delta for which both numbers are still considered equal.
      *
-     * @see {@link Item}
+     * @see Item
      */
     private void compareSingletonItem(DescriptiveStatistic stat, SpecificRecord expectedRecord,
             SpecificRecord actualRecord, double delta) {
@@ -400,8 +390,8 @@ public class EndToEndTest {
      * are compared using a constant representing the maximum delta for which both numbers are
      * still considered equal.
      *
-     * @see {@link Item}
-     * @see {@link Acceleration}
+     * @see Item
+     * @see Acceleration
      */
     private void compareAccelerationItem(DescriptiveStatistic stat, Acceleration expectedRecord,
             Acceleration actualRecord, double delta) {
@@ -430,8 +420,8 @@ public class EndToEndTest {
      * compared using a constant representing the maximum delta for which both numbers are
      * still considered equal.
      *
-     * @see {@link Item}
-     * @see {@link Quartiles}
+     * @see Item
+     * @see Quartiles
      */
     private void compareQuartiles(Quartiles expectedQuartiles, Quartiles actualQuartiles,
             double delta) {
@@ -453,7 +443,6 @@ public class EndToEndTest {
             return SensorType.BATTERY;
         }
         for (SensorType type : SensorType.values()) {
-
             if (type.name().equalsIgnoreCase(config.getSensor())) {
                 return type;
             }
@@ -490,27 +479,13 @@ public class EndToEndTest {
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
         LOGGER.info("Checking Frontend config ...");
 
-        URL url = new URL(
-                config.getRestApi().getProtocol(),
-                config.getRestApi().getHost(),
-                80,
-                "/frontend/config/");
+        String expected = Utility.readAll(
+                EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
 
-        String actual = checkFrontEndConfig(url);
+        RestClient client = new RestClient(config.getRestApi());
 
-        String expected = Utility.fileToString(
-                EndToEndTest.class.getClassLoader().getResource(CONFIG_JSON).getFile());
-
-        assertEquals(expected, actual);
-    }
-
-    /** Retrieves the exposed Frontedn config file. **/
-    public static String checkFrontEndConfig(URL url)
-            throws IOException, KeyManagementException, NoSuchAlgorithmException {
-        Response response = Utility.makeUnsafeRequest(new URL(url, CONFIG_JSON).toString());
-
-        assertEquals(200, response.code());
-
-        return response.body().string();
+        try (Response response = client.request("frontend/config/")) {
+            assertEquals(expected, response.body().string());
+        }
     }
 }

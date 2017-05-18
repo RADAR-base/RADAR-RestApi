@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -179,30 +180,6 @@ public class Utility {
     }
 
     /**
-     * Makes an HTTP request to given URL without validating the SSL certificate.
-     *
-     * @param url end-point
-     *
-     * @return HTTP Response
-     * @throws IOException if the request could not be executed
-     */
-    public static Response makeUnsafeRequest(String url)
-        throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        OkHttpClient client = RestClient.getUnsafeBuilder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build();
-
-        Request request = new Request.Builder()
-                .header("User-Agent", "Mozilla/5.0")
-                .url(url)
-                .build();
-
-        return client.newCall(request).execute();
-    }
-
-    /**
      * Converts Bson Document into an Application.
      * @param documents map containing variables to create the Application class
      * @return an Application class
@@ -233,38 +210,17 @@ public class Utility {
     }
 
     /**
-     * Returns a logger for the given class.
-     * @param obj class for which the logger is required
-     * @return a Logger
-     */
-    public static Logger getLogger(Object obj) {
-        return LoggerFactory.getLogger(obj.getClass());
-    }
-
-    /**
-     * Converts file content to java String.
-     * @param path location of the file to convert
+     * Converts add data in an InputStream to a String.
+     * @param in inputstream
      * @return a String representing the file content
      */
-    public static String fileToString(String path) throws IOException {
-        File file = new File(path);
-        if (!file.exists() || file.isDirectory()) {
-            throw new FileNotFoundException(path + " is not a valid file");
+    public static String readAll(InputStream in) throws IOException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = in.read(buffer)) != -1) {
+            result.write(buffer, 0, length);
         }
-
-        byte [] buffer = new byte[4096];
-        ByteArrayOutputStream outs = new ByteArrayOutputStream();
-        InputStream ins = new FileInputStream(file);
-
-        int read = 0;
-        while ((read = ins.read(buffer)) != -1 ) {
-            outs.write(buffer, 0, read);
-        }
-
-        ins.close();
-        outs.close();
-        byte [] fileBytes = outs.toByteArray();
-
-        return new String(fileBytes);
+        return result.toString("UTF-8");
     }
 }

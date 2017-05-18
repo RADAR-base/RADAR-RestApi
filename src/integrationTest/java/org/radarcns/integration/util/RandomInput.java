@@ -35,6 +35,7 @@ import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.integration.model.ExpectedArrayValue;
 import org.radarcns.integration.model.ExpectedDoubleValue;
+import org.radarcns.key.MeasurementKey;
 
 /**
  * All supported sources specifications.
@@ -56,7 +57,7 @@ public class RandomInput {
             SensorType sensorType, DescriptiveStatistic stat, TimeFrame timeFrame,
             int samples, boolean singleWindow) throws InstantiationException,
             IllegalAccessException {
-        ExpectedDoubleValue instance = new ExpectedDoubleValue(user, source);
+        ExpectedDoubleValue instance = new ExpectedDoubleValue(new MeasurementKey(user, source));
 
         Long start = new Date().getTime();
 
@@ -80,17 +81,19 @@ public class RandomInput {
     private static void randomArrayValue(String user, String source, SourceType sourceType,
             SensorType sensorType, DescriptiveStatistic stat, TimeFrame timeFrame, int samples,
             boolean singleWindow) throws InstantiationException, IllegalAccessException {
-        ExpectedArrayValue instance = new ExpectedArrayValue(user, source);
+        ExpectedArrayValue instance = new ExpectedArrayValue(new MeasurementKey(user, source));
 
         Long start = new Date().getTime();
 
-        Double[] array;
-        for (int i = 0; i < samples; i++) {
+        double[] array;
 
-            array = new Double[3];
-            array[0] = ThreadLocalRandom.current().nextDouble();
-            array[1] = ThreadLocalRandom.current().nextDouble();
-            array[2] = ThreadLocalRandom.current().nextDouble();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+
+        for (int i = 0; i < samples; i++) {
+            array = new double[3];
+            array[0] = random.nextDouble();
+            array[1] = random.nextDouble();
+            array[2] = random.nextDouble();
 
             instance.add(Utility.getStartTimeWindow(start), start, array);
 
@@ -189,7 +192,7 @@ public class RandomInput {
             boolean singleWindow) throws InstantiationException, IllegalAccessException {
         nextValue(user, source, sourceType, sensorType, stat, timeFrame, samples, singleWindow);
 
-        Map<String, Object> map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put(DATASET, dataset);
         map.put(DOCUMENTS, documents);
         return map;

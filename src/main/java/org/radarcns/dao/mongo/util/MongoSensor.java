@@ -113,7 +113,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @return the last seen data value stat for the given user and source, otherwise
      *      empty dataset
      *
-     * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
+     * @see Dataset
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Dataset valueRTByUserSource(String user, String source, Header header, Stat stat,
@@ -136,7 +136,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @param collection is the mongoDb collection that has to be queried
      * @return data dataset for the given user and source, otherwise empty dataset
      *
-     * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
+     * @see Dataset
      */
     public Dataset valueByUserSource(String user, String source, Header header,
             MongoHelper.Stat stat, MongoCollection<Document> collection) throws ConnectException {
@@ -161,7 +161,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @return data dataset for the given user and source within the start and end time window,
      *      otherwise empty dataset
      *
-     * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
+     * @see Dataset
      */
     public Dataset valueByUserSourceWindow(String user, String source, Header header,
             MongoHelper.Stat stat, Long start, Long end, MongoCollection<Document> collection)

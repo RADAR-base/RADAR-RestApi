@@ -104,7 +104,7 @@ public class SensorDataAccessObject {
      * @return the last seen data value stat for the given user and source, otherwise
      *      empty dataset
      *
-     * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
+     * @see Dataset
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Dataset valueRTByUserSource(String user, String source, DescriptiveStatistic stat,
@@ -141,7 +141,7 @@ public class SensorDataAccessObject {
      * @param context is the servlet context needed to retrieve the database client INSTANCE
      * @return data dataset for the given user and source, otherwise empty dataset
      *
-     * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
+     * @see Dataset
      */
     public Dataset valueByUserSource(String user, String source, DescriptiveStatistic stat,
             TimeFrame timeFrame, SensorType sensorType, ServletContext context)
@@ -180,7 +180,7 @@ public class SensorDataAccessObject {
      * @return data dataset for the given user and source within the start and end time window,
      *      otherwise empty dataset
      *
-     * @see {@link import org.radarcns.avro.restapi.dataset.Dataset;}
+     * @see Dataset
      */
     public Dataset valueByUserSourceWindow(String user, String source, DescriptiveStatistic stat,
             TimeFrame timeFrame, Long start, Long end, SensorType sensorType,
@@ -232,7 +232,7 @@ public class SensorDataAccessObject {
      * @return a study {@code Cohort}
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link org.radarcns.avro.restapi.user.Cohort}
+     * @see org.radarcns.avro.restapi.user.Cohort
      */
     public Set<String> findAllUsers(MongoClient client) throws ConnectException {
         Set<String> users = new HashSet<>();
@@ -252,7 +252,7 @@ public class SensorDataAccessObject {
      * @return a {@code Patient} object
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link org.radarcns.avro.restapi.user.Patient}
+     * @see org.radarcns.avro.restapi.user.Patient
      */
     public Set<Source> findAllSourcesByUser(String user, MongoClient client)
             throws ConnectException {
@@ -274,7 +274,7 @@ public class SensorDataAccessObject {
      *
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link org.radarcns.avro.restapi.source.SourceType}
+     * @see SourceType
      */
     public SourceType findSourceType(String source, MongoClient client) throws ConnectException {
         SourceType type =  null;

@@ -51,7 +51,7 @@ import org.radarcns.util.RadarConverter;
  */
 public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
-    private static Map<DescriptiveStatistic, StatType> statMap = new HashMap();
+    private static Map<DescriptiveStatistic, StatType> statMap = new HashMap<>();
 
     /**
      * Default constructor initializes the mapping between {@link DescriptiveStatistic} and {@link
@@ -79,7 +79,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param statistic function that has to be simulated
      * @param timeFrame time interval between two consecutive samples
      * @return {@code Dataset} resulted by the simulation
-     * @see {@link org.radarcns.avro.restapi.dataset.Dataset}
+     * @see Dataset
      **/
     public Dataset getDataset(ExpectedValue expectedValue, String userId, String sourceId,
             SourceType sourceType, SensorType sensorType, DescriptiveStatistic statistic,
@@ -98,8 +98,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
      * @param timeFrame time interval between two consecutive samples
-     * @return {@link org.radarcns.avro.restapi.header.Header} for a {@link
-     * org.radarcns.avro.restapi.dataset.Dataset}
+     * @return {@link Header} for a {@link Dataset}
      **/
     public Header getHeader(ExpectedValue expectedValue, String userId, String sourceId,
             SourceType sourceType, SensorType sensorType, DescriptiveStatistic statistic,
@@ -111,9 +110,9 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
     /**
      * @return {@code EffectiveTimeFrame} for the simulated inteval.
-     * @see {@link org.radarcns.avro.restapi.header.EffectiveTimeFrame}
+     * @see EffectiveTimeFrame
      */
-    public EffectiveTimeFrame getEffectiveTimeFrame(ExpectedValue expectedValue) {
+    public EffectiveTimeFrame getEffectiveTimeFrame(ExpectedValue<?> expectedValue) {
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
 
@@ -130,7 +129,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param value timestamp.
      * @return {@code EffectiveTimeFrame} starting on value and ending {@link
      * ExpectedValue#DURATION} milliseconds after.
-     * @see {@link org.radarcns.avro.restapi.header.EffectiveTimeFrame}
+     * @see EffectiveTimeFrame
      */
     public EffectiveTimeFrame getEffectiveTimeFrame(Long value) {
         return new EffectiveTimeFrame(RadarConverter.getISO8601(new Date(value)),
@@ -142,23 +141,28 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * It generates the {@code List<Item>} for the resulting {@code Dataset}
      *
      * @param statistic function that has to be simulated  @return {@code List<Item>} for a {@link
-     * org.radarcns.avro.restapi.dataset.Dataset}
-     * @see {@link org.radarcns.avro.restapi.dataset.Item}.
+     * Dataset}
+     * @see Item
      **/
-    public List<Item> getItem(ExpectedValue expectedValue,
+    public List<Item> getItem(ExpectedValue<?> expectedValue,
             DescriptiveStatistic statistic, SensorType sensorType)
             throws IllegalAccessException, InstantiationException {
 
-        List<Long> keys = new LinkedList<>(expectedValue.getSeries().keySet());
+        List<Long> keys = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(keys);
 
-        switch (expectedValue.getExpectedType()) {
-            case ARRAY:
-                return getArrayItems(expectedValue, keys, statistic, sensorType);
-            case DOUBLE:
-                return getSingletonItems(expectedValue, keys, statistic, sensorType);
-            default:
-                throw new IllegalArgumentException(sensorType.name() + " not supported yet");
+        if (keys.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Class<?> type = expectedValue.getSeries().get(keys.get(0)).getClass();
+
+        if (DoubleArrayCollector.class.isAssignableFrom(type)) {
+            return getArrayItems(expectedValue, keys, statistic, sensorType);
+        } else if (DoubleValueCollector.class.isAssignableFrom(type)) {
+            return getSingletonItems(expectedValue, keys, statistic, sensorType);
+        } else {
+            throw new IllegalArgumentException(sensorType.name() + " not supported yet");
         }
     }
 
@@ -169,7 +173,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param statistic function that has to be simulated
      * @param sensor @return {@code List<Item>} for a
      *      {@link org.radarcns.avro.restapi.dataset.Dataset}
-     * @see {@link org.radarcns.avro.restapi.dataset.Item} containg data data that can be
+     * @see org.radarcns.avro.restapi.dataset.Item containg data data that can be
      *      represented as array of {@code Double}.
      **/
     private List<Item> getArrayItems(ExpectedValue expectedValue,
@@ -211,7 +215,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     /**
      * @param list of {@code Double} values representing a quartile.
      * @return the value that has to be stored within a {@code Dataset} {@code Item}
-     * @see {@link org.radarcns.avro.restapi.data.Quartiles}.
+     * @see Quartiles
      **/
     private Quartiles getQuartile(List<Double> list) {
         return new Quartiles(list.get(0), list.get(1), list.get(2));
@@ -224,7 +228,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param statistic function that has to be simulated
      * @param sensor @return {@code List<Item>} for a
      *      {@link org.radarcns.avro.restapi.dataset.Dataset}
-     * @see {@link org.radarcns.avro.restapi.dataset.Item} containg data data that can be
+     * @see org.radarcns.avro.restapi.dataset.Item containg data data that can be
      *      represented as {@code Double}.
      **/
     private List<Item> getSingletonItems(ExpectedValue expectedValue,

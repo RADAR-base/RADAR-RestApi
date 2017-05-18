@@ -70,8 +70,8 @@ public class SourceDefinition {
      *      expected amount of data.
      *
      * @return {@code SourceSpecification} containing all data names and related frequencies
-     * @see {@link SensorSpecification}
-     * @see {@link SourceSpecification}
+     * @see SensorSpecification
+     * @see SourceSpecification
      */
     public SourceSpecification getSpecification() {
         Map<String, SensorSpecification> sensors = new HashMap();

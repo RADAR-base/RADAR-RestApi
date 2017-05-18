@@ -54,7 +54,7 @@ public class SourceMonitor {
      * @return {@code SourceDefinition} representing a source source
      * @throws ConnectException if the connection with MongoDb is faulty
      *
-     * @see {@link Source}
+     * @see Source
      */
     public Source getState(String user, String source, MongoClient client)
             throws ConnectException {
@@ -80,7 +80,7 @@ public class SourceMonitor {
      * @return {@code SourceDefinition} representing a source source
      * @throws ConnectException if the connection with MongoDb is faulty
      *
-     * @see {@link Source}
+     * @see Source
      */
     public Source getState(String user, String source, long start, long end, MongoClient client)
             throws ConnectException {
@@ -133,7 +133,7 @@ public class SourceMonitor {
      * @param percentage numerical value that has to be converted int Status
      * @return the current {@code Status}
      *
-     * @see {@link State}
+     * @see State
      */
     public static State getStatus(double percentage) {
         if (percentage > 0.95) {

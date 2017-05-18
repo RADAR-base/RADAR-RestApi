@@ -48,21 +48,14 @@ public class ExposedConfigTest {
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
         URL url = new URL(PROTOCOL, SERVER, PORT, "/radar/frontend/");
 
-        String actual = checkFrontEndConfig(url);
+        try (Response response = Utility.makeRequest(new URL(url, CONFIG_JSON).toString())) {
+            assertEquals(200, response.code());
 
-        String expected = Utility.fileToString(
-                ExposedConfigTest.class.getClassLoader().getResource(CONFIG_JSON).getFile());
+            String expected = Utility.readAll(
+                    ExposedConfigTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
 
-        assertEquals(expected, actual);
-    }
-
-    /** Retrieves the exposed Frontedn config file. **/
-    public static String checkFrontEndConfig(URL url) throws IOException {
-        Response response = Utility.makeRequest(new URL(url, CONFIG_JSON).toString());
-
-        assertEquals(200, response.code());
-
-        return response.body().string();
+            assertEquals(expected, response.body().string());
+        }
     }
 
     @Test

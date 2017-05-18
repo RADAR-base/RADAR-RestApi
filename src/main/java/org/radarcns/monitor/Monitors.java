@@ -70,7 +70,7 @@ public class Monitors {
      * @return {@code SourceDefinition} representing a source source
      * @throws ConnectException if the connection with MongoDb is faulty
      *
-     * @see {@link Source}
+     * @see Source
      */
     public Source getState(String user, String source, SourceType sourceType, MongoClient client)
             throws ConnectException {
@@ -89,8 +89,8 @@ public class Monitors {
      *
      * @return {@code SourceSpecification} containing all data names and related frequencies
      *
-     * @see {@link SensorSpecification}
-     * @see {@link SourceSpecification}
+     * @see SensorSpecification
+     * @see SourceSpecification
      */
     public SourceSpecification getSpecification(SourceType sourceType)
             throws ConnectException {

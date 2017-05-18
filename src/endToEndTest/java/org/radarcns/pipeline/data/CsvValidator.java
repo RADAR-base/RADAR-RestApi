@@ -20,10 +20,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.radarcns.integration.model.MockConfigToCsvParser;
-import org.radarcns.integration.model.MockConfigToCsvParser.Variable;
+import org.radarcns.integration.model.MockRecord;
 import org.radarcns.mock.MockDataConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,7 @@ public class CsvValidator {
      * @param config configuration item containing the CSV file path.
      * @throws IllegalArgumentException if the CSV file does not respect the constrains.
      */
-    public static void validate(MockDataConfig config, Long duration)
+    public static void validate(MockDataConfig config, long duration)
         throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
         InvocationTargetException, ParseException {
 
@@ -53,20 +52,13 @@ public class CsvValidator {
         Date start = null;
         Date end = null;
 
-        Map<Variable, Object> map = parser.next();
-        Map<Variable, Object> last = map;
-        while (map != null) {
-            if (!last.get(Variable.USER).toString().equals(map.get(Variable.USER).toString())) {
-                mex = "It is possible to test only one user at time.";
-            } else if ( !last.get(Variable.SOURCE).toString().equals(
-                    map.get(Variable.SOURCE).toString()) ) {
-                mex = "It is possible to test only one source at time.";
-            } else if ( !( ((Long)map.get(Variable.TIMESTAMP)).longValue()
-                    >= ((Long)last.get(Variable.TIMESTAMP)).longValue() ) ) {
-                mex = Variable.TIMESTAMP.toString() + " must increase raw by raw.";
-
-            } else if ( map.get(Variable.VALUE) == null ) {
-                mex = Variable.VALUE.toString() + "value to test must be specified.";
+        MockRecord.DoubleType record = parser.nextDoubleRecord();
+        MockRecord.DoubleType last = record;
+        while (record != null) {
+            if (!last.getKey().equals(record.getKey())) {
+                mex = "It is possible to test only one user/source at time.";
+            } else if (record.getTimeMillis() < last.getTimeMillis() ) {
+                mex = "time must increase raw by raw.";
             }
 
             if ( mex != null) {
@@ -76,24 +68,24 @@ public class CsvValidator {
             }
 
             if (line == 1) {
-                start = new Date((Long) map.get(Variable.TIMESTAMP));
+                start = new Date(record.getTimeMillis());
             }
-            end = new Date((Long) map.get(Variable.TIMESTAMP));
+            end = new Date(record.getTimeMillis());
 
-            last = map;
-            map = parser.next();
+            last = record;
+            record = parser.nextDoubleRecord();
             line++;
         }
 
         if (checkDuration(start, end, duration)) {
             mex = config.getDataFile() + " is invalid. Data does not cover "
-                    + duration.longValue() + " seconds.";
+                    + duration + " seconds.";
             logger.error(mex);
             throw new IllegalArgumentException(mex);
         }
 
         if (line != (config.getFrequency() * duration + 1)) {
-            mex = config.getDataFile() + " is invalid. CVS contains less messages tha expected.";
+            mex = config.getDataFile() + " is invalid. CSV contains fewer messages than expected.";
             logger.error(mex);
             throw new IllegalArgumentException(mex);
         }
@@ -101,13 +93,12 @@ public class CsvValidator {
         parser.close();
     }
 
-    private static boolean checkDuration(Date start, Date end, Long duration) {
-        long upperbound = duration.longValue() * 1000;
-        long lowerbound = upperbound - 1000;
+    private static boolean checkDuration(Date start, Date end, long duration) {
+        long upperbound = duration * 1000L;
+        long lowerbound = upperbound - 1000L;
 
         long interval = TimeUnit.MILLISECONDS.toSeconds(end.getTime() - start.getTime());
 
         return interval > lowerbound && upperbound > interval;
     }
-
 }

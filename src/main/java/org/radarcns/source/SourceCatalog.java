@@ -108,7 +108,7 @@ public class SourceCatalog {
      * Returns source's SourceDefinition.
      * @param source sourceType involved in the interaction
      * @return the SourceDefinition related to the input
-     * @see {@link SourceDefinition}
+     * @see SourceDefinition
      */
     public SourceDefinition getDefinition(SourceType source) {
         SourceDefinition definition = sourceCatalog.get(source);

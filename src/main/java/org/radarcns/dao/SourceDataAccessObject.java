@@ -68,7 +68,7 @@ public class SourceDataAccessObject {
      * @return a {@code Patient} object
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link org.radarcns.avro.restapi.user.Patient}
+     * @see Patient
      */
     public static Patient findAllSourcesByUser(String user, MongoClient client)
             throws ConnectException {
