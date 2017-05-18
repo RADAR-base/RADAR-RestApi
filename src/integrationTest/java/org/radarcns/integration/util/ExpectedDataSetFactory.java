@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +51,8 @@ import org.radarcns.util.RadarConverter;
  */
 public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
-    private static Map<DescriptiveStatistic, StatType> statMap = new HashMap<>();
+    private static final Map<DescriptiveStatistic, StatType> statMap = new EnumMap<>(
+            DescriptiveStatistic.class);
 
     /**
      * Default constructor initializes the mapping between {@link DescriptiveStatistic} and {@link
@@ -148,18 +149,16 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             DescriptiveStatistic statistic, SensorType sensorType)
             throws IllegalAccessException, InstantiationException {
 
-        List<Long> keys = new ArrayList<>(expectedValue.getSeries().keySet());
-        Collections.sort(keys);
-
-        if (keys.isEmpty()) {
+        if (expectedValue.getSeries().isEmpty()) {
             return Collections.emptyList();
         }
+        List<Long> keys = new ArrayList<>(expectedValue.getSeries().keySet());
+        Collections.sort(keys);
+        Object singleExpectedValue = expectedValue.getSeries().get(keys.get(0));
 
-        Class<?> type = expectedValue.getSeries().get(keys.get(0)).getClass();
-
-        if (DoubleArrayCollector.class.isAssignableFrom(type)) {
+        if (singleExpectedValue instanceof DoubleArrayCollector) {
             return getArrayItems(expectedValue, keys, statistic, sensorType);
-        } else if (DoubleValueCollector.class.isAssignableFrom(type)) {
+        } else if (singleExpectedValue instanceof DoubleValueCollector) {
             return getSingletonItems(expectedValue, keys, statistic, sensorType);
         } else {
             throw new IllegalArgumentException(sensorType.name() + " not supported yet");
