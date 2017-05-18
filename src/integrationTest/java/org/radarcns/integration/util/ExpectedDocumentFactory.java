@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.bson.Document;
 import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.model.ExpectedValue.StatType;
@@ -55,35 +54,12 @@ public class ExpectedDocumentFactory {
     public List<?> getStatValue(StatType statistic,
             DoubleArrayCollector collectors) {
 
-        switch (statistic) {
-            case AVERAGE:
-                return collectors.getCollectors().stream()
-                        .map(DoubleValueCollector::getAvg).collect(Collectors.toList());
-            case COUNT:
-                return collectors.getCollectors().stream()
-                        .map(DoubleValueCollector::getCount).collect(Collectors.toList());
-            case INTERQUARTILE_RANGE:
-                return collectors.getCollectors().stream()
-                        .map(DoubleValueCollector::getIqr).collect(Collectors.toList());
-            case MAXIMUM:
-                return collectors.getCollectors().stream()
-                        .map(DoubleValueCollector::getMax).collect(Collectors.toList());
-            case MEDIAN:
-                return collectors.getCollectors().stream()
-                        .map(v -> v.getQuartile().get(1)).collect(Collectors.toList());
-            case MINIMUM:
-                return collectors.getCollectors().stream()
-                        .map(DoubleValueCollector::getMin).collect(Collectors.toList());
-            case QUARTILES:
-                return collectors.getCollectors().stream()
-                        .map(DoubleValueCollector::getQuartile).collect(Collectors.toList());
-            case SUM:
-                return collectors.getCollectors().stream()
-                        .map(DoubleValueCollector::getSum).collect(Collectors.toList());
-            default:
-                throw new IllegalArgumentException(
-                        statistic.toString() + " is not supported");
+        List<DoubleValueCollector> subCollectors = collectors.getCollectors();
+        List<Object> subList = new ArrayList<>(subCollectors.size());
+        for (DoubleValueCollector collector : subCollectors) {
+            subList.add(getStatValue(statistic, collector));
         }
+        return subList;
     }
 
     /**
@@ -121,7 +97,7 @@ public class ExpectedDocumentFactory {
     }
 
 
-    private List<Document> getDocumentsBySingle(ExpectedValue expectedValue) {
+    private List<Document> getDocumentsBySingle(ExpectedValue<?> expectedValue) {
         LinkedList<Document> list = new LinkedList<>();
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
@@ -154,7 +130,7 @@ public class ExpectedDocumentFactory {
         return list;
     }
 
-    private List<Document> getDocumentsByArray(ExpectedValue expectedValue) {
+    private List<Document> getDocumentsByArray(ExpectedValue<?> expectedValue) {
         LinkedList<Document> list = new LinkedList<>();
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());

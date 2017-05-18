@@ -49,7 +49,6 @@ public abstract class MongoSensor extends MongoDataAccess {
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoSensor.class);
 
     private final Map<SourceType, Map<TimeFrame, String>> deviceCollections;
-    private final Map<SourceType, Set<String>> collectionNames;
     private final Map<String, SourceType> collectionToSource;
 
     private final SensorType sensorType;
@@ -63,7 +62,6 @@ public abstract class MongoSensor extends MongoDataAccess {
     public MongoSensor(DataFormat format, SensorType sensorType) {
 
         deviceCollections = new HashMap<>();
-        collectionNames = new HashMap<>();
         collectionToSource = new HashMap<>();
 
         this.sensorType = sensorType;
@@ -79,8 +77,6 @@ public abstract class MongoSensor extends MongoDataAccess {
 
             Set<String> names = new HashSet<>(SourceCatalog.getInstance(
                     sourceType).getCollections().get(sensorType).values());
-
-            collectionNames.put(sourceType, names);
 
             for (String name : names) {
                 collectionToSource.put(name, sourceType);

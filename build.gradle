@@ -31,6 +31,7 @@ ext.okhttpVersion = '3.5.0'
 ext.okioVersion = '1.11.0'
 ext.openCsvVersion = '3.9'
 ext.radarCommon = '0.3'
+ext.radarSchemasCommon = '0.1'
 ext.radarStream = '0.1-alpha.3-SNAPSHOT'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
@@ -76,7 +77,6 @@ dependencies {
   compile group: 'org.json', name: 'json', version: json
   compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
-//  compile group: 'ch.qos.logback', name: 'logback-classic', version: logback
   compile group: 'org.apache.avro', name: 'avro', version: avro
   compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: jackson
   compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
@@ -85,10 +85,8 @@ dependencies {
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
-  integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
-  integrationTestCompile group: 'org.radarcns' , name: 'radar-backend' , version: radarStream
-
-//  testCompile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
+  testCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
+  testCompile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasCommon
   testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
   testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
@@ -255,21 +253,40 @@ task endToEndTest(type: Test) {
 //Useful for E2E tests
 task setRadarEnvironmentForDocker {
   doLast {
-    File volumes = new File("src/endToEndTest/dockerRadar/volumes")
-    volumes.mkdir()
-    String volumePath = volumes.getAbsolutePath()
+    def envPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/env.template'
+    def smtpPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env.template'
+    def streamPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/'
 
-    def fileEnv = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/env.template")
-    fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumePath)
+    File volumes = new File('src/endToEndTest/dockerRadar/volumes')
+    volumes.mkdir()
+
+    def src = new File(envPath)
+    def fileEnv = new File(envPath + 'tmp')
+    fileEnv << src.text
+    fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumes.getAbsolutePath())
     fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
     fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
     fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
-    fileEnv.renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env")
+    fileEnv.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env')
 
-    def fileInstall = new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh")
-    fileInstall.text = fileInstall.text.replace('/usr/local/var/lib/docker', volumePath)
+    src = new File(smtpPath)
+    def fileSmtp = new File(smtpPath + 'tmp')
+    fileSmtp << src.text
+    fileSmtp.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env')
 
-    new File("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env.template").renameTo("src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env")
+    src = new File(streamPath + 'radar.yml.template')
+    def fileStream = new File(streamPath + 'radar.yml.template' + 'tmp')
+    fileStream << src.text
+    fileStream.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/' + 'radar.yml')
+  }
+}
+
+//Useful for Travis for running the correct version of docker-compose
+task setDockerCompose {
+  doLast {
+    def installScriptPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh'
+    def installScript = new File(installScriptPath)
+    installScript.text = installScript.text.replace('docker-compose', '$HOME/bin/docker-compose')
   }
 }
 

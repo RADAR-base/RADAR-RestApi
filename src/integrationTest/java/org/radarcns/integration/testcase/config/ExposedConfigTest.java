@@ -18,17 +18,20 @@ package org.radarcns.integration.testcase.config;
 
 import static org.junit.Assert.assertEquals;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import okhttp3.Response;
 import org.junit.Test;
 import org.radarcns.config.Properties;
+import org.radarcns.config.ServerConfig;
 import org.radarcns.integration.util.Utility;
+import org.radarcns.producer.rest.RestClient;
 
 /**
  * Checks if the config file for the Front-End ecosystem is where expected, and checks the
@@ -59,17 +62,31 @@ public class ExposedConfigTest {
     }
 
     @Test
-    public void checkSwaggerDoc() throws MalformedURLException {
-        URL url = new URL(PROTOCOL, SERVER, PORT, "/radar/api/");
-        assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(url));
+    public void checkSwaggerDoc()
+            throws IOException, NoSuchAlgorithmException, KeyManagementException {
+        ServerConfig config = new ServerConfig();
+        config.setProtocol(PROTOCOL);
+        config.setHost(SERVER);
+        config.setPort(PORT);
+        config.setPath("/radar/api/");
+        config.setUnsafe(false);
+        assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(config));
     }
 
     /** Retrieves the exposed Swagger documentation. **/
-    public static String getSwaggerBasePath(URL url) throws MalformedURLException {
-        Swagger swagger = new SwaggerParser().read(
-                new URL(url, SWAGGER_JSON).toString());
+    public static String getSwaggerBasePath(ServerConfig config)
+            throws IOException, NoSuchAlgorithmException, KeyManagementException {
 
-        return swagger.getBasePath();
+        try (RestClient client = new RestClient(config);
+                Response response = client.request(SWAGGER_JSON)) {
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode swaggerDocumentation = mapper.readTree(response.body().string());
+
+            Swagger swagger = new SwaggerParser().read(swaggerDocumentation);
+
+            return swagger.getBasePath();
+        }
     }
 
 }

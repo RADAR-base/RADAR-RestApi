@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -58,7 +57,6 @@ import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.mock.CsvGenerator;
-import org.radarcns.mock.CsvSensorDataModel;
 import org.radarcns.mock.MockDataConfig;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.pipeline.config.PipelineConfig;
@@ -71,6 +69,8 @@ import org.slf4j.LoggerFactory;
 public class EndToEndTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EndToEndTest.class);
+    private static final String USER_ID_MOCK = "UserID_0";
+    private static final String SOURCE_ID_MOCK = "SourceID_0";
 
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
@@ -259,8 +259,8 @@ public class EndToEndTest {
 
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory
-                    .getDataset(expectedValue.get(config), CsvSensorDataModel.USER_ID_MOCK,
-                        CsvSensorDataModel.SOURCE_ID_MOCK, SourceType.EMPATICA,
+                    .getDataset(expectedValue.get(config), USER_ID_MOCK,
+                        SOURCE_ID_MOCK, SourceType.EMPATICA,
                             getSensorType(config), stat, TIME_FRAME));
         }
 
@@ -273,7 +273,6 @@ public class EndToEndTest {
     private void streamToKafka() throws IOException, InterruptedException {
         LOGGER.info("Streaming data into Kafka ...");
         MockProducer producer = new MockProducer(getPipelineConfig());
-        LOGGER.info("Streaming data into Kafka ...");
         producer.start();
         producer.shutdown();
     }
@@ -287,8 +286,8 @@ public class EndToEndTest {
 
         String path = "data/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", CsvSensorDataModel.USER_ID_MOCK);
-        path = path.replace("{" + SOURCE_ID + "}", CsvSensorDataModel.SOURCE_ID_MOCK);
+        path = path.replace("{" + SUBJECT_ID + "}", USER_ID_MOCK);
+        path = path.replace("{" + SOURCE_ID + "}", SOURCE_ID_MOCK);
 
         path = path.replace("{" + INTERVAL + "}", TimeFrame.TEN_SECOND.name());
 
@@ -307,6 +306,8 @@ public class EndToEndTest {
 
                 try (Response response = client.request(pathSensor)) {
                     assertEquals(200, response.code());
+
+                    LOGGER.info("[{}] Requesting {}", response.code(), pathSensor);
 
                     Dataset actual = null;
 
@@ -456,16 +457,12 @@ public class EndToEndTest {
      *
      * @throws MalformedURLException if the used URL is malformed
      */
-    private static void checkSwaggerConfig() throws MalformedURLException {
+    private static void checkSwaggerConfig()
+        throws IOException, NoSuchAlgorithmException, KeyManagementException {
         LOGGER.info("Checking Swagger ...");
 
-        URL url = new URL(
-                config.getRestApi().getProtocol(),
-                config.getRestApi().getHost(),
-                80,
-                config.getRestApi().getPath());
-
-        assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(url));
+        assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(
+                getPipelineConfig().getRestApi()));
     }
 
     /**
