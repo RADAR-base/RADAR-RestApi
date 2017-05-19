@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceType;
@@ -31,6 +32,7 @@ import org.radarcns.dao.mongo.data.android.AndroidAppStatus;
 import org.radarcns.dao.mongo.data.android.AndroidRecordCounter;
 import org.radarcns.dao.mongo.data.android.AndroidServerStatus;
 import org.radarcns.dao.mongo.util.MongoAndroidApp;
+import org.radarcns.dao.mongo.util.MongoHelper;
 
 /**
  * Data Access Object for Android App Status values.
@@ -56,57 +58,72 @@ public class AndroidAppDataAccessObject {
     /**
      * Computes the Android App Status realign on different collection.
      *
-     * @param user identifier
+     * @param subject identifier
+     * @param source identifier
+     * @param context {@link ServletContext} used to retrieve the client for accessing the
+     *      results cache
+     * @return {@code Application} representing the status of the related Android App
+     * @throws ConnectException if MongoDb is not available
+     */
+    public Application getStatus(String subject, String source, ServletContext context)
+        throws ConnectException {
+        return getStatus(subject, source, MongoHelper.getClient(context));
+    }
+
+    /**
+     * Computes the Android App Status realign on different collection.
+     *
+     * @param subject identifier
      * @param source identifier
      * @param client is the MongoDb client
      * @return {@code Application} representing the status of the related Android App
      * @throws ConnectException if MongoDb is not available
      */
-    public Application getStatus(String user, String source, MongoClient client)
+    public Application getStatus(String subject, String source, MongoClient client)
             throws ConnectException {
         Application app = null;
 
         for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
-            app = dataAccessObject.valueByUserSource(user, source, app, client);
+            app = dataAccessObject.valueBySubjectSource(subject, source, app, client);
         }
 
         return app;
     }
 
     /**
-     * Finds all users.
+     * Finds all subjects.
      *
-     * @return all distinct userIDs for the given collection, otherwise an empty Collection
+     * @return all distinct subjectIDs for the given collection, otherwise an empty Collection
      *
      * @throws ConnectException if MongoDb is not available
      */
     public Collection<String> findAllUser(MongoClient client) throws ConnectException {
-        Set<String> users = new HashSet<>();
+        Set<String> subjects = new HashSet<>();
 
         for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
-            users.addAll(dataAccessObject.findAllUser(client));
+            subjects.addAll(dataAccessObject.findAllUser(client));
         }
 
-        return users;
+        return subjects;
     }
 
     /**
-     * Finds all sources for the given user.
+     * Finds all sources for the given subject.
      *
-     * @param user is the userID
+     * @param subject is the subjectID
      * @return all distinct sourceIDs for the given collection, otherwise empty Collection
      *
      * @throws ConnectException if MongoDb is not available
      */
-    public Collection<Source> findAllSoucesByUser(String user, MongoClient client)
+    public Collection<Source> findAllSourcesBySubject(String subject, MongoClient client)
             throws ConnectException {
-        Set<Source> users = new HashSet<>();
+        Set<Source> subjects = new HashSet<>();
 
         for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
-            users.addAll(dataAccessObject.findAllSourcesByUser(user, client));
+            subjects.addAll(dataAccessObject.findAllSourcesByUser(subject, client));
         }
 
-        return users;
+        return subjects;
     }
 
     /**

@@ -90,7 +90,6 @@ dependencies {
   testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
   testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
-  testCompile group: 'org.mockito', name: 'mockito-all', version: mokitoVersion
   testCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParserVersion
 
   codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion

@@ -18,6 +18,12 @@ package org.radarcns.integration.testcase.monitor;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.X_LABEL;
+import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Y_LABEL;
+import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Z_LABEL;
+import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
+import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
+import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -41,6 +47,7 @@ import org.radarcns.avro.restapi.source.State;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.monitor.SourceMonitor;
 import org.radarcns.source.SourceCatalog;
@@ -48,7 +55,7 @@ import org.radarcns.source.SourceDefinition;
 
 public class SourceMonitorDbTest {
 
-    private static final String USER = "UserID_0";
+    private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
 
@@ -170,7 +177,7 @@ public class SourceMonitorDbTest {
 
         return new SourceMonitor(new SourceDefinition(EMPATICA,
                 Properties.getDeviceCatalog().getDevices().get(EMPATICA))).getState(
-                    USER, SOURCE, timestamp, end, client);
+            SUBJECT, SOURCE, timestamp, end, client);
     }
 
     private static void insertDoc(SensorType sensorType, int messages, long start, long end,
@@ -186,52 +193,52 @@ public class SourceMonitorDbTest {
 
 
     private static Document getDocumentsBySingle(int samples, long start, long end) {
-        return new Document("_id", USER + "-" + SOURCE + "-" + start + "-" + end)
-            .append("user", USER)
-            .append("source", SOURCE)
-            .append("min", new Double(0))
-            .append("max", new Double(0))
-            .append("sum", new Double(0))
-            .append("count", new Double(samples))
-            .append("avg", new Double(0))
-            .append("quartile", getQuartile())
-            .append("iqr", new Double(0))
-            .append("start", new Date(start))
-            .append("end", new Date(end));
+        return new Document(MongoHelper.ID, SUBJECT + "-" + SOURCE + "-" + start + "-" + end)
+            .append(MongoHelper.USER, SUBJECT)
+            .append(MongoHelper.SOURCE, SOURCE)
+            .append(Stat.min.getParam(), new Double(0))
+            .append(Stat.max.getParam(), new Double(0))
+            .append(Stat.sum.getParam(), new Double(0))
+            .append(Stat.count.getParam(), new Double(samples))
+            .append(Stat.avg.getParam(), new Double(0))
+            .append(Stat.quartile.getParam(), getQuartile())
+            .append(Stat.iqr.getParam(), new Double(0))
+            .append(MongoHelper.START, new Date(start))
+            .append(MongoHelper.END, new Date(end));
     }
 
     private static Document getDocumentsByArray(int samples, long start, long end) {
-        return new Document("_id", USER + "-" + SOURCE + "-" + start + "-" + end)
-            .append("user", USER)
-            .append("source", SOURCE)
-            .append("min", getValue(0))
-            .append("max", getValue(0))
-            .append("sum", getValue(0))
-            .append("count", getValue(samples))
-            .append("avg", getValue(0))
-            .append("quartile", Arrays.asList(new Document[]{
-                new Document("25", getValue(0)),
-                new Document("50", getValue(0)),
-                new Document("75", getValue(0))
+        return new Document(MongoHelper.ID, SUBJECT + "-" + SOURCE + "-" + start + "-" + end)
+            .append(MongoHelper.USER, SUBJECT)
+            .append(MongoHelper.SOURCE, SOURCE)
+            .append(Stat.min.getParam(), getValue(0))
+            .append(Stat.max.getParam(), getValue(0))
+            .append(Stat.sum.getParam(), getValue(0))
+            .append(Stat.count.getParam(), getValue(samples))
+            .append(Stat.avg.getParam(), getValue(0))
+            .append(Stat.quartile.getParam(), Arrays.asList(new Document[]{
+                new Document(FIRST_QUARTILE, getValue(0)),
+                new Document(SECOND_QUARTILE, getValue(0)),
+                new Document(THIRD_QUARTILE, getValue(0))
             }))
-            .append("iqr", getValue(0))
-            .append("start", new Date(start))
-            .append("end", new Date(end));
+            .append(Stat.iqr.getParam(), getValue(0))
+            .append(MongoHelper.START, new Date(start))
+            .append(MongoHelper.END, new Date(end));
     }
 
     private static List<Document> getQuartile() {
         return Arrays.asList(new Document[]{
-            new Document("25", new Double(0)),
-            new Document("50", new Double(0)),
-            new Document("75", new Double(0))
+            new Document(FIRST_QUARTILE, new Double(0)),
+            new Document(SECOND_QUARTILE, new Double(0)),
+            new Document(THIRD_QUARTILE, new Double(0))
         });
     }
 
     private static List<Document> getValue(int value) {
         return Arrays.asList(new Document[]{
-            new Document("x", new Double(value)),
-            new Document("y", new Double(value)),
-            new Document("z", new Double(value))
+            new Document(X_LABEL, new Double(value)),
+            new Document(Y_LABEL, new Double(value)),
+            new Document(Z_LABEL, new Double(value))
         });
     }
 

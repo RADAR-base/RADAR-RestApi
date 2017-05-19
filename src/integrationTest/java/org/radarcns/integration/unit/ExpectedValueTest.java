@@ -30,6 +30,8 @@ import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
 import org.radarcns.avro.restapi.header.TimeFrame;
+import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.util.RadarConverter;
 
@@ -38,20 +40,20 @@ import org.radarcns.util.RadarConverter;
  */
 public class ExpectedValueTest {
 
-    private static final String USER = "UserID_0";
+    private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test
     public void matchDatasetOnDocuments() throws Exception {
-        Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(USER, SOURCE,
+        Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(SUBJECT, SOURCE,
                 EMPATICA, HEART_RATE, COUNT, TIME_FRAME, SAMPLES, false);
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
         int count = 0;
         for (Document doc : docs) {
-            count += doc.getDouble("count").intValue();
+            count += doc.getDouble(Stat.count.getParam()).intValue();
         }
         assertEquals(SAMPLES, count);
 
@@ -64,8 +66,8 @@ public class ExpectedValueTest {
         assertEquals(SAMPLES, count);
 
         EffectiveTimeFrame window1 = new EffectiveTimeFrame(
-                RadarConverter.getISO8601(docs.get(0).getDate("start")),
-                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate("end")));
+                RadarConverter.getISO8601(docs.get(0).getDate(MongoHelper.START)),
+                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate(MongoHelper.END)));
 
         EffectiveTimeFrame window2 = dataset.getHeader().getEffectiveTimeFrame();
         assertEquals(true, compareEffectiveTimeFrame(window1, window2));

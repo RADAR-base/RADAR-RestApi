@@ -21,7 +21,7 @@ package org.radarcns.security;
  */
 public class Param {
 
-    public static final String USER = "user";
+    public static final String SUBJECT = "subject";
     public static final String SOURCE = "source";
 
     public static boolean isNullOrEmpty(String input) {
@@ -66,10 +66,10 @@ public class Param {
     }
 
     /**
-     * Given a userID, it checks if they are valid input or not.
+     * Given a subjectID, it checks if they are valid input or not.
      **/
-    public static void isValidUser(String user) {
-        validOrThrow(user, USER);
+    public static void isValidSubject(String user) {
+        validOrThrow(user, SUBJECT);
     }
 
     /**
@@ -86,7 +86,7 @@ public class Param {
         boolean test;
 
         switch (param) {
-            case USER:      test = isUser(value);
+            case SUBJECT:      test = isUser(value);
                             break;
             case SOURCE:    test = isSource(value);
                             break;

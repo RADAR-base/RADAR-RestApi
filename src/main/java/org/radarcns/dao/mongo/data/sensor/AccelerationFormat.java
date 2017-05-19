@@ -16,6 +16,10 @@ package org.radarcns.dao.mongo.data.sensor;
  * limitations under the License.
  */
 
+import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
+import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
+import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
+
 import java.util.ArrayList;
 import org.bson.Document;
 import org.radarcns.avro.restapi.data.Acceleration;
@@ -31,6 +35,10 @@ import org.slf4j.LoggerFactory;
  */
 public class AccelerationFormat extends MongoSensor {
 
+    public static final String X_LABEL = "x";
+    public static final String Y_LABEL = "y";
+    public static final String Z_LABEL = "z";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AccelerationFormat.class);
 
     public AccelerationFormat(SensorType sensorType) {
@@ -44,31 +52,31 @@ public class AccelerationFormat extends MongoSensor {
             Document component = (Document) doc.get(field);
 
             @SuppressWarnings("checkstyle:LocalVariableName")
-            ArrayList<Document> x = (ArrayList<Document>) component.get("x");
+            ArrayList<Document> x = (ArrayList<Document>) component.get(X_LABEL);
             @SuppressWarnings("checkstyle:LocalVariableName")
-            ArrayList<Document> y = (ArrayList<Document>) component.get("y");
+            ArrayList<Document> y = (ArrayList<Document>) component.get(Y_LABEL);
             @SuppressWarnings("checkstyle:LocalVariableName")
-            ArrayList<Document> z = (ArrayList<Document>) component.get("z");
+            ArrayList<Document> z = (ArrayList<Document>) component.get(Z_LABEL);
 
             if (stat.equals(DescriptiveStatistic.QUARTILES)) {
                 return new Acceleration(
                     new Quartiles(
-                        x.get(0).getDouble("25"),
-                        x.get(1).getDouble("50"),
-                        x.get(2).getDouble("75")),
+                        x.get(0).getDouble(FIRST_QUARTILE),
+                        x.get(1).getDouble(SECOND_QUARTILE),
+                        x.get(2).getDouble(THIRD_QUARTILE)),
                     new Quartiles(
-                        y.get(0).getDouble("25"),
-                        y.get(1).getDouble("50"),
-                        y.get(2).getDouble("75")),
+                        y.get(0).getDouble(FIRST_QUARTILE),
+                        y.get(1).getDouble(SECOND_QUARTILE),
+                        y.get(2).getDouble(THIRD_QUARTILE)),
                     new Quartiles(
-                        z.get(0).getDouble("25"),
-                        z.get(1).getDouble("50"),
-                        z.get(2).getDouble("75")));
+                        z.get(0).getDouble(FIRST_QUARTILE),
+                        z.get(1).getDouble(SECOND_QUARTILE),
+                        z.get(2).getDouble(THIRD_QUARTILE)));
             } else if (stat.equals(DescriptiveStatistic.MEDIAN)) {
                 return new Acceleration(
-                        x.get(1).getDouble("50"),
-                        y.get(1).getDouble("50"),
-                        z.get(1).getDouble("50"));
+                        x.get(1).getDouble(SECOND_QUARTILE),
+                        y.get(1).getDouble(SECOND_QUARTILE),
+                        z.get(1).getDouble(SECOND_QUARTILE));
             }
 
         } else {
@@ -76,9 +84,9 @@ public class AccelerationFormat extends MongoSensor {
             Document data = (Document) doc.get(field);
             LOGGER.debug(data.toJson());
             return new Acceleration(
-                    data.getDouble("x"),
-                    data.getDouble("y"),
-                    data.getDouble("z"));
+                    data.getDouble(X_LABEL),
+                    data.getDouble(Y_LABEL),
+                    data.getDouble(Z_LABEL));
         }
 
         LOGGER.warn("Returning null value for the tuple: <{},{},{}>",field,stat,doc.toJson());
@@ -87,6 +95,6 @@ public class AccelerationFormat extends MongoSensor {
 
     @Override
     protected double extractCount(Document doc ) {
-        return (doc.getDouble("x") + doc.getDouble("y") + doc.getDouble("z")) / 3.0d;
+        return (doc.getDouble(X_LABEL) + doc.getDouble(Y_LABEL) + doc.getDouble(Z_LABEL)) / 3.0d;
     }
 }

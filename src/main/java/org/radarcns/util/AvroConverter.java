@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by Francesco Nobilia on 11/11/2016.
+ * Utility to convert AVRO object to JSON and Bytes array.
  */
 public class AvroConverter {
 

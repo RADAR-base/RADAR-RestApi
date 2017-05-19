@@ -18,13 +18,16 @@ package org.radarcns.pipeline;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.FRONTEND;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.checkFrontEndConfig;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
-import static org.radarcns.webapp.Parameter.INTERVAL;
-import static org.radarcns.webapp.Parameter.SENSOR;
-import static org.radarcns.webapp.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.Parameter.STAT;
-import static org.radarcns.webapp.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.util.BasePath.AVRO;
+import static org.radarcns.webapp.util.BasePath.DATA;
+import static org.radarcns.webapp.util.Parameter.INTERVAL;
+import static org.radarcns.webapp.util.Parameter.SENSOR;
+import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.util.Parameter.STAT;
+import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import java.io.File;
 import java.io.IOException;
@@ -297,8 +300,8 @@ public class EndToEndTest {
         LOGGER.info("Fetching APIs ...");
 
         String server = getPipelineConfig().getRestApi().getUrlString();
-        String path = server + "data/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
-                + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+        String path = server + DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{"
+                + INTERVAL + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", CsvSensorDataModel.USER_ID_MOCK);
         path = path.replace("{" + SOURCE_ID + "}", CsvSensorDataModel.SOURCE_ID_MOCK);
 
@@ -492,7 +495,7 @@ public class EndToEndTest {
                 config.getRestApi().getProtocol(),
                 config.getRestApi().getHost(),
                 config.getRestApi().getPort(),
-                "/frontend/config/");
+                "/" + FRONTEND + "/config/");
 
         String actual = checkFrontEndConfig(url, getPipelineConfig().getRestApi().isUnsafe());
 

@@ -16,6 +16,10 @@ package org.radarcns.dao.mongo.data.sensor;
  * limitations under the License.
  */
 
+import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
+import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
+import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
+
 import java.util.ArrayList;
 import org.bson.Document;
 import org.radarcns.avro.restapi.data.DoubleSample;
@@ -46,11 +50,11 @@ public class DoubleFormat extends MongoSensor {
 
             if (stat.equals(DescriptiveStatistic.QUARTILES)) {
                 return new DoubleSample( new Quartiles(
-                        quartilesList.get(0).getDouble("25"),
-                        quartilesList.get(1).getDouble("50"),
-                        quartilesList.get(2).getDouble("75")));
+                        quartilesList.get(0).getDouble(FIRST_QUARTILE),
+                        quartilesList.get(1).getDouble(SECOND_QUARTILE),
+                        quartilesList.get(2).getDouble(THIRD_QUARTILE)));
             } else if (stat.equals(DescriptiveStatistic.MEDIAN)) {
-                return new DoubleSample(quartilesList.get(1).getDouble("50"));
+                return new DoubleSample(quartilesList.get(1).getDouble(SECOND_QUARTILE));
             }
 
         } else {

@@ -33,6 +33,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.bson.Document;
+import org.radarcns.dao.mongo.data.sensor.AccelerationFormat;
+import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.aggregator.DoubleArrayCollector;
 import org.radarcns.integration.aggregator.DoubleValueCollector;
 import org.radarcns.integration.model.ExpectedValue;
@@ -151,21 +154,22 @@ public class ExpectedDocumentFactory {
 
             end = timestamp + DURATION;
 
-            list.add(new Document("_id",
+            list.add(new Document(MongoHelper.ID,
                     expectedValue.getUser() + "-" + expectedValue.getSource() + "-" + timestamp
                             + "-" + end)
-                    .append("user", expectedValue.getUser())
-                    .append("source", expectedValue.getSource())
-                    .append("min", getStatValue(MINIMUM, doubleValueCollector))
-                    .append("max", getStatValue(MAXIMUM, doubleValueCollector))
-                    .append("sum", getStatValue(SUM, doubleValueCollector))
-                    .append("count", getStatValue(COUNT, doubleValueCollector))
-                    .append("avg", getStatValue(AVERAGE, doubleValueCollector))
-                    .append("quartile", extractQuartile((List<Double>) getStatValue(
+                    .append(MongoHelper.USER, expectedValue.getUser())
+                    .append(MongoHelper.SOURCE, expectedValue.getSource())
+                    .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
+                    .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleValueCollector))
+                    .append(Stat.sum.getParam(), getStatValue(SUM, doubleValueCollector))
+                    .append(Stat.count.getParam(), getStatValue(COUNT, doubleValueCollector))
+                    .append(Stat.avg.getParam(), getStatValue(AVERAGE, doubleValueCollector))
+                    .append(Stat.quartile.getParam(), extractQuartile((List<Double>) getStatValue(
                             QUARTILES, doubleValueCollector)))
-                    .append("iqr", getStatValue(INTERQUARTILE_RANGE, doubleValueCollector))
-                    .append("start", new Date(timestamp))
-                    .append("end", new Date(end)));
+                    .append(Stat.iqr.getParam(), getStatValue(INTERQUARTILE_RANGE,
+                            doubleValueCollector))
+                    .append(MongoHelper.START, new Date(timestamp))
+                    .append(MongoHelper.END, new Date(end)));
         }
 
         return list;
@@ -184,23 +188,23 @@ public class ExpectedDocumentFactory {
 
             end = timestamp + DURATION;
 
-            list.add(new Document("_id",
+            list.add(new Document(MongoHelper.ID,
                     expectedValue.getUser() + "-" + expectedValue.getSource() + "-" + timestamp
                             + "-" + end)
-                    .append("user", expectedValue.getUser())
-                    .append("source", expectedValue.getSource())
-                    .append("min", getStatValue(MINIMUM, doubleArrayCollector))
-                    .append("max", getStatValue(MAXIMUM, doubleArrayCollector))
-                    .append("sum", getStatValue(SUM, doubleArrayCollector))
-                    .append("count", getStatValue(COUNT, doubleArrayCollector))
-                    .append("avg", getStatValue(AVERAGE, doubleArrayCollector))
-                    .append("quartile",
+                    .append(MongoHelper.USER, expectedValue.getUser())
+                    .append(MongoHelper.SOURCE, expectedValue.getSource())
+                    .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleArrayCollector))
+                    .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleArrayCollector))
+                    .append(Stat.sum.getParam(), getStatValue(SUM, doubleArrayCollector))
+                    .append(Stat.count.getParam(), getStatValue(COUNT, doubleArrayCollector))
+                    .append(Stat.avg.getParam(), getStatValue(AVERAGE, doubleArrayCollector))
+                    .append(Stat.quartile.getParam(),
                             extractAccelerationQuartile((List<List<Double>>) getStatValue(
                                     QUARTILES, doubleArrayCollector)))
-                    .append("iqr", getStatValue(INTERQUARTILE_RANGE,
+                    .append(Stat.iqr.getParam(), getStatValue(INTERQUARTILE_RANGE,
                             doubleArrayCollector))
-                    .append("start", new Date(timestamp))
-                    .append("end", new Date(end)));
+                    .append(MongoHelper.START, new Date(timestamp))
+                    .append(MongoHelper.END, new Date(end)));
         }
 
         return list;
@@ -208,9 +212,9 @@ public class ExpectedDocumentFactory {
 
     private Document extractAccelerationQuartile(List<List<Double>> statValue) {
         Document quartile = new Document();
-        quartile.put("x", extractQuartile(statValue.get(0)));
-        quartile.put("y", extractQuartile(statValue.get(1)));
-        quartile.put("z", extractQuartile(statValue.get(2)));
+        quartile.put(AccelerationFormat.X_LABEL, extractQuartile(statValue.get(0)));
+        quartile.put(AccelerationFormat.Y_LABEL, extractQuartile(statValue.get(1)));
+        quartile.put(AccelerationFormat.Z_LABEL, extractQuartile(statValue.get(2)));
         return quartile;
     }
 

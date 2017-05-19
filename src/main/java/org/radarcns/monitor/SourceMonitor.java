@@ -18,7 +18,6 @@ package org.radarcns.monitor;
 
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.radarcns.avro.restapi.sensor.Sensor;
@@ -48,7 +47,7 @@ public class SourceMonitor {
      * Checks the status for the given source counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
      *
-     * @param user identifier
+     * @param subject identifier
      * @param source identifier
      * @param client is the MongoDB client
      * @return {@code SourceDefinition} representing a source source
@@ -56,23 +55,20 @@ public class SourceMonitor {
      *
      * @see {@link Source}
      */
-    public Source getState(String user, String source, MongoClient client)
+    public Source getState(String subject, String source, MongoClient client)
             throws ConnectException {
 
         long end = (System.currentTimeMillis() / 10000) * 10000;
         long start = end - 60000;
 
-        System.out.println("Start: " + RadarConverter.getISO8601(new Date(start)));
-        System.out.println("End: " + RadarConverter.getISO8601(new Date(end)));
-
-        return getState(user, source, start, end, client);
+        return getState(subject, source, start, end, client);
     }
 
     /**
      * Checks the status for the given source counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
      *
-     * @param user identifier
+     * @param subject identifier
      * @param source identifier
      * @oaram start initial time that has to be monitored
      * @param end final time that has to be monitored
@@ -82,7 +78,7 @@ public class SourceMonitor {
      *
      * @see {@link Source}
      */
-    public Source getState(String user, String source, long start, long end, MongoClient client)
+    public Source getState(String subject, String source, long start, long end, MongoClient client)
             throws ConnectException {
         Map<String, Sensor> sensorMap = new HashMap<>();
 
@@ -91,7 +87,7 @@ public class SourceMonitor {
         for (SensorType type : specification.getSensorTypes()) {
 
             countTemp = SensorDataAccessObject.getInstance().countSamplesByUserSourceWindow(
-                user, source, start, end, type, specification.getType(), client);
+                subject, source, start, end, type, specification.getType(), client);
 
             percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);
 

@@ -140,7 +140,7 @@ public class ParamTest {
 
     private int isValidUserTestCount(String user, int count) {
         try {
-            Param.isValidUser(user);
+            Param.isValidSubject(user);
         } catch (IllegalArgumentException exec) {
             count++;
         }
@@ -160,7 +160,7 @@ public class ParamTest {
 
     private int isValidSourceTestCount(String source, int count) {
         try {
-            Param.isValidUser(source);
+            Param.isValidSubject(source);
         } catch (IllegalArgumentException exec) {
             count++;
         }

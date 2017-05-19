@@ -1,4 +1,4 @@
-package org.radarcns.webapp;
+package org.radarcns.webapp.util;
 
 /*
  *  Copyright 2017 King's College London and The Hyve

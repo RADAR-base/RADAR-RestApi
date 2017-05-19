@@ -41,13 +41,13 @@ import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 
 /**
- * UserDao Test.
+ * AndroidDao Test.
  */
 public class AndroidDaoTest {
 
     //private static final Logger logger = LoggerFactory.getLogger(SourceDaoTest.class);
 
-    private static final String USER = "UserID_0";
+    private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
     private static final SensorType SENSOR_TYPE = HEART_RATE;
@@ -67,14 +67,14 @@ public class AndroidDaoTest {
         int recordsUnsent = ThreadLocalRandom.current().nextInt();
 
         Utility.insertMixedDocs(client,
-                RandomInput.getRandomApplicationStatus(USER, SOURCE, ipAdress, serverStatus, uptime,
-                    recordsCached, recordsSent, recordsUnsent));
+                RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE, ipAdress, serverStatus,
+                    uptime, recordsCached, recordsSent, recordsUnsent));
 
         Application application = new Application(ipAdress, uptime, serverStatus, recordsCached,
                 recordsSent, recordsUnsent);
 
         assertEquals(application,
-                AndroidAppDataAccessObject.getInstance().getStatus(USER, SOURCE, client));
+                AndroidAppDataAccessObject.getInstance().getStatus(SUBJECT, SOURCE, client));
 
         dropAndClose(client);
     }
@@ -84,10 +84,10 @@ public class AndroidDaoTest {
         MongoClient client = Utility.getMongoClient();
 
         Utility.insertMixedDocs(client,
-                RandomInput.getRandomApplicationStatus(USER, SOURCE));
+                RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE));
 
         Utility.insertMixedDocs(client, RandomInput.getRandomApplicationStatus(
-                USER.concat("1"), SOURCE.concat("1")));
+                SUBJECT.concat("1"), SOURCE.concat("1")));
 
         assertEquals(2,
                 AndroidAppDataAccessObject.getInstance().findAllUser(client).size());
@@ -100,13 +100,14 @@ public class AndroidDaoTest {
         MongoClient client = Utility.getMongoClient();
 
         Utility.insertMixedDocs(client,
-                RandomInput.getRandomApplicationStatus(USER, SOURCE));
+                RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE));
 
         Utility.insertMixedDocs(client, RandomInput.getRandomApplicationStatus(
-                USER, SOURCE.concat("1")));
+                SUBJECT, SOURCE.concat("1")));
 
         assertEquals(2,
-                AndroidAppDataAccessObject.getInstance().findAllSoucesByUser(USER, client).size());
+                AndroidAppDataAccessObject.getInstance().findAllSourcesBySubject(SUBJECT,
+                        client).size());
 
         dropAndClose(client);
     }
@@ -116,13 +117,13 @@ public class AndroidDaoTest {
         MongoClient client = Utility.getMongoClient();
 
         Utility.insertMixedDocs(client,
-                RandomInput.getRandomApplicationStatus(USER, SOURCE));
+                RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE));
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
                     SOURCE_TYPE, TIME_FRAME));
-        collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE.concat("1"), SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
+        collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE.concat("1"),
+                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
 
         assertEquals(ANDROID,
                 AndroidAppDataAccessObject.getInstance().findSourceType(SOURCE, client));
