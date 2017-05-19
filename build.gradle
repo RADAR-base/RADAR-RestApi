@@ -35,7 +35,7 @@ ext.radarSchemasCommon = '0.1'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.swaggerParser='1.0.24'
-ext.tomcat = '8.0.37'
+ext.tomcat = '8.0.43'
 ext.schemaRestApi = '0.1.1-alpha.1'
 
 configurations {
