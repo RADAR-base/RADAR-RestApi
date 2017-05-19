@@ -180,7 +180,7 @@ public class Utility {
      *
      * @see Application
      */
-    //TODO take field names from schemas
+    //TODO take field names from RADAR Mongo Connector
     public static Application convertDocToApplication(Map<String, Document> documents) {
         return new Application(
             documents.get(STATUS_COLLECTION).getString("clientIP"),

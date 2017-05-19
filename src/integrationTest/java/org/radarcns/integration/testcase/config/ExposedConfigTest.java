@@ -68,9 +68,6 @@ public class ExposedConfigTest {
     @Test
     public void checkSwaggerDoc()
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
-
-        //TODO get this from config
-
         ServerConfig config = new ServerConfig();
         config.setProtocol(PROTOCOL);
         config.setHost(SERVER);

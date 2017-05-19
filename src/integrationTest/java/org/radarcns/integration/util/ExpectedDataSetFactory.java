@@ -51,6 +51,8 @@ import org.radarcns.util.RadarConverter;
  */
 public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
+    //private static final Logger LOGGER = LoggerFactory.getLogger(ExpectedDataSetFactory.class);
+
     private static final Map<DescriptiveStatistic, StatType> statMap = new EnumMap<>(
             DescriptiveStatistic.class);
 
@@ -65,7 +67,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         statMap.put(DescriptiveStatistic.MAXIMUM, StatType.MAXIMUM);
         statMap.put(DescriptiveStatistic.MEDIAN, StatType.MEDIAN);
         statMap.put(DescriptiveStatistic.MINIMUM, StatType.MINIMUM);
-        statMap.put(QUARTILES, StatType.QUARTILES);
+        statMap.put(DescriptiveStatistic.QUARTILES, StatType.QUARTILES);
         statMap.put(DescriptiveStatistic.SUM, StatType.SUM);
     }
 

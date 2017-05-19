@@ -45,6 +45,8 @@ import org.radarcns.stream.collector.DoubleValueCollector;
  */
 public class ExpectedDocumentFactory {
 
+    //private static final Logger LOGGER = LoggerFactory.getLogger(ExpectedDocumentFactory.class);
+
     /**
      * It return the value of the given statistical function.
      *
@@ -72,7 +74,6 @@ public class ExpectedDocumentFactory {
      * @see DoubleValueCollector
      **/
     public Object getStatValue(StatType statistic, DoubleValueCollector collector) {
-
         switch (statistic) {
             case AVERAGE:
                 return collector.getAvg();

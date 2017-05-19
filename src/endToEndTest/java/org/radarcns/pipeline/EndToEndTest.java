@@ -54,6 +54,7 @@ import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.Properties;
+import org.radarcns.config.ServerConfig;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.aggregator.MockAggregator;
 import org.radarcns.integration.model.ExpectedValue;
@@ -215,7 +216,8 @@ public class EndToEndTest {
 
         expectedDataset = computeExpectedDataset(expectedValue);
 
-        assertEquals(DescriptiveStatistic.values().length - 2, expectedDataset.size());
+        //TODO add DescriptiveStatistic.DELIVERY_RATE
+        assertEquals(DescriptiveStatistic.values().length - 3, expectedDataset.size());
 
         for (Map<MockDataConfig, Dataset> datasets : expectedDataset.values()) {
             assertEquals(size, datasets.size());
@@ -233,8 +235,10 @@ public class EndToEndTest {
 
         for (DescriptiveStatistic stat : DescriptiveStatistic.values()) {
 
+            //TODO add DescriptiveStatistic.DELIVERY_RATE
             if (stat.equals(DescriptiveStatistic.LOWER_QUARTILE)
-                    || stat.equals(DescriptiveStatistic.UPPER_QUARTILE)) {
+                    || stat.equals(DescriptiveStatistic.UPPER_QUARTILE)
+                    || stat.equals(DescriptiveStatistic.DELIVERY_RATE)) {
                 continue;
             }
 
@@ -483,9 +487,12 @@ public class EndToEndTest {
         String expected = Utility.readAll(
                 EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
 
-        RestClient client = new RestClient(config.getRestApi());
+        ServerConfig server = config.getRestApi();
+        server.setPath("/" + FRONTEND + "/");
 
-        try (Response response = client.request("/" + FRONTEND + "/config/")) {
+        RestClient client = new RestClient(server);
+
+        try (Response response = client.request("/config/" + CONFIG_JSON)) {
             assertEquals(expected, response.body().string());
         }
     }

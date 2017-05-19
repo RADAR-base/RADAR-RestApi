@@ -37,7 +37,7 @@ data:
     value_fields: [x, y, z]
     minimum: -2.0
     maximum: 2.0
-    maximum_difference: 1e-10
+    maximum_difference: 1e-2
   - topic: android_empatica_e4_battery_level
     sensor: BATTERY
     frequency: 1
@@ -47,7 +47,7 @@ data:
     value_fields: [batteryLevel]
     minimum: 0
     maximum: 1
-    maximum_difference: 1e-10
+    maximum_difference: 1e-2
   - topic: android_empatica_e4_blood_volume_pulse
     frequency: 64
     sensor: BLOOD_VOLUME_PULSE
@@ -57,7 +57,7 @@ data:
     value_fields: [bloodVolumePulse]
     minimum: -200
     maximum: 200
-    maximum_difference: 1e-10
+    maximum_difference: 1e-2
   - topic: android_empatica_e4_electrodermal_activity
     frequency: 4
     sensor: ELECTRODERMAL_ACTIVITY
@@ -67,7 +67,7 @@ data:
     value_fields: [electroDermalActivity]
     minimum: 0.01
     maximum: 0.05
-    maximum_difference: 1e-10
+    maximum_difference: 1e-2
   - topic: android_empatica_e4_inter_beat_interval
     frequency: 1
     sensor: INTER_BEAT_INTERVAL
@@ -77,7 +77,7 @@ data:
     value_fields: [interBeatInterval]
     minimum: 0.5
     maximum: 1.1
-    maximum_difference: 1e-10
+    maximum_difference: 1e-2
   - topic: android_empatica_e4_temperature
     frequency: 4
     sensor: THERMOMETER
@@ -87,4 +87,4 @@ data:
     value_fields: [temperature]
     minimum: 20
     maximum: 55
-    maximum_difference: 1e-10
+    maximum_difference: 1e-2
