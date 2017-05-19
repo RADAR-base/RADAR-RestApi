@@ -23,14 +23,8 @@ import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COL
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -55,10 +49,7 @@ import org.radarcns.config.Properties;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.listener.MongoDbContextListener;
-import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.RadarConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Utility {
 
@@ -120,6 +111,8 @@ public class Utility {
     /**
      * Generates a Dataset using the input documents.
      * @param docs list of Documents that has to be converted
+     * @param subjectId subject identifier
+     * @param sourceId source identifier
      * @param stat filed extracted from the document
      * @param unit measurement unit useful to generate the dataset's header
      * @param timeFrame time interval between two consecutive samples
@@ -128,13 +121,13 @@ public class Utility {
      * @throws IllegalAccessException if the item class or its nullary constructor is not accessible
      * @throws InstantiationException if item class cannot be instantiated
      */
-    public static Dataset convertDocToDataset(List<Document> docs, String userId, String sourceId,
-            SourceType sourceType, SensorType sensorType, Stat stat, Unit unit, TimeFrame timeFrame,
-            Class<? extends SpecificRecord> recordClass) throws IllegalAccessException,
-            InstantiationException {
+    public static Dataset convertDocToDataset(List<Document> docs, String subjectId,
+            String sourceId, SourceType sourceType, SensorType sensorType, Stat stat, Unit unit,
+            TimeFrame timeFrame, Class<? extends SpecificRecord> recordClass)
+            throws IllegalAccessException, InstantiationException {
         EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(
-                RadarConverter.getISO8601(docs.get(0).getDate("start")),
-                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate("end")));
+                RadarConverter.getISO8601(docs.get(0).getDate(MongoHelper.START)),
+                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate(MongoHelper.END)));
 
         List<Item> itemList = new LinkedList<>();
         for (Document doc : docs) {
@@ -147,10 +140,11 @@ public class Utility {
                             doc.getDouble(stat.getParam()));
                     break;
             }
-            itemList.add(new Item(record, RadarConverter.getISO8601(doc.getDate("start"))));
+            itemList.add(new Item(record, RadarConverter.getISO8601(
+                    doc.getDate(MongoHelper.START))));
         }
 
-        Header header = new Header(userId, sourceId, sourceType, sensorType,
+        Header header = new Header(subjectId, sourceId, sourceType, sensorType,
                     RadarConverter.getDescriptiveStatistic(stat), unit, timeFrame, eftHeader);
 
         return new Dataset(header, itemList);

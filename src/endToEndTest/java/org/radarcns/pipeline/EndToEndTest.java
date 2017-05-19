@@ -18,12 +18,15 @@ package org.radarcns.pipeline;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.FRONTEND;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
-import static org.radarcns.webapp.Parameter.INTERVAL;
-import static org.radarcns.webapp.Parameter.SENSOR;
-import static org.radarcns.webapp.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.Parameter.STAT;
-import static org.radarcns.webapp.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.util.BasePath.AVRO;
+import static org.radarcns.webapp.util.BasePath.DATA;
+import static org.radarcns.webapp.util.Parameter.INTERVAL;
+import static org.radarcns.webapp.util.Parameter.SENSOR;
+import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.util.Parameter.STAT;
+import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,6 +72,7 @@ import org.slf4j.LoggerFactory;
 public class EndToEndTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EndToEndTest.class);
+
     private static final String USER_ID_MOCK = "UserID_0";
     private static final String SOURCE_ID_MOCK = "SourceID_0";
 
@@ -161,7 +165,7 @@ public class EndToEndTest {
 
         RestClient client = new RestClient(getPipelineConfig().getRestProxy());
         for (int i = 0; i < retry; i++) {
-            try (Response response = client.request("topics")){
+            try (Response response = client.request("topics")) {
                 if (response.code() == 200) {
                     String topics = response.body().string();
                     String[] topicArray = topics.substring(1, topics.length() - 1).replace(
@@ -284,8 +288,8 @@ public class EndToEndTest {
             NoSuchAlgorithmException {
         LOGGER.info("Fetching APIs ...");
 
-        String path = "data/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
-                + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{"
+                + INTERVAL + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", USER_ID_MOCK);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE_ID_MOCK);
 
@@ -481,7 +485,7 @@ public class EndToEndTest {
 
         RestClient client = new RestClient(config.getRestApi());
 
-        try (Response response = client.request("frontend/config/")) {
+        try (Response response = client.request("/" + FRONTEND + "/config/")) {
             assertEquals(expected, response.body().string());
         }
     }

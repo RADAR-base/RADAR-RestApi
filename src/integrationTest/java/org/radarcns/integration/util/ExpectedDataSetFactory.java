@@ -73,7 +73,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * It computes the {@code Dataset} resulted from the mock data.
      *
      * @param expectedValue mock data used to test
-     * @param userId user identifier
+     * @param subjectId subject identifier
      * @param sourceId source identifier
      * @param sourceType source that has to be simulated
      * @param sensorType sensor that has to be simulated
@@ -82,10 +82,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @return {@code Dataset} resulted by the simulation
      * @see Dataset
      **/
-    public Dataset getDataset(ExpectedValue expectedValue, String userId, String sourceId,
+    public Dataset getDataset(ExpectedValue expectedValue, String subjectId, String sourceId,
             SourceType sourceType, SensorType sensorType, DescriptiveStatistic statistic,
             TimeFrame timeFrame) throws InstantiationException, IllegalAccessException {
-        return new Dataset(getHeader(expectedValue, userId, sourceId, sourceType, sensorType,
+        return new Dataset(getHeader(expectedValue, subjectId, sourceId, sourceType, sensorType,
                 statistic, timeFrame), getItem(expectedValue, statistic, sensorType));
     }
 
@@ -93,7 +93,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * It generates the {@code Header} for the resulting {@code Dataset}.
      *
      * @param expectedValue mock data used to test
-     * @param userId user identifier
+     * @param subjectId subject identifier
      * @param sourceId source identifier
      * @param sourceType source that has to be simulated
      * @param sensorType sensor that has to be simulated
@@ -101,10 +101,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param timeFrame time interval between two consecutive samples
      * @return {@link Header} for a {@link Dataset}
      **/
-    public Header getHeader(ExpectedValue expectedValue, String userId, String sourceId,
+    public Header getHeader(ExpectedValue expectedValue, String subjectId, String sourceId,
             SourceType sourceType, SensorType sensorType, DescriptiveStatistic statistic,
             TimeFrame timeFrame) {
-        return new Header(userId, sourceId, sourceType, sensorType, statistic,
+        return new Header(subjectId, sourceId, sourceType, sensorType, statistic,
                 SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType), timeFrame,
                 getEffectiveTimeFrame(expectedValue));
     }
@@ -139,10 +139,11 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
 
     /**
-     * It generates the {@code List<Item>} for the resulting {@code Dataset}
+     * It generates the {@code List<Item>} for the resulting {@link Dataset}.
      *
      * @param statistic function that has to be simulated  @return {@code List<Item>} for a {@link
      * Dataset}
+     *
      * @see Item
      **/
     public List<Item> getItem(ExpectedValue<?> expectedValue,

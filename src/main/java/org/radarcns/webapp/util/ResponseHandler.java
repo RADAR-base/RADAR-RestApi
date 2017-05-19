@@ -1,4 +1,4 @@
-package org.radarcns.util;
+package org.radarcns.webapp.util;
 
 /*
  * Copyright 2016 King's College London and The Hyve
@@ -16,6 +16,8 @@ package org.radarcns.util;
  * limitations under the License.
  */
 
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -24,9 +26,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.avro.specific.SpecificRecord;
+import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.avro.restapi.avro.Message;
 import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.user.Cohort;
+import org.radarcns.avro.restapi.subject.Cohort;
+import org.radarcns.avro.restapi.subject.Subject;
+import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,20 +43,20 @@ public class ResponseHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseHandler.class);
 
     /**
-     * It serialises the {@code Dataset} in input in JSON and sets the suitable status code.
+     * It serialises the {@link Dataset} in input in JSON and sets the suitable status code.
      * @param request HTTP request that has to be served
      * @param dataset request result
      * @return the response content formatted in JSON
-     * @see Dataset
+     * @see {@link Dataset}
      **/
     public static Response getJsonResponse(HttpServletRequest request, Dataset dataset)
             throws IOException {
-        int code = 200;
+        Status status = Status.OK;
         int size = 0;
         SpecificRecord obj = dataset;
 
         if (dataset.getDataset().isEmpty()) {
-            code = 204;
+            status = NO_CONTENT;
             obj = new Message("No data for this input");
         } else {
             size = dataset.getDataset().size();
@@ -59,12 +64,12 @@ public class ResponseHandler {
 
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
-        LOGGER.debug("{}",json.toString());
-        LOGGER.debug("[{}] {} records",code,size);
+        LOGGER.debug("{}", json.toString());
+        LOGGER.debug("[{}] {} records", status.getStatusCode(), size);
 
-        LOGGER.info("[{}] {}", code, request.getRequestURI());
+        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        return Response.status(code).entity(json).build();
+        return Response.status(status.getStatusCode()).entity(json).build();
     }
 
     /**
@@ -75,17 +80,28 @@ public class ResponseHandler {
      **/
     public static Response getJsonResponse(HttpServletRequest request, SpecificRecord obj)
             throws IOException {
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
+        Status status = getStatus(obj);
+        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        LOGGER.debug("{}",json.toString());
-        LOGGER.debug("[{}] {}",200,obj);
+        JsonNode json;
 
-        LOGGER.info("[{}] {}", 200, request.getRequestURI());
+        switch (status) {
+            case OK:
+                json = AvroConverter.avroToJsonNode(obj);
+                break;
+            case NO_CONTENT:
+                json = AvroConverter.avroToJsonNode(new Message("No data for this input"));
+                break;
+            default: return Response.serverError().build();
+        }
 
-        return Response.status(200).entity(json).build();
+        LOGGER.debug("{}", json.toString());
+        LOGGER.debug("{}", obj.toString());
+
+        return Response.status(status.getStatusCode()).entity(json).build();
     }
 
-    //TODO return 400 in case of parameter that does not respect regex
+    //TODO return Status.BAD_REQUEST in case of parameter that does not respect regex.
     /**
      * It sets the suitable status code and return a JSON message containing the input String.
      * @param request HTTP request that has to be served
@@ -93,18 +109,19 @@ public class ResponseHandler {
      * @return the response content formatted in JSON
      **/
     public static Response getJsonErrorResponse(HttpServletRequest request, String message) {
+        Status status = Status.INTERNAL_SERVER_ERROR;
+        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
+
         SpecificRecord obj = new Message(message);
 
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
         if (json == null) {
-            LOGGER.debug("[{}] {}",500,json);
-            LOGGER.info("[{}] {}", 500, request.getRequestURI());
-            return Response.status(500).entity("Internal error!").build();
+            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+            return Response.status(status.getStatusCode()).entity("Internal error!").build();
         } else {
-            LOGGER.debug("[{}] {}",500,json);
-            LOGGER.info("[{}] {}", 500, request.getRequestURI());
-            return Response.status(500).entity(json).build();
+            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+            return Response.status(status.getStatusCode()).entity(json).build();
         }
     }
 
@@ -128,7 +145,7 @@ public class ResponseHandler {
         }
     }
 
-    //TODO return 400 in case of parameter that does not respect regex
+    //TODO return 400 in case of parameter does not respect regex
     /**
      * It sets the status code.
      * @param request HTTP request that has to be served
@@ -142,22 +159,30 @@ public class ResponseHandler {
 
     private static Status getStatus(SpecificRecord obj) throws UnsupportedEncodingException {
         if (obj == null) {
-            return Status.NO_CONTENT;
+            return NO_CONTENT;
         }
 
         switch (obj.getSchema().getName()) {
             case "Cohort" :
-                if (((Cohort) obj).getPatients().isEmpty()) {
-                    return Status.NO_CONTENT;
+                if (((Cohort) obj).getSubjects().isEmpty()) {
+                    return NO_CONTENT;
                 }
                 break;
             case "Dataset" :
                 if (((Dataset) obj).getDataset().isEmpty()) {
-                    return Status.NO_CONTENT;
+                    return NO_CONTENT;
                 }
                 break;
-            case "Application" : break;
-            case "Patient" : break;
+            case "Application" :
+                if (((Application) obj).getServerStatus() == null) {
+                    return NO_CONTENT;
+                }
+                break;
+            case "Subject" :
+                if (((Subject) obj).getSubjectId() == null) {
+                    return NO_CONTENT;
+                }
+                break;
             case "Source" : break;
             case "SourceSpecification" : break;
             default: throw new UnsupportedEncodingException("SpecificRecord "

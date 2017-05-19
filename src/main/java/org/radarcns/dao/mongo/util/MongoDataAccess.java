@@ -16,7 +16,13 @@ package org.radarcns.dao.mongo.util;
  * limitations under the License.
  */
 
+import static org.radarcns.dao.mongo.util.MongoHelper.ASCENDING;
+import static org.radarcns.dao.mongo.util.MongoHelper.DESCENDING;
+import static org.radarcns.dao.mongo.util.MongoHelper.DEVICE_CATALOG;
+import static org.radarcns.dao.mongo.util.MongoHelper.END;
+import static org.radarcns.dao.mongo.util.MongoHelper.ID;
 import static org.radarcns.dao.mongo.util.MongoHelper.SOURCE_TYPE;
+import static org.radarcns.dao.mongo.util.MongoHelper.START;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
@@ -24,6 +30,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import org.bson.Document;
@@ -35,16 +42,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generic function for user management.
+ * Generic function for subject management.
  */
 public abstract class MongoDataAccess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDataAccess.class);
 
     /**
-     * Finds all users.
+     * Finds all subjects.
      *
-     * @return all distinct userIDs for the current DAO instance, otherwise an empty Collection
+     * @param client is the MongoDb client instance
+     *
+     * @return all distinct subjectIDs for the current DAO instance, otherwise an empty Collection
      */
     public Collection<String> findAllUser(MongoClient client) throws ConnectException {
         Set<String> set = new HashSet<>();
@@ -68,18 +77,20 @@ public abstract class MongoDataAccess {
     }
 
     /**
-     * Finds all sources for the given user.
+     * Finds all sources for the given subject.
      *
-     * @param user is the userID
+     * @param subject is the subjectID
+     * @param client is the MongoDb client instance
+     *
      * @return all distinct sourceIDs for the given collection, otherwise empty Collection
      */
-    public Collection<Source> findAllSourcesByUser(String user, MongoClient client)
+    public Collection<Source> findAllSourcesByUser(String subject, MongoClient client)
             throws ConnectException {
         Set<Source> list = new HashSet<>();
 
         MongoCursor<String> cursor;
         for (String collection : getCollectionNames()) {
-            cursor = MongoHelper.findAllSourceByUser(user,
+            cursor = MongoHelper.findAllSourceByUser(subject,
                     MongoHelper.getCollection(client, collection));
 
             if (!cursor.hasNext()) {
@@ -96,9 +107,11 @@ public abstract class MongoDataAccess {
     }
 
     /**
-     * Finds source type for the given user checking all available source device collections.
+     * Finds source type for the given subject checking all available source device collections.
      *
      * @param source is the sourceID
+     * @param client is the MongoDb client instance
+     *
      * @return source type for the given sourceID, otherwise null
      */
     public SourceType findSourceType(String source, MongoClient client)
@@ -136,10 +149,9 @@ public abstract class MongoDataAccess {
      */
     public static void writeSourceType(String source, SourceType type, MongoClient client)
             throws ConnectException, MongoException {
-        Document doc = new Document().append("_id", source).append(SOURCE_TYPE, type.toString());
+        Document doc = new Document().append(ID, source).append(SOURCE_TYPE, type.toString());
 
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-                MongoHelper.DEVICE_CATALOG);
+        MongoCollection<Document> collection = MongoHelper.getCollection(client, DEVICE_CATALOG);
 
         collection.insertOne(doc);
     }
@@ -148,6 +160,7 @@ public abstract class MongoDataAccess {
      * Returns the current collection.
      *
      * @param client is the MongoDb client instance
+     * @param source is the {@link SourceType} related to the required collection
      * @param interval useful to identify which collection has to be queried. A sensor has a
      *      collection for each time frame or time window
      * @return the MongoDb collection
@@ -158,7 +171,56 @@ public abstract class MongoDataAccess {
     }
 
     /**
-     * Finds source type for the given user using the source catalog.
+     * Finds either the minimum or the maximum available timestamp querying all available
+     *      {@link MongoCollection} according to the value of {@code min}.
+     *
+     * @param subject subject identifier
+     * @param source source identifier
+     * @param min if {@code true}, it returns the minimum timestamp, while {@code false} the
+     *      maximum
+     * @param client {@link MongoClient} used to connect to the database
+     *
+     * @return the minimum available timestamp as {@link Date}
+     *
+     * @throws ConnectException if the connection with MongoDb cannot be established
+     */
+    public Date getTimestamp(String subject, String source, boolean min, MongoClient client)
+            throws ConnectException {
+        long timestamp = Long.MIN_VALUE;
+        int order = DESCENDING;
+        String field = END;
+
+        if (min) {
+            timestamp = Long.MAX_VALUE;
+            order = ASCENDING;
+            field = START;
+        }
+
+        MongoCursor<Document> cursor;
+        for (String collection : getCollectionNames()) {
+            cursor = MongoHelper.findDocumentByUserSource(subject, source, field, order, 1,
+                    MongoHelper.getCollection(client, collection));
+
+            if (!cursor.hasNext()) {
+                LOGGER.debug("Empty cursor for collection {}", collection);
+            }
+
+            if (cursor.hasNext()) {
+                if (min) {
+                    timestamp = Math.min(timestamp, cursor.next().getDate(field).getTime());
+                } else {
+                    timestamp = Math.max(timestamp, cursor.next().getDate(field).getTime());
+                }
+            }
+
+            cursor.close();
+        }
+
+        return new Date(timestamp);
+    }
+
+    /**
+     * Finds source type for the given subject using the source catalog.
      *
      * @param source is the sourceID
      * @return source type for the given sourceID, otherwise null
@@ -168,7 +230,7 @@ public abstract class MongoDataAccess {
         SourceType type = null;
 
         MongoCursor<Document> cursor = MongoHelper.findDocumentById(source, null,
-                0, 1, MongoHelper.getCollection(client, MongoHelper.DEVICE_CATALOG));
+                0, 1, MongoHelper.getCollection(client, DEVICE_CATALOG));
 
         if (!cursor.hasNext()) {
             LOGGER.debug("Empty cursor");

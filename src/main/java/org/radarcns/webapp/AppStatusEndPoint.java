@@ -16,10 +16,12 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
-import static org.radarcns.webapp.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.util.BasePath.ANDROID;
+import static org.radarcns.webapp.util.BasePath.AVRO;
+import static org.radarcns.webapp.util.BasePath.STATUS;
+import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
-import com.mongodb.MongoClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -36,9 +38,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.dao.AndroidAppDataAccessObject;
-import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.security.Param;
-import org.radarcns.util.ResponseHandler;
+import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * Android application status web-app. Function set to access Android app status information.
  */
 @Api
-@Path("/android")
+@Path("/" + ANDROID)
 public class AppStatusEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppStatusEndPoint.class);
@@ -58,11 +60,11 @@ public class AppStatusEndPoint {
     //                                    REAL-TIME FUNCTIONS                                     //
     //--------------------------------------------------------------------------------------------//
     /**
-     * JSON function that returns the status app of the given user.
+     * JSON function that returns the status app of the given subject.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/status/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")
@@ -74,11 +76,11 @@ public class AppStatusEndPoint {
             @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
                 + "received status")})
     public Response getRtStatByUserDeviceJsonAppStatus(
-            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getRtStatByUserDeviceWorker(user, source));
+                getRtStatByUserDeviceWorker(subject, source));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -87,11 +89,11 @@ public class AppStatusEndPoint {
     }
 
     /**
-     * AVRO function that returns the status app of the given user.
+     * AVRO function that returns the status app of the given subject.
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/status/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("/" + AVRO + "/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")
@@ -101,11 +103,11 @@ public class AppStatusEndPoint {
             @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
                 + "received status")})
     public Response getRtStatByUserDeviceAvroAppStatus(
-            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRtStatByUserDeviceWorker(user, source));
+                getRtStatByUserDeviceWorker(subject, source));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -115,14 +117,16 @@ public class AppStatusEndPoint {
     /**
      * Actual implementation of AVRO and JSON getRealTimeUser.
      **/
-    private Application getRtStatByUserDeviceWorker(String user, String source)
+    private Application getRtStatByUserDeviceWorker(String subject, String source)
             throws ConnectException {
-        Param.isValidInput(user, source);
+        Param.isValidInput(subject, source);
 
-        MongoClient client = MongoHelper.getClient(context);
+        Application application = new Application();
 
-        Application application = AndroidAppDataAccessObject.getInstance().getStatus(
-                user, source, client);
+        if (SubjectDataAccessObject.exist(subject, context)) {
+            application = AndroidAppDataAccessObject.getInstance().getStatus(
+                subject, source, context);
+        }
 
         return application;
     }

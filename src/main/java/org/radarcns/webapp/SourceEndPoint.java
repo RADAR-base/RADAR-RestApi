@@ -16,11 +16,15 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
-import static org.radarcns.webapp.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.Parameter.SOURCE_TYPE;
-import static org.radarcns.webapp.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.util.BasePath.AVRO;
+import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
+import static org.radarcns.webapp.util.BasePath.SOURCE;
+import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
+import static org.radarcns.webapp.util.BasePath.STATE;
+import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.util.Parameter.SOURCE_TYPE;
+import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
-import com.mongodb.MongoClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -38,12 +42,12 @@ import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceSpecification;
 import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.avro.restapi.user.Patient;
+import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.SourceDataAccessObject;
-import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.security.Param;
-import org.radarcns.util.ResponseHandler;
+import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * SourceDefinition web-app. Function set to access source information.
  */
 @Api
-@Path("/source")
+@Path("/" + SOURCE)
 public class SourceEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceEndPoint.class);
@@ -67,11 +71,11 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/state/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("/" + STATE + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return a SourceDefinition values",
             notes = "Using the source sensors values arrived within last 60sec, it computes the"
-                + "sender status for the given patientID and sourceID")
+                + "sender status for the given subjectID and sourceID")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
                 + "there is a message.avsc object with more details"),
@@ -81,11 +85,11 @@ public class SourceEndPoint {
                 + "computed status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStateByUserDeviceJsonDevStatus(
-            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getRTStateByUserSourceWorker(user, source));
+                getRTStateByUserSourceWorker(subject, source));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -98,11 +102,11 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/state/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("/" + AVRO + "/" + STATE + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return a SourceDefinition values",
             notes = "Using the source sensors values arrived within last 60sec, it computes the"
-                + "sender status for the given patientID and sourceID")
+                + "sender status for the given subjectID and sourceID")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
@@ -110,11 +114,11 @@ public class SourceEndPoint {
                 + "containing last computed status")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getRTStateByUserDeviceAvroDevStatus(
-            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRTStateByUserSourceWorker(user, source));
+                getRTStateByUserSourceWorker(subject, source));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -124,19 +128,17 @@ public class SourceEndPoint {
     /**
      * Actual implementation of AVRO and JSON getRTStateByUserDevice.
      **/
-    private Source getRTStateByUserSourceWorker(String user, String source)
+    private Source getRTStateByUserSourceWorker(String subject, String source)
             throws ConnectException {
-        Param.isValidInput(user, source);
+        Param.isValidInput(subject, source);
 
-        MongoClient client = MongoHelper.getClient(context);
-
-        SourceType sourceType = SourceDataAccessObject.getSourceType(source, client);
+        SourceType sourceType = SourceDataAccessObject.getSourceType(source, context);
 
         if (sourceType == null) {
             return null;
         }
 
-        Source device = Monitors.getInstance().getState(user, source, sourceType, client);
+        Source device = Monitors.getInstance().getState(subject, source, sourceType, context);
 
         return device;
     }
@@ -149,7 +151,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/specification/{" + SOURCE_TYPE + "}")
+    @Path("/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
     @ApiOperation(
             value = "Return a SourceDefinition specification",
             notes = "Return the data specification of all on-board sensors for the given"
@@ -178,7 +180,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/specification/{" + SOURCE_TYPE + "}")
+    @Path("/" + AVRO + "/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
     @ApiOperation(
             value = "Return a SourceDefinition specification",
             notes = "Return the data specification of all on-board sensors for the given"
@@ -213,48 +215,49 @@ public class SourceEndPoint {
     //                                         ALL SOURCES                                        //
     //--------------------------------------------------------------------------------------------//
     /**
-     * JSON function that returns all known sources for the given user.
+     * JSON function that returns all known sources for the given subject.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/getAllSources/{" + SUBJECT_ID + "}")
+    @Path("/" + GET_ALL_SOURCES + "/{" + SUBJECT_ID + "}")
     @ApiOperation(
             value = "Return a User value",
-            notes = "Return all known sources associated with the give patientID")
+            notes = "Return all known sources associated with the give subjectID")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a user.avsc object")})
+            @ApiResponse(code = 200, message = "Return a subject.avsc object")})
     public Response getAllSourcesJsonUser(
-            @PathParam(SUBJECT_ID) String user) {
+            @PathParam(SUBJECT_ID) String subject) {
         try {
-            return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(user));
+            return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subject));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact the service"
+                    + "administrator.");
         }
     }
 
     /**
-     * AVRO function that returns all known sources for the given user.
+     * AVRO function that returns all known sources for the given subject.
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/getAllSources/{" + SUBJECT_ID + "}")
+    @Path("/" + AVRO + "/" + GET_ALL_SOURCES + "/{" + SUBJECT_ID + "}")
     @ApiOperation(
             value = "Return a User value",
-            notes = "Return all known sources associated with the give patientID")
+            notes = "Return all known sources associated with the give subjectID")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a user.avsc object")})
+            @ApiResponse(code = 200, message = "Return a subject.avsc object")})
     public Response getAllSourcesAvroUser(
-            @PathParam(SUBJECT_ID) String user) {
+            @PathParam(SUBJECT_ID) String subject) {
         try {
-            return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(user));
+            return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subject));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -264,13 +267,15 @@ public class SourceEndPoint {
     /**
      * Actual implementation of AVRO and JSON getAllSources.
      **/
-    private Patient getAllSourcesWorker(String user) throws ConnectException {
-        Param.isValidUser(user);
+    private Subject getAllSourcesWorker(String subjectId) throws ConnectException {
+        Param.isValidSubject(subjectId);
 
-        MongoClient client = MongoHelper.getClient(context);
+        Subject subject = new Subject();
 
-        Patient patient = SourceDataAccessObject.findAllSourcesByUser(user, client);
+        if (SubjectDataAccessObject.exist(subjectId, context)) {
+            subject = SourceDataAccessObject.findAllSourcesByUser(subjectId, context);
+        }
 
-        return patient;
+        return subject;
     }
 }

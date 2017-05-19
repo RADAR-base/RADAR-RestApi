@@ -47,7 +47,7 @@ public class SourceDaoTest {
 
     //private static final Logger logger = LoggerFactory.getLogger(SourceDaoTest.class);
 
-    private static final String USER = "UserID_0";
+    private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
     private static final SensorType SENSOR_TYPE = HEART_RATE;
@@ -62,17 +62,17 @@ public class SourceDaoTest {
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
                     SOURCE_TYPE, TIME_FRAME));
 
-        collection.insertMany(RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, TIME_FRAME, SAMPLES, false));
+        collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
+                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
 
         assertEquals(SOURCE_TYPE, SourceDataAccessObject.getSourceType(SOURCE, client));
 
         Utility.insertMixedDocs(client,
-                RandomInput.getRandomApplicationStatus(USER, SOURCE.concat("1")));
+                RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE.concat("1")));
 
         assertEquals(ANDROID, SourceDataAccessObject.getSourceType(SOURCE.concat("1"), client));
 
-        assertEquals(2, SourceDataAccessObject.findAllSourcesByUser(USER,
+        assertEquals(2, SourceDataAccessObject.findAllSourcesByUser(SUBJECT,
                 client).getSources().size());
 
         String extractedSourceId = null;

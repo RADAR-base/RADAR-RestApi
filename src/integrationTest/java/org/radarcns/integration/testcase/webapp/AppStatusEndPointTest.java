@@ -20,8 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-import static org.radarcns.webapp.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.util.BasePath.ANDROID;
+import static org.radarcns.webapp.util.BasePath.AVRO;
+import static org.radarcns.webapp.util.BasePath.STATUS;
+import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -29,6 +32,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
@@ -51,7 +55,7 @@ public class AppStatusEndPointTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppStatusEndPointTest.class);
 
-    private static final String USER = "UserID_0";
+    private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final SourceType SOURCE_TYPE = EMPATICA;
     private static final SensorType SENSOR_TYPE = HEART_RATE;
@@ -60,14 +64,15 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest204() throws IOException {
-        String path = "android/avro/status/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", USER);
+        String path = ANDROID + "/" + AVRO + "/" + STATUS + "/{" + SUBJECT_ID
+                + "}/{" + SOURCE_ID + "}";
+        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
         LOGGER.info(path);
 
-        assertEquals(204, Utility.makeRequest(Properties.getApiConfig().getApiUrl()
-                + path).code());
+        assertEquals(Status.NO_CONTENT.getStatusCode(), Utility.makeRequest(
+                Properties.getApiConfig().getApiUrl() + path).code());
     }
 
     @Test
@@ -79,28 +84,29 @@ public class AppStatusEndPointTest {
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
                     SOURCE_TYPE, TIME_FRAME));
 
-        List<Document> list = RandomInput.getDocumentsRandom(USER, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, TIME_FRAME, SAMPLES, false);
+        List<Document> list = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
+                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
 
         collection.insertMany(list);
 
         Map<String, Document> map = RandomInput.getRandomApplicationStatus(
-                USER.concat("1"), SOURCE.concat("1"));
+                SUBJECT.concat("1"), SOURCE.concat("1"));
 
         Utility.insertMixedDocs(client, map);
 
         Application expected = Utility.convertDocToApplication(map);
 
-        String path = "android/avro/status/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", USER.concat("1"));
+        String path = ANDROID + "/" + AVRO + "/" + STATUS + "/{"
+                + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT.concat("1"));
         path = path.replace("{" + SOURCE_ID + "}", SOURCE.concat("1"));
 
         LOGGER.info(path);
 
         Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
-        assertEquals(200, response.code());
+        assertEquals(Status.OK.getStatusCode(), response.code());
 
-        if (response.code() == 200) {
+        if (response.code() == Status.OK.getStatusCode()) {
             Application actual = AvroConverter.avroByteToAvro(response.body().bytes(),
                     Application.getClassSchema());
             assertEquals(expected, actual);

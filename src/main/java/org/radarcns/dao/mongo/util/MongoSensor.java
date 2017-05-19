@@ -99,23 +99,23 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Returns a {@code Dataset} containing the last seen value for the couple user source.
+     * Returns a {@code Dataset} containing the last seen value for the couple subject source.
      *
-     * @param user is the userID
+     * @param subject is the subjectID
      * @param source is the sourceID
      * @param stat is the required statistical value
      * @param header information used to provide the data context
      * @param collection is the mongoDb collection that has to be queried
-     * @return the last seen data value stat for the given user and source, otherwise
+     * @return the last seen data value stat for the given subject and source, otherwise
      *      empty dataset
      *
      * @see Dataset
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Dataset valueRTByUserSource(String user, String source, Header header, Stat stat,
+    public Dataset valueRTByUserSource(String subject, String source, Header header, Stat stat,
             MongoCollection<Document> collection) throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSource(user, source, "end", -1, 1,
+                .findDocumentByUserSource(subject, source, MongoHelper.END, -1, 1,
                 collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
@@ -123,21 +123,21 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Returns a {@code Dataset} containing alla available values for the couple user source.
+     * Returns a {@code Dataset} containing alla available values for the couple subject source.
      *
-     * @param user is the userID
+     * @param subject is the subjectID
      * @param source is the sourceID
      * @param header information used to provide the data context
      * @param stat is the required statistical value
      * @param collection is the mongoDb collection that has to be queried
-     * @return data dataset for the given user and source, otherwise empty dataset
+     * @return data dataset for the given subject and source, otherwise empty dataset
      *
      * @see Dataset
      */
-    public Dataset valueByUserSource(String user, String source, Header header,
+    public Dataset valueByUserSource(String subject, String source, Header header,
             MongoHelper.Stat stat, MongoCollection<Document> collection) throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSource(user, source,"start", 1, null,
+                .findDocumentByUserSource(subject, source,MongoHelper.START, 1, null,
                 collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
@@ -145,44 +145,45 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Returns a {@code Dataset} containing alla available values for the couple user surce.
+     * Returns a {@code Dataset} containing alla available values for the couple subject source.
      *
-     * @param user is the userID
+     * @param subject is the subjectID
      * @param source is the sourceID
      * @param header information used to provide the data context
      * @param stat is the required statistical value
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
      * @param collection is the mongoDb collection that has to be queried
-     * @return data dataset for the given user and source within the start and end time window,
+     * @return data dataset for the given subject and source within the start and end time window,
      *      otherwise empty dataset
      *
      * @see Dataset
      */
-    public Dataset valueByUserSourceWindow(String user, String source, Header header,
+    public Dataset valueByUserSourceWindow(String subject, String source, Header header,
             MongoHelper.Stat stat, Long start, Long end, MongoCollection<Document> collection)
             throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSourceWindow(user, source, start, end, collection);
+                .findDocumentByUserSourceWindow(subject, source, start, end, collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                 cursor);
     }
 
     /**
-     * Counts the received messages within the time-window [start-end] for the couple user source.
-     * @param user is the userID
+     * Counts the received messages within the time-window [start-end] for the couple subject
+     *      source.
+     * @param subject is the subjectID
      * @param source is the sourceID
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
      * @param collection is the mongoDb collection that has to be queried
      * @return the number of received messages within the time-window [start-end].
      */
-    public double countSamplesByUserSourceWindow(String user, String source, Long start, Long end,
-            MongoCollection<Document> collection) throws ConnectException {
+    public double countSamplesByUserSourceWindow(String subject, String source, Long start,
+            Long end, MongoCollection<Document> collection) throws ConnectException {
         double count = 0;
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSourceWindow(user, source, start, end, collection);
+                .findDocumentByUserSourceWindow(subject, source, start, end, collection);
 
         if (!cursor.hasNext()) {
             LOGGER.debug("Empty cursor");
@@ -192,9 +193,9 @@ public abstract class MongoSensor extends MongoDataAccess {
             Document doc = cursor.next();
 
             try {
-                count += doc.getDouble("count");
+                count += doc.getDouble(Stat.count.getParam());
             } catch (ClassCastException exec) {
-                count += extractCount((Document) doc.get("count"));
+                count += extractCount((Document) doc.get(Stat.count.getParam()));
             }
         }
 
@@ -233,12 +234,12 @@ public abstract class MongoSensor extends MongoDataAccess {
             Document doc = cursor.next();
 
             if (start == null) {
-                start = doc.getDate("start");
+                start = doc.getDate(MongoHelper.START);
             }
-            end = doc.getDate("end");
+            end = doc.getDate(MongoHelper.END);
 
             Item item = new Item(docToAvro(doc,field,stat),
-                    RadarConverter.getISO8601(doc.getDate("start")));
+                    RadarConverter.getISO8601(doc.getDate(MongoHelper.START)));
 
             list.addLast(item);
         }
@@ -259,7 +260,7 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Finds source type for the given user using the source catalog.
+     * Finds source type for the given subject using the source catalog.
      *
      * @param collection name
      */

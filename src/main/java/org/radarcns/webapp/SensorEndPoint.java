@@ -16,19 +16,23 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
-import static org.radarcns.webapp.Parameter.END;
-import static org.radarcns.webapp.Parameter.INTERVAL;
-import static org.radarcns.webapp.Parameter.SENSOR;
-import static org.radarcns.webapp.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.Parameter.START;
-import static org.radarcns.webapp.Parameter.STAT;
-import static org.radarcns.webapp.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.util.BasePath.AVRO;
+import static org.radarcns.webapp.util.BasePath.DATA;
+import static org.radarcns.webapp.util.BasePath.REALTIME;
+import static org.radarcns.webapp.util.Parameter.END;
+import static org.radarcns.webapp.util.Parameter.INTERVAL;
+import static org.radarcns.webapp.util.Parameter.SENSOR;
+import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.util.Parameter.START;
+import static org.radarcns.webapp.util.Parameter.STAT;
+import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.net.ConnectException;
+import java.util.LinkedList;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -39,12 +43,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.SensorDataAccessObject;
+import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.security.Param;
-import org.radarcns.util.ResponseHandler;
+import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * Sensor web-app. Function set to access all data data.
  */
 @Api
-@Path("/data")
+@Path("/" + DATA)
 public class SensorEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorEndPoint.class);
@@ -68,13 +74,13 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/realTime/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID
+    @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID
             + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in JSON.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns the last computed result of type stat for the "
-                + "given patientID, sourceID, and sensor. Data can be queried using different "
+                + "given subjectID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in JSON.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body "
@@ -84,15 +90,15 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing last "
                 + "computed sample for the given inputs formatted either Acceleration.avsc or "
                 + "DoubleValue.avsc")})
-    public Response getRealTimeUserJson(
+    public Response getRealTimeSubjectJson(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
-            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                    getRealTimeUserWorker(user, source, sensor, stat, interval));
+                    getRealTimeSubjectWorker(subject, source, sensor, stat, interval));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
@@ -105,13 +111,13 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/realTime/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID
-            + "}/{" + SOURCE_ID + "}")
+    @Path("/" + AVRO + "/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL
+            + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns the last computed result of type stat for the "
-                + "given patientID, sourceID, and sensor. Data can be queried using different "
+                + "given subjectID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in Apache AVRO.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
@@ -119,15 +125,15 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
                 + "object containing last computed sample for the given inputs formatted either "
                 + "Acceleration.avsc or DoubleValue.avsc")})
-    public Response getRealTimeUserAvro(
+    public Response getRealTimeSubjectAvro(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
-            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRealTimeUserWorker(user, source, sensor, stat, interval));
+                getRealTimeSubjectWorker(subject, source, sensor, stat, interval));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -135,20 +141,25 @@ public class SensorEndPoint {
     }
 
     /**
-     * Actual implementation of AVRO and JSON getRealTimeUser.
+     * Actual implementation of AVRO and JSON getRealTimeSubject.
      **/
-    private Dataset getRealTimeUserWorker(String user, String source, SensorType sensor,
+    private Dataset getRealTimeSubjectWorker(String subject, String source, SensorType sensor,
             DescriptiveStatistic stat, TimeFrame interval) throws ConnectException {
-        Param.isValidInput(user, source);
+        Param.isValidInput(subject, source);
 
-        Dataset data = SensorDataAccessObject.getInstance().valueRTByUserSource(user, source,
+        Dataset dataset = new Dataset(null, new LinkedList<Item>());
+
+        if (SubjectDataAccessObject.exist(subject, context)) {
+            dataset = SensorDataAccessObject.getInstance()
+                .valueRTBySubjectSource(subject, source,
                     stat, interval, sensor, context);
 
-        if (data.getDataset().isEmpty()) {
-            LOGGER.info("No data for the user {} with source {}", user, source);
+            if (dataset.getDataset().isEmpty()) {
+                LOGGER.debug("No data for the subject {} with source {}", subject, source);
+            }
         }
 
-        return data;
+        return dataset;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -165,7 +176,7 @@ public class SensorEndPoint {
             value = "Returns a dataset object formatted in JSON.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
-                + "given patientID, sourceID, and sensor. Data can be queried using different "
+                + "given subjectID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in JSON.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body there "
@@ -175,15 +186,15 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing all "
                 + "available samples for the given inputs formatted either Acceleration.avsc or "
                 + "DoubleValue.avsc")})
-    public Response getAllByUserJson(
+    public Response getAllBySubjectJson(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
-            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getAllByUserWorker(user, source, stat, interval, sensor));
+                getAllBySubjectWorker(subject, source, stat, interval, sensor));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
@@ -196,13 +207,13 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Path("/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
-                + "given patientID, sourceID, and sensor. Data can be queried using different "
+                + "given subjectID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in Apache AVRO.")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing."),
@@ -210,15 +221,15 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
                 + "object containing all available samples for the given inputs formatted either "
                 + "Acceleration.avsc or DoubleValue.avsc")})
-    public Response getAllByUserAvro(
+    public Response getAllBySubjectAvro(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
-            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getAllByUserWorker(user, source, stat, interval, sensor));
+                getAllBySubjectWorker(subject, source, stat, interval, sensor));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -226,20 +237,24 @@ public class SensorEndPoint {
     }
 
     /**
-     * Actual implementation of AVRO and JSON getAllByUser.
+     * Actual implementation of AVRO and JSON getAllBySubject.
      **/
-    private Dataset getAllByUserWorker(String user, String source, DescriptiveStatistic stat,
+    private Dataset getAllBySubjectWorker(String subject, String source, DescriptiveStatistic stat,
             TimeFrame interval, SensorType sensor) throws ConnectException {
-        Param.isValidInput(user, source);
+        Param.isValidInput(subject, source);
 
-        Dataset data = SensorDataAccessObject.getInstance().valueByUserSource(user, source, stat,
-                interval, sensor, context);
+        Dataset dataset = new Dataset(null, new LinkedList<Item>());
 
-        if (data.getDataset().isEmpty()) {
-            LOGGER.info("No data for the user {} with source {}", user, source);
+        if (SubjectDataAccessObject.exist(subject, context)) {
+            dataset = SensorDataAccessObject.getInstance().valueBySubjectSource(subject,
+                source, stat, interval, sensor, context);
+
+            if (dataset.getDataset().isEmpty()) {
+                LOGGER.debug("No data for the subject {} with source {}", subject, source);
+            }
         }
 
-        return data;
+        return dataset;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -256,7 +271,7 @@ public class SensorEndPoint {
             value = "Returns a dataset object formatted in JSON.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
-                + "given patientID, sourceID, and sensor belonging to the time window "
+                + "given subjectID, sourceID, and sensor belonging to the time window "
                 + "[start - end]. Data can be queried using different time-frame resolutions. "
                 + "The response is formatted in JSON.")
     @ApiResponses(value = {
@@ -267,17 +282,17 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing samples "
                 + "belonging to the time window [start - end] for the given inputs formatted "
                 + "either Acceleration.avsc or DoubleValue.avsc.")})
-    public Response getByUserForWindowJson(
+    public Response getBySubjectForWindowJson(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source,
             @PathParam(INTERVAL) TimeFrame interval,
             @PathParam(START) long start,
             @PathParam(END) long end) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getByUserForWindowWorker(user, source, stat, interval, sensor, start, end));
+                getBySubjectForWindowWorker(subject, source, stat, interval, sensor, start, end));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
@@ -290,13 +305,13 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Path("/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
             notes = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
-                + "given patientID, sourceID, and sensor belonging to the time window "
+                + "given subjectID, sourceID, and sensor belonging to the time window "
                 + "[start - end]. Data can be queried using different time-frame resolutions. "
                 + "The response is formatted in Apache AVRO.")
     @ApiResponses(value = {
@@ -305,17 +320,17 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
                 + "object containing samples belonging to the time window [start - end] for the "
                 + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")})
-    public Response getByUserForWindowAvro(
+    public Response getBySubjectForWindowAvro(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
-            @PathParam(SUBJECT_ID) String user,
+            @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source,
             @PathParam(START) long start,
             @PathParam(END) long end) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getByUserForWindowWorker(user, source, stat, interval, sensor, start, end));
+                getBySubjectForWindowWorker(subject, source, stat, interval, sensor, start, end));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -323,20 +338,25 @@ public class SensorEndPoint {
     }
 
     /**
-     * Actual implementation of AVRO and JSON getByUserForWindow.
+     * Actual implementation of AVRO and JSON getBySubjectForWindow.
      **/
-    private Dataset getByUserForWindowWorker(String user, String source, DescriptiveStatistic stat,
-            TimeFrame interval, SensorType sensor, long start, long end) throws ConnectException {
-        Param.isValidInput(user, source);
+    private Dataset getBySubjectForWindowWorker(String subject, String source,
+            DescriptiveStatistic stat, TimeFrame interval, SensorType sensor, long start,
+            long end) throws ConnectException {
+        Param.isValidInput(subject, source);
 
-        Dataset acc = SensorDataAccessObject.getInstance().valueByUserSourceWindow(user, source,
-                stat, interval, start, end, sensor, context);
+        Dataset dataset = new Dataset(null, new LinkedList<Item>());
 
-        if (acc.getDataset().isEmpty()) {
-            LOGGER.info("No data for the user {} with source {}", user, source);
+        if (SubjectDataAccessObject.exist(subject, context)) {
+            dataset = SensorDataAccessObject.getInstance().valueBySubjectSourceWindow(
+                subject, source, stat, interval, start, end, sensor, context);
+
+            if (dataset.getDataset().isEmpty()) {
+                LOGGER.debug("No data for the subject {} with source {}", subject, source);
+            }
         }
 
-        return acc;
+        return dataset;
     }
 
 }

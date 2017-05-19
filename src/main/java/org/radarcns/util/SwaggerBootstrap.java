@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by Francesco Nobilia on 14/11/2016.
+ * Swagger initializer. It sets all the required variable to create a valid swagger documentation.
  */
 public class SwaggerBootstrap extends HttpServlet {
 

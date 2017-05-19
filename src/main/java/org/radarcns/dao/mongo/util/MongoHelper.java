@@ -49,7 +49,14 @@ public class MongoHelper {
     public static final String END = "end";
     public static final String SOURCE_TYPE = "sourceType";
 
+    public static final String FIRST_QUARTILE = "25";
+    public static final String SECOND_QUARTILE = "50";
+    public static final String THIRD_QUARTILE = "75";
+
     public static final String DEVICE_CATALOG = "radar_device_catalog";
+
+    public static final int ASCENDING = 1;
+    public static final int DESCENDING = -1;
 
     /**
      * Enumerate all available statistical values.
@@ -70,9 +77,9 @@ public class MongoHelper {
     }
 
     /**
-     * Finds all Documents within [start-end] belonging to the given user for the give source.
+     * Finds all Documents within [start-end] belonging to the given subject for the give source.
      *
-     * @param user is the userID
+     * @param subject is the subjectID
      * @param source is the sourceID
      * @param start is the start time of the queried timewindow
      * @param end is the end time of the queried timewindow
@@ -80,11 +87,11 @@ public class MongoHelper {
      * @return a MongoDB cursor containing all documents between start and end for the given User,
      *      SourceDefinition and MongoDB collection
      */
-    protected static MongoCursor<Document> findDocumentByUserSourceWindow(String user,
+    protected static MongoCursor<Document> findDocumentByUserSourceWindow(String subject,
             String source, Long start, Long end, MongoCollection<Document> collection) {
         FindIterable<Document> result = collection.find(
                 Filters.and(
-                        eq(USER,user),
+                        eq(USER,subject),
                         eq(SOURCE,source),
                         gte(START,new Date(start)),
                         lte(END,new Date(end)))).sort(new BasicDBObject(START,1));
@@ -93,29 +100,30 @@ public class MongoHelper {
     }
 
     /**
-     * Finds all Documents belonging to the given user for the give source.
+     * Finds all Documents belonging to the given subject for the give source.
      *
-     * @param user is the userID
+     * @param subject is the subjectID
      * @param source is the sourceID
-     * @param sortBy states the way in which documents have to be sorted. It is optional
+     * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
+     *      means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents for the given User, SourceDefinition
      *      and MongoDB collection
      */
-    protected static MongoCursor<Document> findDocumentByUserSource(String user, String source,
+    protected static MongoCursor<Document> findDocumentByUserSource(String subject, String source,
             String sortBy, int order, Integer limit, MongoCollection<Document> collection) {
         FindIterable<Document> result;
 
         if (sortBy == null) {
             result = collection.find(
                 Filters.and(
-                    eq(USER, user),
+                    eq(USER, subject),
                     eq(SOURCE, source)));
         } else {
             result = collection.find(
                 Filters.and(
-                    eq(USER, user),
+                    eq(USER, subject),
                     eq(SOURCE, source))
             ).sort(new BasicDBObject(sortBy, order));
         }
@@ -131,7 +139,8 @@ public class MongoHelper {
      * Finds all Documents belonging to the given source.
      *
      * @param source is the sourceID
-     * @param sortBy states the way in which documents have to be sorted. It is optional
+     * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
+     *      means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents for the given SourceDefinition and MongoDB
@@ -162,7 +171,8 @@ public class MongoHelper {
      * Finds document with the given ID.
      *
      * @param id Document _id
-     * @param sortBy states the way in which documents have to be sorted. It is optional
+     * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
+     *      means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents for the given SourceDefinition and MongoDB
@@ -190,27 +200,27 @@ public class MongoHelper {
     }
 
     /**
-     * Finds all users.
+     * Finds all subjects.
      *
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all distinct users for the given MongoDB collection
+     * @return a MongoDB cursor containing all distinct subjects for the given MongoDB collection
      */
     public static MongoCursor<String> findAllUser(MongoCollection<Document> collection) {
-        return collection.distinct("user", String.class).iterator();
+        return collection.distinct(USER, String.class).iterator();
     }
 
     /**
-     * Finds all sources for the given user.
+     * Finds all sources for the given subject.
      *
-     * @param user is the userID
+     * @param subject is the subjectID
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all distinct sources for the given User and MongoDB
      *      collection
      */
-    public static MongoCursor<String> findAllSourceByUser(String user,
+    public static MongoCursor<String> findAllSourceByUser(String subject,
                 MongoCollection<Document> collection) {
-        return collection.distinct("source", String.class)
-                .filter(eq(USER,user)).iterator();
+        return collection.distinct(SOURCE, String.class)
+                .filter(eq(USER,subject)).iterator();
     }
 
     /**

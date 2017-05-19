@@ -46,10 +46,14 @@ public class ExposedConfigTest {
     public static final String CONFIG_JSON = "config.json";
     private static final String SWAGGER_JSON = "swagger.json";
 
+    private static final String WEB_ROOT = "radar";
+    private static final String BASE_PATH = "api";
+    public static final String FRONTEND = "frontend";
+
     @Test
     public void checkFrontEndConfig()
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        URL url = new URL(PROTOCOL, SERVER, PORT, "/radar/frontend/");
+        URL url = new URL(PROTOCOL, SERVER, PORT, "/" + WEB_ROOT + "/" + FRONTEND + "/");
 
         try (Response response = Utility.makeRequest(new URL(url, CONFIG_JSON).toString())) {
             assertEquals(200, response.code());
@@ -64,11 +68,14 @@ public class ExposedConfigTest {
     @Test
     public void checkSwaggerDoc()
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
+
+        //TODO get this from config
+
         ServerConfig config = new ServerConfig();
         config.setProtocol(PROTOCOL);
         config.setHost(SERVER);
         config.setPort(PORT);
-        config.setPath("/radar/api/");
+        config.setPath("/" + WEB_ROOT + "/" + BASE_PATH + "/");
         config.setUnsafe(false);
         assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(config));
     }

@@ -19,10 +19,12 @@ package org.radarcns.monitor;
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.HashMap;
+import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.sensor.SensorSpecification;
 import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceSpecification;
 import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.source.SourceCatalog;
 
 /**
@@ -36,7 +38,7 @@ public class Monitors {
     /** Singleton instance. **/
     private static final Monitors INSTANCE;
 
-    /** Constructo.r **/
+    /** Constructor. **/
     private Monitors(SourceCatalog catalog) {
         hooks = new HashMap<>();
 
@@ -64,7 +66,25 @@ public class Monitors {
      * Checks the status for the given source counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
      *
-     * @param user identifier
+     * @param subject identifier
+     * @param source identifier
+     * @param context {@link ServletContext} used to retrieve the client for accessing the
+     *      results cache
+     * @return {@code SourceDefinition} representing a source source
+     * @throws ConnectException if the connection with MongoDb is faulty
+     *
+     * @see {@link Source}
+     */
+    public Source getState(String subject, String source, SourceType sourceType,
+            ServletContext context) throws ConnectException {
+        return getState(subject, source, sourceType, MongoHelper.getClient(context));
+    }
+
+    /**
+     * Checks the status for the given source counting the number of received messages and
+     *      checking whether it respects the data frequencies. There is a check for each data.
+     *
+     * @param subject identifier
      * @param source identifier
      * @param client is the MongoDB client
      * @return {@code SourceDefinition} representing a source source
@@ -72,7 +92,7 @@ public class Monitors {
      *
      * @see Source
      */
-    public Source getState(String user, String source, SourceType sourceType, MongoClient client)
+    public Source getState(String subject, String source, SourceType sourceType, MongoClient client)
             throws ConnectException {
         SourceMonitor monitor = hooks.get(sourceType);
 
@@ -81,7 +101,7 @@ public class Monitors {
                     + "is not currently supported");
         }
 
-        return monitor.getState(user, source, client);
+        return monitor.getState(subject, source, client);
     }
 
     /**

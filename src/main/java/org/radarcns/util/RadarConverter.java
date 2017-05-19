@@ -41,8 +41,22 @@ public class RadarConverter {
     private static Logger logger = LoggerFactory.getLogger(RadarConverter.class);
 
     /**
-     * Converts java Date to ISO8601 String.
-     * @param value input {@code Date} that has to be converted
+     * Converts {@code long} to ISO8601 {@code String}.
+     * @param value input {@code long} that has to be converted
+     * @return a {@code String} representing a date in ISO8601 format
+     * @see <a href="http://www.iso.org/iso/home/standards/iso8601.htm>ISO8601 specification</a>
+     **/
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    public static String getISO8601(long value) {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(tz);
+        return df.format(new Date(value));
+    }
+
+    /**
+     * Converts {@link Date} to ISO8601 {@code String}.
+     * @param value input {@link Date} that has to be converted
      * @return a {@code String} representing a date in ISO8601 format
      * @see <a href="http://www.iso.org/iso/home/standards/iso8601.htm>ISO8601 specification</a>
      **/
@@ -55,9 +69,9 @@ public class RadarConverter {
     }
 
     /**
-     * Converts ISO8601 {@code String} to java {@code Date}.
+     * Converts ISO8601 {@code String} to java {@link Date}.
      * @param value input {@code String} formatted in ISO8601
-     * @return {@code Date} object according to the given input
+     * @return {@link Date} object according to the given input
      * @see <a href="http://www.iso.org/iso/home/standards/iso8601.htm>ISO8601 specification</a>
      **/
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")

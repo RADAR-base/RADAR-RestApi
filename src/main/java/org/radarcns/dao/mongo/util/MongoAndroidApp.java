@@ -39,16 +39,16 @@ public abstract class MongoAndroidApp extends MongoDataAccess {
     /**
      * Returns an {@code Application} initialised with the extracted value.
      *
-     * @param user is the userID
+     * @param subject is the subjectID
      * @param source is the sourceID
      * @param client is the mongoDb client instance
-     * @return the last seen status update for the given user and source, otherwise null
+     * @return the last seen status update for the given subject and source, otherwise null
      */
-    public Application valueByUserSource(String user, String source, Application app,
+    public Application valueBySubjectSource(String subject, String source, Application app,
             MongoClient client) throws ConnectException {
 
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSource(user, source, null, -1, 1,
+                .findDocumentByUserSource(subject, source, null, -1, 1,
                     MongoHelper.getCollection(client, getCollectionName()));
 
         if (!cursor.hasNext()) {

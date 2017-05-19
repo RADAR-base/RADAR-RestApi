@@ -16,9 +16,11 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
-import static org.radarcns.webapp.Parameter.STUDY_ID;
+import static org.radarcns.webapp.util.BasePath.AVRO;
+import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
+import static org.radarcns.webapp.util.BasePath.SUBJECT;
+import static org.radarcns.webapp.util.Parameter.STUDY_ID;
 
-import com.mongodb.MongoClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -33,48 +35,48 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.radarcns.avro.restapi.user.Cohort;
-import org.radarcns.dao.UserDataAccessObject;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.util.ResponseHandler;
+import org.radarcns.avro.restapi.subject.Cohort;
+import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * User web-app. Function set to access users information.
+ * Subject web-app. Function set to access subject information. A subject is a person enrolled for
+ *      in a study.
  */
 @Api
-@Path("/user")
-public class UserEndPoint {
+@Path("/" + SUBJECT)
+public class SubjectEndPoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserEndPoint.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectEndPoint.class);
 
     @Context private ServletContext context;
     @Context private HttpServletRequest request;
 
     //--------------------------------------------------------------------------------------------//
-    //                                        ALL PATIENTS                                        //
+    //                                        ALL SUBJECTS                                        //
     //--------------------------------------------------------------------------------------------//
     /**
-     * JSON function that returns all available patient.
+     * JSON function that returns all available subject.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/getAllPatients/{" + STUDY_ID + "}")
+    @Path("/" + GET_ALL_SUBJECTS + "/{" + STUDY_ID + "}")
     @ApiOperation(
-            value = "Return a list of users",
-            notes = "Each user can have multiple sourceID associated with him")
+            value = "Return a list of subjects",
+            notes = "Each subject can have multiple sourceID associated with him")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a list of user.avsc objects")})
-    public Response getAllPatientsJsonUser(
+            @ApiResponse(code = 200, message = "Return a list of subject.avsc objects")})
+    public Response getAllSubjectsJsonSubject(
             @PathParam(STUDY_ID) String study
     ) {
         try {
-            return ResponseHandler.getJsonResponse(request, getAllPatientsWorker());
+            return ResponseHandler.getJsonResponse(request, getAllSubjectsWorker());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -83,24 +85,24 @@ public class UserEndPoint {
     }
 
     /**
-     * AVRO function that returns all available patient.
+     * AVRO function that returns all available subject.
      */
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/avro/getAllPatients/{" + STUDY_ID + "}")
+    @Path("/" + AVRO + "/" + GET_ALL_SUBJECTS + "/{" + STUDY_ID + "}")
     @ApiOperation(
-            value = "Return a list of users",
-            notes = "Each user can have multiple sourceID associated with him")
+            value = "Return a list of subjects",
+            notes = "Each subject can have multiple sourceID associated with him")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a byte array serialising a list of"
-                + "user.avsc objects")})
-    public Response getAllPatientsAvroUser(
+                + "subject.avsc objects")})
+    public Response getAllSubjectsAvroSubject(
             @PathParam(STUDY_ID) String study
     ) {
         try {
-            return ResponseHandler.getAvroResponse(request, getAllPatientsWorker());
+            return ResponseHandler.getAvroResponse(request, getAllSubjectsWorker());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -108,13 +110,17 @@ public class UserEndPoint {
     }
 
     /**
-     * Actual implementation of AVRO and JSON getAllPatients.
+     * Actual implementation of AVRO and JSON getAllSubjects.
      **/
-    private Cohort getAllPatientsWorker() throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
-
-        Cohort cohort = UserDataAccessObject.findAllUsers(client);
+    private Cohort getAllSubjectsWorker() throws ConnectException {
+        Cohort cohort = SubjectDataAccessObject.findAllSubjects(context);
 
         return cohort;
     }
+
+    //--------------------------------------------------------------------------------------------//
+    //                                        SUBJECT INFO                                        //
+    //--------------------------------------------------------------------------------------------//
+    //TODO get info by subjectId
+
 }
