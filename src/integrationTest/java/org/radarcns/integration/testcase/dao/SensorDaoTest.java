@@ -222,6 +222,10 @@ public class SensorDaoTest {
 
         collection.insertMany(randomInput);
 
+        EffectiveTimeFrame expected;
+        expected = getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE,
+            randomInput);
+
         collection = MongoHelper.getCollection(client,
             SensorDataAccessObject.getInstance(ACCELEROMETER).getCollectionName(SOURCE_TYPE,
                 TIME_FRAME));
@@ -233,9 +237,6 @@ public class SensorDaoTest {
                 COUNT, TIME_FRAME, SAMPLES, false);
 
         collection.insertMany(randomInput);
-
-        EffectiveTimeFrame expected = getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE,
-                randomInput);
 
         expected = getExpectedTimeFrame(
                 RadarConverter.getISO8601(expected.getStartDateTime()).getTime(),
