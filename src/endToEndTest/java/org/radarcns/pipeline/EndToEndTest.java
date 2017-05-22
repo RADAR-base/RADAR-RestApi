@@ -88,7 +88,7 @@ public class EndToEndTest {
     public static final String PIPELINE_CONFIG = "pipeline.yml";
 
     // Latency expressed in second
-    private static final long LATENCY = 60;
+    private static final long LATENCY = 120;
 
     private static class BaseFile {
         private static final File file = new File(
