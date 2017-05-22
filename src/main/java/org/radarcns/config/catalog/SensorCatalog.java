@@ -22,17 +22,37 @@ import org.radarcns.dao.mongo.data.sensor.DataFormat;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Sensor specification. It is used to define a sensor providing all available information.
+ */
 public class SensorCatalog {
 
+    /** Sensor name. **/
     private SensorType name;
 
+    /** Sample rate measured in Hz: number of samples generated within a second. **/
     private Double frequency;
 
+    /**
+     * Measurement {@link Unit}.
+     **/
     private Unit unit;
 
+    /** Explains if the sample is a RAW data or it is the result of a computation. In the second
+     *      case, it reports who has computed the value.
+     * @see DataType
+     **/
     @JsonProperty("data_type")
     private DataType dataType;
 
+    /**
+     * Defines at which {@code Data Class} the sensor belongs to. A {@code Data Class} is a
+     *      generalised value within the RADAR Platform. For instance, all data coming from sensors
+     *      generating a single {@code Double} is generalised using
+     *      {@link DataFormat#DOUBLE_FORMAT}.
+     * @see DataFormat
+     */
     @JsonProperty("data_class")
     private DataFormat dataFormat;
 

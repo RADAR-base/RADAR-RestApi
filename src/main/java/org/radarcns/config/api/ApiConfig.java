@@ -53,11 +53,12 @@ public class ApiConfig {
     @JsonProperty("swagger_version")
     private String swaggerVersion;
 
-    /** Comma separated list stating supported Application Protocols applicable to query APIs. **/
+    /** Comma separated list stating supported Application Protocols applicable to query
+     *          RESTFul interface. **/
     @JsonProperty("application_protocol")
     private String applicationProtocol;
 
-    /** Machine address hosting the APIs. **/
+    /** Machine address hosting the RESTFul interface. **/
     private String host;
 
     /** Base or Root path for the RESTFul interface. **/
@@ -89,7 +90,7 @@ public class ApiConfig {
         return mongoHosts;
     }
 
-    /** Sets MongoDb intances. **/
+    /** Sets MongoDb instance. **/
     public void setMongoHosts(Map<String, String> mongoHosts) {
         this.mongoHosts = mongoHosts;
     }
@@ -134,22 +135,25 @@ public class ApiConfig {
         return applicationProtocol;
     }
 
-    /** Sets the list of supported Application Protocols applicable to query APIs. **/
+    /** Sets the list of supported Application Protocols applicable to query RESTFul interface. **/
     public void setApplicationProtocol(String applicationProtocol) {
         this.applicationProtocol = applicationProtocol;
     }
 
-    /** Returns the Host address hosting the API. **/
+    /** Returns the Host address hosting the RESTFul interface. **/
     public String getHost() {
         return host;
     }
 
-    /** Sets the Host address hosting the API. **/
+    /** Sets the Host address hosting the RESTFul interface. **/
     public void setHost(String host) {
         this.host = host;
     }
 
-    /** Returns the API base bath making sure it starts with slash. **/
+    /**
+     * Returns the RESTFul interface web root, making sure it starts with slash.
+     * @return the RESTFul interface web root as a {@code String}
+     */
     public String getApiBasePath() {
         if (apiBasePath.charAt(0) != '/') {
             return  "/" + apiBasePath;
@@ -158,7 +162,10 @@ public class ApiConfig {
         return apiBasePath;
     }
 
-    /** Returns the URL to access the RESTFul interface. **/
+    /**
+     * Returns a {@code String} stating the {@code URL} to access the RESTFul interface.
+     * @return the {@code URL} to access the RESTFul interface as a {@code String}
+     */
     public String getApiUrl() {
         String apiComponent = getApiBasePath();
         if (apiComponent.charAt(apiComponent.length() - 1) != '/') {
@@ -189,7 +196,7 @@ public class ApiConfig {
 
     /**
      * Returns the list of all known MongoDB credentials.
-     * @return MongoDB credentials as List
+     * @return a {@code List} of {@link MongoCredential}
      */
     public List<MongoCredential> getMongoDbCredentials() {
         return singletonList(MongoCredential.createCredential(mongoUser.get("usr"),
@@ -197,8 +204,8 @@ public class ApiConfig {
     }
 
     /**
-     * Returns a String representing the MongoDB database name.
-     * @return MongoDB database name as String
+     * Returns a {@code String} representing the MongoDB database name.
+     * @return MongoDB database name as {@code String}
      */
     public String getMongoDbName() {
         return mongoUser.get("db");

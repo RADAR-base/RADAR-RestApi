@@ -65,18 +65,15 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-  // The production code runs on tomcat 8.0.37
   providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
   compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApi
 
-  // The production code uses the SLF4J logging API at compile time
   compile group: 'ch.qos.logback', name:'logback-classic', version: logback
 
   compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
   compile group: 'org.json', name: 'json', version: json
   compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
-  compile group: 'org.apache.avro', name: 'avro', version: avro
   compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: jackson
   compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
   compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
