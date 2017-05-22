@@ -15,7 +15,6 @@ war {
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
-ext.avro='1.7.7'
 ext.codacyVersion = '1.0.10'
 ext.dataformat = '2.8.5'
 ext.jackson='2.8.4'
@@ -30,7 +29,8 @@ ext.mongodb='3.3.0'
 ext.okhttpVersion = '3.5.0'
 ext.okioVersion = '1.11.0'
 ext.openCsvVersion = '3.9'
-ext.radarCommon = '0.3'
+ext.radarCommon = '0.3.1-SNAPSHOT'
+ext.radarCommonTesting = '0.3.1-SNAPSHOT'
 ext.radarSchemasCommon = '0.1'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
@@ -81,7 +81,7 @@ dependencies {
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
-  testCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
+  testCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommonTesting
   testCompile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasCommon
   testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion

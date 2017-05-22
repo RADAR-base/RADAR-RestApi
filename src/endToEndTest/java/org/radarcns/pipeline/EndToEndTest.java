@@ -88,7 +88,7 @@ public class EndToEndTest {
     public static final String PIPELINE_CONFIG = "pipeline.yml";
 
     // Latency expressed in second
-    private static final long LATENCY = 30;
+    private static final long LATENCY = 60;
 
     private static class BaseFile {
         private static final File file = new File(
@@ -281,9 +281,27 @@ public class EndToEndTest {
      */
     private void streamToKafka() throws IOException, InterruptedException {
         LOGGER.info("Streaming data into Kafka ...");
-        MockProducer producer = new MockProducer(getPipelineConfig());
+        MockProducer producer = new MockProducer(getPipelineConfig(), getCsvRoot());
         producer.start();
         producer.shutdown();
+    }
+
+    private File getCsvRoot() {
+        if (getPipelineConfig().getData().isEmpty()) {
+            throw new IllegalStateException("Data in " + PIPELINE_CONFIG
+                        + " is empty or not defined");
+        }
+
+        String fileName = getPipelineConfig().getData().get(0).getDataFile();
+
+        String path = this.getClass().getClassLoader().getResource(fileName).getPath();
+        //path = path.substring(0, path.length() - fileName.length());
+
+        LOGGER.info(path);
+        LOGGER.info("Using CSV files located at: {}",
+                path.substring(0, path.length() - fileName.length()));
+
+        return new File(path);
     }
 
     /**
