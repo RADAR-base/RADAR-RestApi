@@ -17,7 +17,7 @@ package org.radarcns.integration.util;
  */
 
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
-import static org.radarcns.integration.model.ExpectedValue.DURATION;
+import static org.radarcns.mock.model.ExpectedValue.DURATION;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,8 +39,8 @@ import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.integration.model.ExpectedValue;
-import org.radarcns.integration.model.ExpectedValue.StatType;
+import org.radarcns.mock.model.CollectorStatisticsType;
+import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.source.SourceCatalog;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
@@ -53,22 +53,23 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
     //private static final Logger LOGGER = LoggerFactory.getLogger(ExpectedDataSetFactory.class);
 
-    private static final Map<DescriptiveStatistic, StatType> statMap = new EnumMap<>(
+    private static final Map<DescriptiveStatistic, CollectorStatisticsType> statMap = new EnumMap<>(
             DescriptiveStatistic.class);
 
     /**
      * Default constructor initializes the mapping between {@link DescriptiveStatistic} and {@link
-     * StatType}.
+     * }.
      */
     public ExpectedDataSetFactory() {
-        statMap.put(DescriptiveStatistic.AVERAGE, StatType.AVERAGE);
-        statMap.put(DescriptiveStatistic.COUNT, StatType.COUNT);
-        statMap.put(DescriptiveStatistic.INTERQUARTILE_RANGE, StatType.INTERQUARTILE_RANGE);
-        statMap.put(DescriptiveStatistic.MAXIMUM, StatType.MAXIMUM);
-        statMap.put(DescriptiveStatistic.MEDIAN, StatType.MEDIAN);
-        statMap.put(DescriptiveStatistic.MINIMUM, StatType.MINIMUM);
-        statMap.put(DescriptiveStatistic.QUARTILES, StatType.QUARTILES);
-        statMap.put(DescriptiveStatistic.SUM, StatType.SUM);
+        statMap.put(DescriptiveStatistic.AVERAGE, CollectorStatisticsType.AVERAGE);
+        statMap.put(DescriptiveStatistic.COUNT, CollectorStatisticsType.COUNT);
+        statMap.put(DescriptiveStatistic.INTERQUARTILE_RANGE,
+                CollectorStatisticsType.INTERQUARTILE_RANGE);
+        statMap.put(DescriptiveStatistic.MAXIMUM, CollectorStatisticsType.MAXIMUM);
+        statMap.put(DescriptiveStatistic.MEDIAN, CollectorStatisticsType.MEDIAN);
+        statMap.put(DescriptiveStatistic.MINIMUM, CollectorStatisticsType.MINIMUM);
+        statMap.put(DescriptiveStatistic.QUARTILES, CollectorStatisticsType.QUARTILES);
+        statMap.put(DescriptiveStatistic.SUM, CollectorStatisticsType.SUM);
     }
 
     /**

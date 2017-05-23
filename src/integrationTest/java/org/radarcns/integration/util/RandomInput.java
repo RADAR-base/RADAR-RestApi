@@ -33,9 +33,9 @@ import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.integration.model.ExpectedArrayValue;
-import org.radarcns.integration.model.ExpectedDoubleValue;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.mock.model.ExpectedArrayValue;
+import org.radarcns.mock.model.ExpectedDoubleValue;
 
 /**
  * All supported sources specifications.
@@ -57,13 +57,13 @@ public class RandomInput {
             SensorType sensorType, DescriptiveStatistic stat, TimeFrame timeFrame,
             int samples, boolean singleWindow) throws InstantiationException,
             IllegalAccessException {
-        ExpectedDoubleValue instance = new ExpectedDoubleValue(new MeasurementKey(user, source));
+        MeasurementKey key = new MeasurementKey(user, source);
+        ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
         Long start = new Date().getTime();
 
         for (int i = 0; i < samples; i++) {
-            instance.add(Utility.getStartTimeWindow(start), start,
-                    ThreadLocalRandom.current().nextDouble());
+            instance.add(key, start, new Object[] {ThreadLocalRandom.current().nextDouble()});
 
             if (singleWindow) {
                 start += 1;
@@ -81,21 +81,24 @@ public class RandomInput {
     private static void randomArrayValue(String user, String source, SourceType sourceType,
             SensorType sensorType, DescriptiveStatistic stat, TimeFrame timeFrame, int samples,
             boolean singleWindow) throws InstantiationException, IllegalAccessException {
-        ExpectedArrayValue instance = new ExpectedArrayValue(new MeasurementKey(user, source));
+
+        ExpectedArrayValue instance = new ExpectedArrayValue();
 
         Long start = new Date().getTime();
 
-        double[] array;
+        Double[] array;
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
 
+        MeasurementKey key = new MeasurementKey(user, source);
+
         for (int i = 0; i < samples; i++) {
-            array = new double[3];
+            array = new Double[3];
             array[0] = random.nextDouble();
             array[1] = random.nextDouble();
             array[2] = random.nextDouble();
 
-            instance.add(Utility.getStartTimeWindow(start), start, array);
+            instance.add(key, start, array);
 
             if (singleWindow) {
                 start += TimeUnit.SECONDS.toMillis(

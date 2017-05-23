@@ -57,15 +57,15 @@ import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
-import org.radarcns.integration.aggregator.MockAggregator;
-import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.mock.CsvGenerator;
-import org.radarcns.mock.MockDataConfig;
 import org.radarcns.mock.MockProducer;
+import org.radarcns.mock.config.MockDataConfig;
+import org.radarcns.mock.data.CsvGenerator;
+import org.radarcns.mock.data.MockRecordValidator;
+import org.radarcns.mock.model.ExpectedValue;
+import org.radarcns.mock.model.MockAggregator;
 import org.radarcns.pipeline.config.PipelineConfig;
-import org.radarcns.pipeline.data.CsvValidator;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
@@ -187,7 +187,7 @@ public class EndToEndTest {
         LOGGER.info("Generating CSV files ...");
         for (MockDataConfig config : pipelineConfig.getData()) {
             new CsvGenerator().generate(config, pipelineConfig.getDuration(), dataRoot);
-            CsvValidator.validate(config, pipelineConfig.getDuration(), dataRoot);
+            new MockRecordValidator(config, pipelineConfig.getDuration(), dataRoot).validate();
         }
     }
 
