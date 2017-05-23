@@ -204,7 +204,7 @@ public class EndToEndTest {
 
         expectedDataset = computeExpectedDataset(expectedValue);
 
-        //TODO add DescriptiveStatistic.DELIVERY_RATE
+        //TODO add DescriptiveStatistic.RECEIVED_MESSAGES
         assertEquals(DescriptiveStatistic.values().length - 3, expectedDataset.size());
 
         for (Map<MockDataConfig, Dataset> datasets : expectedDataset.values()) {
@@ -223,10 +223,10 @@ public class EndToEndTest {
 
         for (DescriptiveStatistic stat : DescriptiveStatistic.values()) {
 
-            //TODO add DescriptiveStatistic.DELIVERY_RATE
+            //TODO add DescriptiveStatistic.RECEIVED_MESSAGES
             if (stat.equals(DescriptiveStatistic.LOWER_QUARTILE)
                     || stat.equals(DescriptiveStatistic.UPPER_QUARTILE)
-                    || stat.equals(DescriptiveStatistic.DELIVERY_RATE)) {
+                    || stat.equals(DescriptiveStatistic.RECEIVED_MESSAGES)) {
                 continue;
             }
 

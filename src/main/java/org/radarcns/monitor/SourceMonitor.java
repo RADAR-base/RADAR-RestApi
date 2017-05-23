@@ -86,7 +86,7 @@ public class SourceMonitor {
         double percentTemp;
         for (SensorType type : specification.getSensorTypes()) {
 
-            countTemp = SensorDataAccessObject.getInstance().countSamplesByUserSourceWindow(
+            countTemp = SensorDataAccessObject.getInstance().count(
                 subject, source, start, end, type, specification.getType(), client);
 
             percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);

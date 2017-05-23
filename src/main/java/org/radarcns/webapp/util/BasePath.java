@@ -26,6 +26,7 @@ public class BasePath {
     public static final String DATA = "data";
     public static final String GET_ALL_SOURCES = "getAllSources";
     public static final String GET_ALL_SUBJECTS = "getAllSubjects";
+    public static final String GET_SUBJECT = "getSubject";
     public static final String REALTIME = "realTime";
     public static final String SPECIFICATION = "specification";
     public static final String SOURCE = "source";

@@ -109,8 +109,7 @@ public class SensorDataAccessObject {
      *
      * @see Dataset
      */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Dataset valueRTBySubjectSource(String subject, String source, DescriptiveStatistic stat,
+    public Dataset getLastReceivedSample(String subject, String source, DescriptiveStatistic stat,
             TimeFrame timeFrame, SensorType sensorType, ServletContext context)
             throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
@@ -147,7 +146,7 @@ public class SensorDataAccessObject {
      *
      * @see Dataset
      */
-    public Dataset valueBySubjectSource(String subject, String source, DescriptiveStatistic stat,
+    public Dataset getSamples(String subject, String source, DescriptiveStatistic stat,
             TimeFrame timeFrame, SensorType sensorType, ServletContext context)
             throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
@@ -171,7 +170,7 @@ public class SensorDataAccessObject {
     }
 
     /**
-     * Returns a {@code Dataset} containing alla available values for the couple subject surce.
+     * Returns a {@link Dataset} containing alla available values for the couple subject surce.
      *
      * @param subject is the subjectID
      * @param source is the sourceID
@@ -187,7 +186,7 @@ public class SensorDataAccessObject {
      *
      * @see Dataset
      */
-    public Dataset valueBySubjectSourceWindow(String subject, String source,
+    public Dataset getSamples(String subject, String source,
             DescriptiveStatistic stat, TimeFrame timeFrame, Long start, Long end,
             SensorType sensorType, ServletContext context) throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
@@ -221,7 +220,7 @@ public class SensorDataAccessObject {
      * @param sourceType is the required source type
      * @return the number of received messages within the time-window [start-end].
      */
-    public double countSamplesByUserSourceWindow(String subject, String source, Long start,
+    public double count(String subject, String source, Long start,
             Long end, SensorType sensorType, SourceType sourceType, MongoClient client)
             throws ConnectException {
         MongoSensor sensorDao = hooks.get(sensorType);
@@ -239,7 +238,7 @@ public class SensorDataAccessObject {
      * @throws ConnectException if MongoDB is not available
      *
      */
-    public Set<String> findAllUsers(MongoClient client) throws ConnectException {
+    public Set<String> getAllSubject(MongoClient client) throws ConnectException {
         Set<String> subjects = new HashSet<>();
 
         for (MongoSensor mongoSensor : hooks.values()) {
@@ -260,7 +259,7 @@ public class SensorDataAccessObject {
      * @see {@link Subject}
      * @see {@link Source}
      */
-    public Set<Source> findAllSourcesBySubject(String subject, MongoClient client)
+    public Set<Source> getAllSources(String subject, MongoClient client)
             throws ConnectException {
         Set<Source> sources = new HashSet<>();
 
@@ -282,7 +281,7 @@ public class SensorDataAccessObject {
      *
      * @see SourceType
      */
-    public SourceType findSourceType(String source, MongoClient client) throws ConnectException {
+    public SourceType getSourceType(String source, MongoClient client) throws ConnectException {
         SourceType type =  null;
 
         for (MongoSensor mongoSensor : hooks.values()) {
@@ -307,14 +306,14 @@ public class SensorDataAccessObject {
      *
      * @throws ConnectException if the connection with MongoDb cannot be established
      */
-    public EffectiveTimeFrame getUserEffectiveTimeFrame(String subject, MongoClient client)
+    public EffectiveTimeFrame getEffectiveTimeFrame(String subject, MongoClient client)
             throws ConnectException {
         long start = Long.MAX_VALUE;
         long end = Long.MIN_VALUE;
 
         boolean min = true;
 
-        Set<Source> sources = findAllSourcesBySubject(subject, client);
+        Set<Source> sources = getAllSources(subject, client);
 
         for (MongoSensor mongoSensor : hooks.values()) {
             for (Source source : sources) {

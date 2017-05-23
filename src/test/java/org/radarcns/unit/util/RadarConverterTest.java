@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
 import org.radarcns.avro.restapi.app.ServerStatus;
+import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
@@ -158,5 +159,16 @@ public class RadarConverterTest {
                 RadarConverter.getSourceType(SourceType.PEBBLE.toString()));
 
         RadarConverter.getSourceType(SourceType.PEBBLE.toString().concat("test"));
+    }
+
+    @Test
+    public void getSecondTest() {
+        assertEquals(10, RadarConverter.getSecond(TimeFrame.TEN_SECOND), 0);
+        assertEquals(30, RadarConverter.getSecond(TimeFrame.THIRTY_SECOND), 0);
+        assertEquals(60, RadarConverter.getSecond(TimeFrame.ONE_MIN), 0);
+        assertEquals(600, RadarConverter.getSecond(TimeFrame.TEN_MIN), 0);
+        assertEquals(3600, RadarConverter.getSecond(TimeFrame.ONE_HOUR), 0);
+        assertEquals(3600 * 24, RadarConverter.getSecond(TimeFrame.ONE_DAY), 0);
+        assertEquals(3600 * 24 * 7, RadarConverter.getSecond(TimeFrame.ONE_WEEK), 0);
     }
 }

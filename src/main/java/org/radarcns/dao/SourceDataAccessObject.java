@@ -62,7 +62,7 @@ public class SourceDataAccessObject {
         SourceType type = MongoDataAccess.getSourceType(source, client);
 
         if (type == null) {
-            type = SensorDataAccessObject.getInstance().findSourceType(source, client);
+            type = SensorDataAccessObject.getInstance().getSourceType(source, client);
 
             if (type == null) {
                 type = AndroidAppDataAccessObject.getInstance().findSourceType(source, client);
@@ -106,13 +106,13 @@ public class SourceDataAccessObject {
             throws ConnectException {
         Set<Source> sources = new HashSet<>();
 
-        sources.addAll(SensorDataAccessObject.getInstance().findAllSourcesBySubject(
+        sources.addAll(SensorDataAccessObject.getInstance().getAllSources(
                 subject, client));
         sources.addAll(AndroidAppDataAccessObject.getInstance().findAllSourcesBySubject(
                 subject, client));
 
         return new Subject(subject, SubjectDataAccessObject.isSubjectActive(subject),
-                SensorDataAccessObject.getInstance().getUserEffectiveTimeFrame(subject, client),
+                SensorDataAccessObject.getInstance().getEffectiveTimeFrame(subject, client),
                 new LinkedList<>(sources));
     }
 
