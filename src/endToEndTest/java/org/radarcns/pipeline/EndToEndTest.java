@@ -87,7 +87,7 @@ public class EndToEndTest {
     public static final String PIPELINE_CONFIG = "pipeline.yml";
 
     // Latency expressed in second
-    private static final long LATENCY = 120;
+    private static final long LATENCY = 180;
 
     private static File dataRoot;
     private static PipelineConfig pipelineConfig;
@@ -304,7 +304,7 @@ public class EndToEndTest {
                     try (Response response = client.request(pathSensor)) {
                         assertEquals(200, response.code());
 
-                        LOGGER.info("[{}] Requesting {}", response.code(), pathSensor);
+                        LOGGER.info("[{}] {}", response.code(), pathSensor);
 
                         Dataset actual = null;
 

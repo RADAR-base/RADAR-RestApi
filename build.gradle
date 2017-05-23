@@ -209,16 +209,62 @@ task integrationTest(type: Test) {
   }
 }
 
-//check.dependsOn integrationTest
+//---------------------------------------------------------------------------//
+// Docker Utility                                                            //
+//---------------------------------------------------------------------------//
+ext.dockerCompose = hasProperty('dockerComposePath') ? property('dockerComposePath') : 'docker-compose'
+ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
+
+//---------------------------------------------------------------------------//
+// Integration Test                                                          //
+//---------------------------------------------------------------------------//
+ext.simpleStackPath = 'src/integrationTest'
+ext.simpleStackLock = "${simpleStackPath}/.RUNNING_INSTANCE_LOCK"
+
+task buildDocker(type: Exec, dependsOn: 'copyWarForIntegration') {
+  workingDir 'src/integrationTest/image'
+  commandLine sudoLinux + ['docker', 'image', 'build', '.']
+}
+
+task installSimpleStack(type: Exec, dependsOn: ['buildDocker']) {
+  doFirst{
+    def lockFile = new File(simpleStackLock)
+    if (lockFile.exists()) {
+      throw new GradleException("A previous instance of the simple stack is still running. Please stop it first and then try again.")
+    } else {
+
+      print "$simpleStackLock"
+
+      lockFile.createNewFile()
+    }
+  }
+
+  workingDir simpleStackPath
+  standardInput = System.in
+  commandLine sudoLinux + [dockerCompose, 'up', '-d']
+}
+integrationTest.dependsOn 'installSimpleStack'
+
+task stopSimpleStack(type: Exec) {
+  onlyIf{
+    new File(simpleStackLock).exists()
+  }
+  standardInput = System.in
+  workingDir simpleStackPath
+  commandLine sudoLinux + [dockerCompose, 'down', '-v']
+
+  doLast{
+    new File(simpleStackLock).delete()
+  }
+}
+
+integrationTest.finalizedBy 'stopSimpleStack'
 
 //---------------------------------------------------------------------------//
 // End to End Test                                                           //
 //---------------------------------------------------------------------------//
-
-ext.dockerCompose = hasProperty('dockerComposePath') ? property('dockerComposePath') : 'docker-compose'
-ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
 ext.radarStackPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack'
-ext.radarStackLock = "${radarStackPath}/RUNNING_INSTANCE_LOCK"
+ext.radarStackLock = "${radarStackPath}/.RUNNING_INSTANCE_LOCK"
 
 task endToEndTest(type: Test, dependsOn: ['installRadarStack', 'listDockerProcesses']) {
   description = "Run end to end tests (located in src/endToEndTest/...)."
@@ -277,7 +323,7 @@ task cleanRadarStack(type: Delete, dependsOn: stopRadarStack) {
 stopRadarStack.finalizedBy cleanRadarStack
 clean.dependsOn cleanRadarStack
 
-//Useful for E2E tests
+// Sets configuration files for running the entire platform
 task setRadarEnvironmentForDocker {
   doLast {
     def envTemplatePath = "${radarStackPath}/etc/env.template"
@@ -306,11 +352,6 @@ task setRadarEnvironmentForDocker {
     def installScript = file("${radarStackPath}/install-radar-stack.sh")
     installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
   }
-}
-
-task buildDocker(type: Exec, dependsOn: 'copyWarForIntegration') {
-  workingDir 'src/integrationTest/image'
-  commandLine sudoLinux + ['docker', 'image', 'build', '.']
 }
 
 //---------------------------------------------------------------------------//
@@ -346,29 +387,25 @@ task copyFrontendConfig(type: Copy) {
   from "${projectDir}/schemas/restapi/config/config.json"
   into "${projectDir}/src/main/webapp/frontend/"
 }
+war.dependsOn(copyFrontendConfig)
 
 task copyFrontendConfigIntegrationTest(type: Copy) {
   from "${projectDir}/schemas/restapi/config/config.json"
   into "${projectDir}/src/integrationTest/resources"
 }
+integrationTest.dependsOn(copyFrontendConfigIntegrationTest)
 
 task copyFrontendConfigEndToEndTest(type: Copy) {
   from "${projectDir}/schemas/restapi/config/config.json"
   into "${projectDir}/src/endToEndTest/resources"
 }
+endToEndTest.dependsOn(copyFrontendConfigEndToEndTest)
 
 task removeFrontendConfig(type: Delete) {
   delete "${projectDir}/src/main/webapp/frontend/"
   delete "${projectDir}/src/integrationTest/resources/config.json"
   delete "${projectDir}/src/endToEndTest/resources/config.json"
 }
-
-war.dependsOn(copyFrontendConfig)
-
-integrationTest.dependsOn(copyFrontendConfigIntegrationTest)
-
-endToEndTest.dependsOn(copyFrontendConfigEndToEndTest)
-
 clean.dependsOn(removeFrontendConfig)
 
 //---------------------------------------------------------------------------//
