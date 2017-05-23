@@ -125,19 +125,18 @@ sourceSets {
 checkstyle {
   // codacy version
   toolVersion '6.16'
-  ignoreFailures true
+  ignoreFailures false
 
   // ignore tests
-  sourceSets = [sourceSets.main]
+  sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest, sourceSets.endToEndTest]
 }
 
 pmd {
   // pmd version
   toolVersion = '5.5.2'
-  ignoreFailures = true
+  ignoreFailures = false
 
-  // ignore tests
-  sourceSets = [sourceSets.main]
+  sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest, sourceSets.endToEndTest]
 
   consoleOutput = true
 
@@ -232,9 +231,6 @@ task installSimpleStack(type: Exec, dependsOn: ['buildDocker']) {
     if (lockFile.exists()) {
       throw new GradleException("A previous instance of the simple stack is still running. Please stop it first and then try again.")
     } else {
-
-      print "$simpleStackLock"
-
       lockFile.createNewFile()
     }
   }
@@ -252,7 +248,6 @@ task stopSimpleStack(type: Exec) {
   standardInput = System.in
   workingDir simpleStackPath
   commandLine sudoLinux + [dockerCompose, 'down', '-v']
-
   doLast{
     new File(simpleStackLock).delete()
   }
@@ -307,16 +302,29 @@ task listDockerProcesses(type: Exec) {
 }
 listDockerProcesses.mustRunAfter 'installRadarStack'
 
+ext.stoppingStack = false
 task stopRadarStack(type: Exec) {
   onlyIf{
-    new File(radarStackLock).exists()
+    new File(radarStackLock).exists() && !stoppingStack
   }
+  doFirst{
+    stoppingStack = true
+  }
+
   standardInput = System.in
   workingDir radarStackPath
   commandLine sudoLinux + [dockerCompose, 'down', '-v']
+
+  doLast{
+    stoppingStack = false
+  }
 }
 
 task cleanRadarStack(type: Delete, dependsOn: stopRadarStack) {
+  onlyIf{
+    !stoppingStack
+  }
+
   delete "${radarStackPath}/volumes"
   delete radarStackLock
 }

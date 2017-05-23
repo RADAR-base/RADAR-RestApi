@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory;
  */
 public class SensorDataAccessObject {
 
+    //TODO change Unit for DescriptiveStatistic.RECEIVED_MESSAGES
+
     /** Logger. **/
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorDataAccessObject.class);
 

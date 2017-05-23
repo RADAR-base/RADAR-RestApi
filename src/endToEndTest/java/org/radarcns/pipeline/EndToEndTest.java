@@ -48,12 +48,15 @@ import org.apache.avro.specific.SpecificRecord;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.radarcns.avro.restapi.data.Acceleration;
+import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
+import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
@@ -68,6 +71,7 @@ import org.radarcns.mock.model.MockAggregator;
 import org.radarcns.pipeline.config.PipelineConfig;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
+import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -206,8 +210,7 @@ public class EndToEndTest {
 
         expectedDataset = computeExpectedDataset(expectedValue);
 
-        //TODO add DescriptiveStatistic.RECEIVED_MESSAGES
-        assertEquals(DescriptiveStatistic.values().length - 3, expectedDataset.size());
+        assertEquals(DescriptiveStatistic.values().length - 2, expectedDataset.size());
 
         for (Map<MockDataConfig, Dataset> datasets : expectedDataset.values()) {
             assertEquals(size, datasets.size());
@@ -224,8 +227,6 @@ public class EndToEndTest {
         Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> datasets = new HashMap<>();
 
         for (DescriptiveStatistic stat : DescriptiveStatistic.values()) {
-
-            //TODO add DescriptiveStatistic.RECEIVED_MESSAGES
             if (stat.equals(DescriptiveStatistic.LOWER_QUARTILE)
                     || stat.equals(DescriptiveStatistic.UPPER_QUARTILE)
                     || stat.equals(DescriptiveStatistic.RECEIVED_MESSAGES)) {
@@ -235,7 +236,54 @@ public class EndToEndTest {
             datasets.put(stat, getExpectedDataset(expectedValue, stat));
         }
 
+        datasets.put(DescriptiveStatistic.RECEIVED_MESSAGES, getReceivedMessage(
+                datasets.get(DescriptiveStatistic.COUNT)));
+
         return datasets;
+    }
+
+    private static Map<MockDataConfig, Dataset> getReceivedMessage(
+            Map<MockDataConfig, Dataset> expectedCount) {
+        Map<MockDataConfig, Dataset> expectedReceivedMessage = new HashMap<>();
+
+        for (MockDataConfig config : expectedCount.keySet()) {
+
+            Dataset dataset = Utility.cloneDataset(expectedCount.get(config));
+
+            Header updatedHeader = dataset.getHeader();
+            updatedHeader.setDescriptiveStatistic(DescriptiveStatistic.RECEIVED_MESSAGES);
+            updatedHeader.setUnit(Unit.PERCENTAGE);
+            dataset.setHeader(updatedHeader);
+
+            for (Item item : dataset.getDataset()) {
+                if (item.getSample() instanceof DoubleSample) {
+                    DoubleSample sample = (DoubleSample)item.getSample();
+                    item.setSample(new DoubleSample(RadarConverter.roundDouble(
+                            (Double) sample.getValue() / RadarConverter.getExpectedMessages(
+                            updatedHeader), 2)));
+                } else if (item.getSample() instanceof Acceleration) {
+                    Acceleration sample = (Acceleration)item.getSample();
+                    item.setSample(new Acceleration(
+                            new DoubleSample(RadarConverter.roundDouble(
+                            (Double) sample.getX() / RadarConverter.getExpectedMessages(
+                                updatedHeader), 2)),
+                            new DoubleSample(RadarConverter.roundDouble(
+                            (Double) sample.getY() / RadarConverter.getExpectedMessages(
+                                updatedHeader), 2)),
+                            new DoubleSample(RadarConverter.roundDouble(
+                            (Double) sample.getZ() / RadarConverter.getExpectedMessages(
+                                updatedHeader), 2))));
+                } else {
+                    throw new IllegalArgumentException(
+                            item.getSample().getClass().getCanonicalName()
+                                + " is not supported yet");
+                }
+            }
+
+            expectedReceivedMessage.put(config, dataset);
+        }
+
+        return expectedReceivedMessage;
     }
 
     /**

@@ -37,14 +37,9 @@ Swagger provides a tool to automatically generate a client in several programmin
 ## Integration test
 Useful for testing the integration between `RADAR-CNS Hotstorage` and `RADAR-CNS Rest API`. Before running the test, add `127.0.0.1	hotstorage` to the `hosts` file.
 To run the test:
-- `./gradlew clean`
-- `./gradlew build`
-- `cd src/integrationTest`
-- `docker-compose up -d --build`
-- `cd -`
-- `./gradlew integrationTest`
-- `cd -`
-- `docker-compose down`
+```shell
+  ./gradlew integrationTest`
+```
 
 ## End to end test
 This project contains an end to end test for the RADAR-CNS platform covering:

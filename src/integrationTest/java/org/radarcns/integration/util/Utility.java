@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +40,8 @@ import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
 import org.radarcns.avro.restapi.app.Application;
+import org.radarcns.avro.restapi.data.Acceleration;
+import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
@@ -243,5 +246,43 @@ public class Utility {
         return new EffectiveTimeFrame(
             RadarConverter.getISO8601(expectedStart),
             RadarConverter.getISO8601(expectedEnd));
+    }
+
+    /**
+     * Clones the input {@link Dataset}.
+     *
+     * @param input {@link Dataset} that has to be cloned
+     *
+     * @return {@link Dataset} cloned from {@code input}
+     */
+    public static Dataset cloneDataset(Dataset input) {
+        Header inputHeader = input.getHeader();
+        EffectiveTimeFrame cloneEffectiveTimeFrame =  new EffectiveTimeFrame(
+                inputHeader.getEffectiveTimeFrame().getStartDateTime(),
+                inputHeader.getEffectiveTimeFrame().getEndDateTime());
+        Header cloneHeader = new Header(inputHeader.getSubjectId(), inputHeader.getSourceId(),
+                    inputHeader.getSource(), inputHeader.getSensor(),
+                    inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
+                    inputHeader.getTimeFrame(), cloneEffectiveTimeFrame);
+
+
+        List<Item> cloneItem = new ArrayList<>();
+        SpecificRecord value;
+        for (Item item : input.getDataset()) {
+
+            if (item.getSample() instanceof DoubleSample) {
+                value = new DoubleSample(((DoubleSample)item.getSample()).getValue());
+            } else if (item.getSample() instanceof Acceleration) {
+                Acceleration temp = (Acceleration)item.getSample();
+                value = new Acceleration(temp.getX(), temp.getY(), temp.getZ());
+            } else {
+                throw new IllegalArgumentException(item.getSample().getClass().getCanonicalName()
+                        + " is not supported yet");
+            }
+
+            cloneItem.add(new Item(value, item.getStartDateTime()));
+        }
+
+        return new Dataset(cloneHeader, cloneItem);
     }
 }

@@ -16,7 +16,6 @@ package org.radarcns.integration.util;
  * limitations under the License.
  */
 
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.mock.model.ExpectedValue.DURATION;
 
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
     /**
      * Default constructor initializes the mapping between {@link DescriptiveStatistic} and {@link
-     * }.
+     *      CollectorStatisticsType}.
      */
     public ExpectedDataSetFactory() {
         statMap.put(DescriptiveStatistic.AVERAGE, CollectorStatisticsType.AVERAGE);
@@ -88,8 +87,11 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     public Dataset getDataset(ExpectedValue expectedValue, String subjectId, String sourceId,
             SourceType sourceType, SensorType sensorType, DescriptiveStatistic statistic,
             TimeFrame timeFrame) throws InstantiationException, IllegalAccessException {
-        return new Dataset(getHeader(expectedValue, subjectId, sourceId, sourceType, sensorType,
-                statistic, timeFrame), getItem(expectedValue, statistic, sensorType));
+
+        Header header = getHeader(expectedValue, subjectId, sourceId, sourceType, sensorType,
+                statistic, timeFrame);
+
+        return new Dataset(header, getItem(expectedValue, header));
     }
 
     /**
@@ -144,13 +146,13 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     /**
      * It generates the {@code List<Item>} for the resulting {@link Dataset}.
      *
-     * @param statistic function that has to be simulated  @return {@code List<Item>} for a {@link
-     * Dataset}
+     * @param header {@link Header} used to provide data context
+
+     * @return {@code List<Item>} for a {@link Dataset}
      *
      * @see Item
      **/
-    public List<Item> getItem(ExpectedValue<?> expectedValue,
-            DescriptiveStatistic statistic, SensorType sensorType)
+    public List<Item> getItem(ExpectedValue<?> expectedValue, Header header)
             throws IllegalAccessException, InstantiationException {
 
         if (expectedValue.getSeries().isEmpty()) {
@@ -161,11 +163,13 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         Object singleExpectedValue = expectedValue.getSeries().get(keys.get(0));
 
         if (singleExpectedValue instanceof DoubleArrayCollector) {
-            return getArrayItems(expectedValue, keys, statistic, sensorType);
+            return getArrayItems(expectedValue, keys, header.getDescriptiveStatistic(),
+                    header.getSensor());
         } else if (singleExpectedValue instanceof DoubleValueCollector) {
-            return getSingletonItems(expectedValue, keys, statistic, sensorType);
+            return getSingletonItems(expectedValue, keys, header.getDescriptiveStatistic(),
+                header.getSensor());
         } else {
-            throw new IllegalArgumentException(sensorType.name() + " not supported yet");
+            throw new IllegalArgumentException(header.getSensor().name() + " not supported yet");
         }
     }
 
@@ -191,7 +195,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                 case ACCELEROMETER:
                     Object content;
 
-                    if (statistic.name().equals(QUARTILES.name())) {
+                    if (statistic.name().equals(DescriptiveStatistic.QUARTILES.name())) {
                         List<List<Double>> statValues = (List<List<Double>>) getStatValue(
                                 statMap.get(statistic),
                                 dac);

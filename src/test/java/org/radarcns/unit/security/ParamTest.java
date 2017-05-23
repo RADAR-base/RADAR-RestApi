@@ -119,13 +119,14 @@ public class ParamTest {
     }
 
     private int isValidInputTestCount(String user, String source, int count) {
+        int countLocal = count;
         try {
             Param.isValidInput(user, source);
         } catch (IllegalArgumentException exec) {
-            count++;
+            countLocal++;
         }
 
-        return count;
+        return countLocal;
     }
 
     @Test
@@ -139,13 +140,14 @@ public class ParamTest {
     }
 
     private int isValidUserTestCount(String user, int count) {
+        int countLocal = count;
         try {
             Param.isValidSubject(user);
         } catch (IllegalArgumentException exec) {
-            count++;
+            countLocal++;
         }
 
-        return count;
+        return countLocal;
     }
 
     @Test
@@ -159,13 +161,14 @@ public class ParamTest {
     }
 
     private int isValidSourceTestCount(String source, int count) {
+        int countLocal = count;
         try {
             Param.isValidSubject(source);
         } catch (IllegalArgumentException exec) {
-            count++;
+            countLocal++;
         }
 
-        return count;
+        return countLocal;
     }
 
 }
