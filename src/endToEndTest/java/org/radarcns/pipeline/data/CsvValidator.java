@@ -39,6 +39,7 @@ public class CsvValidator {
     /**
      * Verify whether the CSV file can be used or not.
      * @param config configuration item containing the CSV file path.
+     * @param duration duration in milliseconds
      * @throws IllegalArgumentException if the CSV file does not respect the constrains.
      */
     public static void validate(MockDataConfig config, long duration, File root)
@@ -47,7 +48,7 @@ public class CsvValidator {
 
         MockConfigToCsvParser parser = new MockConfigToCsvParser(config, root);
 
-        int line = 1;
+        long line = 1;
         String mex = null;
 
         Date start = null;
@@ -62,13 +63,13 @@ public class CsvValidator {
                 mex = "time must increase raw by raw.";
             }
 
-            if ( mex != null) {
+            if (mex != null) {
                 mex += " " + config.getDataFile() + " is invalid. Error at line " + line;
                 logger.error(mex);
                 throw new IllegalArgumentException(mex);
             }
 
-            if (line == 1) {
+            if (line == 1L) {
                 start = new Date(record.getTimeMillis());
             }
             end = new Date(record.getTimeMillis());
@@ -85,7 +86,7 @@ public class CsvValidator {
             throw new IllegalArgumentException(mex);
         }
 
-        if (line != (config.getFrequency() * duration + 1)) {
+        if (line != config.getFrequency() * duration / 1000L + 1L) {
             mex = config.getDataFile() + " is invalid. CSV contains fewer messages than expected.";
             logger.error(mex);
             throw new IllegalArgumentException(mex);
@@ -95,7 +96,7 @@ public class CsvValidator {
     }
 
     private static boolean checkDuration(Date start, Date end, long duration) {
-        long upperbound = duration * 1000L;
+        long upperbound = duration;
         long lowerbound = upperbound - 1000L;
 
         long interval = TimeUnit.MILLISECONDS.toSeconds(end.getTime() - start.getTime());

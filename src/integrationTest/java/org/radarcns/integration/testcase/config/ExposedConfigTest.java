@@ -32,6 +32,8 @@ import org.radarcns.config.Properties;
 import org.radarcns.config.ServerConfig;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.producer.rest.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Checks if the config file for the Front-End ecosystem is where expected, and checks the
@@ -49,6 +51,8 @@ public class ExposedConfigTest {
     private static final String WEB_ROOT = "radar";
     private static final String BASE_PATH = "api";
     public static final String FRONTEND = "frontend";
+
+    private static Logger logger = LoggerFactory.getLogger(ExposedConfigTest.class);
 
     @Test
     public void checkFrontEndConfig()
@@ -84,6 +88,8 @@ public class ExposedConfigTest {
         try (RestClient client = new RestClient(config);
                 Response response = client.request(SWAGGER_JSON)) {
 
+            logger.info("Requested {}", client.getRelativeUrl(SWAGGER_JSON));
+
             ObjectMapper mapper = new ObjectMapper();
             JsonNode swaggerDocumentation = mapper.readTree(response.body().string());
 
@@ -92,5 +98,4 @@ public class ExposedConfigTest {
             return swagger.getBasePath();
         }
     }
-
 }

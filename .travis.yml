@@ -37,22 +37,7 @@ before_install:
 script:
   - ./gradlew check
   - ./gradlew war
-  - sudo $HOME/bin/docker-compose -f src/integrationTest/docker-compose.yml up -d --build
-  - sudo docker ps -a
-  - echo "INTEGRATION TEST"
-  - ./gradlew integrationTest
-  - sudo $HOME/bin/docker-compose -f src/integrationTest/docker-compose.yml down
-  - echo "END TO END TEST"
-  - ./gradlew setRadarEnvironmentForDocker
-  - ./gradlew setDockerCompose
-  - cd src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack
-  - sudo ./install-radar-stack.sh
-  - sudo docker ps -a
-  - cd -
-  - ./gradlew endToEndTest
-  - cd src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack
-  - sudo $HOME/bin/docker-compose -f docker-compose.yml down
-  - cd -
+  - ./gradlew -PdockerComposePath="$HOME/bin/docker-compose" endToEndTest
 
 after_script:
   - ./gradlew sendCoverageToCodacy

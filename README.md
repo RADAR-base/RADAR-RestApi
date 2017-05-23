@@ -70,18 +70,10 @@ Test case settings are located at `src/endToEndTest/resources/pipeline.yml`. Eac
 The test will generate random data and stream it to the landing topic specified by `topic` having for key `key_schema` and for value `value_schema`. Data for the sensor type `sensor` are randomly generated according to the `frequency`: number of messages generated per second. `value_to_test` are the variables list which will be tested against the RESTfull service. Since we are comparing `double`s, `magnitude` states a negative power of 10 representing the maximum delta between expected and actual values for which both numbers are still considered equal.
 
 To run the test:
-- `./gradlew clean`
-- `./gradlew build`
-- `cd src/integrationTest/image`
-- `docker image build .`
-- `cd -`
-- `./gradlew setRadarEnvironmentForDocker`
-- `cd src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack`
-- `./install-radar-stack.sh`
-- `cd -`
-- `./gradlew endToEndTest`
-- `cd -`
-- `./stop-radar-stack.sh`
+
+```shell
+./gradlew endToEndTest`
+```
 
 ## Contributing
 Code should be formatted using the [Google Java Code Style Guide](https://google.github.io/styleguide/javaguide.html). If you want to contribute a feature or fix, please make a pull request.

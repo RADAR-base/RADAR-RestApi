@@ -215,7 +215,11 @@ task integrationTest(type: Test) {
 // End to End Test                                                           //
 //---------------------------------------------------------------------------//
 
-task endToEndTest(type: Test) {
+ext.dockerCompose = hasProperty('dockerComposePath') ? property('dockerComposePath') : 'docker-compose'
+ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
+ext.radarStackPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack'
+
+task endToEndTest(type: Test, dependsOn: ['installRadarStack', 'listDockerProcesses']) {
   description = "Run end to end tests (located in src/endToEndTest/...)."
 
   testClassesDir = sourceSets.endToEndTest.output.classesDir
@@ -223,7 +227,6 @@ task endToEndTest(type: Test) {
 
   testLogging {
     events "failed"
-    exceptionFormat "short"
 
     debug {
       events "started", "skipped", "failed"
@@ -233,45 +236,65 @@ task endToEndTest(type: Test) {
 
   testLogging.showStandardStreams = true
 }
+endToEndTest.finalizedBy 'stopRadarStack'
 
-//Useful for E2E tests
-task setRadarEnvironmentForDocker {
-  doLast {
-    def envPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/env.template'
-    def smtpPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env.template'
-    def streamPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/'
-
-    File volumes = new File('src/endToEndTest/dockerRadar/volumes')
-    volumes.mkdir()
-
-    def src = new File(envPath)
-    def fileEnv = new File(envPath + 'tmp')
-    fileEnv << src.text
-    fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumes.getAbsolutePath())
-    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
-    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
-    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
-    fileEnv.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env')
-
-    src = new File(smtpPath)
-    def fileSmtp = new File(smtpPath + 'tmp')
-    fileSmtp << src.text
-    fileSmtp.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env')
-
-    src = new File(streamPath + 'radar.yml.template')
-    def fileStream = new File(streamPath + 'radar.yml.template' + 'tmp')
-    fileStream << src.text
-    fileStream.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/' + 'radar.yml')
-  }
+task installRadarStack(type: Exec, dependsOn: ['setRadarEnvironmentForDocker', 'buildDocker']) {
+  workingDir radarStackPath
+  standardInput = System.in
+  commandLine sudoLinux + ['./install-radar-stack.sh']
 }
 
-//Useful for Travis for running the correct version of docker-compose
-task setDockerCompose {
-  doLast {
-    def installScriptPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh'
-    def installScript = new File(installScriptPath)
-    installScript.text = installScript.text.replace('docker-compose', '$HOME/bin/docker-compose')
-  }
+task listDockerProcesses(type: Exec) {
+  workingDir radarStackPath
+  standardInput = System.in
+  commandLine sudoLinux + [dockerCompose, 'ps']
+}
+listDockerProcesses.mustRunAfter 'installRadarStack'
+
+task stopRadarStack(type: Exec) {
+  standardInput = System.in
+  workingDir radarStackPath
+  commandLine sudoLinux + [dockerCompose, 'down']
+}
+
+task cleanRadarStack(type: Delete, dependsOn: stopRadarStack) {
+  delete "${radarStackPath}/volumes"
+}
+stopRadarStack.finalizedBy cleanRadarStack
+clean.dependsOn cleanRadarStack
+
+//Useful for E2E tests
+task setRadarEnvironmentForDocker << {
+  def envTemplatePath = "${radarStackPath}/etc/env.template"
+  def smtpTemplatePath = "${radarStackPath}/etc/smtp.env.template"
+  def streamTemplatePath = "${radarStackPath}/etc/radar.yml.template"
+
+  def volumes = file("${radarStackPath}/volumes")
+  volumes.mkdir()
+
+  def fileEnv = file(envTemplatePath + 'tmp')
+  fileEnv << file(envTemplatePath).text
+  fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumes.getAbsolutePath())
+  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
+  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
+  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+  fileEnv.renameTo("${radarStackPath}/.env")
+
+  def fileSmtp = file(smtpTemplatePath + 'tmp')
+  fileSmtp << file(smtpTemplatePath).text
+  fileSmtp.renameTo("${radarStackPath}/etc/smtp.env")
+
+  def fileStream = file(streamTemplatePath + 'tmp')
+  fileStream << file(streamTemplatePath).text
+  fileStream.renameTo("${radarStackPath}/etc/radar.yml")
+
+  def installScript = file("${radarStackPath}/install-radar-stack.sh")
+  installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
+}
+
+task buildDocker(type: Exec, dependsOn: 'copyWarForIntegration') {
+  workingDir 'src/integrationTest/image'
+  commandLine sudoLinux + ['docker', 'image', 'build', '.']
 }
 
 //---------------------------------------------------------------------------//
@@ -335,7 +358,7 @@ clean.dependsOn(removeFrontendConfig)
 //---------------------------------------------------------------------------//
 // Prepare WAR                                                               //
 //---------------------------------------------------------------------------//
-task copyWarForIntegration(type: Copy) {
+task copyWarForIntegration(type: Copy, dependsOn: [removeWar, war]) {
   from war.archivePath
   into "${projectDir}/src/integrationTest/image"
 }
@@ -343,8 +366,7 @@ task copyWarForIntegration(type: Copy) {
 task removeWar(type: Delete) {
   delete "${projectDir}/src/integrationTest/image/${war.getArchiveName()}"
 }
-
-war.dependsOn(removeWar)
+copyWarForIntegration.mustRunAfter removeWar
 
 war.finalizedBy copyWarForIntegration
 

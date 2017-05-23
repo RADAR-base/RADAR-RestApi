@@ -297,7 +297,7 @@ public class EndToEndTest {
                     String pathSensor = pathStat.replace("{" + SENSOR + "}",
                             getSensorType(config).name());
 
-                    LOGGER.info("Requesting {}", pathSensor);
+                    LOGGER.info("Requesting {}", client.getRelativeUrl(pathSensor));
 
                     try (Response response = client.request(pathSensor)) {
                         assertEquals(200, response.code());
@@ -473,11 +473,9 @@ public class EndToEndTest {
         String expected = Utility.readAll(
                 EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
 
-        ServerConfig server = pipelineConfig.getRestApi();
-        server.setPath(FRONTEND);
-
-        try (RestClient client = new RestClient(server);
+        try (RestClient client = new RestClient(pipelineConfig.getFrontend());
                 Response response = client.request("/pipelineConfig/" + CONFIG_JSON)) {
+            LOGGER.info("Requested {}", client.getRelativeUrl("/pipelineConfig/" + CONFIG_JSON));
             assertEquals(expected, response.body().string());
         }
     }
