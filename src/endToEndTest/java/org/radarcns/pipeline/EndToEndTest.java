@@ -92,6 +92,10 @@ public class EndToEndTest {
     private static File dataRoot;
     private static PipelineConfig pipelineConfig;
 
+    /**
+     * Test initialisation. It loads the config file and waits that the infrastructure is ready
+     *      to accept requests.
+     */
     @BeforeClass
     public static void setUpClass() throws IOException, InterruptedException {
         URL configResource = EndToEndTest.class.getClassLoader().getResource(PIPELINE_CONFIG);

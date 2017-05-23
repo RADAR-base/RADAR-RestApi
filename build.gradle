@@ -218,6 +218,7 @@ task integrationTest(type: Test) {
 ext.dockerCompose = hasProperty('dockerComposePath') ? property('dockerComposePath') : 'docker-compose'
 ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
 ext.radarStackPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack'
+ext.radarStackLock = "${radarStackPath}/RUNNING_INSTANCE_LOCK"
 
 task endToEndTest(type: Test, dependsOn: ['installRadarStack', 'listDockerProcesses']) {
   description = "Run end to end tests (located in src/endToEndTest/...)."
@@ -239,6 +240,15 @@ task endToEndTest(type: Test, dependsOn: ['installRadarStack', 'listDockerProces
 endToEndTest.finalizedBy 'stopRadarStack'
 
 task installRadarStack(type: Exec, dependsOn: ['setRadarEnvironmentForDocker', 'buildDocker']) {
+  doFirst{
+    def lockFile = new File(radarStackLock)
+    if (lockFile.exists()) {
+      throw new GradleException("A previous instance of RADAR Platform is still running. Please stop it first and then try again.")
+    } else {
+      lockFile.createNewFile()
+    }
+  }
+
   workingDir radarStackPath
   standardInput = System.in
   commandLine sudoLinux + ['./install-radar-stack.sh']
@@ -252,6 +262,9 @@ task listDockerProcesses(type: Exec) {
 listDockerProcesses.mustRunAfter 'installRadarStack'
 
 task stopRadarStack(type: Exec) {
+  onlyIf{
+    new File(radarStackLock).exists()
+  }
   standardInput = System.in
   workingDir radarStackPath
   commandLine sudoLinux + [dockerCompose, 'down', '-v']
@@ -259,37 +272,40 @@ task stopRadarStack(type: Exec) {
 
 task cleanRadarStack(type: Delete, dependsOn: stopRadarStack) {
   delete "${radarStackPath}/volumes"
+  delete radarStackLock
 }
 stopRadarStack.finalizedBy cleanRadarStack
 clean.dependsOn cleanRadarStack
 
 //Useful for E2E tests
-task setRadarEnvironmentForDocker << {
-  def envTemplatePath = "${radarStackPath}/etc/env.template"
-  def smtpTemplatePath = "${radarStackPath}/etc/smtp.env.template"
-  def streamTemplatePath = "${radarStackPath}/etc/radar.yml.template"
+task setRadarEnvironmentForDocker {
+  doLast {
+    def envTemplatePath = "${radarStackPath}/etc/env.template"
+    def smtpTemplatePath = "${radarStackPath}/etc/smtp.env.template"
+    def streamTemplatePath = "${radarStackPath}/etc/radar.yml.template"
 
-  def volumes = file("${radarStackPath}/volumes")
-  volumes.mkdir()
+    def volumes = file("${radarStackPath}/volumes")
+    volumes.mkdir()
 
-  def fileEnv = file(envTemplatePath + 'tmp')
-  fileEnv << file(envTemplatePath).text
-  fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumes.getAbsolutePath())
-  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
-  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
-  fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
-  fileEnv.renameTo("${radarStackPath}/.env")
+    def fileEnv = file(envTemplatePath + 'tmp')
+    fileEnv << file(envTemplatePath).text
+    fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumes.getAbsolutePath())
+    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
+    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
+    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+    fileEnv.renameTo("${radarStackPath}/.env")
 
-  def fileSmtp = file(smtpTemplatePath + 'tmp')
-  fileSmtp << file(smtpTemplatePath).text
-  fileSmtp.renameTo("${radarStackPath}/etc/smtp.env")
+    def fileSmtp = file(smtpTemplatePath + 'tmp')
+    fileSmtp << file(smtpTemplatePath).text
+    fileSmtp.renameTo("${radarStackPath}/etc/smtp.env")
 
-  def fileStream = file(streamTemplatePath + 'tmp')
-  fileStream << file(streamTemplatePath).text
-  fileStream.renameTo("${radarStackPath}/etc/radar.yml")
+    def fileStream = file(streamTemplatePath + 'tmp')
+    fileStream << file(streamTemplatePath).text
+    fileStream.renameTo("${radarStackPath}/etc/radar.yml")
 
-  def installScript = file("${radarStackPath}/install-radar-stack.sh")
-  installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
+    def installScript = file("${radarStackPath}/install-radar-stack.sh")
+    installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
+  }
 }
 
 task buildDocker(type: Exec, dependsOn: 'copyWarForIntegration') {

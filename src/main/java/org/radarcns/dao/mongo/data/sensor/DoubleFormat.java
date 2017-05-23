@@ -28,15 +28,14 @@ import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.mongo.util.MongoSensor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.radarcns.util.RadarConverter;
 
 /**
  * Data Access Object for sensors which are represented by a single double value.
  */
 public class DoubleFormat extends MongoSensor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DoubleFormat.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(DoubleFormat.class);
 
     public DoubleFormat(SensorType sensorType) {
         super(DataFormat.DOUBLE_FORMAT, sensorType);
@@ -56,7 +55,9 @@ public class DoubleFormat extends MongoSensor {
                     quartilesList.get(1).getDouble(SECOND_QUARTILE),
                     quartilesList.get(2).getDouble(THIRD_QUARTILE)));
             case RECEIVED_MESSAGES:
-                return null;
+                return new DoubleSample(RadarConverter.roundDouble(
+                        doc.getDouble(field) / RadarConverter.getExpectedMessages(header),
+                    2));
             default: return new DoubleSample(doc.getDouble(field));
         }
     }

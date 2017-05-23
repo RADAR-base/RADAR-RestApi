@@ -131,7 +131,7 @@ public class SubjectEndPointTest {
         LOGGER.info(path);
 
         assertEquals(Status.NO_CONTENT.getStatusCode(), Utility.makeRequest(
-            Properties.getApiConfig().getApiUrl() + path).code());
+                Properties.getApiConfig().getApiUrl() + path).code());
     }
 
     @Test
@@ -141,11 +141,11 @@ public class SubjectEndPointTest {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
-            SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                SOURCE_TYPE, TIME_FRAME));
+                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+                    SOURCE_TYPE, TIME_FRAME));
 
         List<Document> randomInput = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-            SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
+                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
 
         collection.insertMany(randomInput);
 

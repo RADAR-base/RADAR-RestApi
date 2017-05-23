@@ -18,6 +18,8 @@ package org.radarcns.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,6 +34,7 @@ import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.security.Param;
 import org.radarcns.source.SourceCatalog;
 import org.slf4j.Logger;
@@ -113,10 +116,11 @@ public class RadarConverter {
             case COUNT: return MongoHelper.Stat.count;
             case INTERQUARTILE_RANGE: return MongoHelper.Stat.iqr;
             case MAXIMUM: return MongoHelper.Stat.max;
-            case MINIMUM: return MongoHelper.Stat.min;
-            case SUM: return MongoHelper.Stat.sum;
-            case QUARTILES: return MongoHelper.Stat.quartile;
             case MEDIAN: return MongoHelper.Stat.median;
+            case MINIMUM: return MongoHelper.Stat.min;
+            case QUARTILES: return MongoHelper.Stat.quartile;
+            case RECEIVED_MESSAGES: return Stat.receivedMessage;
+            case SUM: return MongoHelper.Stat.sum;
             default: throw new IllegalArgumentException("DescriptiveStatistic type cannot be"
                     + "converted. " + stat.name() + "is unknown");
         }
@@ -132,10 +136,9 @@ public class RadarConverter {
             throw new IllegalArgumentException();
         }
 
-        long factor = (long) Math.pow(10, places);
-        double valueTemp = value * factor;
-        long tmp = Math.round(valueTemp);
-        return (double) tmp / factor;
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
     /**
@@ -201,6 +204,14 @@ public class RadarConverter {
         return  indented;
     }
 
+    /**
+     * Returns the amount of expected data related to the {@link SourceType}, {@link SensorType} and
+     *      {@link TimeFrame} specified in the {@link Header}.
+     *
+     * @param header {@link Header} to provide data context
+     *
+     * @return the number of expected messages
+     */
     public static Double getExpectedMessages(Header header) {
         return SourceCatalog.getInstance(header.getSource()).getFrequency(
                 header.getSensor()) * getSecond(header.getTimeFrame()).doubleValue();

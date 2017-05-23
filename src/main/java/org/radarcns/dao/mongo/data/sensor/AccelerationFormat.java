@@ -16,6 +16,8 @@ package org.radarcns.dao.mongo.data.sensor;
  * limitations under the License.
  */
 
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MEDIAN;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
@@ -28,8 +30,7 @@ import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.mongo.util.MongoSensor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.radarcns.util.RadarConverter;
 
 /**
  * Data Access Object for Acceleration values.
@@ -40,7 +41,7 @@ public class AccelerationFormat extends MongoSensor {
     public static final String Y_LABEL = "y";
     public static final String Z_LABEL = "z";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccelerationFormat.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(AccelerationFormat.class);
 
     public AccelerationFormat(SensorType sensorType) {
         super(DataFormat.ACCELERATION_FORMAT, sensorType);
@@ -52,11 +53,21 @@ public class AccelerationFormat extends MongoSensor {
         Document component = (Document) doc.get(field);
 
         @SuppressWarnings("checkstyle:LocalVariableName")
-        ArrayList<Document> x = (ArrayList<Document>) component.get(X_LABEL);
+        ArrayList<Document> x = null;
         @SuppressWarnings("checkstyle:LocalVariableName")
-        ArrayList<Document> y = (ArrayList<Document>) component.get(Y_LABEL);
+        ArrayList<Document> y = null;
         @SuppressWarnings("checkstyle:LocalVariableName")
-        ArrayList<Document> z = (ArrayList<Document>) component.get(Z_LABEL);
+        ArrayList<Document> z = null;
+
+        Document data = null;
+
+        if (stat.equals(MEDIAN) || stat.equals(QUARTILES)) {
+            x = (ArrayList<Document>) component.get(X_LABEL);
+            y = (ArrayList<Document>) component.get(Y_LABEL);
+            z = (ArrayList<Document>) component.get(Z_LABEL);
+        } else {
+            data = (Document) doc.get(field);
+        }
 
         switch (stat) {
             case MEDIAN: return new Acceleration(
@@ -76,9 +87,16 @@ public class AccelerationFormat extends MongoSensor {
                         z.get(0).getDouble(FIRST_QUARTILE),
                         z.get(1).getDouble(SECOND_QUARTILE),
                         z.get(2).getDouble(THIRD_QUARTILE)));
-            case RECEIVED_MESSAGES: return null;
+            case RECEIVED_MESSAGES:
+                return new Acceleration(
+                    RadarConverter.roundDouble(data.getDouble(X_LABEL)
+                            / RadarConverter.getExpectedMessages(header), 2),
+                    RadarConverter.roundDouble(data.getDouble(Y_LABEL)
+                            / RadarConverter.getExpectedMessages(header), 2),
+                    RadarConverter.roundDouble(data.getDouble(Z_LABEL)
+                            / RadarConverter.getExpectedMessages(header), 2)
+                );
             default:
-                Document data = (Document) doc.get(field);
                 return new Acceleration(
                     data.getDouble(X_LABEL),
                     data.getDouble(Y_LABEL),

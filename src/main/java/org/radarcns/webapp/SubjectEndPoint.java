@@ -132,17 +132,17 @@ public class SubjectEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
     @ApiOperation(
-        value = "Return the information related to given subject identifier",
-        notes = "Some information are not implemented yet. The returned values are hardcoded.")
+            value = "Return the information related to given subject identifier",
+            notes = "Some information are not implemented yet. The returned values are hardcoded.")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
-            + "there is a message.avsc object with more details"),
-        @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
-            + "given subject identifier")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
+                + "given subject identifier")})
     public Response getSubjectJson(
-        @PathParam(SUBJECT_ID) String subject
+            @PathParam(SUBJECT_ID) String subject
     ) {
         try {
             return ResponseHandler.getJsonResponse(request, getSubjectWorker(subject));
@@ -160,17 +160,17 @@ public class SubjectEndPoint {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/" + AVRO + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
     @ApiOperation(
-        value = "Return the information related to given subject identifier",
-        notes = "Some information are not implemented yet. The returned values are hardcoded.")
+            value = "Return the information related to given subject identifier",
+            notes = "Some information are not implemented yet. The returned values are hardcoded.")
     @ApiResponses(value = {
-        @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details"),
-        @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
-            + "there is a message.avsc object with more details"),
-        @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
-            + "given subject identifier")})
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
+                + "given subject identifier")})
     public Response getSubjectAvro(
-        @PathParam(SUBJECT_ID) String subject
+            @PathParam(SUBJECT_ID) String subject
     ) {
         try {
             return ResponseHandler.getAvroResponse(request, getSubjectWorker(subject));

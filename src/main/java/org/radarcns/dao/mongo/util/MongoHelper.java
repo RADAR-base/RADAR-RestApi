@@ -62,8 +62,15 @@ public class MongoHelper {
      * Enumerate all available statistical values.
      */
     public enum Stat {
-        avg("avg"), count("count"), iqr("iqr"), max("max"), median("quartile"), min("min"),
-        quartile("quartile"), sum("sum");
+        avg("avg"),
+        count("count"),
+        iqr("iqr"),
+        max("max"),
+        median("quartile"),
+        min("min"),
+        quartile("quartile"),
+        receivedMessage("count"),
+        sum("sum");
 
         private final String param;
 

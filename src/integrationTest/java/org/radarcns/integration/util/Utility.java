@@ -128,8 +128,8 @@ public class Utility {
             TimeFrame timeFrame, Class<? extends SpecificRecord> recordClass)
             throws IllegalAccessException, InstantiationException {
         EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(
-                RadarConverter.getISO8601(docs.get(0).getDate(MongoHelper.START)),
-                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate(MongoHelper.END)));
+                RadarConverter.getISO8601(docs.get(0).getDate(START)),
+                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate(END)));
 
         List<Item> itemList = new LinkedList<>();
         for (Document doc : docs) {
@@ -142,8 +142,7 @@ public class Utility {
                             doc.getDouble(stat.getParam()));
                     break;
             }
-            itemList.add(new Item(record, RadarConverter.getISO8601(
-                    doc.getDate(MongoHelper.START))));
+            itemList.add(new Item(record, RadarConverter.getISO8601(doc.getDate(START))));
         }
 
         Header header = new Header(subjectId, sourceId, sourceType, sensorType,

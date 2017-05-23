@@ -84,7 +84,8 @@ public class SubjectDataAccessObject {
      *
      * @see {@link Subject}
      */
-    public static Subject getSubject(String subject, ServletContext context) throws ConnectException {
+    public static Subject getSubject(String subject, ServletContext context)
+            throws ConnectException {
         return getSubject(subject, MongoHelper.getClient(context));
     }
 
