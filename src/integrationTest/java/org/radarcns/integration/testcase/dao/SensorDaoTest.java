@@ -223,7 +223,7 @@ public class SensorDaoTest {
         collection.insertMany(randomInput);
 
         EffectiveTimeFrame expected;
-        expected = getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE,
+        expected = Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE,
             randomInput);
 
         collection = MongoHelper.getCollection(client,
@@ -238,31 +238,17 @@ public class SensorDaoTest {
 
         collection.insertMany(randomInput);
 
-        expected = getExpectedTimeFrame(
+        expected = Utility.getExpectedTimeFrame(
                 RadarConverter.getISO8601(expected.getStartDateTime()).getTime(),
                 RadarConverter.getISO8601(expected.getEndDateTime()).getTime(),
                 randomInput);
 
         EffectiveTimeFrame actual = SensorDataAccessObject.getInstance()
-                .getUserEffectiveTimeFrame(SUBJECT, client);
+                .getEffectiveTimeFrame(SUBJECT, client);
 
         assertEquals(expected, actual);
 
         dropAndClose(client);
-    }
-
-    private EffectiveTimeFrame getExpectedTimeFrame(long start, long end, List<Document> docs) {
-        long expectedStart = start;
-        long expectedEnd = end;
-
-        for (Document doc : docs) {
-            expectedStart = Math.min(expectedStart, doc.getDate(START).getTime());
-            expectedEnd = Math.max(expectedEnd, doc.getDate(END).getTime());
-        }
-
-        return new EffectiveTimeFrame(
-            RadarConverter.getISO8601(expectedStart),
-            RadarConverter.getISO8601(expectedEnd));
     }
 
     @After

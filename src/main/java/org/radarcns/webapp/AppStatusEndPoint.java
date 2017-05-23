@@ -75,12 +75,12 @@ public class AppStatusEndPoint {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
                 + "received status")})
-    public Response getRtStatByUserDeviceJsonAppStatus(
+    public Response getLastReceivedAppStatusJson(
             @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getRtStatByUserDeviceWorker(subject, source));
+                getLastReceivedAppStatusWorker(subject, source));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -102,12 +102,12 @@ public class AppStatusEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
                 + "received status")})
-    public Response getRtStatByUserDeviceAvroAppStatus(
+    public Response getLastReceivedAppStatusAvro(
             @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRtStatByUserDeviceWorker(subject, source));
+                getLastReceivedAppStatusWorker(subject, source));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -117,7 +117,7 @@ public class AppStatusEndPoint {
     /**
      * Actual implementation of AVRO and JSON getRealTimeUser.
      **/
-    private Application getRtStatByUserDeviceWorker(String subject, String source)
+    private Application getLastReceivedAppStatusWorker(String subject, String source)
             throws ConnectException {
         Param.isValidInput(subject, source);
 

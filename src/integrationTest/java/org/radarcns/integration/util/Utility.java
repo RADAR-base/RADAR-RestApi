@@ -19,6 +19,8 @@ package org.radarcns.integration.util;
 import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
+import static org.radarcns.dao.mongo.util.MongoHelper.END;
+import static org.radarcns.dao.mongo.util.MongoHelper.START;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
@@ -216,5 +218,31 @@ public class Utility {
             result.write(buffer, 0, length);
         }
         return result.toString("UTF-8");
+    }
+
+    /**
+     * Computes the {@link EffectiveTimeFrame} related to the {@code List<Document>}. {@code start}
+     *      {@code end} can be used to update an exiting {@link EffectiveTimeFrame} using the given
+     *      {@code List<Document>}.
+     *
+     * @param start time window start time
+     * @param end time window end time
+     * @param docs list of mock documents that has to be analysed to compute the
+     *      {@link EffectiveTimeFrame}
+     * @return {@link EffectiveTimeFrame} related to the {@code List<Document>}
+     */
+    public static EffectiveTimeFrame getExpectedTimeFrame(long start, long end,
+            List<Document> docs) {
+        long expectedStart = start;
+        long expectedEnd = end;
+
+        for (Document doc : docs) {
+            expectedStart = Math.min(expectedStart, doc.getDate(START).getTime());
+            expectedEnd = Math.max(expectedEnd, doc.getDate(END).getTime());
+        }
+
+        return new EffectiveTimeFrame(
+            RadarConverter.getISO8601(expectedStart),
+            RadarConverter.getISO8601(expectedEnd));
     }
 }

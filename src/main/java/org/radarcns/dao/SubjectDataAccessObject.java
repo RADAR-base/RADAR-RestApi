@@ -44,8 +44,8 @@ public class SubjectDataAccessObject {
      *
      * @see {@link Subject}
      */
-    public static Cohort findAllSubjects(ServletContext context) throws ConnectException {
-        return findAllSubjects(MongoHelper.getClient(context));
+    public static Cohort getAllSubjects(ServletContext context) throws ConnectException {
+        return getAllSubjects(MongoHelper.getClient(context));
     }
 
     /**
@@ -57,12 +57,12 @@ public class SubjectDataAccessObject {
      *
      * @see {@link Subject}
      */
-    public static Cohort findAllSubjects(MongoClient client) throws ConnectException {
+    public static Cohort getAllSubjects(MongoClient client) throws ConnectException {
 
         List<Subject> patients = new LinkedList<>();
 
         Set<String> subjects = new HashSet<>(
-                SensorDataAccessObject.getInstance().findAllUsers(client));
+                SensorDataAccessObject.getInstance().getAllSubject(client));
 
         subjects.addAll(AndroidAppDataAccessObject.getInstance().findAllUser(client));
 
@@ -71,6 +71,35 @@ public class SubjectDataAccessObject {
         }
 
         return new Cohort(0, patients);
+    }
+
+    /**
+     * Returns all information related to the given Subject identifier.
+     *
+     * @param subject Subject Identifier
+     * @param context {@link ServletContext} used to retrieve the client for accessing the
+     *      results cache
+     * @return a study {@link Cohort}
+     * @throws ConnectException if MongoDB is not available
+     *
+     * @see {@link Subject}
+     */
+    public static Subject getSubject(String subject, ServletContext context) throws ConnectException {
+        return getSubject(subject, MongoHelper.getClient(context));
+    }
+
+    /**
+     * Finds all subjects checking all available collections.
+     *
+     * @param subjectId Subject Identifier
+     * @param client {@link MongoClient} used to connect to the database
+     * @return a study {@link Cohort}
+     * @throws ConnectException if MongoDB is not available
+     *
+     * @see {@link Subject}
+     */
+    public static Subject getSubject(String subjectId, MongoClient client) throws ConnectException {
+        return SourceDataAccessObject.findAllSourcesByUser(subjectId, client);
     }
 
     /**
@@ -91,21 +120,6 @@ public class SubjectDataAccessObject {
      * Checks if the subject exists.
      *
      * @param subject Subject identifier
-     * @param client {@link MongoClient} used to connect to the database
-     *
-     * @return {@code true} if exist, {@code false} otherwise
-     *
-     * @throws ConnectException if the connection with MongoDb cannot be established
-     */
-    public static boolean exist(String subject, MongoClient client) throws ConnectException {
-        //TODO Temporary implementation. It must integrated with the suggested user management tool.
-        return !SourceDataAccessObject.findAllSourcesByUser(subject, client).getSources().isEmpty();
-    }
-
-    /**
-     * Checks if the subject exists.
-     *
-     * @param subject Subject identifier
      * @param context {@link ServletContext} used to retrieve the client for the subject management
      *      tool
      *
@@ -114,10 +128,23 @@ public class SubjectDataAccessObject {
      * @throws ConnectException if the connection with MongoDb cannot be established
      */
     public static boolean exist(String subject, ServletContext context) throws ConnectException {
-        //TODO Temporary implementation. It must integrated with the suggested user management tool.
-
         MongoClient client = MongoHelper.getClient(context);
 
+        return exist(subject, client);
+    }
+
+    /**
+     * Checks if the subject exists.
+     *
+     * @param subject Subject identifier
+     * @param client {@link MongoClient} used to connect to the database
+     *
+     * @return {@code true} if exist, {@code false} otherwise
+     *
+     * @throws ConnectException if the connection with MongoDb cannot be established
+     */
+    public static boolean exist(String subject, MongoClient client) throws ConnectException {
+        //TODO Temporary implementation. It must integrated with the suggested user management tool.
         return !SourceDataAccessObject.findAllSourcesByUser(subject, client).getSources().isEmpty();
     }
 

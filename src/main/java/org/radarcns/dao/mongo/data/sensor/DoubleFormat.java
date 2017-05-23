@@ -25,6 +25,7 @@ import org.bson.Document;
 import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.mongo.util.MongoSensor;
 import org.slf4j.Logger;
@@ -42,27 +43,22 @@ public class DoubleFormat extends MongoSensor {
     }
 
     @Override
-    protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat) {
-        if (stat.equals(DescriptiveStatistic.MEDIAN)
-                || stat.equals(DescriptiveStatistic.QUARTILES)) {
-
-            ArrayList<Document> quartilesList = (ArrayList<Document>) doc.get(field);
-
-            if (stat.equals(DescriptiveStatistic.QUARTILES)) {
+    protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat,
+            Header header) {
+        switch (stat) {
+            case MEDIAN:
+                return new DoubleSample(((ArrayList<Document>) doc.get(field)).get(1).getDouble(
+                        SECOND_QUARTILE));
+            case QUARTILES:
+                ArrayList<Document> quartilesList = (ArrayList<Document>) doc.get(field);
                 return new DoubleSample( new Quartiles(
-                        quartilesList.get(0).getDouble(FIRST_QUARTILE),
-                        quartilesList.get(1).getDouble(SECOND_QUARTILE),
-                        quartilesList.get(2).getDouble(THIRD_QUARTILE)));
-            } else if (stat.equals(DescriptiveStatistic.MEDIAN)) {
-                return new DoubleSample(quartilesList.get(1).getDouble(SECOND_QUARTILE));
-            }
-
-        } else {
-            return new DoubleSample(doc.getDouble(field));
+                    quartilesList.get(0).getDouble(FIRST_QUARTILE),
+                    quartilesList.get(1).getDouble(SECOND_QUARTILE),
+                    quartilesList.get(2).getDouble(THIRD_QUARTILE)));
+            case RECEIVED_MESSAGES:
+                return null;
+            default: return new DoubleSample(doc.getDouble(field));
         }
-
-        LOGGER.warn("Returning null value for the tuple: <{},{},{}>",field,stat,doc.toJson());
-        return null;
     }
 
 }
