@@ -254,7 +254,7 @@ listDockerProcesses.mustRunAfter 'installRadarStack'
 task stopRadarStack(type: Exec) {
   standardInput = System.in
   workingDir radarStackPath
-  commandLine sudoLinux + [dockerCompose, 'down']
+  commandLine sudoLinux + [dockerCompose, 'down', '-v']
 }
 
 task cleanRadarStack(type: Delete, dependsOn: stopRadarStack) {
@@ -358,7 +358,7 @@ clean.dependsOn(removeFrontendConfig)
 //---------------------------------------------------------------------------//
 // Prepare WAR                                                               //
 //---------------------------------------------------------------------------//
-task copyWarForIntegration(type: Copy, dependsOn: [removeWar, war]) {
+task copyWarForIntegration(type: Copy, dependsOn: war) {
   from war.archivePath
   into "${projectDir}/src/integrationTest/image"
 }
@@ -366,10 +366,8 @@ task copyWarForIntegration(type: Copy, dependsOn: [removeWar, war]) {
 task removeWar(type: Delete) {
   delete "${projectDir}/src/integrationTest/image/${war.getArchiveName()}"
 }
-copyWarForIntegration.mustRunAfter removeWar
 
 war.finalizedBy copyWarForIntegration
-
 clean.dependsOn(removeWar)
 
 //---------------------------------------------------------------------------//

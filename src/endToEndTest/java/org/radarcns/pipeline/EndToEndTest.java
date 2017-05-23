@@ -19,7 +19,6 @@ package org.radarcns.pipeline;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.FRONTEND;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.DATA;
@@ -57,7 +56,6 @@ import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.Properties;
-import org.radarcns.config.ServerConfig;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.aggregator.MockAggregator;
 import org.radarcns.integration.model.ExpectedValue;
@@ -116,7 +114,7 @@ public class EndToEndTest {
 
         streamToKafka();
 
-        LOGGER.info("Waiting data ({} seconds) ... ", LATENCY);
+        LOGGER.info("Waiting on data ({} seconds) ... ", LATENCY);
         Thread.sleep(TimeUnit.SECONDS.toMillis(LATENCY));
 
         fetchRestApi();
@@ -126,7 +124,7 @@ public class EndToEndTest {
      * Checks if the test bed is ready to accept data.
      */
     private static void waitInfrastructure() throws InterruptedException, MalformedURLException {
-        LOGGER.info("Waiting infrastructure ... ");
+        LOGGER.info("Waiting on infrastructure ... ");
 
         List<String> expectedTopics = new LinkedList<>();
         expectedTopics.add("android_empatica_e4_acceleration");
@@ -474,8 +472,9 @@ public class EndToEndTest {
                 EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
 
         try (RestClient client = new RestClient(pipelineConfig.getFrontend());
-                Response response = client.request("/pipelineConfig/" + CONFIG_JSON)) {
-            LOGGER.info("Requested {}", client.getRelativeUrl("/pipelineConfig/" + CONFIG_JSON));
+                Response response = client.request("/config/" + CONFIG_JSON)) {
+            LOGGER.info("Requested {}", client.getRelativeUrl("/config/" + CONFIG_JSON));
+            assertEquals(200, response.code());
             assertEquals(expected, response.body().string());
         }
     }
