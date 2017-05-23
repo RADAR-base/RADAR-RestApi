@@ -16,6 +16,7 @@ package org.radarcns.pipeline.data;
  * limitations under the License.
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
@@ -40,11 +41,11 @@ public class CsvValidator {
      * @param config configuration item containing the CSV file path.
      * @throws IllegalArgumentException if the CSV file does not respect the constrains.
      */
-    public static void validate(MockDataConfig config, long duration)
+    public static void validate(MockDataConfig config, long duration, File root)
         throws IOException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
         InvocationTargetException, ParseException {
 
-        MockConfigToCsvParser parser = new MockConfigToCsvParser(config);
+        MockConfigToCsvParser parser = new MockConfigToCsvParser(config, root);
 
         int line = 1;
         String mex = null;
