@@ -102,8 +102,9 @@ public class RadarConverter {
             case sum: return DescriptiveStatistic.SUM;
             case quartile: return DescriptiveStatistic.QUARTILES;
             case median: return DescriptiveStatistic.MEDIAN;
+            case receivedMessage: return DescriptiveStatistic.RECEIVED_MESSAGES;
             default: throw new IllegalArgumentException("MongoHelper.Stat type cannot be"
-                + "converted. " + stat.name() + "is unknown");
+                + "converted. " + stat.name() + " is unknown");
         }
     }
 

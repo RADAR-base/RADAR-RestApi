@@ -222,10 +222,10 @@ ext.simpleStackLock = "${simpleStackPath}/.RUNNING_INSTANCE_LOCK"
 
 task buildDocker(type: Exec, dependsOn: 'copyWarForIntegration') {
   workingDir 'src/integrationTest/image'
-  commandLine sudoLinux + ['docker', 'image', 'build', '.']
+  commandLine sudoLinux + ['docker', 'image', 'build', '-t', 'radarcns/radar-restapi:dev', '.']
 }
 
-task installSimpleStack(type: Exec, dependsOn: ['buildDocker']) {
+task installSimpleStack(type: Exec, dependsOn: ['copyWarForIntegration']) {
   doFirst{
     def lockFile = new File(simpleStackLock)
     if (lockFile.exists()) {
@@ -249,7 +249,7 @@ task installSimpleStack(type: Exec, dependsOn: ['buildDocker']) {
 
   workingDir simpleStackPath
   standardInput = System.in
-  commandLine sudoLinux + [dockerCompose, 'up', '-d']
+  commandLine sudoLinux + [dockerCompose, 'up', '-d', '--build']
 
   doLast {
     // wait until the hotstorage is ready
@@ -383,6 +383,12 @@ task setRadarEnvironmentForDocker {
 
     def installScript = file("${radarStackPath}/install-radar-stack.sh")
     installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
+
+    def dockerComposeYml = file("${radarStackPath}/docker-compose.yml")
+    file("${radarStackPath}/.docker-compose.yml.orig") << dockerComposeYml.text
+    def dockerComposeTmp = file("${radarStackPath}/.docker-compose.yml.tmp")
+    dockerComposeTmp << dockerComposeYml.text.replaceAll('radarcns/radar-restapi:.*', 'radarcns/radar-restapi:dev')
+    dockerComposeTmp.renameTo("${radarStackPath}/docker-compose.yml")
   }
 }
 

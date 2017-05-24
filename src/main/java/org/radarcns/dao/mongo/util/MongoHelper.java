@@ -69,7 +69,7 @@ public class MongoHelper {
         median("quartile"),
         min("min"),
         quartile("quartile"),
-        receivedMessage("count"),
+        receivedMessage("receivedMessage"),
         sum("sum");
 
         private final String param;

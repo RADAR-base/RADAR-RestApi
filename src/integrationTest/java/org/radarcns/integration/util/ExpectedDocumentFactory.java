@@ -16,13 +16,13 @@ package org.radarcns.integration.util;
  * limitations under the License.
  */
 
-import static org.radarcns.mock.model.CollectorStatisticsType.AVERAGE;
-import static org.radarcns.mock.model.CollectorStatisticsType.COUNT;
-import static org.radarcns.mock.model.CollectorStatisticsType.INTERQUARTILE_RANGE;
-import static org.radarcns.mock.model.CollectorStatisticsType.MAXIMUM;
-import static org.radarcns.mock.model.CollectorStatisticsType.MINIMUM;
-import static org.radarcns.mock.model.CollectorStatisticsType.QUARTILES;
-import static org.radarcns.mock.model.CollectorStatisticsType.SUM;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.AVERAGE;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MAXIMUM;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MINIMUM;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.SUM;
 import static org.radarcns.mock.model.ExpectedValue.DURATION;
 
 import java.util.ArrayList;
@@ -32,10 +32,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
+import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.dao.mongo.data.sensor.AccelerationFormat;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
-import org.radarcns.mock.model.CollectorStatisticsType;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
@@ -55,7 +55,7 @@ public class ExpectedDocumentFactory {
      * @return the set of values that has to be stored within a {@code Dataset} {@code Item}
      * @see DoubleValueCollector
      **/
-    public List<?> getStatValue(CollectorStatisticsType statistic,
+    public List<?> getStatValue(DescriptiveStatistic statistic,
             DoubleArrayCollector collectors) {
 
         List<DoubleValueCollector> subCollectors = collectors.getCollectors();
@@ -74,7 +74,7 @@ public class ExpectedDocumentFactory {
      * @return the value that has to be stored within a {@code Dataset} {@code Item}
      * @see DoubleValueCollector
      **/
-    public Object getStatValue(CollectorStatisticsType statistic, DoubleValueCollector collector) {
+    public Object getStatValue(DescriptiveStatistic statistic, DoubleValueCollector collector) {
         switch (statistic) {
             case AVERAGE:
                 return collector.getAvg();
@@ -94,7 +94,7 @@ public class ExpectedDocumentFactory {
                 return collector.getSum();
             default:
                 throw new IllegalArgumentException(
-                        statistic.toString() + " is not supported");
+                        statistic.toString() + " is not supported by DoubleValueCollector");
         }
     }
 

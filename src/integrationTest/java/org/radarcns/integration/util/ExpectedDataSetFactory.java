@@ -22,10 +22,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.avro.restapi.data.Acceleration;
 import org.radarcns.avro.restapi.data.DoubleSample;
@@ -38,7 +36,6 @@ import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.mock.model.CollectorStatisticsType;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.source.SourceCatalog;
 import org.radarcns.stream.collector.DoubleArrayCollector;
@@ -49,27 +46,6 @@ import org.radarcns.util.RadarConverter;
  * Produces {@link Dataset} and {@link org.bson.Document} for {@link ExpectedValue}
  */
 public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
-
-    //private static final Logger LOGGER = LoggerFactory.getLogger(ExpectedDataSetFactory.class);
-
-    private static final Map<DescriptiveStatistic, CollectorStatisticsType> statMap = new EnumMap<>(
-            DescriptiveStatistic.class);
-
-    /**
-     * Default constructor initializes the mapping between {@link DescriptiveStatistic} and {@link
-     *      CollectorStatisticsType}.
-     */
-    public ExpectedDataSetFactory() {
-        statMap.put(DescriptiveStatistic.AVERAGE, CollectorStatisticsType.AVERAGE);
-        statMap.put(DescriptiveStatistic.COUNT, CollectorStatisticsType.COUNT);
-        statMap.put(DescriptiveStatistic.INTERQUARTILE_RANGE,
-                CollectorStatisticsType.INTERQUARTILE_RANGE);
-        statMap.put(DescriptiveStatistic.MAXIMUM, CollectorStatisticsType.MAXIMUM);
-        statMap.put(DescriptiveStatistic.MEDIAN, CollectorStatisticsType.MEDIAN);
-        statMap.put(DescriptiveStatistic.MINIMUM, CollectorStatisticsType.MINIMUM);
-        statMap.put(DescriptiveStatistic.QUARTILES, CollectorStatisticsType.QUARTILES);
-        statMap.put(DescriptiveStatistic.SUM, CollectorStatisticsType.SUM);
-    }
 
     /**
      * It computes the {@code Dataset} resulted from the mock data.
@@ -197,14 +173,11 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
                     if (statistic.name().equals(DescriptiveStatistic.QUARTILES.name())) {
                         List<List<Double>> statValues = (List<List<Double>>) getStatValue(
-                                statMap.get(statistic),
-                                dac);
+                                statistic, dac);
                         content = new Acceleration(getQuartile(statValues.get(0)),
                                 getQuartile(statValues.get(1)), getQuartile(statValues.get(2)));
                     } else {
-                        List<Double> statValues = (List<Double>) getStatValue(
-                                statMap.get(statistic),
-                                dac);
+                        List<Double> statValues = (List<Double>) getStatValue(statistic, dac);
                         content = new Acceleration(statValues.get(0), statValues.get(1),
                                 statValues.get(2));
                     }
@@ -246,7 +219,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         for (Long key : keys) {
             DoubleValueCollector dac = (DoubleValueCollector) expectedValue.getSeries().get(key);
 
-            Object content = getContent(getStatValue(statMap.get(statistic), dac), statistic,
+            Object content = getContent(getStatValue(statistic, dac), statistic,
                     getSensorClass(sensor));
 
             items.add(new Item(content, getEffectiveTimeFrame(key).getStartDateTime()));
