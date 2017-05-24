@@ -63,7 +63,7 @@ public class RandomInput {
         Long start = new Date().getTime();
 
         for (int i = 0; i < samples; i++) {
-            instance.add(key, start, new Object[] {ThreadLocalRandom.current().nextDouble()});
+            instance.add(key, start, ThreadLocalRandom.current().nextDouble());
 
             if (singleWindow) {
                 start += 1;
@@ -84,27 +84,18 @@ public class RandomInput {
 
         ExpectedArrayValue instance = new ExpectedArrayValue();
 
-        Long start = new Date().getTime();
-
-        Double[] array;
-
         ThreadLocalRandom random = ThreadLocalRandom.current();
-
         MeasurementKey key = new MeasurementKey(user, source);
 
-        for (int i = 0; i < samples; i++) {
-            array = new Double[3];
-            array[0] = random.nextDouble();
-            array[1] = random.nextDouble();
-            array[2] = random.nextDouble();
+        long start = System.currentTimeMillis();
 
-            instance.add(key, start, array);
+        for (int i = 0; i < samples; i++) {
+            instance.add(key, start, random.nextDouble(), random.nextDouble(), random.nextDouble());
 
             if (singleWindow) {
-                start += TimeUnit.SECONDS.toMillis(
-                    ThreadLocalRandom.current().nextInt(1, 12));
+                start += random.nextInt(1000, 12000);
             } else {
-                start += 1;
+                start += 1L;
             }
         }
 
@@ -164,16 +155,13 @@ public class RandomInput {
             TimeFrame timeFrame, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         switch (sourceType) {
-            case ANDROID: break;
-            case BIOVOTION: break;
-            case EMPATICA: return getDocument(user, source, sourceType, sensorType, stat,
+            case EMPATICA:
+                return getDocument(user, source, sourceType, sensorType, stat,
                             timeFrame, samples, singleWindow);
-            case PEBBLE: break;
-            default: break;
+            default:
+                throw new UnsupportedOperationException(sourceType.name() + " is not"
+                        + " currently supported.");
         }
-
-        throw new UnsupportedOperationException(sourceType.name() + " is not"
-            + " currently supported.");
     }
 
     private static Dataset getDataset(String user, String source, SourceType sourceType,
@@ -219,7 +207,7 @@ public class RandomInput {
      *      by RADAR-CNS pRMT.
      **/
     public static Map<String, Document> getRandomApplicationStatus(String user, String source) {
-        String ipAdress = getRandomIp();
+        String ipAdress = getRandomIpAddress();
         ServerStatus serverStatus = ServerStatus.values()[
                 ThreadLocalRandom.current().nextInt(0, ServerStatus.values().length)];
         Double uptime = ThreadLocalRandom.current().nextDouble();
@@ -263,7 +251,7 @@ public class RandomInput {
     }
 
     /** Returns a String representing a random IP address. **/
-    public static String getRandomIp() {
+    public static String getRandomIpAddress() {
         long ip = ThreadLocalRandom.current().nextLong();
         StringBuilder result = new StringBuilder(15);
 

@@ -233,11 +233,28 @@ task installSimpleStack(type: Exec, dependsOn: ['buildDocker']) {
     } else {
       lockFile.createNewFile()
     }
+
+    def radarVolumePath = "${simpleStackPath}/volumes/radar"
+    file(radarVolumePath).mkdirs()
+
+    def configJson = file("${simpleStackPath}/resources/config.json")
+    file("${radarVolumePath}/config.json") << configJson.text
+
+    def catalogYml = file("${simpleStackPath}/resources/device-catalog.yml")
+    file("${radarVolumePath}/device-catalog.yml") << catalogYml.text
+
+    def radarYml = file("${simpleStackPath}/resources/radar.yml")
+    file("${radarVolumePath}/radar.yml") << radarYml.text.replace("localhost: 27017", "hotstorage: 27017")
   }
 
   workingDir simpleStackPath
   standardInput = System.in
   commandLine sudoLinux + [dockerCompose, 'up', '-d']
+
+  doLast {
+    // wait until the hotstorage is ready
+    sleep(10_000)
+  }
 }
 integrationTest.dependsOn 'installSimpleStack'
 
@@ -254,6 +271,15 @@ task stopSimpleStack(type: Exec) {
 }
 
 integrationTest.finalizedBy 'stopSimpleStack'
+
+task cleanSimpleStack(type: Delete, dependsOn: stopSimpleStack) {
+  delete "${simpleStackPath}/volumes"
+  delete simpleStackLock
+}
+
+stopSimpleStack.finalizedBy cleanSimpleStack
+clean.dependsOn cleanSimpleStack
+
 
 //---------------------------------------------------------------------------//
 // End to End Test                                                           //

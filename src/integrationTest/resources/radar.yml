@@ -15,7 +15,7 @@ api_base_path: api
 
 # Mongodb hosts
 mongo_hosts:
-    hotstorage: 27017
+    localhost: 27017
 
 # Mongodb User
 mongo_user:

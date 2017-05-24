@@ -66,7 +66,9 @@ public class Utility {
         MongoClient client = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),
                 credentials);
         if (!MongoDbContextListener.checkMongoConnection(client)) {
-            client = null;
+            throw new IllegalStateException("MongoDB connection invalid for hosts "
+                    + Properties.getApiConfig().getMongoDbHosts() + " and credentials "
+                    + Properties.getApiConfig().getMongoDbCredentials());
         }
 
         return client;

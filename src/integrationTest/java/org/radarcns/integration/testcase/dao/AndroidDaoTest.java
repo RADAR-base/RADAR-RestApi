@@ -21,7 +21,7 @@ import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-import static org.radarcns.integration.util.RandomInput.getRandomIp;
+import static org.radarcns.integration.util.RandomInput.getRandomIpAddress;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -58,7 +58,7 @@ public class AndroidDaoTest {
     public void testStatus() throws Exception {
         MongoClient client = Utility.getMongoClient();
 
-        String ipAdress = getRandomIp();
+        String ipAdress = getRandomIpAddress();
         ServerStatus serverStatus = ServerStatus.values()[
                 ThreadLocalRandom.current().nextInt(0, ServerStatus.values().length)];
         Double uptime = ThreadLocalRandom.current().nextDouble();
