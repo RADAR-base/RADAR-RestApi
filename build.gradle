@@ -391,7 +391,7 @@ task cleanRadarStack(type: Exec, dependsOn: stopRadarStack) {
   }
   commandLine sudoLinux + ['rm', '-rf', "${radarStackPath}/volumes", radarStackLock]
   doLast{
-    file("${radarStackPath}/${radarDockerComposeOriginal}").renameTo("${radarStackPath}/${radarDockerCompose}.yml")
+    file("${radarStackPath}/${radarDockerComposeOriginal}").renameTo("${radarStackPath}/${radarDockerCompose}")
   }
 }
 stopRadarStack.finalizedBy cleanRadarStack
