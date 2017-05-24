@@ -346,13 +346,11 @@ task stopRadarStack(type: Exec) {
   }
 }
 
-task cleanRadarStack(type: Delete, dependsOn: stopRadarStack) {
+task cleanRadarStack(type: Exec, dependsOn: stopRadarStack) {
   onlyIf{
     !stoppingStack
   }
-
-  delete "${radarStackPath}/volumes"
-  delete radarStackLock
+  commandLine sudoLinux + ['rm', '-rf', "${radarStackPath}/volumes", radarStackLock]
 }
 stopRadarStack.finalizedBy cleanRadarStack
 clean.dependsOn cleanRadarStack
