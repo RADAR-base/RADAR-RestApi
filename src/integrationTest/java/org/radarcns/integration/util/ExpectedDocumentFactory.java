@@ -16,35 +16,36 @@ package org.radarcns.integration.util;
  * limitations under the License.
  */
 
-import static org.radarcns.integration.model.ExpectedValue.DURATION;
-import static org.radarcns.integration.model.ExpectedValue.StatType.AVERAGE;
-import static org.radarcns.integration.model.ExpectedValue.StatType.COUNT;
-import static org.radarcns.integration.model.ExpectedValue.StatType.INTERQUARTILE_RANGE;
-import static org.radarcns.integration.model.ExpectedValue.StatType.MAXIMUM;
-import static org.radarcns.integration.model.ExpectedValue.StatType.MEDIAN;
-import static org.radarcns.integration.model.ExpectedValue.StatType.MINIMUM;
-import static org.radarcns.integration.model.ExpectedValue.StatType.QUARTILES;
-import static org.radarcns.integration.model.ExpectedValue.StatType.SUM;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.AVERAGE;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MAXIMUM;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MINIMUM;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.SUM;
+import static org.radarcns.mock.model.ExpectedValue.DURATION;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.bson.Document;
+import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.dao.mongo.data.sensor.AccelerationFormat;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
-import org.radarcns.integration.aggregator.DoubleArrayCollector;
-import org.radarcns.integration.aggregator.DoubleValueCollector;
-import org.radarcns.integration.model.ExpectedValue;
-import org.radarcns.integration.model.ExpectedValue.StatType;
+import org.radarcns.mock.model.ExpectedValue;
+import org.radarcns.stream.collector.DoubleArrayCollector;
+import org.radarcns.stream.collector.DoubleValueCollector;
 
 /**
  * It computes the expected Documents for a test case i.e. {@link ExpectedValue}.
  */
 public class ExpectedDocumentFactory {
+
+    //private static final Logger LOGGER = LoggerFactory.getLogger(ExpectedDocumentFactory.class);
 
     /**
      * It return the value of the given statistical function.
@@ -52,54 +53,17 @@ public class ExpectedDocumentFactory {
      * @param statistic function that has to be returned
      * @param collectors array of aggregated data
      * @return the set of values that has to be stored within a {@code Dataset} {@code Item}
-     * @see {@link DoubleValueCollector}
+     * @see DoubleValueCollector
      **/
-    public List<? extends Object> getStatValue(StatType statistic,
+    public List<?> getStatValue(DescriptiveStatistic statistic,
             DoubleArrayCollector collectors) {
 
-        int len = collectors.getCollectors().length;
-
-        List<Double> avgList = new ArrayList<>(len);
-        List<Double> countList = new ArrayList<>(len);
-        List<Double> iqrList = new ArrayList<>(len);
-        List<Double> maxList = new ArrayList<>(len);
-        List<Double> medList = new ArrayList<>(len);
-        List<Double> minList = new ArrayList<>(len);
-        List<Double> sumList = new ArrayList<>(len);
-        List<List<Double>> quartileList = new ArrayList<>(len);
-
-        for (DoubleValueCollector collector : collectors.getCollectors()) {
-            minList.add((Double) getStatValue(MINIMUM, collector));
-            maxList.add((Double) getStatValue(MAXIMUM, collector));
-            sumList.add((Double) getStatValue(SUM, collector));
-            countList.add((Double) getStatValue(COUNT, collector));
-            avgList.add((Double) getStatValue(AVERAGE, collector));
-            iqrList.add((Double) getStatValue(INTERQUARTILE_RANGE, collector));
-            quartileList.add((List<Double>) getStatValue(QUARTILES, collector));
-            medList.add((Double) getStatValue(MEDIAN, collector));
+        List<DoubleValueCollector> subCollectors = collectors.getCollectors();
+        List<Object> subList = new ArrayList<>(subCollectors.size());
+        for (DoubleValueCollector collector : subCollectors) {
+            subList.add(getStatValue(statistic, collector));
         }
-
-        switch (statistic) {
-            case AVERAGE:
-                return avgList;
-            case COUNT:
-                return countList;
-            case INTERQUARTILE_RANGE:
-                return iqrList;
-            case MAXIMUM:
-                return maxList;
-            case MEDIAN:
-                return medList;
-            case MINIMUM:
-                return minList;
-            case QUARTILES:
-                return quartileList;
-            case SUM:
-                return sumList;
-            default:
-                throw new IllegalArgumentException(
-                        statistic.toString() + " is not supported");
-        }
+        return subList;
     }
 
     /**
@@ -108,11 +72,9 @@ public class ExpectedDocumentFactory {
      * @param statistic function that has to be returned
      * @param collector data aggregator
      * @return the value that has to be stored within a {@code Dataset} {@code Item}
-     * @see {@link .DoubleValueCollector}
+     * @see DoubleValueCollector
      **/
-    public Object getStatValue(StatType statistic,
-            DoubleValueCollector collector) {
-
+    public Object getStatValue(DescriptiveStatistic statistic, DoubleValueCollector collector) {
         switch (statistic) {
             case AVERAGE:
                 return collector.getAvg();
@@ -123,42 +85,39 @@ public class ExpectedDocumentFactory {
             case MAXIMUM:
                 return collector.getMax();
             case MEDIAN:
-                return collector.getQuartile()[1];
+                return collector.getQuartile().get(1);
             case MINIMUM:
                 return collector.getMin();
             case QUARTILES:
-                List<Double> temp = new ArrayList<>();
-                for (int i = 0; i < collector.getQuartile().length; i++) {
-                    temp.add(collector.getQuartile()[i]);
-                }
-                return temp;
+                return collector.getQuartile();
             case SUM:
                 return collector.getSum();
             default:
                 throw new IllegalArgumentException(
-                        statistic.toString() + " is not supported");
+                        statistic.toString() + " is not supported by DoubleValueCollector");
         }
     }
 
 
-    private List<Document> getDocumentsBySingle(ExpectedValue expectedValue) {
-        LinkedList<Document> list = new LinkedList<>();
+    private List<Document> getDocumentsBySingle(ExpectedValue<?> expectedValue) {
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
 
-        DoubleValueCollector doubleValueCollector;
-        Long end;
-        for (Long timestamp : windows) {
-            doubleValueCollector = (DoubleValueCollector) expectedValue.getSeries().get(timestamp);
+        List<Document> list = new ArrayList<>(windows.size());
 
-            end = timestamp + DURATION;
+        for (Long timestamp : windows) {
+            DoubleValueCollector doubleValueCollector = (DoubleValueCollector) expectedValue
+                    .getSeries().get(timestamp);
+
+            long end = timestamp + DURATION;
 
             list.add(new Document(MongoHelper.ID,
-                    expectedValue.getUser() + "-" + expectedValue.getSource() + "-" + timestamp
-                            + "-" + end)
-                    .append(MongoHelper.USER, expectedValue.getUser())
-                    .append(MongoHelper.SOURCE, expectedValue.getSource())
+                    expectedValue.getLastKey().getUserId()
+                            + "-" + expectedValue.getLastKey().getSourceId()
+                            + "-" + timestamp + "-" + end)
+                    .append(MongoHelper.USER, expectedValue.getLastKey().getUserId())
+                    .append(MongoHelper.SOURCE, expectedValue.getLastKey().getSourceId())
                     .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
                     .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleValueCollector))
                     .append(Stat.sum.getParam(), getStatValue(SUM, doubleValueCollector))
@@ -175,24 +134,25 @@ public class ExpectedDocumentFactory {
         return list;
     }
 
-    private List<Document> getDocumentsByArray(ExpectedValue expectedValue) {
-        LinkedList<Document> list = new LinkedList<>();
+    private List<Document> getDocumentsByArray(ExpectedValue<?> expectedValue) {
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
 
-        DoubleArrayCollector doubleArrayCollector;
-        Long end;
-        for (Long timestamp : windows) {
-            doubleArrayCollector = (DoubleArrayCollector) expectedValue.getSeries().get(timestamp);
+        List<Document> list = new ArrayList<>(windows.size());
 
-            end = timestamp + DURATION;
+        for (Long timestamp : windows) {
+            DoubleArrayCollector doubleArrayCollector = (DoubleArrayCollector) expectedValue
+                    .getSeries().get(timestamp);
+
+            long end = timestamp + DURATION;
 
             list.add(new Document(MongoHelper.ID,
-                    expectedValue.getUser() + "-" + expectedValue.getSource() + "-" + timestamp
-                            + "-" + end)
-                    .append(MongoHelper.USER, expectedValue.getUser())
-                    .append(MongoHelper.SOURCE, expectedValue.getSource())
+                    expectedValue.getLastKey().getUserId()
+                            + "-" + expectedValue.getLastKey().getUserId()
+                            + "-" + timestamp + "-" + end)
+                    .append(MongoHelper.USER, expectedValue.getLastKey().getUserId())
+                    .append(MongoHelper.SOURCE, expectedValue.getLastKey().getUserId())
                     .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleArrayCollector))
                     .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleArrayCollector))
                     .append(Stat.sum.getParam(), getStatValue(SUM, doubleArrayCollector))
@@ -219,11 +179,10 @@ public class ExpectedDocumentFactory {
     }
 
     private static List<Document> extractQuartile(List<Double> component) {
-        return Arrays.asList(new Document[]{
+        return Arrays.asList(
                 new Document("25", component.get(0)),
                 new Document("50", component.get(1)),
-                new Document("75", component.get(2))
-        });
+                new Document("75", component.get(2)));
     }
 
     /**
@@ -232,11 +191,15 @@ public class ExpectedDocumentFactory {
      * @return {@link List} of {@link Document}s
      */
     public List<Document> produceExpectedData(ExpectedValue expectedValue) {
-        switch (expectedValue.getExpectedType()) {
-            case ARRAY:
-                return getDocumentsByArray(expectedValue);
-            default:
-                return getDocumentsBySingle(expectedValue);
+        Map series = expectedValue.getSeries();
+        if (series.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Object firstCollector = series.values().iterator().next();
+        if (firstCollector instanceof DoubleArrayCollector) {
+            return getDocumentsByArray(expectedValue);
+        } else {
+            return getDocumentsBySingle(expectedValue);
         }
     }
 }

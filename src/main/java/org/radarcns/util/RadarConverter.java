@@ -18,18 +18,25 @@ package org.radarcns.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.avro.restapi.app.ServerStatus;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.header.Header;
+import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.security.Param;
+import org.radarcns.source.SourceCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,8 +102,9 @@ public class RadarConverter {
             case sum: return DescriptiveStatistic.SUM;
             case quartile: return DescriptiveStatistic.QUARTILES;
             case median: return DescriptiveStatistic.MEDIAN;
+            case receivedMessage: return DescriptiveStatistic.RECEIVED_MESSAGES;
             default: throw new IllegalArgumentException("MongoHelper.Stat type cannot be"
-                + "converted. " + stat.name() + "is unknown");
+                + "converted. " + stat.name() + " is unknown");
         }
     }
 
@@ -109,10 +117,11 @@ public class RadarConverter {
             case COUNT: return MongoHelper.Stat.count;
             case INTERQUARTILE_RANGE: return MongoHelper.Stat.iqr;
             case MAXIMUM: return MongoHelper.Stat.max;
-            case MINIMUM: return MongoHelper.Stat.min;
-            case SUM: return MongoHelper.Stat.sum;
-            case QUARTILES: return MongoHelper.Stat.quartile;
             case MEDIAN: return MongoHelper.Stat.median;
+            case MINIMUM: return MongoHelper.Stat.min;
+            case QUARTILES: return MongoHelper.Stat.quartile;
+            case RECEIVED_MESSAGES: return Stat.receivedMessage;
+            case SUM: return MongoHelper.Stat.sum;
             default: throw new IllegalArgumentException("DescriptiveStatistic type cannot be"
                     + "converted. " + stat.name() + "is unknown");
         }
@@ -128,10 +137,9 @@ public class RadarConverter {
             throw new IllegalArgumentException();
         }
 
-        long factor = (long) Math.pow(10, places);
-        double valueTemp = value * factor;
-        long tmp = Math.round(valueTemp);
-        return (double) tmp / factor;
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
     /**
@@ -190,11 +198,43 @@ public class RadarConverter {
      * @param record Specific Record that has to be converted
      * @return String with the object serialised in pretty JSON
      */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public static String getPrettyJSON(SpecificRecord record) throws IOException {
+    public static String getPrettyJson(SpecificRecord record) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Object json = mapper.readValue(record.toString(), Object.class);
         String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
         return  indented;
+    }
+
+    /**
+     * Returns the amount of expected data related to the {@link SourceType}, {@link SensorType} and
+     *      {@link TimeFrame} specified in the {@link Header}.
+     *
+     * @param header {@link Header} to provide data context
+     *
+     * @return the number of expected messages
+     */
+    public static Double getExpectedMessages(Header header) {
+        return SourceCatalog.getInstance(header.getSource()).getFrequency(
+                header.getSensor()) * getSecond(header.getTimeFrame()).doubleValue();
+    }
+
+    /**
+     * Converts a {@link TimeFrame} to seconds.
+     *
+     * @param timeFrame {@link TimeFrame} that has to be converted in seconds
+     *
+     * @return a {@link Long} representing the amount of seconds
+     */
+    public static Long getSecond(TimeFrame timeFrame) {
+        switch (timeFrame) {
+            case TEN_SECOND: return TimeUnit.SECONDS.toSeconds(10);
+            case THIRTY_SECOND: return TimeUnit.SECONDS.toSeconds(30);
+            case ONE_MIN: return TimeUnit.MINUTES.toSeconds(1);
+            case TEN_MIN: return TimeUnit.MINUTES.toSeconds(10);
+            case ONE_HOUR: return TimeUnit.HOURS.toSeconds(1);
+            case ONE_DAY: return TimeUnit.DAYS.toSeconds(1);
+            case ONE_WEEK: return TimeUnit.DAYS.toSeconds(7);
+            default: throw new IllegalArgumentException(timeFrame.name() + " is not yet supported");
+        }
     }
 }

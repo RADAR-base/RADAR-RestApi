@@ -19,18 +19,16 @@ package org.radarcns.integration.util;
 import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
+import static org.radarcns.dao.mongo.util.MongoHelper.END;
+import static org.radarcns.dao.mongo.util.MongoHelper.START;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +40,8 @@ import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
 import org.radarcns.avro.restapi.app.Application;
+import org.radarcns.avro.restapi.data.Acceleration;
+import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
@@ -54,10 +54,7 @@ import org.radarcns.config.Properties;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.listener.MongoDbContextListener;
-import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.RadarConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Utility {
 
@@ -69,7 +66,9 @@ public class Utility {
         MongoClient client = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),
                 credentials);
         if (!MongoDbContextListener.checkMongoConnection(client)) {
-            client = null;
+            throw new IllegalStateException("MongoDB connection invalid for hosts "
+                    + Properties.getApiConfig().getMongoDbHosts() + " and credentials "
+                    + Properties.getApiConfig().getMongoDbCredentials());
         }
 
         return client;
@@ -134,8 +133,8 @@ public class Utility {
             TimeFrame timeFrame, Class<? extends SpecificRecord> recordClass)
             throws IllegalAccessException, InstantiationException {
         EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(
-                RadarConverter.getISO8601(docs.get(0).getDate(MongoHelper.START)),
-                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate(MongoHelper.END)));
+                RadarConverter.getISO8601(docs.get(0).getDate(START)),
+                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate(END)));
 
         List<Item> itemList = new LinkedList<>();
         for (Document doc : docs) {
@@ -148,8 +147,7 @@ public class Utility {
                             doc.getDouble(stat.getParam()));
                     break;
             }
-            itemList.add(new Item(record, RadarConverter.getISO8601(
-                    doc.getDate(MongoHelper.START))));
+            itemList.add(new Item(record, RadarConverter.getISO8601(doc.getDate(START))));
         }
 
         Header header = new Header(subjectId, sourceId, sourceType, sensorType,
@@ -182,37 +180,13 @@ public class Utility {
     }
 
     /**
-     * Makes an HTTP request to given URL without validating the SSL certificate.
-     *
-     * @param url end-point
-     *
-     * @return HTTP Response
-     * @throws IOException if the request could not be executed
-     */
-    public static Response makeUnsafeRequest(String url)
-        throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        OkHttpClient client = RestClient.getUnsafeBuilder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build();
-
-        Request request = new Request.Builder()
-                .header("User-Agent", "Mozilla/5.0")
-                .url(url)
-                .build();
-
-        return client.newCall(request).execute();
-    }
-
-    /**
      * Converts Bson Document into an Application.
      * @param documents map containing variables to create the Application class
      * @return an Application class
      *
      * @see Application
      */
-    //TODO take field names from schemas
+    //TODO take field names from RADAR Mongo Connector
     public static Application convertDocToApplication(Map<String, Document> documents) {
         return new Application(
             documents.get(STATUS_COLLECTION).getString("clientIP"),
@@ -236,38 +210,81 @@ public class Utility {
     }
 
     /**
-     * Returns a logger for the given class.
-     * @param obj class for which the logger is required
-     * @return a Logger
+     * Converts add data in an InputStream to a String.
+     * @param in inputstream
+     * @return a String representing the file content
      */
-    public static Logger getLogger(Object obj) {
-        return LoggerFactory.getLogger(obj.getClass());
+    public static String readAll(InputStream in) throws IOException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = in.read(buffer)) != -1) {
+            result.write(buffer, 0, length);
+        }
+        return result.toString("UTF-8");
     }
 
     /**
-     * Converts file content to java String.
-     * @param path location of the file to convert
-     * @return a String representing the file content
+     * Computes the {@link EffectiveTimeFrame} related to the {@code List<Document>}. {@code start}
+     *      {@code end} can be used to update an exiting {@link EffectiveTimeFrame} using the given
+     *      {@code List<Document>}.
+     *
+     * @param start time window start time
+     * @param end time window end time
+     * @param docs list of mock documents that has to be analysed to compute the
+     *      {@link EffectiveTimeFrame}
+     * @return {@link EffectiveTimeFrame} related to the {@code List<Document>}
      */
-    public static String fileToString(String path) throws IOException {
-        File file = new File(path);
-        if (!file.exists() || file.isDirectory()) {
-            throw new FileNotFoundException(path + " is not a valid file");
+    public static EffectiveTimeFrame getExpectedTimeFrame(long start, long end,
+            List<Document> docs) {
+        long expectedStart = start;
+        long expectedEnd = end;
+
+        for (Document doc : docs) {
+            expectedStart = Math.min(expectedStart, doc.getDate(START).getTime());
+            expectedEnd = Math.max(expectedEnd, doc.getDate(END).getTime());
         }
 
-        byte [] buffer = new byte[4096];
-        ByteArrayOutputStream outs = new ByteArrayOutputStream();
-        InputStream ins = new FileInputStream(file);
+        return new EffectiveTimeFrame(
+            RadarConverter.getISO8601(expectedStart),
+            RadarConverter.getISO8601(expectedEnd));
+    }
 
-        int read = 0;
-        while ((read = ins.read(buffer)) != -1 ) {
-            outs.write(buffer, 0, read);
+    /**
+     * Clones the input {@link Dataset}.
+     *
+     * @param input {@link Dataset} that has to be cloned
+     *
+     * @return {@link Dataset} cloned from {@code input}
+     */
+    public static Dataset cloneDataset(Dataset input) {
+        Header inputHeader = input.getHeader();
+        EffectiveTimeFrame cloneEffectiveTimeFrame =  new EffectiveTimeFrame(
+                inputHeader.getEffectiveTimeFrame().getStartDateTime(),
+                inputHeader.getEffectiveTimeFrame().getEndDateTime());
+        Header cloneHeader = new Header(inputHeader.getSubjectId(), inputHeader.getSourceId(),
+                    inputHeader.getSource(), inputHeader.getSensor(),
+                    inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
+                    inputHeader.getTimeFrame(), cloneEffectiveTimeFrame);
+
+
+        List<Item> cloneItem = new ArrayList<>();
+        SpecificRecord value;
+        for (Item item : input.getDataset()) {
+
+            if (item.getSample() instanceof DoubleSample) {
+                value = new DoubleSample(((DoubleSample)item.getSample()).getValue());
+            } else if (item.getSample() instanceof Acceleration) {
+                Acceleration temp = (Acceleration)item.getSample();
+                value = new Acceleration(temp.getX(), temp.getY(), temp.getZ());
+            } else {
+                throw new IllegalArgumentException(item.getSample().getClass().getCanonicalName()
+                        + " is not supported yet");
+            }
+
+            cloneItem.add(new Item(value, item.getStartDateTime()));
         }
 
-        ins.close();
-        outs.close();
-        byte [] fileBytes = outs.toByteArray();
-
-        return new String(fileBytes);
+        return new Dataset(cloneHeader, cloneItem);
     }
 }

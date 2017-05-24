@@ -29,7 +29,11 @@ import java.security.NoSuchAlgorithmException;
 import okhttp3.Response;
 import org.junit.Test;
 import org.radarcns.config.Properties;
+import org.radarcns.config.ServerConfig;
 import org.radarcns.integration.util.Utility;
+import org.radarcns.producer.rest.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Checks if the config file for the Front-End ecosystem is where expected, and checks the
@@ -48,58 +52,50 @@ public class ExposedConfigTest {
     private static final String BASE_PATH = "api";
     public static final String FRONTEND = "frontend";
 
+    private static Logger logger = LoggerFactory.getLogger(ExposedConfigTest.class);
+
     @Test
     public void checkFrontEndConfig()
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
         URL url = new URL(PROTOCOL, SERVER, PORT, "/" + WEB_ROOT + "/" + FRONTEND + "/");
 
-        String actual = checkFrontEndConfig(url, false);
+        try (Response response = Utility.makeRequest(new URL(url, CONFIG_JSON).toString())) {
+            assertEquals(200, response.code());
 
-        String expected = Utility.fileToString(
-                ExposedConfigTest.class.getClassLoader().getResource(CONFIG_JSON).getFile());
+            String expected = Utility.readAll(
+                    ExposedConfigTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
 
-        assertEquals(expected, actual);
-    }
-
-    /** Retrieves the exposed Frontedn config file. **/
-    public static String checkFrontEndConfig(URL url, boolean isUnsafe)
-            throws IOException, KeyManagementException, NoSuchAlgorithmException {
-        Response response;
-        if (isUnsafe) {
-            response = Utility.makeUnsafeRequest(new URL(url, CONFIG_JSON).toString());
-        } else {
-            response = Utility.makeUnsafeRequest(new URL(url, CONFIG_JSON).toString());
+            assertEquals(expected, response.body().string());
         }
-
-        assertEquals(200, response.code());
-
-        return response.body().string();
     }
 
     @Test
     public void checkSwaggerDoc()
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        URL url = new URL(PROTOCOL, SERVER, PORT, "/" + WEB_ROOT + "/" + BASE_PATH + "/");
-        assertEquals(Properties.getApiConfig().getApiBasePath(),
-                getSwaggerBasePath(url, false));
+        ServerConfig config = new ServerConfig();
+        config.setProtocol(PROTOCOL);
+        config.setHost(SERVER);
+        config.setPort(PORT);
+        config.setPath("/" + WEB_ROOT + "/" + BASE_PATH + "/");
+        config.setUnsafe(false);
+        assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(config));
     }
 
     /** Retrieves the exposed Swagger documentation. **/
-    public static String getSwaggerBasePath(URL url, boolean isUnsafe)
+    public static String getSwaggerBasePath(ServerConfig config)
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        Response response;
-        if (isUnsafe) {
-            response = Utility.makeUnsafeRequest(new URL(url, SWAGGER_JSON).toString());
-        } else {
-            response = Utility.makeRequest(new URL(url, SWAGGER_JSON).toString());
+
+        try (RestClient client = new RestClient(config);
+                Response response = client.request(SWAGGER_JSON)) {
+
+            logger.info("Requested {}", client.getRelativeUrl(SWAGGER_JSON));
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode swaggerDocumentation = mapper.readTree(response.body().string());
+
+            Swagger swagger = new SwaggerParser().read(swaggerDocumentation);
+
+            return swagger.getBasePath();
         }
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode swaggerDocumentation = mapper.readTree(response.body().string());
-
-        Swagger swagger = new SwaggerParser().read(swaggerDocumentation);
-
-        return swagger.getBasePath();
     }
-
 }

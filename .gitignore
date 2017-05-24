@@ -27,3 +27,4 @@ src/test/resources/*.json
 src/integrationTest/resources/*.json
 src/endToEndTest/resources/*.json
 src/main/webapp/frontend/*.json
+.RUNNING_INSTANCE_LOCK

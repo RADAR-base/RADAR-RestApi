@@ -33,8 +33,9 @@ import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.integration.model.ExpectedArrayValue;
-import org.radarcns.integration.model.ExpectedDoubleValue;
+import org.radarcns.key.MeasurementKey;
+import org.radarcns.mock.model.ExpectedArrayValue;
+import org.radarcns.mock.model.ExpectedDoubleValue;
 
 /**
  * All supported sources specifications.
@@ -56,13 +57,13 @@ public class RandomInput {
             SensorType sensorType, DescriptiveStatistic stat, TimeFrame timeFrame,
             int samples, boolean singleWindow) throws InstantiationException,
             IllegalAccessException {
-        ExpectedDoubleValue instance = new ExpectedDoubleValue(user, source);
+        MeasurementKey key = new MeasurementKey(user, source);
+        ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
         Long start = new Date().getTime();
 
         for (int i = 0; i < samples; i++) {
-            instance.add(Utility.getStartTimeWindow(start), start,
-                    ThreadLocalRandom.current().nextDouble());
+            instance.add(key, start, ThreadLocalRandom.current().nextDouble());
 
             if (singleWindow) {
                 start += 1;
@@ -80,25 +81,21 @@ public class RandomInput {
     private static void randomArrayValue(String user, String source, SourceType sourceType,
             SensorType sensorType, DescriptiveStatistic stat, TimeFrame timeFrame, int samples,
             boolean singleWindow) throws InstantiationException, IllegalAccessException {
-        ExpectedArrayValue instance = new ExpectedArrayValue(user, source);
 
-        Long start = new Date().getTime();
+        ExpectedArrayValue instance = new ExpectedArrayValue();
 
-        Double[] array;
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        MeasurementKey key = new MeasurementKey(user, source);
+
+        long start = System.currentTimeMillis();
+
         for (int i = 0; i < samples; i++) {
-
-            array = new Double[3];
-            array[0] = ThreadLocalRandom.current().nextDouble();
-            array[1] = ThreadLocalRandom.current().nextDouble();
-            array[2] = ThreadLocalRandom.current().nextDouble();
-
-            instance.add(Utility.getStartTimeWindow(start), start, array);
+            instance.add(key, start, random.nextDouble(), random.nextDouble(), random.nextDouble());
 
             if (singleWindow) {
-                start += TimeUnit.SECONDS.toMillis(
-                    ThreadLocalRandom.current().nextInt(1, 12));
+                start += random.nextInt(1000, 12000);
             } else {
-                start += 1;
+                start += 1L;
             }
         }
 
@@ -158,16 +155,13 @@ public class RandomInput {
             TimeFrame timeFrame, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         switch (sourceType) {
-            case ANDROID: break;
-            case BIOVOTION: break;
-            case EMPATICA: return getDocument(user, source, sourceType, sensorType, stat,
+            case EMPATICA:
+                return getDocument(user, source, sourceType, sensorType, stat,
                             timeFrame, samples, singleWindow);
-            case PEBBLE: break;
-            default: break;
+            default:
+                throw new UnsupportedOperationException(sourceType.name() + " is not"
+                        + " currently supported.");
         }
-
-        throw new UnsupportedOperationException(sourceType.name() + " is not"
-            + " currently supported.");
     }
 
     private static Dataset getDataset(String user, String source, SourceType sourceType,
@@ -189,7 +183,7 @@ public class RandomInput {
             boolean singleWindow) throws InstantiationException, IllegalAccessException {
         nextValue(user, source, sourceType, sensorType, stat, timeFrame, samples, singleWindow);
 
-        Map<String, Object> map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put(DATASET, dataset);
         map.put(DOCUMENTS, documents);
         return map;
@@ -213,7 +207,7 @@ public class RandomInput {
      *      by RADAR-CNS pRMT.
      **/
     public static Map<String, Document> getRandomApplicationStatus(String user, String source) {
-        String ipAdress = getRandomIp();
+        String ipAdress = getRandomIpAddress();
         ServerStatus serverStatus = ServerStatus.values()[
                 ThreadLocalRandom.current().nextInt(0, ServerStatus.values().length)];
         Double uptime = ThreadLocalRandom.current().nextDouble();
@@ -257,7 +251,7 @@ public class RandomInput {
     }
 
     /** Returns a String representing a random IP address. **/
-    public static String getRandomIp() {
+    public static String getRandomIpAddress() {
         long ip = ThreadLocalRandom.current().nextLong();
         StringBuilder result = new StringBuilder(15);
 

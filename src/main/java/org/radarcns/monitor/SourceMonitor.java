@@ -53,7 +53,7 @@ public class SourceMonitor {
      * @return {@code SourceDefinition} representing a source source
      * @throws ConnectException if the connection with MongoDb is faulty
      *
-     * @see {@link Source}
+     * @see Source
      */
     public Source getState(String subject, String source, MongoClient client)
             throws ConnectException {
@@ -76,7 +76,7 @@ public class SourceMonitor {
      * @return {@code SourceDefinition} representing a source source
      * @throws ConnectException if the connection with MongoDb is faulty
      *
-     * @see {@link Source}
+     * @see Source
      */
     public Source getState(String subject, String source, long start, long end, MongoClient client)
             throws ConnectException {
@@ -86,7 +86,7 @@ public class SourceMonitor {
         double percentTemp;
         for (SensorType type : specification.getSensorTypes()) {
 
-            countTemp = SensorDataAccessObject.getInstance().countSamplesByUserSourceWindow(
+            countTemp = SensorDataAccessObject.getInstance().count(
                 subject, source, start, end, type, specification.getType(), client);
 
             percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);
@@ -129,7 +129,7 @@ public class SourceMonitor {
      * @param percentage numerical value that has to be converted int Status
      * @return the current {@code Status}
      *
-     * @see {@link State}
+     * @see State
      */
     public static State getStatus(double percentage) {
         if (percentage > 0.95) {

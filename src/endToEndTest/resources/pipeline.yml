@@ -20,9 +20,16 @@ rest_api:
   path: /api/
   unsafe: true
 
+#============================= Frontend =================================#
+frontend:
+  protocol: https
+  host: localhost
+  path: /frontend/
+  unsafe: true
+
 #=============================== Test ===================================#
-# time duration that mock data has to cover expressed in seconds.
-duration: 60
+# time duration that mock data has to cover expressed in milliseconds.
+duration_millis: 60000
 
 #Possible value are direct, rest
 producer_mode: rest
@@ -34,45 +41,57 @@ data:
     file: accelerometer.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4Acceleration
-    assert_header: "x, y, z"
-    magnitude: 10
+    value_fields: [x, y, z]
+    minimum: -2.0
+    maximum: 2.0
+    maximum_difference: 1e-10
   - topic: android_empatica_e4_battery_level
-    sensor: BATTERY_LEVEL
+    sensor: BATTERY
     frequency: 1.0
     file: battery.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4BatteryLevel
-    assert_header: "batteryLevel"
-    magnitude: 10
+    value_fields: [batteryLevel]
+    minimum: 0
+    maximum: 1
+    maximum_difference: 1e-10
   - topic: android_empatica_e4_blood_volume_pulse
-    sensor: BLOOD_VOLUME_PULSE
     frequency: 64.0
+    sensor: BLOOD_VOLUME_PULSE
     file: blood_volume_pulse.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4BloodVolumePulse
-    assert_header: "bloodVolumePulse"
-    magnitude: 10
+    value_fields: [bloodVolumePulse]
+    minimum: -200
+    maximum: 200
+    maximum_difference: 1e-10
   - topic: android_empatica_e4_electrodermal_activity
-    sensor: ELECTRODERMAL_ACTIVITY
     frequency: 4.0
+    sensor: ELECTRODERMAL_ACTIVITY
     file: electrodermal_activity.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4ElectroDermalActivity
-    assert_header: "electroDermalActivity"
-    magnitude: 10
+    value_fields: [electroDermalActivity]
+    minimum: 0.01
+    maximum: 0.05
+    maximum_difference: 1e-10
   - topic: android_empatica_e4_inter_beat_interval
-    sensor: INTER_BEAT_INTERVAL
     frequency: 1.0
+    sensor: INTER_BEAT_INTERVAL
     file: inter_beat_interval.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4InterBeatInterval
-    assert_header: "interBeatInterval"
-    magnitude: 10
+    value_fields: [interBeatInterval]
+    minimum: 0.5
+    maximum: 1.1
+    maximum_difference: 1e-10
   - topic: android_empatica_e4_temperature
-    sensor: THERMOMETER
     frequency: 4.0
+    sensor: THERMOMETER
     file: thermometer.csv
     key_schema: org.radarcns.key.MeasurementKey
     value_schema: org.radarcns.empatica.EmpaticaE4Temperature
-    assert_header: "temperature"
-    magnitude: 10
+    value_fields: [temperature]
+    minimum: 20
+    maximum: 55
+    maximum_difference: 1e-10

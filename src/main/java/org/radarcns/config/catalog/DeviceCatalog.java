@@ -40,8 +40,8 @@ public class DeviceCatalog {
     }
 
     /**
-     * Returns all supported {@code SourceType}s.
-     * @return collection of all {@code SourceType} defined in the catalog configuration file.
+     * Returns all supported {@link SourceType}s.
+     * @return collection of all {@link SourceType} defined in the catalog configuration file.
      */
     public Collection<SourceType> getSupportedSources() {
         return devices.keySet();

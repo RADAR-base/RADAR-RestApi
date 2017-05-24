@@ -24,7 +24,7 @@ public class AndroidServerStatus extends MongoAndroidApp {
 
     public static final String STATUS_COLLECTION = "application_server_status";
 
-    //TODO take field names from schemas
+    //TODO take field names from RADAR MongoDb Connector
     @Override
     protected Application getApplication(Document doc, Application app) {
         app.setIpAddress(doc.getString("clientIP"));

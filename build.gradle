@@ -12,10 +12,9 @@ war {
   archiveName = 'radar.war'
 }
 
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
+targetCompatibility = '1.8'
+sourceCompatibility = '1.8'
 
-ext.avro='1.7.7'
 ext.codacyVersion = '1.0.10'
 ext.dataformat = '2.8.5'
 ext.jackson='2.8.4'
@@ -30,14 +29,14 @@ ext.mongodb='3.3.0'
 ext.okhttpVersion = '3.5.0'
 ext.okioVersion = '1.11.0'
 ext.openCsvVersion = '3.9'
-ext.radarCommon = '0.3-SNAPSHOT'
+ext.radarCommon = '0.3.1-SNAPSHOT'
+ext.radarCommonTesting = '0.3.1-SNAPSHOT'
 ext.radarSchemasCommon = '0.1'
-ext.radarStream = '0.1-alpha.3-SNAPSHOT'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
-ext.swaggerParserVersion='1.0.24'
-ext.tomcat = '8.0.37'
-ext.schemaRestApiVersion = '0.1.1-alpha.1'
+ext.swaggerParser='1.0.24'
+ext.tomcat = '8.0.43'
+ext.schemaRestApi = '0.1.1-alpha.1'
 
 configurations {
   codacy
@@ -66,18 +65,15 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-  // The production code runs on tomcat 8.0.37
   providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
-  compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApiVersion
+  compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApi
 
-  // The production code uses the SLF4J logging API at compile time
   compile group: 'ch.qos.logback', name:'logback-classic', version: logback
 
   compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
   compile group: 'org.json', name: 'json', version: json
   compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
-  compile group: 'org.apache.avro', name: 'avro', version: avro
   compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: jackson
   compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
   compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
@@ -85,26 +81,15 @@ dependencies {
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
-  testCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
+  testCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommonTesting
   testCompile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasCommon
   testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
   testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
   testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
-  testCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParserVersion
+  testCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParser
 
   codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }
-
-//---------------------------------------------------------------------------//
-// AVRO file manipulation                                                    //
-//---------------------------------------------------------------------------//
-
-//task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
-//  source("schemas/restapi")
-//  outputDir = file("build/avro")
-//}
-//
-//compileJava.source(generateAvro.outputs)
 
 //---------------------------------------------------------------------------//
 // Source Set                                                                //
@@ -140,19 +125,18 @@ sourceSets {
 checkstyle {
   // codacy version
   toolVersion '6.16'
-  ignoreFailures true
+  ignoreFailures false
 
   // ignore tests
-  sourceSets = [sourceSets.main]
+  sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest, sourceSets.endToEndTest]
 }
 
 pmd {
   // pmd version
   toolVersion = '5.5.2'
-  ignoreFailures = true
+  ignoreFailures = false
 
-  // ignore tests
-  sourceSets = [sourceSets.main]
+  sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest, sourceSets.endToEndTest]
 
   consoleOutput = true
 
@@ -224,13 +208,88 @@ task integrationTest(type: Test) {
   }
 }
 
-//check.dependsOn integrationTest
+//---------------------------------------------------------------------------//
+// Docker Utility                                                            //
+//---------------------------------------------------------------------------//
+ext.dockerCompose = hasProperty('dockerComposePath') ? property('dockerComposePath') : 'docker-compose'
+ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
+
+//---------------------------------------------------------------------------//
+// Integration Test                                                          //
+//---------------------------------------------------------------------------//
+ext.simpleStackPath = 'src/integrationTest'
+ext.simpleStackLock = "${simpleStackPath}/.RUNNING_INSTANCE_LOCK"
+
+task buildDocker(type: Exec, dependsOn: 'copyWarForIntegration') {
+  workingDir 'src/integrationTest/image'
+  commandLine sudoLinux + ['docker', 'image', 'build', '-t', 'radarcns/radar-restapi:dev', '.']
+}
+
+task installSimpleStack(type: Exec, dependsOn: ['copyWarForIntegration']) {
+  doFirst{
+    def lockFile = new File(simpleStackLock)
+    if (lockFile.exists()) {
+      throw new GradleException("A previous instance of the simple stack is still running. Please stop it first and then try again.")
+    } else {
+      lockFile.createNewFile()
+    }
+
+    def radarVolumePath = "${simpleStackPath}/volumes/radar"
+    file(radarVolumePath).mkdirs()
+
+    def configJson = file("${simpleStackPath}/resources/config.json")
+    file("${radarVolumePath}/config.json") << configJson.text
+
+    def catalogYml = file("${simpleStackPath}/resources/device-catalog.yml")
+    file("${radarVolumePath}/device-catalog.yml") << catalogYml.text
+
+    def radarYml = file("${simpleStackPath}/resources/radar.yml")
+    file("${radarVolumePath}/radar.yml") << radarYml.text.replace("localhost: 27017", "hotstorage: 27017")
+  }
+
+  workingDir simpleStackPath
+  standardInput = System.in
+  commandLine sudoLinux + [dockerCompose, 'up', '-d', '--build']
+
+  doLast {
+    // wait until the hotstorage is ready
+    sleep(10_000)
+  }
+}
+integrationTest.dependsOn 'installSimpleStack'
+
+task stopSimpleStack(type: Exec) {
+  onlyIf{
+    new File(simpleStackLock).exists()
+  }
+  standardInput = System.in
+  workingDir simpleStackPath
+  commandLine sudoLinux + [dockerCompose, 'down', '-v']
+  doLast{
+    new File(simpleStackLock).delete()
+  }
+}
+
+integrationTest.finalizedBy 'stopSimpleStack'
+
+task cleanSimpleStack(type: Delete, dependsOn: stopSimpleStack) {
+  delete "${simpleStackPath}/volumes"
+  delete simpleStackLock
+}
+
+stopSimpleStack.finalizedBy cleanSimpleStack
+clean.dependsOn cleanSimpleStack
+
 
 //---------------------------------------------------------------------------//
 // End to End Test                                                           //
 //---------------------------------------------------------------------------//
+ext.radarStackPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack'
+ext.radarStackLock = "${radarStackPath}/.RUNNING_INSTANCE_LOCK"
+ext.radarDockerCompose = 'docker-compose.yml'
+ext.radarDockerComposeOriginal = ".${radarDockerCompose}.orig"
 
-task endToEndTest(type: Test) {
+task endToEndTest(type: Test, dependsOn: ['installRadarStack', 'listDockerProcesses']) {
   description = "Run end to end tests (located in src/endToEndTest/...)."
 
   testClassesDir = sourceSets.endToEndTest.output.classesDir
@@ -238,7 +297,6 @@ task endToEndTest(type: Test) {
 
   testLogging {
     events "failed"
-    exceptionFormat "short"
 
     debug {
       events "started", "skipped", "failed"
@@ -248,46 +306,96 @@ task endToEndTest(type: Test) {
 
   testLogging.showStandardStreams = true
 }
+endToEndTest.finalizedBy 'stopRadarStack'
 
-//Useful for E2E tests
+// Sets configuration files for running the entire platform
 task setRadarEnvironmentForDocker {
   doLast {
-    def envPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/env.template'
-    def smtpPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env.template'
-    def streamPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/'
+    def envTemplatePath = "${radarStackPath}/etc/env.template"
+    def smtpTemplatePath = "${radarStackPath}/etc/smtp.env.template"
+    def streamTemplatePath = "${radarStackPath}/etc/radar.yml.template"
 
-    File volumes = new File('src/endToEndTest/dockerRadar/volumes')
+    def volumes = file("${radarStackPath}/volumes")
     volumes.mkdir()
 
-    def src = new File(envPath)
-    def fileEnv = new File(envPath + 'tmp')
-    fileEnv << src.text
+    def fileEnv = file(envTemplatePath + 'tmp')
+    fileEnv << file(envTemplatePath).text
     fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumes.getAbsolutePath())
     fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
     fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
     fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
-    fileEnv.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/.env')
+    fileEnv.renameTo("${radarStackPath}/.env")
 
-    src = new File(smtpPath)
-    def fileSmtp = new File(smtpPath + 'tmp')
-    fileSmtp << src.text
-    fileSmtp.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/smtp.env')
+    def fileSmtp = file(smtpTemplatePath + 'tmp')
+    fileSmtp << file(smtpTemplatePath).text
+    fileSmtp.renameTo("${radarStackPath}/etc/smtp.env")
 
-    src = new File(streamPath + 'radar.yml.template')
-    def fileStream = new File(streamPath + 'radar.yml.template' + 'tmp')
-    fileStream << src.text
-    fileStream.renameTo('src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/etc/' + 'radar.yml')
+    def fileStream = file(streamTemplatePath + 'tmp')
+    fileStream << file(streamTemplatePath).text
+    fileStream.renameTo("${radarStackPath}/etc/radar.yml")
+
+    def installScript = file("${radarStackPath}/install-radar-stack.sh")
+    installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
+
+    def dockerComposeYml = file("${radarStackPath}/${radarDockerCompose}")
+    file("${radarStackPath}/${radarDockerComposeOriginal}") << dockerComposeYml.text
+    def dockerComposeTmp = file("${radarStackPath}/.${radarDockerCompose}.tmp")
+    dockerComposeTmp << dockerComposeYml.text.replaceAll('radarcns/radar-restapi:.*', 'radarcns/radar-restapi:dev')
+    dockerComposeTmp.renameTo("${radarStackPath}/${radarDockerCompose}")
   }
 }
 
-//Useful for Travis for running the correct version of docker-compose
-task setDockerCompose {
-  doLast {
-    def installScriptPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack/install-radar-stack.sh'
-    def installScript = new File(installScriptPath)
-    installScript.text = installScript.text.replace('docker-compose', '$HOME/bin/docker-compose')
+task installRadarStack(type: Exec, dependsOn: ['setRadarEnvironmentForDocker', 'buildDocker']) {
+  doFirst{
+    def lockFile = new File(radarStackLock)
+    if (lockFile.exists()) {
+      throw new GradleException("A previous instance of RADAR Platform is still running. Please stop it first and then try again.")
+    } else {
+      lockFile.createNewFile()
+    }
+  }
+
+  workingDir radarStackPath
+  standardInput = System.in
+  commandLine sudoLinux + ['./install-radar-stack.sh']
+}
+
+task listDockerProcesses(type: Exec) {
+  workingDir radarStackPath
+  standardInput = System.in
+  commandLine sudoLinux + [dockerCompose, 'ps']
+}
+listDockerProcesses.mustRunAfter 'installRadarStack'
+
+ext.stoppingStack = false
+task stopRadarStack(type: Exec) {
+  onlyIf{
+    new File(radarStackLock).exists() && !stoppingStack
+  }
+  doFirst{
+    stoppingStack = true
+  }
+
+  standardInput = System.in
+  workingDir radarStackPath
+  commandLine sudoLinux + [dockerCompose, 'down', '-v']
+
+  doLast{
+    stoppingStack = false
   }
 }
+
+task cleanRadarStack(type: Exec, dependsOn: stopRadarStack) {
+  onlyIf{
+    !stoppingStack
+  }
+  commandLine sudoLinux + ['rm', '-rf', "${radarStackPath}/volumes", radarStackLock]
+  doLast{
+    file("${radarStackPath}/${radarDockerComposeOriginal}").renameTo("${radarStackPath}/${radarDockerCompose}")
+  }
+}
+stopRadarStack.finalizedBy cleanRadarStack
+clean.dependsOn cleanRadarStack
 
 //---------------------------------------------------------------------------//
 // Code coverage and codacy                                                  //
@@ -322,35 +430,31 @@ task copyFrontendConfig(type: Copy) {
   from "${projectDir}/schemas/restapi/config/config.json"
   into "${projectDir}/src/main/webapp/frontend/"
 }
+war.dependsOn(copyFrontendConfig)
 
 task copyFrontendConfigIntegrationTest(type: Copy) {
   from "${projectDir}/schemas/restapi/config/config.json"
   into "${projectDir}/src/integrationTest/resources"
 }
+integrationTest.dependsOn(copyFrontendConfigIntegrationTest)
 
 task copyFrontendConfigEndToEndTest(type: Copy) {
   from "${projectDir}/schemas/restapi/config/config.json"
   into "${projectDir}/src/endToEndTest/resources"
 }
+endToEndTest.dependsOn(copyFrontendConfigEndToEndTest)
 
 task removeFrontendConfig(type: Delete) {
   delete "${projectDir}/src/main/webapp/frontend/"
   delete "${projectDir}/src/integrationTest/resources/config.json"
   delete "${projectDir}/src/endToEndTest/resources/config.json"
 }
-
-war.dependsOn(copyFrontendConfig)
-
-integrationTest.dependsOn(copyFrontendConfigIntegrationTest)
-
-endToEndTest.dependsOn(copyFrontendConfigEndToEndTest)
-
 clean.dependsOn(removeFrontendConfig)
 
 //---------------------------------------------------------------------------//
 // Prepare WAR                                                               //
 //---------------------------------------------------------------------------//
-task copyWarForIntegration(type: Copy) {
+task copyWarForIntegration(type: Copy, dependsOn: war) {
   from war.archivePath
   into "${projectDir}/src/integrationTest/image"
 }
@@ -359,10 +463,7 @@ task removeWar(type: Delete) {
   delete "${projectDir}/src/integrationTest/image/${war.getArchiveName()}"
 }
 
-war.dependsOn(removeWar)
-
 war.finalizedBy copyWarForIntegration
-
 clean.dependsOn(removeWar)
 
 //---------------------------------------------------------------------------//
@@ -376,5 +477,5 @@ idea {
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '3.0'
+  gradleVersion = '3.4.1'
 }

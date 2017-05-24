@@ -16,6 +16,8 @@ package org.radarcns.dao.mongo.data.sensor;
  * limitations under the License.
  */
 
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MEDIAN;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
@@ -25,10 +27,10 @@ import org.bson.Document;
 import org.radarcns.avro.restapi.data.Acceleration;
 import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.mongo.util.MongoSensor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.radarcns.util.RadarConverter;
 
 /**
  * Data Access Object for Acceleration values.
@@ -39,27 +41,40 @@ public class AccelerationFormat extends MongoSensor {
     public static final String Y_LABEL = "y";
     public static final String Z_LABEL = "z";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccelerationFormat.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(AccelerationFormat.class);
 
     public AccelerationFormat(SensorType sensorType) {
         super(DataFormat.ACCELERATION_FORMAT, sensorType);
     }
 
     @Override
-    protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat) {
-        if (stat.equals(DescriptiveStatistic.MEDIAN)
-                || stat.equals(DescriptiveStatistic.QUARTILES)) {
-            Document component = (Document) doc.get(field);
+    protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat,
+            Header header) {
+        Document component = (Document) doc.get(field);
 
-            @SuppressWarnings("checkstyle:LocalVariableName")
-            ArrayList<Document> x = (ArrayList<Document>) component.get(X_LABEL);
-            @SuppressWarnings("checkstyle:LocalVariableName")
-            ArrayList<Document> y = (ArrayList<Document>) component.get(Y_LABEL);
-            @SuppressWarnings("checkstyle:LocalVariableName")
-            ArrayList<Document> z = (ArrayList<Document>) component.get(Z_LABEL);
+        @SuppressWarnings("checkstyle:LocalVariableName")
+        ArrayList<Document> x = null;
+        @SuppressWarnings("checkstyle:LocalVariableName")
+        ArrayList<Document> y = null;
+        @SuppressWarnings("checkstyle:LocalVariableName")
+        ArrayList<Document> z = null;
 
-            if (stat.equals(DescriptiveStatistic.QUARTILES)) {
-                return new Acceleration(
+        Document data = null;
+
+        if (stat.equals(MEDIAN) || stat.equals(QUARTILES)) {
+            x = (ArrayList<Document>) component.get(X_LABEL);
+            y = (ArrayList<Document>) component.get(Y_LABEL);
+            z = (ArrayList<Document>) component.get(Z_LABEL);
+        } else {
+            data = (Document) doc.get(field);
+        }
+
+        switch (stat) {
+            case MEDIAN: return new Acceleration(
+                    x.get(1).getDouble(SECOND_QUARTILE),
+                    y.get(1).getDouble(SECOND_QUARTILE),
+                    z.get(1).getDouble(SECOND_QUARTILE));
+            case QUARTILES: return new Acceleration(
                     new Quartiles(
                         x.get(0).getDouble(FIRST_QUARTILE),
                         x.get(1).getDouble(SECOND_QUARTILE),
@@ -72,25 +87,21 @@ public class AccelerationFormat extends MongoSensor {
                         z.get(0).getDouble(FIRST_QUARTILE),
                         z.get(1).getDouble(SECOND_QUARTILE),
                         z.get(2).getDouble(THIRD_QUARTILE)));
-            } else if (stat.equals(DescriptiveStatistic.MEDIAN)) {
+            case RECEIVED_MESSAGES:
                 return new Acceleration(
-                        x.get(1).getDouble(SECOND_QUARTILE),
-                        y.get(1).getDouble(SECOND_QUARTILE),
-                        z.get(1).getDouble(SECOND_QUARTILE));
-            }
-
-        } else {
-            LOGGER.debug(doc.toJson());
-            Document data = (Document) doc.get(field);
-            LOGGER.debug(data.toJson());
-            return new Acceleration(
+                    RadarConverter.roundDouble(data.getDouble(X_LABEL)
+                            / RadarConverter.getExpectedMessages(header), 2),
+                    RadarConverter.roundDouble(data.getDouble(Y_LABEL)
+                            / RadarConverter.getExpectedMessages(header), 2),
+                    RadarConverter.roundDouble(data.getDouble(Z_LABEL)
+                            / RadarConverter.getExpectedMessages(header), 2)
+                );
+            default:
+                return new Acceleration(
                     data.getDouble(X_LABEL),
                     data.getDouble(Y_LABEL),
                     data.getDouble(Z_LABEL));
         }
-
-        LOGGER.warn("Returning null value for the tuple: <{},{},{}>",field,stat,doc.toJson());
-        return null;
     }
 
     @Override

@@ -17,9 +17,8 @@ package org.radarcns.pipeline;
  */
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.FRONTEND;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.checkFrontEndConfig;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.DATA;
@@ -37,6 +36,7 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -45,28 +45,33 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.radarcns.avro.restapi.data.Acceleration;
+import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.data.Quartiles;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
+import org.radarcns.avro.restapi.sensor.Unit;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
-import org.radarcns.integration.aggregator.MockAggregator;
-import org.radarcns.integration.model.ExpectedValue;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.mock.CsvGenerator;
-import org.radarcns.mock.CsvSensorDataModel;
-import org.radarcns.mock.MockDataConfig;
 import org.radarcns.mock.MockProducer;
+import org.radarcns.mock.config.MockDataConfig;
+import org.radarcns.mock.data.CsvGenerator;
+import org.radarcns.mock.data.MockRecordValidator;
+import org.radarcns.mock.model.ExpectedValue;
+import org.radarcns.mock.model.MockAggregator;
 import org.radarcns.pipeline.config.PipelineConfig;
-import org.radarcns.pipeline.data.CsvValidator;
+import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
+import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,69 +79,60 @@ public class EndToEndTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EndToEndTest.class);
 
+    private static final String USER_ID_MOCK = "UserID_0";
+    private static final String SOURCE_ID_MOCK = "SourceID_0";
+
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
     private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
 
     private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
 
-    private static PipelineConfig config = null;
-
     public static final String PIPELINE_CONFIG = "pipeline.yml";
-    // Latency expressed in second
-    private static final long LATENCY = 30;
 
-    private static class BaseFile {
-        private static final File file = new File(
-                EndToEndTest.class.getClassLoader().getResource(PIPELINE_CONFIG).getFile());
+    // Latency expressed in second
+    private static final long LATENCY = 240;
+
+    private static File dataRoot;
+    private static PipelineConfig pipelineConfig;
+
+    /**
+     * Test initialisation. It loads the config file and waits that the infrastructure is ready
+     *      to accept requests.
+     */
+    @BeforeClass
+    public static void setUpClass() throws IOException, InterruptedException {
+        URL configResource = EndToEndTest.class.getClassLoader().getResource(PIPELINE_CONFIG);
+        assertNotNull(configResource);
+        File configFile = new File(configResource.getFile());
+        pipelineConfig = new YamlConfigLoader().load(configFile, PipelineConfig.class);
+        dataRoot = configFile.getAbsoluteFile().getParentFile();
+
+        waitInfrastructure();
     }
 
     @Test
     public void endToEnd() throws Exception {
-        getPipelineConfig();
-
-        waitInfrastructure();
-
         produceInputFile();
 
-        Map<MockDataConfig, ExpectedValue> expectedValue = MockAggregator
-                .getSimulations(getPipelineConfig().getData());
+        Map<MockDataConfig, ExpectedValue> expectedValue = MockAggregator.getSimulations(
+                pipelineConfig.getData(), dataRoot);
 
         produceExpectedDataset(expectedValue);
 
         streamToKafka();
 
-        LOGGER.info("Waiting data ({} seconds) ... ", LATENCY);
+        LOGGER.info("Waiting on data ({} seconds) ... ", LATENCY);
         Thread.sleep(TimeUnit.SECONDS.toMillis(LATENCY));
 
         fetchRestApi();
-
-        checkSwaggerConfig();
-
-        checkFrontendConfig();
-    }
-
-    private static PipelineConfig getPipelineConfig() {
-        if (config == null) {
-
-            try {
-                config = new YamlConfigLoader().load(
-                        new File(
-                                EndToEndTest.class.getClassLoader()
-                                        .getResource(PIPELINE_CONFIG).getFile()
-                        ), PipelineConfig.class);
-            } catch (IOException exec) {
-                exec.printStackTrace();
-            }
-        }
-        return config;
     }
 
     /**
      * Checks if the test bed is ready to accept data.
      */
-    private void waitInfrastructure() throws InterruptedException {
-        LOGGER.info("Waiting infrastructure ... ");
+    private static void waitInfrastructure() throws InterruptedException, MalformedURLException {
+        LOGGER.info("Waiting on infrastructure ... ");
 
         List<String> expectedTopics = new LinkedList<>();
         expectedTopics.add("android_empatica_e4_acceleration");
@@ -160,42 +156,30 @@ public class EndToEndTest {
 
         int retry = 60;
         long sleep = 1000;
-        int count = 0;
 
-        for (int i = 0; i < retry; i++) {
-            count = 0;
-
-            Response response = null;
-            try {
-                response = Utility.makeUnsafeRequest(
-                        getPipelineConfig().getRestProxy().getUrlString() + "topics");
-                if (response.code() == 200) {
-                    String topics = response.body().string().toString();
-                    String[] topicArray = topics.substring(1, topics.length() - 1).replace(
+        try (RestClient client = new RestClient(pipelineConfig.getRestProxy())) {
+            for (int i = 0; i < retry; i++) {
+                try (Response response = client.request("topics")) {
+                    if (response.code() == 200) {
+                        String topics = response.body().string();
+                        String[] topicArray = topics.substring(1, topics.length() - 1).replace(
                                 "\"", "").split(",");
 
-                    for (String topic : topicArray) {
-                        if (expectedTopics.contains(topic)) {
-                            count++;
+                        expectedTopics.removeAll(Arrays.asList(topicArray));
+
+                        if (expectedTopics.isEmpty()) {
+                            break;
                         }
                     }
-
-                    if (count == expectedTopics.size()) {
-                        break;
-                    }
+                } catch (IOException ex) {
+                    LOGGER.info("Error while waiting infrastructure", ex);
                 }
-            } catch (IOException exec) {
-                LOGGER.info("Error while waiting infrastructure", exec);
-            } catch (NoSuchAlgorithmException exec) {
-                LOGGER.info("Error while waiting infrastructure", exec);
-            } catch (KeyManagementException exec) {
-                LOGGER.info("Error while waiting infrastructure", exec);
-            }
 
-            Thread.sleep(sleep * (i + 1));
+                Thread.sleep(sleep * (i + 1));
+            }
         }
 
-        assertEquals(expectedTopics.size(), count);
+        assertEquals("missing " + expectedTopics, 0, expectedTopics.size());
     }
 
     /**
@@ -204,10 +188,10 @@ public class EndToEndTest {
     private void produceInputFile()
             throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, ParseException, IllegalAccessException {
-        LOGGER.info("Generating CVS files ...");
-        for (MockDataConfig config : getPipelineConfig().getData()) {
-            CsvGenerator.generate(config, getPipelineConfig().getDuration(), BaseFile.file);
-            CsvValidator.validate(config, getPipelineConfig().getDuration());
+        LOGGER.info("Generating CSV files ...");
+        for (MockDataConfig config : pipelineConfig.getData()) {
+            new CsvGenerator().generate(config, pipelineConfig.getDuration(), dataRoot);
+            new MockRecordValidator(config, pipelineConfig.getDuration(), dataRoot).validate();
         }
     }
 
@@ -215,44 +199,94 @@ public class EndToEndTest {
      * Starting from the expected values computed using the available CSV files, it computes all
      * the expected Datasets used to test REST-API.
      *
-     * @see {@link ExpectedValue}
+     * @see ExpectedValue
      */
     private void produceExpectedDataset(Map<MockDataConfig, ExpectedValue> expectedValue)
             throws Exception {
         LOGGER.info("Computing expected dataset ...");
-        int tastCase = getPipelineConfig().getData().size();
+        int size = pipelineConfig.getData().size();
 
-        assertEquals(tastCase, expectedValue.size());
+        assertEquals(size, expectedValue.size());
 
         expectedDataset = computeExpectedDataset(expectedValue);
 
         assertEquals(DescriptiveStatistic.values().length - 2, expectedDataset.size());
 
         for (Map<MockDataConfig, Dataset> datasets : expectedDataset.values()) {
-            assertEquals(tastCase, datasets.size());
+            assertEquals(size, datasets.size());
         }
     }
 
     /**
      * This is the actual generator of Datasets exploited by {@link #produceExpectedDataset(Map)}.
      *
-     * @see {@link ExpectedValue}
+     * @see ExpectedValue
      */
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> computeExpectedDataset(
             Map<MockDataConfig, ExpectedValue> expectedValue) throws Exception {
         Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> datasets = new HashMap<>();
 
         for (DescriptiveStatistic stat : DescriptiveStatistic.values()) {
-
             if (stat.equals(DescriptiveStatistic.LOWER_QUARTILE)
-                    || stat.equals(DescriptiveStatistic.UPPER_QUARTILE)) {
+                    || stat.equals(DescriptiveStatistic.UPPER_QUARTILE)
+                    || stat.equals(DescriptiveStatistic.RECEIVED_MESSAGES)) {
                 continue;
             }
 
-            datasets.put(stat, getExpecetedDataset(expectedValue, stat));
+            datasets.put(stat, getExpectedDataset(expectedValue, stat));
         }
 
+        datasets.put(DescriptiveStatistic.RECEIVED_MESSAGES, getReceivedMessage(
+                datasets.get(DescriptiveStatistic.COUNT)));
+
         return datasets;
+    }
+
+    private static Map<MockDataConfig, Dataset> getReceivedMessage(
+            Map<MockDataConfig, Dataset> expectedCount) {
+        Map<MockDataConfig, Dataset> expectedReceivedMessage = new HashMap<>();
+
+        for (MockDataConfig config : expectedCount.keySet()) {
+            MockDataConfig updatedConfig = new MockDataConfig();
+            updatedConfig.setSensor(config.getSensor());
+            updatedConfig.setMaximumDifference(Double.valueOf("1e-2"));
+
+            Dataset dataset = Utility.cloneDataset(expectedCount.get(config));
+
+            Header updatedHeader = dataset.getHeader();
+            updatedHeader.setDescriptiveStatistic(DescriptiveStatistic.RECEIVED_MESSAGES);
+            updatedHeader.setUnit(Unit.PERCENTAGE);
+            dataset.setHeader(updatedHeader);
+
+            for (Item item : dataset.getDataset()) {
+                if (item.getSample() instanceof DoubleSample) {
+                    DoubleSample sample = (DoubleSample)item.getSample();
+                    item.setSample(new DoubleSample(RadarConverter.roundDouble(
+                            (Double) sample.getValue() / RadarConverter.getExpectedMessages(
+                            updatedHeader), 2)));
+                } else if (item.getSample() instanceof Acceleration) {
+                    Acceleration sample = (Acceleration)item.getSample();
+                    item.setSample(new Acceleration(
+                                RadarConverter.roundDouble(
+                                (Double) sample.getX() / RadarConverter.getExpectedMessages(
+                                updatedHeader), 2),
+                                RadarConverter.roundDouble(
+                                (Double) sample.getY() / RadarConverter.getExpectedMessages(
+                                updatedHeader), 2),
+                                RadarConverter.roundDouble(
+                                (Double) sample.getZ() / RadarConverter.getExpectedMessages(
+                                updatedHeader), 2)));
+                } else {
+                    throw new IllegalArgumentException(
+                            item.getSample().getClass().getCanonicalName()
+                                + " is not supported yet");
+                }
+            }
+
+            expectedReceivedMessage.put(updatedConfig, dataset);
+        }
+
+        return expectedReceivedMessage;
     }
 
     /**
@@ -264,19 +298,18 @@ public class EndToEndTest {
      * ExpectedValue} containing all expected values
      * @param stat statistical value that has be tested
      * @return {@code Map} of key {@code MockDataConfig} and value {@code Dataset}.
-     * @see {@link ExpectedValue}.
+     * @see ExpectedValue
      **/
-    public static Map<MockDataConfig, Dataset> getExpecetedDataset(
+    public static Map<MockDataConfig, Dataset> getExpectedDataset(
             Map<MockDataConfig, ExpectedValue> expectedValue, DescriptiveStatistic stat)
             throws ClassNotFoundException, NoSuchMethodException, IOException,
             IllegalAccessException, InvocationTargetException, InstantiationException {
         Map<MockDataConfig, Dataset> map = new HashMap<>();
 
         for (MockDataConfig config : expectedValue.keySet()) {
-            map.put(config, expectedDataSetFactory
-                    .getDataset(expectedValue.get(config), CsvSensorDataModel.USER_ID_MOCK,
-                        CsvSensorDataModel.SOURCE_ID_MOCK, SourceType.EMPATICA,
-                            getSensorType(config), stat, TIME_FRAME));
+            map.put(config, expectedDataSetFactory.getDataset(
+                    expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, SourceType.EMPATICA,
+                    getSensorType(config), stat, TIME_FRAME));
         }
 
         return map;
@@ -287,7 +320,7 @@ public class EndToEndTest {
      */
     private void streamToKafka() throws IOException, InterruptedException {
         LOGGER.info("Streaming data into Kafka ...");
-        MockProducer producer = new MockProducer(getPipelineConfig());
+        MockProducer producer = new MockProducer(pipelineConfig, dataRoot);
         producer.start();
         producer.shutdown();
     }
@@ -299,40 +332,43 @@ public class EndToEndTest {
             NoSuchAlgorithmException {
         LOGGER.info("Fetching APIs ...");
 
-        String server = getPipelineConfig().getRestApi().getUrlString();
-        String path = server + DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{"
+        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{"
                 + INTERVAL + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", CsvSensorDataModel.USER_ID_MOCK);
-        path = path.replace("{" + SOURCE_ID + "}", CsvSensorDataModel.SOURCE_ID_MOCK);
+        path = path.replace("{" + SUBJECT_ID + "}", USER_ID_MOCK);
+        path = path.replace("{" + SOURCE_ID + "}", SOURCE_ID_MOCK);
 
         path = path.replace("{" + INTERVAL + "}", TimeFrame.TEN_SECOND.name());
 
-        for (DescriptiveStatistic stat : expectedDataset.keySet()) {
-            String pathStat = path.replace("{" + STAT + "}", stat.name());
+        try (RestClient client = new RestClient(pipelineConfig.getRestApi())) {
 
-            Map<MockDataConfig, Dataset> datasets = expectedDataset.get(stat);
+            for (DescriptiveStatistic stat : expectedDataset.keySet()) {
+                String pathStat = path.replace("{" + STAT + "}", stat.name());
 
-            for (MockDataConfig config : datasets.keySet()) {
-                String pathSensor = pathStat.replace("{" + SENSOR + "}",
-                        getSensorType(config).name());
+                Map<MockDataConfig, Dataset> datasets = expectedDataset.get(stat);
 
-                Response response = Utility.makeUnsafeRequest(pathSensor);
+                for (MockDataConfig config : datasets.keySet()) {
+                    String pathSensor = pathStat.replace("{" + SENSOR + "}",
+                            getSensorType(config).name());
 
-                LOGGER.info("[{}] Requesting {}", response.code(), pathSensor);
+                    LOGGER.info("Requesting {}", client.getRelativeUrl(pathSensor));
 
-                assertEquals(200, response.code());
+                    try (Response response = client.request(pathSensor)) {
+                        assertEquals(200, response.code());
 
-                Dataset actual = null;
+                        LOGGER.info("[{}] {}", response.code(), pathSensor);
 
-                if (response.code() == 200) {
-                    actual = AvroConverter.avroByteToAvro(response.body().bytes(),
-                            Dataset.getClassSchema());
+                        Dataset actual = null;
+
+                        if (response.code() == 200) {
+                            actual = AvroConverter.avroByteToAvro(response.body().bytes(),
+                                    Dataset.getClassSchema());
+                        }
+
+                        assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
+                                config.getMaximumDifference());
+                    }
                 }
-
-                assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
-                        getDelta(config));
             }
-
         }
     }
 
@@ -340,7 +376,7 @@ public class EndToEndTest {
      * Checks if the two given datasets are equals. Double values are compared using a constant
      * representing the maximum delta for which both numbers are still considered equal.
      *
-     * @see {@link Dataset}
+     * @see Dataset
      */
     private void assertDatasetEquals(SensorType sensorType, Dataset expected, Dataset actual,
             double delta) {
@@ -373,15 +409,11 @@ public class EndToEndTest {
         assertEquals(false, actualItems.hasNext());
     }
 
-    private double getDelta(MockDataConfig config) {
-        return config.getMagnitude() == 0 ? 0.0 : Math.pow(10.0, -1.0 * config.getMagnitude());
-    }
-
     /**
      * Checks if the two given list of Item are equals. Double values are compared using a constant
      * representing the maximum delta for which both numbers are still considered equal.
      *
-     * @see {@link Item}
+     * @see Item
      */
     private void compareSingletonItem(DescriptiveStatistic stat, SpecificRecord expectedRecord,
             SpecificRecord actualRecord, double delta) {
@@ -404,8 +436,8 @@ public class EndToEndTest {
      * are compared using a constant representing the maximum delta for which both numbers are
      * still considered equal.
      *
-     * @see {@link Item}
-     * @see {@link Acceleration}
+     * @see Item
+     * @see Acceleration
      */
     private void compareAccelerationItem(DescriptiveStatistic stat, Acceleration expectedRecord,
             Acceleration actualRecord, double delta) {
@@ -434,8 +466,8 @@ public class EndToEndTest {
      * compared using a constant representing the maximum delta for which both numbers are
      * still considered equal.
      *
-     * @see {@link Item}
-     * @see {@link Quartiles}
+     * @see Item
+     * @see Quartiles
      */
     private void compareQuartiles(Quartiles expectedQuartiles, Quartiles actualQuartiles,
             double delta) {
@@ -457,7 +489,6 @@ public class EndToEndTest {
             return SensorType.BATTERY;
         }
         for (SensorType type : SensorType.values()) {
-
             if (type.name().equalsIgnoreCase(config.getSensor())) {
                 return type;
             }
@@ -471,13 +502,13 @@ public class EndToEndTest {
      *
      * @throws MalformedURLException if the used URL is malformed
      */
-    private static void checkSwaggerConfig()
+    @Test
+    public void checkSwaggerConfig()
         throws IOException, NoSuchAlgorithmException, KeyManagementException {
         LOGGER.info("Checking Swagger ...");
 
         assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(
-                getPipelineConfig().getRestApi().getUrl(),
-                getPipelineConfig().getRestApi().isUnsafe()));
+                pipelineConfig.getRestApi()));
     }
 
     /**
@@ -487,21 +518,19 @@ public class EndToEndTest {
      * @throws IOException either if the used URL is malformed or the response containing the
      *      downloaded file cannot be parsed.
      */
-    private static void checkFrontendConfig()
+    @Test
+    public void checkFrontendConfig()
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        LOGGER.info("Checking Frontend config ...");
+        LOGGER.info("Checking Frontend pipelineConfig ...");
 
-        URL url = new URL(
-                config.getRestApi().getProtocol(),
-                config.getRestApi().getHost(),
-                config.getRestApi().getPort(),
-                "/" + FRONTEND + "/config/");
+        String expected = Utility.readAll(
+                EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
 
-        String actual = checkFrontEndConfig(url, getPipelineConfig().getRestApi().isUnsafe());
-
-        String expected = Utility.fileToString(
-                EndToEndTest.class.getClassLoader().getResource(CONFIG_JSON).getFile());
-
-        assertEquals(expected, actual);
+        try (RestClient client = new RestClient(pipelineConfig.getFrontend());
+                Response response = client.request("/config/" + CONFIG_JSON)) {
+            LOGGER.info("Requested {}", client.getRelativeUrl("/config/" + CONFIG_JSON));
+            assertEquals(200, response.code());
+            assertEquals(expected, response.body().string());
+        }
     }
 }

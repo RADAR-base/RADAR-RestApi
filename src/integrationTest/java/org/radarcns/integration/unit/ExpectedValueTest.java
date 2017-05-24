@@ -79,7 +79,7 @@ public class ExpectedValueTest {
      * @param window1 first component that to has to be compared
      * @param window2 second component that to has to be compared
      * @return {@code true} if they match, false otherwise
-     * @see {@link org.radarcns.avro.restapi.header.EffectiveTimeFrame}
+     * @see EffectiveTimeFrame
      **/
     public static boolean compareEffectiveTimeFrame(EffectiveTimeFrame window1,
                 EffectiveTimeFrame window2) {

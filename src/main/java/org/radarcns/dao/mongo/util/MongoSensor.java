@@ -49,7 +49,6 @@ public abstract class MongoSensor extends MongoDataAccess {
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoSensor.class);
 
     private final Map<SourceType, Map<TimeFrame, String>> deviceCollections;
-    private final Map<SourceType, Set<String>> collectionNames;
     private final Map<String, SourceType> collectionToSource;
 
     private final SensorType sensorType;
@@ -63,7 +62,6 @@ public abstract class MongoSensor extends MongoDataAccess {
     public MongoSensor(DataFormat format, SensorType sensorType) {
 
         deviceCollections = new HashMap<>();
-        collectionNames = new HashMap<>();
         collectionToSource = new HashMap<>();
 
         this.sensorType = sensorType;
@@ -79,8 +77,6 @@ public abstract class MongoSensor extends MongoDataAccess {
 
             Set<String> names = new HashSet<>(SourceCatalog.getInstance(
                     sourceType).getCollections().get(sensorType).values());
-
-            collectionNames.put(sourceType, names);
 
             for (String name : names) {
                 collectionToSource.put(name, sourceType);
@@ -113,7 +109,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @return the last seen data value stat for the given subject and source, otherwise
      *      empty dataset
      *
-     * @see {@link org.radarcns.avro.restapi.dataset.Dataset;}
+     * @see Dataset
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Dataset valueRTByUserSource(String subject, String source, Header header, Stat stat,
@@ -136,7 +132,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @param collection is the mongoDb collection that has to be queried
      * @return data dataset for the given subject and source, otherwise empty dataset
      *
-     * @see {@link org.radarcns.avro.restapi.dataset.Dataset;}
+     * @see Dataset
      */
     public Dataset valueByUserSource(String subject, String source, Header header,
             MongoHelper.Stat stat, MongoCollection<Document> collection) throws ConnectException {
@@ -161,7 +157,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @return data dataset for the given subject and source within the start and end time window,
      *      otherwise empty dataset
      *
-     * @see {@link org.radarcns.avro.restapi.dataset.Dataset;}
+     * @see Dataset
      */
     public Dataset valueByUserSourceWindow(String subject, String source, Header header,
             MongoHelper.Stat stat, Long start, Long end, MongoCollection<Document> collection)
@@ -242,7 +238,7 @@ public abstract class MongoSensor extends MongoDataAccess {
             }
             end = doc.getDate(MongoHelper.END);
 
-            Item item = new Item(docToAvro(doc,field,stat),
+            Item item = new Item(docToAvro(doc, field, stat, header),
                     RadarConverter.getISO8601(doc.getDate(MongoHelper.START)));
 
             list.addLast(item);
@@ -306,13 +302,20 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Convert a MongoDB Document to the corresponding Avro object.
-     * @param doc is the Bson Document from which we extract the required value to instantiate
-     *      an Item
+     * Convert a {@link Document} to the corresponding
+     *      {@link org.apache.avro.specific.SpecificRecord}.
+     *
+     * @param doc {@link Document} storing data used to create the related {@link Item}
+     * @param field key of the value that has to be extracted from the {@link Document}
+     * @param stat {@link DescriptiveStatistic} represented by the resulting {@link Item}
+     * @param header {@link Header} used to provide the data context
+     *
      * @implSpec this function must be override by the subclass
-     * @return the required Object
+     *
+     * @return the {@link DataFormat} related to the sensor
      */
-    protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat) {
+    protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat,
+            Header header) {
         throw new UnsupportedOperationException("This function must be override by the subclass");
     }
 

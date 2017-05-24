@@ -64,7 +64,7 @@ public class UserDaoTest {
         collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
                 SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
 
-        Cohort cohort = SubjectDataAccessObject.findAllSubjects(client);
+        Cohort cohort = SubjectDataAccessObject.getAllSubjects(client);
 
         assertEquals(1, cohort.getSubjects().size());
         assertEquals(1, cohort.getSubjects().get(0).getSources().size());
@@ -86,7 +86,7 @@ public class UserDaoTest {
                 SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
         collection.insertMany(docs);
 
-        Cohort cohort = SubjectDataAccessObject.findAllSubjects(client);
+        Cohort cohort = SubjectDataAccessObject.getAllSubjects(client);
 
         assertEquals(1, cohort.getSubjects().size());
         assertEquals(2, cohort.getSubjects().get(0).getSources().size());
@@ -116,7 +116,7 @@ public class UserDaoTest {
         collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE.concat("2"),
                 SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
 
-        Cohort cohort = SubjectDataAccessObject.findAllSubjects(client);
+        Cohort cohort = SubjectDataAccessObject.getAllSubjects(client);
 
         assertEquals(2, cohort.getSubjects().size());
 

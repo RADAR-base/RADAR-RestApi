@@ -83,13 +83,12 @@ public class SourceEndPoint {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a source.avsc object containing last"
                 + "computed status")})
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Response getRTStateByUserDeviceJsonDevStatus(
+    public Response getLastComputedSourceStatusJson(
             @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getRTStateByUserSourceWorker(subject, source));
+                getLastComputedSourceStatus(subject, source));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -112,13 +111,12 @@ public class SourceEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a byte array serialising source.avsc object"
                 + "containing last computed status")})
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Response getRTStateByUserDeviceAvroDevStatus(
+    public Response getLastComputedSourceStatusAvro(
             @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRTStateByUserSourceWorker(subject, source));
+                getLastComputedSourceStatus(subject, source));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -128,7 +126,7 @@ public class SourceEndPoint {
     /**
      * Actual implementation of AVRO and JSON getRTStateByUserDevice.
      **/
-    private Source getRTStateByUserSourceWorker(String subject, String source)
+    private Source getLastComputedSourceStatus(String subject, String source)
             throws ConnectException {
         Param.isValidInput(subject, source);
 
@@ -229,7 +227,7 @@ public class SourceEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a subject.avsc object")})
-    public Response getAllSourcesJsonUser(
+    public Response getAllSourcesJson(
             @PathParam(SUBJECT_ID) String subject) {
         try {
             return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subject));
@@ -254,7 +252,7 @@ public class SourceEndPoint {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a subject.avsc object")})
-    public Response getAllSourcesAvroUser(
+    public Response getAllSourcesAvro(
             @PathParam(SUBJECT_ID) String subject) {
         try {
             return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subject));

@@ -17,8 +17,18 @@ import java.util.List;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * {@link DeviceCatalog} item. It lists all sensors on board on a device providing the sensor
+ *      specification.
+ * @see SensorCatalog
+ */
 public class DeviceItem {
 
+    /**
+     * List of senors on board on a device.
+     * @see SensorCatalog
+     **/
     private List<SensorCatalog> sensors;
 
     public DeviceItem() {

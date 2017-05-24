@@ -18,8 +18,10 @@ package org.radarcns.webapp;
 
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
+import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
 import static org.radarcns.webapp.util.BasePath.SUBJECT;
 import static org.radarcns.webapp.util.Parameter.STUDY_ID;
+import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,7 +38,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.subject.Cohort;
+import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.security.Param;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +76,7 @@ public class SubjectEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a list of subject.avsc objects")})
-    public Response getAllSubjectsJsonSubject(
+    public Response getAllSubjectsJson(
             @PathParam(STUDY_ID) String study
     ) {
         try {
@@ -98,7 +102,7 @@ public class SubjectEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a byte array serialising a list of"
                 + "subject.avsc objects")})
-    public Response getAllSubjectsAvroSubject(
+    public Response getAllSubjectsAvro(
             @PathParam(STUDY_ID) String study
     ) {
         try {
@@ -113,7 +117,7 @@ public class SubjectEndPoint {
      * Actual implementation of AVRO and JSON getAllSubjects.
      **/
     private Cohort getAllSubjectsWorker() throws ConnectException {
-        Cohort cohort = SubjectDataAccessObject.findAllSubjects(context);
+        Cohort cohort = SubjectDataAccessObject.getAllSubjects(context);
 
         return cohort;
     }
@@ -121,6 +125,74 @@ public class SubjectEndPoint {
     //--------------------------------------------------------------------------------------------//
     //                                        SUBJECT INFO                                        //
     //--------------------------------------------------------------------------------------------//
-    //TODO get info by subjectId
+    /**
+     * JSON function that returns all information related to the given subject identifier.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
+    @ApiOperation(
+            value = "Return the information related to given subject identifier",
+            notes = "Some information are not implemented yet. The returned values are hardcoded.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
+                + "given subject identifier")})
+    public Response getSubjectJson(
+            @PathParam(SUBJECT_ID) String subject
+    ) {
+        try {
+            return ResponseHandler.getJsonResponse(request, getSubjectWorker(subject));
+        } catch (Exception exec) {
+            LOGGER.error(exec.getMessage(), exec);
+            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
+                + "completed. If this error persists, please contact the service administrator.");
+        }
+    }
+
+    /**
+     * AVRO function that returns all information related to the given subject identifier.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Path("/" + AVRO + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
+    @ApiOperation(
+            value = "Return the information related to given subject identifier",
+            notes = "Some information are not implemented yet. The returned values are hardcoded.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
+                + "there is a message.avsc object with more details"),
+            @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
+                + "given subject identifier")})
+    public Response getSubjectAvro(
+            @PathParam(SUBJECT_ID) String subject
+    ) {
+        try {
+            return ResponseHandler.getAvroResponse(request, getSubjectWorker(subject));
+        } catch (Exception exec) {
+            LOGGER.error(exec.getMessage(), exec);
+            return ResponseHandler.getAvroErrorResponse(request);
+        }
+    }
+
+    /**
+     * Actual implementation of AVRO and JSON getSubject.
+     **/
+    private Subject getSubjectWorker(String subjectId) throws ConnectException {
+        Param.isValidSubject(subjectId);
+
+        Subject subject = new Subject();
+
+        if (SubjectDataAccessObject.exist(subjectId, context)) {
+            subject = SubjectDataAccessObject.getSubject(subjectId, context);
+        }
+
+        return subject;
+    }
 
 }

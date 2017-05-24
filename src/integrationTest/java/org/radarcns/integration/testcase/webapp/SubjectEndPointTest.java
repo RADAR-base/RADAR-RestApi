@@ -23,12 +23,16 @@ import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
+import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
 import static org.radarcns.webapp.util.Parameter.STUDY_ID;
+import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.bson.Document;
@@ -114,6 +118,54 @@ public class SubjectEndPointTest {
                     assertEquals(SOURCE.concat("1"), source.getId());
                 }
             }
+        }
+
+        dropAndClose(client);
+    }
+
+    @Test
+    public void getSubjectTest204() throws IOException {
+        String path = BasePath.SUBJECT + "/" + AVRO + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}";
+        path = path.replace("{" + SUBJECT_ID + "}", "0");
+
+        LOGGER.info(path);
+
+        assertEquals(Status.NO_CONTENT.getStatusCode(), Utility.makeRequest(
+                Properties.getApiConfig().getApiUrl() + path).code());
+    }
+
+    @Test
+    public void getSubjectTest200()
+        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
+
+        MongoClient client = Utility.getMongoClient();
+
+        MongoCollection<Document> collection = MongoHelper.getCollection(client,
+                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+                    SOURCE_TYPE, TIME_FRAME));
+
+        List<Document> randomInput = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
+                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
+
+        collection.insertMany(randomInput);
+
+        String path = BasePath.SUBJECT + "/" + AVRO + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}";
+        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
+
+        LOGGER.info(path);
+
+        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
+        assertEquals(Status.OK.getStatusCode(), response.code());
+
+        if (response.code() == Status.OK.getStatusCode()) {
+            Subject actual = AvroConverter.avroByteToAvro(
+                        response.body().bytes(), Subject.getClassSchema());
+
+            Subject expected = new Subject(SUBJECT, true,
+                    Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput),
+                    Collections.singletonList(new Source(SOURCE, SOURCE_TYPE, null)));
+
+            assertEquals(expected, actual);
         }
 
         dropAndClose(client);

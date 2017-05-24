@@ -59,11 +59,19 @@ public class MongoHelper {
     public static final int DESCENDING = -1;
 
     /**
-     * Enumerate all available statistical values.
+     * Enumerate all available statistical values. The string value represents the Document field
+     *      that has to be used to compute the result.
      */
     public enum Stat {
-        avg("avg"), count("count"), iqr("iqr"), max("max"), median("quartile"), min("min"),
-        quartile("quartile"), sum("sum");
+        avg("avg"),
+        count("count"),
+        iqr("iqr"),
+        max("max"),
+        median("quartile"),
+        min("min"),
+        quartile("quartile"),
+        receivedMessage("count"),
+        sum("sum");
 
         private final String param;
 

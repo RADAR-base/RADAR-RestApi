@@ -90,7 +90,7 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing last "
                 + "computed sample for the given inputs formatted either Acceleration.avsc or "
                 + "DoubleValue.avsc")})
-    public Response getRealTimeSubjectJson(
+    public Response getLastReceivedSampleJson(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
@@ -98,7 +98,7 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                    getRealTimeSubjectWorker(subject, source, sensor, stat, interval));
+                    getLastReceivedSampleWorker(subject, source, sensor, stat, interval));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
@@ -125,7 +125,7 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
                 + "object containing last computed sample for the given inputs formatted either "
                 + "Acceleration.avsc or DoubleValue.avsc")})
-    public Response getRealTimeSubjectAvro(
+    public Response getLastReceivedSampleAvro(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
@@ -133,7 +133,7 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getRealTimeSubjectWorker(subject, source, sensor, stat, interval));
+                getLastReceivedSampleWorker(subject, source, sensor, stat, interval));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -143,7 +143,7 @@ public class SensorEndPoint {
     /**
      * Actual implementation of AVRO and JSON getRealTimeSubject.
      **/
-    private Dataset getRealTimeSubjectWorker(String subject, String source, SensorType sensor,
+    private Dataset getLastReceivedSampleWorker(String subject, String source, SensorType sensor,
             DescriptiveStatistic stat, TimeFrame interval) throws ConnectException {
         Param.isValidInput(subject, source);
 
@@ -151,7 +151,7 @@ public class SensorEndPoint {
 
         if (SubjectDataAccessObject.exist(subject, context)) {
             dataset = SensorDataAccessObject.getInstance()
-                .valueRTBySubjectSource(subject, source,
+                .getLastReceivedSample(subject, source,
                     stat, interval, sensor, context);
 
             if (dataset.getDataset().isEmpty()) {
@@ -186,7 +186,7 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing all "
                 + "available samples for the given inputs formatted either Acceleration.avsc or "
                 + "DoubleValue.avsc")})
-    public Response getAllBySubjectJson(
+    public Response getSamplesJson(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
@@ -194,7 +194,7 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getAllBySubjectWorker(subject, source, stat, interval, sensor));
+                getSamplesWorker(subject, source, stat, interval, sensor));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
@@ -221,7 +221,7 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
                 + "object containing all available samples for the given inputs formatted either "
                 + "Acceleration.avsc or DoubleValue.avsc")})
-    public Response getAllBySubjectAvro(
+    public Response getSamplesAvro(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
@@ -229,7 +229,7 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String source) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getAllBySubjectWorker(subject, source, stat, interval, sensor));
+                getSamplesWorker(subject, source, stat, interval, sensor));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -239,14 +239,14 @@ public class SensorEndPoint {
     /**
      * Actual implementation of AVRO and JSON getAllBySubject.
      **/
-    private Dataset getAllBySubjectWorker(String subject, String source, DescriptiveStatistic stat,
+    private Dataset getSamplesWorker(String subject, String source, DescriptiveStatistic stat,
             TimeFrame interval, SensorType sensor) throws ConnectException {
         Param.isValidInput(subject, source);
 
         Dataset dataset = new Dataset(null, new LinkedList<Item>());
 
         if (SubjectDataAccessObject.exist(subject, context)) {
-            dataset = SensorDataAccessObject.getInstance().valueBySubjectSource(subject,
+            dataset = SensorDataAccessObject.getInstance().getSamples(subject,
                 source, stat, interval, sensor, context);
 
             if (dataset.getDataset().isEmpty()) {
@@ -282,7 +282,7 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing samples "
                 + "belonging to the time window [start - end] for the given inputs formatted "
                 + "either Acceleration.avsc or DoubleValue.avsc.")})
-    public Response getBySubjectForWindowJson(
+    public Response getSamplesWithinWindowJson(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(SUBJECT_ID) String subject,
@@ -292,7 +292,7 @@ public class SensorEndPoint {
             @PathParam(END) long end) {
         try {
             return ResponseHandler.getJsonResponse(request,
-                getBySubjectForWindowWorker(subject, source, stat, interval, sensor, start, end));
+                getSamplesWithinWindowWorker(subject, source, stat, interval, sensor, start, end));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
@@ -320,7 +320,7 @@ public class SensorEndPoint {
             @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
                 + "object containing samples belonging to the time window [start - end] for the "
                 + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")})
-    public Response getBySubjectForWindowAvro(
+    public Response getSamplesWithinWindowAvro(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
@@ -330,7 +330,7 @@ public class SensorEndPoint {
             @PathParam(END) long end) {
         try {
             return ResponseHandler.getAvroResponse(request,
-                getBySubjectForWindowWorker(subject, source, stat, interval, sensor, start, end));
+                getSamplesWithinWindowWorker(subject, source, stat, interval, sensor, start, end));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -340,15 +340,15 @@ public class SensorEndPoint {
     /**
      * Actual implementation of AVRO and JSON getBySubjectForWindow.
      **/
-    private Dataset getBySubjectForWindowWorker(String subject, String source,
+    private Dataset getSamplesWithinWindowWorker(String subject, String source,
             DescriptiveStatistic stat, TimeFrame interval, SensorType sensor, long start,
             long end) throws ConnectException {
         Param.isValidInput(subject, source);
 
-        Dataset dataset = new Dataset(null, new LinkedList<Item>());
+        Dataset dataset = new Dataset(null, new LinkedList<>());
 
         if (SubjectDataAccessObject.exist(subject, context)) {
-            dataset = SensorDataAccessObject.getInstance().valueBySubjectSourceWindow(
+            dataset = SensorDataAccessObject.getInstance().getSamples(
                 subject, source, stat, interval, start, end, sensor, context);
 
             if (dataset.getDataset().isEmpty()) {
