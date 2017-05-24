@@ -23,7 +23,7 @@ public class AndroidRecordCounter extends MongoAndroidApp {
 
     public static final String RECORD_COLLECTION = "application_record_counts";
 
-    //TODO take field names from schemas
+    //TODO take field names from RADAR MongoDb Connector
     @Override
     protected Application getApplication(Document doc, Application app) {
         app.setRecordsCached(doc.getInteger("recordsCached"));

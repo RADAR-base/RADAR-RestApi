@@ -247,6 +247,9 @@ public class EndToEndTest {
         Map<MockDataConfig, Dataset> expectedReceivedMessage = new HashMap<>();
 
         for (MockDataConfig config : expectedCount.keySet()) {
+            MockDataConfig updatedConfig = new MockDataConfig();
+            updatedConfig.setSensor(config.getSensor());
+            updatedConfig.setMaximumDifference(Double.valueOf("1e-2"));
 
             Dataset dataset = Utility.cloneDataset(expectedCount.get(config));
 
@@ -264,15 +267,15 @@ public class EndToEndTest {
                 } else if (item.getSample() instanceof Acceleration) {
                     Acceleration sample = (Acceleration)item.getSample();
                     item.setSample(new Acceleration(
-                            new DoubleSample(RadarConverter.roundDouble(
-                            (Double) sample.getX() / RadarConverter.getExpectedMessages(
-                                updatedHeader), 2)),
-                            new DoubleSample(RadarConverter.roundDouble(
-                            (Double) sample.getY() / RadarConverter.getExpectedMessages(
-                                updatedHeader), 2)),
-                            new DoubleSample(RadarConverter.roundDouble(
-                            (Double) sample.getZ() / RadarConverter.getExpectedMessages(
-                                updatedHeader), 2))));
+                                RadarConverter.roundDouble(
+                                (Double) sample.getX() / RadarConverter.getExpectedMessages(
+                                updatedHeader), 2),
+                                RadarConverter.roundDouble(
+                                (Double) sample.getY() / RadarConverter.getExpectedMessages(
+                                updatedHeader), 2),
+                                RadarConverter.roundDouble(
+                                (Double) sample.getZ() / RadarConverter.getExpectedMessages(
+                                updatedHeader), 2)));
                 } else {
                     throw new IllegalArgumentException(
                             item.getSample().getClass().getCanonicalName()
@@ -280,7 +283,7 @@ public class EndToEndTest {
                 }
             }
 
-            expectedReceivedMessage.put(config, dataset);
+            expectedReceivedMessage.put(updatedConfig, dataset);
         }
 
         return expectedReceivedMessage;

@@ -23,7 +23,7 @@ public class AndroidAppStatus extends MongoAndroidApp {
 
     public static final String UPTIME_COLLECTION = "application_uptime";
 
-    //TODO take field names from schemas
+    //TODO take field names from RADAR MongoDb Connector
     @Override
     protected Application getApplication(Document doc, Application app) {
         app.setUptime(doc.getDouble("applicationUptime"));
