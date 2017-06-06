@@ -8,7 +8,9 @@ plugins {
 }
 
 war {
-  archiveName = 'radar.war'
+  baseName = 'radar'
+  version = '0.1.1'
+  extension = 'war'
 }
 
 targetCompatibility = '1.8'
@@ -438,6 +440,9 @@ clean.dependsOn(removeFrontendConfig)
 task copyWarForIntegration(type: Copy, dependsOn: war) {
   from war.archivePath
   into "${projectDir}/src/integrationTest/image"
+  doLast{
+    file("${projectDir}/src/integrationTest/image/${war.getArchiveName()}").renameTo("${projectDir}/src/integrationTest/image/radar.war")
+  }
 }
 
 task removeWar(type: Delete) {
