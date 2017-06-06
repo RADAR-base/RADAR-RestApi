@@ -24,7 +24,7 @@ The api documentation is located at `<your-server-address>:<port>/radar/api/swag
 ## Dev Environment
 Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json) to see documentation of dev deploy instance.
 
-Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/user/getAllPatients/0) to see some mock data.
+Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/subject/getAllSubjects/0) to see some mock data.
 
 ## Clients
 Swagger provides a tool to automatically generate a client in several programming language.
@@ -59,15 +59,17 @@ Test case settings are located at `src/endToEndTest/resources/pipeline.yml`. Eac
   file: accelerometer.csv
   key_schema: org.radarcns.key.MeasurementKey
   value_schema: org.radarcns.empatica.EmpaticaE4Acceleration
-  values_to_test: "x, y, z"
-  magnitude: 10
+  value_fields: [x, y, z]
+  minimum: -2.0
+  maximum: 2.0
+  maximum_difference: 1e-10
 ```
-The test will generate random data and stream it to the landing topic specified by `topic` having for key `key_schema` and for value `value_schema`. Data for the sensor type `sensor` are randomly generated according to the `frequency`: number of messages generated per second. `value_to_test` are the variables list which will be tested against the RESTfull service. Since we are comparing `double`s, `magnitude` states a negative power of 10 representing the maximum delta between expected and actual values for which both numbers are still considered equal.
+The test will generate random data between `minimum` and `maximum`, and stream it to the landing topic specified by `topic` having for key `key_schema` and for value `value_schema`. Data for the sensor type `sensor` are randomly generated according to the `frequency`: number of messages generated per second. `value_fields` is the variables list which will be tested against the RESTfull service. Since we are comparing `double`s, `magnitude` represents the maximum delta between expected and actual values for which both numbers are still considered equal.
 
 To run the test:
 
 ```shell
-./gradlew endToEndTest`
+./gradlew endToEndTest
 ```
 
 ## Contributing
