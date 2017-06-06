@@ -7,6 +7,8 @@ plugins {
   id 'war'
 }
 
+apply from: 'build-utility.gradle'
+
 war {
   baseName = 'radar'
   version = '0.1.1'
@@ -77,7 +79,6 @@ dependencies {
 //---------------------------------------------------------------------------//
 // Source Set                                                                //
 //---------------------------------------------------------------------------//
-
 sourceSets {
   integrationTest {
     java {
@@ -104,7 +105,6 @@ sourceSets {
 //---------------------------------------------------------------------------//
 // Style checking                                                            //
 //---------------------------------------------------------------------------//
-
 checkstyle {
   // codacy version
   toolVersion '6.16'
@@ -135,7 +135,6 @@ pmdTest {
 //---------------------------------------------------------------------------//
 // Testing                                                                   //
 //---------------------------------------------------------------------------//
-
 tasks.matching {it instanceof Test}.all {
   def stdout = new LinkedList<String>()
   beforeTest { TestDescriptor td ->
@@ -179,7 +178,7 @@ test {
   }
 }
 
-task integrationTest(type: Test) {
+task integrationTest(type: Test, dependsOn: ['copyFrontendConfigIntegrationTest', 'installSimpleStack']) {
   description = "Run integration tests (located in src/integrationTest/...)."
 
   testClassesDir = sourceSets.integrationTest.output.classesDir
@@ -190,89 +189,9 @@ task integrationTest(type: Test) {
     events "skipped", "failed"
   }
 }
-
-//---------------------------------------------------------------------------//
-// Docker Utility                                                            //
-//---------------------------------------------------------------------------//
-ext.dockerCompose = hasProperty('dockerComposePath') ? property('dockerComposePath') : 'docker-compose'
-ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
-
-//---------------------------------------------------------------------------//
-// Integration Test                                                          //
-//---------------------------------------------------------------------------//
-ext.simpleStackPath = 'src/integrationTest'
-ext.simpleStackLock = "${simpleStackPath}/.RUNNING_INSTANCE_LOCK"
-
-task buildDocker(type: Exec, dependsOn: 'copyWarForIntegration') {
-  workingDir 'src/integrationTest/image'
-  commandLine sudoLinux + ['docker', 'image', 'build', '-t', 'radarcns/radar-restapi:dev', '.']
-}
-
-task installSimpleStack(type: Exec, dependsOn: ['copyWarForIntegration']) {
-  doFirst{
-    def lockFile = new File(simpleStackLock)
-    if (lockFile.exists()) {
-      throw new GradleException("A previous instance of the simple stack is still running. Please stop it first and then try again.")
-    } else {
-      lockFile.createNewFile()
-    }
-
-    def radarVolumePath = "${simpleStackPath}/volumes/radar"
-    file(radarVolumePath).mkdirs()
-
-    def configJson = file("${simpleStackPath}/resources/config.json")
-    file("${radarVolumePath}/config.json") << configJson.text
-
-    def catalogYml = file("${simpleStackPath}/resources/device-catalog.yml")
-    file("${radarVolumePath}/device-catalog.yml") << catalogYml.text
-
-    def radarYml = file("${simpleStackPath}/resources/radar.yml")
-    file("${radarVolumePath}/radar.yml") << radarYml.text.replace("localhost: 27017", "hotstorage: 27017")
-  }
-
-  workingDir simpleStackPath
-  standardInput = System.in
-  commandLine sudoLinux + [dockerCompose, 'up', '-d', '--build']
-
-  doLast {
-    // wait until the hotstorage is ready
-    sleep(10_000)
-  }
-}
-integrationTest.dependsOn 'installSimpleStack'
-
-task stopSimpleStack(type: Exec) {
-  onlyIf{
-    new File(simpleStackLock).exists()
-  }
-  standardInput = System.in
-  workingDir simpleStackPath
-  commandLine sudoLinux + [dockerCompose, 'down', '-v']
-  doLast{
-    new File(simpleStackLock).delete()
-  }
-}
-
 integrationTest.finalizedBy 'stopSimpleStack'
 
-task cleanSimpleStack(type: Delete, dependsOn: stopSimpleStack) {
-  delete "${simpleStackPath}/volumes"
-  delete simpleStackLock
-}
-
-stopSimpleStack.finalizedBy cleanSimpleStack
-clean.dependsOn cleanSimpleStack
-
-
-//---------------------------------------------------------------------------//
-// End to End Test                                                           //
-//---------------------------------------------------------------------------//
-ext.radarStackPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack'
-ext.radarStackLock = "${radarStackPath}/.RUNNING_INSTANCE_LOCK"
-ext.radarDockerCompose = 'docker-compose.yml'
-ext.radarDockerComposeOriginal = ".${radarDockerCompose}.orig"
-
-task endToEndTest(type: Test, dependsOn: ['installRadarStack', 'listDockerProcesses']) {
+task endToEndTest(type: Test, dependsOn: ['copyFrontendConfigEndToEndTest', 'installRadarStack', 'listDockerProcesses']) {
   description = "Run end to end tests (located in src/endToEndTest/...)."
 
   testClassesDir = sourceSets.endToEndTest.output.classesDir
@@ -291,99 +210,9 @@ task endToEndTest(type: Test, dependsOn: ['installRadarStack', 'listDockerProces
 }
 endToEndTest.finalizedBy 'stopRadarStack'
 
-// Sets configuration files for running the entire platform
-task setRadarEnvironmentForDocker {
-  doLast {
-    def envTemplatePath = "${radarStackPath}/etc/env.template"
-    def smtpTemplatePath = "${radarStackPath}/etc/smtp.env.template"
-    def streamTemplatePath = "${radarStackPath}/etc/radar.yml.template"
-
-    def volumes = file("${radarStackPath}/volumes")
-    volumes.mkdir()
-
-    def fileEnv = file(envTemplatePath + 'tmp')
-    fileEnv << file(envTemplatePath).text
-    fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumes.getAbsolutePath())
-    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
-    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
-    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
-    fileEnv.renameTo("${radarStackPath}/.env")
-
-    def fileSmtp = file(smtpTemplatePath + 'tmp')
-    fileSmtp << file(smtpTemplatePath).text
-    fileSmtp.renameTo("${radarStackPath}/etc/smtp.env")
-
-    def fileStream = file(streamTemplatePath + 'tmp')
-    fileStream << file(streamTemplatePath).text
-    fileStream.renameTo("${radarStackPath}/etc/radar.yml")
-
-    def installScript = file("${radarStackPath}/install-radar-stack.sh")
-    installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
-
-    def dockerComposeYml = file("${radarStackPath}/${radarDockerCompose}")
-    file("${radarStackPath}/${radarDockerComposeOriginal}") << dockerComposeYml.text
-    def dockerComposeTmp = file("${radarStackPath}/.${radarDockerCompose}.tmp")
-    dockerComposeTmp << dockerComposeYml.text.replaceAll('radarcns/radar-restapi:.*', 'radarcns/radar-restapi:dev')
-    dockerComposeTmp.renameTo("${radarStackPath}/${radarDockerCompose}")
-  }
-}
-
-task installRadarStack(type: Exec, dependsOn: ['setRadarEnvironmentForDocker', 'buildDocker']) {
-  doFirst{
-    def lockFile = new File(radarStackLock)
-    if (lockFile.exists()) {
-      throw new GradleException("A previous instance of RADAR Platform is still running. Please stop it first and then try again.")
-    } else {
-      lockFile.createNewFile()
-    }
-  }
-
-  workingDir radarStackPath
-  standardInput = System.in
-  commandLine sudoLinux + ['./install-radar-stack.sh']
-}
-
-task listDockerProcesses(type: Exec) {
-  workingDir radarStackPath
-  standardInput = System.in
-  commandLine sudoLinux + [dockerCompose, 'ps']
-}
-listDockerProcesses.mustRunAfter 'installRadarStack'
-
-ext.stoppingStack = false
-task stopRadarStack(type: Exec) {
-  onlyIf{
-    new File(radarStackLock).exists() && !stoppingStack
-  }
-  doFirst{
-    stoppingStack = true
-  }
-
-  standardInput = System.in
-  workingDir radarStackPath
-  commandLine sudoLinux + [dockerCompose, 'down', '-v']
-
-  doLast{
-    stoppingStack = false
-  }
-}
-
-task cleanRadarStack(type: Exec, dependsOn: stopRadarStack) {
-  onlyIf{
-    !stoppingStack
-  }
-  commandLine sudoLinux + ['rm', '-rf', "${radarStackPath}/volumes", radarStackLock]
-  doLast{
-    file("${radarStackPath}/${radarDockerComposeOriginal}").renameTo("${radarStackPath}/${radarDockerCompose}")
-  }
-}
-stopRadarStack.finalizedBy cleanRadarStack
-clean.dependsOn cleanRadarStack
-
 //---------------------------------------------------------------------------//
 // Code coverage and codacy                                                  //
 //---------------------------------------------------------------------------//
-
 jacocoTestReport {
   executionData test, integrationTest
   reports {
@@ -407,50 +236,12 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 }
 
 //---------------------------------------------------------------------------//
-// Prepare FRONT-END config file                                             //
+// Clean definition                                                          //
 //---------------------------------------------------------------------------//
-task copyFrontendConfig(type: Copy) {
-  from "${projectDir}/schemas/restapi/config/config.json"
-  into "${projectDir}/src/main/webapp/frontend/"
-}
-war.dependsOn(copyFrontendConfig)
-
-task copyFrontendConfigIntegrationTest(type: Copy) {
-  from "${projectDir}/schemas/restapi/config/config.json"
-  into "${projectDir}/src/integrationTest/resources"
-}
-integrationTest.dependsOn(copyFrontendConfigIntegrationTest)
-
-task copyFrontendConfigEndToEndTest(type: Copy) {
-  from "${projectDir}/schemas/restapi/config/config.json"
-  into "${projectDir}/src/endToEndTest/resources"
-}
-endToEndTest.dependsOn(copyFrontendConfigEndToEndTest)
-
-task removeFrontendConfig(type: Delete) {
-  delete "${projectDir}/src/main/webapp/frontend/"
-  delete "${projectDir}/src/integrationTest/resources/config.json"
-  delete "${projectDir}/src/endToEndTest/resources/config.json"
-}
-clean.dependsOn(removeFrontendConfig)
-
-//---------------------------------------------------------------------------//
-// Prepare WAR                                                               //
-//---------------------------------------------------------------------------//
-task copyWarForIntegration(type: Copy, dependsOn: war) {
-  from war.archivePath
-  into "${projectDir}/src/integrationTest/image"
-  doLast{
-    file("${projectDir}/src/integrationTest/image/${war.getArchiveName()}").renameTo("${projectDir}/src/integrationTest/image/radar.war")
-  }
-}
-
-task removeWar(type: Delete) {
-  delete "${projectDir}/src/integrationTest/image/${war.getArchiveName()}"
-}
-
-war.finalizedBy copyWarForIntegration
-clean.dependsOn(removeWar)
+clean.dependsOn cleanSimpleStack
+clean.dependsOn cleanRadarStack
+clean.dependsOn removeFrontendConfig
+clean.dependsOn removeWar
 
 //---------------------------------------------------------------------------//
 // Build system metadata                                                     //
@@ -458,7 +249,7 @@ clean.dependsOn(removeWar)
 
 idea {
   module {
-    sourceDirs += file("build/avro")
+    downloadSources = true
   }
 }
 
