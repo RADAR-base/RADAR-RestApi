@@ -1,5 +1,4 @@
 plugins {
-  // Apply the java plugin to add support for Java
   id 'java'
   id 'idea'
   id 'pmd'
@@ -16,27 +15,16 @@ targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
 ext.codacyVersion = '1.0.10'
-ext.dataformat = '2.8.5'
-ext.jackson='2.8.4'
 ext.jersey = '2.22.1'
-ext.jerseymedia = '2.24'
-ext.json='20160810'
 ext.junitVersion = '4.12'
 ext.logback = '1.1.7'
-ext.mathVersion = '3.0'
-ext.mokitoVersion ='1.10.19'
 ext.mongodb='3.3.0'
-ext.okhttpVersion = '3.5.0'
-ext.okioVersion = '1.11.0'
-ext.openCsvVersion = '3.9'
-ext.radarCommon = '0.3.1-SNAPSHOT'
-ext.radarCommonTesting = '0.3.1-SNAPSHOT'
-ext.radarSchemasCommon = '0.1'
+ext.radarCommon = '0.4'
+ext.schemaRestApi = '0.1.1-alpha.1'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.swaggerParser='1.0.24'
 ext.tomcat = '8.0.43'
-ext.schemaRestApi = '0.1.1-alpha.1'
 
 configurations {
   codacy
@@ -50,7 +38,6 @@ configurations {
   compile.extendsFrom provided
 }
 
-// In this section you declare where to find the dependencies of your project
 repositories {
   // Use 'jcenter' for resolving your dependencies.
   // You can declare any Maven/Ivy/file repository here.
@@ -63,30 +50,24 @@ repositories {
   maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
 }
 
-// In this section you declare the dependencies for your production and test code
 dependencies {
   providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
-  compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApi
 
   compile group: 'ch.qos.logback', name:'logback-classic', version: logback
 
   compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
-  compile group: 'org.json', name: 'json', version: json
-  compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
-  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: jackson
+
+  compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
   compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
-  compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
-  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-avro', version: dataformat
+
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
+  compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApi
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
-  testCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommonTesting
-  testCompile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasCommon
-  testCompile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
-  testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
-  testCompile group: 'com.squareup.okio', name: 'okio', version: okioVersion
-  testCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParser
+
+  integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
+  integrationTestCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParser
 
   codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }
