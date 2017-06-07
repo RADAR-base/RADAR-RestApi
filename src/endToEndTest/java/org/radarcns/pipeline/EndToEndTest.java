@@ -91,7 +91,7 @@ public class EndToEndTest {
     public static final String PIPELINE_CONFIG = "pipeline.yml";
 
     // Latency expressed in second
-    private static final long LATENCY = 240;
+    private static final long LATENCY = 120;
 
     private static File dataRoot;
     private static PipelineConfig pipelineConfig;
