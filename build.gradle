@@ -7,8 +7,6 @@ plugins {
   id 'war'
 }
 
-apply from: 'build-utility.gradle'
-
 war {
   baseName = 'radar'
   version = '0.1.1'
@@ -131,6 +129,11 @@ pmd {
 pmdTest {
   ruleSetFiles = files("config/pmd/test_ruleset.xml")
 }
+
+//---------------------------------------------------------------------------//
+// Import Script                                                             //
+//---------------------------------------------------------------------------//
+apply from: 'build-utility.gradle'
 
 //---------------------------------------------------------------------------//
 // Testing                                                                   //

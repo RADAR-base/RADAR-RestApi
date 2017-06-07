@@ -1,4 +1,41 @@
 //---------------------------------------------------------------------------//
+// Preparing WAR                                                             //
+//---------------------------------------------------------------------------//
+task copyFrontendConfig(type: Copy) {
+  from "${projectDir}/schemas/restapi/config/config.json"
+  into "${projectDir}/src/main/webapp/frontend/"
+}
+war.dependsOn copyFrontendConfig
+
+task copyFrontendConfigIntegrationTest(type: Copy) {
+  from "${projectDir}/schemas/restapi/config/config.json"
+  into "${projectDir}/src/integrationTest/resources"
+}
+
+task copyFrontendConfigEndToEndTest(type: Copy) {
+  from "${projectDir}/schemas/restapi/config/config.json"
+  into "${projectDir}/src/endToEndTest/resources"
+}
+
+task removeFrontendConfig(type: Delete) {
+  delete "${projectDir}/src/main/webapp/frontend/"
+  delete "${projectDir}/src/integrationTest/resources/config.json"
+  delete "${projectDir}/src/endToEndTest/resources/config.json"
+}
+
+task copyWarForIntegration(type: Copy, dependsOn: war) {
+  from "${war.archivePath}"
+  into "${projectDir}/src/integrationTest/image"
+  doLast{
+    file("${projectDir}/src/integrationTest/image/${war.archiveName}").renameTo("${projectDir}/src/integrationTest/image/radar.war")
+  }
+}
+
+task removeWar(type: Delete) {
+  delete "${projectDir}/src/integrationTest/image/radar.war"
+}
+
+//---------------------------------------------------------------------------//
 // Docker Utility                                                            //
 //---------------------------------------------------------------------------//
 ext.dockerCompose = hasProperty('dockerComposePath') ? property('dockerComposePath') : 'docker-compose'
@@ -10,12 +47,12 @@ ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? [
 ext.simpleStackPath = 'src/integrationTest'
 ext.simpleStackLock = "${simpleStackPath}/.RUNNING_INSTANCE_LOCK"
 
-task buildDocker(type: Exec, dependsOn: 'copyWarForIntegration') {
+task buildDocker(type: Exec, dependsOn: copyWarForIntegration) {
   workingDir 'src/integrationTest/image'
   commandLine sudoLinux + ['docker', 'image', 'build', '-t', 'radarcns/radar-restapi:dev', '.']
 }
 
-task installSimpleStack(type: Exec, dependsOn: 'buildDocker') {
+task installSimpleStack(type: Exec, dependsOn: buildDocker) {
   doFirst{
     def lockFile = new File(simpleStackLock)
     if (lockFile.exists()) {
@@ -63,8 +100,10 @@ task cleanSimpleStack(type: Delete, dependsOn: stopSimpleStack) {
   delete "${simpleStackPath}/volumes"
   delete simpleStackLock
 }
-stopSimpleStack.finalizedBy cleanSimpleStack
 
+stopSimpleStack.finalizedBy cleanSimpleStack
+stopSimpleStack.finalizedBy removeWar
+stopSimpleStack.finalizedBy removeFrontendConfig
 //---------------------------------------------------------------------------//
 // End to End Test                                                           //
 //---------------------------------------------------------------------------//
@@ -150,7 +189,7 @@ task stopRadarStack(type: Exec) {
   }
 }
 
-task cleanRadarStack(type: Exec, dependsOn: 'stopRadarStack') {
+task cleanRadarStack(type: Exec, dependsOn: stopRadarStack) {
   onlyIf{
     !stoppingStack
   }
@@ -160,42 +199,5 @@ task cleanRadarStack(type: Exec, dependsOn: 'stopRadarStack') {
   }
 }
 stopRadarStack.finalizedBy cleanRadarStack
-
-//---------------------------------------------------------------------------//
-// Prepare FRONT-END config file                                             //
-//---------------------------------------------------------------------------//
-task copyFrontendConfig(type: Copy) {
-  from "${projectDir}/schemas/restapi/config/config.json"
-  into "${projectDir}/src/main/webapp/frontend/"
-}
-
-task copyFrontendConfigIntegrationTest(type: Copy) {
-  from "${projectDir}/schemas/restapi/config/config.json"
-  into "${projectDir}/src/integrationTest/resources"
-}
-
-task copyFrontendConfigEndToEndTest(type: Copy) {
-  from "${projectDir}/schemas/restapi/config/config.json"
-  into "${projectDir}/src/endToEndTest/resources"
-}
-
-task removeFrontendConfig(type: Delete) {
-  delete "${projectDir}/src/main/webapp/frontend/"
-  delete "${projectDir}/src/integrationTest/resources/config.json"
-  delete "${projectDir}/src/endToEndTest/resources/config.json"
-}
-
-//---------------------------------------------------------------------------//
-// Prepare WAR                                                               //
-//---------------------------------------------------------------------------//
-task copyWarForIntegration(type: Copy, dependsOn: 'war') {
-  from war.archivePath
-  into "${projectDir}/src/integrationTest/image"
-  doLast{
-    file("${projectDir}/src/integrationTest/image/${war.archiveName}").renameTo("${projectDir}/src/integrationTest/image/radar.war")
-  }
-}
-
-task removeWar(type: Delete) {
-  delete "${projectDir}/src/integrationTest/image/radar.war"
-}
+stopRadarStack.finalizedBy removeWar
+stopRadarStack.finalizedBy removeFrontendConfig
