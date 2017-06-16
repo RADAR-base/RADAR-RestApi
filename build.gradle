@@ -18,6 +18,7 @@ sourceCompatibility = '1.8'
 
 ext.codacyVersion = '1.0.10'
 ext.jersey = '2.22.1'
+ext.jerseymedia = '2.24'
 ext.junitVersion = '4.12'
 ext.logback = '1.1.7'
 ext.mongodb='3.3.0'
@@ -65,6 +66,8 @@ dependencies {
 
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
   compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApi
+
+  compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
 
