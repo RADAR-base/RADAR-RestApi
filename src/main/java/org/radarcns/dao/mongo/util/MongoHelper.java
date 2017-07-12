@@ -40,7 +40,7 @@ import org.radarcns.listener.MongoDbContextListener;
  */
 public class MongoHelper {
 
-    //private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(MongoHelper.class);
 
     public static final String ID = "_id";
     public static final String USER = "user";

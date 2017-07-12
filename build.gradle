@@ -59,6 +59,7 @@ dependencies {
   compile group: 'ch.qos.logback', name:'logback-classic', version: logback
 
   compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
+  compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
 
   compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
@@ -66,8 +67,6 @@ dependencies {
 
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
   compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApi
-
-  compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
 
@@ -127,7 +126,6 @@ pmd {
   ruleSets = []
   ruleSetFiles = files("config/pmd/ruleset.xml")
 }
-
 
 pmdTest {
   ruleSetFiles = files("config/pmd/test_ruleset.xml")
@@ -252,7 +250,6 @@ clean.dependsOn removeWar
 //---------------------------------------------------------------------------//
 // Build system metadata                                                     //
 //---------------------------------------------------------------------------//
-
 idea {
   module {
     downloadSources = true
