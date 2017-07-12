@@ -40,7 +40,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
-import org.radarcns.avro.restapi.app.ServerStatus;
+import org.radarcns.application.ServerStatus;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;

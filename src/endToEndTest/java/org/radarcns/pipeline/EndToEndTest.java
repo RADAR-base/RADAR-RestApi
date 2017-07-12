@@ -68,7 +68,7 @@ import org.radarcns.mock.data.CsvGenerator;
 import org.radarcns.mock.data.MockRecordValidator;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mock.model.MockAggregator;
-import org.radarcns.pipeline.config.PipelineConfig;
+import org.radarcns.pipeline.util.PipelineConfig;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;

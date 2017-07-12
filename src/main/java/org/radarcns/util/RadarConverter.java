@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.avro.restapi.app.ServerStatus;
+import org.radarcns.application.ServerStatus;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.header.TimeFrame;

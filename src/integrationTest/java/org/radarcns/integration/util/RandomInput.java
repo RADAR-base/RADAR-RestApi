@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.bson.Document;
-import org.radarcns.avro.restapi.app.ServerStatus;
+import org.radarcns.application.ServerStatus;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.TimeFrame;

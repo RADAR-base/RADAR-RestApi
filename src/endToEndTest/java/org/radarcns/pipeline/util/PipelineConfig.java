@@ -1,0 +1,45 @@
+package org.radarcns.pipeline.util;
+
+/*
+ * Copyright 2016 King's College London and The Hyve
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.radarcns.config.ServerConfig;
+import org.radarcns.mock.config.BasicMockConfig;
+
+public class PipelineConfig extends BasicMockConfig {
+
+    @JsonProperty("rest_api")
+    private ServerConfig restApi;
+
+    private ServerConfig frontend;
+
+    public ServerConfig getRestApi() {
+        return restApi;
+    }
+
+    public void setRestApi(ServerConfig restApi) {
+        this.restApi = restApi;
+    }
+
+    public ServerConfig getFrontend() {
+        return frontend;
+    }
+
+    public void setFrontend(ServerConfig frontend) {
+        this.frontend = frontend;
+    }
+}
