@@ -18,7 +18,13 @@ package org.radarcns.integration.testcase.webapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.avro.restapi.sensor.SensorType.ACCELEROMETER;
+import static org.radarcns.avro.restapi.sensor.SensorType.BATTERY;
+import static org.radarcns.avro.restapi.sensor.SensorType.BLOOD_VOLUME_PULSE;
+import static org.radarcns.avro.restapi.sensor.SensorType.ELECTRODERMAL_ACTIVITY;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
+import static org.radarcns.avro.restapi.sensor.SensorType.INTER_BEAT_INTERVAL;
+import static org.radarcns.avro.restapi.sensor.SensorType.THERMOMETER;
 import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 import static org.radarcns.webapp.util.BasePath.AVRO;
@@ -32,16 +38,21 @@ import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
 import org.radarcns.avro.restapi.header.TimeFrame;
+import org.radarcns.avro.restapi.sensor.Sensor;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.avro.restapi.source.Source;
+import org.radarcns.avro.restapi.source.SourceSummary;
 import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.avro.restapi.source.State;
 import org.radarcns.avro.restapi.subject.Cohort;
 import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.config.Properties;
@@ -161,9 +172,26 @@ public class SubjectEndPointTest {
             Subject actual = AvroConverter.avroByteToAvro(
                         response.body().bytes(), Subject.getClassSchema());
 
+            Map<String, Sensor> sensorMap = new HashMap<>();
+            sensorMap.put(INTER_BEAT_INTERVAL.name(),
+                    new Sensor(INTER_BEAT_INTERVAL, State.DISCONNECTED, 0, 1.0));
+            sensorMap.put(BATTERY.name(),
+                    new Sensor(BATTERY, State.DISCONNECTED, 0, 1.0));
+            sensorMap.put(HEART_RATE.name(),
+                    new Sensor(HEART_RATE, State.DISCONNECTED, 0, 1.0));
+            sensorMap.put(THERMOMETER.name(),
+                    new Sensor(THERMOMETER, State.DISCONNECTED, 0, 1.0));
+            sensorMap.put(ACCELEROMETER.name(),
+                    new Sensor(ACCELEROMETER, State.DISCONNECTED, 0, 1.0));
+            sensorMap.put(ELECTRODERMAL_ACTIVITY.name(),
+                    new Sensor(ELECTRODERMAL_ACTIVITY, State.DISCONNECTED, 0, 1.0));
+            sensorMap.put(BLOOD_VOLUME_PULSE.name(),
+                    new Sensor(BLOOD_VOLUME_PULSE, State.DISCONNECTED, 0, 1.0));
+
             Subject expected = new Subject(SUBJECT, true,
                     Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput),
-                    Collections.singletonList(new Source(SOURCE, SOURCE_TYPE, null)));
+                    Collections.singletonList(new Source(SOURCE, SOURCE_TYPE, new SourceSummary(
+                            State.DISCONNECTED, 0, 1.0, sensorMap))));
 
             assertEquals(expected, actual);
         }

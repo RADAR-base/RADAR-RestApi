@@ -18,8 +18,9 @@ package org.radarcns.dao;
 
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.source.Source;
@@ -27,6 +28,7 @@ import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.mongo.util.MongoDataAccess;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.monitor.Monitors;
 
 /**
  * Data Access Object for subject management.
@@ -111,9 +113,22 @@ public class SourceDataAccessObject {
         sources.addAll(AndroidAppDataAccessObject.getInstance().findAllSourcesBySubject(
                 subject, client));
 
+        Monitors monitor = Monitors.getInstance();
+
+        List<Source> updatedSources = new ArrayList<>(sources.size());
+
+        for (Source source : sources) {
+            try {
+                updatedSources.add(monitor.getState(subject, source.getId(), source.getType(),
+                        client));
+            } catch (UnsupportedOperationException ex) {
+                updatedSources.add(source);
+            }
+        }
+
         return new Subject(subject, SubjectDataAccessObject.isSubjectActive(subject),
                 SensorDataAccessObject.getInstance().getEffectiveTimeFrame(subject, client),
-                new LinkedList<>(sources));
+                updatedSources);
     }
 
 }
