@@ -19,7 +19,6 @@ package org.radarcns.dao.mongo.util;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lte;
-import static org.radarcns.listener.MongoDbContextListener.MONGO_CLIENT;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -97,12 +96,13 @@ public class MongoHelper {
      */
     protected static MongoCursor<Document> findDocumentByUserSourceWindow(String subject,
             String source, Long start, Long end, MongoCollection<Document> collection) {
-        FindIterable<Document> result = collection.find(
-                Filters.and(
+        FindIterable<Document> result = collection
+                .find(Filters.and(
                         eq(USER,subject),
                         eq(SOURCE,source),
                         gte(START,new Date(start)),
-                        lte(END,new Date(end)))).sort(new BasicDBObject(START,1));
+                        lte(END,new Date(end))))
+                .sort(new BasicDBObject(START, 1));
 
         return result.iterator();
     }
@@ -123,17 +123,12 @@ public class MongoHelper {
             String sortBy, int order, Integer limit, MongoCollection<Document> collection) {
         FindIterable<Document> result;
 
-        if (sortBy == null) {
-            result = collection.find(
-                Filters.and(
-                    eq(USER, subject),
-                    eq(SOURCE, source)));
-        } else {
-            result = collection.find(
-                Filters.and(
-                    eq(USER, subject),
-                    eq(SOURCE, source))
-            ).sort(new BasicDBObject(sortBy, order));
+        result = collection.find(Filters.and(
+                eq(USER, subject),
+                eq(SOURCE, source)));
+
+        if (sortBy != null) {
+            result = result.sort(new BasicDBObject(sortBy, order));
         }
 
         if (limit != null) {
@@ -146,65 +141,15 @@ public class MongoHelper {
     /**
      * Finds all Documents belonging to the given source.
      *
-     * @param source is the sourceID
-     * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
-     *      means ascending while {@code -1} means descending
-     * @param limit is the number of document that will be retrieved
+     * @param keyName key in the database
+     * @param keyValue value of given key
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents for the given SourceDefinition and MongoDB
      *      collection
      */
-    protected static MongoCursor<Document> findDocumentBySource(String source,
-            String sortBy, int order, Integer limit, MongoCollection<Document> collection) {
-        FindIterable<Document> result;
-
-        if (sortBy == null) {
-            result = collection.find(
-                Filters.and(
-                    eq(SOURCE, source)));
-        } else {
-            result = collection.find(
-                Filters.and(
-                    eq(SOURCE, source))
-            ).sort(new BasicDBObject(sortBy, order));
-        }
-
-        if (limit != null) {
-            result = result.limit(limit);
-        }
-        return result.iterator();
-    }
-
-    /**
-     * Finds document with the given ID.
-     *
-     * @param id Document _id
-     * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
-     *      means ascending while {@code -1} means descending
-     * @param limit is the number of document that will be retrieved
-     * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents for the given SourceDefinition and MongoDB
-     *      collection
-     */
-    protected static MongoCursor<Document> findDocumentById(String id, String sortBy, int order,
-            Integer limit, MongoCollection<Document> collection) {
-        FindIterable<Document> result;
-
-        if (sortBy == null) {
-            result = collection.find(
-                Filters.and(
-                    eq(ID, id)));
-        } else {
-            result = collection.find(
-                Filters.and(
-                    eq(ID, id))
-            ).sort(new BasicDBObject(sortBy, order));
-        }
-
-        if (limit != null) {
-            result = result.limit(limit);
-        }
-        return result.iterator();
+    protected static MongoCursor<Document> findSingleDocument(String keyName, String keyValue,
+              MongoCollection<Document> collection) {
+        return collection.find(eq(keyName, keyValue)).limit(1).iterator();
     }
 
     /**
@@ -242,13 +187,7 @@ public class MongoHelper {
      */
     public static MongoCollection<Document> getCollection(ServletContext context, String collection)
             throws ConnectException {
-        MongoDbContextListener.testConnection(context);
-
-        if (context.getAttribute(MONGO_CLIENT) == null) {
-            MongoDbContextListener.recoverOrThrow(context);
-        }
-
-        MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
+        MongoClient mongoClient = MongoDbContextListener.getClient(context);
         MongoDatabase database = mongoClient.getDatabase(
                 Properties.getApiConfig().getMongoDbName());
 
@@ -277,12 +216,6 @@ public class MongoHelper {
      * @throws ConnectException if MongoDB cannot be reached
      */
     public static MongoClient getClient(ServletContext context) throws ConnectException {
-        MongoDbContextListener.testConnection(context);
-
-        if (context.getAttribute(MONGO_CLIENT) == null) {
-            MongoDbContextListener.recoverOrThrow(context);
-        }
-
-        return (MongoClient) context.getAttribute(MONGO_CLIENT);
+        return MongoDbContextListener.getClient(context);
     }
 }

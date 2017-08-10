@@ -17,6 +17,9 @@ package org.radarcns.monitor;
  */
 
 import com.mongodb.MongoClient;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
@@ -95,21 +98,20 @@ public class SourceMonitor {
                     RadarConverter.roundDouble(1.0 - percentTemp, 2)));
         }
 
-        double countMex = 0;
-        double avgPerc = 0;
+        int countMex = 0;
+        BigDecimal avgPerc = BigDecimal.ZERO;
         for (Sensor sensor : sensorMap.values()) {
             countMex += sensor.getReceivedMessage();
-            avgPerc += sensor.getMessageLoss();
+            avgPerc = avgPerc.add(BigDecimal.valueOf(sensor.getMessageLoss()));
         }
 
-        avgPerc = avgPerc / 7.0;
+        avgPerc = avgPerc.divide(BigDecimal.valueOf(7.0), MathContext.DECIMAL32);
 
-        SourceSummary sourceState = new SourceSummary(getStatus(1 - avgPerc),
-                (int)countMex, RadarConverter.roundDouble(avgPerc, 2), sensorMap);
+        SourceSummary sourceState = new SourceSummary(getStatus(BigDecimal.ONE.subtract(avgPerc)
+                .doubleValue()),
+                countMex, avgPerc.round(new MathContext(2)).doubleValue(), sensorMap);
 
-        Source device = new Source(source, specification.getType(), sourceState);
-
-        return device;
+        return new Source(source, specification.getType(), sourceState);
     }
 
     /**

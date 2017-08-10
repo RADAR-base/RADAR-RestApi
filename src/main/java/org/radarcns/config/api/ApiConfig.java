@@ -21,6 +21,8 @@ import static java.util.Collections.singletonList;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -186,9 +188,9 @@ public class ApiConfig {
      */
     public List<ServerAddress> getMongoDbHosts() {
 
-        final List<ServerAddress> mongoHostsTemp = new LinkedList<>();
+        final List<ServerAddress> mongoHostsTemp = new ArrayList<>(mongoHosts.size());
         for (final String key : mongoHosts.keySet()) {
-            mongoHostsTemp.add(new ServerAddress(key,Integer.valueOf(mongoHosts.get(key))));
+            mongoHostsTemp.add(new ServerAddress(key, Integer.valueOf(mongoHosts.get(key))));
         }
 
         return mongoHostsTemp;

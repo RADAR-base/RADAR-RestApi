@@ -47,25 +47,24 @@ public abstract class MongoAndroidApp extends MongoDataAccess {
     public Application valueBySubjectSource(String subject, String source, Application app,
             MongoClient client) throws ConnectException {
 
-        MongoCursor<Document> cursor = MongoHelper
+        try (MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSource(subject, source, null, -1, 1,
-                    MongoHelper.getCollection(client, getCollectionName()));
+                    MongoHelper.getCollection(client, getCollectionName()))) {
 
-        if (!cursor.hasNext()) {
-            LOGGER.debug("Empty cursor");
-            cursor.close();
-            return null;
+            if (!cursor.hasNext()) {
+                LOGGER.debug("Empty cursor");
+                cursor.close();
+                return null;
+            }
+
+            Document doc = cursor.next();
+
+            if (app == null) {
+                return getApplication(doc, new Application());
+            }
+
+            return getApplication(doc, app);
         }
-
-        Document doc = cursor.next();
-        cursor.close();
-
-        if (app == null) {
-            return getApplication(doc, new Application());
-        }
-
-        return getApplication(doc, app);
-
     }
 
     protected abstract Application getApplication(Document doc, Application app);

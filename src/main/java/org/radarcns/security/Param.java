@@ -16,86 +16,46 @@ package org.radarcns.security;
  * limitations under the License.
  */
 
+import java.util.regex.Pattern;
+
 /**
  * Checks if parameters are valid or not matching again REGEXs.
  */
 public class Param {
-
-    public static final String SUBJECT = "subject";
-    public static final String SOURCE = "source";
+    private static final Pattern IS_ALPHANUMERIC_SPECIAL = Pattern.compile(
+            "^[a-zA-Z0-9_./:#@-]+$");
 
     public static boolean isNullOrEmpty(String input) {
         return input == null || input.trim().isEmpty();
     }
 
-    public static boolean isNumeric(String input) {
-        return !isNullOrEmpty(input) && input.matches("\\d+");
-    }
-
-    public static boolean isAlpha(String input) {
-        return !isNullOrEmpty(input) && input.matches("[a-zA-Z]+");
-    }
-
-    public static boolean isAlphaNumeric(String input) {
-        return !isNullOrEmpty(input) && input.matches("^[a-zA-Z0-9]*$");
-    }
-
-    public static boolean isMacAddress(String input) {
-        return !isNullOrEmpty(input) && input.matches("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$");
-    }
-
     public static boolean isAlphaNumericAndSpecials(String input) {
-        return !isNullOrEmpty(input) && input.matches("^[a-zA-Z0-9-_./:#@-]*$");
-    }
-
-    public static boolean isUser(String input) {
-        return isAlphaNumericAndSpecials(input);
-    }
-
-    public static boolean isSource(String input) {
-        return isAlphaNumericAndSpecials(input);
+        return input != null && IS_ALPHANUMERIC_SPECIAL.matcher(input).matches();
     }
 
     /**
      * Given a userID and a sourceID, it checks if they are valid input or not.
      **/
     public static void isValidInput(String user, String source) {
-        if (!(isUser(user) && isSource(source))) {
-            throw new IllegalArgumentException("Parameters do not respect REGEXs");
-        }
+        isValidSubject(user);
+        isValidSource(source);
     }
 
     /**
      * Given a subjectID, it checks if they are valid input or not.
      **/
     public static void isValidSubject(String user) {
-        validOrThrow(user, SUBJECT);
+        if (!isAlphaNumericAndSpecials(user)) {
+            throw new IllegalArgumentException("SUBJECT " + user + " is not alphanumeric");
+        }
     }
 
     /**
      * Given a sourceID, it checks if they are valid input or not.
      **/
     public static void isValidSource(String source) {
-        validOrThrow(source, SOURCE);
-    }
-
-    /**
-     * Checks against the REGEX whether the input parameter is valid or not.
-     **/
-    public static void validOrThrow(String value, String param) throws IllegalArgumentException {
-        boolean test;
-
-        switch (param) {
-            case SUBJECT:      test = isUser(value);
-                            break;
-            case SOURCE:    test = isSource(value);
-                            break;
-            default: throw new UnsupportedOperationException(param + " is not supported yet.");
-        }
-
-        if (!test) {
-            throw new IllegalArgumentException(param + "parameter does not respect REGEXs");
+        if (!isAlphaNumericAndSpecials(source)) {
+            throw new IllegalArgumentException("SOURCE " + source + " is not alphanumeric");
         }
     }
-
 }

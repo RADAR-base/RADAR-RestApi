@@ -17,15 +17,16 @@ package org.radarcns.dao;
  */
 
 import com.mongodb.MongoClient;
-import java.net.ConnectException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.subject.Cohort;
 import org.radarcns.avro.restapi.subject.Subject;
-import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.listener.MongoDbContextListener;
+
+import javax.servlet.ServletContext;
+import java.net.ConnectException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Data Access Object for user management.
@@ -45,7 +46,7 @@ public class SubjectDataAccessObject {
      * @see {@link Subject}
      */
     public static Cohort getAllSubjects(ServletContext context) throws ConnectException {
-        return getAllSubjects(MongoHelper.getClient(context));
+        return getAllSubjects(MongoDbContextListener.getClient(context));
     }
 
     /**
@@ -55,16 +56,15 @@ public class SubjectDataAccessObject {
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link Subject}
+     * @see Subject
      */
     public static Cohort getAllSubjects(MongoClient client) throws ConnectException {
-
-        List<Subject> patients = new LinkedList<>();
-
         Set<String> subjects = new HashSet<>(
                 SensorDataAccessObject.getInstance().getAllSubject(client));
 
         subjects.addAll(AndroidAppDataAccessObject.getInstance().findAllUser(client));
+
+        List<Subject> patients = new ArrayList<>(subjects.size());
 
         for (String user : subjects) {
             patients.add(SourceDataAccessObject.findAllSourcesByUser(user, client));
@@ -82,11 +82,11 @@ public class SubjectDataAccessObject {
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link Subject}
+     * @see Subject
      */
     public static Subject getSubject(String subject, ServletContext context)
             throws ConnectException {
-        return getSubject(subject, MongoHelper.getClient(context));
+        return getSubject(subject, MongoDbContextListener.getClient(context));
     }
 
     /**
@@ -129,7 +129,7 @@ public class SubjectDataAccessObject {
      * @throws ConnectException if the connection with MongoDb cannot be established
      */
     public static boolean exist(String subject, ServletContext context) throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
+        MongoClient client = MongoDbContextListener.getClient(context);
 
         return exist(subject, client);
     }

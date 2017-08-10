@@ -46,7 +46,7 @@ public class SourceCatalogContextListener implements ServletContextListener {
         try {
             SourceCatalog.getInstance();
         } catch (Exception exec) {
-            LOGGER.error("Source Catalog cannot be load. Check the log for more information.",
+            LOGGER.error("Source Catalog cannot be loaded. Check the log for more information.",
                     exec);
             throw new ExceptionInInitializerError(exec);
         }

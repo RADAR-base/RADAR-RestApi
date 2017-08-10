@@ -33,45 +33,6 @@ public class ParamTest {
     }
 
     @Test
-    public void isNumericTest() {
-        assertEquals(false, Param.isNumeric(null));
-        assertEquals(false, Param.isNumeric(""));
-        assertEquals(false, Param.isNumeric("test"));
-        assertEquals(true, Param.isNumeric("1"));
-        assertEquals(false, Param.isNumeric("test1"));
-    }
-
-    @Test
-    public void isAlphaTest() {
-        assertEquals(false, Param.isAlpha(null));
-        assertEquals(false, Param.isAlpha(""));
-        assertEquals(true, Param.isAlpha("test"));
-        assertEquals(false, Param.isAlpha("1"));
-        assertEquals(false, Param.isAlpha("test1"));
-    }
-
-    @Test
-    public void isAlphaNumericTest() {
-        assertEquals(false, Param.isAlphaNumeric(null));
-        assertEquals(false, Param.isAlphaNumeric(""));
-        assertEquals(true, Param.isAlphaNumeric("test"));
-        assertEquals(true, Param.isAlphaNumeric("1"));
-        assertEquals(true, Param.isAlphaNumeric("test1"));
-    }
-
-    @Test
-    public void isMacAddressTest() {
-        assertEquals(false, Param.isMacAddress(null));
-        assertEquals(false, Param.isMacAddress(""));
-        assertEquals(false, Param.isMacAddress("test"));
-        assertEquals(false, Param.isMacAddress("1"));
-        assertEquals(false, Param.isMacAddress(" 01:23:45:67:89:ab"));
-        assertEquals(false, Param.isMacAddress(" 01:23:45:67:89:abb"));
-        assertEquals(false, Param.isMacAddress("01:23:45:67:89:abb"));
-        assertEquals(true, Param.isMacAddress("01:23:45:67:89:ab"));
-    }
-
-    @Test
     public void isAlphaNumericAndSpecialsTest() {
         assertEquals(false, Param.isAlphaNumericAndSpecials(null));
         assertEquals(false, Param.isAlphaNumericAndSpecials(""));
@@ -82,26 +43,6 @@ public class ParamTest {
         assertEquals(true, Param.isAlphaNumericAndSpecials("SourceID_1"));
         assertEquals(true, Param.isAlphaNumericAndSpecials("SourceID#1"));
         assertEquals(true, Param.isAlphaNumericAndSpecials("SourceID@1"));
-    }
-
-    @Test
-    public void isUserTest() {
-        assertEquals(false, Param.isUser(null));
-        assertEquals(false, Param.isUser(""));
-        assertEquals(true, Param.isUser("UserID_1"));
-        assertEquals(true, Param.isUser("UserID_1"));
-        assertEquals(true, Param.isUser("UserID#1"));
-        assertEquals(true, Param.isUser("UserID@1"));
-    }
-
-    @Test
-    public void isSourceTest() {
-        assertEquals(false, Param.isSource(null));
-        assertEquals(false, Param.isSource(""));
-        assertEquals(true, Param.isSource("UserID_1"));
-        assertEquals(true, Param.isSource("UserID_1"));
-        assertEquals(true, Param.isSource("UserID#1"));
-        assertEquals(true, Param.isSource("UserID@1"));
     }
 
     @Test

@@ -17,14 +17,6 @@ package org.radarcns.dao;
  */
 
 import com.mongodb.MongoClient;
-import java.net.ConnectException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
@@ -38,10 +30,20 @@ import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoSensor;
+import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.source.SourceCatalog;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletContext;
+import java.net.ConnectException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Generic Data Accesss Object database independent.
@@ -111,13 +113,13 @@ public class SensorDataAccessObject {
     public Dataset getLastReceivedSample(String subject, String source, DescriptiveStatistic stat,
             TimeFrame timeFrame, SensorType sensorType, ServletContext context)
             throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
+        MongoClient client = MongoDbContextListener.getClient(context);
 
         Header header = getHeader(subject, source, sensorType, stat,
                 timeFrame, client);
 
         if (header == null) {
-            return new Dataset(null, new LinkedList<>());
+            return new Dataset(null, Collections.emptyList());
         }
 
         MongoSensor sensorDao = hooks.get(sensorType);
@@ -144,13 +146,13 @@ public class SensorDataAccessObject {
     public Dataset getSamples(String subject, String source, DescriptiveStatistic stat,
             TimeFrame timeFrame, SensorType sensorType, ServletContext context)
             throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
+        MongoClient client = MongoDbContextListener.getClient(context);
 
         Header header = getHeader(subject, source, sensorType, stat,
                 timeFrame, client);
 
         if (header == null) {
-            return new Dataset(null, new LinkedList<>());
+            return new Dataset(null, Collections.emptyList());
         }
 
         MongoSensor sensorDao = hooks.get(sensorType);
@@ -180,13 +182,13 @@ public class SensorDataAccessObject {
     public Dataset getSamples(String subject, String source,
             DescriptiveStatistic stat, TimeFrame timeFrame, Long start, Long end,
             SensorType sensorType, ServletContext context) throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
+        MongoClient client = MongoDbContextListener.getClient(context);
 
         Header header = getHeader(subject, source, sensorType, stat,
                 timeFrame, client);
 
         if (header == null) {
-            return new Dataset(null, new LinkedList<>());
+            return new Dataset(null, Collections.emptyList());
         }
 
         MongoSensor sensorDao = hooks.get(sensorType);
@@ -243,8 +245,8 @@ public class SensorDataAccessObject {
      * @return a {@code Set<Source>} containing all {@link Source} used by the given {@code subject}
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link Subject}
-     * @see {@link Source}
+     * @see Subject
+     * @see Source
      */
     public Set<Source> getAllSources(String subject, MongoClient client)
             throws ConnectException {
@@ -269,17 +271,15 @@ public class SensorDataAccessObject {
      * @see SourceType
      */
     public SourceType getSourceType(String source, MongoClient client) throws ConnectException {
-        SourceType type =  null;
-
         for (MongoSensor mongoSensor : hooks.values()) {
-            type = mongoSensor.findSourceType(source, client);
+            SourceType type = mongoSensor.findSourceType(source, client);
 
             if (type != null) {
                 return type;
             }
         }
 
-        return type;
+        return null;
     }
 
     /**
@@ -355,7 +355,7 @@ public class SensorDataAccessObject {
     }
 
     /**
-     * Returns a {@link Header} that can be used to constract a {@link Dataset}.
+     * Returns a {@link Header} that can be used to construct a {@link Dataset}.
      *
      * @param subject is the subjectID
      * @param source is the sourceID

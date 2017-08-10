@@ -25,6 +25,7 @@ import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceSpecification;
 import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.source.SourceCatalog;
 
 /**
@@ -47,9 +48,7 @@ public class Monitors {
         }
     }
 
-    /**
-     * Static initializer.
-     */
+    // Static intializer.
     static {
         INSTANCE = new Monitors(SourceCatalog.getInstance());
     }
@@ -73,11 +72,11 @@ public class Monitors {
      * @return {@code SourceDefinition} representing a source source
      * @throws ConnectException if the connection with MongoDb is faulty
      *
-     * @see {@link Source}
+     * @see Source
      */
     public Source getState(String subject, String source, SourceType sourceType,
             ServletContext context) throws ConnectException {
-        return getState(subject, source, sourceType, MongoHelper.getClient(context));
+        return getState(subject, source, sourceType, MongoDbContextListener.getClient(context));
     }
 
     /**

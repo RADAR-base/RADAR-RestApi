@@ -16,6 +16,33 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import org.radarcns.avro.restapi.dataset.Dataset;
+import org.radarcns.avro.restapi.header.DescriptiveStatistic;
+import org.radarcns.avro.restapi.header.TimeFrame;
+import org.radarcns.avro.restapi.sensor.SensorType;
+import org.radarcns.dao.SensorDataAccessObject;
+import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.security.Param;
+import org.radarcns.webapp.util.ResponseHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.net.ConnectException;
+import java.util.Collections;
+
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
@@ -26,33 +53,6 @@ import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.START;
 import static org.radarcns.webapp.util.Parameter.STAT;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import java.net.ConnectException;
-import java.util.LinkedList;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.dao.SubjectDataAccessObject;
-import org.radarcns.security.Param;
-import org.radarcns.webapp.util.ResponseHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Sensor web-app. Function set to access all data data.
@@ -147,7 +147,7 @@ public class SensorEndPoint {
             DescriptiveStatistic stat, TimeFrame interval) throws ConnectException {
         Param.isValidInput(subject, source);
 
-        Dataset dataset = new Dataset(null, new LinkedList<Item>());
+        Dataset dataset = new Dataset(null, Collections.emptyList());
 
         if (SubjectDataAccessObject.exist(subject, context)) {
             dataset = SensorDataAccessObject.getInstance()
@@ -243,7 +243,7 @@ public class SensorEndPoint {
             TimeFrame interval, SensorType sensor) throws ConnectException {
         Param.isValidInput(subject, source);
 
-        Dataset dataset = new Dataset(null, new LinkedList<Item>());
+        Dataset dataset = new Dataset(null, Collections.emptyList());
 
         if (SubjectDataAccessObject.exist(subject, context)) {
             dataset = SensorDataAccessObject.getInstance().getSamples(subject,
@@ -345,7 +345,7 @@ public class SensorEndPoint {
             long end) throws ConnectException {
         Param.isValidInput(subject, source);
 
-        Dataset dataset = new Dataset(null, new LinkedList<>());
+        Dataset dataset = new Dataset(null, Collections.emptyList());
 
         if (SubjectDataAccessObject.exist(subject, context)) {
             dataset = SensorDataAccessObject.getInstance().getSamples(

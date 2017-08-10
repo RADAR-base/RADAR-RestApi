@@ -16,24 +16,8 @@ package org.radarcns.integration.util;
  * limitations under the License.
  */
 
-import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
-import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
-import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
-import static org.radarcns.dao.mongo.util.MongoHelper.END;
-import static org.radarcns.dao.mongo.util.MongoHelper.START;
-
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -55,6 +39,22 @@ import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.util.RadarConverter;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
+import static org.radarcns.dao.mongo.util.MongoHelper.END;
+import static org.radarcns.dao.mongo.util.MongoHelper.START;
 
 public class Utility {
 
@@ -136,7 +136,7 @@ public class Utility {
                 RadarConverter.getISO8601(docs.get(0).getDate(START)),
                 RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate(END)));
 
-        List<Item> itemList = new LinkedList<>();
+        List<Item> itemList = new ArrayList<>();
         for (Document doc : docs) {
             SpecificRecord record = recordClass.newInstance();
             switch (stat) {

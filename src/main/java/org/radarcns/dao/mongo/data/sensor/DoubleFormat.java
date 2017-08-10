@@ -21,6 +21,8 @@ import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import org.bson.Document;
 import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.data.Quartiles;
@@ -46,10 +48,10 @@ public class DoubleFormat extends MongoSensor {
             Header header) {
         switch (stat) {
             case MEDIAN:
-                return new DoubleSample(((ArrayList<Document>) doc.get(field)).get(1).getDouble(
+                return new DoubleSample(((List<Document>) doc.get(field)).get(1).getDouble(
                         SECOND_QUARTILE));
             case QUARTILES:
-                ArrayList<Document> quartilesList = (ArrayList<Document>) doc.get(field);
+                List<Document> quartilesList = (List<Document>) doc.get(field);
                 return new DoubleSample( new Quartiles(
                     quartilesList.get(0).getDouble(FIRST_QUARTILE),
                     quartilesList.get(1).getDouble(SECOND_QUARTILE),
@@ -61,5 +63,4 @@ public class DoubleFormat extends MongoSensor {
             default: return new DoubleSample(doc.getDouble(field));
         }
     }
-
 }

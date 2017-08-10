@@ -21,6 +21,7 @@ import static org.radarcns.dao.mongo.util.MongoHelper.DESCENDING;
 import static org.radarcns.dao.mongo.util.MongoHelper.DEVICE_CATALOG;
 import static org.radarcns.dao.mongo.util.MongoHelper.END;
 import static org.radarcns.dao.mongo.util.MongoHelper.ID;
+import static org.radarcns.dao.mongo.util.MongoHelper.SOURCE;
 import static org.radarcns.dao.mongo.util.MongoHelper.SOURCE_TYPE;
 import static org.radarcns.dao.mongo.util.MongoHelper.START;
 
@@ -58,19 +59,18 @@ public abstract class MongoDataAccess {
     public Collection<String> findAllUser(MongoClient client) throws ConnectException {
         Set<String> set = new HashSet<>();
 
-        MongoCursor<String> cursor;
         for (String collection : getCollectionNames()) {
-            cursor = MongoHelper.findAllUser(MongoHelper.getCollection(client, collection));
+            try (MongoCursor<String> cursor = MongoHelper.findAllUser(MongoHelper.getCollection
+                    (client, collection))) {
 
-            if (!cursor.hasNext()) {
-                LOGGER.debug("Empty cursor for collection {}", collection);
+                if (!cursor.hasNext()) {
+                    LOGGER.debug("Empty cursor for collection {}", collection);
+                }
+
+                while (cursor.hasNext()) {
+                    set.add(cursor.next());
+                }
             }
-
-            while (cursor.hasNext()) {
-                set.add(cursor.next());
-            }
-
-            cursor.close();
         }
 
         return set;
@@ -88,21 +88,20 @@ public abstract class MongoDataAccess {
             throws ConnectException {
         Set<Source> list = new HashSet<>();
 
-        MongoCursor<String> cursor;
         for (String collection : getCollectionNames()) {
-            cursor = MongoHelper.findAllSourceByUser(subject,
-                    MongoHelper.getCollection(client, collection));
+            try (MongoCursor<String> cursor = MongoHelper.findAllSourceByUser(subject,
+                    MongoHelper.getCollection(client, collection))) {
 
-            if (!cursor.hasNext()) {
-                LOGGER.debug("Empty cursor");
+                if (!cursor.hasNext()) {
+                    LOGGER.debug("Empty cursor");
+                }
+
+                while (cursor.hasNext()) {
+                    list.add(new Source(cursor.next(), getSourceType(collection), null));
+                }
             }
-
-            while (cursor.hasNext()) {
-                list.add(new Source(cursor.next(), getSourceType(collection), null));
-            }
-
-            cursor.close();
         }
+
         return list;
     }
 
@@ -116,22 +115,18 @@ public abstract class MongoDataAccess {
      */
     public SourceType findSourceType(String source, MongoClient client)
             throws ConnectException {
-        SourceType type;
 
-        MongoCursor<Document> cursor;
         for (String collection : getCollectionNames()) {
+            try (MongoCursor<Document> cursor = MongoHelper.findSingleDocument(SOURCE, source,
+                MongoHelper.getCollection(client, collection))){
 
-            cursor = MongoHelper.findDocumentBySource(source, null, 0, 1,
-                MongoHelper.getCollection(client, collection));
-
-            if (cursor.hasNext()) {
-                type = getSourceType(collection);
-                if (type != null) {
-                    return type;
+                if (cursor.hasNext()) {
+                    SourceType type = getSourceType(collection);
+                    if (type != null) {
+                        return type;
+                    }
                 }
             }
-
-            cursor.close();
         }
 
         return null;
@@ -227,24 +222,18 @@ public abstract class MongoDataAccess {
      */
     public static SourceType getSourceType(String source, MongoClient client)
         throws ConnectException {
-        SourceType type = null;
 
-        MongoCursor<Document> cursor = MongoHelper.findDocumentById(source, null,
-                0, 1, MongoHelper.getCollection(client, DEVICE_CATALOG));
+        try (MongoCursor<Document> cursor = MongoHelper.findSingleDocument(ID, source,
+                MongoHelper.getCollection(client, DEVICE_CATALOG))) {
 
-        if (!cursor.hasNext()) {
-            LOGGER.debug("Empty cursor");
+            if (!cursor.hasNext()) {
+                LOGGER.debug("Empty cursor");
+                return null;
+            }
+
+            Document doc = cursor.next();
+            return RadarConverter.getSourceType(doc.getString(SOURCE_TYPE));
         }
-
-        Document doc = cursor.tryNext();
-
-        if (doc != null) {
-            type = RadarConverter.getSourceType(doc.getString(SOURCE_TYPE));
-        }
-
-        cursor.close();
-
-        return type;
     }
 
     /**

@@ -19,10 +19,13 @@ package org.radarcns.dao.mongo.util;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.bson.Document;
@@ -221,13 +224,13 @@ public abstract class MongoSensor extends MongoDataAccess {
         Date start = null;
         Date end = null;
 
-        LinkedList<Item> list = new LinkedList<>();
-
         if (!cursor.hasNext()) {
             LOGGER.debug("Empty cursor");
             cursor.close();
-            return new Dataset(null, list);
+            return new Dataset(null, Collections.emptyList());
         }
+
+        List<Item> list = new ArrayList<>();
 
         while (cursor.hasNext()) {
 
@@ -241,7 +244,7 @@ public abstract class MongoSensor extends MongoDataAccess {
             Item item = new Item(docToAvro(doc, field, stat, header),
                     RadarConverter.getISO8601(doc.getDate(MongoHelper.START)));
 
-            list.addLast(item);
+            list.add(item);
         }
 
         cursor.close();

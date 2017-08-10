@@ -201,8 +201,9 @@ public class RadarConverter {
     public static String getPrettyJson(SpecificRecord record) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Object json = mapper.readValue(record.toString(), Object.class);
-        String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-        return  indented;
+        return mapper
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(json);
     }
 
     /**

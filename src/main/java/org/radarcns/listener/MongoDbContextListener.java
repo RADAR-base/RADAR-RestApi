@@ -24,6 +24,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+
+import com.mongodb.ServerAddress;
 import org.bson.Document;
 import org.radarcns.config.Properties;
 import org.slf4j.Logger;
@@ -35,44 +37,28 @@ import org.slf4j.LoggerFactory;
  */
 @WebListener
 public class MongoDbContextListener implements ServletContextListener {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDbContextListener.class);
-
-    public static final String MONGO_CLIENT = "MONGO_CLIENT";
+    private static final String MONGO_CLIENT = "MONGO_CLIENT";
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        MongoClient mongo = (MongoClient) sce.getServletContext().getAttribute(MONGO_CLIENT);
+        ServletContext context = sce.getServletContext();
+        MongoClient mongo = (MongoClient) context.getAttribute(MONGO_CLIENT);
 
         if (mongo != null) {
             mongo.close();
         }
+
+        context.removeAttribute(MONGO_CLIENT);
     }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        MongoClient mongoClient = null;
+        MongoClient mongoClient = createClient();
 
-        try {
-            List<MongoCredential> credentials = Properties.getApiConfig().getMongoDbCredentials();
-
-            mongoClient = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),credentials);
-
-            if (checkMongoConnection(mongoClient)) {
-                sce.getServletContext().setAttribute(MONGO_CLIENT, mongoClient);
-
-                LOGGER.info("MongoDB connection established");
-            }
-        } catch (com.mongodb.MongoSocketOpenException exec) {
-            if (mongoClient != null) {
-                mongoClient.close();
-            }
-
-            LOGGER.error(exec.getMessage());
-        } catch (java.lang.ExceptionInInitializerError exec) {
-            LOGGER.error("Mongo Client cannot be initialised since Property cannot be initialised.",
-                    exec);
-            throw new ExceptionInInitializerError(exec);
+        if (checkMongoConnection(mongoClient)) {
+            sce.getServletContext().setAttribute(MONGO_CLIENT, mongoClient);
+            LOGGER.info("MongoDB connection established");
         }
     }
 
@@ -84,91 +70,6 @@ public class MongoDbContextListener implements ServletContextListener {
      * @return {@code true} if the connection can be established false otherwise
      */
     public static boolean checkMongoConnection(MongoClient mongoClient) {
-        Boolean flag = true;
-        try {
-            for (MongoCredential user : mongoClient.getCredentialsList()) {
-                mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
-            }
-
-        } catch (Exception exec) {
-            flag = false;
-
-            if (mongoClient != null) {
-                mongoClient.close();
-            }
-
-            LOGGER.error("Error during connection test",exec);
-        }
-
-        LOGGER.info("MongoDB connection is {}",flag.toString());
-
-        return flag;
-    }
-
-    /**
-     * Tries to recover the connection with MongoDB.
-     *
-     * @param context useful to retrieve and store the MongoDb client
-     * @throws ConnectException if the connection cannot be established
-     */
-    public static void recoverOrThrow(ServletContext context) throws ConnectException {
-        LOGGER.warn("Try to reconnect to MongoDB");
-
-        MongoClient mongoClient = null;
-        Boolean flag = true;
-
-        try {
-            List<MongoCredential> credentials = Properties.getApiConfig().getMongoDbCredentials();
-
-            mongoClient = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),credentials);
-
-            try {
-                for (MongoCredential user : credentials) {
-                    mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
-                }
-            } catch (Exception exec) {
-                flag = false;
-
-                if (mongoClient != null) {
-                    mongoClient.close();
-                }
-
-                LOGGER.error("The connection with MongoDb cannot be established", exec);
-            }
-
-            if (flag.booleanValue()) {
-                context.setAttribute(MONGO_CLIENT, mongoClient);
-
-                LOGGER.info("MongoDB connection established");
-            } else {
-                throw new ConnectException("The connection with MongoDb cannot be established");
-            }
-        } catch (com.mongodb.MongoSocketOpenException exec) {
-            if (mongoClient != null) {
-                mongoClient.close();
-            }
-
-            LOGGER.error(exec.getMessage());
-
-            throw new ConnectException("The connection with MongoDb cannot be established");
-        }
-
-        LOGGER.info("MongoDB connection is {}", flag.toString());
-
-    }
-
-    /**
-     * Verifies if the required database can be pinged.
-     *
-     * @param context useful to retrieve and the MongoDb client
-     * @return {@cod true} if the required database can be ping, {@code false} otherwise
-     * @throws ConnectException if the MongoDB client is faulty
-     */
-    public static boolean testConnection(ServletContext context) throws ConnectException {
-        boolean flag = false;
-
-        MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
-
         if (mongoClient == null) {
             return false;
         }
@@ -177,21 +78,35 @@ public class MongoDbContextListener implements ServletContextListener {
             for (MongoCredential user : Properties.getApiConfig().getMongoDbCredentials()) {
                 mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
             }
-
-            flag = true;
-
+            LOGGER.info("MongoDB connection is established");
+            return true;
         } catch (Exception exec) {
-            if (mongoClient != null) {
-                mongoClient.close();
-            }
-
-            context.setAttribute(MONGO_CLIENT, null);
-            LOGGER.error("The connection with MongoDb cannot be established", exec);
+            mongoClient.close();
+            LOGGER.warn("The connection with MongoDb cannot be established", exec);
+            return false;
         }
-
-        LOGGER.debug("MongoDB connection is {}", flag);
-
-        return false;
     }
 
+    public static MongoClient getClient(ServletContext context) throws ConnectException {
+        MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
+
+        if (checkMongoConnection(mongoClient)) {
+            return mongoClient;
+        } else {
+            mongoClient = createClient();
+            if (checkMongoConnection(mongoClient)) {
+                context.setAttribute(MONGO_CLIENT, mongoClient);
+                return mongoClient;
+            } else {
+                throw new ConnectException("The connection with MongoDb cannot be established");
+            }
+        }
+    }
+
+    private static MongoClient createClient() {
+        List<MongoCredential> credentials = Properties.getApiConfig().getMongoDbCredentials();
+        List<ServerAddress> hosts = Properties.getApiConfig().getMongoDbHosts();
+
+        return new MongoClient(hosts, credentials);
+    }
 }

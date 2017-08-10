@@ -74,7 +74,7 @@ public class SourceDefinition {
      * @see SourceSpecification
      */
     public SourceSpecification getSpecification() {
-        Map<String, SensorSpecification> sensors = new HashMap();
+        Map<String, SensorSpecification> sensors = new HashMap<>();
 
         for (SensorType type : specificationMap.keySet()) {
             sensors.put(type.name(), new SensorSpecification(type,

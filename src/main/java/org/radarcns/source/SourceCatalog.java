@@ -43,9 +43,7 @@ public class SourceCatalog {
     /** Singleton instance. **/
     private static final SourceCatalog INSTANCE;
 
-    /**
-     * Static initializer.
-     */
+    // Static initializer.
     static {
         try {
             INSTANCE = new SourceCatalog(Properties.getDeviceCatalog());

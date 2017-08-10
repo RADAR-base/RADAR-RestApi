@@ -64,7 +64,7 @@ public class ResponseHandler {
 
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
-        LOGGER.debug("{}", json.toString());
+        LOGGER.debug("{}", json);
         LOGGER.debug("[{}] {} records", status.getStatusCode(), size);
 
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
@@ -95,8 +95,8 @@ public class ResponseHandler {
             default: return Response.serverError().build();
         }
 
-        LOGGER.debug("{}", json.toString());
-        LOGGER.debug("{}", obj.toString());
+        LOGGER.debug("{}", json);
+        LOGGER.debug("{}", obj);
 
         return Response.status(status.getStatusCode()).entity(json).build();
     }
@@ -117,7 +117,7 @@ public class ResponseHandler {
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
         if (json == null) {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+            LOGGER.debug("[{}] null", status.getStatusCode());
             return Response.status(status.getStatusCode()).entity("Internal error!").build();
         } else {
             LOGGER.debug("[{}] {}", status.getStatusCode(), json);

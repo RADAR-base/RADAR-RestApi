@@ -28,6 +28,7 @@ import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.mongo.util.MongoDataAccess;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.monitor.Monitors;
 
 /**
@@ -47,7 +48,7 @@ public class SourceDataAccessObject {
      */
     public static SourceType getSourceType(String source, ServletContext context)
         throws ConnectException {
-        return getSourceType(source, MongoHelper.getClient(context));
+        return getSourceType(source, MongoDbContextListener.getClient(context));
     }
 
     /**
@@ -87,11 +88,11 @@ public class SourceDataAccessObject {
      * @return a {@code Subject} object
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link Subject}
+     * @see Subject
      */
     public static Subject findAllSourcesByUser(String subject, ServletContext context)
         throws ConnectException {
-        return findAllSourcesByUser(subject, MongoHelper.getClient(context));
+        return findAllSourcesByUser(subject, MongoDbContextListener.getClient(context));
     }
 
     /**
@@ -102,21 +103,19 @@ public class SourceDataAccessObject {
      * @return a {@code Subject} object
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link Subject}
+     * @see Subject
      */
     public static Subject findAllSourcesByUser(String subject, MongoClient client)
             throws ConnectException {
         Set<Source> sources = new HashSet<>();
 
-        sources.addAll(SensorDataAccessObject.getInstance().getAllSources(
-                subject, client));
-        sources.addAll(AndroidAppDataAccessObject.getInstance().findAllSourcesBySubject(
-                subject, client));
+        sources.addAll(SensorDataAccessObject.getInstance()
+                .getAllSources(subject, client));
+        sources.addAll(AndroidAppDataAccessObject.getInstance()
+                .findAllSourcesBySubject(subject, client));
 
         Monitors monitor = Monitors.getInstance();
-
         List<Source> updatedSources = new ArrayList<>(sources.size());
-
         for (Source source : sources) {
             try {
                 updatedSources.add(monitor.getState(subject, source.getId(), source.getType(),
@@ -130,5 +129,4 @@ public class SourceDataAccessObject {
                 SensorDataAccessObject.getInstance().getEffectiveTimeFrame(subject, client),
                 updatedSources);
     }
-
 }
