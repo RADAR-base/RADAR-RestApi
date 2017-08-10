@@ -87,6 +87,12 @@ public class MongoDbContextListener implements ServletContextListener {
         }
     }
 
+    /**
+     * Get a MongoClient. This will recreate it at most once if needed.
+     * @param context servlet context
+     * @return connected MongoClient
+     * @throws ConnectException if the MongoClient could not connect to the database
+     */
     public static MongoClient getClient(ServletContext context) throws ConnectException {
         MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
 

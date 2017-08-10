@@ -17,16 +17,16 @@ package org.radarcns.monitor;
  */
 
 import com.mongodb.MongoClient;
-import java.net.ConnectException;
-import java.util.HashMap;
-import javax.servlet.ServletContext;
 import org.radarcns.avro.restapi.sensor.SensorSpecification;
 import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceSpecification;
 import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.source.SourceCatalog;
+
+import javax.servlet.ServletContext;
+import java.net.ConnectException;
+import java.util.HashMap;
 
 /**
  * Generic Data Accesss Object database independent.

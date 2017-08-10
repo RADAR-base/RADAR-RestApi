@@ -117,9 +117,7 @@ public class SubjectEndPoint {
      * Actual implementation of AVRO and JSON getAllSubjects.
      **/
     private Cohort getAllSubjectsWorker() throws ConnectException {
-        Cohort cohort = SubjectDataAccessObject.getAllSubjects(context);
-
-        return cohort;
+        return SubjectDataAccessObject.getAllSubjects(context);
     }
 
     //--------------------------------------------------------------------------------------------//

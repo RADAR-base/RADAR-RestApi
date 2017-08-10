@@ -16,13 +16,6 @@ package org.radarcns.dao.mongo.data.sensor;
  * limitations under the License.
  */
 
-import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
-import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
-import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bson.Document;
 import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.data.Quartiles;
@@ -31,6 +24,12 @@ import org.radarcns.avro.restapi.header.Header;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.mongo.util.MongoSensor;
 import org.radarcns.util.RadarConverter;
+
+import java.util.List;
+
+import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
+import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
+import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
 
 /**
  * Data Access Object for sensors which are represented by a single double value.
@@ -43,6 +42,7 @@ public class DoubleFormat extends MongoSensor {
         super(DataFormat.DOUBLE_FORMAT, sensorType);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat,
             Header header) {

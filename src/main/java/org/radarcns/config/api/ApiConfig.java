@@ -16,17 +16,16 @@ package org.radarcns.config.api;
  * limitations under the License.
  */
 
-import static java.util.Collections.singletonList;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Yaml deserializer.

@@ -60,8 +60,8 @@ public abstract class MongoDataAccess {
         Set<String> set = new HashSet<>();
 
         for (String collection : getCollectionNames()) {
-            try (MongoCursor<String> cursor = MongoHelper.findAllUser(MongoHelper.getCollection
-                    (client, collection))) {
+            try (MongoCursor<String> cursor = MongoHelper.findAllUser(
+                    MongoHelper.getCollection(client, collection))) {
 
                 if (!cursor.hasNext()) {
                     LOGGER.debug("Empty cursor for collection {}", collection);
@@ -118,7 +118,7 @@ public abstract class MongoDataAccess {
 
         for (String collection : getCollectionNames()) {
             try (MongoCursor<Document> cursor = MongoHelper.findSingleDocument(SOURCE, source,
-                MongoHelper.getCollection(client, collection))){
+                MongoHelper.getCollection(client, collection))) {
 
                 if (cursor.hasNext()) {
                     SourceType type = getSourceType(collection);
