@@ -1,5 +1,3 @@
-package org.radarcns.webapp.util;
-
 /*
  *  Copyright 2017 King's College London and The Hyve
  *
@@ -16,12 +14,14 @@ package org.radarcns.webapp.util;
  * limitations under the License.
  */
 
+package org.radarcns.webapp.util;
+
 /**
  * Static class listing of constants used to created End Point base path.
  */
 public class BasePath {
 
-    public static final String ANDROID = "android";
+    public static final String MONITOR = "monitor";
     public static final String AVRO = "avro";
     public static final String DATA = "data";
     public static final String GET_ALL_SOURCES = "getAllSources";

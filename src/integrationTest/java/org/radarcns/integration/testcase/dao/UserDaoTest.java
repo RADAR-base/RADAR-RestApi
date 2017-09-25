@@ -99,7 +99,7 @@ public class UserDaoTest {
         MongoClient client = Utility.getMongoClient();
 
         // SUBJECT
-        // SOURCE -> ANDROID
+        // SOURCE -> MONITOR
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE));
 

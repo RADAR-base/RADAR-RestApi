@@ -60,7 +60,7 @@ public class Param {
      * Given a userID and a sourceID, it checks if they are valid input or not.
      **/
     public static void isValidInput(String user, String source) {
-        if (!(isUser(user) && isSource(source))) {
+        if (!isUser(user) || !isSource(source)) {
             throw new IllegalArgumentException("Parameters do not respect REGEXs");
         }
     }

@@ -1,5 +1,3 @@
-package org.radarcns.webapp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,26 +14,12 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
-import static org.radarcns.webapp.util.BasePath.ANDROID;
-import static org.radarcns.webapp.util.BasePath.AVRO;
-import static org.radarcns.webapp.util.BasePath.STATUS;
-import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+package org.radarcns.webapp;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.net.ConnectException;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
@@ -44,11 +28,28 @@ import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.net.ConnectException;
+
+import static org.radarcns.webapp.util.BasePath.MONITOR;
+import static org.radarcns.webapp.util.BasePath.STATUS;
+import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.util.ResponseHandler.AVRO_NOT_PREFERRED_MEDIA_TYPE;
+import static org.radarcns.webapp.util.ResponseHandler.JSON_PREFERRED_MEDIA_TYPE;
+
 /**
  * Android application status web-app. Function set to access Android app status information.
  */
 @Api
-@Path("/" + ANDROID)
+@Path("/" + MONITOR)
 public class AppStatusEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppStatusEndPoint.class);
@@ -63,7 +64,7 @@ public class AppStatusEndPoint {
      * JSON function that returns the status app of the given subject.
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(JSON_PREFERRED_MEDIA_TYPE)
     @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return an Applications status",
@@ -92,8 +93,8 @@ public class AppStatusEndPoint {
      * AVRO function that returns the status app of the given subject.
      */
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/" + AVRO + "/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Produces(AVRO_NOT_PREFERRED_MEDIA_TYPE)
+    @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")

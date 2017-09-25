@@ -1,5 +1,3 @@
-package org.radarcns.webapp.util;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.webapp.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.webapp.util;
 
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
@@ -39,6 +39,9 @@ import org.slf4j.LoggerFactory;
  * Generic response handler.
  */
 public class ResponseHandler {
+    public static final String AVRO_MEDIA_TYPE = "application/vnd.avro+binary";
+    public static final String AVRO_NOT_PREFERRED_MEDIA_TYPE = AVRO_MEDIA_TYPE + ";qs=0.5";
+    public static final String JSON_PREFERRED_MEDIA_TYPE = MediaType.APPLICATION_JSON + ";qs=1.0";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseHandler.class);
 
@@ -117,7 +120,7 @@ public class ResponseHandler {
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
         if (json == null) {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+            LOGGER.debug("[{}] JSON is null", status.getStatusCode());
             return Response.status(status.getStatusCode()).entity("Internal error!").build();
         } else {
             LOGGER.debug("[{}] {}", status.getStatusCode(), json);
@@ -139,7 +142,7 @@ public class ResponseHandler {
         switch (status) {
             case OK:
                 byte[] array = AvroConverter.avroToAvroByte(obj);
-                return Response.ok(array, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
+                return Response.ok(array, AVRO_MEDIA_TYPE).build();
             case NO_CONTENT: return Response.noContent().build();
             default: return Response.serverError().build();
         }

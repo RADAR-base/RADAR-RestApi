@@ -1,5 +1,3 @@
-package org.radarcns.integration.testcase.webapp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,11 +14,13 @@ package org.radarcns.integration.testcase.webapp;
  * limitations under the License.
  */
 
+package org.radarcns.integration.testcase.webapp;
+
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-import static org.radarcns.webapp.util.BasePath.ANDROID;
+import static org.radarcns.webapp.util.BasePath.MONITOR;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.STATUS;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
@@ -64,10 +64,7 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest204() throws IOException {
-        String path = ANDROID + "/" + AVRO + "/" + STATUS + "/{" + SUBJECT_ID
-                + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
-        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
+        String path = MONITOR + "/" + STATUS + "/" + SUBJECT + "/" + SOURCE;
 
         LOGGER.info(path);
 
@@ -96,10 +93,8 @@ public class AppStatusEndPointTest {
 
         Application expected = Utility.convertDocToApplication(map);
 
-        String path = ANDROID + "/" + AVRO + "/" + STATUS + "/{"
-                + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT.concat("1"));
-        path = path.replace("{" + SOURCE_ID + "}", SOURCE.concat("1"));
+        String path = MONITOR + "/" + STATUS + "/"
+                + SUBJECT + "/" + SOURCE;
 
         LOGGER.info(path);
 
@@ -120,8 +115,9 @@ public class AppStatusEndPointTest {
         dropAndClose(Utility.getMongoClient());
     }
 
-    /** Drops all used collections to bring the database back to the initial state, and close the
-     *      database connection.
+    /**
+     * Drops all used collections to bring the database back to the initial state, and close the
+     * database connection.
      **/
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
