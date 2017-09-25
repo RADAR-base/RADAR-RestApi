@@ -19,7 +19,8 @@ To deploy the war do:
 
 By default, log messages are redirected to the `STDOUT`.
 
-The api documentation is located at `<your-server-address>:<port>/radar/api/swagger.json`
+Interactive API documentation is located at <http://localhost:8080/radar/swagger> and the technical
+API is located at <http://localhost:8080/radar/api/swagger.json>.
 
 ## Dev Environment
 Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json) to see documentation of dev deploy instance.
