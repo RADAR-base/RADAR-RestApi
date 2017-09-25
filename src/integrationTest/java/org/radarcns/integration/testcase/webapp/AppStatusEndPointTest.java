@@ -18,6 +18,8 @@ package org.radarcns.integration.testcase.webapp;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
@@ -41,6 +43,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
@@ -48,6 +51,7 @@ import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 import static org.radarcns.webapp.util.BasePath.MONITOR;
 import static org.radarcns.webapp.util.BasePath.STATUS;
+import static org.radarcns.webapp.util.ResponseHandler.AVRO_MEDIA_TYPE;
 
 public class AppStatusEndPointTest {
 
@@ -85,24 +89,31 @@ public class AppStatusEndPointTest {
         collection.insertMany(list);
 
         Map<String, Document> map = RandomInput.getRandomApplicationStatus(
-                SUBJECT.concat("1"), SOURCE.concat("1"));
+                SUBJECT + "1", SOURCE + "1");
 
         Utility.insertMixedDocs(client, map);
 
         Application expected = Utility.convertDocToApplication(map);
 
-        String path = MONITOR + "/" + STATUS + "/"
-                + SUBJECT + "/" + SOURCE;
+        String path = MONITOR + "/" + STATUS + "/" + SUBJECT + "1/" + SOURCE + "1";
 
         LOGGER.info(path);
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
-        assertEquals(Status.OK.getStatusCode(), response.code());
+        OkHttpClient httpClient = new OkHttpClient();
 
-        if (response.code() == Status.OK.getStatusCode()) {
-            Application actual = AvroConverter.avroByteToAvro(response.body().bytes(),
-                    Application.getClassSchema());
-            assertEquals(expected, actual);
+        Request request = new Request.Builder()
+                .header("Accept", AVRO_MEDIA_TYPE)
+                .url(Properties.getApiConfig().getApiUrl() + path)
+                .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            assertEquals(Status.OK.getStatusCode(), response.code());
+
+            if (response.code() == Status.OK.getStatusCode()) {
+                Application actual = AvroConverter.avroByteToAvro(response.body().bytes(),
+                        Application.getClassSchema());
+                assertEquals(expected, actual);
+            }
         }
 
         dropAndClose(client);

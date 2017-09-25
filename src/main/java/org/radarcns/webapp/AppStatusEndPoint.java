@@ -54,8 +54,11 @@ public class AppStatusEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppStatusEndPoint.class);
 
-    @Context private ServletContext context;
-    @Context private HttpServletRequest request;
+    @Context
+    private ServletContext context;
+
+    @Context
+    private HttpServletRequest request;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
