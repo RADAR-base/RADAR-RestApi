@@ -16,23 +16,8 @@
 
 package org.radarcns.integration.testcase.webapp;
 
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-import static org.radarcns.webapp.util.BasePath.MONITOR;
-import static org.radarcns.webapp.util.BasePath.AVRO;
-import static org.radarcns.webapp.util.BasePath.STATUS;
-import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
-
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
@@ -50,6 +35,19 @@ import org.radarcns.integration.util.Utility;
 import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.core.Response.Status;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
+import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.webapp.util.BasePath.MONITOR;
+import static org.radarcns.webapp.util.BasePath.STATUS;
 
 public class AppStatusEndPointTest {
 
