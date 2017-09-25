@@ -68,7 +68,7 @@ public class AppStatusEndPoint {
      */
     @GET
     @Produces(JSON_PREFERRED_MEDIA_TYPE)
-    @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}/" + STATUS)
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")
@@ -97,7 +97,7 @@ public class AppStatusEndPoint {
      */
     @GET
     @Produces(AVRO_NOT_PREFERRED_MEDIA_TYPE)
-    @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}/" + STATUS)
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")

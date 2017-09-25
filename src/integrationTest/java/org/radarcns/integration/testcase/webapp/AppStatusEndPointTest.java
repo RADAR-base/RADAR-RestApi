@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
@@ -66,7 +65,7 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest204() throws IOException {
-        String path = MONITOR + "/" + STATUS + "/" + SUBJECT + "/" + SOURCE;
+        String path = MONITOR + "/" + SUBJECT + "/" + SOURCE + "/" + STATUS;
 
         LOGGER.info(path);
 
@@ -95,7 +94,7 @@ public class AppStatusEndPointTest {
 
         Application expected = Utility.convertDocToApplication(map);
 
-        String path = MONITOR + "/" + STATUS + "/" + SUBJECT + "1/" + SOURCE + "1";
+        String path = MONITOR + "/" + SUBJECT + "1/" + SOURCE + "1/" + STATUS;
 
         LOGGER.info(path);
 
