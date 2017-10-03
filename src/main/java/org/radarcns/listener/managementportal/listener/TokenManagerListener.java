@@ -75,6 +75,7 @@ public class TokenManagerListener implements ServletContextListener {
         } catch (TokenException exc) {
             LOGGER.warn("{} cannot be generated: {}", ACCESS_TOKEN, exc.getMessage());
         }
+
     }
 
     @Override

@@ -33,6 +33,9 @@ public class BasePath {
     public static final String SUBJECT = "subject";
     public static final String STATUS = "status";
     public static final String STATE = "state";
+    public static final String PROJECT = "projects";
+    public static final String SUBJECTS = "subjects";
+
 
     private BasePath() {
         //Static Class
