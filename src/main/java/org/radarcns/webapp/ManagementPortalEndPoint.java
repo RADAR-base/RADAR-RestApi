@@ -57,7 +57,7 @@ public class ManagementPortalEndPoint {
     @Context private HttpServletRequest request;
 
     //--------------------------------------------------------------------------------------------//
-    //                                        ALL SUBJECTS                                        //
+    //                                        SUBJECTS                                            //
     //--------------------------------------------------------------------------------------------//
     /**
      * JSON function that returns all available subject.
@@ -152,11 +152,11 @@ public class ManagementPortalEndPoint {
 
 
     //--------------------------------------------------------------------------------------------//
-    //                                        ALL PROJECTS                                        //
+    //                                       PROJECTS                                             //
     //--------------------------------------------------------------------------------------------//
 
     /**
-     * JSON function that returns all available subject.
+     * JSON function that returns all available projects.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -214,5 +214,4 @@ public class ManagementPortalEndPoint {
             return ResponseHandler.getAvroErrorResponse(request);
         }
     }
-
 }

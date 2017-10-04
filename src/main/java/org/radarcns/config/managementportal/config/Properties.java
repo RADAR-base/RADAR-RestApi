@@ -70,35 +70,6 @@ public final class Properties {
         //Nothing to do
     }
 
-/*    *//**
-     * Loads the API configuration file. First of all, the {@code CONFIG_FOLDER} env variable is
-     *      checked to verify if points a valid config file. If not, the default location for AWS
-     *      and Docker image deployment are checked. In the last instance, the config file is
-     *      searched inside the default projects resources folder.
-     *//*
-    private static Configuration loadApiConfig() throws IOException {
-        Configuration config;
-
-
-        // TODO Load these values from a config file.
-
-        String version = "0.1-alpha";
-        String released = "2017-08-29";
-        String oauthClientId = "radar_redcap_integrator";
-        String oauthClientSecret = "my-secrect_token";
-        URL managementPortalUrl = new URL("https://radar-backend.ddns.net/");
-        String tokenEndPoint = "oauth/token";
-        String projectEndPoint = "api/projects/";
-        String subjectEndPoint = "api/subjects/";
-
-        config = new Configuration(version, released, oauthClientId, oauthClientSecret, managementPortalUrl
-                , tokenEndPoint, projectEndPoint, subjectEndPoint);
-
-
-        return config;
-
-    }*/
-
     /**
      * Loads the API configuration file. First of all, the {@code CONFIG_FOLDER} env variable is
      *      checked to verify if points a valid config file. If not, the default location for AWS
@@ -238,15 +209,4 @@ public final class Properties {
         return CONFIG.getManagementPortalUrl();
     }
 
-    /**
-     * Checks if the provided {@link URL} is using a secure connection and returns it.
-     * @param url {@link URL} to has to be checked
-     * @return the provided {@link URL}
-     */
-    public static URL validateRedcapUrl(URL url) {
-        if (!isSecureConnection(url)) {
-            LOGGER.warn("The provided REDCap instance is not using an encrypted connection.");
-        }
-        return url;
-    }
 }

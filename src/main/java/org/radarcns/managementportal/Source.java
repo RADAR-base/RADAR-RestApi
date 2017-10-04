@@ -31,12 +31,13 @@ import java.io.IOException;
 public class Source {
 
     @JsonProperty("id")
-    private final Integer id;
+    private Integer id;
     @JsonProperty("deviceTypeAndSourceId")
-    private final String typeAndId;
+    private String typeAndId;
     @JsonProperty("assigned")
-    private final Boolean assigned;
+    private Boolean assigned;
 
+    protected Source(){}
 
     protected Source(
             @JsonProperty("id") Integer id,

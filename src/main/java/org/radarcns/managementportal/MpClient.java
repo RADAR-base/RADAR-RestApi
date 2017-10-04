@@ -63,7 +63,7 @@ public class MpClient {
 
         try {
             subjects = getAllSubjects(context);
-            getSubject("5",context);
+            getSubject("1",context);
         } catch (MalformedURLException exc){
             LOGGER.error(exc.getMessage());
         } catch (URISyntaxException exc){
@@ -112,6 +112,7 @@ public class MpClient {
                 allSubjects = Subject.getAllSubjectsFromJson(jsonData);
                 LOGGER.info("Retrieved Subjects from MP.");
                 SUBJECTS_INITIALIZED = true;
+                response.close();
                 return allSubjects;
             }
             LOGGER.info("Subjects is not present");
@@ -123,7 +124,7 @@ public class MpClient {
 
     /**
      * Retrieves a {@link Subject} from the already computed list of subjects using {@link ArrayList<Subject>} entity.
-     * @param subjectId {@link Integer} that has to be searched.
+     * @param subjectId {@link String} that has to be searched.
      * @return {@link Subject} if a subject is found
      */
     public Subject getSubject(String subjectId){
@@ -132,7 +133,7 @@ public class MpClient {
 
             while (elements.hasNext()) {
                 Subject currentSubject = elements.next();
-                if (subjectId.equals(currentSubject.getSubjectId())) {
+                if (subjectId.equals(currentSubject.getLogin())) {
                     return currentSubject;
                 }
             }
@@ -166,12 +167,16 @@ public class MpClient {
         if (SUBJECTS_INITIALIZED)
             return getSubject(subjectId);
 
+        // TODO Use Login instead of Subject ID to get subjects from Management Portal.
+
         Request request = getBuilder(getUrl(Properties.getSubjectEndPoint(), subjectId), context).get().build();
 
         try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
             if (response.isSuccessful()) {
-                Subject subject = Subject.createSubjectFromJson(response.body().string());
+                Subject subject = Subject.getObject(response.body().string());
+                //Subject subject = Subject.createSubjectFromJson(response.body().string());
                 LOGGER.info("Subject : " + subject.getJsonString());
+                response.close();
                 return subject;
             }
             LOGGER.info("Subject is not present");
@@ -182,7 +187,7 @@ public class MpClient {
     }
 
     /**
-     * Retrieves all {@link Subject} from a study {@param studyId} in the Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link Subject} from a study (or project) {@param studyId} in the Management Portal using {@link ServletContext} entity.
      * @param studyId {@link Integer} the study from which subjects to be retrieved
      * @return {@link ArrayList<Subject>} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
@@ -219,7 +224,7 @@ public class MpClient {
 
         while (elements.hasNext()) {
             Subject currentSubject = elements.next();
-            if (projectId.intValue() == currentSubject.getProjectId().intValue()) {
+            if (projectId.intValue() == currentSubject.getProject().getId().intValue()) {
                 subjectsInProject.add(currentSubject);
             }
         }
@@ -281,6 +286,7 @@ public class MpClient {
             if (response.isSuccessful()) {
                 Project project = Project.getObject(response.body().string());
                 LOGGER.info("Project : " + project.toString());
+                response.close();
                 return project;
             }
             LOGGER.info("Subject is not present");
@@ -294,7 +300,6 @@ public class MpClient {
 
     public static javax.ws.rs.core.Response getJsonResponse(Object obj) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        //Set pretty printing of json
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         JsonNode toJson = objectMapper.valueToTree(obj);
 

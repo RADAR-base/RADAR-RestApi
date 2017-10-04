@@ -148,6 +148,7 @@ public class Project {
             Project project = getObject(currentProject.toString());
             allProjects.add(project);
         }
+        response.close();
         return allProjects;
     }
 }

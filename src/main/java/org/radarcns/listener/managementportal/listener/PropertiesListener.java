@@ -38,8 +38,6 @@ public class PropertiesListener implements ServletContextListener {
         try {
             LOGGER.info(Properties.validate());
 
-            //MpClient mp = new MpClient(sce.getServletContext());
-            //LOGGER.info(mp.toString());
         } catch (Exception exc) {
             LOGGER.error("Properties cannot be load. Check the log for more information.", exc);
             throw new ExceptionInInitializerError(exc);
