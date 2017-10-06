@@ -1,0 +1,10 @@
+version: 0.1-alpha
+released: 2017-08-29
+
+# ManagementPortal configuration
+oauth_client_id: client_id
+oauth_client_secret:  client_secret
+management_portal_url: http://managementportal.org
+token_endpoint: oath/token
+project_endpoint: /api/project/
+subject_endpoint: /api/subject/
