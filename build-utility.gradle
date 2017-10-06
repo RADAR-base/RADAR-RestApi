@@ -142,7 +142,7 @@ task setRadarEnvironmentForDocker(dependsOn: buildDocker) {
     fileStream.renameTo("${radarStackPath}/etc/radar.yml")
     
     def mpYml = file("${simpleStackPath}/resources/mp_info.yml")
-    file("${radarStackPath}/etc/mp_info.yml") << mpYml.text
+    file("${radarStackPath}/etc/rest-api/mp_info.yml") << mpYml.text
 
     def installScript = file("${radarStackPath}/install-radar-stack.sh")
     installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
