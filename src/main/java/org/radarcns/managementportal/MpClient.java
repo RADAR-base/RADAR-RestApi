@@ -76,10 +76,11 @@ public class MpClient {
 
     }
 
+
     /**
      * Retrieves all {@link Subject} from the already computed list of subjects
-     * using {@link ArrayList} of {@link Subject} else it calls a method for
-     * retrieving the subjects from MP
+     * using {@link ArrayList} of {@link Subject} else it calls a method for retrieving
+     * the subjects from MP
      * @return {@link ArrayList} of {@link Subject} if a subject is found
      */
     public ArrayList<Subject> getSubjects() {
@@ -152,9 +153,9 @@ public class MpClient {
                 subjects = getAllSubjects(context);
                 isSubjectsInitialised = true;
                 getSubject(subjectId);
-            } catch (MalformedURLException exc){
+            } catch (MalformedURLException exc) {
                 LOGGER.error(exc.getMessage());
-            } catch (URISyntaxException exc){
+            } catch (URISyntaxException exc) {
                 LOGGER.error(exc.getMessage());
             } catch (IllegalStateException exc) {
                 LOGGER.error("Error : ", exc.fillInStackTrace());
@@ -213,9 +214,9 @@ public class MpClient {
             try {
                 ArrayList<Subject> allSubjects = getAllSubjects(context);
                 return findSubjectsInProject(allSubjects , studyId);
-            } catch (MalformedURLException exc){
+            } catch (MalformedURLException exc) {
                 LOGGER.error(exc.getMessage());
-            } catch (URISyntaxException exc){
+            } catch (URISyntaxException exc) {
                 LOGGER.error(exc.getMessage());
             } catch (IllegalStateException exc) {
                 LOGGER.error("Error : ", exc.fillInStackTrace());
