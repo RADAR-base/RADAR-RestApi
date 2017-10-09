@@ -51,7 +51,7 @@ public class MpClient {
 
     /**
      * @param context {@link ServletContext} useful to retrieve shared {@link OkHttpClient} and
-     *      {@code access token}
+     *      {@code access token}.
      * @throws IllegalStateException in case the object cannot be created
      * @see org.radarcns.listener.managementportal.listener.HttpClientListener
      * @see org.radarcns.listener.managementportal.listener.TokenManagerListener
@@ -80,7 +80,7 @@ public class MpClient {
     /**
      * Retrieves all {@link Subject} from the already computed list of subjects
      * using {@link ArrayList} of {@link Subject} else it calls a method for retrieving
-     * the subjects from MP
+     * the subjects from MP.
      * @return {@link ArrayList} of {@link Subject} if a subject is found
      */
     public ArrayList<Subject> getSubjects() {
@@ -102,7 +102,7 @@ public class MpClient {
     }
 
     /**
-     * Retrieves all {@link Subject} from Management Portal using {@link ServletContext} entity
+     * Retrieves all {@link Subject} from Management Portal using {@link ServletContext} entity.
      * @param context {@link ServletContext} that has been used to authenticate token
      * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved
@@ -258,7 +258,7 @@ public class MpClient {
     }
 
     /**
-     * Retrieves all {@link Project} from the Management Portal using {@link ServletContext} entity
+     * Retrieves all {@link Project} from Management Portal using {@link ServletContext} entity.
      * @param context {@link ServletContext} that has been used to authenticate token
      * @return {@link ArrayList} of {@link Project} retrieved from the Management Portal
      */
@@ -312,7 +312,7 @@ public class MpClient {
     }
 
     /**
-     * Creates a {@link Response} entity from a provided {@link Object}
+     * Creates a {@link Response} entity from a provided {@link Object}.
      */
     public static javax.ws.rs.core.Response getJsonResponse(Object obj) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
