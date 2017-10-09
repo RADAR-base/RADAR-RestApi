@@ -63,7 +63,7 @@ public class Subject {
      * @param login {@link String} representing Management Portal Subject identifier
      * @param externalId {@link Integer} representing the REDCap Record identifier
      * @param externalLink {@link URL} pointing the REDCap integration form / instrument
-     * @param attributes {@link List<Tag>} representing the value associated with
+     * @param attributes {@link List} of {@link Tag} representing the value associated with
      * @param status {@link String} representing the status of the subject
      * @param sources {@link List} of {@link Tag} representing the sources of a subject
      * @param project {@link Project} representing the value associated with

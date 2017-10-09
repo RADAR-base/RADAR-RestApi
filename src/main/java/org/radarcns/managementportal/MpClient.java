@@ -66,13 +66,13 @@ public class MpClient {
         try {
             subjects = getAllSubjects(context);
             getSubject("1",context);
-         } catch (MalformedURLException exc){
+        } catch (MalformedURLException exc) {
             LOGGER.error(exc.getMessage());
-         } catch (URISyntaxException exc){
+        } catch (URISyntaxException exc) {
             LOGGER.error(exc.getMessage());
-         } catch (IllegalStateException exc) {
+        } catch (IllegalStateException exc) {
             LOGGER.error("Error : ", exc.fillInStackTrace());
-         }
+        }
 
     }
 
@@ -80,7 +80,7 @@ public class MpClient {
      * Retrieves all {@link Subject} from the already computed list of subjects
      * using {@link ArrayList} of {@link Subject} else it calls a method for
      * retrieving the subjects from MP
-     * @return {@link ArrayList<Subject>} if a subject is found
+     * @return {@link ArrayList} of {@link Subject} if a subject is found
      */
     public ArrayList<Subject> getSubjects() {
         if ( isSubjectsInitialised ) {
@@ -138,7 +138,7 @@ public class MpClient {
      * @return {@link Subject} if a subject is found
      */
     public Subject getSubject(String subjectId) {
-        if(isSubjectsInitialised){
+        if (isSubjectsInitialised) {
             Iterator<Subject> elements = subjects.iterator();
 
             while (elements.hasNext()) {
@@ -198,7 +198,7 @@ public class MpClient {
     }
 
     /**
-     * Retrieves all {@link Subject} from a study (or project) {@param studyId} in the
+     * Retrieves all {@link Subject} from a study (or project) in the
      * Management Portal using {@link ServletContext} entity.
      * @param studyId {@link Integer} the study from which subjects to be retrieved
      * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
@@ -210,7 +210,7 @@ public class MpClient {
         if(isSubjectsInitialised) {
             return findSubjectsInProject(subjects,studyId);
         } else {
-            try{
+            try {
                 ArrayList<Subject> allSubjects = getAllSubjects(context);
                 return findSubjectsInProject(allSubjects , studyId);
             } catch (MalformedURLException exc){
@@ -260,7 +260,6 @@ public class MpClient {
      * Retrieves all {@link Project} from the Management Portal using {@link ServletContext} entity
      * @param context {@link ServletContext} that has been used to authenticate token
      * @return {@link ArrayList} of {@link Project} retrieved from the Management Portal
-     * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
     public ArrayList<Project> getAllProjects(ServletContext context) throws
             MalformedURLException, URISyntaxException {

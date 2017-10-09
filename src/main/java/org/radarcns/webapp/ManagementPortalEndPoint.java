@@ -84,8 +84,8 @@ public class ManagementPortalEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                    + "completed. If this error persists, please contact " +
-                    "the service administrator.");
+                    + "completed. If this error persists, please contact "
+                    + "the service administrator.");
         }
     }
 
@@ -117,7 +117,8 @@ public class ManagementPortalEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                    + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact "
+                    + "the service administrator.");
         }
     }
 
@@ -182,7 +183,8 @@ public class ManagementPortalEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                    + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact"
+                    + " the service administrator.");
         }
     }
 

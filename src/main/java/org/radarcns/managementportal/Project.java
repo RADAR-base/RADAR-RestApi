@@ -24,7 +24,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 import okhttp3.Response;
 
@@ -64,7 +67,7 @@ public class Project {
         this.attributes = attributes;
         this.projectStatus = projectStatus;
         this.deviceTypes = deviceTypes;
-}
+    }
 
     public Integer getId() {
         return id;
@@ -110,7 +113,7 @@ public class Project {
     /**
      * Converts the {@link String} to a {@link Project} entity.
      * @param response {@link String} that has to be converted
-     * @return {@link Project} stored in the {@link byte[]}
+     * @return {@link Project} stored in the {@link String}
      * @throws IOException in case the conversion cannot be computed
      */
     @JsonIgnore
@@ -130,8 +133,14 @@ public class Project {
             + "attributes=" + attributes + '}';
     }
 
+    /**
+     * Converts the {@link String} to a {@link ArrayList} of {@link Project} entity.
+     * @param response {@link String} that has to be converted
+     * @return {@link ArrayList} of {@link Project} stored in the {@link String}
+     * @throws IOException in case the conversion cannot be computed
+     */
     @JsonIgnore
-    public  static ArrayList<Project> getAllObjects (Response response) throws IOException {
+    public  static ArrayList<Project> getAllObjects(Response response) throws IOException {
         ArrayList<Project> allProjects = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
