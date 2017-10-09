@@ -88,9 +88,9 @@ public class MpClient {
         } else {
             try {
                 return getAllSubjects(context);
-            } catch (MalformedURLException exc){
+            } catch (MalformedURLException exc) {
                 LOGGER.error(exc.getMessage());
-            } catch (URISyntaxException exc){
+            } catch (URISyntaxException exc) {
                 LOGGER.error(exc.getMessage());
             } catch (IllegalStateException exc) {
                 LOGGER.error("Error : ", exc.fillInStackTrace());
@@ -207,7 +207,7 @@ public class MpClient {
     public ArrayList<Subject> getAllSubjectsFromStudy(Integer studyId) {
         LOGGER.info(studyId + context.getContextPath());
 
-        if(isSubjectsInitialised) {
+        if (isSubjectsInitialised) {
             return findSubjectsInProject(subjects,studyId);
         } else {
             try {
@@ -288,7 +288,6 @@ public class MpClient {
      * @param context {@link ServletContext} that has been used to authenticate token
      * @param projectId {@link String} of the Project that has to be retrieved
      * @return {@link Project} retrieved from the Management Portal
-     * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
     public Project getProject(String projectId, ServletContext context) throws
             MalformedURLException, URISyntaxException {
