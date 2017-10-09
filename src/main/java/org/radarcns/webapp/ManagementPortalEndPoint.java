@@ -36,13 +36,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static org.radarcns.webapp.util.BasePath.*;
+import static org.radarcns.webapp.util.BasePath.PROJECT;
+import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 import static org.radarcns.webapp.util.Parameter.STUDY_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 /**
- *  Management Portal web-app. Function set to access subject and source information from MP. A subject is a
- *  person enrolled for in a study. A source is a device linked to the subject.
+ *  Management Portal web-app. Function set to access subject and source information from MP.
+ *  A subject is a person enrolled for in a study. A source is a device linked to the subject.
  */
 @Api
 @Path("/" + "mp")
@@ -83,7 +84,8 @@ public class ManagementPortalEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                    + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact " +
+                    "the service administrator.");
         }
     }
 
@@ -108,7 +110,8 @@ public class ManagementPortalEndPoint {
     ) {
         try {
             MpClient mpClient = new MpClient(context);
-            Response response = MpClient.getJsonResponse(mpClient.getAllSubjectsFromStudy(Integer.parseInt(study)));
+            Response response = MpClient.getJsonResponse(
+                    mpClient.getAllSubjectsFromStudy(Integer.parseInt(study)));
             LOGGER.info("Response : " + response.toString());
             return response;
         } catch (Exception exec) {
@@ -124,7 +127,7 @@ public class ManagementPortalEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + SUBJECTS+ "/{" + SUBJECT_ID + "}")
+    @Path("/" + SUBJECTS + "/{" + SUBJECT_ID + "}")
     @ApiOperation(
             value = "Return the information related to given subject identifier",
             notes = "Some information are not implemented yet. The returned values are hardcoded.")
@@ -189,7 +192,7 @@ public class ManagementPortalEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + PROJECT+ "/{" + PROJECT_ID + "}")
+    @Path("/" + PROJECT + "/{" + PROJECT_ID + "}")
     @ApiOperation(
             value = "Return the information related to given subject identifier",
             notes = "Some information are not implemented yet. The returned values are hardcoded.")

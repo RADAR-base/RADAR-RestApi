@@ -9,7 +9,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.radarcns.managementportal.util.UrlDeseralizer;
@@ -62,14 +65,18 @@ public class Subject {
      * @param externalLink {@link URL} pointing the REDCap integration form / instrument
      * @param attributes {@link List<Tag>} representing the value associated with
      * @param status {@link String} representing the status of the subject
-     * @param sources {@link List<Tag>} representing the sources associated with the subject
+     * @param sources {@link List} of {@link Tag} representing the sources of a subject
      * @param project {@link Project} representing the value associated with
      *      {@link #HUMAN_READABLE_IDENTIFIER_KEY}
      */
-    public Subject(@JsonProperty("login") String login, @JsonProperty("externalId") Integer externalId,
-            @JsonProperty("externalLink") URL externalLink, @JsonProperty("attributes") List<Tag> attributes,
-            @JsonProperty("status") String status, @JsonProperty("sources") List<Source> sources,
-            @JsonProperty("email") String email, @JsonProperty("project") Project project) {
+    public Subject(@JsonProperty("login") String login,
+                   @JsonProperty("externalId") Integer externalId,
+                   @JsonProperty("externalLink") URL externalLink,
+                   @JsonProperty("attributes") List<Tag> attributes,
+                   @JsonProperty("status") String status,
+                   @JsonProperty("sources") List<Source> sources,
+                   @JsonProperty("email") String email,
+                   @JsonProperty("project") Project project) {
         this.login = login;
         this.externalId = externalId;
         this.externalLink = externalLink;
@@ -168,13 +175,14 @@ public class Subject {
     }
 
     /**
-     * Converts the JSON {@link String} to a {@link ArrayList<Subject>} entity.
+     * Converts the JSON {@link String} to a {@link ArrayList} of {@link Subject} entity.
      * @param jsonString {@link String} that has to be converted
-     * @return {@link ArrayList<Subject>} stored in the JSON {@link String}
+     * @return {@link ArrayList} of {@link Subject} stored in the JSON {@link String}
      * @throws IOException in case the conversion cannot be computed
      */
     @JsonIgnore
-    public static ArrayList<Subject> getAllSubjectsFromJson(String jsonString) throws IOException{
+    public static ArrayList<Subject> getAllSubjectsFromJson(String jsonString) throws
+            IOException {
 
         ArrayList<Subject> allSubjects = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();

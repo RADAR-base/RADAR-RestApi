@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Objects;
 
 /*
  * Copyright 2017 King's College London
@@ -45,7 +47,7 @@ public class MpClient {
 
     private ArrayList<Subject> subjects;
     private ServletContext context;
-    private boolean SUBJECTS_INITIALIZED = false;
+    private boolean isSubjectsInitialised = false;
 
     /**
      * @param context {@link ServletContext} useful to retrieve shared {@link OkHttpClient} and
@@ -64,20 +66,26 @@ public class MpClient {
         try {
             subjects = getAllSubjects(context);
             getSubject("1",context);
-        } catch (MalformedURLException exc){
+         } catch (MalformedURLException exc){
             LOGGER.error(exc.getMessage());
-        } catch (URISyntaxException exc){
+         } catch (URISyntaxException exc){
             LOGGER.error(exc.getMessage());
-        } catch (IllegalStateException exc) {
+         } catch (IllegalStateException exc) {
             LOGGER.error("Error : ", exc.fillInStackTrace());
-        }
+         }
 
     }
 
+    /**
+     * Retrieves all {@link Subject} from the already computed list of subjects
+     * using {@link ArrayList} of {@link Subject} else it calls a method for
+     * retrieving the subjects from MP
+     * @return {@link ArrayList<Subject>} if a subject is found
+     */
     public ArrayList<Subject> getSubjects() {
-        if(SUBJECTS_INITIALIZED) {
+        if ( isSubjectsInitialised ) {
             return subjects;
-        }else {
+        } else {
             try {
                 return getAllSubjects(context);
             } catch (MalformedURLException exc){
@@ -93,25 +101,26 @@ public class MpClient {
     }
 
     /**
-     * Retrieves all {@link Subject} from the Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link Subject} from Management Portal using {@link ServletContext} entity
      * @param context {@link ServletContext} that has been used to authenticate token
-     * @return {@link ArrayList<Subject>} retrieved from the Management Portal
-     * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
+     * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
+     * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved
      */
-    private ArrayList<Subject> getAllSubjects(ServletContext context) throws MalformedURLException,
-            URISyntaxException {
+    private ArrayList<Subject> getAllSubjects(ServletContext context) throws
+            MalformedURLException, URISyntaxException {
 
         Request request = getBuilder(Properties.getSubjectEndPoint(), context).get().build();
 
         ArrayList<Subject> allSubjects;
 
-        try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
+        try (Response response = HttpClientListener.getClient(context)
+                .newCall(request).execute()) {
             if (response.isSuccessful()) {
 
                 String jsonData = response.body().string();
                 allSubjects = Subject.getAllSubjectsFromJson(jsonData);
                 LOGGER.info("Retrieved Subjects from MP.");
-                SUBJECTS_INITIALIZED = true;
+                isSubjectsInitialised = true;
                 response.close();
                 return allSubjects;
             }
@@ -123,12 +132,13 @@ public class MpClient {
     }
 
     /**
-     * Retrieves a {@link Subject} from the already computed list of subjects using {@link ArrayList<Subject>} entity.
+     * Retrieves a {@link Subject} from the already computed list of subjects
+     * using {@link ArrayList} of {@link Subject} entity.
      * @param subjectId {@link String} that has to be searched.
      * @return {@link Subject} if a subject is found
      */
-    public Subject getSubject(String subjectId){
-        if(SUBJECTS_INITIALIZED){
+    public Subject getSubject(String subjectId) {
+        if(isSubjectsInitialised){
             Iterator<Subject> elements = subjects.iterator();
 
             while (elements.hasNext()) {
@@ -138,9 +148,9 @@ public class MpClient {
                 }
             }
         } else {
-            try{
+            try {
                 subjects = getAllSubjects(context);
-                SUBJECTS_INITIALIZED = true;
+                isSubjectsInitialised = true;
                 getSubject(subjectId);
             } catch (MalformedURLException exc){
                 LOGGER.error(exc.getMessage());
@@ -161,20 +171,21 @@ public class MpClient {
      * @return {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
-    private Subject getSubject(String subjectId, ServletContext context) throws MalformedURLException,
-            URISyntaxException {
+    private Subject getSubject(String subjectId, ServletContext context) throws
+            MalformedURLException, URISyntaxException {
 
-        if (SUBJECTS_INITIALIZED)
+        if (isSubjectsInitialised) {
             return getSubject(subjectId);
-
+        }
         // TODO Use Login instead of Subject ID to get subjects from Management Portal.
 
-        Request request = getBuilder(getUrl(Properties.getSubjectEndPoint(), subjectId), context).get().build();
+        Request request = getBuilder(getUrl(Properties.getSubjectEndPoint(),
+                subjectId), context).get().build();
 
-        try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
+        try (Response response = HttpClientListener.getClient(context)
+                .newCall(request).execute()) {
             if (response.isSuccessful()) {
                 Subject subject = Subject.getObject(response.body().string());
-                //Subject subject = Subject.createSubjectFromJson(response.body().string());
                 LOGGER.info("Subject : " + subject.getJsonString());
                 response.close();
                 return subject;
@@ -187,15 +198,16 @@ public class MpClient {
     }
 
     /**
-     * Retrieves all {@link Subject} from a study (or project) {@param studyId} in the Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link Subject} from a study (or project) {@param studyId} in the
+     * Management Portal using {@link ServletContext} entity.
      * @param studyId {@link Integer} the study from which subjects to be retrieved
-     * @return {@link ArrayList<Subject>} retrieved from the Management Portal
+     * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
-    public ArrayList<Subject> getAllSubjectsFromStudy(Integer studyId){
+    public ArrayList<Subject> getAllSubjectsFromStudy(Integer studyId) {
         LOGGER.info(studyId + context.getContextPath());
 
-        if(SUBJECTS_INITIALIZED) {
+        if(isSubjectsInitialised) {
             return findSubjectsInProject(subjects,studyId);
         } else {
             try{
@@ -215,10 +227,10 @@ public class MpClient {
     /**
      * Retrieves all {@link Subject} from a list of subjects having the same projectId.
      * @param projectId {@link Integer} that has to be searched
-     * @return {@link ArrayList<Subject>} retrieved from the Management Portal
-     * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
+     * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
      */
-    private ArrayList<Subject> findSubjectsInProject(ArrayList<Subject> subjects, Integer projectId) {
+    private ArrayList<Subject> findSubjectsInProject(ArrayList<Subject> subjects,
+                                                     Integer projectId) {
         ArrayList<Subject> subjectsInProject = new ArrayList<>();
         Iterator<Subject> elements = subjects.iterator();
 
@@ -245,17 +257,19 @@ public class MpClient {
     }
 
     /**
-     * Retrieves all {@link Project} from the Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link Project} from the Management Portal using {@link ServletContext} entity
      * @param context {@link ServletContext} that has been used to authenticate token
-     * @return {@link ArrayList<Project>} retrieved from the Management Portal
+     * @return {@link ArrayList} of {@link Project} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
-    public ArrayList<Project> getAllProjects(ServletContext context) throws MalformedURLException, URISyntaxException {
+    public ArrayList<Project> getAllProjects(ServletContext context) throws
+            MalformedURLException, URISyntaxException {
         Request request = getBuilder(Properties.getProjectEndPoint(), context).get().build();
 
         ArrayList<Project> allProjects;
 
-        try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
+        try (Response response = HttpClientListener.getClient(context)
+                .newCall(request).execute()) {
             if (response.isSuccessful()) {
                 LOGGER.info("Response : " + response.body().string());
                 allProjects = Project.getAllObjects(response);
@@ -274,15 +288,17 @@ public class MpClient {
      * Retrieves a {@link Project} from the Management Portal using {@link ServletContext} entity.
      * @param context {@link ServletContext} that has been used to authenticate token
      * @param projectId {@link String} of the Project that has to be retrieved
-     * @return {@link Subject} retrieved from the Management Portal
+     * @return {@link Project} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
-    public Project getProject(String projectId, ServletContext context) throws MalformedURLException,
-            URISyntaxException {
+    public Project getProject(String projectId, ServletContext context) throws
+            MalformedURLException, URISyntaxException {
 
-        Request request = getBuilder(getUrl(Properties.getProjectEndPoint(), projectId), context).get().build();
+        Request request = getBuilder(getUrl(Properties.getProjectEndPoint(), projectId),
+                context).get().build();
 
-        try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
+        try (Response response = HttpClientListener.getClient(context)
+                .newCall(request).execute()) {
             if (response.isSuccessful()) {
                 Project project = Project.getObject(response.body().string());
                 LOGGER.info("Project : " + project.toString());
@@ -296,8 +312,9 @@ public class MpClient {
         }
     }
 
-
-
+    /**
+     * Creates a {@link Response} entity from a provided {@link Object}
+     */
     public static javax.ws.rs.core.Response getJsonResponse(Object obj) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);

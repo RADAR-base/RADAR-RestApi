@@ -24,6 +24,7 @@ import java.net.URL;
 /**
  * <p>Java class that defines the configuration required by the web app to handle authentication and
  * authorisation against Management Portal and REDCap instances.</p>
+ *
  * <p>Current implementation support a single Management Portal instance since the current
  * RADAR-CNS Platform Architecture is designed with a centralised Management Portal. In order
  * to support multiple Management Portal instances, the following variables<ul>
