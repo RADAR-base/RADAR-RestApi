@@ -12,7 +12,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.radarcns.managementportal.util.UrlDeseralizer;
@@ -53,7 +52,7 @@ public class Subject {
     @JsonProperty("sources")
     private final List<Source> sources;
     @JsonProperty("attributes")
-    private final List<Tag> attributes;
+    private final Attribute attributes;
     @JsonProperty("project")
     private final Project project;
 
@@ -72,7 +71,7 @@ public class Subject {
     public Subject(@JsonProperty("login") String login,
                    @JsonProperty("externalId") Integer externalId,
                    @JsonProperty("externalLink") URL externalLink,
-                   @JsonProperty("attributes") List<Tag> attributes,
+                   @JsonProperty("attributes") Attribute attributes,
                    @JsonProperty("status") String status,
                    @JsonProperty("sources") List<Source> sources,
                    @JsonProperty("email") String email,
@@ -103,7 +102,7 @@ public class Subject {
         return email;
     }
 
-    public List<Tag> getAttributes() {
+    public Attribute getAttributes() {
         return attributes;
     }
 
@@ -135,10 +134,12 @@ public class Subject {
      */
     @JsonIgnore
     public String getAttribute(String key) {
-        Optional<Tag> tag = attributes.stream()
-                .filter(item -> item.getKey().equals(key)).findFirst();
 
-        return tag.isPresent() ? tag.get().getValue() : null;
+        if(attributes.getHumanRedableIdentifier() != null) {
+            return attributes.toString();
+        } else {
+            return null;
+        }
     }
 
     /**

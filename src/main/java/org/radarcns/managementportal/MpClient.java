@@ -271,7 +271,6 @@ public class MpClient {
         try (Response response = HttpClientListener.getClient(context)
                 .newCall(request).execute()) {
             if (response.isSuccessful()) {
-                LOGGER.info("Response : " + response.body().string());
                 allProjects = Project.getAllObjects(response);
                 LOGGER.info("Retrieved Projects from MP.");
                 LOGGER.info(allProjects.toString());

@@ -27,7 +27,7 @@ ext.logback = '1.1.7'
 ext.mongodb='3.3.0'
 ext.radarCommon = '0.4'
 ext.schemaRestApi = '0.1.1-alpha.1'
-ext.radarOauthClientVersion = '1.0-SNAPSHOT'
+ext.radarOauthClientVersion = '0.1-SNAPSHOT'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.swaggerParser='1.0.24'
@@ -52,7 +52,7 @@ repositories {
   // Use 'jcenter' for resolving your dependencies.
   // You can declare any Maven/Ivy/file repository here.
   // For working with dev-branches
-  maven { url "${rootProject.projectDir}/libs" }
+  maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
   //jcenter()
   mavenCentral()
   maven { url 'http://packages.confluent.io/maven/' }
