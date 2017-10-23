@@ -1,26 +1,30 @@
 # RADAR-CNS REST-API
 
-[![Build Status](https://travis-ci.org/RADAR-CNS/RADAR-RestApi.svg?branch=master)](https://travis-ci.org/RADAR-CNS/RADAR-RestApi) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/622b8036e0a5420db5206cdcd55bbd11)](https://www.codacy.com/app/RADAR-CNS/RADAR-RestApi?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RADAR-CNS/RADAR-RestApi&amp;utm_campaign=Badge_Grade)
+[![Build Status](https://travis-ci.org/RADAR-CNS/RADAR-RestApi.svg?branch=master)](https://travis-ci.org/RADAR-CNS/RADAR-RestApi) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/622b8036e0a5420db5206cdcd55bbd11)](https://www.codacy.com/app/RADAR-CNS/RADAR-RestApi?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RADAR-CNS/RADAR-RestApi&amp;utm_campaign=Badge_Grade) [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/622b8036e0a5420db5206cdcd55bbd11)](https://www.codacy.com/app/RADAR-CNS/RADAR-RestApi?utm_source=github.com&utm_medium=referral&utm_content=RADAR-CNS/RADAR-RestApi&utm_campaign=Badge_Coverage)
 
 A REST-FULL Service using Tomcat 8.0.37, MongoDb 3.2.10, Swagger 2.0, Apache Avro 1.7.7 and Jersey 2.
 
 Thi project implents the downstream REST API for the RADAR-CNS project'
 
 ## Setup
+This project uses `git submodule`. When cloning, please use the command `git clone --recursive`. For already cloned repos, use `git submodule update --init --recursive` to update modules.
 
-Before deploying the war file edit the `radar.yml` config file and then copy it into `/usr/local/tomcat/conf/`. If your installation uses a different path you need to modify the variable `pathFile` in `org.radarcns.config.Properties` After that
-- Run `./gradlew build`
+To deploy the war do:
+- edit the `device-catalog.yml` configuration file and specify its location in `radar.yml`
+- edit the `radar.yml` config file and then copy it your config folder. Paths checked to find the config file are
+  - `/usr/share/tomcat8/conf/`
+  - `/usr/local/tomcat/conf/radar/`
+- run `./gradlew build`
 - Copy the radar.war located at `build/libs/` in `/usr/local/tomcat/webapp/`
 
-The application log file is located at `/usr/local/tomcat/log/radar-restapi.log`. You need to modify this location, update the file tag in `/resources/logback.xml`
-The log `rolling policy` entails you have a folder named `archived` under your log pah. If you do not have it, you must create it before running the project.
+By default, log messages are redirected to the `STDOUT`.
 
 The api documentation is located at `<your-server-address>:<port>/radar/api/swagger.json`
 
 ## Dev Environment
 Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json) to see documentation of dev deploy instance.
 
-Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/user/getAllPatients/0) to see some mock data.
+Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/subject/getAllSubjects/0) to see some mock data.
 
 ## Clients
 Swagger provides a tool to automatically generate a client in several programming language.
@@ -30,6 +34,43 @@ Swagger provides a tool to automatically generate a client in several programmin
 - Click on `Import`
 - Click on `Generate Client` and select your programming language
 
-## Contributing
+## Integration test
+Useful for testing the integration between `RADAR-CNS Hotstorage` and `RADAR-CNS Rest API`. Before running the test, add `127.0.0.1	hotstorage` to the `hosts` file.
+To run the test:
+```shell
+  ./gradlew integrationTest
+```
 
-Code should be formatted using the [Google Java Code Style Guide](https://google.github.io/styleguide/javaguide.html). If you want to contribute a feature or fix, please make a pull request
+## End to end test
+This project contains an end to end test for the RADAR-CNS platform covering:
+- `Confluent Rest-Proxy`
+- `Kafka infrastructure`
+- `RADAR-CNS kafka streams application`
+- `RADAR-CNS MongoDb connector`
+- `RADAR-CNS Hotstorage`
+- `RADAR-CNS Rest API`
+
+Infrastructure settings are located at `src/endToEndTest/resources/pipeline.yml`.
+Test case settings are located at `src/endToEndTest/resources/pipeline.yml`. Each test case is specified as:
+```yaml
+- topic: android_empatica_e4_acceleration
+  sensor: ACCELEROMETER
+  frequency: 32.0
+  file: accelerometer.csv
+  key_schema: org.radarcns.key.MeasurementKey
+  value_schema: org.radarcns.empatica.EmpaticaE4Acceleration
+  value_fields: [x, y, z]
+  minimum: -2.0
+  maximum: 2.0
+  maximum_difference: 1e-10
+```
+The test will generate random data between `minimum` and `maximum`, and stream it to the landing topic specified by `topic` having for key `key_schema` and for value `value_schema`. Data for the sensor type `sensor` are randomly generated according to the `frequency`: number of messages generated per second. `value_fields` is the variables list which will be tested against the RESTfull service. Since we are comparing `double`s, `magnitude` represents the maximum delta between expected and actual values for which both numbers are still considered equal.
+
+To run the test:
+
+```shell
+./gradlew endToEndTest
+```
+
+## Contributing
+Code should be formatted using the [Google Java Code Style Guide](https://google.github.io/styleguide/javaguide.html). If you want to contribute a feature or fix, please make a pull request.

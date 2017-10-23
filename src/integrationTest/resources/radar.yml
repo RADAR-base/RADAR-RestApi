@@ -1,0 +1,27 @@
+version: 1.0
+released: 2017-04-27
+
+# Swagger documentation version
+swagger_version: 1.0.0
+
+# Comma separated list stating supported Application Protocols applicable to query APIs
+application_protocol: http
+
+# Machine address hosting the APIs
+host: localhost:8080/radar
+
+# Base or Root path for the RESTFul interface
+api_base_path: api
+
+# Mongodb hosts
+mongo_hosts:
+    localhost: 27017
+
+# Mongodb User
+mongo_user:
+    usr: restapi
+    pwd: radar
+    db: hotstorage
+
+# Path to the Device Catalog
+device_catalog: device-catalog.yml

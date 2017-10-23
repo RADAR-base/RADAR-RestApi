@@ -1,4 +1,50 @@
 language: java
-sudo: false
+
 jdk:
-  - openjdk7
+  - oraclejdk8
+
+sudo: required
+
+services:
+  - docker
+
+env:
+  DOCKER_COMPOSE_VERSION: 1.14.0
+
+addons:
+  hosts:
+    - hotstorage
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+before_install:
+  - docker --version
+  - mkdir -p "$HOME/bin";
+  - export PATH="$HOME/bin:$PATH";
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > "$HOME/bin/docker-compose";
+  - chmod +x "$HOME/bin/docker-compose";
+  - sudo $HOME/bin/docker-compose --version
+
+script:
+  - ./gradlew check
+  - ./gradlew war
+  - ./gradlew -PdockerComposePath="$HOME/bin/docker-compose" integrationTest
+  - ./gradlew -PdockerComposePath="$HOME/bin/docker-compose" endToEndTest
+
+after_script:
+  - ./gradlew sendCoverageToCodacy
+
+deploy:
+  provider: releases
+  api_key: ${GH_TOKEN}
+  file: "build/libs/radar*"
+  skip_cleanup: true
+  on:
+    tags: true

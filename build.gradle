@@ -1,83 +1,264 @@
 plugins {
-  // Apply the java plugin to add support for Java
   id 'java'
   id 'idea'
-  id 'com.commercehub.gradle.plugin.avro-base' version '0.8.0'
+  id 'pmd'
+  id 'checkstyle'
+  id 'jacoco'
   id 'war'
 }
 
 war {
-  archiveName = 'radar.war'
+  baseName = 'radar'
+  version = '0.1.1'
+  extension = 'war'
 }
 
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
+targetCompatibility = '1.8'
+sourceCompatibility = '1.8'
 
-ext.tomcat = '8.0.37'
-ext.logback = '1.1.7'
+ext.codacyVersion = '1.0.10'
 ext.jersey = '2.22.1'
-ext.json='20160810'
-ext.swagger='1.5.0'
-ext.mongodb='3.3.0'
-ext.avro='1.7.7'
-ext.jackson='2.8.4'
-ext.snakeyaml='1.17'
 ext.jerseymedia = '2.24'
-ext.dataformat = '2.8.5'
 ext.junitVersion = '4.12'
+ext.logback = '1.1.7'
+ext.mongodb='3.3.0'
+ext.radarCommon = '0.4'
+ext.schemaRestApi = '0.1.1-alpha.1'
+ext.snakeyaml='1.17'
+ext.swagger='1.5.0'
+ext.swaggerParser='1.0.24'
+ext.tomcat = '8.0.43'
 
-// In this section you declare where to find the dependencies of your project
+configurations {
+  codacy
+  //Integration test for REST API only
+  integrationTestCompile.extendsFrom testCompile
+  integrationTestRuntime.extendsFrom testRuntime
+  //End to end tests
+  endToEndTestCompile.extendsFrom integrationTestCompile
+  endToEndTestCompile.extendsFrom integrationTestRuntime
+  provided
+  compile.extendsFrom provided
+}
+
 repositories {
   // Use 'jcenter' for resolving your dependencies.
   // You can declare any Maven/Ivy/file repository here.
+  // For working with dev-branches
+  maven { url "${rootProject.projectDir}/libs" }
   jcenter()
-  maven {
-    url 'http://packages.confluent.io/maven/'
-  }
+  maven { url 'http://packages.confluent.io/maven/' }
+  maven { url 'https://jitpack.io' }
+  maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
+  maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
 }
 
-// In this section you declare the dependencies for your production and test code
 dependencies {
-  // The production code runs on tomcat 8.0.37
   providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
 
-  // The production code uses the SLF4J logging API at compile time
   compile group: 'ch.qos.logback', name:'logback-classic', version: logback
 
   compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
-  compile group: 'org.json', name: 'json', version: json
-  compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
-  compile group: 'ch.qos.logback', name: 'logback-classic', version: logback
-  compile group: 'org.apache.avro', name: 'avro', version: avro
-  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: jackson
+
+  compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
   compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
+
+  compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
+  compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApi
+
   compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
-  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-avro', version: dataformat
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
+
+  integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
+  integrationTestCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParser
+
+  codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }
 
-task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
-  source("src/main/resources/avro")
-  outputDir = file("build/avro")
-}
-
-compileJava.source(generateAvro.outputs)
-
-idea {
-  module {
-    sourceDirs += file("build/avro")
+//---------------------------------------------------------------------------//
+// Source Set                                                                //
+//---------------------------------------------------------------------------//
+sourceSets {
+  integrationTest {
+    java {
+      compileClasspath += main.output + test.output
+      runtimeClasspath += main.output + test.output
+      srcDir file('src/integrationTest/java')
+    }
+    resources {
+      srcDir 'src/integrationTest/resources'
+    }
+  }
+  endToEndTest {
+    java {
+      compileClasspath += main.output + test.output + integrationTest.output
+      runtimeClasspath += main.output + test.output + integrationTest.output
+      srcDir file('src/endToEndTest/java')
+    }
+    resources {
+      srcDir 'src/endToEndTest/resources'
+    }
   }
 }
 
-task wrapper(type: Wrapper) {
-  gradleVersion = '3.0'
+//---------------------------------------------------------------------------//
+// Style checking                                                            //
+//---------------------------------------------------------------------------//
+checkstyle {
+  // codacy version
+  toolVersion '6.16'
+  ignoreFailures false
+
+  // ignore tests
+  sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest, sourceSets.endToEndTest]
+}
+
+pmd {
+  // pmd version
+  toolVersion = '5.5.2'
+  ignoreFailures = false
+
+  sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest, sourceSets.endToEndTest]
+
+  consoleOutput = true
+
+  ruleSets = []
+  ruleSetFiles = files("config/pmd/ruleset.xml")
+}
+
+
+pmdTest {
+  ruleSetFiles = files("config/pmd/test_ruleset.xml")
+}
+
+//---------------------------------------------------------------------------//
+// Import Script                                                             //
+//---------------------------------------------------------------------------//
+apply from: 'build-utility.gradle'
+
+//---------------------------------------------------------------------------//
+// Testing                                                                   //
+//---------------------------------------------------------------------------//
+tasks.matching {it instanceof Test}.all {
+  def stdout = new LinkedList<String>()
+  beforeTest { TestDescriptor td ->
+    stdout.clear()
+  }
+
+  onOutput { TestDescriptor td, TestOutputEvent toe ->
+    stdout.addAll(toe.getMessage().split('(?m)$'))
+    while (stdout.size() > 100) {
+      stdout.remove()
+    }
+  }
+
+  afterTest { TestDescriptor td, TestResult tr ->
+    if (tr.resultType == TestResult.ResultType.FAILURE) {
+      println()
+      print("${td.className}.${td.name} FAILED")
+      if (stdout.empty) {
+        println(" without any output")
+      } else {
+        println(" with last 100 lines of output:")
+        println('=' * 100)
+        stdout.each { print(it) }
+        println('=' * 100)
+      }
+    }
+  }
+
+  testLogging {
+    showExceptions = true
+    showCauses = true
+    showStackTraces = true
+    exceptionFormat "full"
+  }
 }
 
 test {
   testLogging {
     // Show that tests are run in the command-line output
-    events 'passed'
+    events "skipped", "failed"
   }
+}
+
+task integrationTest(type: Test, dependsOn: ['copyFrontendConfigIntegrationTest', 'installSimpleStack']) {
+  description = "Run integration tests (located in src/integrationTest/...)."
+
+  testClassesDir = sourceSets.integrationTest.output.classesDir
+  classpath = sourceSets.integrationTest.runtimeClasspath
+
+  // This is not needed, but I like to see which tests have run
+  testLogging {
+    events "skipped", "failed"
+  }
+}
+integrationTest.finalizedBy 'stopSimpleStack'
+
+task endToEndTest(type: Test, dependsOn: ['copyFrontendConfigEndToEndTest', 'installRadarStack', 'listDockerProcesses']) {
+  description = "Run end to end tests (located in src/endToEndTest/...)."
+
+  testClassesDir = sourceSets.endToEndTest.output.classesDir
+  classpath = sourceSets.endToEndTest.runtimeClasspath
+
+  testLogging {
+    events "failed"
+
+    debug {
+      events "started", "skipped", "failed"
+      exceptionFormat "full"
+    }
+  }
+
+  testLogging.showStandardStreams = true
+}
+endToEndTest.finalizedBy 'stopRadarStack'
+
+//---------------------------------------------------------------------------//
+// Code coverage and codacy                                                  //
+//---------------------------------------------------------------------------//
+jacocoTestReport {
+  executionData test, integrationTest
+  reports {
+    xml.enabled true
+    csv.enabled false
+    html.enabled true
+  }
+}
+
+task downloadDependencies(type: Exec) {
+  configurations.testRuntime.files
+  configurations.codacy.files
+  configurations.jacocoAnt.files
+  commandLine 'echo', 'Downloaded all dependencies'
+}
+
+task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
+  main = 'com.codacy.CodacyCoverageReporter'
+  classpath = configurations.codacy
+  args = ['-l', 'Java', '-r', "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"]
+}
+
+//---------------------------------------------------------------------------//
+// Clean definition                                                          //
+//---------------------------------------------------------------------------//
+clean.dependsOn cleanSimpleStack
+clean.dependsOn cleanRadarStack
+clean.dependsOn removeFrontendConfig
+clean.dependsOn removeWar
+
+//---------------------------------------------------------------------------//
+// Build system metadata                                                     //
+//---------------------------------------------------------------------------//
+
+idea {
+  module {
+    downloadSources = true
+  }
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '3.4.1'
 }
