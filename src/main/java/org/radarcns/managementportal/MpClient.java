@@ -144,7 +144,7 @@ public class MpClient {
 
             while (elements.hasNext()) {
                 Subject currentSubject = elements.next();
-                if (subjectId.equals(currentSubject.getId())) {
+                if (subjectId.equals(currentSubject.getLogin())) {
                     return currentSubject;
                 }
             }

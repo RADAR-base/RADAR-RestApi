@@ -39,8 +39,8 @@ public class Subject {
 
     public static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
 
-    @JsonProperty("id")
-    private final String id;
+    //@JsonProperty("login")
+    private final String login;
     @JsonProperty("externalId")
     private final Integer externalId;
     @JsonDeserialize(using = UrlDeseralizer.class)
@@ -60,7 +60,7 @@ public class Subject {
 
     /**
      * Constructor.
-     * @param id {@link String} representing Management Portal Subject identifier
+     * @param login {@link String} representing Management Portal Subject identifier
      * @param externalId {@link Integer} representing the REDCap Record identifier
      * @param externalLink {@link URL} pointing the REDCap integration form / instrument
      * @param attributes {@link Map} representing the value associated with
@@ -69,7 +69,7 @@ public class Subject {
      * @param project {@link Project} representing the value associated with
      *      {@link #HUMAN_READABLE_IDENTIFIER_KEY}
      */
-    public Subject(@JsonProperty("login") String id,
+    public Subject(@JsonProperty("login") String login,
                    @JsonProperty("externalId") Integer externalId,
                    @JsonProperty("externalLink") URL externalLink,
                    @JsonProperty("attributes") Map<String,String> attributes,
@@ -77,7 +77,7 @@ public class Subject {
                    @JsonProperty("sources") List<Source> sources,
                    @JsonProperty("email") String email,
                    @JsonProperty("project") Project project) {
-        this.id = id;
+        this.login = login;
         this.externalId = externalId;
         this.externalLink = externalLink;
         this.attributes = attributes;
@@ -87,8 +87,9 @@ public class Subject {
         this.project = project;
     }
 
-    public String getId() {
-        return id;
+    @JsonProperty("id")
+    public String getLogin() {
+        return login;
     }
 
     public Integer getExternalId() {
