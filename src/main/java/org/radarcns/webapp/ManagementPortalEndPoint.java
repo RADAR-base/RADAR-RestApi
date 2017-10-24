@@ -51,7 +51,7 @@ public class ManagementPortalEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPortalEndPoint.class);
 
-    private static final String PROJECT_ID = "projectId";
+    private static final String PROJECT_NAME = "projectName";
 
     @Context
     private ServletContext context;
@@ -194,7 +194,7 @@ public class ManagementPortalEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + PROJECT + "/{" + PROJECT_ID + "}")
+    @Path("/" + PROJECT + "/{" + PROJECT_NAME + "}")
     @ApiOperation(
             value = "Return the information related to given subject identifier",
             notes = "Some information are not implemented yet. The returned values are hardcoded.")
@@ -206,11 +206,11 @@ public class ManagementPortalEndPoint {
             @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
                     + "given subject identifier")})
     public Response getProjectJson(
-            @PathParam(PROJECT_ID) String projectId
+            @PathParam(PROJECT_NAME) String projectName
     ) {
         try {
             MpClient mpClient = new MpClient(context);
-            Project project = mpClient.getProject(projectId, context);
+            Project project = mpClient.getProject(projectName, context);
             Response response = MpClient.getJsonResponse(project);
             LOGGER.info("Response : " + response.toString());
             return response;

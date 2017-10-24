@@ -286,13 +286,13 @@ public class MpClient {
     /**
      * Retrieves a {@link Project} from the Management Portal using {@link ServletContext} entity.
      * @param context {@link ServletContext} that has been used to authenticate token
-     * @param projectId {@link String} of the Project that has to be retrieved
+     * @param projectName {@link String} of the Project that has to be retrieved
      * @return {@link Project} retrieved from the Management Portal
      */
-    public Project getProject(String projectId, ServletContext context) throws
+    public Project getProject(String projectName, ServletContext context) throws
             MalformedURLException, URISyntaxException {
 
-        Request request = getBuilder(getUrl(Properties.getProjectEndPoint(), projectId),
+        Request request = getBuilder(getUrl(Properties.getProjectEndPoint(), projectName),
                 context).get().build();
 
         try (Response response = HttpClientListener.getClient(context)
