@@ -63,17 +63,6 @@ public class MpClient {
 
         this.context = context;
 
-        try {
-            subjects = getAllSubjects(context);
-            getSubject("1",context);
-        } catch (MalformedURLException exc) {
-            LOGGER.error(exc.getMessage());
-        } catch (URISyntaxException exc) {
-            LOGGER.error(exc.getMessage());
-        } catch (IllegalStateException exc) {
-            LOGGER.error("Error : ", exc.fillInStackTrace());
-        }
-
     }
 
 
@@ -150,9 +139,7 @@ public class MpClient {
             }
         } else {
             try {
-                subjects = getAllSubjects(context);
-                isSubjectsInitialised = true;
-                getSubject(subjectId);
+                return getSubject(subjectId, context);
             } catch (MalformedURLException exc) {
                 LOGGER.error(exc.getMessage());
             } catch (URISyntaxException exc) {
