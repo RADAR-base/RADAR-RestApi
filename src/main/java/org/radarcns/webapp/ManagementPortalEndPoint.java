@@ -38,7 +38,7 @@ import javax.ws.rs.core.Response;
 
 import static org.radarcns.webapp.util.BasePath.PROJECT;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
-import static org.radarcns.webapp.util.Parameter.STUDY_ID;
+import static org.radarcns.webapp.util.Parameter.STUDY_NAME;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 /**
@@ -95,9 +95,9 @@ public class ManagementPortalEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + PROJECT + "/{" + STUDY_ID + "}" + "/" + SUBJECTS)
+    @Path("/" + PROJECT + "/{" + STUDY_NAME + "}" + "/" + SUBJECTS)
     @ApiOperation(
-            value = "Return a list of subjects",
+            value = "Return a list of subjects contained within a study",
             notes = "Each subject can have multiple sourceID associated with him")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
@@ -106,12 +106,12 @@ public class ManagementPortalEndPoint {
                     + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a list of subject.avsc objects")})
     public Response getAllSubjectsJsonFromStudy(
-            @PathParam(STUDY_ID) String study
+            @PathParam(STUDY_NAME) String studyName
     ) {
         try {
             MpClient mpClient = new MpClient(context);
             Response response = MpClient.getJsonResponse(
-                    mpClient.getAllSubjectsFromStudy(Integer.parseInt(study)));
+                    mpClient.getAllSubjectsFromStudy(studyName));
             LOGGER.info("Response : " + response.toString());
             return response;
         } catch (Exception exec) {
@@ -131,7 +131,7 @@ public class ManagementPortalEndPoint {
     @Path("/" + SUBJECTS + "/{" + SUBJECT_ID + "}")
     @ApiOperation(
             value = "Return the information related to given subject identifier",
-            notes = "Some information are not implemented yet. The returned values are hardcoded.")
+            notes = "Source infomation not present right now")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
                     + "there is a message.avsc object with more details"),
@@ -166,8 +166,8 @@ public class ManagementPortalEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + PROJECT)
     @ApiOperation(
-            value = "Return a list of subjects",
-            notes = "Each subject can have multiple sourceID associated with him")
+            value = "Return a list of projects",
+            notes = "Each project can have multiple deviceID associated with it")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
                     + "there is a message.avsc object with more details"),
@@ -196,8 +196,8 @@ public class ManagementPortalEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + PROJECT + "/{" + PROJECT_NAME + "}")
     @ApiOperation(
-            value = "Return the information related to given subject identifier",
-            notes = "Some information are not implemented yet. The returned values are hardcoded.")
+            value = "Return the information related to given project identifier",
+            notes = "Each project can have multiple deviceID associated with it")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
                     + "there is a message.avsc object with more details"),

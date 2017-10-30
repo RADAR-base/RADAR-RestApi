@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  */
 public class UrlDeseralizer extends JsonDeserializer<URL> {
 
-    private Pattern urlPrefix = Pattern.compile("^(https?://|ftp://).*");
+    private static final Pattern urlPrefix = Pattern.compile("^(https?://|ftp://).*");
 
     @Override
     public URL deserialize(JsonParser parser, DeserializationContext ctxt) throws

@@ -28,6 +28,7 @@ public class Parameter {
     public static final String START = "start";
     public static final String STAT = "stat";
     public static final String STUDY_ID = "studyId";
+    public static final String STUDY_NAME = "studyName";
     public static final String SUBJECT_ID = "subjectId";
 
     private Parameter() {

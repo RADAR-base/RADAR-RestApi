@@ -57,6 +57,12 @@ public class Subject {
     @JsonProperty("project")
     private final Project project;
 
+    private static final ObjectMapper mapper;
+
+    static {
+        mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     /**
      * Constructor.
@@ -146,7 +152,7 @@ public class Subject {
      */
     @JsonIgnore
     public JsonNode getJson() throws IOException {
-        return new ObjectMapper().readTree(getJsonString());
+        return mapper.readTree(getJsonString());
     }
 
     /**
@@ -156,7 +162,7 @@ public class Subject {
      */
     @JsonIgnore
     public String getJsonString() throws IOException {
-        return new ObjectMapper().writeValueAsString(this);
+        return mapper.writeValueAsString(this);
     }
 
     /**
@@ -167,8 +173,6 @@ public class Subject {
      */
     @JsonIgnore
     public static Subject getObject(String response) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper.readValue(response, Subject.class);
     }
 

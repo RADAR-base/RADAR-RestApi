@@ -111,7 +111,6 @@ public class MpClient {
                 allSubjects = Subject.getAllSubjectsFromJson(jsonData);
                 LOGGER.info("Retrieved Subjects from MP.");
                 isSubjectsInitialised = true;
-                response.close();
                 return allSubjects;
             }
             LOGGER.info("Subjects is not present");
@@ -175,7 +174,6 @@ public class MpClient {
             if (response.isSuccessful()) {
                 Subject subject = Subject.getObject(response.body().string());
                 LOGGER.info("Subject : " + subject.getJsonString());
-                response.close();
                 return subject;
             }
             LOGGER.info("Subject is not present");
@@ -188,19 +186,19 @@ public class MpClient {
     /**
      * Retrieves all {@link Subject} from a study (or project) in the
      * Management Portal using {@link ServletContext} entity.
-     * @param studyId {@link Integer} the study from which subjects to be retrieved
+     * @param studyName {@link String} the study from which subjects to be retrieved
      * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
-    public ArrayList<Subject> getAllSubjectsFromStudy(Integer studyId) {
-        LOGGER.info(studyId + context.getContextPath());
+    public ArrayList<Subject> getAllSubjectsFromStudy(String studyName) {
+        LOGGER.info(studyName + context.getContextPath());
 
         if (isSubjectsInitialised) {
-            return findSubjectsInProject(subjects,studyId);
+            return findSubjectsInProject(subjects,studyName);
         } else {
             try {
                 ArrayList<Subject> allSubjects = getAllSubjects(context);
-                return findSubjectsInProject(allSubjects , studyId);
+                return findSubjectsInProject(allSubjects , studyName);
             } catch (MalformedURLException exc) {
                 LOGGER.error(exc.getMessage());
             } catch (URISyntaxException exc) {
@@ -214,21 +212,21 @@ public class MpClient {
 
     /**
      * Retrieves all {@link Subject} from a list of subjects having the same projectId.
-     * @param projectId {@link Integer} that has to be searched
+     * @param projectName {@link String} that has to be searched
      * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
      */
     private ArrayList<Subject> findSubjectsInProject(ArrayList<Subject> subjects,
-                                                     Integer projectId) {
+                                                     String projectName) {
         ArrayList<Subject> subjectsInProject = new ArrayList<>();
         Iterator<Subject> elements = subjects.iterator();
 
         while (elements.hasNext()) {
             Subject currentSubject = elements.next();
-            if (projectId.intValue() == currentSubject.getProject().getId().intValue()) {
+            if (projectName.equals(currentSubject.getProject().getProjectName())) {
                 subjectsInProject.add(currentSubject);
             }
         }
-        LOGGER.info("Subjects Retrieved from Study ID " + projectId);
+        LOGGER.info("Subjects Retrieved from Study Name " + projectName);
         return subjectsInProject;
     }
 
@@ -287,7 +285,6 @@ public class MpClient {
             if (response.isSuccessful()) {
                 Project project = Project.getObject(response.body().string());
                 LOGGER.info("Project : " + project.toString());
-                response.close();
                 return project;
             }
             LOGGER.info("Subject is not present");
