@@ -14,6 +14,9 @@ To deploy the war do:
 - edit the `radar.yml` config file and then copy it your config folder. Paths checked to find the config file are
   - `/usr/share/tomcat8/conf/`
   - `/usr/local/tomcat/conf/radar/`
+  - edit the `mp_info.yml` config file for Management Portal Configuration and then copy it your config folder. Paths checked to find the config file are
+  - `/usr/share/tomcat8/conf/`
+  - `/usr/local/tomcat/conf/radar/`
 - run `./gradlew build`
 - Copy the radar.war located at `build/libs/` in `/usr/local/tomcat/webapp/`
 

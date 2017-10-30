@@ -7,6 +7,9 @@ plugins {
   id 'war'
 }
 
+group 'org.radarcns'
+version '1.0-SNAPSHOT'
+
 war {
   baseName = 'radar'
   version = '0.1.1'
@@ -24,10 +27,14 @@ ext.logback = '1.1.7'
 ext.mongodb='3.3.0'
 ext.radarCommon = '0.4'
 ext.schemaRestApi = '0.1.1-alpha.1'
+ext.radarOauthClientVersion = '0.1-SNAPSHOT'
 ext.snakeyaml='1.17'
 ext.swagger='1.5.0'
 ext.swaggerParser='1.0.24'
 ext.tomcat = '8.0.43'
+ext.apacheCommonsIoVersion = '2.5'
+ext.apacheCommonsLangVersion = '3.6'
+ext.okhttp3Version = '3.8.1'
 
 configurations {
   codacy
@@ -45,8 +52,9 @@ repositories {
   // Use 'jcenter' for resolving your dependencies.
   // You can declare any Maven/Ivy/file repository here.
   // For working with dev-branches
-  maven { url "${rootProject.projectDir}/libs" }
-  jcenter()
+  maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
+  //jcenter()
+  mavenCentral()
   maven { url 'http://packages.confluent.io/maven/' }
   maven { url 'https://jitpack.io' }
   maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
@@ -66,6 +74,13 @@ dependencies {
 
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
   compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApi
+
+  compile group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
+
+  compile group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
+  compile group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLangVersion
+
+  compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
 
   compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
 

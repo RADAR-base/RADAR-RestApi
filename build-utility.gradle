@@ -72,6 +72,9 @@ task installSimpleStack(type: Exec, dependsOn: buildDocker) {
 
     def radarYml = file("${simpleStackPath}/resources/radar.yml")
     file("${radarVolumePath}/radar.yml") << radarYml.text.replace("localhost: 27017", "hotstorage: 27017")
+    
+    def mpYml = file("${simpleStackPath}/resources/mp_info.yml")
+    file("${radarVolumePath}/mp_info.yml") << mpYml.text
   }
 
   workingDir simpleStackPath
@@ -137,6 +140,9 @@ task setRadarEnvironmentForDocker(dependsOn: buildDocker) {
     def fileStream = file(streamTemplatePath + 'tmp')
     fileStream << file(streamTemplatePath).text
     fileStream.renameTo("${radarStackPath}/etc/radar.yml")
+    
+    def mpYml = file("${simpleStackPath}/resources/mp_info.yml")
+    file("${radarStackPath}/etc/rest-api/mp_info.yml") << mpYml.text
 
     def installScript = file("${radarStackPath}/install-radar-stack.sh")
     installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
