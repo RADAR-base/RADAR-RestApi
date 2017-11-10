@@ -35,6 +35,8 @@ ext.tomcat = '8.0.43'
 ext.apacheCommonsIoVersion = '2.5'
 ext.apacheCommonsLangVersion = '3.6'
 ext.okhttp3Version = '3.8.1'
+ext.httpProxyVersion = '1.9'
+ext.radarAuthVersion = '0.2.0'
 
 configurations {
   codacy
@@ -76,6 +78,8 @@ dependencies {
   compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApi
 
   compile group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
+  compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
+  compile group: 'org.mitre.dsmiley.httpproxy' , name: 'smiley-http-proxy-servlet' , version: httpProxyVersion
 
   compile group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
   compile group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLangVersion
