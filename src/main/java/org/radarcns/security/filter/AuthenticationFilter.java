@@ -5,11 +5,13 @@ import org.radarcns.auth.authentication.TokenValidator;
 import org.radarcns.auth.config.ServerConfig;
 import org.radarcns.auth.config.YamlServerConfig;
 import org.radarcns.auth.exception.TokenValidationException;
+import org.radarcns.config.managementportal.config.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -22,17 +24,19 @@ import java.net.URISyntaxException;
 import java.util.Locale;
 
 /**
- * Created by dverbeec on 27/09/2017. Added to Rest-Api by yatharthranjan on 10/11/2017
+ * Created by dverbeec on 27/09/2017. Updated in Rest-Api by yatharthranjan on 10/11/2017.
  */
 public class AuthenticationFilter implements Filter {
-    private ServletContext context;
+
+    private static Logger log = LoggerFactory.getLogger(AuthenticationFilter.class);
+    public static final String TOKEN_ATTRIBUTE = "jwt";
 
     private static SoftReference<TokenValidator> validator = new SoftReference<>(null);
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        this.context = filterConfig.getServletContext();
-        this.context.log("Authentication filter initialized");
+        //this.context = filterConfig.getServletContext();
+        log.info("Authentication filter initialized");
     }
 
     @Override
@@ -47,30 +51,30 @@ public class AuthenticationFilter implements Filter {
         }
 
         try {
-            request.setAttribute("jwt", getValidator(context).validateAccessToken(token));
+            request.setAttribute(TOKEN_ATTRIBUTE, getValidator().validateAccessToken(token));
             chain.doFilter(request, response);
         } catch (TokenValidationException ex) {
-            context.log(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
         }
     }
 
-    private static synchronized TokenValidator getValidator(ServletContext context) {
+    private static synchronized TokenValidator getValidator() {
         TokenValidator localValidator = validator.get();
         if (localValidator == null) {
             ServerConfig config = null;
-            String mpUrlString = context.getInitParameter("managementPortalUrl");
+            String mpUrlString = Properties.validateMpUrl().toString();
             if (mpUrlString != null) {
                 try {
                     YamlServerConfig cfg = new YamlServerConfig();
-                    cfg.setPublicKeyEndpoint(new URI(mpUrlString + "/oauth/token_key"));
+                    cfg.setResourceName("res_RestApi");
+                    cfg.setPublicKeyEndpoint(new URI(mpUrlString + "oauth/token_key"));
                     config = cfg;
-                } catch (URISyntaxException e) {
-                    context.log("Failed to load Management Portal URL " + mpUrlString, e);
+                } catch (URISyntaxException exc) {
+                    log.error("Failed to load Management Portal URL " + mpUrlString, exc);
                 }
             }
-
             localValidator = config == null ? new TokenValidator() : new TokenValidator(config);
             validator = new SoftReference<>(localValidator);
         }
@@ -89,7 +93,7 @@ public class AuthenticationFilter implements Filter {
         // Check if the HTTP Authorization header is present and formatted correctly
         if (authorizationHeader == null
                 || !authorizationHeader.toLowerCase(Locale.US).startsWith("bearer ")) {
-            this.context.log("No authorization header provided in the request");
+            log.error("No authorization header provided in the request");
             return null;
         }
 

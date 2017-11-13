@@ -16,6 +16,11 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+import static org.radarcns.auth.authorization.Permission.SENSORDATA_READ;
+import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
+import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.security.utils.SecurityUtils.getJWT;
 import static org.radarcns.webapp.util.BasePath.ANDROID;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.STATUS;
@@ -79,6 +84,8 @@ public class AppStatusEndPoint {
             @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
+            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getJWT(request), SUBJECT_READ);
             return ResponseHandler.getJsonResponse(request,
                 getLastReceivedAppStatusWorker(subject, source));
         } catch (Exception exec) {
@@ -106,6 +113,8 @@ public class AppStatusEndPoint {
             @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
+            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getJWT(request), SUBJECT_READ);
             return ResponseHandler.getAvroResponse(request,
                 getLastReceivedAppStatusWorker(subject, source));
         } catch (Exception exec) {

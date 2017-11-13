@@ -19,10 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.radarcns.managementportal.MpClient;
-import org.radarcns.managementportal.Project;
-import org.radarcns.managementportal.Subject;
-import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +36,14 @@ import static org.radarcns.webapp.util.BasePath.PROJECT;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 import static org.radarcns.webapp.util.Parameter.STUDY_NAME;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+import org.radarcns.managementportal.MpClient;
+import org.radarcns.managementportal.Project;
+import org.radarcns.managementportal.Subject;
+import org.radarcns.webapp.util.ResponseHandler;
+import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
+import static org.radarcns.auth.authorization.Permission.PROJECT_READ;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.security.utils.SecurityUtils.getJWT;
 
 /**
  *  Management Portal web-app. Function set to access subject and source information from MP.
@@ -77,6 +81,7 @@ public class ManagementPortalEndPoint {
             @ApiResponse(code = 200, message = "Return a list of subject.avsc objects")})
     public Response getAllSubjectsJson() {
         try {
+            checkPermission(getJWT(request), SUBJECT_READ);
             MpClient mpClient = new MpClient(context);
             Response response = MpClient.getJsonResponse(mpClient.getSubjects());
             LOGGER.info("Response : " + response.toString());
@@ -109,6 +114,7 @@ public class ManagementPortalEndPoint {
             @PathParam(STUDY_NAME) String studyName
     ) {
         try {
+            checkPermission(getJWT(request), SUBJECT_READ);
             MpClient mpClient = new MpClient(context);
             Response response = MpClient.getJsonResponse(
                     mpClient.getAllSubjectsFromStudy(studyName));
@@ -143,6 +149,7 @@ public class ManagementPortalEndPoint {
             @PathParam(SUBJECT_ID) String subjectId
     ) {
         try {
+            checkPermission(getJWT(request), SUBJECT_READ);
             MpClient mpClient = new MpClient(context);
             Subject subject = mpClient.getSubject(subjectId);
             Response response = MpClient.getJsonResponse(subject);
@@ -176,6 +183,7 @@ public class ManagementPortalEndPoint {
             @ApiResponse(code = 200, message = "Return a list of subject.avsc objects")})
     public Response getAllProjectsJson() {
         try {
+            checkPermission(getJWT(request), PROJECT_READ);
             MpClient mpClient = new MpClient(context);
             Response response = MpClient.getJsonResponse(mpClient.getAllProjects(context));
             LOGGER.info("Response : " + response.getEntity());
@@ -209,6 +217,7 @@ public class ManagementPortalEndPoint {
             @PathParam(PROJECT_NAME) String projectName
     ) {
         try {
+            checkPermission(getJWT(request), PROJECT_READ);
             MpClient mpClient = new MpClient(context);
             Project project = mpClient.getProject(projectName, context);
             Response response = MpClient.getJsonResponse(project);

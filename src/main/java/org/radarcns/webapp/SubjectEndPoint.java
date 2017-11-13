@@ -16,6 +16,9 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.security.utils.SecurityUtils.getJWT;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
 import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
@@ -80,6 +83,7 @@ public class SubjectEndPoint {
             @PathParam(STUDY_ID) String study
     ) {
         try {
+            checkPermission(getJWT(request), SUBJECT_READ);
             return ResponseHandler.getJsonResponse(request, getAllSubjectsWorker());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
@@ -106,6 +110,7 @@ public class SubjectEndPoint {
             @PathParam(STUDY_ID) String study
     ) {
         try {
+            checkPermission(getJWT(request), SUBJECT_READ);
             return ResponseHandler.getAvroResponse(request, getAllSubjectsWorker());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
@@ -145,6 +150,7 @@ public class SubjectEndPoint {
             @PathParam(SUBJECT_ID) String subject
     ) {
         try {
+            checkPermission(getJWT(request), SUBJECT_READ);
             return ResponseHandler.getJsonResponse(request, getSubjectWorker(subject));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
@@ -173,6 +179,7 @@ public class SubjectEndPoint {
             @PathParam(SUBJECT_ID) String subject
     ) {
         try {
+            checkPermission(getJWT(request), SUBJECT_READ);
             return ResponseHandler.getAvroResponse(request, getSubjectWorker(subject));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);

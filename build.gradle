@@ -36,7 +36,7 @@ ext.apacheCommonsIoVersion = '2.5'
 ext.apacheCommonsLangVersion = '3.6'
 ext.okhttp3Version = '3.8.1'
 ext.httpProxyVersion = '1.9'
-ext.radarAuthVersion = '0.2.0'
+ext.radarAuthVersion = '0.2.1'
 
 configurations {
   codacy

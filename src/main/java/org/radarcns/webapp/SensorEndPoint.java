@@ -16,6 +16,10 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+import static org.radarcns.auth.authorization.Permission.SENSORDATA_READ;
+import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.security.utils.SecurityUtils.getJWT;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
@@ -97,6 +101,8 @@ public class SensorEndPoint {
             @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
+            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getJWT(request), SENSORDATA_READ);
             return ResponseHandler.getJsonResponse(request,
                     getLastReceivedSampleWorker(subject, source, sensor, stat, interval));
         } catch (Exception exec) {
@@ -132,6 +138,8 @@ public class SensorEndPoint {
             @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
+            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getJWT(request), SENSORDATA_READ);
             return ResponseHandler.getAvroResponse(request,
                 getLastReceivedSampleWorker(subject, source, sensor, stat, interval));
         } catch (Exception exec) {
@@ -193,6 +201,8 @@ public class SensorEndPoint {
             @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
+            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getJWT(request), SENSORDATA_READ);
             return ResponseHandler.getJsonResponse(request,
                 getSamplesWorker(subject, source, stat, interval, sensor));
         } catch (Exception exec) {
@@ -228,6 +238,8 @@ public class SensorEndPoint {
             @PathParam(SUBJECT_ID) String subject,
             @PathParam(SOURCE_ID) String source) {
         try {
+            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getJWT(request), SENSORDATA_READ);
             return ResponseHandler.getAvroResponse(request,
                 getSamplesWorker(subject, source, stat, interval, sensor));
         } catch (Exception exec) {
@@ -291,6 +303,8 @@ public class SensorEndPoint {
             @PathParam(START) long start,
             @PathParam(END) long end) {
         try {
+            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getJWT(request), SENSORDATA_READ);
             return ResponseHandler.getJsonResponse(request,
                 getSamplesWithinWindowWorker(subject, source, stat, interval, sensor, start, end));
         } catch (Exception exec) {
@@ -329,6 +343,8 @@ public class SensorEndPoint {
             @PathParam(START) long start,
             @PathParam(END) long end) {
         try {
+            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getJWT(request), SENSORDATA_READ);
             return ResponseHandler.getAvroResponse(request,
                 getSamplesWithinWindowWorker(subject, source, stat, interval, sensor, start, end));
         } catch (Exception exec) {
