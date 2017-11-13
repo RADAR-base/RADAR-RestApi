@@ -16,7 +16,6 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
-import static org.radarcns.auth.authorization.Permission.SENSORDATA_READ;
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
