@@ -17,8 +17,8 @@ package org.radarcns.webapp;
  */
 
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
-import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
@@ -49,6 +49,7 @@ import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.managementportal.MpClient;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.security.Param;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -88,12 +89,15 @@ public class SourceEndPoint {
             @ApiResponse(code = 200, message = "Return a source.avsc object containing last"
                 + "computed status")})
     public Response getLastComputedSourceStatusJson(
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source) {
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId) {
         try {
-            checkPermission(getJWT(request), SOURCE_READ);
+            MpClient client = new MpClient(context);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getLastComputedSourceStatus(subject, source));
+                getLastComputedSourceStatus(subjectId, sourceId));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -117,12 +121,15 @@ public class SourceEndPoint {
             @ApiResponse(code = 200, message = "Return a byte array serialising source.avsc object"
                 + "containing last computed status")})
     public Response getLastComputedSourceStatusAvro(
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source) {
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId) {
         try {
-            checkPermission(getJWT(request), SOURCE_READ);
+            MpClient client = new MpClient(context);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getLastComputedSourceStatus(subject, source));
+                getLastComputedSourceStatus(subjectId, sourceId));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -236,11 +243,13 @@ public class SourceEndPoint {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a subject.avsc object")})
     public Response getAllSourcesJson(
-            @PathParam(SUBJECT_ID) String subject) {
+            @PathParam(SUBJECT_ID) String subjectId) {
         try {
-            checkPermission(getJWT(request), SUBJECT_READ);
-            checkPermission(getJWT(request), SOURCE_READ);
-            return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subject));
+            MpClient client = new MpClient(context);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+                    sub.getProject().getProjectName());
+            return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subjectId));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -263,11 +272,13 @@ public class SourceEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a subject.avsc object")})
     public Response getAllSourcesAvro(
-            @PathParam(SUBJECT_ID) String subject) {
+            @PathParam(SUBJECT_ID) String subjectId) {
         try {
-            checkPermission(getJWT(request), SUBJECT_READ);
-            checkPermission(getJWT(request), SOURCE_READ);
-            return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subject));
+            MpClient client = new MpClient(context);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+                    sub.getProject().getProjectName());
+            return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subjectId));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);

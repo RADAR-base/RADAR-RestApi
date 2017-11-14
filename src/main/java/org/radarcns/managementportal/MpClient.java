@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
 
+import static org.radarcns.webapp.util.BasePath.SUBJECTS;
+
 /*
  * Copyright 2017 King's College London
  *
@@ -190,49 +192,35 @@ public class MpClient {
      * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
-    public ArrayList<Subject> getAllSubjectsFromStudy(String studyName) {
+    public ArrayList<Subject> getAllSubjectsFromStudy(String studyName) throws
+            MalformedURLException, URISyntaxException {
+
         LOGGER.info(studyName + context.getContextPath());
+        Request request = getBuilder(getUrl(Properties.getProjectEndPoint(),
+                studyName + "/" + SUBJECTS), context).get().build();
 
-        if (isSubjectsInitialised) {
-            return findSubjectsInProject(subjects,studyName);
-        } else {
-            try {
-                ArrayList<Subject> allSubjects = getAllSubjects(context);
-                return findSubjectsInProject(allSubjects , studyName);
-            } catch (MalformedURLException exc) {
-                LOGGER.error(exc.getMessage());
-            } catch (URISyntaxException exc) {
-                LOGGER.error(exc.getMessage());
-            } catch (IllegalStateException exc) {
-                LOGGER.error("Error : ", exc.fillInStackTrace());
+        ArrayList<Subject> allSubjects;
+
+        try (Response response = HttpClientListener.getClient(context)
+                .newCall(request).execute()) {
+            if (response.isSuccessful()) {
+
+                String jsonData = response.body().string();
+                allSubjects = Subject.getAllSubjectsFromJson(jsonData);
+                LOGGER.info("Retrieved Subjects from MP from Project " + studyName);
+                return allSubjects;
             }
+            LOGGER.info("Subjects is not present");
+            return null;
+        } catch (IOException exc) {
+            throw new IllegalStateException("Subjects could not be retrieved from Project "
+                    + studyName, exc);
         }
-        return null;
     }
 
-    /**
-     * Retrieves all {@link Subject} from a list of subjects having the same projectId.
-     * @param projectName {@link String} that has to be searched
-     * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
-     */
-    private ArrayList<Subject> findSubjectsInProject(ArrayList<Subject> subjects,
-                                                     String projectName) {
-        ArrayList<Subject> subjectsInProject = new ArrayList<>();
-        Iterator<Subject> elements = subjects.iterator();
-
-        while (elements.hasNext()) {
-            Subject currentSubject = elements.next();
-            if (projectName.equals(currentSubject.getProject().getProjectName())) {
-                subjectsInProject.add(currentSubject);
-            }
-        }
-        LOGGER.info("Subjects Retrieved from Study Name " + projectName);
-        return subjectsInProject;
-    }
-
-    private URL getUrl(URL endPoint, String subjectId) throws MalformedURLException {
-        URL subjectUrl = new URL(endPoint + subjectId);
-        return subjectUrl;
+    private URL getUrl(URL endPoint, String path) throws MalformedURLException {
+        URL newUrl = new URL(endPoint + path);
+        return newUrl;
     }
 
     private static Request.Builder getBuilder(URL url, ServletContext context) {

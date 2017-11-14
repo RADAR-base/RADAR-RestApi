@@ -32,14 +32,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.webapp.util.BasePath.PROJECT;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 import static org.radarcns.webapp.util.Parameter.STUDY_NAME;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.webapp.util.ResponseHandler;
+
 import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
 import static org.radarcns.auth.authorization.Permission.PROJECT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
@@ -114,7 +117,7 @@ public class ManagementPortalEndPoint {
             @PathParam(STUDY_NAME) String studyName
     ) {
         try {
-            checkPermission(getJWT(request), SUBJECT_READ);
+            checkPermissionOnProject(getJWT(request), SUBJECT_READ, studyName);
             MpClient mpClient = new MpClient(context);
             Response response = MpClient.getJsonResponse(
                     mpClient.getAllSubjectsFromStudy(studyName));
@@ -149,9 +152,10 @@ public class ManagementPortalEndPoint {
             @PathParam(SUBJECT_ID) String subjectId
     ) {
         try {
-            checkPermission(getJWT(request), SUBJECT_READ);
             MpClient mpClient = new MpClient(context);
             Subject subject = mpClient.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SUBJECT_READ,
+                    subject.getProject().getProjectName());
             Response response = MpClient.getJsonResponse(subject);
             LOGGER.info("Response : " + response.toString());
             return response;
@@ -217,7 +221,7 @@ public class ManagementPortalEndPoint {
             @PathParam(PROJECT_NAME) String projectName
     ) {
         try {
-            checkPermission(getJWT(request), PROJECT_READ);
+            checkPermissionOnProject(getJWT(request), PROJECT_READ, projectName);
             MpClient mpClient = new MpClient(context);
             Project project = mpClient.getProject(projectName, context);
             Response response = MpClient.getJsonResponse(project);

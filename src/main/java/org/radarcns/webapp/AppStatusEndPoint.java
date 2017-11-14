@@ -16,10 +16,8 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
-import static org.radarcns.auth.authorization.Permission.SENSORDATA_READ;
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
-import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
-import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
 import static org.radarcns.webapp.util.BasePath.ANDROID;
 import static org.radarcns.webapp.util.BasePath.AVRO;
@@ -44,6 +42,8 @@ import javax.ws.rs.core.Response;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.managementportal.MpClient;
+import org.radarcns.managementportal.Subject;
 import org.radarcns.security.Param;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
@@ -81,13 +81,15 @@ public class AppStatusEndPoint {
             @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
                 + "received status")})
     public Response getLastReceivedAppStatusJson(
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source) {
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId) {
         try {
-            checkPermission(getJWT(request), SOURCE_READ);
-            checkPermission(getJWT(request), SUBJECT_READ);
+            MpClient client = new MpClient(context);
+            Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getLastReceivedAppStatusWorker(subject, source));
+                getLastReceivedAppStatusWorker(subjectId, sourceId));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -110,13 +112,15 @@ public class AppStatusEndPoint {
             @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
                 + "received status")})
     public Response getLastReceivedAppStatusAvro(
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source) {
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId) {
         try {
-            checkPermission(getJWT(request), SOURCE_READ);
-            checkPermission(getJWT(request), SUBJECT_READ);
+            MpClient client = new MpClient(context);
+            Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getLastReceivedAppStatusWorker(subject, source));
+                getLastReceivedAppStatusWorker(subjectId, sourceId));
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
