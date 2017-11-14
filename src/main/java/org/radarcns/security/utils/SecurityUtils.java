@@ -1,10 +1,10 @@
 package org.radarcns.security.utils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.security.filter.AuthenticationFilter;
 
 import javax.servlet.ServletRequest;
-import java.nio.file.AccessDeniedException;
 
 /**
  * Utility class for Rest-API Security.
