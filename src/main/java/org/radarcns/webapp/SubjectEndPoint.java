@@ -40,10 +40,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.avro.restapi.subject.Cohort;
 import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.security.Param;
+import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,13 +81,21 @@ public class SubjectEndPoint {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a list of subject.avsc objects")})
+            @ApiResponse(code = 200, message = "Return a list of subject.avsc objects"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getAllSubjectsJson(
             @PathParam(STUDY_ID) String study
     ) {
         try {
             checkPermission(getJWT(request), SUBJECT_READ);
             return ResponseHandler.getJsonResponse(request, getAllSubjectsWorker());
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -105,13 +116,21 @@ public class SubjectEndPoint {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a byte array serialising a list of"
-                + "subject.avsc objects")})
+                + "subject.avsc objects"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getAllSubjectsAvro(
             @PathParam(STUDY_ID) String study
     ) {
         try {
             checkPermission(getJWT(request), SUBJECT_READ);
             return ResponseHandler.getAvroResponse(request, getAllSubjectsWorker());
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -145,13 +164,21 @@ public class SubjectEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
-                + "given subject identifier")})
+                + "given subject identifier"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSubjectJson(
             @PathParam(SUBJECT_ID) String subject
     ) {
         try {
             checkPermission(getJWT(request), SUBJECT_READ);
             return ResponseHandler.getJsonResponse(request, getSubjectWorker(subject));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -174,13 +201,21 @@ public class SubjectEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
-                + "given subject identifier")})
+                + "given subject identifier"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSubjectAvro(
             @PathParam(SUBJECT_ID) String subject
     ) {
         try {
             checkPermission(getJWT(request), SUBJECT_READ);
             return ResponseHandler.getAvroResponse(request, getSubjectWorker(subject));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);

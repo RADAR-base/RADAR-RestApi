@@ -126,6 +126,55 @@ public class ResponseHandler {
     }
 
     /**
+     * It sets the suitable status code and return a JSON message containing the input String.
+     * @param request HTTP request that has to be served
+     * @param message to provide more information about the error
+     * @return the response content formatted in JSON
+     **/
+    public static Response getJsonAccessDeniedResponse(HttpServletRequest request,
+                                                       String message) {
+        Status status = Status.UNAUTHORIZED;
+        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
+
+        SpecificRecord obj = new Message(message);
+
+        JsonNode json = AvroConverter.avroToJsonNode(obj);
+
+        if (json == null) {
+            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+            return Response.status(status.getStatusCode()).entity("Access Denied!").build();
+        } else {
+            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+            return Response.status(status.getStatusCode()).entity(json).build();
+        }
+    }
+
+    /**
+     * It sets the suitable status code and return a JSON message containing the input String.
+     * @param request HTTP request that has to be served
+     * @param message to provide more information about the error
+     * @return the response content formatted in JSON
+     **/
+    public static Response getJsonNotAuthorizedResponse(HttpServletRequest request,
+                                                        String message) {
+        Status status = Status.FORBIDDEN;
+        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
+
+        SpecificRecord obj = new Message(message);
+
+        JsonNode json = AvroConverter.avroToJsonNode(obj);
+
+        if (json == null) {
+            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+            return Response.status(status.getStatusCode()).entity("Forbidden!").build();
+        } else {
+            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+            return Response.status(status.getStatusCode()).entity(json).build();
+        }
+    }
+
+
+    /**
      * It sets the status code and serialises the given {@code SpecificRecord} in bytes array.
      * @param request HTTP request that has to be served
      * @param obj request result

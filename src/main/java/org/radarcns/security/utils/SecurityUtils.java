@@ -21,12 +21,12 @@ public final class SecurityUtils {
     public static DecodedJWT getJWT(ServletRequest request) throws AccessDeniedException {
         Object jwt = request.getAttribute(AuthenticationFilter.TOKEN_ATTRIBUTE);
         if (jwt == null) {
-            // should not happen, the JwtAuthenticationFilter would throw an exception first if it
+            // should not happen, the AuthenticationFilter would throw an exception first if it
             // can not decode the authorization header into a valid JWT
             throw new AccessDeniedException("No token was found in the request context.");
         }
         if (!(jwt instanceof DecodedJWT)) {
-            // should not happen, the JwtAuthenticationFilter will only set a DecodedJWT object
+            // should not happen, the AuthenticationFilter will only set a DecodedJWT object
             throw new AccessDeniedException("Expected token to be of type DecodedJWT but was "
                     + jwt.getClass().getName());
         }

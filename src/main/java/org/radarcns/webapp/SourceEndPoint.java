@@ -43,6 +43,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.avro.restapi.source.Source;
 import org.radarcns.avro.restapi.source.SourceSpecification;
 import org.radarcns.avro.restapi.source.SourceType;
@@ -52,6 +54,7 @@ import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.security.Param;
+import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +90,9 @@ public class SourceEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a source.avsc object containing last"
-                + "computed status")})
+                + "computed status"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getLastComputedSourceStatusJson(
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
@@ -98,6 +103,12 @@ public class SourceEndPoint {
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
                 getLastComputedSourceStatus(subjectId, sourceId));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -119,7 +130,9 @@ public class SourceEndPoint {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a byte array serialising source.avsc object"
-                + "containing last computed status")})
+                + "containing last computed status"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getLastComputedSourceStatusAvro(
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
@@ -130,6 +143,12 @@ public class SourceEndPoint {
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
                 getLastComputedSourceStatus(subjectId, sourceId));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -173,13 +192,21 @@ public class SourceEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a source_specification.avsc object"
-                + "containing last computed status")})
+                + "containing last computed status"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationJson(
             @PathParam(SOURCE_TYPE) SourceType source) {
         try {
             checkPermission(getJWT(request), SOURCE_READ);
             return ResponseHandler.getJsonResponse(request, getSourceSpecificationWorker(source));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -201,13 +228,21 @@ public class SourceEndPoint {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a source_specification.avsc object"
-                + "containing last computed status")})
+                + "containing last computed status"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationAvro(
             @PathParam(SOURCE_TYPE) SourceType source) {
         try {
             checkPermission(getJWT(request), SOURCE_READ);
             return ResponseHandler.getAvroResponse(request, getSourceSpecificationWorker(source));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -241,7 +276,9 @@ public class SourceEndPoint {
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a subject.avsc object")})
+            @ApiResponse(code = 200, message = "Return a subject.avsc object"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getAllSourcesJson(
             @PathParam(SUBJECT_ID) String subjectId) {
         try {
@@ -250,6 +287,12 @@ public class SourceEndPoint {
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subjectId));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -270,7 +313,9 @@ public class SourceEndPoint {
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a subject.avsc object")})
+            @ApiResponse(code = 200, message = "Return a subject.avsc object"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getAllSourcesAvro(
             @PathParam(SUBJECT_ID) String subjectId) {
         try {
@@ -279,6 +324,12 @@ public class SourceEndPoint {
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subjectId));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
