@@ -1,5 +1,6 @@
 package org.radarcns.integration.testcase.webapp;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
@@ -13,6 +14,7 @@ import static org.radarcns.webapp.util.BasePath.STATE;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
@@ -22,8 +24,7 @@ import java.util.List;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.bson.Document;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.*;
 import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.Sensor;
 import org.radarcns.avro.restapi.sensor.SensorSpecification;
@@ -40,6 +41,7 @@ import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoDataAccess;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
+import org.radarcns.integration.util.TokenTestUtils;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.util.AvroConverter;
@@ -73,6 +75,23 @@ public class SourceEndPointTest {
     private static final SensorType SENSOR_TYPE = HEART_RATE;
     private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
     private static final int SAMPLES = 10;
+
+    @BeforeClass
+    public static void loadToken() throws Exception {
+        TokenTestUtils.setUp();
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        stubFor(get(urlEqualTo(TokenTestUtils.PUBLIC_KEY))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-type", TokenTestUtils.APPLICATION_JSON)
+                        .withBody(TokenTestUtils.PUBLIC_KEY_BODY)));
+    }
+
+    @Rule
+    public WireMockRule wireMockRule = new WireMockRule(TokenTestUtils.WIREMOCK_PORT);
 
     @Test
     public void getStatusTest204() throws IOException {

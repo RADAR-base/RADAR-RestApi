@@ -16,6 +16,7 @@ package org.radarcns.integration.testcase.webapp;
  * limitations under the License.
  */
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
@@ -32,6 +33,7 @@ import static org.radarcns.webapp.util.Parameter.START;
 import static org.radarcns.webapp.util.Parameter.STAT;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
@@ -40,8 +42,7 @@ import java.util.List;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.bson.Document;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.*;
 import org.radarcns.avro.restapi.data.DoubleSample;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.header.TimeFrame;
@@ -53,6 +54,7 @@ import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
+import org.radarcns.integration.util.TokenTestUtils;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
@@ -70,6 +72,25 @@ public class SensorEndPointTest {
     private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
     private static final Class ITEM = DoubleSample.class;
     private static final int SAMPLES = 10;
+
+    @BeforeClass
+    public static void loadToken() throws Exception {
+        TokenTestUtils.setUp();
+        LOGGER.info("Token Utils set up successfully");
+    }
+
+    @Rule
+    public WireMockRule wireMockRule = new WireMockRule(TokenTestUtils.WIREMOCK_PORT);
+
+    @Before
+    public void setUp() throws Exception {
+        stubFor(get(urlEqualTo(TokenTestUtils.PUBLIC_KEY))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-type", TokenTestUtils.APPLICATION_JSON)
+                        .withBody(TokenTestUtils.PUBLIC_KEY_BODY)));
+        LOGGER.info("Mock MP set up successfully");
+    }
 
     @Test
     public void getRealtimeTest()

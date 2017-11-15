@@ -37,6 +37,7 @@ ext.apacheCommonsLangVersion = '3.6'
 ext.okhttp3Version = '3.8.1'
 ext.httpProxyVersion = '1.9'
 ext.radarAuthVersion = '0.2.1'
+ext.wireMockVersion = '2.5.1'
 
 configurations {
   codacy
@@ -89,6 +90,7 @@ dependencies {
   compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
+  testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: wireMockVersion
 
   integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
   integrationTestCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParser

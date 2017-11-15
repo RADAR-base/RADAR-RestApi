@@ -57,6 +57,7 @@ public class AuthenticationFilter implements Filter {
             log.error(ex.getMessage(), ex);
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
+            res.setHeader("Error", "Invalid Token!");
         }
     }
 

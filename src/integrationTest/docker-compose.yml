@@ -6,6 +6,7 @@ services:
     #----------------------------------------#
     hotstorage:
       image: radarcns/radar-hotstorage:0.1
+      network_mode: "host"
       ports:
         - "27017:27017"
         - "28017:28017"
@@ -19,6 +20,7 @@ services:
     #----------------------------------------#
     rest-api:
       build: image
+      network_mode: "host"
       image: radarcns/radar-restapi:0.1
       depends_on:
         - hotstorage
