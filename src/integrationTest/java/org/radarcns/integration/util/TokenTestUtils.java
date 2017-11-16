@@ -17,7 +17,7 @@ import java.util.Date;
  * Created by dverbeec on 29/06/2017. Updated in Rest-Api by yatharthranjan on 14/11/2017.
  */
 public class TokenTestUtils {
-    public static final String PUBLIC_KEY = "/oauth/token_key";
+
     public static String PUBLIC_KEY_BODY;
     public static String VALID_TOKEN;
     public static DecodedJWT SUPER_USER_TOKEN;
@@ -35,7 +35,6 @@ public class TokenTestUtils {
     public static String PUBLIC_KEY_STRING;
 
     public static final String APPLICATION_JSON = "application/json";
-    public static final int WIREMOCK_PORT = 8089;
     public static final String AUDIENCE = "res_RestApi";
 
     /**

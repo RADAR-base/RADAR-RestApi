@@ -4,7 +4,7 @@ released: 2017-08-29
 # ManagementPortal configuration
 oauth_client_id: client_id
 oauth_client_secret:  client_secret
-management_portal_url: http://localhost:8089/
+management_portal_url: http://wiremock:8089/
 token_endpoint: oauth/token
 project_endpoint: api/projects/
 subject_endpoint: api/subjects/

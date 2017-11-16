@@ -172,8 +172,8 @@ public class Utility {
                 .build();
 
         Request request = new Request.Builder()
-                .header("User-Agent", "Mozilla/5.0")
-                .header("Authentication","Bearer " + TokenTestUtils.VALID_TOKEN)
+                .addHeader("User-Agent", "Mozilla/5.0")
+                .header("Authorization","Bearer " + TokenTestUtils.VALID_TOKEN)
                 .url(url)
                 .build();
 

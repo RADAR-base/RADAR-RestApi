@@ -18,6 +18,7 @@ package org.radarcns.webapp;
 
 import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
@@ -45,6 +46,7 @@ import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.avro.restapi.subject.Cohort;
 import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.managementportal.MpClient;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -168,11 +170,14 @@ public class SubjectEndPoint {
             @ApiResponse(code = 401, message = "Access denied error occured"),
             @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSubjectJson(
-            @PathParam(SUBJECT_ID) String subject
+            @PathParam(SUBJECT_ID) String subjectId
     ) {
         try {
-            checkPermission(getJWT(request), SUBJECT_READ);
-            return ResponseHandler.getJsonResponse(request, getSubjectWorker(subject));
+            MpClient client = new MpClient(context);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SUBJECT_READ,
+                    sub.getProject().getProjectName());
+            return ResponseHandler.getJsonResponse(request, getSubjectWorker(subjectId));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -205,11 +210,14 @@ public class SubjectEndPoint {
             @ApiResponse(code = 401, message = "Access denied error occured"),
             @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSubjectAvro(
-            @PathParam(SUBJECT_ID) String subject
+            @PathParam(SUBJECT_ID) String subjectId
     ) {
         try {
-            checkPermission(getJWT(request), SUBJECT_READ);
-            return ResponseHandler.getAvroResponse(request, getSubjectWorker(subject));
+            MpClient client = new MpClient(context);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SUBJECT_READ,
+                    sub.getProject().getProjectName());
+            return ResponseHandler.getAvroResponse(request, getSubjectWorker(subjectId));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());

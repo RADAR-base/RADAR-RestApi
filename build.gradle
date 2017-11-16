@@ -213,7 +213,7 @@ task integrationTest(type: Test, dependsOn: ['copyFrontendConfigIntegrationTest'
 
   // This is not needed, but I like to see which tests have run
   testLogging {
-    events "skipped", "failed"
+    events "skipped", "failed", "passed"
   }
 }
 integrationTest.finalizedBy 'stopSimpleStack'
