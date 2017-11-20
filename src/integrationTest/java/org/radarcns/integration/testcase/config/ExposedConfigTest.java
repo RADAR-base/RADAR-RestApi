@@ -61,7 +61,9 @@ public class ExposedConfigTest {
 
     @BeforeClass
     public static void loadWiremock() throws Exception {
-        WiremockUtils.initializeWiremock();
+        if(WiremockUtils.wiremockInitialized == 0) {
+            WiremockUtils.initializeWiremock();
+        }
         logger.info("Wiremock set up successfully");
     }
 

@@ -1,15 +1,21 @@
 package org.radarcns.integration.util;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
+//import com.github.tomakehurst.wiremock.client.WireMock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
+/**
+ * Created by yatharthranjan on 14/11/2017.
+ */
 public class WiremockUtils {
 
     public static final String WIREMOCK_HOST = "localhost";
     public static final int WIREMOCK_PORT = 8089;
+    public static int wiremockInitialized = 0;
     public static final String SUBJECT_LOGIN1 = "UserID_0";
     public static final String SUBJECT_LOGIN2 = "UserID_01";
     public static final String SUBJECT_LOGIN_FALSE = "0";
@@ -111,6 +117,7 @@ public class WiremockUtils {
         TokenTestUtils.setUp();
         setupTokenResponse();
         setupStubs();
+        wiremockInitialized = 1;
     }
 
     public static void setupTokenResponse() {
@@ -121,38 +128,38 @@ public class WiremockUtils {
                 "\"sub\":\"radar_restapi\"," +
                 "\"sources\":[]," +
                 "\"iss\":\"ManagementPortal\"," +
-                "\"iat\":1510837691," +
+                "\"iat\":"+ Instant.now().getEpochSecond()+"," +
                 "\"jti\":\"c9b29b53-2bf8-4a1b-aed5-1732e0dbce57\"}";
         logger.info("Mock token response set up successful!");
     }
 
     public static void setupStubs() {
-        WireMock wireMock1 = new WireMock(WIREMOCK_HOST, WIREMOCK_PORT);
-        wireMock1.configureFor(WIREMOCK_HOST,WIREMOCK_PORT);
-        wireMock1.stubFor(get(urlEqualTo(PUBLIC_KEY))
+        //WireMock wireMock1 = new WireMock(WIREMOCK_HOST, WIREMOCK_PORT);
+        configureFor(WIREMOCK_HOST,WIREMOCK_PORT);
+        stubFor(get(urlEqualTo(PUBLIC_KEY))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-type", TokenTestUtils.APPLICATION_JSON)
                         .withBody(TokenTestUtils.PUBLIC_KEY_BODY)));
 
-        wireMock1.stubFor(post(urlEqualTo(TOKEN_END))
+        stubFor(post(urlEqualTo(TOKEN_END))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-type", TokenTestUtils.APPLICATION_JSON)
                         .withBody(TOKEN_RESPONSE)));
 
-        wireMock1.stubFor(get(urlEqualTo(SUBJECT_END1))
+        stubFor(get(urlEqualTo(SUBJECT_END1))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-type", TokenTestUtils.APPLICATION_JSON)
                         .withBody(MOCK_SUBJECT)));
 
-        wireMock1.stubFor(get(urlEqualTo(SUBJECT_END2))
+        stubFor(get(urlEqualTo(SUBJECT_END2))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-type", TokenTestUtils.APPLICATION_JSON)
                         .withBody(MOCK_SUBJECT)));
-        wireMock1.stubFor(get(urlEqualTo(SUBJECT_END_FALSE))
+        stubFor(get(urlEqualTo(SUBJECT_END_FALSE))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-type", TokenTestUtils.APPLICATION_JSON)
