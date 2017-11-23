@@ -20,11 +20,7 @@ import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
-import static org.radarcns.webapp.util.BasePath.AVRO;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
-import static org.radarcns.webapp.util.BasePath.SOURCE;
-import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
-import static org.radarcns.webapp.util.BasePath.STATE;
+import static org.radarcns.webapp.util.BasePath.*;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SOURCE_TYPE;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
@@ -120,8 +116,8 @@ public class SourceEndPoint {
      * AVRO function that returns the status of the given source.
      */
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/" + AVRO + "/" + STATE + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Produces(AVRO_BINARY)
+    @Path("/" + STATE + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return a SourceDefinition values",
             notes = "Using the source sensors values arrived within last 60sec, it computes the"
@@ -218,8 +214,8 @@ public class SourceEndPoint {
      * AVRO function that returns the status of the given data.
      */
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/" + AVRO + "/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
+    @Produces(AVRO_BINARY)
+    @Path("/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
     @ApiOperation(
             value = "Return a SourceDefinition specification",
             notes = "Return the data specification of all on-board sensors for the given"
@@ -305,8 +301,8 @@ public class SourceEndPoint {
      * AVRO function that returns all known sources for the given subject.
      */
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/" + AVRO + "/" + GET_ALL_SOURCES + "/{" + SUBJECT_ID + "}")
+    @Produces(AVRO_BINARY)
+    @Path("/" + GET_ALL_SOURCES + "/{" + SUBJECT_ID + "}")
     @ApiOperation(
             value = "Return a User value",
             notes = "Return all known sources associated with the give subjectID")

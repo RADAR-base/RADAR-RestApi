@@ -20,10 +20,7 @@ import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
-import static org.radarcns.webapp.util.BasePath.AVRO;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
-import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
-import static org.radarcns.webapp.util.BasePath.SUBJECT;
+import static org.radarcns.webapp.util.BasePath.*;
 import static org.radarcns.webapp.util.Parameter.STUDY_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
@@ -109,8 +106,8 @@ public class SubjectEndPoint {
      * AVRO function that returns all available subject.
      */
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/" + AVRO + "/" + GET_ALL_SUBJECTS + "/{" + STUDY_ID + "}")
+    @Produces(AVRO_BINARY)
+    @Path("/" + GET_ALL_SUBJECTS + "/{" + STUDY_ID + "}")
     @ApiOperation(
             value = "Return a list of subjects",
             notes = "Each subject can have multiple sourceID associated with him")
@@ -195,8 +192,8 @@ public class SubjectEndPoint {
      * AVRO function that returns all information related to the given subject identifier.
      */
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/" + AVRO + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
+    @Produces(AVRO_BINARY)
+    @Path("/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
     @ApiOperation(
             value = "Return the information related to given subject identifier",
             notes = "Some information are not implemented yet. The returned values are hardcoded.")
