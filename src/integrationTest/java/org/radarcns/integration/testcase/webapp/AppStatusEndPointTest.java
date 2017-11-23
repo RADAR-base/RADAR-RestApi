@@ -20,9 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-import static org.radarcns.webapp.util.BasePath.ANDROID;
-import static org.radarcns.webapp.util.BasePath.AVRO;
-import static org.radarcns.webapp.util.BasePath.STATUS;
+import static org.radarcns.webapp.util.BasePath.*;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
@@ -64,7 +62,7 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest204() throws IOException {
-        String path = ANDROID + "/" + AVRO + "/" + STATUS + "/{" + SUBJECT_ID
+        String path = ANDROID + "/" + STATUS + "/{" + SUBJECT_ID
                 + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE);
@@ -72,7 +70,7 @@ public class AppStatusEndPointTest {
         LOGGER.info(path);
 
         assertEquals(Status.NO_CONTENT.getStatusCode(), Utility.makeRequest(
-                Properties.getApiConfig().getApiUrl() + path).code());
+                Properties.getApiConfig().getApiUrl() + path, AVRO_BINARY).code());
     }
 
     @Test
@@ -96,14 +94,15 @@ public class AppStatusEndPointTest {
 
         Application expected = Utility.convertDocToApplication(map);
 
-        String path = ANDROID + "/" + AVRO + "/" + STATUS + "/{"
+        String path = ANDROID + "/" + STATUS + "/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT.concat("1"));
         path = path.replace("{" + SOURCE_ID + "}", SOURCE.concat("1"));
 
         LOGGER.info(path);
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
+        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
+                AVRO_BINARY);
         assertEquals(Status.OK.getStatusCode(), response.code());
 
         if (response.code() == Status.OK.getStatusCode()) {

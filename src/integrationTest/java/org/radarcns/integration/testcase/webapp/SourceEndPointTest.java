@@ -6,10 +6,7 @@ import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
 import static org.radarcns.avro.restapi.source.SourceType.BIOVOTION;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-import static org.radarcns.webapp.util.BasePath.AVRO;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
-import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
-import static org.radarcns.webapp.util.BasePath.STATE;
+import static org.radarcns.webapp.util.BasePath.*;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
@@ -42,7 +39,6 @@ import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.util.AvroConverter;
-import org.radarcns.webapp.util.BasePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +71,7 @@ public class SourceEndPointTest {
 
     @Test
     public void getStatusTest204() throws IOException {
-        String path = BasePath.SOURCE + "/" + AVRO + "/" + STATE + "/{" + SUBJECT_ID
+        String path = SOURCE + "/" + STATE + "/{" + SUBJECT_ID
                 + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE);
@@ -83,7 +79,7 @@ public class SourceEndPointTest {
         LOGGER.info(path);
 
         assertEquals(Status.NO_CONTENT.getStatusCode(), Utility.makeRequest(
-                Properties.getApiConfig().getApiUrl() + path).code());
+                Properties.getApiConfig().getApiUrl() + path, AVRO_BINARY).code());
     }
 
     @Test
@@ -94,14 +90,15 @@ public class SourceEndPointTest {
 
         MongoDataAccess.writeSourceType(SOURCE, SOURCE_TYPE, client);
 
-        String path = BasePath.SOURCE + "/" + AVRO + "/" + STATE + "/{" + SUBJECT_ID
+        String path = SOURCE + "/" + STATE + "/{" + SUBJECT_ID
                 + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
         LOGGER.info(path);
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
+        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
+                AVRO_BINARY);
         assertEquals(Status.OK.getStatusCode(), response.code());
 
         byte[] array = response.body().bytes();
@@ -142,23 +139,24 @@ public class SourceEndPointTest {
 
     @Test
     public void getSpecificationTest500() throws IOException {
-        String path = BasePath.SOURCE + "/" + AVRO + "/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}";
+        String path = SOURCE + "/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}";
         path = path.replace("{" + SOURCE_TYPE + "}", BIOVOTION.toString());
 
         LOGGER.info(path);
 
         assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), Utility.makeRequest(
-                Properties.getApiConfig().getApiUrl() + path).code());
+                Properties.getApiConfig().getApiUrl() + path, AVRO_BINARY).code());
     }
 
     @Test
     public void getSpecificationTest200() throws IOException {
-        String path = BasePath.SOURCE + "/" + AVRO + "/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}";
+        String path = SOURCE + "/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}";
         path = path.replace("{" + SOURCE_TYPE + "}", EMPATICA.toString());
 
         LOGGER.info(path);
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
+        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
+                AVRO_BINARY);
         assertEquals(Status.OK.getStatusCode(), response.code());
 
         SourceSpecification expected = Monitors.getInstance().getSpecification(EMPATICA);
@@ -186,7 +184,7 @@ public class SourceEndPointTest {
     @Test
     public void getAllSourcesTest200()
         throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = BasePath.SOURCE + "/" + AVRO + "/" + GET_ALL_SOURCES
+        String path = SOURCE + "/" + GET_ALL_SOURCES
                 + "/{" + SUBJECT_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
 
@@ -203,7 +201,8 @@ public class SourceEndPointTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE.concat("1")));
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
+        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
+                AVRO_BINARY);
         assertEquals(Status.OK.getStatusCode(), response.code());
 
         Subject actual = null;
@@ -235,13 +234,14 @@ public class SourceEndPointTest {
     @Test
     public void getAllSourcesTest204()
         throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = BasePath.SOURCE + "/" + AVRO + "/" + GET_ALL_SOURCES
+        String path = SOURCE + "/" + GET_ALL_SOURCES
                 + "/{" + SUBJECT_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
 
         LOGGER.info(path);
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
+        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
+                AVRO_BINARY);
         assertEquals(Status.NO_CONTENT.getStatusCode(), response.code());
     }
 

@@ -160,11 +160,12 @@ public class Utility {
      * Makes an HTTP request to given URL.
      *
      * @param url end-point
+     * @param accept Accept Header for content negotiation
      *
      * @return HTTP Response
      * @throws IOException if the request could not be executed
      */
-    public static Response makeRequest(String url) throws IOException {
+    public static Response makeRequest(String url, String accept) throws IOException {
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
@@ -173,6 +174,7 @@ public class Utility {
 
         Request request = new Request.Builder()
                 .addHeader("User-Agent", "Mozilla/5.0")
+                .addHeader("Accept", accept)
                 .header("Authorization","Bearer " + TokenTestUtils.VALID_TOKEN)
                 .url(url)
                 .build();

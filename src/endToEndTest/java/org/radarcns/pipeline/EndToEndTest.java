@@ -22,7 +22,7 @@ import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
 import static org.radarcns.integration.util.WiremockUtils.initializeWiremock;
 import static org.radarcns.integration.util.WiremockUtils.wiremockInitialized;
-import static org.radarcns.webapp.util.BasePath.AVRO;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.Parameter.INTERVAL;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
@@ -341,7 +341,7 @@ public class EndToEndTest {
             NoSuchAlgorithmException {
         LOGGER.info("Fetching APIs ...");
 
-        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{"
+        String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{"
                 + INTERVAL + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", USER_ID_MOCK);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE_ID_MOCK);
@@ -364,6 +364,7 @@ public class EndToEndTest {
                     Request request = new Request.Builder().
                             header("Authorization","Bearer "
                                     + TokenTestUtils.VALID_TOKEN)
+                            .addHeader("Accept", AVRO_BINARY)
                             .url(client.getRelativeUrl(pathSensor)).build();
 
                     try (Response response = client.request(request)) {
