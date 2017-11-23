@@ -27,7 +27,10 @@ import static org.radarcns.avro.restapi.sensor.SensorType.INTER_BEAT_INTERVAL;
 import static org.radarcns.avro.restapi.sensor.SensorType.THERMOMETER;
 import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-import static org.radarcns.webapp.util.BasePath.*;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;git
+import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
+
 import static org.radarcns.webapp.util.Parameter.STUDY_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
@@ -59,6 +62,7 @@ import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.util.AvroConverter;
+import org.radarcns.webapp.util.BasePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +79,7 @@ public class SubjectEndPointTest {
 
     @Test
     public void getAllSubjectsTest204() throws IOException {
-        String path = SUBJECT + "/" + GET_ALL_SUBJECTS + "/{"
+        String path = BasePath.SUBJECT + "/" + GET_ALL_SUBJECTS + "/{"
                 + STUDY_ID + "}";
         path = path.replace("{" + STUDY_ID + "}", "0");
 
@@ -100,7 +104,7 @@ public class SubjectEndPointTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT.concat("1"), SOURCE.concat("1")));
 
-        String path = SUBJECT + "/" + GET_ALL_SUBJECTS + "/{"
+        String path = BasePath.SUBJECT + "/" + GET_ALL_SUBJECTS + "/{"
                 + STUDY_ID + "}";
         path = path.replace("{" + STUDY_ID + "}", "0");
 
@@ -133,7 +137,7 @@ public class SubjectEndPointTest {
 
     @Test
     public void getSubjectTest204() throws IOException {
-        String path = SUBJECT + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}";
+        String path = BasePath.SUBJECT + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", "0");
 
         LOGGER.info(path);
@@ -157,7 +161,7 @@ public class SubjectEndPointTest {
 
         collection.insertMany(randomInput);
 
-        String path = SUBJECT + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}";
+        String path = BasePath.SUBJECT + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
 
         LOGGER.info(path);
