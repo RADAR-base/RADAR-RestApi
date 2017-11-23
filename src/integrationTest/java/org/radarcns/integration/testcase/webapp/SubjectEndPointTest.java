@@ -28,7 +28,7 @@ import static org.radarcns.avro.restapi.sensor.SensorType.THERMOMETER;
 import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;git
+import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
 import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
 
 import static org.radarcns.webapp.util.Parameter.STUDY_ID;
