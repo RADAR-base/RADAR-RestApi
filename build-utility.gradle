@@ -151,13 +151,41 @@ task setRadarEnvironmentForDocker(dependsOn: buildDocker) {
     file("${radarStackPath}/${radarDockerComposeOriginal}") << dockerComposeYml.text
     def dockerComposeTmp = file("${radarStackPath}/.${radarDockerCompose}.tmp")
     dockerComposeTmp << dockerComposeYml.text.replaceAll('radarcns/radar-restapi:.*', 'radarcns/radar-restapi:dev')
+
+    // Add wiremock as a dependency to Rest Api
+    def dockerComposeText = dockerComposeTmp.text.replaceAll('  rest-api:\n' +
+            '    image: radarcns/radar-restapi:dev\n' +
+            '    networks:\n' +
+            '      - hotstorage\n' +
+            '      - api\n' +
+            '    depends_on:\n' +
+            '      - hotstorage\n' +
+            '    restart: always', '  rest-api:\n' +
+            '    image: radarcns/radar-restapi:dev\n' +
+            '    networks:\n' +
+            '      - hotstorage\n' +
+            '      - api\n' +
+            '    depends_on:\n' +
+            '      - hotstorage\n' +
+            '      - wiremock\n' +
+            '    restart: always')
+    dockerComposeTmp.createNewFile()
+    dockerComposeTmp.write(dockerComposeText)
+    // Add wiremock to docker-compose to start up with the stack
+    dockerComposeTmp.append("\n\n  wiremock:\n" +
+            "    image: radarcns/wiremock\n" +
+            "    networks:\n" +
+            "      - api\n" +
+            "      - default\n" +
+            "    ports:\n" +
+            "      - \"8089:8089\"")
     dockerComposeTmp.renameTo("${radarStackPath}/${radarDockerCompose}")
   }
 }
 
 ext.containers = ['zookeeper-1', 'kafka-1', 'kafka-2', 'kafka-3', 'schema-registry-1',
                   'rest-proxy-1', 'kafka-init', 'hotstorage', 'rest-api',
-                  'radar-mongodb-connector', 'radar-backend-stream', 'webserver']
+                  'radar-mongodb-connector', 'radar-backend-stream', 'webserver', 'wiremock']
 task reducedStack(dependsOn: setRadarEnvironmentForDocker) {
   doLast {
     def dockerComposeYml = file("${radarStackPath}/${radarDockerCompose}")

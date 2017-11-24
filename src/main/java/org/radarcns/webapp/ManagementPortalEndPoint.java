@@ -19,10 +19,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.radarcns.managementportal.MpClient;
-import org.radarcns.managementportal.Project;
-import org.radarcns.managementportal.Subject;
-import org.radarcns.webapp.util.ResponseHandler;
+import org.radarcns.auth.exception.NotAuthorizedException;
+import org.radarcns.security.exception.AccessDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +34,21 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.webapp.util.BasePath.PROJECT;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 import static org.radarcns.webapp.util.Parameter.STUDY_NAME;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+
+import org.radarcns.managementportal.MpClient;
+import org.radarcns.managementportal.Project;
+import org.radarcns.managementportal.Subject;
+import org.radarcns.webapp.util.ResponseHandler;
+
+import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
+import static org.radarcns.auth.authorization.Permission.PROJECT_READ;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.security.utils.SecurityUtils.getJWT;
 
 /**
  *  Management Portal web-app. Function set to access subject and source information from MP.
@@ -67,20 +76,29 @@ public class ManagementPortalEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + SUBJECTS)
     @ApiOperation(
-            value = "Return a list of subjects",
+            value = "Return a list of subjects from the management portal",
             notes = "Each subject can have multiple sourceID associated with him")
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
                     + "there is a message.avsc object with more details"),
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                     + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a list of subject.avsc objects")})
+            @ApiResponse(code = 200, message = "Return a list of subject.avsc objects"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getAllSubjectsJson() {
         try {
+            checkPermission(getJWT(request), SUBJECT_READ);
             MpClient mpClient = new MpClient(context);
             Response response = MpClient.getJsonResponse(mpClient.getSubjects());
             LOGGER.info("Response : " + response.toString());
             return response;
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -104,16 +122,25 @@ public class ManagementPortalEndPoint {
                     + "there is a message.avsc object with more details"),
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                     + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a list of subject.avsc objects")})
+            @ApiResponse(code = 200, message = "Return a list of subject.avsc objects"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getAllSubjectsJsonFromStudy(
             @PathParam(STUDY_NAME) String studyName
     ) {
         try {
+            checkPermissionOnProject(getJWT(request), SUBJECT_READ, studyName);
             MpClient mpClient = new MpClient(context);
             Response response = MpClient.getJsonResponse(
                     mpClient.getAllSubjectsFromStudy(studyName));
             LOGGER.info("Response : " + response.toString());
             return response;
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -138,16 +165,26 @@ public class ManagementPortalEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                     + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
-                    + "given subject identifier")})
+                    + "given subject identifier"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSubjectJson(
             @PathParam(SUBJECT_ID) String subjectId
     ) {
         try {
             MpClient mpClient = new MpClient(context);
             Subject subject = mpClient.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SUBJECT_READ,
+                    subject.getProject().getProjectName());
             Response response = MpClient.getJsonResponse(subject);
             LOGGER.info("Response : " + response.toString());
             return response;
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -173,13 +210,22 @@ public class ManagementPortalEndPoint {
                     + "there is a message.avsc object with more details"),
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                     + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a list of subject.avsc objects")})
+            @ApiResponse(code = 200, message = "Return a list of subject.avsc objects"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getAllProjectsJson() {
         try {
+            checkPermission(getJWT(request), PROJECT_READ);
             MpClient mpClient = new MpClient(context);
             Response response = MpClient.getJsonResponse(mpClient.getAllProjects(context));
             LOGGER.info("Response : " + response.getEntity());
             return response;
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -204,16 +250,25 @@ public class ManagementPortalEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                     + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return the subject.avsc object associated with the "
-                    + "given subject identifier")})
+                    + "given subject identifier"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getProjectJson(
             @PathParam(PROJECT_NAME) String projectName
     ) {
         try {
+            checkPermissionOnProject(getJWT(request), PROJECT_READ, projectName);
             MpClient mpClient = new MpClient(context);
             Project project = mpClient.getProject(projectName, context);
             Response response = MpClient.getJsonResponse(project);
             LOGGER.info("Response : " + response.toString());
             return response;
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);

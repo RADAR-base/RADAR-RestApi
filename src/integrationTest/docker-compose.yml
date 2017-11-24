@@ -1,4 +1,8 @@
-version: '2'
+version: '3'
+
+networks:
+    simplestack:
+      driver: bridge
 
 services:
     #----------------------------------------#
@@ -9,6 +13,10 @@ services:
       ports:
         - "27017:27017"
         - "28017:28017"
+      networks:
+        - simplestack
+      depends_on:
+        - wiremock
       environment:
         RADAR_USER: restapi
         RADAR_PWD: radar
@@ -22,7 +30,22 @@ services:
       image: radarcns/radar-restapi:0.1
       depends_on:
         - hotstorage
+        - wiremock
+      networks:
+        - simplestack
       ports:
         - "8080:8080"
       volumes:
         - "./volumes/radar:/usr/local/tomcat/conf/radar"
+
+
+    #----------------------------------------#
+    #             RADAR Wiremock             #
+    #----------------------------------------#
+    wiremock:
+      build: image/wiremock
+      image: radarcns/wiremock
+      networks:
+        - simplestack
+      ports:
+        - "8089:8089"

@@ -32,8 +32,16 @@ public class Source {
 
     @JsonProperty("id")
     private Integer id;
-    @JsonProperty("deviceTypeAndSourceId")
-    private String typeAndId;
+    @JsonProperty("deviceTypeId")
+    private String deviceTypeId;
+    @JsonProperty("deviceTypeProducer")
+    private String deviceTypeProducer;
+    @JsonProperty("deviceTypeModel")
+    private String deviceTypeModel;
+    @JsonProperty("sourceId")
+    private String sourceId;
+    @JsonProperty("sourceName")
+    private String sourceName;
     @JsonProperty("assigned")
     private Boolean assigned;
 
@@ -41,11 +49,19 @@ public class Source {
 
     protected Source(
             @JsonProperty("id") Integer id,
-            @JsonProperty("deviceTypeAndSourceId") String typeAndId,
+            @JsonProperty("deviceTypeId") String deviceTypeId,
+            @JsonProperty("deviceTypeProducer") String deviceTypeProducer,
+            @JsonProperty("deviceTypeModel") String deviceTypeModel,
+            @JsonProperty("sourceId") String sourceId,
+            @JsonProperty("sourceName") String sourceName,
             @JsonProperty("assigned")  boolean assigned
     ) {
         this.id = id;
-        this.typeAndId = typeAndId;
+        this.deviceTypeId = deviceTypeId;
+        this.deviceTypeModel = deviceTypeModel;
+        this.deviceTypeProducer = deviceTypeProducer;
+        this.sourceId = sourceId;
+        this.sourceName = sourceName;
         this.assigned = assigned;
     }
 
@@ -54,8 +70,24 @@ public class Source {
         return id;
     }
 
-    public String getTypeAndId() {
-        return typeAndId;
+    public String getDeviceTypeId() {
+        return deviceTypeId;
+    }
+
+    public String getDeviceTypeProducer() {
+        return deviceTypeProducer;
+    }
+
+    public String getDeviceTypeModel() {
+        return deviceTypeModel;
+    }
+
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public String getSourceName() {
+        return sourceName;
     }
 
     public Boolean getAssigned() {

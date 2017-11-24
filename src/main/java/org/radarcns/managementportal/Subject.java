@@ -39,10 +39,9 @@ public class Subject {
 
     public static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
 
-    //@JsonProperty("login")
     private final String login;
     @JsonProperty("externalId")
-    private final Integer externalId;
+    private final String externalId;
     @JsonDeserialize(using = UrlDeseralizer.class)
     @JsonProperty("externalLink")
     private final URL externalLink;
@@ -76,7 +75,7 @@ public class Subject {
      *      {@link #HUMAN_READABLE_IDENTIFIER_KEY}
      */
     public Subject(@JsonProperty("login") String login,
-                   @JsonProperty("externalId") Integer externalId,
+                   @JsonProperty("externalId") String externalId,
                    @JsonProperty("externalLink") URL externalLink,
                    @JsonProperty("attributes") Map<String,String> attributes,
                    @JsonProperty("status") String status,
@@ -98,7 +97,7 @@ public class Subject {
         return login;
     }
 
-    public Integer getExternalId() {
+    public String getExternalId() {
         return externalId;
     }
 

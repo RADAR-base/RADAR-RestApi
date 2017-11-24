@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
+import static org.radarcns.integration.util.WiremockUtils.initializeWiremock;
+import static org.radarcns.integration.util.WiremockUtils.wiremockInitialized;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.Parameter.INTERVAL;
@@ -43,6 +45,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.junit.BeforeClass;
@@ -61,6 +65,7 @@ import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
+import org.radarcns.integration.util.TokenTestUtils;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.MockDataConfig;
@@ -101,7 +106,11 @@ public class EndToEndTest {
      *      to accept requests.
      */
     @BeforeClass
-    public static void setUpClass() throws IOException, InterruptedException {
+    public static void setUpClass() throws Exception {
+        if(wiremockInitialized == 0) {
+            initializeWiremock();
+        }
+        LOGGER.info("Wiremock set up successfully");
         URL configResource = EndToEndTest.class.getClassLoader().getResource(PIPELINE_CONFIG);
         assertNotNull(configResource);
         File configFile = new File(configResource.getFile());
@@ -352,7 +361,12 @@ public class EndToEndTest {
 
                     LOGGER.info("Requesting {}", client.getRelativeUrl(pathSensor));
 
-                    try (Response response = client.request(pathSensor)) {
+                    Request request = new Request.Builder().
+                            header("Authorization","Bearer "
+                                    + TokenTestUtils.VALID_TOKEN)
+                            .url(client.getRelativeUrl(pathSensor)).build();
+
+                    try (Response response = client.request(request)) {
                         assertEquals(200, response.code());
 
                         LOGGER.info("[{}] {}", response.code(), pathSensor);
@@ -527,7 +541,10 @@ public class EndToEndTest {
                 EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
 
         try (RestClient client = new RestClient(pipelineConfig.getFrontend());
-                Response response = client.request("/config/" + CONFIG_JSON)) {
+                Response response = client.request(new Request.Builder().
+                        header("Authorization","Bearer "
+                                + TokenTestUtils.VALID_TOKEN)
+                        .url(client.getRelativeUrl("/config/" + CONFIG_JSON)).build())) {
             LOGGER.info("Requested {}", client.getRelativeUrl("/config/" + CONFIG_JSON));
             assertEquals(200, response.code());
             assertEquals(expected, response.body().string());

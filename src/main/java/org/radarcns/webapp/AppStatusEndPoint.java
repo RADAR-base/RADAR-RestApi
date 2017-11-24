@@ -16,6 +16,9 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
+import static org.radarcns.security.utils.SecurityUtils.getJWT;
 import static org.radarcns.webapp.util.BasePath.ANDROID;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.STATUS;
@@ -36,10 +39,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.managementportal.MpClient;
+import org.radarcns.managementportal.Subject;
 import org.radarcns.security.Param;
+import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,13 +82,25 @@ public class AppStatusEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
                 + "there is a message.avsc object with more details"),
             @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
-                + "received status")})
+                + "received status"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getLastReceivedAppStatusJson(
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source) {
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId) {
         try {
+            MpClient client = new MpClient(context);
+            Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getLastReceivedAppStatusWorker(subject, source));
+                getLastReceivedAppStatusWorker(subjectId, sourceId));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -101,13 +121,25 @@ public class AppStatusEndPoint {
             @ApiResponse(code = 500, message = "An error occurs while executing"),
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
-                + "received status")})
+                + "received status"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getLastReceivedAppStatusAvro(
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source) {
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId) {
         try {
+            MpClient client = new MpClient(context);
+            Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getLastReceivedAppStatusWorker(subject, source));
+                getLastReceivedAppStatusWorker(subjectId, sourceId));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);

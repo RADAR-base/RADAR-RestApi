@@ -26,11 +26,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+
+import okhttp3.Request;
 import okhttp3.Response;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.radarcns.config.Properties;
 import org.radarcns.config.ServerConfig;
+import org.radarcns.integration.util.TokenTestUtils;
 import org.radarcns.integration.util.Utility;
+import org.radarcns.integration.util.WiremockUtils;
 import org.radarcns.producer.rest.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +58,15 @@ public class ExposedConfigTest {
     public static final String FRONTEND = "frontend";
 
     private static Logger logger = LoggerFactory.getLogger(ExposedConfigTest.class);
+
+    @BeforeClass
+    public static void loadWiremock() throws Exception {
+        if(WiremockUtils.wiremockInitialized == 0) {
+            WiremockUtils.initializeWiremock();
+        }
+        logger.info("Wiremock set up successfully");
+    }
+
 
     @Test
     public void checkFrontEndConfig()
@@ -85,8 +99,12 @@ public class ExposedConfigTest {
     public static String getSwaggerBasePath(ServerConfig config)
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
 
+
         try (RestClient client = new RestClient(config);
-                Response response = client.request(SWAGGER_JSON)) {
+                Response response = client.request(new Request.Builder().
+                        header("Authorization","Bearer "
+                                + TokenTestUtils.VALID_TOKEN)
+                        .url(client.getRelativeUrl(SWAGGER_JSON)).build())) {
 
             logger.info("Requested {}", client.getRelativeUrl(SWAGGER_JSON));
 

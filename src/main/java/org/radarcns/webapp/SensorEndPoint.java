@@ -16,6 +16,9 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
+import static org.radarcns.security.utils.SecurityUtils.getJWT;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
@@ -42,6 +45,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.avro.restapi.dataset.Dataset;
 import org.radarcns.avro.restapi.dataset.Item;
 import org.radarcns.avro.restapi.header.DescriptiveStatistic;
@@ -49,7 +54,10 @@ import org.radarcns.avro.restapi.header.TimeFrame;
 import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.managementportal.MpClient;
+import org.radarcns.managementportal.Subject;
 import org.radarcns.security.Param;
+import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,16 +97,28 @@ public class SensorEndPoint {
                 + "there is a message.avsc object with more details."),
             @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing last "
                 + "computed sample for the given inputs formatted either Acceleration.avsc or "
-                + "DoubleValue.avsc")})
+                + "DoubleValue.avsc"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getLastReceivedSampleJson(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source) {
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId) {
         try {
+            MpClient client = new MpClient(context);
+            Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                    getLastReceivedSampleWorker(subject, source, sensor, stat, interval));
+                    getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
@@ -124,16 +144,28 @@ public class SensorEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters."),
             @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
                 + "object containing last computed sample for the given inputs formatted either "
-                + "Acceleration.avsc or DoubleValue.avsc")})
+                + "Acceleration.avsc or DoubleValue.avsc"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getLastReceivedSampleAvro(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source) {
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId) {
         try {
+            MpClient client = new MpClient(context);
+            Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getLastReceivedSampleWorker(subject, source, sensor, stat, interval));
+                getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -185,16 +217,28 @@ public class SensorEndPoint {
                 + "there is a message.avsc object with more details."),
             @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing all "
                 + "available samples for the given inputs formatted either Acceleration.avsc or "
-                + "DoubleValue.avsc")})
+                + "DoubleValue.avsc"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSamplesJson(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source) {
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId) {
         try {
+            MpClient client = new MpClient(context);
+            Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getSamplesWorker(subject, source, stat, interval, sensor));
+                getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
@@ -220,16 +264,28 @@ public class SensorEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters."),
             @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
                 + "object containing all available samples for the given inputs formatted either "
-                + "Acceleration.avsc or DoubleValue.avsc")})
+                + "Acceleration.avsc or DoubleValue.avsc"),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSamplesAvro(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source) {
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId) {
         try {
+            MpClient client = new MpClient(context);
+            Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getSamplesWorker(subject, source, stat, interval, sensor));
+                getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
@@ -281,18 +337,31 @@ public class SensorEndPoint {
                 + "there is a message.avsc object with more details."),
             @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing samples "
                 + "belonging to the time window [start - end] for the given inputs formatted "
-                + "either Acceleration.avsc or DoubleValue.avsc.")})
+                + "either Acceleration.avsc or DoubleValue.avsc."),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSamplesWithinWindowJson(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source,
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId,
             @PathParam(INTERVAL) TimeFrame interval,
             @PathParam(START) long start,
             @PathParam(END) long end) {
         try {
+            MpClient client = new MpClient(context);
+            Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getSamplesWithinWindowWorker(subject, source, stat, interval, sensor, start, end));
+                getSamplesWithinWindowWorker(subjectId, sourceId, stat,
+                        interval, sensor, start, end));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
@@ -319,18 +388,31 @@ public class SensorEndPoint {
             @ApiResponse(code = 204, message = "No value for the given parameters"),
             @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
                 + "object containing samples belonging to the time window [start - end] for the "
-                + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")})
+                + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc."),
+            @ApiResponse(code = 401, message = "Access denied error occured"),
+            @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSamplesWithinWindowAvro(
             @PathParam(SENSOR) SensorType sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeFrame interval,
-            @PathParam(SUBJECT_ID) String subject,
-            @PathParam(SOURCE_ID) String source,
+            @PathParam(SUBJECT_ID) String subjectId,
+            @PathParam(SOURCE_ID) String sourceId,
             @PathParam(START) long start,
             @PathParam(END) long end) {
         try {
+            MpClient client = new MpClient(context);
+            Subject sub = client.getSubject(subjectId);
+            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+                    sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getSamplesWithinWindowWorker(subject, source, stat, interval, sensor, start, end));
+                getSamplesWithinWindowWorker(subjectId, sourceId, stat,
+                        interval, sensor, start, end));
+        } catch (AccessDeniedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+        } catch (NotAuthorizedException exc) {
+            LOGGER.error(exc.getMessage(), exc);
+            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);
