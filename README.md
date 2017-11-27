@@ -24,7 +24,7 @@ By default, log messages are redirected to the `STDOUT`.
 
 The api documentation is located at `<your-server-address>:<port>/radar/api/swagger.json`
 
-For accessing the end-points of this API, you will need JWT tokens from the [Management Portal](https://github.com/RADAR-CNS/ManagementPortal) and sned it with each request in the header. In order for your token to allow access to the Rest-Api you will need to add the resource name of rest-api (ie - `res_RestApi`) in the oauth client details of the Management Portal(MP). For example, if you want a client named `dashboard` to have access to the REST API just add this line to the OAuth client credentials csv file of MP - 
+For accessing the end-points of this API, you will need JWT tokens from the [Management Portal](https://github.com/RADAR-CNS/ManagementPortal) and send it with each request in the header. In order for your token to allow access to the Rest-Api you will need to add the resource name of rest-api (ie - `res_RestApi`) in the oauth client details of the Management Portal(MP). For example, if you want a client named `dashboard` to have access to the REST API just add this line to the OAuth client credentials csv file of MP - 
 ```
 dashbard;res_RestApi;my-secret-token-to-change-in-production;SUBJECT.READ,PROJECT.READ,SOURCE.READ,DEVICETYPE.READ;client_credentials;;;1800;3600;{};true
 ```

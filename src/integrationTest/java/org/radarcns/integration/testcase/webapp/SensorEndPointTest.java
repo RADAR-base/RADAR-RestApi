@@ -21,9 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
 import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-import static org.radarcns.webapp.util.BasePath.AVRO;
-import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.BasePath.REALTIME;
+import static org.radarcns.webapp.util.BasePath.*;
 import static org.radarcns.webapp.util.Parameter.END;
 import static org.radarcns.webapp.util.Parameter.INTERVAL;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
@@ -73,7 +71,7 @@ public class SensorEndPointTest {
     @Test
     public void getRealtimeTest()
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/" + AVRO + "/" + REALTIME + "/{" + SENSOR + "}/{" + STAT
+        String path = DATA + "/" + REALTIME + "/{" + SENSOR + "}/{" + STAT
                 + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
         path = path.replace("{" + STAT + "}", COUNT.name());
@@ -100,7 +98,8 @@ public class SensorEndPointTest {
 
         Dataset actual = null;
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
+        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
+                AVRO_BINARY);
         assertEquals(Status.OK.getStatusCode(), response.code());
 
         if (response.code() == Status.OK.getStatusCode()) {
@@ -116,7 +115,7 @@ public class SensorEndPointTest {
     @Test
     public void getAllByUserTest()
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+        String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
         path = path.replace("{" + STAT + "}", COUNT.name());
@@ -143,7 +142,8 @@ public class SensorEndPointTest {
 
         Dataset actual = null;
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
+        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
+                AVRO_BINARY);
         assertEquals(Status.OK.getStatusCode(), response.code());
 
         if (response.code() == Status.OK.getStatusCode()) {
@@ -159,7 +159,7 @@ public class SensorEndPointTest {
     @Test
     public void getTimeWindowTest200()
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+        String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + START + "}/{" + END + "}";
         path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
         path = path.replace("{" + STAT + "}", COUNT.name());
@@ -197,7 +197,8 @@ public class SensorEndPointTest {
 
         Dataset actual = null;
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
+        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
+                AVRO_BINARY);
         assertEquals(Status.OK.getStatusCode(), response.code());
 
         if (response.code() == Status.OK.getStatusCode()) {
@@ -213,7 +214,7 @@ public class SensorEndPointTest {
     @Test
     public void getAllDataTest204()
         throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+        String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
         path = path.replace("{" + STAT + "}", COUNT.name());
@@ -223,7 +224,8 @@ public class SensorEndPointTest {
 
         LOGGER.info(path);
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path);
+        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
+                AVRO_BINARY);
         assertEquals(Status.NO_CONTENT.getStatusCode(), response.code());
     }
 

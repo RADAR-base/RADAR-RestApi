@@ -35,6 +35,7 @@ public class BasePath {
     public static final String STATE = "state";
     public static final String PROJECT = "projects";
     public static final String SUBJECTS = "subjects";
+    public static final String AVRO_BINARY = "avro/binary";
 
 
     private BasePath() {

@@ -19,9 +19,7 @@ package org.radarcns.webapp;
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
-import static org.radarcns.webapp.util.BasePath.ANDROID;
-import static org.radarcns.webapp.util.BasePath.AVRO;
-import static org.radarcns.webapp.util.BasePath.STATUS;
+import static org.radarcns.webapp.util.BasePath.*;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
@@ -112,8 +110,8 @@ public class AppStatusEndPoint {
      * AVRO function that returns the status app of the given subject.
      */
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/" + AVRO + "/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Produces(AVRO_BINARY)
+    @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Return an Applications status",
             notes = "The Android application periodically updates its current status")

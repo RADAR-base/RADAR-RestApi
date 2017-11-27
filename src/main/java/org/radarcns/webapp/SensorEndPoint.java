@@ -19,9 +19,7 @@ package org.radarcns.webapp;
 import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
-import static org.radarcns.webapp.util.BasePath.AVRO;
-import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.BasePath.REALTIME;
+import static org.radarcns.webapp.util.BasePath.*;
 import static org.radarcns.webapp.util.Parameter.END;
 import static org.radarcns.webapp.util.Parameter.INTERVAL;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
@@ -130,8 +128,8 @@ public class SensorEndPoint {
      * AVRO function that returns the last seen data value if available.
      */
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/" + AVRO + "/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL
+    @Produces(AVRO_BINARY)
+    @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL
             + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
@@ -250,8 +248,8 @@ public class SensorEndPoint {
      * AVRO function that returns all available samples for the given data.
      */
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Produces(AVRO_BINARY)
+    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
@@ -373,8 +371,8 @@ public class SensorEndPoint {
      * AVRO function that returns all data value inside the time-window [start-end].
      */
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Produces(AVRO_BINARY)
+    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @ApiOperation(
             value = "Returns a dataset object formatted in Apache AVRO.",
