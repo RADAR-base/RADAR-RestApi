@@ -2,28 +2,28 @@
 #List of Schema Registry instances
 schema_registry:
   protocol: https
-  host: localhost
+  host: 10.131.135.158
   path: /schema/
   unsafe: true
 #============================ Rest Proxy ================================#
 # if the producer_mode is rest, you must provide rest_proxy values
 rest_proxy:
   protocol: https
-  host: localhost
+  host: 10.131.135.158
   path: /kafka/
   unsafe: true
 
 #============================= Rest API =================================#
 rest_api:
   protocol: https
-  host: localhost
+  host: 10.131.135.158
   path: /api/
   unsafe: true
 
 #============================= Frontend =================================#
 frontend:
   protocol: https
-  host: localhost
+  host: 10.131.135.158
   path: /frontend/
   unsafe: true
 

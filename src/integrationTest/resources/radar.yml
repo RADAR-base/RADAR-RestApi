@@ -8,14 +8,14 @@ swagger_version: 1.0.0
 application_protocol: http
 
 # Machine address hosting the APIs
-host: localhost:8080/radar
+host: 10.131.135.158:8080/radar
 
 # Base or Root path for the RESTFul interface
 api_base_path: api
 
 # Mongodb hosts
 mongo_hosts:
-    localhost: 27017
+    10.131.135.158: 27017
 
 # Mongodb User
 mongo_user:

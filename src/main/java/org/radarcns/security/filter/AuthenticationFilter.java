@@ -47,6 +47,9 @@ public class AuthenticationFilter implements Filter {
         if (token == null) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
+            res.setHeader("Error", "No Token Provided!");
+            res.getWriter().write("No token was provided with the request " +
+                    "and thus the request cannot be authorized");
             return;
         }
 
@@ -58,6 +61,8 @@ public class AuthenticationFilter implements Filter {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
             res.setHeader("Error", "Invalid Token!");
+            res.getWriter().write("The token provided with the request is invalid " +
+                    "and thus the request cannot be authorized");
         }
     }
 
@@ -69,7 +74,7 @@ public class AuthenticationFilter implements Filter {
             if (mpUrlString != null) {
                 try {
                     YamlServerConfig cfg = new YamlServerConfig();
-                    cfg.setResourceName("res_RestApi");
+                    cfg.setResourceName("res_restApi");
                     cfg.setPublicKeyEndpoint(new URI(mpUrlString + "oauth/token_key"));
                     config = cfg;
                 } catch (URISyntaxException exc) {
