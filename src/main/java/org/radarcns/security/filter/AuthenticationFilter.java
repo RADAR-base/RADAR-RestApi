@@ -6,6 +6,8 @@ import org.radarcns.auth.config.ServerConfig;
 import org.radarcns.auth.config.YamlServerConfig;
 import org.radarcns.auth.exception.TokenValidationException;
 import org.radarcns.config.managementportal.config.Properties;
+import org.radarcns.exception.TokenException;
+import org.radarcns.security.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.net.URI;
@@ -48,8 +51,13 @@ public class AuthenticationFilter implements Filter {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
             res.setHeader("Error", "No Token Provided!");
-            res.getWriter().write("No token was provided with the request " +
-                    "and thus the request cannot be authorized");
+            String jsonMsg = SecurityUtils.getJsonError("Please provide a valid token" +
+                            " in the authentication header",
+                    new TokenException("No token was provided " +
+                            "with the request and thus the request " +
+                            "cannot be authorized")).toString();
+            res.setContentType(MediaType.APPLICATION_JSON);
+            res.getWriter().write(jsonMsg);
             return;
         }
 
@@ -61,8 +69,11 @@ public class AuthenticationFilter implements Filter {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
             res.setHeader("Error", "Invalid Token!");
-            res.getWriter().write("The token provided with the request is invalid " +
-                    "and thus the request cannot be authorized");
+            String jsonMsg = SecurityUtils.getJsonError("The token provided with " +
+                    "the request is invalid and thus the request cannot be authorized",
+                    ex).toString();
+            res.setContentType(MediaType.APPLICATION_JSON);
+            res.getWriter().write(jsonMsg);
         }
     }
 
