@@ -35,7 +35,7 @@ public class TokenTestUtils {
     public static String PUBLIC_KEY_STRING;
 
     public static final String APPLICATION_JSON = "application/json";
-    public static final String AUDIENCE = "res_RestApi";
+    public static final String AUDIENCE = "res_restApi";
 
     /**
      * Set up a keypair for signing the tokens, initialize the tokens for tests.
