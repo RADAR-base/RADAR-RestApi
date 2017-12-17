@@ -48,8 +48,8 @@ public class Project {
     private final List<Tag> attributes;
     @JsonProperty("projectStatus")
     private final String projectStatus;
-    @JsonProperty("deviceTypes")
-    private final List<DeviceType> deviceTypes;
+    @JsonProperty("sourceTypes")
+    private final List<SourceType> sourceTypes;
 
 
     protected Project(
@@ -59,14 +59,14 @@ public class Project {
             @JsonProperty("location") String location,
             @JsonProperty("attributes") List<Tag> attributes,
             @JsonProperty("projectStatus") String projectStatus,
-            @JsonProperty("deviceTypes") List<DeviceType> deviceTypes) {
+            @JsonProperty("sourceTypes") List<SourceType> sourceTypes) {
         this.id = id;
         this.projectName = projectName;
         this.organization = organization;
         this.location = location;
         this.attributes = attributes;
         this.projectStatus = projectStatus;
-        this.deviceTypes = deviceTypes;
+        this.sourceTypes = sourceTypes;
     }
 
     public Integer getId() {
@@ -93,8 +93,8 @@ public class Project {
         return projectStatus;
     }
 
-    public List<DeviceType> getDeviceTypes() {
-        return deviceTypes;
+    public List<SourceType> getSourceTypes() {
+        return sourceTypes;
     }
 
     /**

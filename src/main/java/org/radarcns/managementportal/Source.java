@@ -32,12 +32,12 @@ public class Source {
 
     @JsonProperty("id")
     private Integer id;
-    @JsonProperty("deviceTypeId")
-    private String deviceTypeId;
-    @JsonProperty("deviceTypeProducer")
-    private String deviceTypeProducer;
-    @JsonProperty("deviceTypeModel")
-    private String deviceTypeModel;
+    @JsonProperty("sourceTypeId")
+    private String sourceTypeId;
+    @JsonProperty("sourceTypeProducer")
+    private String sourceTypeProducer;
+    @JsonProperty("sourceTypeModel")
+    private String sourceTypeModel;
     @JsonProperty("sourceId")
     private String sourceId;
     @JsonProperty("sourceName")
@@ -49,17 +49,17 @@ public class Source {
 
     protected Source(
             @JsonProperty("id") Integer id,
-            @JsonProperty("deviceTypeId") String deviceTypeId,
-            @JsonProperty("deviceTypeProducer") String deviceTypeProducer,
-            @JsonProperty("deviceTypeModel") String deviceTypeModel,
+            @JsonProperty("sourceTypeId") String sourceTypeId,
+            @JsonProperty("sourceTypeProducer") String sourceTypeProducer,
+            @JsonProperty("sourceTypeModel") String sourceTypeModel,
             @JsonProperty("sourceId") String sourceId,
             @JsonProperty("sourceName") String sourceName,
             @JsonProperty("assigned")  boolean assigned
     ) {
         this.id = id;
-        this.deviceTypeId = deviceTypeId;
-        this.deviceTypeModel = deviceTypeModel;
-        this.deviceTypeProducer = deviceTypeProducer;
+        this.sourceTypeId = sourceTypeId;
+        this.sourceTypeModel = sourceTypeModel;
+        this.sourceTypeProducer = sourceTypeProducer;
         this.sourceId = sourceId;
         this.sourceName = sourceName;
         this.assigned = assigned;
@@ -70,16 +70,16 @@ public class Source {
         return id;
     }
 
-    public String getDeviceTypeId() {
-        return deviceTypeId;
+    public String getSourceTypeId() {
+        return sourceTypeId;
     }
 
-    public String getDeviceTypeProducer() {
-        return deviceTypeProducer;
+    public String getSourceTypeProducer() {
+        return sourceTypeProducer;
     }
 
-    public String getDeviceTypeModel() {
-        return deviceTypeModel;
+    public String getSourceTypeModel() {
+        return sourceTypeModel;
     }
 
     public String getSourceId() {
