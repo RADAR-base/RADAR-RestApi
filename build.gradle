@@ -193,7 +193,7 @@ test {
 task integrationTest(type: Test, dependsOn: ['copyFrontendConfigIntegrationTest', 'installSimpleStack']) {
   description = "Run integration tests (located in src/integrationTest/...)."
 
-  testClassesDir = sourceSets.integrationTest.output.classesDir
+  testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
 
   // This is not needed, but I like to see which tests have run
@@ -206,7 +206,7 @@ integrationTest.finalizedBy 'stopSimpleStack'
 task endToEndTest(type: Test, dependsOn: ['copyFrontendConfigEndToEndTest', 'installRadarStack', 'listDockerProcesses']) {
   description = "Run end to end tests (located in src/endToEndTest/...)."
 
-  testClassesDir = sourceSets.endToEndTest.output.classesDir
+  testClassesDirs = sourceSets.endToEndTest.output.classesDirs
   classpath = sourceSets.endToEndTest.runtimeClasspath
 
   testLogging {
