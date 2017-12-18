@@ -2,9 +2,9 @@ version: 0.1-alpha
 released: 2017-08-29
 
 # ManagementPortal configuration
-oauth_client_id: #OAuth2 clientId used by the webApp for making requests
-oauth_client_secret:  #OAuth2 client secret
-management_portal_url: #URL pointing Management Portal
-token_endpoint: #URL managing tokens
-project_endpoint: #URL managing project function
-subject_endpoint: #URL managing subject functions
+oauth_client_id: radar_restapi
+oauth_client_secret: himself&WEDGE&panama
+management_portal_url: https://radar-backend.ddns.net/managementportal/
+token_endpoint: oauth/token
+project_endpoint: api/projects/
+subject_endpoint: api/subjects/

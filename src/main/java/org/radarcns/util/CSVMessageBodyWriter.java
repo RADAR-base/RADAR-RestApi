@@ -18,7 +18,7 @@ package org.radarcns.util;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.radarcns.webapp.util.CSVData;
+import org.radarcns.status.CSVData;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;

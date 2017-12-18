@@ -4,9 +4,9 @@ import org.apache.http.HttpHeaders;
 import org.radarcns.auth.authentication.TokenValidator;
 import org.radarcns.auth.config.ServerConfig;
 import org.radarcns.auth.config.YamlServerConfig;
+import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.auth.exception.TokenValidationException;
 import org.radarcns.config.managementportal.config.Properties;
-import org.radarcns.exception.TokenException;
 import org.radarcns.security.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +53,7 @@ public class AuthenticationFilter implements Filter {
             res.setHeader("Error", "No Token Provided!");
             String jsonMsg = SecurityUtils.getJsonError("Please provide a valid token" +
                             " in the authentication header",
-                    new TokenException("No token was provided " +
+                    new NotAuthorizedException("No token was provided " +
                             "with the request and thus the request " +
                             "cannot be authorized")).toString();
             res.setContentType(MediaType.APPLICATION_JSON);
@@ -71,7 +71,7 @@ public class AuthenticationFilter implements Filter {
             res.setHeader("Error", "Invalid Token!");
             String jsonMsg = SecurityUtils.getJsonError("The token provided with " +
                     "the request is invalid and thus the request cannot be authorized",
-                    ex).toString();
+                    new NotAuthorizedException(ex)).toString();
             res.setContentType(MediaType.APPLICATION_JSON);
             res.getWriter().write(jsonMsg);
         }

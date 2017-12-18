@@ -38,32 +38,14 @@ public class Source {
     private String sourceTypeProducer;
     @JsonProperty("sourceTypeModel")
     private String sourceTypeModel;
+    @JsonProperty("sourceTypeCatalogVersion")
+    private String sourceTypeCatalogVersion;
     @JsonProperty("sourceId")
     private String sourceId;
     @JsonProperty("sourceName")
     private String sourceName;
     @JsonProperty("assigned")
     private Boolean assigned;
-
-    protected Source(){}
-
-    protected Source(
-            @JsonProperty("id") Integer id,
-            @JsonProperty("sourceTypeId") String sourceTypeId,
-            @JsonProperty("sourceTypeProducer") String sourceTypeProducer,
-            @JsonProperty("sourceTypeModel") String sourceTypeModel,
-            @JsonProperty("sourceId") String sourceId,
-            @JsonProperty("sourceName") String sourceName,
-            @JsonProperty("assigned")  boolean assigned
-    ) {
-        this.id = id;
-        this.sourceTypeId = sourceTypeId;
-        this.sourceTypeModel = sourceTypeModel;
-        this.sourceTypeProducer = sourceTypeProducer;
-        this.sourceId = sourceId;
-        this.sourceName = sourceName;
-        this.assigned = assigned;
-    }
 
 
     public Integer getId() {
@@ -92,6 +74,42 @@ public class Source {
 
     public Boolean getAssigned() {
         return assigned;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setSourceTypeId(String sourceTypeId) {
+        this.sourceTypeId = sourceTypeId;
+    }
+
+    public void setSourceTypeProducer(String sourceTypeProducer) {
+        this.sourceTypeProducer = sourceTypeProducer;
+    }
+
+    public void setSourceTypeModel(String sourceTypeModel) {
+        this.sourceTypeModel = sourceTypeModel;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    public String getSourceTypeCatalogVersion() {
+        return sourceTypeCatalogVersion;
+    }
+
+    public void setSourceTypeCatalogVersion(String sourceTypeCatalogVersion) {
+        this.sourceTypeCatalogVersion = sourceTypeCatalogVersion;
+    }
+
+    public void setAssigned(Boolean assigned) {
+        this.assigned = assigned;
     }
 
     /**

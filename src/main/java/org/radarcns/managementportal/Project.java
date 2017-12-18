@@ -37,35 +37,45 @@ import okhttp3.Response;
 public class Project {
 
     @JsonProperty("id")
-    private final Integer id;
+    private Integer id;
     @JsonProperty("projectName")
-    private final String projectName;
+    private String projectName;
     @JsonProperty("organization")
-    private final String organization;
+    private String organization;
     @JsonProperty("location")
-    private final String location;
+    private String location;
     @JsonProperty("attributes")
-    private final List<Tag> attributes;
+    private List<Tag> attributes;
     @JsonProperty("projectStatus")
-    private final String projectStatus;
+    private String projectStatus;
     @JsonProperty("sourceTypes")
-    private final List<SourceType> sourceTypes;
+    private List<SourceType> sourceTypes;
 
-
-    protected Project(
-            @JsonProperty("id") Integer id,
-            @JsonProperty("projectName") String projectName,
-            @JsonProperty("organization") String organization,
-            @JsonProperty("location") String location,
-            @JsonProperty("attributes") List<Tag> attributes,
-            @JsonProperty("projectStatus") String projectStatus,
-            @JsonProperty("sourceTypes") List<SourceType> sourceTypes) {
+    public void setId(Integer id) {
         this.id = id;
+    }
+
+    public void setProjectName(String projectName) {
         this.projectName = projectName;
+    }
+
+    public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public void setLocation(String location) {
         this.location = location;
+    }
+
+    public void setAttributes(List<Tag> attributes) {
         this.attributes = attributes;
+    }
+
+    public void setProjectStatus(String projectStatus) {
         this.projectStatus = projectStatus;
+    }
+
+    public void setSourceTypes(List<SourceType> sourceTypes) {
         this.sourceTypes = sourceTypes;
     }
 

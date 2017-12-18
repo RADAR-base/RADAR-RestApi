@@ -1,4 +1,4 @@
-package org.radarcns.webapp.util;
+package org.radarcns.status;
 
 public class CSVData {
 
