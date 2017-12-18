@@ -22,42 +22,40 @@ import java.io.IOException;
 import java.util.HashMap;
 import javax.servlet.ServletException;
 import org.junit.Test;
-import org.radarcns.avro.restapi.sensor.DataType;
-import org.radarcns.avro.restapi.sensor.SensorSpecification;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
-import org.radarcns.avro.restapi.source.SourceSpecification;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.ProcessingState;
+import org.radarcns.catalogue.Unit;
 import org.radarcns.monitor.Monitors;
+import org.radarcns.restapi.spec.SensorSpecification;
+import org.radarcns.restapi.spec.SourceSpecification;
 
 public class MonitorsTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void test() throws ServletException, IOException {
-        HashMap<SensorType, SensorSpecification> sensors =  new HashMap<>();
-        sensors.put(SensorType.ACCELEROMETER,
-                new SensorSpecification(SensorType.ACCELEROMETER, DataType.RAW,
+        HashMap<String, SensorSpecification> sensors =  new HashMap<>();
+        sensors.put("ACCELEROMETER",
+                new SensorSpecification("ACCELEROMETER", ProcessingState.RAW,
                     32.0, Unit.G));
-        sensors.put(SensorType.THERMOMETER,
-                new SensorSpecification(SensorType.THERMOMETER, DataType.RAW,
+        sensors.put("THERMOMETER",
+                new SensorSpecification("THERMOMETER", ProcessingState.RAW,
                     4.0, Unit.CELSIUS));
-        sensors.put(SensorType.ELECTRODERMAL_ACTIVITY,
-                new SensorSpecification(SensorType.ELECTRODERMAL_ACTIVITY, DataType.RAW,
-                    4.0, Unit.MICROSIEMENS));
-        sensors.put(SensorType.INTER_BEAT_INTERVAL,
-                new SensorSpecification(SensorType.INTER_BEAT_INTERVAL, DataType.VENDOR,
+        sensors.put("ELECTRODERMAL_ACTIVITY",
+                new SensorSpecification("ELECTRODERMAL_ACTIVITY", ProcessingState.RAW,
+                    4.0, Unit.MICRO_SIEMENS));
+        sensors.put("INTER_BEAT_INTERVAL",
+                new SensorSpecification("INTER_BEAT_INTERVAL", ProcessingState.VENDOR,
                     1.0, Unit.SECOND));
-        sensors.put(SensorType.BLOOD_VOLUME_PULSE,
-                new SensorSpecification(SensorType.BLOOD_VOLUME_PULSE, DataType.RAW,
-                    64.0, Unit.NANOWATT));
-        sensors.put(SensorType.BATTERY,
-                new SensorSpecification(SensorType.BATTERY, DataType.RAW,
+        sensors.put("BLOOD_VOLUME_PULSE",
+                new SensorSpecification("BLOOD_VOLUME_PULSE", ProcessingState.RAW,
+                    64.0, Unit.NANO_WATT));
+        sensors.put("BATTERY",
+                new SensorSpecification("BATTERY", ProcessingState.RAW,
                     1.0, Unit.PERCENTAGE));
-        sensors.put(SensorType.HEART_RATE,
-                new SensorSpecification(SensorType.HEART_RATE, DataType.RADAR,
+        sensors.put("HEART_RATE",
+                new SensorSpecification("HEART_RATE", ProcessingState.RADAR,
                     1.0, Unit.BEATS_PER_MIN));
 
-        SourceSpecification spec = Monitors.getInstance().getSpecification(SourceType.EMPATICA);
+        SourceSpecification spec = Monitors.getInstance().getSpecification("EMPATICA");
 
         for (SensorSpecification sensorSpec : spec.getSensors().values()) {
             SensorSpecification tmp = sensors.get(sensorSpec.getName());
@@ -68,7 +66,7 @@ public class MonitorsTest {
 
         assertEquals(true, sensors.isEmpty());
 
-        Monitors.getInstance().getSpecification(SourceType.BIOVOTION);
+        Monitors.getInstance().getSpecification("BIOVOTION");
     }
 
 }

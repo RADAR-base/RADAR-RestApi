@@ -1,5 +1,3 @@
-package org.radarcns.integration.util;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.integration.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.integration.util;
 
 import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
@@ -39,17 +39,15 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
-import org.radarcns.avro.restapi.app.Application;
-import org.radarcns.avro.restapi.data.Acceleration;
-import org.radarcns.avro.restapi.data.DoubleSample;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.catalogue.Unit;
+import org.radarcns.restapi.app.Application;
+import org.radarcns.restapi.data.Acceleration;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.dataset.Item;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
@@ -129,8 +127,8 @@ public class Utility {
      * @throws InstantiationException if item class cannot be instantiated
      */
     public static Dataset convertDocToDataset(List<Document> docs, String subjectId,
-            String sourceId, SourceType sourceType, SensorType sensorType, Stat stat, Unit unit,
-            TimeFrame timeFrame, Class<? extends SpecificRecord> recordClass)
+            String sourceId, String sourceType, String sensorType, Stat stat, Unit unit,
+            TimeWindow timeFrame, Class<? extends SpecificRecord> recordClass)
             throws IllegalAccessException, InstantiationException {
         EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(
                 RadarConverter.getISO8601(docs.get(0).getDate(START)),
@@ -266,9 +264,9 @@ public class Utility {
                 inputHeader.getEffectiveTimeFrame().getStartDateTime(),
                 inputHeader.getEffectiveTimeFrame().getEndDateTime());
         Header cloneHeader = new Header(inputHeader.getSubjectId(), inputHeader.getSourceId(),
-                    inputHeader.getSource(), inputHeader.getSensor(),
+                    inputHeader.getSource(), inputHeader.getType(),
                     inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
-                    inputHeader.getTimeFrame(), cloneEffectiveTimeFrame);
+                    inputHeader.getTimeWindow(), cloneEffectiveTimeFrame);
 
 
         List<Item> cloneItem = new ArrayList<>();

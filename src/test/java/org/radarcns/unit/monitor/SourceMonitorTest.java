@@ -1,5 +1,3 @@
-package org.radarcns.unit.monitor;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,17 +14,17 @@ package org.radarcns.unit.monitor;
  * limitations under the License.
  */
 
+package org.radarcns.unit.monitor;
+
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.Test;
-import org.radarcns.avro.restapi.sensor.DataType;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
-import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.avro.restapi.source.State;
+import org.radarcns.catalogue.ProcessingState;
+import org.radarcns.catalogue.Unit;
+import org.radarcns.restapi.source.States;
 import org.radarcns.config.catalog.DeviceItem;
 import org.radarcns.config.catalog.SensorCatalog;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
@@ -39,36 +37,36 @@ public class SourceMonitorTest {
     public void getSourceTest() {
         List<SensorCatalog> sensors = new LinkedList<>();
 
-        sensors.add(new SensorCatalog(SensorType.ACCELEROMETER, 32.0, Unit.G, DataType.RAW,
+        sensors.add(new SensorCatalog("ACCELEROMETER", 32.0, Unit.G, ProcessingState.RAW,
                 DataFormat.ACCELERATION_FORMAT,
                 getCollections("android_empatica_e4_acceleration_output")));
 
-        sensors.add(new SensorCatalog(SensorType.BATTERY, 1.0, Unit.PERCENTAGE,
-                DataType.RAW, DataFormat.DOUBLE_FORMAT,
+        sensors.add(new SensorCatalog("BATTERY", 1.0, Unit.PERCENTAGE,
+                ProcessingState.RAW, DataFormat.DOUBLE_FORMAT,
                 getCollections("android_empatica_e4_battery_level_output")));
 
-        sensors.add(new SensorCatalog(SensorType.BLOOD_VOLUME_PULSE, 64.0, Unit.NANOWATT,
-                DataType.RAW, DataFormat.DOUBLE_FORMAT,
+        sensors.add(new SensorCatalog("BLOOD_VOLUME_PULSE", 64.0, Unit.NANO_WATT,
+                ProcessingState.RAW, DataFormat.DOUBLE_FORMAT,
                 getCollections("android_empatica_e4_blood_volume_pulse_output")));
 
-        sensors.add(new SensorCatalog(SensorType.ELECTRODERMAL_ACTIVITY, 4.0,
-                Unit.MICROSIEMENS, DataType.RAW, DataFormat.DOUBLE_FORMAT,
+        sensors.add(new SensorCatalog("ELECTRODERMAL_ACTIVITY", 4.0,
+                Unit.MICRO_SIEMENS, ProcessingState.RAW, DataFormat.DOUBLE_FORMAT,
                 getCollections("android_empatica_e4_electrodermal_activity_output")));
 
-        sensors.add(new SensorCatalog(SensorType.HEART_RATE, 1.0, Unit.BEATS_PER_MIN,
-                DataType.RADAR, DataFormat.DOUBLE_FORMAT,
+        sensors.add(new SensorCatalog("HEART_RATE", 1.0, Unit.BEATS_PER_MIN,
+                ProcessingState.RADAR, DataFormat.DOUBLE_FORMAT,
                 getCollections("android_empatica_e4_heartrate")));
 
-        sensors.add(new SensorCatalog(SensorType.INTER_BEAT_INTERVAL, 1.0,
-                Unit.BEATS_PER_MIN, DataType.RAW, DataFormat.DOUBLE_FORMAT,
+        sensors.add(new SensorCatalog("INTER_BEAT_INTERVAL", 1.0,
+                Unit.BEATS_PER_MIN, ProcessingState.RAW, DataFormat.DOUBLE_FORMAT,
                 getCollections("android_empatica_e4_inter_beat_interval_output")));
 
-        sensors.add(new SensorCatalog(SensorType.THERMOMETER, 4.0, Unit.CELSIUS,
-                DataType.RAW, DataFormat.DOUBLE_FORMAT,
+        sensors.add(new SensorCatalog("THERMOMETER", 4.0, Unit.CELSIUS,
+                ProcessingState.RAW, DataFormat.DOUBLE_FORMAT,
                 getCollections("android_empatica_e4_inter_beat_interval_output")));
 
 
-        SourceDefinition empatica = new SourceDefinition(SourceType.EMPATICA,
+        SourceDefinition empatica = new SourceDefinition("EMPATICA",
                 new DeviceItem(sensors));
 
         SourceMonitor monitor = new SourceMonitor(empatica);
@@ -80,7 +78,6 @@ public class SourceMonitorTest {
         HashMap<String, String> collections = new HashMap<>();
 
         collections.put("10sec", prefix);
-        collections.put("30sec", prefix + "_30sec");
         collections.put("1min", prefix + "_1min");
         collections.put("10min", prefix + "_10min");
         collections.put("1h", prefix + "_1h");
@@ -92,20 +89,20 @@ public class SourceMonitorTest {
 
     @Test
     public void getStatusTest() {
-        assertEquals(State.FINE, SourceMonitor.getStatus(1d));
-        assertEquals(State.FINE, SourceMonitor.getStatus(0.951));
+        assertEquals(States.FINE, SourceMonitor.getStatus(1d));
+        assertEquals(States.FINE, SourceMonitor.getStatus(0.951));
 
-        assertEquals(State.OK, SourceMonitor.getStatus(0.95));
-        assertEquals(State.OK, SourceMonitor.getStatus(0.90));
-        assertEquals(State.OK, SourceMonitor.getStatus(0.801));
+        assertEquals(States.OK, SourceMonitor.getStatus(0.95));
+        assertEquals(States.OK, SourceMonitor.getStatus(0.90));
+        assertEquals(States.OK, SourceMonitor.getStatus(0.801));
 
-        assertEquals(State.WARNING, SourceMonitor.getStatus(0.80));
-        assertEquals(State.WARNING, SourceMonitor.getStatus(0.40));
-        assertEquals(State.WARNING, SourceMonitor.getStatus(0.01));
+        assertEquals(States.WARNING, SourceMonitor.getStatus(0.80));
+        assertEquals(States.WARNING, SourceMonitor.getStatus(0.40));
+        assertEquals(States.WARNING, SourceMonitor.getStatus(0.01));
 
-        assertEquals(State.DISCONNECTED, SourceMonitor.getStatus(0d));
+        assertEquals(States.DISCONNECTED, SourceMonitor.getStatus(0d));
 
-        assertEquals(State.UNKNOWN, SourceMonitor.getStatus(-1d));
+        assertEquals(States.UNKNOWN, SourceMonitor.getStatus(-1d));
     }
 
     @Test

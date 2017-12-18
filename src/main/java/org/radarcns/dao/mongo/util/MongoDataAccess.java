@@ -1,5 +1,3 @@
-package org.radarcns.dao.mongo.util;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.dao.mongo.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.dao.mongo.util;
 
 import static org.radarcns.dao.mongo.util.MongoHelper.ASCENDING;
 import static org.radarcns.dao.mongo.util.MongoHelper.DESCENDING;
@@ -34,9 +34,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import org.bson.Document;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.source.Source;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.restapi.source.Source;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,9 +113,9 @@ public abstract class MongoDataAccess {
      *
      * @return source type for the given sourceID, otherwise null
      */
-    public SourceType findSourceType(String source, MongoClient client)
+    public String findSourceType(String source, MongoClient client)
             throws ConnectException {
-        SourceType type;
+        String type;
 
         MongoCursor<Document> cursor;
         for (String collection : getCollectionNames()) {
@@ -147,9 +146,9 @@ public abstract class MongoDataAccess {
      * @throws ConnectException if MongoDB is not available
      * @throws MongoException if something goes wrong with the write
      */
-    public static void writeSourceType(String source, SourceType type, MongoClient client)
+    public static void writeSourceType(String source, String type, MongoClient client)
             throws ConnectException, MongoException {
-        Document doc = new Document().append(ID, source).append(SOURCE_TYPE, type.toString());
+        Document doc = new Document().append(ID, source).append(SOURCE_TYPE, type);
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client, DEVICE_CATALOG);
 
@@ -160,13 +159,13 @@ public abstract class MongoDataAccess {
      * Returns the current collection.
      *
      * @param client is the MongoDb client instance
-     * @param source is the {@link SourceType} related to the required collection
+     * @param source is the source type related to the required collection
      * @param interval useful to identify which collection has to be queried. A sensor has a
      *      collection for each time frame or time window
      * @return the MongoDb collection
      */
-    protected MongoCollection<Document> getCollection(MongoClient client, SourceType source,
-            TimeFrame interval) throws ConnectException {
+    protected MongoCollection<Document> getCollection(MongoClient client, String source,
+            TimeWindow interval) throws ConnectException {
         return MongoHelper.getCollection(client,getCollectionName(source, interval));
     }
 
@@ -225,9 +224,9 @@ public abstract class MongoDataAccess {
      * @param source is the sourceID
      * @return source type for the given sourceID, otherwise null
      */
-    public static SourceType getSourceType(String source, MongoClient client)
+    public static String getSourceType(String source, MongoClient client)
         throws ConnectException {
-        SourceType type = null;
+        String type = null;
 
         MongoCursor<Document> cursor = MongoHelper.findDocumentById(source, null,
                 0, 1, MongoHelper.getCollection(client, DEVICE_CATALOG));
@@ -251,13 +250,13 @@ public abstract class MongoDataAccess {
      * @implSpec this function must be override by the subclass.
      * @return covert collection name to the source type.
      */
-    public abstract SourceType getSourceType(String collection);
+    public abstract String getSourceType(String collection);
 
     /**
      * @implSpec this function must be override by the subclass.
      * @return the MongoDB Collection name associated to the source type for the given time frame
      */
-    public abstract String getCollectionName(SourceType source, TimeFrame interval);
+    public abstract String getCollectionName(String source, TimeWindow interval);
 
     /**
      * @implSpec this function must be override by the subclass.

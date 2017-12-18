@@ -1,5 +1,3 @@
-package org.radarcns.integration.unit;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,20 +14,20 @@ package org.radarcns.integration.unit;
  * limitations under the License.
  */
 
+package org.radarcns.integration.unit;
+
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.junit.Test;
-import org.radarcns.avro.restapi.data.DoubleSample;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.avro.restapi.header.TimeFrame;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.dataset.Item;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.RandomInput;
@@ -42,13 +40,13 @@ public class ExpectedValueTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
+    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test
     public void matchDatasetOnDocuments() throws Exception {
         Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(SUBJECT, SOURCE,
-                EMPATICA, HEART_RATE, COUNT, TIME_FRAME, SAMPLES, false);
+                "EMPATICA", "HEART_RATE", COUNT, TIME_FRAME, SAMPLES, false);
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
         int count = 0;

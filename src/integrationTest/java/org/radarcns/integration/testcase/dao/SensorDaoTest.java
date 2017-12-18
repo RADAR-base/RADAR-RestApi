@@ -1,5 +1,3 @@
-package org.radarcns.integration.testcase.dao;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -16,12 +14,11 @@ package org.radarcns.integration.testcase.dao;
  * limitations under the License.
  */
 
+package org.radarcns.integration.testcase.dao;
+
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.ACCELEROMETER;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.dao.mongo.util.MongoHelper.END;
 import static org.radarcns.dao.mongo.util.MongoHelper.START;
 
@@ -33,14 +30,12 @@ import java.util.Set;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
-import org.radarcns.avro.restapi.data.DoubleSample;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.catalogue.Unit;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
@@ -57,11 +52,11 @@ public class SensorDaoTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final SourceType SOURCE_TYPE = EMPATICA;
-    private static final SensorType SENSOR_TYPE = HEART_RATE;
+    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SENSOR_TYPE = "HEART_RATE";
     private static final Unit UNIT = Unit.BEATS_PER_MIN;
     private static final Class ITEM = DoubleSample.class;
-    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
+    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     private Set<String> dirtyCollections = new HashSet<>();
@@ -211,14 +206,14 @@ public class SensorDaoTest {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
-                SensorDataAccessObject.getInstance(HEART_RATE).getCollectionName(
+                SensorDataAccessObject.getInstance("HEART_RATE").getCollectionName(
                 SOURCE_TYPE, TIME_FRAME));
 
-        dirtyCollections.add(SensorDataAccessObject.getInstance(HEART_RATE).getCollectionName(
+        dirtyCollections.add(SensorDataAccessObject.getInstance("HEART_RATE").getCollectionName(
                 SOURCE_TYPE, TIME_FRAME));
 
         List<Document> randomInput = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                HEART_RATE, COUNT, TIME_FRAME, SAMPLES, false);
+                "HEART_RATE", COUNT, TIME_FRAME, SAMPLES, false);
 
         collection.insertMany(randomInput);
 
@@ -227,13 +222,13 @@ public class SensorDaoTest {
             randomInput);
 
         collection = MongoHelper.getCollection(client,
-            SensorDataAccessObject.getInstance(ACCELEROMETER).getCollectionName(SOURCE_TYPE,
+            SensorDataAccessObject.getInstance("ACCELEROMETER").getCollectionName(SOURCE_TYPE,
                 TIME_FRAME));
 
-        dirtyCollections.add(SensorDataAccessObject.getInstance(ACCELEROMETER).getCollectionName(
+        dirtyCollections.add(SensorDataAccessObject.getInstance("ACCELEROMETER").getCollectionName(
                 SOURCE_TYPE, TIME_FRAME));
 
-        randomInput = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE, ACCELEROMETER,
+        randomInput = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE, "ACCELEROMETER",
                 COUNT, TIME_FRAME, SAMPLES, false);
 
         collection.insertMany(randomInput);

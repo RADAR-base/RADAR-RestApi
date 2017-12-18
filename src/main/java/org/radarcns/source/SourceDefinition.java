@@ -16,18 +16,17 @@ package org.radarcns.source;
  * limitations under the License.
  */
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorSpecification;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
-import org.radarcns.avro.restapi.source.SourceSpecification;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.catalogue.Unit;
 import org.radarcns.config.catalog.DeviceItem;
 import org.radarcns.config.catalog.SensorCatalog;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
+import org.radarcns.restapi.spec.SensorSpecification;
+import org.radarcns.restapi.spec.SourceSpecification;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Generic Source Definition.
@@ -37,18 +36,18 @@ public class SourceDefinition {
     //private static final Logger LOGGER = LoggerFactory.getLogger(SourceDefinition.class);
 
     /** Source name. **/
-    private final SourceType sourceType;
+    private final String sourceType;
     /** Map to associate each data with the relative definition. **/
-    private final Map<SensorType, SensorSpecification> specificationMap;
+    private final Map<String, SensorSpecification> specificationMap;
     /** For each data, it define which data class has to be used to read data from MongoDb. **/
-    private final Map<SensorType, DataFormat> formatMap;
+    private final Map<String, DataFormat> formatMap;
     /** For each data, it lists all the relative collection names. **/
-    private final Map<SensorType, Map<TimeFrame, String>> collectionsMap;
+    private final Map<String, Map<TimeWindow, String>> collectionsMap;
 
     /**
      * Constructor.
      **/
-    public SourceDefinition(SourceType sourceType, DeviceItem device) {
+    public SourceDefinition(String sourceType, DeviceItem device) {
         specificationMap = new HashMap<>();
         formatMap = new HashMap<>();
         collectionsMap = new HashMap<>();
@@ -70,14 +69,12 @@ public class SourceDefinition {
      *      expected amount of data.
      *
      * @return {@code SourceSpecification} containing all data names and related frequencies
-     * @see SensorSpecification
-     * @see SourceSpecification
      */
     public SourceSpecification getSpecification() {
-        Map<String, SensorSpecification> sensors = new HashMap();
+        Map<String, SensorSpecification> sensors = new HashMap<>();
 
-        for (SensorType type : specificationMap.keySet()) {
-            sensors.put(type.name(), new SensorSpecification(type,
+        for (String type : specificationMap.keySet()) {
+            sensors.put(type, new SensorSpecification(type,
                     specificationMap.get(type).getDataType(),
                     specificationMap.get(type).getFrequency(),
                     specificationMap.get(type).getUnit()));
@@ -86,7 +83,7 @@ public class SourceDefinition {
         return new SourceSpecification(sourceType, sensors);
     }
 
-    public SourceType getType() {
+    public String getType() {
         return sourceType;
     }
 
@@ -95,7 +92,7 @@ public class SourceDefinition {
      *
      * @return {@code Collection<SensorType>} for the given source
      */
-    public Collection<SensorType> getSensorTypes() {
+    public Collection<String> getSensorTypes() {
         return specificationMap.keySet();
     }
 
@@ -104,7 +101,7 @@ public class SourceDefinition {
      *
      * @return {@code Unit} for the given source
      */
-    public Unit getMeasurementUnit(SensorType sensor) {
+    public Unit getMeasurementUnit(String sensor) {
         return specificationMap.get(sensor).getUnit();
     }
 
@@ -113,40 +110,37 @@ public class SourceDefinition {
      *
      * @return {@code Double} stating the data frequency
      */
-    public Double getFrequency(SensorType sensor) {
+    public Double getFrequency(String sensor) {
         return specificationMap.get(sensor).getFrequency();
     }
 
     /**
      * Converts the keys of the collection map from String to TimeFrame.
      *
-     * @see TimeFrame
+     * @see TimeWindow
      */
-    private Map<TimeFrame, String> convertCollectionMap(Map<String, String> input) {
-        Map<TimeFrame, String> map = new HashMap<>();
+    private Map<TimeWindow, String> convertCollectionMap(Map<String, String> input) {
+        Map<TimeWindow, String> map = new HashMap<>();
 
         for (String key : input.keySet()) {
             switch (key) {
                 case "10sec":
-                    map.put(TimeFrame.TEN_SECOND, input.get(key));
-                    break;
-                case "30sec":
-                    map.put(TimeFrame.THIRTY_SECOND, input.get(key));
+                    map.put(TimeWindow.TEN_SECOND, input.get(key));
                     break;
                 case "1min":
-                    map.put(TimeFrame.ONE_MIN, input.get(key));
+                    map.put(TimeWindow.ONE_MIN, input.get(key));
                     break;
                 case "10min":
-                    map.put(TimeFrame.TEN_MIN, input.get(key));
+                    map.put(TimeWindow.TEN_MIN, input.get(key));
                     break;
                 case "1h":
-                    map.put(TimeFrame.ONE_HOUR, input.get(key));
+                    map.put(TimeWindow.ONE_HOUR, input.get(key));
                     break;
                 case "1d":
-                    map.put(TimeFrame.ONE_DAY, input.get(key));
+                    map.put(TimeWindow.ONE_DAY, input.get(key));
                     break;
                 case "1w":
-                    map.put(TimeFrame.ONE_WEEK, input.get(key));
+                    map.put(TimeWindow.ONE_WEEK, input.get(key));
                     break;
                 default: throw new UnsupportedOperationException(key + " is not a supported value."
                     + " It is outside the domain specified by"
@@ -157,7 +151,7 @@ public class SourceDefinition {
         return map;
     }
 
-    public Map<SensorType, Map<TimeFrame, String>> getCollections() {
+    public Map<String, Map<TimeWindow, String>> getCollections() {
         return collectionsMap;
     }
 
@@ -166,11 +160,11 @@ public class SourceDefinition {
      * @param sensor requested sensor
      * @return true if the sensor is on-board on source, false otherwise
      */
-    public boolean isSupported(SensorType sensor) {
+    public boolean isSupported(String sensor) {
         return specificationMap.containsKey(sensor);
     }
 
-    public Map<SensorType, DataFormat> getFormats() {
+    public Map<String, DataFormat> getFormats() {
         return formatMap;
     }
 }

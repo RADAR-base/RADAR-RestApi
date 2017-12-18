@@ -1,5 +1,3 @@
-package org.radarcns.unit.util;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,11 +14,11 @@ package org.radarcns.unit.util;
  * limitations under the License.
  */
 
+package org.radarcns.unit.util;
+
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.sensor.Unit.G;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.catalogue.Unit.G;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
@@ -29,15 +27,15 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.Test;
-import org.radarcns.avro.restapi.avro.Message;
-import org.radarcns.avro.restapi.data.Acceleration;
-import org.radarcns.avro.restapi.data.DoubleSample;
-import org.radarcns.avro.restapi.data.Quartiles;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.TimeFrame;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.restapi.avro.Message;
+import org.radarcns.restapi.data.Acceleration;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.dataset.Item;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
 
@@ -57,8 +55,8 @@ public class AvroConverterTest {
         EffectiveTimeFrame etf = new EffectiveTimeFrame(
                 RadarConverter.getISO8601(new Date()),
                 RadarConverter.getISO8601(new Date()));
-        Header header = new Header("User", "Source", EMPATICA, HEART_RATE,
-                COUNT, G, TimeFrame.TEN_SECOND, etf);
+        Header header = new Header("User", "Source", "EMPATICA", "HEART_RATE",
+                COUNT, G, TimeWindow.TEN_SECOND, etf);
 
         LinkedList<Item> item = new LinkedList<>();
         item.add(new Item(new DoubleSample(1.0), RadarConverter.getISO8601(new Date())));

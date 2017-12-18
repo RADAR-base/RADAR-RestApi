@@ -1,5 +1,3 @@
-package org.radarcns.integration.testcase.dao;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -16,11 +14,10 @@ package org.radarcns.integration.testcase.dao;
  * limitations under the License.
  */
 
+package org.radarcns.integration.testcase.dao;
+
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -28,12 +25,10 @@ import java.util.List;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.source.Source;
-import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.avro.restapi.subject.Cohort;
-import org.radarcns.avro.restapi.subject.Subject;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.restapi.source.Source;
+import org.radarcns.restapi.subject.Cohort;
+import org.radarcns.restapi.subject.Subject;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
@@ -48,9 +43,9 @@ public class UserDaoTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final SourceType SOURCE_TYPE = EMPATICA;
-    private static final SensorType SENSOR_TYPE = HEART_RATE;
-    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
+    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SENSOR_TYPE = "HEART_RATE";
+    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test
@@ -125,9 +120,9 @@ public class UserDaoTest {
                 assertEquals(2, patient.getSources().size());
                 for (Source temp : patient.getSources()) {
                     if (temp.getId().equals(SOURCE)) {
-                        assertEquals(ANDROID, temp.getType());
+                        assertEquals("ANDROID", temp.getType());
                     } else if (temp.getId().equals(SOURCE.concat("2"))) {
-                        assertEquals(EMPATICA, temp.getType());
+                        assertEquals("EMPATICA", temp.getType());
                     }
                 }
                 break;

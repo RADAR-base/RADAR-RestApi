@@ -20,12 +20,12 @@ import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
-import org.radarcns.avro.restapi.sensor.Sensor;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.source.Source;
-import org.radarcns.avro.restapi.source.SourceSummary;
-import org.radarcns.avro.restapi.source.State;
+
 import org.radarcns.dao.SensorDataAccessObject;
+import org.radarcns.restapi.source.Sensor;
+import org.radarcns.restapi.source.Source;
+import org.radarcns.restapi.source.SourceSummary;
+import org.radarcns.restapi.source.States;
 import org.radarcns.source.SourceDefinition;
 import org.radarcns.util.RadarConverter;
 
@@ -84,14 +84,14 @@ public class SourceMonitor {
 
         double countTemp;
         double percentTemp;
-        for (SensorType type : specification.getSensorTypes()) {
+        for (String type : specification.getSensorTypes()) {
 
             countTemp = SensorDataAccessObject.getInstance().count(
                 subject, source, start, end, type, specification.getType(), client);
 
             percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);
 
-            sensorMap.put(type.name(), new Sensor(type, getStatus(percentTemp), (int)countTemp,
+            sensorMap.put(type, new Sensor(type, getStatus(percentTemp), (int)countTemp,
                     RadarConverter.roundDouble(1.0 - percentTemp, 2)));
         }
 
@@ -128,20 +128,18 @@ public class SourceMonitor {
      *
      * @param percentage numerical value that has to be converted int Status
      * @return the current {@code Status}
-     *
-     * @see State
      */
-    public static State getStatus(double percentage) {
+    public static States getStatus(double percentage) {
         if (percentage > 0.95) {
-            return State.FINE;
+            return States.FINE;
         } else if (percentage > 0.80 && percentage <= 0.95) {
-            return State.OK;
+            return States.OK;
         } else if (percentage > 0.0 && percentage <= 0.80) {
-            return State.WARNING;
+            return States.WARNING;
         } else if (percentage == 0.0 ) {
-            return State.DISCONNECTED;
+            return States.DISCONNECTED;
         } else {
-            return State.UNKNOWN;
+            return States.UNKNOWN;
         }
     }
 

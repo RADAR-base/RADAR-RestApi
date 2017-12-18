@@ -40,8 +40,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.avro.restapi.subject.Cohort;
-import org.radarcns.avro.restapi.subject.Subject;
+import org.radarcns.restapi.subject.Cohort;
+import org.radarcns.restapi.subject.Subject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.security.Param;

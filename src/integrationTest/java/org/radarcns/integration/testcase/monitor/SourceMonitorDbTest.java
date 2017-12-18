@@ -17,7 +17,6 @@ package org.radarcns.integration.testcase.monitor;
  */
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.X_LABEL;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Y_LABEL;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Z_LABEL;
@@ -39,17 +38,15 @@ import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.source.Source;
-import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.avro.restapi.source.State;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.restapi.source.Source;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.monitor.SourceMonitor;
+import org.radarcns.restapi.source.States;
 import org.radarcns.source.SourceCatalog;
 import org.radarcns.source.SourceDefinition;
 
@@ -57,7 +54,7 @@ public class SourceMonitorDbTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final SourceType SOURCE_TYPE = EMPATICA;
+    private static final String SOURCE_TYPE = "EMPATICA";
 
     private static int WINDOWS = 2;
 
@@ -67,7 +64,7 @@ public class SourceMonitorDbTest {
 
         Source source = getSource(WINDOWS,0, client);
 
-        assertEquals(State.FINE, source.getSummary().getState());
+        assertEquals(States.FINE, source.getSummary().getState());
 
         dropAndClose(client);
     }
@@ -78,7 +75,7 @@ public class SourceMonitorDbTest {
 
         Source source = getSource(WINDOWS, 0.05, client);
 
-        assertEquals(State.OK, source.getSummary().getState());
+        assertEquals(States.OK, source.getSummary().getState());
 
         dropAndClose(client);
     }
@@ -89,7 +86,7 @@ public class SourceMonitorDbTest {
 
         Source source = getSource(WINDOWS, 0.50, client);
 
-        assertEquals(State.WARNING, source.getSummary().getState());
+        assertEquals(States.WARNING, source.getSummary().getState());
 
         dropAndClose(client);
     }
@@ -100,7 +97,7 @@ public class SourceMonitorDbTest {
 
         Source source = getSource(WINDOWS, 1, client);
 
-        assertEquals(State.DISCONNECTED, source.getSummary().getState());
+        assertEquals(States.DISCONNECTED, source.getSummary().getState());
 
         dropAndClose(client);
     }
@@ -116,10 +113,10 @@ public class SourceMonitorDbTest {
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
-        for (SensorType sensorType : definition.getSensorTypes()) {
+        for (String sensorType : definition.getSensorTypes()) {
             Utility.dropCollection(client,
                     SensorDataAccessObject.getInstance().getCollectionName(
-                        SOURCE_TYPE, sensorType, TimeFrame.TEN_SECOND));
+                        SOURCE_TYPE, sensorType, TimeWindow.TEN_SECOND));
         }
 
         client.close();
@@ -129,7 +126,7 @@ public class SourceMonitorDbTest {
             throws ConnectException {
         long timestamp = System.currentTimeMillis();
 
-        Map<SensorType, Integer> count = new HashMap<>();
+        Map<String, Integer> count = new HashMap<>();
         long start = timestamp + TimeUnit.SECONDS.toMillis(10);
         long end = start + TimeUnit.SECONDS.toMillis(60 / (window + 1));
         int messages;
@@ -138,13 +135,13 @@ public class SourceMonitorDbTest {
 
         SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
         for (int i = 0; i < window; i++) {
-            for (SensorType sensorType : definition.getSensorTypes()) {
+            for (String sensorType : definition.getSensorTypes()) {
                 messages = reducedMessage(
                     definition.getFrequency(sensorType).intValue() * 60, percentage)
                         / window;
 
                 collectionName = SensorDataAccessObject.getInstance().getCollectionName(
-                    SOURCE_TYPE, sensorType, TimeFrame.TEN_SECOND);
+                    SOURCE_TYPE, sensorType, TimeWindow.TEN_SECOND);
 
                 insertDoc(sensorType, messages, start, end,
                         MongoHelper.getCollection(client, collectionName));
@@ -161,7 +158,7 @@ public class SourceMonitorDbTest {
         }
 
         end = start + TimeUnit.SECONDS.toMillis(1);
-        for (SensorType sensorType : count.keySet()) {
+        for (String sensorType : count.keySet()) {
             int sendMessages = count.containsKey(sensorType) ? count.get(sensorType) : 0;
             messages = reducedMessage(
                 definition.getFrequency(sensorType).intValue() * 60, percentage)
@@ -171,19 +168,19 @@ public class SourceMonitorDbTest {
                 insertDoc(sensorType, messages, start, end,
                         MongoHelper.getCollection(client,
                             SensorDataAccessObject.getInstance().getCollectionName(SOURCE_TYPE,
-                                sensorType, TimeFrame.TEN_SECOND)));
+                                sensorType, TimeWindow.TEN_SECOND)));
             }
         }
 
-        return new SourceMonitor(new SourceDefinition(EMPATICA,
-                Properties.getDeviceCatalog().getDevices().get(EMPATICA))).getState(
+        return new SourceMonitor(new SourceDefinition("EMPATICA",
+                Properties.getDeviceCatalog().getDevices().get("EMPATICA"))).getState(
             SUBJECT, SOURCE, timestamp, end, client);
     }
 
-    private static void insertDoc(SensorType sensorType, int messages, long start, long end,
+    private static void insertDoc(String sensorType, int messages, long start, long end,
             MongoCollection collection) {
         Document doc;
-        if (sensorType.name().equals(sensorType.ACCELEROMETER)) {
+        if (sensorType.equals("ACCELEROMETER")) {
             doc = getDocumentsByArray(messages, start, end);
         } else {
             doc = getDocumentsBySingle(messages, start, end);
@@ -196,13 +193,13 @@ public class SourceMonitorDbTest {
         return new Document(MongoHelper.ID, SUBJECT + "-" + SOURCE + "-" + start + "-" + end)
             .append(MongoHelper.USER, SUBJECT)
             .append(MongoHelper.SOURCE, SOURCE)
-            .append(Stat.min.getParam(), new Double(0))
-            .append(Stat.max.getParam(), new Double(0))
-            .append(Stat.sum.getParam(), new Double(0))
-            .append(Stat.count.getParam(), new Double(samples))
-            .append(Stat.avg.getParam(), new Double(0))
+            .append(Stat.min.getParam(), 0d)
+            .append(Stat.max.getParam(), 0d)
+            .append(Stat.sum.getParam(), 0d)
+            .append(Stat.count.getParam(), (double) samples)
+            .append(Stat.avg.getParam(), 0d)
             .append(Stat.quartile.getParam(), getQuartile())
-            .append(Stat.iqr.getParam(), new Double(0))
+            .append(Stat.iqr.getParam(), 0d)
             .append(MongoHelper.START, new Date(start))
             .append(MongoHelper.END, new Date(end));
     }

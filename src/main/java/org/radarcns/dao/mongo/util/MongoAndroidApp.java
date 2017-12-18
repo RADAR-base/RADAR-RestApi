@@ -1,5 +1,3 @@
-package org.radarcns.dao.mongo.util;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -16,6 +14,8 @@ package org.radarcns.dao.mongo.util;
  * limitations under the License.
  */
 
+package org.radarcns.dao.mongo.util;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
@@ -23,9 +23,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.bson.Document;
-import org.radarcns.avro.restapi.app.Application;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.restapi.app.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +72,7 @@ public abstract class MongoAndroidApp extends MongoDataAccess {
     protected abstract String getCollectionName();
 
     @Override
-    public String getCollectionName(SourceType source, TimeFrame interval) {
+    public String getCollectionName(String source, TimeWindow interval) {
         return null;
     }
 
@@ -83,8 +82,8 @@ public abstract class MongoAndroidApp extends MongoDataAccess {
     }
 
     @Override
-    public SourceType getSourceType(String collection) {
-        return SourceType.ANDROID;
+    public String getSourceType(String collection) {
+        return "ANDROID";
     }
 
 }

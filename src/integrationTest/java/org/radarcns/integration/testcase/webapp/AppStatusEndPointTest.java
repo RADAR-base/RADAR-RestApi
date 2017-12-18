@@ -17,9 +17,7 @@ package org.radarcns.integration.testcase.webapp;
  */
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.webapp.util.BasePath.*;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
@@ -35,10 +33,8 @@ import okhttp3.Response;
 import org.bson.Document;
 import org.junit.Test;
 import org.junit.After;
-import org.radarcns.avro.restapi.app.Application;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.restapi.app.Application;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
@@ -55,9 +51,9 @@ public class AppStatusEndPointTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final SourceType SOURCE_TYPE = EMPATICA;
-    private static final SensorType SENSOR_TYPE = HEART_RATE;
-    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
+    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SENSOR_TYPE = "HEART_RATE";
+    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test

@@ -1,5 +1,3 @@
-package org.radarcns.unit.source;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,9 +14,9 @@ package org.radarcns.unit.source;
  * limitations under the License.
  */
 
+package org.radarcns.unit.source;
+
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
-import static org.radarcns.avro.restapi.source.SourceType.PEBBLE;
 
 import org.junit.Test;
 import org.radarcns.source.SourceCatalog;
@@ -27,9 +25,9 @@ public class SourceCatalogTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void sourceCatalogTest() {
-        assertEquals(EMPATICA, SourceCatalog.getInstance(EMPATICA).getType());
+        assertEquals("EMPATICA", SourceCatalog.getInstance("EMPATICA").getType());
 
-        SourceCatalog.getInstance(PEBBLE).getType();
+        SourceCatalog.getInstance("PEBBLE");
     }
 
 }

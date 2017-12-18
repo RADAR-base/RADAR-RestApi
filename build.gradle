@@ -8,35 +8,26 @@ plugins {
 }
 
 group 'org.radarcns'
-version '1.0-SNAPSHOT'
+version '0.1.2-SNAPSHOT'
 
 war {
-  baseName = 'radar'
-  version = '0.1.1'
-  extension = 'war'
+  archiveName 'radar.war'
 }
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
-ext.codacyVersion = '1.0.10'
-ext.jersey = '2.22.1'
-ext.jerseymedia = '2.24'
+ext.codacyVersion = '2.0.1'
+ext.jersey = '2.26'
 ext.junitVersion = '4.12'
-ext.logback = '1.1.7'
-ext.mongodb='3.3.0'
-ext.radarCommon = '0.4'
-ext.schemaRestApi = '0.1.1-alpha.1'
-ext.radarOauthClientVersion = '0.1-SNAPSHOT'
-ext.snakeyaml='1.17'
-ext.swagger='1.5.0'
-ext.swaggerParser='1.0.24'
-ext.tomcat = '8.0.43'
-ext.apacheCommonsIoVersion = '2.5'
-ext.apacheCommonsLangVersion = '3.6'
-ext.okhttp3Version = '3.8.1'
-ext.httpProxyVersion = '1.9'
-ext.radarAuthVersion = '0.2.1'
+ext.logback = '1.2.3'
+ext.mongodb = '3.6.0'
+ext.radarCommons = '0.7'
+ext.radarSchema = '0.2.3'
+ext.swagger = '1.5.17'
+ext.swaggerParser = '1.0.33'
+ext.tomcat = '8.0.47'
+ext.radarAuthVersion = '0.3.1'
 ext.wireMockVersion = '2.5.1'
 
 configurations {
@@ -70,29 +61,23 @@ dependencies {
   compile group: 'ch.qos.logback', name:'logback-classic', version: logback
 
   compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
+
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
 
   compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
-  compile group: 'org.yaml', name: 'snakeyaml', version: snakeyaml
 
-  compile group: 'org.radarcns', name: 'radar-commons', version: radarCommon
-  compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: schemaRestApi
+  compile group: 'org.radarcns', name: 'radar-commons', version: radarCommons
+  compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: radarSchema
 
-  compile group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
+  compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthVersion
   compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
-  compile group: 'org.mitre.dsmiley.httpproxy' , name: 'smiley-http-proxy-servlet' , version: httpProxyVersion
 
-  compile group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
-  compile group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLangVersion
-
-  compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
-
-  compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
+  runtime group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
   testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: wireMockVersion
 
-  integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommon
+  integrationTestCompile group: 'org.radarcns' , name: 'radar-commons-testing' , version: radarCommons
   integrationTestCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParser
 
   codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion

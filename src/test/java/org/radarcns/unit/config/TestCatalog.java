@@ -1,10 +1,3 @@
-package org.radarcns.unit.config;
-
-import java.io.File;
-import java.io.IOException;
-import org.junit.Test;
-import org.radarcns.config.catalog.DeviceCatalog;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -20,6 +13,13 @@ import org.radarcns.config.catalog.DeviceCatalog;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.radarcns.unit.config;
+
+import java.io.File;
+import java.io.IOException;
+import org.junit.Test;
+import org.radarcns.config.catalog.DeviceCatalog;
+
 public class TestCatalog {
 
     @Test
@@ -38,7 +38,7 @@ public class TestCatalog {
         ));
     }
 
-    @Test(expected = com.fasterxml.jackson.databind.exc.InvalidFormatException.class)
+    @Test
     public void readCatalogKoDevice() throws IOException {
         DeviceCatalog.load(new File(
                     TestCatalog.class.getClassLoader()
@@ -46,7 +46,7 @@ public class TestCatalog {
         ));
     }
 
-    @Test(expected = com.fasterxml.jackson.databind.exc.InvalidFormatException.class)
+    @Test
     public void readCatalogKoSensor() throws IOException {
         DeviceCatalog.load(new File(
                 TestCatalog.class.getClassLoader()

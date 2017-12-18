@@ -1,5 +1,3 @@
-package org.radarcns.webapp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.webapp;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.webapp;
 
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
@@ -39,11 +39,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.managementportal.Subject;
+import org.radarcns.restapi.app.Application;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;

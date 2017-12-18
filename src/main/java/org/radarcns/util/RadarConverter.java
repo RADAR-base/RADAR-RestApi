@@ -1,5 +1,3 @@
-package org.radarcns.util;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,25 +14,24 @@ package org.radarcns.util;
  * limitations under the License.
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
+package org.radarcns.util;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.avro.restapi.app.ServerStatus;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.source.SourceType;
+
+import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.monitor.application.ServerStatus;
+import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.security.Param;
 import org.radarcns.source.SourceCatalog;
 import org.slf4j.Logger;
@@ -166,48 +163,24 @@ public class RadarConverter {
     /**
      * Converts the SensorType to the related data name used to convert AVRO to JSON.
      **/
-    public static String getSensorName(SensorType sensor) {
+    public static String getSensorName(String sensor) {
         switch (sensor) {
-            case ACCELEROMETER: return "acceleration";
-            case BATTERY: return "battery";
-            case BLOOD_VOLUME_PULSE: return "blood_volume_pulse";
-            case ELECTRODERMAL_ACTIVITY: return "electrodermal_activity";
-            case HEART_RATE: return "heart_rate";
-            case INTER_BEAT_INTERVAL: return "inter_beat_interval";
-            case THERMOMETER: return "temperature";
-            default: throw new IllegalArgumentException("Sensor type cannot be converted. "
-                    + sensor.name() + "is unknown");
+            case "THERMOMETER":  return "temperature";
+            case "ACCELEROMETER": return "acceleration";
+            default: return sensor.toLowerCase(Locale.US);
         }
     }
 
     /**
      * Converts a String to the related source type.
      **/
-    public static SourceType getSourceType(String value) {
-        for (SourceType source : SourceType.values()) {
-            if (source.name().equalsIgnoreCase(value)) {
-                return source;
-            }
-        }
-
-        throw new IllegalArgumentException(value + " cannot be converted to SourceDefinition type");
+    public static String getSourceType(String value) {
+        return value.toUpperCase();
     }
 
     /**
-     * Converts AVRO objects in pretty JSON.
-     * @param record Specific Record that has to be converted
-     * @return String with the object serialised in pretty JSON
-     */
-    public static String getPrettyJson(SpecificRecord record) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        Object json = mapper.readValue(record.toString(), Object.class);
-        String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-        return  indented;
-    }
-
-    /**
-     * Returns the amount of expected data related to the {@link SourceType}, {@link SensorType} and
-     *      {@link TimeFrame} specified in the {@link Header}.
+     * Returns the amount of expected data related to the source type, sensor type and
+     *      {@link TimeWindow} specified in the {@link Header}.
      *
      * @param header {@link Header} to provide data context
      *
@@ -215,20 +188,19 @@ public class RadarConverter {
      */
     public static Double getExpectedMessages(Header header) {
         return SourceCatalog.getInstance(header.getSource()).getFrequency(
-                header.getSensor()) * getSecond(header.getTimeFrame()).doubleValue();
+                header.getType()) * getSecond(header.getTimeWindow()).doubleValue();
     }
 
     /**
-     * Converts a {@link TimeFrame} to seconds.
+     * Converts a time window to seconds.
      *
-     * @param timeFrame {@link TimeFrame} that has to be converted in seconds
+     * @param timeFrame time window that has to be converted in seconds
      *
      * @return a {@link Long} representing the amount of seconds
      */
-    public static Long getSecond(TimeFrame timeFrame) {
+    public static Long getSecond(TimeWindow timeFrame) {
         switch (timeFrame) {
             case TEN_SECOND: return TimeUnit.SECONDS.toSeconds(10);
-            case THIRTY_SECOND: return TimeUnit.SECONDS.toSeconds(30);
             case ONE_MIN: return TimeUnit.MINUTES.toSeconds(1);
             case TEN_MIN: return TimeUnit.MINUTES.toSeconds(10);
             case ONE_HOUR: return TimeUnit.HOURS.toSeconds(1);

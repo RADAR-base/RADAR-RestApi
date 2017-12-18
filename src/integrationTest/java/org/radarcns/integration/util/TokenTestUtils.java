@@ -3,7 +3,6 @@ package org.radarcns.integration.util;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import org.apache.commons.codec.binary.Base64;
 
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -11,6 +10,7 @@ import java.security.cert.Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 
 /**
@@ -53,7 +53,8 @@ public class TokenTestUtils {
         RSAPublicKey publicKey = (RSAPublicKey) cert.getPublicKey();
 
         keyStream.close();
-        PUBLIC_KEY_STRING = new String(new Base64().encode(publicKey.getEncoded()));
+
+        PUBLIC_KEY_STRING = Base64.getEncoder().encodeToString(publicKey.getEncoded());
         initVars(PUBLIC_KEY_STRING, Algorithm.RSA256(publicKey, privateKey));
     }
 

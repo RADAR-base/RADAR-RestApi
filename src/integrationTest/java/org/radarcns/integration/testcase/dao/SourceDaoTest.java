@@ -18,10 +18,7 @@ package org.radarcns.integration.testcase.dao;
 
 import static com.mongodb.client.model.Filters.eq;
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.ANDROID;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -30,9 +27,7 @@ import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SourceDataAccessObject;
@@ -49,9 +44,9 @@ public class SourceDaoTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final SourceType SOURCE_TYPE = EMPATICA;
-    private static final SensorType SENSOR_TYPE = HEART_RATE;
-    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
+    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SENSOR_TYPE = "HEART_RATE";
+    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test
@@ -70,7 +65,7 @@ public class SourceDaoTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE.concat("1")));
 
-        assertEquals(ANDROID, SourceDataAccessObject.getSourceType(SOURCE.concat("1"), client));
+        assertEquals("ANDROID", SourceDataAccessObject.getSourceType(SOURCE.concat("1"), client));
 
         assertEquals(2, SourceDataAccessObject.findAllSourcesByUser(SUBJECT,
                 client).getSources().size());
@@ -86,7 +81,7 @@ public class SourceDaoTest {
             extractedSourceType = doc.getString(MongoHelper.SOURCE_TYPE);
         }
         assertEquals(SOURCE, extractedSourceId);
-        assertEquals(EMPATICA.name(), extractedSourceType);
+        assertEquals("EMPATICA", extractedSourceType);
 
         extractedSourceId = null;
         extractedSourceType = null;
@@ -98,7 +93,7 @@ public class SourceDaoTest {
             extractedSourceType = doc.getString(MongoHelper.SOURCE_TYPE);
         }
         assertEquals(SOURCE.concat("1"), extractedSourceId);
-        assertEquals(ANDROID.name(), extractedSourceType);
+        assertEquals("ANDROID", extractedSourceType);
 
         dropAndClose(client);
     }

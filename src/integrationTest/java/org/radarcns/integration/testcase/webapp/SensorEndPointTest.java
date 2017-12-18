@@ -1,5 +1,3 @@
-package org.radarcns.integration.testcase.webapp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,11 +14,11 @@ package org.radarcns.integration.testcase.webapp;
  * limitations under the License.
  */
 
+package org.radarcns.integration.testcase.webapp;
+
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.source.SourceType.EMPATICA;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.webapp.util.BasePath.*;
 import static org.radarcns.webapp.util.Parameter.END;
 import static org.radarcns.webapp.util.Parameter.INTERVAL;
@@ -39,12 +37,10 @@ import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.bson.Document;
 import org.junit.*;
-import org.radarcns.avro.restapi.data.DoubleSample;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.catalogue.Unit;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
@@ -62,9 +58,9 @@ public class SensorEndPointTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final SourceType SOURCE_TYPE = EMPATICA;
-    private static final SensorType SENSOR_TYPE = HEART_RATE;
-    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
+    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SENSOR_TYPE = "HEART_RATE";
+    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final Class ITEM = DoubleSample.class;
     private static final int SAMPLES = 10;
 
@@ -73,7 +69,7 @@ public class SensorEndPointTest {
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = DATA + "/" + REALTIME + "/{" + SENSOR + "}/{" + STAT
                 + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
+        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE);
         path = path.replace("{" + STAT + "}", COUNT.name());
         path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
@@ -117,7 +113,7 @@ public class SensorEndPointTest {
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
+        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE);
         path = path.replace("{" + STAT + "}", COUNT.name());
         path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
@@ -161,7 +157,7 @@ public class SensorEndPointTest {
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + START + "}/{" + END + "}";
-        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
+        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE);
         path = path.replace("{" + STAT + "}", COUNT.name());
         path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
@@ -216,7 +212,7 @@ public class SensorEndPointTest {
         throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
+        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE);
         path = path.replace("{" + STAT + "}", COUNT.name());
         path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);

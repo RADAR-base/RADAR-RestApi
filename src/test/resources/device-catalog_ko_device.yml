@@ -24,8 +24,6 @@ device_catalog:
         collections:
           #Time-frame of 10 seconds
           10sec: android_empatica_e4_acceleration_output
-          #Time-frame of 30 seconds
-          30sec: android_empatica_e4_acceleration_output_30sec
           #Time-frame of 1 minute
           1min: android_empatica_e4_acceleration_output_1min
           #Time-frame of 10 minutes
@@ -43,7 +41,6 @@ device_catalog:
         data_class: DOUBLE_FORMAT
         collections:
           10sec: android_empatica_e4_battery_level_output
-          30sec: android_empatica_e4_battery_level_output_30sec
           1min: android_empatica_e4_battery_level_output_1min
           10min: android_empatica_e4_battery_level_output_10min
           1h: android_empatica_e4_battery_level_output_1h
@@ -51,12 +48,11 @@ device_catalog:
           1w: android_empatica_e4_battery_level_output_1w
       - name: BLOOD_VOLUME_PULSE
         frequency: 64.0
-        unit: NANOWATT
+        unit: NANO_WATT
         data_type: RAW
         data_class: DOUBLE_FORMAT
         collections:
           10sec: android_empatica_e4_blood_volume_pulse_output
-          30sec: android_empatica_e4_blood_volume_pulse_output_30sec
           1min: android_empatica_e4_blood_volume_pulse_output_1min
           10min: android_empatica_e4_blood_volume_pulse_output_10min
           1h: android_empatica_e4_blood_volume_pulse_output_1h
@@ -64,12 +60,11 @@ device_catalog:
           1w: android_empatica_e4_blood_volume_pulse_output_1w
       - name: ELECTRODERMAL_ACTIVITY
         frequency: 4.0
-        unit: MICROSIEMENS
+        unit: MICRO_SIEMENS
         data_type: RAW
         data_class: DOUBLE_FORMAT
         collections:
           10sec: android_empatica_e4_electrodermal_activity_output
-          30sec: android_empatica_e4_electrodermal_activity_output_30sec
           1min: android_empatica_e4_electrodermal_activity_output_1min
           10min: android_empatica_e4_electrodermal_activity_output_10min
           1h: android_empatica_e4_electrodermal_activity_output_1h
@@ -82,7 +77,6 @@ device_catalog:
         data_class: DOUBLE_FORMAT
         collections:
           10sec: android_empatica_e4_heartrate
-          30sec: android_empatica_e4_heartrate_30sec
           1min: android_empatica_e4_heartrate_1min
           10min: android_empatica_e4_heartrate_10min
           1h: android_empatica_e4_heartrate_1h
@@ -95,7 +89,6 @@ device_catalog:
         data_class: DOUBLE_FORMAT
         collections:
           10sec: android_empatica_e4_inter_beat_interval_output
-          30sec: android_empatica_e4_inter_beat_interval_output_30sec
           1min: android_empatica_e4_inter_beat_interval_output_1min
           10min: android_empatica_e4_inter_beat_interval_output_10min
           1h: android_empatica_e4_inter_beat_interval_output_1h
@@ -108,7 +101,6 @@ device_catalog:
         data_class: DOUBLE_FORMAT
         collections:
           10sec: android_empatica_e4_inter_beat_interval_output
-          30sec: android_empatica_e4_inter_beat_interval_output_30sec
           1min: android_empatica_e4_inter_beat_interval_output_1min
           10min: android_empatica_e4_inter_beat_interval_output_10min
           1h: android_empatica_e4_inter_beat_interval_output_1h

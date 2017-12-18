@@ -1,5 +1,3 @@
-package org.radarcns.webapp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.webapp;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.webapp;
 
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
@@ -41,10 +41,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.avro.restapi.source.Source;
-import org.radarcns.avro.restapi.source.SourceSpecification;
-import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.avro.restapi.subject.Subject;
+import org.radarcns.restapi.source.Source;
+import org.radarcns.restapi.spec.SourceSpecification;
+import org.radarcns.restapi.subject.Subject;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.managementportal.MpClient;
@@ -158,7 +157,7 @@ public class SourceEndPoint {
             throws ConnectException {
         Param.isValidInput(subject, source);
 
-        SourceType sourceType = SourceDataAccessObject.getSourceType(source, context);
+        String sourceType = SourceDataAccessObject.getSourceType(source, context);
 
         if (sourceType == null) {
             return null;
@@ -193,7 +192,7 @@ public class SourceEndPoint {
             @ApiResponse(code = 403, message = "Not Authorised error occured")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationJson(
-            @PathParam(SOURCE_TYPE) SourceType source) {
+            @PathParam(SOURCE_TYPE) String source) {
         try {
             checkPermission(getJWT(request), SOURCE_READ);
             return ResponseHandler.getJsonResponse(request, getSourceSpecificationWorker(source));
@@ -229,7 +228,7 @@ public class SourceEndPoint {
             @ApiResponse(code = 403, message = "Not Authorised error occured")})
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationAvro(
-            @PathParam(SOURCE_TYPE) SourceType source) {
+            @PathParam(SOURCE_TYPE) String source) {
         try {
             checkPermission(getJWT(request), SOURCE_READ);
             return ResponseHandler.getAvroResponse(request, getSourceSpecificationWorker(source));
@@ -248,11 +247,9 @@ public class SourceEndPoint {
     /**
      * Actual implementation of AVRO and JSON getSpecification.
      **/
-    private SourceSpecification getSourceSpecificationWorker(SourceType source)
+    private SourceSpecification getSourceSpecificationWorker(String source)
             throws ConnectException {
-        SourceSpecification device = Monitors.getInstance().getSpecification(source);
-
-        return device;
+        return Monitors.getInstance().getSpecification(source);
     }
 
     //--------------------------------------------------------------------------------------------//

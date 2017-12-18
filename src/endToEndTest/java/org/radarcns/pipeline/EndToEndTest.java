@@ -1,5 +1,3 @@
-package org.radarcns.pipeline;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.pipeline;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.pipeline;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -51,17 +51,15 @@ import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.radarcns.avro.restapi.data.Acceleration;
-import org.radarcns.avro.restapi.data.DoubleSample;
-import org.radarcns.avro.restapi.data.Quartiles;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.catalogue.Unit;
+import org.radarcns.restapi.data.Acceleration;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.dataset.Item;
+import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
@@ -91,7 +89,7 @@ public class EndToEndTest {
 
     private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
 
-    private static final TimeFrame TIME_FRAME = TimeFrame.TEN_SECOND;
+    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
 
     public static final String PIPELINE_CONFIG = "pipeline.yml";
 
@@ -317,7 +315,7 @@ public class EndToEndTest {
 
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory.getDataset(
-                    expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, SourceType.EMPATICA,
+                    expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, "EMPATICA",
                     getSensorType(config), stat, TIME_FRAME));
         }
 
@@ -346,7 +344,7 @@ public class EndToEndTest {
         path = path.replace("{" + SUBJECT_ID + "}", USER_ID_MOCK);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE_ID_MOCK);
 
-        path = path.replace("{" + INTERVAL + "}", TimeFrame.TEN_SECOND.name());
+        path = path.replace("{" + INTERVAL + "}", TimeWindow.TEN_SECOND.name());
 
         try (RestClient client = new RestClient(pipelineConfig.getRestApi())) {
 
@@ -357,7 +355,7 @@ public class EndToEndTest {
 
                 for (MockDataConfig config : datasets.keySet()) {
                     String pathSensor = pathStat.replace("{" + SENSOR + "}",
-                            getSensorType(config).name());
+                            getSensorType(config));
 
                     LOGGER.info("Requesting {}", client.getRelativeUrl(pathSensor));
 
@@ -393,7 +391,7 @@ public class EndToEndTest {
      *
      * @see Dataset
      */
-    private void assertDatasetEquals(SensorType sensorType, Dataset expected, Dataset actual,
+    private void assertDatasetEquals(String sensorType, Dataset expected, Dataset actual,
             double delta) {
         assertEquals(expected.getHeader(), actual.getHeader());
 
@@ -410,7 +408,7 @@ public class EndToEndTest {
             SpecificRecord actualRecord = (SpecificRecord) actualItem.getSample();
 
             switch (sensorType) {
-                case ACCELEROMETER:
+                case "ACCELEROMETER":
                     compareAccelerationItem(expected.getHeader().getDescriptiveStatistic(),
                             (Acceleration) expectedRecord, (Acceleration) actualRecord, delta);
                     break;
@@ -499,17 +497,11 @@ public class EndToEndTest {
      * @throws IllegalArgumentException if the specified data does not match any of the already
      *          known ones
      */
-    public static SensorType getSensorType(MockDataConfig config) {
+    public static String getSensorType(MockDataConfig config) {
         if (config.getSensor().equals("BATTERY_LEVEL")) {
-            return SensorType.BATTERY;
+            return "BATTERY";
         }
-        for (SensorType type : SensorType.values()) {
-            if (type.name().equalsIgnoreCase(config.getSensor())) {
-                return type;
-            }
-        }
-
-        throw new IllegalArgumentException(config.getSensor() + " unknown data");
+        return config.getSensor().toUpperCase();
     }
 
     /**

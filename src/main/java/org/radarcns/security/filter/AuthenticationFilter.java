@@ -1,6 +1,5 @@
 package org.radarcns.security.filter;
 
-import org.apache.http.HttpHeaders;
 import org.radarcns.auth.authentication.TokenValidator;
 import org.radarcns.auth.config.ServerConfig;
 import org.radarcns.auth.config.YamlServerConfig;
@@ -89,7 +88,7 @@ public class AuthenticationFilter implements Filter {
 
     private String getToken(ServletRequest request) {
         HttpServletRequest req = (HttpServletRequest) request;
-        String authorizationHeader = req.getHeader(HttpHeaders.AUTHORIZATION);
+        String authorizationHeader = req.getHeader("Authorization");
 
         // Check if the HTTP Authorization header is present and formatted correctly
         if (authorizationHeader == null

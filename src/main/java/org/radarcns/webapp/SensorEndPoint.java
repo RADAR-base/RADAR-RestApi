@@ -45,11 +45,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
+import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.dataset.Item;
+import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.managementportal.MpClient;
@@ -99,9 +98,9 @@ public class SensorEndPoint {
             @ApiResponse(code = 401, message = "Access denied error occured"),
             @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getLastReceivedSampleJson(
-            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
         try {
@@ -146,9 +145,9 @@ public class SensorEndPoint {
             @ApiResponse(code = 401, message = "Access denied error occured"),
             @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getLastReceivedSampleAvro(
-            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
         try {
@@ -173,8 +172,8 @@ public class SensorEndPoint {
     /**
      * Actual implementation of AVRO and JSON getRealTimeSubject.
      **/
-    private Dataset getLastReceivedSampleWorker(String subject, String source, SensorType sensor,
-            DescriptiveStatistic stat, TimeFrame interval) throws ConnectException {
+    private Dataset getLastReceivedSampleWorker(String subject, String source, String sensor,
+            DescriptiveStatistic stat, TimeWindow interval) throws ConnectException {
         Param.isValidInput(subject, source);
 
         Dataset dataset = new Dataset(null, new LinkedList<Item>());
@@ -219,9 +218,9 @@ public class SensorEndPoint {
             @ApiResponse(code = 401, message = "Access denied error occured"),
             @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSamplesJson(
-            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
         try {
@@ -266,9 +265,9 @@ public class SensorEndPoint {
             @ApiResponse(code = 401, message = "Access denied error occured"),
             @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSamplesAvro(
-            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
         try {
@@ -294,7 +293,7 @@ public class SensorEndPoint {
      * Actual implementation of AVRO and JSON getAllBySubject.
      **/
     private Dataset getSamplesWorker(String subject, String source, DescriptiveStatistic stat,
-            TimeFrame interval, SensorType sensor) throws ConnectException {
+            TimeWindow interval, String sensor) throws ConnectException {
         Param.isValidInput(subject, source);
 
         Dataset dataset = new Dataset(null, new LinkedList<Item>());
@@ -339,11 +338,11 @@ public class SensorEndPoint {
             @ApiResponse(code = 401, message = "Access denied error occured"),
             @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSamplesWithinWindowJson(
-            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId,
-            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(START) long start,
             @PathParam(END) long end) {
         try {
@@ -390,9 +389,9 @@ public class SensorEndPoint {
             @ApiResponse(code = 401, message = "Access denied error occured"),
             @ApiResponse(code = 403, message = "Not Authorised error occured")})
     public Response getSamplesWithinWindowAvro(
-            @PathParam(SENSOR) SensorType sensor,
+            @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(INTERVAL) TimeFrame interval,
+            @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId,
             @PathParam(START) long start,
@@ -421,7 +420,7 @@ public class SensorEndPoint {
      * Actual implementation of AVRO and JSON getBySubjectForWindow.
      **/
     private Dataset getSamplesWithinWindowWorker(String subject, String source,
-            DescriptiveStatistic stat, TimeFrame interval, SensorType sensor, long start,
+            DescriptiveStatistic stat, TimeWindow interval, String sensor, long start,
             long end) throws ConnectException {
         Param.isValidInput(subject, source);
 

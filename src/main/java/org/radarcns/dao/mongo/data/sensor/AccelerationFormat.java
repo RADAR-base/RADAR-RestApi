@@ -16,20 +16,19 @@ package org.radarcns.dao.mongo.data.sensor;
  * limitations under the License.
  */
 
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MEDIAN;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
+import static org.radarcns.restapi.header.DescriptiveStatistic.MEDIAN;
+import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
 
 import java.util.ArrayList;
 import org.bson.Document;
-import org.radarcns.avro.restapi.data.Acceleration;
-import org.radarcns.avro.restapi.data.Quartiles;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.mongo.util.MongoSensor;
+import org.radarcns.restapi.data.Acceleration;
+import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -43,7 +42,7 @@ public class AccelerationFormat extends MongoSensor {
 
     //private static final Logger LOGGER = LoggerFactory.getLogger(AccelerationFormat.class);
 
-    public AccelerationFormat(SensorType sensorType) {
+    public AccelerationFormat(String sensorType) {
         super(DataFormat.ACCELERATION_FORMAT, sensorType);
     }
 
