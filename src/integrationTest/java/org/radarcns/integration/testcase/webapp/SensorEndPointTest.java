@@ -25,7 +25,6 @@ import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
 import static org.radarcns.webapp.util.Parameter.END;
-import static org.radarcns.webapp.util.Parameter.INTERVAL;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.START;
@@ -56,6 +55,7 @@ import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
+import org.radarcns.webapp.util.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,10 +75,10 @@ public class SensorEndPointTest {
     public void getRealtimeTest()
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
         String path = DATA + "/" + AVRO + "/" + REALTIME + "/{" + SENSOR + "}/{" + STAT
-                + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+                + "}/{" + Parameter.TIME_WINDOW + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
         path = path.replace("{" + STAT + "}", COUNT.name());
-        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
+        path = path.replace("{" + Parameter.TIME_WINDOW + "}", TIME_FRAME.name());
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
@@ -117,11 +117,11 @@ public class SensorEndPointTest {
     @Test
     public void getAllByUserTest()
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + Parameter.TIME_WINDOW + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
         path = path.replace("{" + STAT + "}", COUNT.name());
-        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
+        path = path.replace("{" + Parameter.TIME_WINDOW + "}", TIME_FRAME.name());
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
@@ -160,11 +160,11 @@ public class SensorEndPointTest {
     @Test
     public void getTimeWindowTest200()
             throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + Parameter.TIME_WINDOW + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + START + "}/{" + END + "}";
         path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
         path = path.replace("{" + STAT + "}", COUNT.name());
-        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
+        path = path.replace("{" + Parameter.TIME_WINDOW + "}", TIME_FRAME.name());
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 
@@ -214,11 +214,11 @@ public class SensorEndPointTest {
     @Test
     public void getAllDataTest204()
         throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+        String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{" + Parameter.TIME_WINDOW + "}/{"
                 + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SENSOR + "}", SENSOR_TYPE.name());
         path = path.replace("{" + STAT + "}", COUNT.name());
-        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
+        path = path.replace("{" + Parameter.TIME_WINDOW + "}", TIME_FRAME.name());
         path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE);
 

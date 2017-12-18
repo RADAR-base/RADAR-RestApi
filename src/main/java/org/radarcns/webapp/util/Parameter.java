@@ -21,7 +21,7 @@ package org.radarcns.webapp.util;
  */
 public class Parameter {
     public static final String END = "end";
-    public static final String INTERVAL = "interval";
+    public static final String TIME_WINDOW = "time_window";
     public static final String SENSOR = "sensor";
     public static final String SOURCE_ID = "sourceId";
     public static final String SOURCE_TYPE = "sourceType";

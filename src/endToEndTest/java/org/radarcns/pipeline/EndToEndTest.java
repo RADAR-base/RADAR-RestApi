@@ -22,7 +22,6 @@ import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
 import static org.radarcns.webapp.util.BasePath.AVRO;
 import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.Parameter.INTERVAL;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.STAT;
@@ -72,6 +71,7 @@ import org.radarcns.pipeline.config.PipelineConfig;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
+import org.radarcns.webapp.util.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -333,11 +333,11 @@ public class EndToEndTest {
         LOGGER.info("Fetching APIs ...");
 
         String path = DATA + "/" + AVRO + "/{" + SENSOR + "}/{" + STAT + "}/{"
-                + INTERVAL + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
+                + Parameter.TIME_WINDOW + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
         path = path.replace("{" + SUBJECT_ID + "}", USER_ID_MOCK);
         path = path.replace("{" + SOURCE_ID + "}", SOURCE_ID_MOCK);
 
-        path = path.replace("{" + INTERVAL + "}", TimeFrame.TEN_SECOND.name());
+        path = path.replace("{" + Parameter.TIME_WINDOW + "}", TimeFrame.TEN_SECOND.name());
 
         try (RestClient client = new RestClient(pipelineConfig.getRestApi())) {
 
