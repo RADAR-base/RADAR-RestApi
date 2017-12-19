@@ -3,6 +3,7 @@ package org.radarcns.status;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -36,7 +37,7 @@ public class CSVDataController {
      * @param csvDataList list of {@link CSVData} objects read from bins.csv
      * @return a {@link JsonNode} object containing aggregated data for each topic for each source
      */
-    public static String getDataOfTopic(List<CSVData> csvDataList) {
+    public static String getDataOfTopics(List<CSVData> csvDataList) {
 
         sources  = new ArrayList<>();
 
@@ -92,7 +93,9 @@ public class CSVDataController {
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = mapper.valueToTree(listMap);
-        return jsonNode.toString();
+        ObjectNode root = mapper.createObjectNode();
+        root.set("topics", jsonNode);
+        return root.toString();
     }
 
     /**

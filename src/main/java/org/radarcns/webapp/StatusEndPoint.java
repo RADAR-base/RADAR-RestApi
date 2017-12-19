@@ -61,7 +61,7 @@ public class StatusEndPoint {
             List<CSVData> data = getListFromCSVFile(CSV_FILE_PATH);
             HashSet<String> topics = CSVDataController.getAllTopics(data);
             return Response.status(Response.Status.OK).entity(topics + "\n" +
-                    CSVDataController.getDataOfTopic(data,"")).build();
+                    CSVDataController.getDataOfTopics(data)).build();
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
