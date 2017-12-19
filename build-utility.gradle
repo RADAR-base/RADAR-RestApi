@@ -46,13 +46,29 @@ ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? [
 //---------------------------------------------------------------------------//
 ext.simpleStackPath = 'src/integrationTest'
 ext.simpleStackLock = "${simpleStackPath}/.RUNNING_INSTANCE_LOCK"
+ext.radarVolumePath = "${simpleStackPath}/volumes/radar"
 
-task buildDocker(type: Exec, dependsOn: copyWarForIntegration) {
-  workingDir 'src/integrationTest/image'
+task buildDocker(type: Exec) {
   commandLine sudoLinux + ['docker', 'image', 'build', '-t', 'radarcns/radar-restapi:dev', '.']
 }
 
-task installSimpleStack(type: Exec, dependsOn: buildDocker) {
+task simpleConfigJson(type: Copy) {
+  from files("${simpleStackPath}/resources/config.json",
+          "${simpleStackPath}/resources/device-catalog.yml",
+          "${simpleStackPath}/resources/mp_info.yml")
+  into "${radarVolumePath}"
+}
+
+task simpleRadarJson(type: Copy) {
+  from "${simpleStackPath}/resources/radar.yml"
+  into "${radarVolumePath}"
+
+  filter { String line ->
+    line.replace("localhost: 27017", "hotstorage: 27017")
+  }
+}
+
+task installSimpleStack(type: Exec, dependsOn: [buildDocker, simpleConfigJson, simpleRadarJson]) {
   doFirst{
     def lockFile = new File(simpleStackLock)
     if (lockFile.exists()) {
@@ -60,21 +76,6 @@ task installSimpleStack(type: Exec, dependsOn: buildDocker) {
     } else {
       lockFile.createNewFile()
     }
-
-    def radarVolumePath = "${simpleStackPath}/volumes/radar"
-    file(radarVolumePath).mkdirs()
-
-    def configJson = file("${simpleStackPath}/resources/config.json")
-    file("${radarVolumePath}/config.json") << configJson.text
-
-    def catalogYml = file("${simpleStackPath}/resources/device-catalog.yml")
-    file("${radarVolumePath}/device-catalog.yml") << catalogYml.text
-
-    def radarYml = file("${simpleStackPath}/resources/radar.yml")
-    file("${radarVolumePath}/radar.yml") << radarYml.text.replace("localhost: 27017", "hotstorage: 27017")
-    
-    def mpYml = file("${simpleStackPath}/resources/mp_info.yml")
-    file("${radarVolumePath}/mp_info.yml") << mpYml.text
   }
 
   workingDir simpleStackPath
@@ -88,7 +89,7 @@ task installSimpleStack(type: Exec, dependsOn: buildDocker) {
 }
 
 task stopSimpleStack(type: Exec) {
-  onlyIf{
+  onlyIf {
     new File(simpleStackLock).exists()
   }
   standardInput = System.in
@@ -110,76 +111,67 @@ stopSimpleStack.finalizedBy removeFrontendConfig
 //---------------------------------------------------------------------------//
 // End to End Test                                                           //
 //---------------------------------------------------------------------------//
-ext.radarStackPath = 'src/endToEndTest/dockerRadar/dcompose-stack/radar-cp-hadoop-stack'
+ext.e2ePath = 'src/endToEndTest'
+ext.radarStackPath = "${e2ePath}/dockerRadar/dcompose-stack/radar-cp-hadoop-stack"
 ext.radarStackLock = "${radarStackPath}/.RUNNING_INSTANCE_LOCK"
 ext.radarDockerCompose = 'docker-compose.yml'
 ext.radarDockerComposeOriginal = ".${radarDockerCompose}.orig"
+ext.radarVolumes = file("${radarStackPath}/volumes")
+
+
+task radarEnv(type: Copy) {
+  from "${radarStackPath}/etc/env.template"
+  into "${radarStackPath}/.env"
+
+  filter { String line ->
+    line.replace('/usr/local/var/lib/docker', radarVolumes.getAbsolutePath())
+            .replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
+            .replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
+            .replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+  }
+}
+
+task radarConfigJson(type: Copy) {
+  from files("${radarStackPath}/etc/radar.yml.template", "${radarStackPath}/etc/smtp.env.template")
+  into "${radarStackPath}/etc"
+  rename '(.+).template', '$1'
+}
+
+task radarMpInfo(type: Copy) {
+  from "${simpleStackPath}/resources/mp_info.yml"
+  into "${radarStackPath}/etc/rest-api"
+}
+
+task radarDockerComposeOrig(type: Copy) {
+  from "${radarStackPath}/docker-compose.yml"
+  into radarStackPath
+  rename 'docker-compose.yml', '.docker-compose.yml.orig'
+  eachFile {
+    if (it.getRelativePath().getFile(file(radarStackPath)).exists()) {
+      it.exclude()
+    }
+  }
+}
 
 // Sets configuration files for running the entire platform
-task setRadarEnvironmentForDocker(dependsOn: buildDocker) {
+task setRadarEnvironmentForDocker(dependsOn: [buildDocker, radarEnv, radarConfigJson, radarMpInfo, radarDockerComposeOrig]) {
   doLast {
-    def envTemplatePath = "${radarStackPath}/etc/env.template"
-    def smtpTemplatePath = "${radarStackPath}/etc/smtp.env.template"
-    def streamTemplatePath = "${radarStackPath}/etc/radar.yml.template"
-
     def volumes = file("${radarStackPath}/volumes")
     volumes.mkdir()
-
-    def fileEnv = file(envTemplatePath + 'tmp')
-    fileEnv << file(envTemplatePath).text
-    fileEnv.text = fileEnv.text.replace('/usr/local/var/lib/docker', volumes.getAbsolutePath())
-    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
-    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
-    fileEnv.text = fileEnv.text.replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
-    fileEnv.renameTo("${radarStackPath}/.env")
-
-    def fileSmtp = file(smtpTemplatePath + 'tmp')
-    fileSmtp << file(smtpTemplatePath).text
-    fileSmtp.renameTo("${radarStackPath}/etc/smtp.env")
-
-    def fileStream = file(streamTemplatePath + 'tmp')
-    fileStream << file(streamTemplatePath).text
-    fileStream.renameTo("${radarStackPath}/etc/radar.yml")
-    
-    def mpYml = file("${simpleStackPath}/resources/mp_info.yml")
-    file("${radarStackPath}/etc/rest-api/mp_info.yml") << mpYml.text
 
     def installScript = file("${radarStackPath}/install-radar-stack.sh")
     installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
 
     def dockerComposeYml = file("${radarStackPath}/${radarDockerCompose}")
     file("${radarStackPath}/${radarDockerComposeOriginal}") << dockerComposeYml.text
-    def dockerComposeTmp = file("${radarStackPath}/.${radarDockerCompose}.tmp")
-    dockerComposeTmp << dockerComposeYml.text.replaceAll('radarcns/radar-restapi:.*', 'radarcns/radar-restapi:dev')
-
-    // Add wiremock as a dependency to Rest Api
-    def dockerComposeText = dockerComposeTmp.text.replaceAll('  rest-api:\n' +
-            '    image: radarcns/radar-restapi:dev\n' +
-            '    networks:\n' +
-            '      - hotstorage\n' +
-            '      - api\n' +
-            '    depends_on:\n' +
-            '      - hotstorage\n' +
-            '    restart: always', '  rest-api:\n' +
-            '    image: radarcns/radar-restapi:dev\n' +
-            '    networks:\n' +
-            '      - hotstorage\n' +
-            '      - api\n' +
-            '    depends_on:\n' +
-            '      - hotstorage\n' +
-            '      - wiremock\n' +
-            '    restart: always')
-    dockerComposeTmp.createNewFile()
-    dockerComposeTmp.write(dockerComposeText)
-    // Add wiremock to docker-compose to start up with the stack
-    dockerComposeTmp.append("\n\n  wiremock:\n" +
+    dockerComposeYml.text = dockerComposeYml.text.replace('radarcns/radar-restapi:.*', 'radarcns/radar-restapi:dev')
+    dockerComposeYml.text += "\n\n  wiremock:\n" +
             "    image: radarcns/wiremock\n" +
             "    networks:\n" +
             "      - api\n" +
             "      - default\n" +
             "    ports:\n" +
-            "      - \"8089:8089\"")
-    dockerComposeTmp.renameTo("${radarStackPath}/${radarDockerCompose}")
+            "      - \"8089:8089\""
   }
 }
 

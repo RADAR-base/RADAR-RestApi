@@ -26,8 +26,7 @@ services:
     #             RADAR Rest Api             #
     #----------------------------------------#
     rest-api:
-      build: image
-      image: radarcns/radar-restapi:0.1
+      image: radarcns/radar-restapi:dev
       depends_on:
         - hotstorage
         - wiremock
@@ -43,7 +42,7 @@ services:
     #             RADAR Wiremock             #
     #----------------------------------------#
     wiremock:
-      build: image/wiremock
+      build: images/wiremock
       image: radarcns/wiremock
       networks:
         - simplestack
