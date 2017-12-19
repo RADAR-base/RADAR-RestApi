@@ -60,7 +60,8 @@ public class StatusEndPoint {
             checkPermission(getJWT(request), MEASUREMENT_READ);
             List<CSVData> data = getListFromCSVFile(CSV_FILE_PATH);
             HashSet<String> topics = CSVDataController.getAllTopics(data);
-            return Response.status(Response.Status.OK).entity(topics + CSVDataController.getDataOfTopic(data,"")).build();
+            return Response.status(Response.Status.OK).entity(topics + "\n" +
+                    CSVDataController.getDataOfTopic(data,"")).build();
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -131,6 +132,7 @@ public class StatusEndPoint {
         BufferedReader br = new BufferedReader(new FileReader(csvFileToRead));
         String line;
 
+        br.readLine();
         while ((line = br.readLine()) != null) {
 
             String[] dataCsv = line.split(",");

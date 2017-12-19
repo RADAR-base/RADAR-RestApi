@@ -2776,7 +2776,7 @@ android_phone_battery_level,9fc25dd1-a8cb-41ee-94e6-c731982b23eb,20171130_17,831
 android_phone_relative_location,734ba51c-68db-47b0-bb45-39c88cd49473,20171210_18,14
 android_phone_gyroscope,791e3f93-c19d-4b9c-a8d5-f8adee3730cc,20171206_15,17976
 android_phone_battery_level,8fa1cdde-0ed3-4884-9784-17920d38cbdc,20171210_11,6864
-android_phone_sms_unread,f27a46d0-a505-4fd7-9d7d-3090bfd9bb84,20171205_13,1
+android_phone_sms_unread,f27a46d0-a505-4fd7-9d7d-3090bfd9bb84,20171219_16,1
 android_phone_light,f27a46d0-a505-4fd7-9d7d-3090bfd9bb84,20171205_09,61
 android_phone_user_interaction,8fa1cdde-0ed3-4884-9784-17920d38cbdc,20171209_22,6
 android_phone_acceleration,734ba51c-68db-47b0-bb45-39c88cd49473,20171208_19,34755
