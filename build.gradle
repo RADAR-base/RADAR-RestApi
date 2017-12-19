@@ -38,6 +38,7 @@ ext.okhttp3Version = '3.8.1'
 ext.httpProxyVersion = '1.9'
 ext.radarAuthVersion = '0.2.1'
 ext.wireMockVersion = '2.5.1'
+ext.jacksonVersion = '2.9.3'
 
 configurations {
   codacy
@@ -88,6 +89,8 @@ dependencies {
   compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
 
   compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
+
+  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: jacksonVersion
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
   testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: wireMockVersion
