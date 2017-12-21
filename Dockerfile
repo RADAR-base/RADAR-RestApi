@@ -14,10 +14,15 @@ FROM openjdk:8-alpine as builder
 
 RUN mkdir /code
 WORKDIR /code
-COPY ./gradle/ /code/gradle
-COPY ./build.gradle ./gradle.properties ./gradlew ./settings.gradle /code/
 
-RUN ./gradlew --no-daemon downloadDependencies
+COPY ./gradle/wrapper /code/gradle/wrapper
+COPY ./gradlew /code/
+RUN ./gradlew --no-daemon --version
+
+COPY ./gradle/*.gradle /code/gradle/
+COPY ./build.gradle ./gradle.properties ./settings.gradle /code/
+
+RUN ./gradlew --no-daemon downloadWarDependencies
 
 COPY ./src/ /code/src
 
