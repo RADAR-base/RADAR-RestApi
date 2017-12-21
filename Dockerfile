@@ -15,7 +15,7 @@ FROM openjdk:8-alpine as builder
 RUN mkdir /code
 WORKDIR /code
 COPY ./gradle/ /code/gradle
-COPY ./build.gradle ./gradle.properties ./gradlew ./settings.gradle ./build-utility.gradle /code/
+COPY ./build.gradle ./gradle.properties ./gradlew ./settings.gradle /code/
 
 RUN ./gradlew --no-daemon downloadDependencies
 

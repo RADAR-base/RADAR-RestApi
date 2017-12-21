@@ -1,39 +1,6 @@
 //---------------------------------------------------------------------------//
 // Preparing WAR                                                             //
 //---------------------------------------------------------------------------//
-task copyFrontendConfig(type: Copy) {
-  from "${projectDir}/schemas/restapi/config/config.json"
-  into "${projectDir}/src/main/webapp/frontend/"
-}
-war.dependsOn copyFrontendConfig
-
-task copyFrontendConfigIntegrationTest(type: Copy) {
-  from "${projectDir}/schemas/restapi/config/config.json"
-  into "${projectDir}/src/integrationTest/resources"
-}
-
-task copyFrontendConfigEndToEndTest(type: Copy) {
-  from "${projectDir}/schemas/restapi/config/config.json"
-  into "${projectDir}/src/endToEndTest/resources"
-}
-
-task removeFrontendConfig(type: Delete) {
-  delete "${projectDir}/src/main/webapp/frontend/"
-  delete "${projectDir}/src/integrationTest/resources/config.json"
-  delete "${projectDir}/src/endToEndTest/resources/config.json"
-}
-
-task copyWarForIntegration(type: Copy, dependsOn: war) {
-  from "${war.archivePath}"
-  into "${projectDir}/src/integrationTest/image"
-  doLast{
-    file("${projectDir}/src/integrationTest/image/${war.archiveName}").renameTo("${projectDir}/src/integrationTest/image/radar.war")
-  }
-}
-
-task removeWar(type: Delete) {
-  delete "${projectDir}/src/integrationTest/image/radar.war"
-}
 
 //---------------------------------------------------------------------------//
 // Docker Utility                                                            //
@@ -106,8 +73,7 @@ task cleanSimpleStack(type: Delete, dependsOn: stopSimpleStack) {
 }
 
 stopSimpleStack.finalizedBy cleanSimpleStack
-stopSimpleStack.finalizedBy removeWar
-stopSimpleStack.finalizedBy removeFrontendConfig
+
 //---------------------------------------------------------------------------//
 // End to End Test                                                           //
 //---------------------------------------------------------------------------//
@@ -343,5 +309,10 @@ task cleanRadarStack(type: Exec, dependsOn: stopRadarStack) {
 }
 
 stopRadarStack.finalizedBy cleanRadarStack
-stopRadarStack.finalizedBy removeWar
-stopRadarStack.finalizedBy removeFrontendConfig
+
+//---------------------------------------------------------------------------//
+// Clean definition                                                          //
+//---------------------------------------------------------------------------//
+clean.dependsOn cleanSimpleStack
+clean.dependsOn cleanRadarStack
+

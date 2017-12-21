@@ -6,3 +6,6 @@ src/endToEndTest
 src/test
 libs
 out
+.gradle
+.idea
+.git
