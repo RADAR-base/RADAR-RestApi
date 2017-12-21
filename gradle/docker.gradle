@@ -72,6 +72,7 @@ task cleanSimpleStack(type: Delete, dependsOn: stopSimpleStack) {
   delete simpleStackLock
 }
 
+installSimpleStack.finalizedBy stopSimpleStack
 stopSimpleStack.finalizedBy cleanSimpleStack
 
 //---------------------------------------------------------------------------//
