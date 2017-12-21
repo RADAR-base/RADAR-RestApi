@@ -61,8 +61,8 @@ Test case settings are located at `src/endToEndTest/resources/pipeline.yml`. Eac
   sensor: ACCELEROMETER
   frequency: 32.0
   file: accelerometer.csv
-  key_schema: org.radarcns.key.MeasurementKey
-  value_schema: org.radarcns.empatica.EmpaticaE4Acceleration
+  key_schema: org.radarcns.kafka.ObservationKey
+  value_schema: org.radarcns.passive.empatica.EmpaticaE4Acceleration
   value_fields: [x, y, z]
   minimum: -2.0
   maximum: 2.0

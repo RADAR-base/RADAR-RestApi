@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response.Status;
+import okhttp3.ConnectionPool;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -21,6 +22,7 @@ import org.apache.avro.specific.SpecificRecord;
 import org.hamcrest.CoreMatchers;
 import org.junit.rules.ExternalResource;
 import org.radarcns.config.ServerConfig;
+import org.radarcns.producer.rest.ManagedConnectionPool;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
@@ -58,7 +60,7 @@ public class ApiClient extends ExternalResource {
 
     @Override
     protected void before() throws Throwable {
-        this.client = new RestClient(config);
+        this.client = new RestClient(config, 120, new ManagedConnectionPool());
         this.wireMock.before();
     }
 

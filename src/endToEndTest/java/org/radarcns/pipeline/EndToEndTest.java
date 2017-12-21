@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
@@ -115,7 +116,7 @@ public class EndToEndTest {
     };
 
     // Latency expressed in second
-    private static final long LATENCY = 120;
+    private static final long LATENCY = 180;
 
     private static File dataRoot;
     private static PipelineConfig pipelineConfig;
@@ -492,7 +493,6 @@ public class EndToEndTest {
      *
      * @throws MalformedURLException if the used URL is malformed
      */
-    @Test
     public void checkSwaggerConfig() throws IOException {
         String response = apiClient.requestString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
         JsonNode node = new ObjectMapper().readTree(response);

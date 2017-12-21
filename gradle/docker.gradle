@@ -130,8 +130,7 @@ task setRadarEnvironmentForDocker(dependsOn: [buildDocker, radarEnv, radarConfig
     installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
 
     def dockerComposeYml = file("${radarStackPath}/${radarDockerCompose}")
-    file("${radarStackPath}/${radarDockerComposeOriginal}") << dockerComposeYml.text
-    dockerComposeYml.text = dockerComposeYml.text.replace('radarcns/radar-restapi:.*', 'radarcns/radar-restapi:dev')
+    dockerComposeYml.text = dockerComposeYml.text.replaceAll('radarcns/radar-restapi:.*', 'radarcns/radar-restapi:dev')
     dockerComposeYml.text += "\n\n  wiremock:\n" +
             "    image: radarcns/wiremock\n" +
             "    networks:\n" +
