@@ -1,5 +1,18 @@
 package org.radarcns.integration.util;
 
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.ws.rs.core.Response.Status;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -12,20 +25,6 @@ import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import javax.ws.rs.core.Response.Status;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 
 public class ApiClient extends ExternalResource {
     private static final Logger logger = LoggerFactory.getLogger(ApiClient.class);

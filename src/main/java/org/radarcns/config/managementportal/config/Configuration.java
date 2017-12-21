@@ -2,7 +2,6 @@ package org.radarcns.config.managementportal.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.net.URL;
 
 /*

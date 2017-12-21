@@ -16,8 +16,35 @@
 
 package org.radarcns.pipeline;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.OPENAPI_JSON;
+import static org.radarcns.webapp.util.BasePath.DATA;
+import static org.radarcns.webapp.util.Parameter.SENSOR;
+import static org.radarcns.webapp.util.Parameter.STAT;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import javax.ws.rs.core.Response.Status;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -31,8 +58,8 @@ import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
-import org.radarcns.integration.util.Utility;
 import org.radarcns.integration.util.ManagementPortalWireMock;
+import org.radarcns.integration.util.Utility;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.MockDataConfig;
 import org.radarcns.mock.data.CsvGenerator;
@@ -51,34 +78,6 @@ import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.core.Response.Status;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.OPENAPI_JSON;
-import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.Parameter.SENSOR;
-import static org.radarcns.webapp.util.Parameter.STAT;
 
 public class EndToEndTest {
 

@@ -16,16 +16,15 @@
 
 package org.radarcns.source;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.radarcns.config.Properties;
 import org.radarcns.config.catalog.DeviceCatalog;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * All supported sourceCatalog specifications.

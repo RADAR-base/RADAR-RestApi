@@ -18,7 +18,8 @@ package org.radarcns.integration.testcase.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.unit.config.TestCatalog.*;
+import static org.radarcns.unit.config.TestCatalog.ANDROID;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -27,15 +28,15 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.restapi.source.Source;
-import org.radarcns.restapi.subject.Cohort;
-import org.radarcns.restapi.subject.Subject;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
+import org.radarcns.restapi.source.Source;
+import org.radarcns.restapi.subject.Cohort;
+import org.radarcns.restapi.subject.Subject;
 
 /**
  * UserDao Test.

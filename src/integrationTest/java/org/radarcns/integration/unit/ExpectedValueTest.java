@@ -24,13 +24,13 @@ import java.util.Map;
 import org.bson.Document;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.integration.util.RandomInput;
 import org.radarcns.restapi.data.DoubleSample;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.dataset.Item;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
-import org.radarcns.integration.util.RandomInput;
 import org.radarcns.util.RadarConverter;
 
 /**

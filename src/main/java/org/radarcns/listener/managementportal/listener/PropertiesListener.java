@@ -16,13 +16,12 @@ package org.radarcns.listener.managementportal.listener;
  * limitations under the License.
  */
 
-import org.radarcns.config.managementportal.config.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import org.radarcns.config.managementportal.config.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Loads the service configuration.

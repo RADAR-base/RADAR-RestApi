@@ -24,7 +24,6 @@ import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.bson.Document;
 import org.radarcns.dao.mongo.util.MongoSensor;
 import org.radarcns.restapi.data.Acceleration;

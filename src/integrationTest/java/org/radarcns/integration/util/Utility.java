@@ -16,9 +16,22 @@
 
 package org.radarcns.integration.util;
 
+import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
+import static org.radarcns.dao.mongo.util.MongoHelper.END;
+import static org.radarcns.dao.mongo.util.MongoHelper.START;
+
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
 import org.radarcns.catalogue.TimeWindow;
@@ -35,20 +48,6 @@ import org.radarcns.restapi.dataset.Item;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
-import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
-import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
-import static org.radarcns.dao.mongo.util.MongoHelper.END;
-import static org.radarcns.dao.mongo.util.MongoHelper.START;
 
 public class Utility {
 

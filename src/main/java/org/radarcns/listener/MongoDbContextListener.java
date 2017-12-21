@@ -19,16 +19,15 @@ package org.radarcns.listener;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
-import org.bson.Document;
-import org.radarcns.config.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import java.net.ConnectException;
+import org.bson.Document;
+import org.radarcns.config.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * pon the web application initialisation, this Context Listener creates a MongoDb client that can

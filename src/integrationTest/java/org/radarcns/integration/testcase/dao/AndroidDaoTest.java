@@ -17,9 +17,10 @@ package org.radarcns.integration.testcase.dao;
  */
 
 import static junit.framework.TestCase.assertEquals;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.integration.util.RandomInput.getRandomIpAddress;
-import static org.radarcns.unit.config.TestCatalog.*;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.unit.config.TestCatalog.ANDROID;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -28,13 +29,13 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.monitor.application.ServerStatus;
-import org.radarcns.restapi.app.Application;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
+import org.radarcns.monitor.application.ServerStatus;
+import org.radarcns.restapi.app.Application;
 
 /**
  * AndroidDao Test.

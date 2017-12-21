@@ -16,8 +16,19 @@
 
 package org.radarcns.integration.testcase.webapp;
 
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.STATUS;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
@@ -32,18 +43,6 @@ import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.webapp.util.BasePath;
-
-import javax.ws.rs.core.Response.Status;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.STATUS;
 
 public class AppStatusEndPointTest {
     private static final String SUBJECT = "UserID_0";

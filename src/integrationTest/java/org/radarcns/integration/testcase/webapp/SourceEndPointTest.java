@@ -16,8 +16,24 @@
 
 package org.radarcns.integration.testcase.webapp;
 
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
+import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
+import static org.radarcns.webapp.util.BasePath.STATE;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
@@ -42,23 +58,6 @@ import org.radarcns.restapi.subject.Subject;
 import org.radarcns.webapp.util.BasePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.core.Response.Status;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
-import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
-import static org.radarcns.webapp.util.BasePath.STATE;
 
 public class SourceEndPointTest {
 

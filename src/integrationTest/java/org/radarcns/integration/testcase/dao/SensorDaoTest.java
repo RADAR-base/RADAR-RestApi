@@ -18,10 +18,10 @@ package org.radarcns.integration.testcase.dao;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.dao.mongo.util.MongoHelper.END;
 import static org.radarcns.dao.mongo.util.MongoHelper.START;
-import static org.radarcns.unit.config.TestCatalog.*;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -33,15 +33,15 @@ import org.junit.After;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
-import org.radarcns.restapi.data.DoubleSample;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
-import org.radarcns.restapi.header.Header;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 
 /**

@@ -1,16 +1,15 @@
 package org.radarcns.integration.util;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import org.junit.rules.ExternalResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.Instant;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+
+import com.github.tomakehurst.wiremock.client.WireMock;
+import java.time.Instant;
+import org.junit.rules.ExternalResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by yatharthranjan on 14/11/2017.

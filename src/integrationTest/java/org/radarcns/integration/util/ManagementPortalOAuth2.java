@@ -2,9 +2,6 @@ package org.radarcns.integration.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -15,6 +12,8 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by dverbeec on 29/06/2017. Updated in Rest-Api by yatharthranjan on 14/11/2017.

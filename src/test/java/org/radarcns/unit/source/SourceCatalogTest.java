@@ -17,7 +17,7 @@
 package org.radarcns.unit.source;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.unit.config.TestCatalog.*;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 
 import org.junit.Test;
 import org.radarcns.source.SourceCatalog;

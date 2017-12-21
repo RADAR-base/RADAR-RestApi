@@ -17,8 +17,8 @@
 package org.radarcns.dao.mongo.data.android;
 
 import org.bson.Document;
-import org.radarcns.restapi.app.Application;
 import org.radarcns.dao.mongo.util.MongoAndroidApp;
+import org.radarcns.restapi.app.Application;
 
 public class AndroidAppStatus extends MongoAndroidApp {
 

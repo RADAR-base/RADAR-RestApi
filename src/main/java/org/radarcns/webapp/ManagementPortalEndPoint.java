@@ -16,13 +16,18 @@
 
 package org.radarcns.webapp;
 
+import static org.radarcns.auth.authorization.Permission.PROJECT_READ;
+import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
+import static org.radarcns.security.utils.SecurityUtils.getJWT;
+import static org.radarcns.webapp.util.BasePath.PROJECT;
+import static org.radarcns.webapp.util.BasePath.SUBJECTS;
+import static org.radarcns.webapp.util.Parameter.STUDY_NAME;
+import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.security.exception.AccessDeniedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -32,22 +37,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.webapp.util.BasePath.PROJECT;
-import static org.radarcns.webapp.util.BasePath.SUBJECTS;
-import static org.radarcns.webapp.util.Parameter.STUDY_NAME;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
-
+import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
+import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;
-
-import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
-import static org.radarcns.auth.authorization.Permission.PROJECT_READ;
-import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
-import static org.radarcns.security.utils.SecurityUtils.getJWT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *  Management Portal web-app. Function set to access subject and source information from MP.

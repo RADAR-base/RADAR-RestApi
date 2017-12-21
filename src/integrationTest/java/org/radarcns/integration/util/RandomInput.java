@@ -19,7 +19,9 @@ package org.radarcns.integration.util;
 import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
-import static org.radarcns.unit.config.TestCatalog.*;
+import static org.radarcns.unit.config.TestCatalog.ANDROID;
+import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -29,12 +31,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.monitor.application.ServerStatus;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.mock.model.ExpectedArrayValue;
 import org.radarcns.mock.model.ExpectedDoubleValue;
+import org.radarcns.monitor.application.ServerStatus;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.header.DescriptiveStatistic;
 
 /**
  * All supported sources specifications.

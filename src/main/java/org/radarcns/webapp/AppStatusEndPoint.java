@@ -19,10 +19,14 @@ package org.radarcns.webapp;
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
-import static org.radarcns.webapp.util.BasePath.*;
+import static org.radarcns.webapp.util.BasePath.ANDROID;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.STATUS;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -33,9 +37,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;

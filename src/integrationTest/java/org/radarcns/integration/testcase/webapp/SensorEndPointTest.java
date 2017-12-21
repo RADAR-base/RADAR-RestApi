@@ -16,8 +16,19 @@
 
 package org.radarcns.integration.testcase.webapp;
 
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.DATA;
+import static org.radarcns.webapp.util.BasePath.REALTIME;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
@@ -34,18 +45,6 @@ import org.radarcns.integration.util.Utility;
 import org.radarcns.restapi.data.DoubleSample;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.util.RadarConverter;
-
-import javax.ws.rs.core.Response.Status;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
-
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.BasePath.REALTIME;
 
 public class SensorEndPointTest {
     private static final String SUBJECT = "UserID_0";

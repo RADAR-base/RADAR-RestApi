@@ -16,16 +16,15 @@ package org.radarcns.listener.managementportal.listener;
  * limitations under the License.
  */
 
-import okhttp3.OkHttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates a {@link OkHttpClient} and adds it to the {@link javax.servlet.ServletContext} in this

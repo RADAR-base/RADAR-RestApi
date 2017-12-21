@@ -16,21 +16,20 @@ package org.radarcns.listener.managementportal.listener;
  * limitations under the License.
  */
 
-import org.radarcns.exception.TokenException;
-import org.radarcns.oauth.OAuth2AccessTokenDetails;
-import org.radarcns.oauth.OAuth2Client;
-import org.radarcns.config.managementportal.config.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
+import org.radarcns.config.managementportal.config.Properties;
+import org.radarcns.exception.TokenException;
+import org.radarcns.oauth.OAuth2AccessTokenDetails;
+import org.radarcns.oauth.OAuth2Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //TODO check whether the token library is closing all the body request. Log reports
 //WARNING [OkHttp ConnectionPool] okhttp3.internal.platform.Platform.log A connection to

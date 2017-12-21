@@ -17,7 +17,8 @@ package org.radarcns.unit.monitor;
  */
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.unit.config.TestCatalog.*;
+import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 
 import java.io.IOException;
 import java.util.HashMap;

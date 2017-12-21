@@ -16,23 +16,22 @@
 
 package org.radarcns.integration.testcase.config;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import javax.ws.rs.core.Response.Status;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.config.Properties;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.Utility;
-
-import javax.ws.rs.core.Response.Status;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Checks if the config file for the Front-End ecosystem is where expected, and checks the

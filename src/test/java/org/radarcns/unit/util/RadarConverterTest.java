@@ -25,7 +25,9 @@ import static org.radarcns.restapi.header.DescriptiveStatistic.MEDIAN;
 import static org.radarcns.restapi.header.DescriptiveStatistic.MINIMUM;
 import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.restapi.header.DescriptiveStatistic.SUM;
-import static org.radarcns.unit.config.TestCatalog.*;
+import static org.radarcns.unit.config.TestCatalog.ANDROID;
+import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 
 import java.text.DateFormat;
 import java.text.ParseException;

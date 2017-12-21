@@ -16,8 +16,21 @@
 
 package org.radarcns.integration.testcase.webapp;
 
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
+import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
@@ -37,20 +50,6 @@ import org.radarcns.restapi.source.States;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
 import org.radarcns.webapp.util.BasePath;
-
-import javax.ws.rs.core.Response.Status;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
-import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
 
 public class SubjectEndPointTest {
     private static final String SUBJECT = "UserID_0";

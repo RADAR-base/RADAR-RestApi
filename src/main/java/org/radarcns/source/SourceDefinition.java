@@ -16,6 +16,9 @@ package org.radarcns.source;
  * limitations under the License.
  */
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
 import org.radarcns.config.catalog.DeviceItem;
@@ -23,10 +26,6 @@ import org.radarcns.config.catalog.SensorCatalog;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.restapi.spec.SensorSpecification;
 import org.radarcns.restapi.spec.SourceSpecification;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Generic Source Definition.

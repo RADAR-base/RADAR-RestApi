@@ -23,9 +23,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
+import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
-import org.radarcns.dao.mongo.util.MongoHelper;
 
 /**
  * Data Access Object for user management.

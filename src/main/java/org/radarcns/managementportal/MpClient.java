@@ -16,9 +16,19 @@
 
 package org.radarcns.managementportal;
 
+import static org.radarcns.webapp.util.BasePath.SUBJECTS;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Objects;
+import javax.servlet.ServletContext;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -27,17 +37,6 @@ import org.radarcns.listener.managementportal.listener.HttpClientListener;
 import org.radarcns.listener.managementportal.listener.TokenManagerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.servlet.ServletContext;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Objects;
-
-import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 
 /**
  * Client to interact with the RADAR Management Portal.

@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
