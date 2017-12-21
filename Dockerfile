@@ -15,18 +15,20 @@ FROM openjdk:8-alpine as builder
 RUN mkdir /code
 WORKDIR /code
 
+ENV GRADLE_OPTS -Dorg.gradle.daemon=false
+
 COPY ./gradle/wrapper /code/gradle/wrapper
 COPY ./gradlew /code/
-RUN ./gradlew --no-daemon --version
+RUN ./gradlew --version
 
 COPY ./gradle/*.gradle /code/gradle/
 COPY ./build.gradle ./gradle.properties ./settings.gradle /code/
 
-RUN ./gradlew --no-daemon downloadWarDependencies
+RUN ./gradlew downloadWarDependencies
 
 COPY ./src/ /code/src
 
-RUN ./gradlew --no-daemon war
+RUN ./gradlew war
 
 FROM tomcat:8.0.47-jre8-alpine
 
