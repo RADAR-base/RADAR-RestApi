@@ -29,10 +29,14 @@
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>
-                io.swagger.jaxrs2.integration.resources,
+                io.swagger.v3.jaxrs2.integration.resources,
                 org.radarcns.webapp,
                 org.radarcns.webapp.exception
             </param-value>
+        </init-param>
+        <init-param>
+            <param-name>openApi.configuration.location</param-name>
+            <param-value>/openapi-configuration.yaml</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -42,8 +46,12 @@
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
-    <listener><listener-class>org.radarcns.listener.MongoDbContextListener</listener-class></listener>
-    <listener><listener-class>org.radarcns.listener.SourceCatalogContextListener</listener-class></listener>
+    <listener>
+        <listener-class>org.radarcns.listener.MongoDbContextListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>org.radarcns.listener.SourceCatalogContextListener</listener-class>
+    </listener>
     <listener>
         <listener-class>org.radarcns.listener.managementportal.listener.HttpClientListener</listener-class>
     </listener>

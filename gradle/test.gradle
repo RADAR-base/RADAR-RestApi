@@ -35,7 +35,6 @@ sourceSets {
 
 dependencies {
     integrationTestCompile group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommons
-    integrationTestCompile group: 'io.swagger', name: 'swagger-parser', version: swaggerParser
 }
 
 task copyFrontendConfigIntegrationTest(type: Copy) {

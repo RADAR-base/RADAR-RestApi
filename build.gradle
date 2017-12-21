@@ -16,7 +16,6 @@ ext.mongodb = '3.6.0'
 ext.radarCommons = '0.7'
 ext.radarSchema = '0.2.3'
 ext.swagger = '2.0.0-rc3'
-ext.swaggerParser = '1.0.33'
 ext.tomcat = '8.0.47'
 ext.radarAuthVersion = '0.3.1'
 ext.wireMockVersion = '2.5.1'
@@ -55,8 +54,6 @@ dependencies {
 
   runtimeOnly group: 'ch.qos.logback', name:'logback-core', version: logback
   runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logback
-
-  runtimeOnly group: 'io.swagger.core.v3', name: 'swagger-jaxrs2-servlet-initializer', version: swagger
 
   runtimeOnly group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
   runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey

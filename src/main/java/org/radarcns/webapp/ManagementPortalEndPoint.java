@@ -53,7 +53,7 @@ import static org.radarcns.security.utils.SecurityUtils.getJWT;
  *  Management Portal web-app. Function set to access subject and source information from MP.
  *  A subject is a person enrolled for in a study. A source is a device linked to the subject.
  */
-@Path("/" + "mp")
+@Path("/mp")
 public class ManagementPortalEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPortalEndPoint.class);

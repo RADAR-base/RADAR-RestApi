@@ -16,8 +16,8 @@
 
 package org.radarcns.integration.testcase.config;
 
-import io.swagger.models.Swagger;
-import io.swagger.parser.SwaggerParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.config.Properties;
@@ -32,6 +32,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Checks if the config file for the Front-End ecosystem is where expected, and checks the
@@ -39,7 +40,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ExposedConfigTest {
     public static final String CONFIG_JSON = "config.json";
-    public static final String SWAGGER_JSON = "swagger.json";
+    public static final String OPENAPI_JSON = "openapi.json";
 
     private static final String BASE_PATH = "api";
     private static final String FRONTEND = "frontend";
@@ -60,8 +61,10 @@ public class ExposedConfigTest {
     @Test
     public void checkSwaggerDoc()
             throws IOException, GeneralSecurityException {
-        String response = apiClient.requestString(BASE_PATH + '/' + SWAGGER_JSON, APPLICATION_JSON, Status.OK);
-        Swagger swagger = new SwaggerParser().parse(response);
-        assertEquals(Properties.getApiConfig().getApiBasePath(), swagger.getBasePath());
+        String response = apiClient.requestString(BASE_PATH + '/' + OPENAPI_JSON, APPLICATION_JSON, Status.OK);
+        JsonNode node = new ObjectMapper().readTree(response);
+        assertTrue(node.has("servers"));
+        String serverUrl = node.get("servers").elements().next().get("url").asText();
+        assertEquals(Properties.getApiConfig().getApiUrl(), serverUrl);
     }
 }

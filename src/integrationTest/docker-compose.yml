@@ -39,7 +39,7 @@ services:
 
 
     #----------------------------------------#
-    #             RADAR Wiremock             #
+    #             RADAR WireMock             #
     #----------------------------------------#
     wiremock:
       build: images/wiremock

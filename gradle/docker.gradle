@@ -20,9 +20,9 @@ task buildDocker(type: Exec) {
 }
 
 task simpleConfigJson(type: Copy) {
-  from files("${simpleStackPath}/resources/config.json",
-          "${simpleStackPath}/resources/device-catalog.yml",
-          "${simpleStackPath}/resources/mp_info.yml")
+  from "${simpleStackPath}/resources"
+  exclude 'radar.yml'
+  exclude 'keystore.jks'
   into "${radarVolumePath}"
 }
 
@@ -105,7 +105,7 @@ task radarConfigJson(type: Copy) {
 }
 
 task radarMpInfo(type: Copy) {
-  from "${simpleStackPath}/resources/mp_info.yml"
+  from "${simpleStackPath}/resources"
   into "${radarStackPath}/etc/rest-api"
 }
 

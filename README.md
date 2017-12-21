@@ -22,7 +22,7 @@ To deploy the war do:
 
 By default, log messages are redirected to the `STDOUT`.
 
-The api documentation is located at `<your-server-address>:<port>/radar/api/swagger.json`
+The api documentation is located at `<your-server-address>:<port>/radar/api/openapi.json`
 
 For accessing the end-points of this API, you will need JWT tokens from the [Management Portal](https://github.com/RADAR-CNS/ManagementPortal) and send it with each request in the header. In order for your token to allow access to the Rest-Api you will need to add the resource name of rest-api (ie - `res_RestApi`) in the oauth client details of the Management Portal(MP). For example, if you want a client named `dashboard` to have access to the REST API just add this line to the OAuth client credentials csv file of MP - 
 ```
@@ -30,16 +30,11 @@ dashbard;res_RestApi;my-secret-token-to-change-in-production;SUBJECT.READ,PROJEC
 ```
 You can change the secret, scope, name, etc according to your needs. For more info, read the configuration in the Readme of Management Portal
 
-## Dev Environment
-Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json) to see documentation of dev deploy instance.
-
-Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/subject/getAllSubjects/0) to see some mock data.
-
 ## Clients
 Swagger provides a tool to automatically generate a client in several programming language.
 - Access this [link](http://editor.swagger.io)
 - Click on `File / Import URL`
-- Paste `http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json` 
+- Paste your public URL to `openapi.json`
 - Click on `Import`
 - Click on `Generate Client` and select your programming language
 

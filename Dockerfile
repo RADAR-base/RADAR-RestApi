@@ -29,9 +29,10 @@ MAINTAINER @yatharthranjan, @blootsvoets
 
 LABEL description="RADAR-CNS Rest Api docker container"
 
-RUN mkdir /usr/local/tomcat/conf/radar
-
 COPY --from=builder /code/build/libs/radar.war /usr/local/tomcat/webapps/radar.war
+COPY src/main/docker/classpath.xml /usr/local/tomcat/conf/Catalina/localhost/radar.xml
+
+VOLUME /usr/local/tomcat/conf/radar
 
 EXPOSE 8080
 

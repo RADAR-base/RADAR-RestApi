@@ -16,8 +16,8 @@
 
 package org.radarcns.pipeline;
 
-import io.swagger.models.Swagger;
-import io.swagger.parser.SwaggerParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Request;
 import org.apache.avro.specific.SpecificRecord;
 import org.junit.BeforeClass;
@@ -71,8 +71,9 @@ import java.util.concurrent.TimeUnit;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.SWAGGER_JSON;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.OPENAPI_JSON;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
 import static org.radarcns.webapp.util.Parameter.STAT;
@@ -488,9 +489,11 @@ public class EndToEndTest {
      */
     @Test
     public void checkSwaggerConfig() throws IOException {
-        String swaggerString = apiClient.requestString(SWAGGER_JSON, APPLICATION_JSON, Status.OK);
-        Swagger swagger = new SwaggerParser().parse(swaggerString);
-        assertEquals(Properties.getApiConfig().getApiBasePath(), swagger.getBasePath());
+        String response = apiClient.requestString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
+        JsonNode node = new ObjectMapper().readTree(response);
+        assertTrue(node.has("servers"));
+        String serverUrl = node.get("servers").elements().next().get("url").asText();
+        assertEquals(Properties.getApiConfig().getApiUrl(), serverUrl);
     }
 
     /**

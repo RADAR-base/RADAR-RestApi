@@ -161,7 +161,7 @@ public class MongoDbContextListener implements ServletContextListener {
      * Verifies if the required database can be pinged.
      *
      * @param context useful to retrieve and the MongoDb client
-     * @return {@cod true} if the required database can be ping, {@code false} otherwise
+     * @return {@code true} if the required database can be ping, {@code false} otherwise
      * @throws ConnectException if the MongoDB client is faulty
      */
     public static boolean testConnection(ServletContext context) throws ConnectException {
