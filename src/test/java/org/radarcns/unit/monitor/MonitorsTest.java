@@ -17,6 +17,7 @@ package org.radarcns.unit.monitor;
  */
 
 import static org.junit.Assert.assertEquals;
+import static org.radarcns.unit.config.TestCatalog.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -55,7 +56,7 @@ public class MonitorsTest {
                 new SensorSpecification("HEART_RATE", ProcessingState.RADAR,
                     1.0, Unit.BEATS_PER_MIN));
 
-        SourceSpecification spec = Monitors.getInstance().getSpecification("EMPATICA");
+        SourceSpecification spec = Monitors.getInstance().getSpecification(EMPATICA);
 
         for (SensorSpecification sensorSpec : spec.getSensors().values()) {
             SensorSpecification tmp = sensors.get(sensorSpec.getName());
@@ -66,7 +67,7 @@ public class MonitorsTest {
 
         assertEquals(true, sensors.isEmpty());
 
-        Monitors.getInstance().getSpecification("BIOVOTION");
+        Monitors.getInstance().getSpecification(BIOVOTION);
     }
 
 }

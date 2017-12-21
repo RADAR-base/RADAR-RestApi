@@ -16,31 +16,17 @@
 
 package org.radarcns.integration.util;
 
-import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
-import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
-import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
-import static org.radarcns.dao.mongo.util.MongoHelper.END;
-import static org.radarcns.dao.mongo.util.MongoHelper.START;
-
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
+import org.radarcns.config.Properties;
+import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.restapi.data.Acceleration;
 import org.radarcns.restapi.data.DoubleSample;
@@ -48,11 +34,21 @@ import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.dataset.Item;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.header.Header;
-import org.radarcns.config.Properties;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
-import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.util.RadarConverter;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
+import static org.radarcns.dao.mongo.util.MongoHelper.END;
+import static org.radarcns.dao.mongo.util.MongoHelper.START;
 
 public class Utility {
 
@@ -60,9 +56,9 @@ public class Utility {
      * Returns a MongoDB client using settings stored in the resource folder.
      */
     public static MongoClient getMongoClient() {
-        List<MongoCredential> credentials = Properties.getApiConfig().getMongoDbCredentials();
+        MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();
         MongoClient client = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),
-                credentials);
+                credentials, MongoClientOptions.builder().build());
         if (!MongoDbContextListener.checkMongoConnection(client)) {
             throw new IllegalStateException("MongoDB connection invalid for hosts "
                     + Properties.getApiConfig().getMongoDbHosts() + " and credentials "
@@ -70,16 +66,6 @@ public class Utility {
         }
 
         return client;
-    }
-
-    /**
-     * @param value Long value that has to be converted.
-     * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT representing the
-     *      initial time of a Kafka time window.
-     **/
-    public static Long getStartTimeWindow(Long value) {
-        Double timeDouble = value.doubleValue() / 10000d;
-        return timeDouble.longValue() * 10000;
     }
 
     /**
@@ -155,32 +141,6 @@ public class Utility {
     }
 
     /**
-     * Makes an HTTP request to given URL.
-     *
-     * @param url end-point
-     * @param accept Accept Header for content negotiation
-     *
-     * @return HTTP Response
-     * @throws IOException if the request could not be executed
-     */
-    public static Response makeRequest(String url, String accept) throws IOException {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build();
-
-        Request request = new Request.Builder()
-                .addHeader("User-Agent", "Mozilla/5.0")
-                .addHeader("Accept", accept)
-                .header("Authorization","Bearer " + TokenTestUtils.VALID_TOKEN)
-                .url(url)
-                .build();
-
-        return client.newCall(request).execute();
-    }
-
-    /**
      * Converts Bson Document into an Application.
      * @param documents map containing variables to create the Application class
      * @return an Application class
@@ -198,16 +158,6 @@ public class Utility {
             documents.get(RECORD_COLLECTION).getInteger("recordsSent"),
             documents.get(RECORD_COLLECTION).getInteger("recordsUnsent")
         );
-    }
-
-    /**
-     * Converts the give a timestamp to a Human readable date format.
-     * @param timestamp value in millisecond that has to be converted
-     * @return String representing a date
-     */
-    public static String timestampToString(long timestamp) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        return sdf.format(new Date(timestamp));
     }
 
     /**

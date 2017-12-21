@@ -25,6 +25,7 @@ import static org.radarcns.restapi.header.DescriptiveStatistic.MEDIAN;
 import static org.radarcns.restapi.header.DescriptiveStatistic.MINIMUM;
 import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.restapi.header.DescriptiveStatistic.SUM;
+import static org.radarcns.unit.config.TestCatalog.*;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -140,12 +141,12 @@ public class RadarConverterTest {
     }
 
     public void getSourceTypeTest() {
-        assertEquals("android",
-                RadarConverter.getSourceType("ANDROID"));
-        assertEquals("BIOVOTION",
-                RadarConverter.getSourceType("BIOVOTION"));
-        assertEquals("EMPATICA",
-                RadarConverter.getSourceType("EMPATICA"));
+        assertEquals(ANDROID,
+                RadarConverter.getSourceType(ANDROID));
+        assertEquals(BIOVOTION,
+                RadarConverter.getSourceType(BIOVOTION));
+        assertEquals(EMPATICA,
+                RadarConverter.getSourceType(EMPATICA));
         assertEquals("PEBBLE",
                 RadarConverter.getSourceType("PEBBLE"));
     }

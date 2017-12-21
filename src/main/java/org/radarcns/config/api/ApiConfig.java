@@ -1,5 +1,3 @@
-package org.radarcns.config.api;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,11 +14,12 @@ package org.radarcns.config.api;
  * limitations under the License.
  */
 
-import static java.util.Collections.singletonList;
+package org.radarcns.config.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -169,7 +168,7 @@ public class ApiConfig {
     public String getApiUrl() {
         String apiComponent = getApiBasePath();
         if (apiComponent.charAt(apiComponent.length() - 1) != '/') {
-            apiComponent += "/";
+            apiComponent += '/';
         }
 
         return applicationProtocol + "://" + host + apiComponent;
@@ -198,9 +197,9 @@ public class ApiConfig {
      * Returns the list of all known MongoDB credentials.
      * @return a {@code List} of {@link MongoCredential}
      */
-    public List<MongoCredential> getMongoDbCredentials() {
-        return singletonList(MongoCredential.createCredential(mongoUser.get("usr"),
-                mongoUser.get("db"), mongoUser.get("pwd").toCharArray()));
+    public MongoCredential getMongoDbCredentials() {
+        return MongoCredential.createCredential(mongoUser.get("usr"),
+                mongoUser.get("db"), mongoUser.get("pwd").toCharArray());
     }
 
     /**

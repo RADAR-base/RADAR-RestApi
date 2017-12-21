@@ -1,5 +1,3 @@
-package org.radarcns.webapp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,6 +14,8 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+package org.radarcns.webapp;
+
 import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
@@ -28,10 +28,6 @@ import static org.radarcns.webapp.util.Parameter.START;
 import static org.radarcns.webapp.util.Parameter.STAT;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import java.net.ConnectException;
 import java.util.LinkedList;
 import javax.servlet.ServletContext;
@@ -44,6 +40,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.restapi.dataset.Dataset;
@@ -62,7 +60,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Sensor web-app. Function set to access all data data.
  */
-@Api
 @Path("/" + DATA)
 public class SensorEndPoint {
 
@@ -81,22 +78,21 @@ public class SensorEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID
             + "}/{" + SOURCE_ID + "}")
-    @ApiOperation(
-            value = "Returns a dataset object formatted in JSON.",
-            notes = "Each collected sample is aggregated to provide near real-time statistical "
+    @Operation(summary = "Returns a dataset object formatted in JSON.",
+            description = "Each collected sample is aggregated to provide near real-time "
+                + "statistical "
                 + "results. This end-point returns the last computed result of type stat for the "
                 + "given subjectID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in JSON.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body "
-                + "there is a message.avsc object with more details."),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body "
-                + "there is a message.avsc object with more details."),
-            @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing last "
-                + "computed sample for the given inputs formatted either Acceleration.avsc or "
-                + "DoubleValue.avsc"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body "
+        + "there is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body "
+        + "there is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing last "
+        + "computed sample for the given inputs formatted either Acceleration.avsc or "
+        + "DoubleValue.avsc")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedSampleJson(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
@@ -130,20 +126,18 @@ public class SensorEndPoint {
     @Produces(AVRO_BINARY)
     @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL
             + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @ApiOperation(
-            value = "Returns a dataset object formatted in Apache AVRO.",
-            notes = "Each collected sample is aggregated to provide near real-time statistical "
+    @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
+            description = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns the last computed result of type stat for the "
                 + "given subjectID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in Apache AVRO.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing"),
-            @ApiResponse(code = 204, message = "No value for the given parameters."),
-            @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
-                + "object containing last computed sample for the given inputs formatted either "
-                + "Acceleration.avsc or DoubleValue.avsc"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters.")
+    @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a "
+            + "dataset.avsc object containing last computed sample for the given inputs formatted "
+            + "either Acceleration.avsc or DoubleValue.avsc")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedSampleAvro(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
@@ -201,22 +195,21 @@ public class SensorEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}")
-    @ApiOperation(
-            value = "Returns a dataset object formatted in JSON.",
-            notes = "Each collected sample is aggregated to provide near real-time statistical "
+    @Operation(summary = "Returns a dataset object formatted in JSON.",
+            description = "Each collected sample is aggregated to provide near real-time "
+                    + "statistical "
                 + "results. This end-point returns all available results of type stat for the "
                 + "given subjectID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in JSON.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body there "
-                + "is a message.avsc object with more details."),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body "
-                + "there is a message.avsc object with more details."),
-            @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing all "
-                + "available samples for the given inputs formatted either Acceleration.avsc or "
-                + "DoubleValue.avsc"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body there "
+        + "is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body "
+        + "there is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing all "
+        + "available samples for the given inputs formatted either Acceleration.avsc or "
+        + "DoubleValue.avsc")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesJson(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
@@ -250,20 +243,19 @@ public class SensorEndPoint {
     @Produces(AVRO_BINARY)
     @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}")
-    @ApiOperation(
-            value = "Returns a dataset object formatted in Apache AVRO.",
-            notes = "Each collected sample is aggregated to provide near real-time statistical "
+    @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
+            description = "Each collected sample is aggregated to provide near real-time "
+                    + "statistical "
                 + "results. This end-point returns all available results of type stat for the "
                 + "given subjectID, sourceID, and sensor. Data can be queried using different "
                 + "time-frame resolutions. The response is formatted in Apache AVRO.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing."),
-            @ApiResponse(code = 204, message = "No value for the given parameters."),
-            @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
-                + "object containing all available samples for the given inputs formatted either "
-                + "Acceleration.avsc or DoubleValue.avsc"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing.")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters.")
+    @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a dataset.avsc "
+        + "object containing all available samples for the given inputs formatted either "
+        + "Acceleration.avsc or DoubleValue.avsc")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesAvro(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
@@ -320,23 +312,22 @@ public class SensorEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
-    @ApiOperation(
-            value = "Returns a dataset object formatted in JSON.",
-            notes = "Each collected sample is aggregated to provide near real-time statistical "
+    @Operation(summary = "Returns a dataset object formatted in JSON.",
+            description = "Each collected sample is aggregated to provide near real-time "
+                    + "statistical "
                 + "results. This end-point returns all available results of type stat for the "
                 + "given subjectID, sourceID, and sensor belonging to the time window "
                 + "[start - end]. Data can be queried using different time-frame resolutions. "
                 + "The response is formatted in JSON.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body "
-                + "there is a message.avsc object with more details."),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body "
-                + "there is a message.avsc object with more details."),
-            @ApiResponse(code = 200, message = "Returns a dataset.avsc object containing samples "
-                + "belonging to the time window [start - end] for the given inputs formatted "
-                + "either Acceleration.avsc or DoubleValue.avsc."),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body "
+        + "there is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body "
+        + "there is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing samples "
+        + "belonging to the time window [start - end] for the given inputs formatted "
+        + "either Acceleration.avsc or DoubleValue.avsc.")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesWithinWindowJson(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
@@ -373,21 +364,19 @@ public class SensorEndPoint {
     @Produces(AVRO_BINARY)
     @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
-    @ApiOperation(
-            value = "Returns a dataset object formatted in Apache AVRO.",
-            notes = "Each collected sample is aggregated to provide near real-time statistical "
+    @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
+            description = "Each collected sample is aggregated to provide near real-time statistical "
                 + "results. This end-point returns all available results of type stat for the "
                 + "given subjectID, sourceID, and sensor belonging to the time window "
                 + "[start - end]. Data can be queried using different time-frame resolutions. "
                 + "The response is formatted in Apache AVRO.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing"),
-            @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Returns a byte array serialising a dataset.avsc "
-                + "object containing samples belonging to the time window [start - end] for the "
-                + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc."),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
+    @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a dataset.avsc "
+        + "object containing samples belonging to the time window [start - end] for the "
+        + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesWithinWindowAvro(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,

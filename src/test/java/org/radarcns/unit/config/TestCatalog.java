@@ -21,6 +21,9 @@ import org.junit.Test;
 import org.radarcns.config.catalog.DeviceCatalog;
 
 public class TestCatalog {
+    public static final String EMPATICA = "EMPATICA";
+    public static final String ANDROID = "ANDROID";
+    public static final String BIOVOTION = "BIOVOTION";
 
     @Test
     public void readCatalogOk() throws IOException {

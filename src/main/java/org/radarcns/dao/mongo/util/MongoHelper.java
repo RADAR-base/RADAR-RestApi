@@ -1,5 +1,3 @@
-package org.radarcns.dao.mongo.util;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.dao.mongo.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.dao.mongo.util;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
@@ -99,10 +99,10 @@ public class MongoHelper {
             String source, Long start, Long end, MongoCollection<Document> collection) {
         FindIterable<Document> result = collection.find(
                 Filters.and(
-                        eq(USER,subject),
-                        eq(SOURCE,source),
-                        gte(START,new Date(start)),
-                        lte(END,new Date(end)))).sort(new BasicDBObject(START,1));
+                        eq(USER, subject),
+                        eq(SOURCE, source),
+                        gte(START, new Date(start)),
+                        lte(END, new Date(end)))).sort(new BasicDBObject(START, 1));
 
         return result.iterator();
     }

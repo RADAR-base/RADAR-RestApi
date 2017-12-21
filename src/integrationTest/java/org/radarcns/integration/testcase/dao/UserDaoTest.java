@@ -18,6 +18,7 @@ package org.radarcns.integration.testcase.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.unit.config.TestCatalog.*;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -43,7 +44,7 @@ public class UserDaoTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
@@ -120,9 +121,9 @@ public class UserDaoTest {
                 assertEquals(2, patient.getSources().size());
                 for (Source temp : patient.getSources()) {
                     if (temp.getId().equals(SOURCE)) {
-                        assertEquals("ANDROID", temp.getType());
+                        assertEquals(ANDROID, temp.getType());
                     } else if (temp.getId().equals(SOURCE.concat("2"))) {
-                        assertEquals("EMPATICA", temp.getType());
+                        assertEquals(EMPATICA, temp.getType());
                     }
                 }
                 break;

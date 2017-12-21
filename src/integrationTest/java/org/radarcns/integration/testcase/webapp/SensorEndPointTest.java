@@ -16,67 +16,55 @@
 
 package org.radarcns.integration.testcase.webapp;
 
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.*;
-import static org.radarcns.webapp.util.Parameter.END;
-import static org.radarcns.webapp.util.Parameter.INTERVAL;
-import static org.radarcns.webapp.util.Parameter.SENSOR;
-import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.util.Parameter.START;
-import static org.radarcns.webapp.util.Parameter.STAT;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
-
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
-import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
 import org.bson.Document;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
-import org.radarcns.restapi.data.DoubleSample;
-import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.util.AvroConverter;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.util.RadarConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.core.Response.Status;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.DATA;
+import static org.radarcns.webapp.util.BasePath.REALTIME;
 
 public class SensorEndPointTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SensorEndPointTest.class);
-
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SOURCE_TYPE = org.radarcns.unit.config.TestCatalog.EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
-    private static final Class ITEM = DoubleSample.class;
+    private static final Class<DoubleSample> ITEM = DoubleSample.class;
     private static final int SAMPLES = 10;
+    private static final String SOURCE_PATH = SENSOR_TYPE + '/' + COUNT + '/' + TIME_FRAME + '/'
+            + SUBJECT + '/' + SOURCE;
+
+    @Rule
+    public final ApiClient apiClient = new ApiClient(
+            Properties.getApiConfig().getApiUrl() + DATA + '/');
 
     @Test
     public void getRealtimeTest()
-            throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/" + REALTIME + "/{" + SENSOR + "}/{" + STAT
-                + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE);
-        path = path.replace("{" + STAT + "}", COUNT.name());
-        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
-        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
-        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
-
-        LOGGER.info(path);
-
+            throws IOException, ReflectiveOperationException, URISyntaxException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
@@ -92,16 +80,9 @@ public class SensorEndPointTest {
                 SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
                 Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
 
-        Dataset actual = null;
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
-                AVRO_BINARY);
-        assertEquals(Status.OK.getStatusCode(), response.code());
-
-        if (response.code() == Status.OK.getStatusCode()) {
-            actual = AvroConverter.avroByteToAvro(response.body().bytes(),
-                    Dataset.getClassSchema());
-        }
+        Dataset actual = apiClient.requestAvro(REALTIME + "/" + SOURCE_PATH,
+                Dataset.class, Status.OK);
 
         assertEquals(expected, actual);
 
@@ -110,17 +91,7 @@ public class SensorEndPointTest {
 
     @Test
     public void getAllByUserTest()
-            throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
-                + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE);
-        path = path.replace("{" + STAT + "}", COUNT.name());
-        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
-        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
-        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
-
-        LOGGER.info(path);
-
+            throws IOException, ReflectiveOperationException, URISyntaxException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
@@ -136,16 +107,7 @@ public class SensorEndPointTest {
                 SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_FRAME,
                 ITEM);
 
-        Dataset actual = null;
-
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
-                AVRO_BINARY);
-        assertEquals(Status.OK.getStatusCode(), response.code());
-
-        if (response.code() == Status.OK.getStatusCode()) {
-            actual = AvroConverter.avroByteToAvro(response.body().bytes(),
-                Dataset.getClassSchema());
-        }
+        Dataset actual = apiClient.requestAvro(SOURCE_PATH, Dataset.class, Status.OK);
 
         assertEquals(expected, actual);
 
@@ -153,18 +115,7 @@ public class SensorEndPointTest {
     }
 
     @Test
-    public void getTimeWindowTest200()
-            throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
-                + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + START + "}/{" + END + "}";
-        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE);
-        path = path.replace("{" + STAT + "}", COUNT.name());
-        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
-        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
-        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
-
-        LOGGER.info(path);
-
+    public void getTimeWindowTest200 () throws IOException, ReflectiveOperationException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
@@ -184,23 +135,12 @@ public class SensorEndPointTest {
         long start = docs.get(index - 1).getDate(MongoHelper.START).getTime();
         long end = docs.get(index + 1).getDate(MongoHelper.END).getTime();
 
-        path = path.replace("{" + START + "}", String.valueOf(start));
-        path = path.replace("{" + END + "}", String.valueOf(end));
+        String path = SOURCE_PATH + '/' + start + '/' + end;
+        Dataset actual = apiClient.requestAvro(path, Dataset.class, Status.OK);
 
         Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
                 SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
                 Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
-
-        Dataset actual = null;
-
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
-                AVRO_BINARY);
-        assertEquals(Status.OK.getStatusCode(), response.code());
-
-        if (response.code() == Status.OK.getStatusCode()) {
-            actual = AvroConverter.avroByteToAvro(response.body().bytes(),
-                Dataset.getClassSchema());
-        }
 
         assertEquals(expected, actual);
 
@@ -208,21 +148,8 @@ public class SensorEndPointTest {
     }
 
     @Test
-    public void getAllDataTest204()
-        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
-        String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
-                + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SENSOR + "}", SENSOR_TYPE);
-        path = path.replace("{" + STAT + "}", COUNT.name());
-        path = path.replace("{" + INTERVAL + "}", TIME_FRAME.name());
-        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
-        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
-
-        LOGGER.info(path);
-
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
-                AVRO_BINARY);
-        assertEquals(Status.NO_CONTENT.getStatusCode(), response.code());
+    public void getAllDataTest204() throws IOException {
+        apiClient.request(SOURCE_PATH, AVRO_BINARY, Status.NO_CONTENT);
     }
 
     @After

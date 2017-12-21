@@ -19,6 +19,7 @@ package org.radarcns.integration.testcase.dao;
 import static com.mongodb.client.model.Filters.eq;
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.unit.config.TestCatalog.*;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -44,7 +45,7 @@ public class SourceDaoTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
@@ -65,7 +66,7 @@ public class SourceDaoTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE.concat("1")));
 
-        assertEquals("ANDROID", SourceDataAccessObject.getSourceType(SOURCE.concat("1"), client));
+        assertEquals(ANDROID, SourceDataAccessObject.getSourceType(SOURCE.concat("1"), client));
 
         assertEquals(2, SourceDataAccessObject.findAllSourcesByUser(SUBJECT,
                 client).getSources().size());
@@ -81,7 +82,7 @@ public class SourceDaoTest {
             extractedSourceType = doc.getString(MongoHelper.SOURCE_TYPE);
         }
         assertEquals(SOURCE, extractedSourceId);
-        assertEquals("EMPATICA", extractedSourceType);
+        assertEquals(EMPATICA, extractedSourceType);
 
         extractedSourceId = null;
         extractedSourceType = null;
@@ -93,7 +94,7 @@ public class SourceDaoTest {
             extractedSourceType = doc.getString(MongoHelper.SOURCE_TYPE);
         }
         assertEquals(SOURCE.concat("1"), extractedSourceId);
-        assertEquals("ANDROID", extractedSourceType);
+        assertEquals(ANDROID, extractedSourceType);
 
         dropAndClose(client);
     }

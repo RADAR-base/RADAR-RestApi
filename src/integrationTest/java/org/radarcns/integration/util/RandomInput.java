@@ -19,6 +19,7 @@ package org.radarcns.integration.util;
 import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
+import static org.radarcns.unit.config.TestCatalog.*;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -111,9 +112,9 @@ public class RandomInput {
             TimeWindow timeFrame, int samples, boolean singleWindow) throws InstantiationException,
             IllegalAccessException {
         switch (sourceType) {
-            case "ANDROID": break;
-            case "BIOVOTION": break;
-            case "EMPATICA": return getBoth(user, source, sourceType, sensorType, stat, timeFrame,
+            case ANDROID: break;
+            case BIOVOTION: break;
+            case EMPATICA: return getBoth(user, source, sourceType, sensorType, stat, timeFrame,
                     samples, singleWindow);
             case "PEBBLE": break;
             default: break;
@@ -132,9 +133,9 @@ public class RandomInput {
             int samples, boolean singleWindow) throws InstantiationException,
             IllegalAccessException {
         switch (sourceType) {
-            case "ANDROID": break;
-            case "BIOVOTION": break;
-            case "EMPATICA": return getDataset(user, source, sourceType, sensorType, stat, timeFrame,
+            case ANDROID: break;
+            case BIOVOTION: break;
+            case EMPATICA: return getDataset(user, source, sourceType, sensorType, stat, timeFrame,
                             samples, singleWindow);
             case "PEBBLE": break;
             default: break;
@@ -153,7 +154,7 @@ public class RandomInput {
             TimeWindow timeFrame, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         switch (sourceType) {
-            case "EMPATICA":
+            case EMPATICA:
                 return getDocument(user, source, sourceType, sensorType, stat,
                             timeFrame, samples, singleWindow);
             default:

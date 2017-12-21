@@ -16,55 +16,21 @@
 
 package org.radarcns.pipeline;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.getSwaggerBasePath;
-import static org.radarcns.integration.util.WiremockUtils.initializeWiremock;
-import static org.radarcns.integration.util.WiremockUtils.wiremockInitialized;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.Parameter.INTERVAL;
-import static org.radarcns.webapp.util.Parameter.SENSOR;
-import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.util.Parameter.STAT;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import io.swagger.models.Swagger;
+import io.swagger.parser.SwaggerParser;
 import okhttp3.Request;
-import okhttp3.Response;
 import org.apache.avro.specific.SpecificRecord;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
-import org.radarcns.restapi.data.Acceleration;
-import org.radarcns.restapi.data.DoubleSample;
-import org.radarcns.restapi.data.Quartiles;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.dataset.Item;
-import org.radarcns.restapi.header.DescriptiveStatistic;
-import org.radarcns.restapi.header.Header;
 import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
+import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
-import org.radarcns.integration.util.TokenTestUtils;
 import org.radarcns.integration.util.Utility;
+import org.radarcns.integration.util.ManagementPortalWireMock;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.MockDataConfig;
 import org.radarcns.mock.data.CsvGenerator;
@@ -73,10 +39,43 @@ import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mock.model.MockAggregator;
 import org.radarcns.pipeline.config.PipelineConfig;
 import org.radarcns.producer.rest.RestClient;
-import org.radarcns.util.AvroConverter;
+import org.radarcns.restapi.data.Acceleration;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.dataset.Item;
+import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.core.Response.Status;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
+import static org.radarcns.integration.testcase.config.ExposedConfigTest.SWAGGER_JSON;
+import static org.radarcns.webapp.util.BasePath.DATA;
+import static org.radarcns.webapp.util.Parameter.SENSOR;
+import static org.radarcns.webapp.util.Parameter.STAT;
 
 public class EndToEndTest {
 
@@ -92,6 +91,26 @@ public class EndToEndTest {
     private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
 
     public static final String PIPELINE_CONFIG = "pipeline.yml";
+    private static final String[] REQUIRED_TOPICS = {
+            "android_empatica_e4_acceleration",
+        "android_empatica_e4_acceleration_output",
+        "android_empatica_e4_battery_level",
+        "android_empatica_e4_battery_level_output",
+        "android_empatica_e4_blood_volume_pulse",
+        "android_empatica_e4_blood_volume_pulse_output",
+        "android_empatica_e4_electrodermal_activity",
+        "android_empatica_e4_electrodermal_activity_output",
+        "android_empatica_e4_heartrate",
+        "android_empatica_e4_inter_beat_interval",
+        "android_empatica_e4_inter_beat_interval_output",
+        "android_empatica_e4_sensor_status",
+        "android_empatica_e4_sensor_status_output",
+        "android_empatica_e4_temperature",
+        "android_empatica_e4_temperature_output",
+        "application_server_status",
+        "application_record_counts",
+        "application_uptime"
+    };
 
     // Latency expressed in second
     private static final long LATENCY = 120;
@@ -99,23 +118,34 @@ public class EndToEndTest {
     private static File dataRoot;
     private static PipelineConfig pipelineConfig;
 
+    @Rule
+    public ManagementPortalWireMock wireMock = new ManagementPortalWireMock();
+
+    @SuppressWarnings("ConstantConditions")
+    @Rule
+    public ApiClient apiClient = new ApiClient(pipelineConfig.getRestApi());
+
+    @SuppressWarnings("ConstantConditions")
+    @Rule
+    public ApiClient frontendClient = new ApiClient(pipelineConfig.getFrontend());
+
     /**
      * Test initialisation. It loads the config file and waits that the infrastructure is ready
      *      to accept requests.
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        if(wiremockInitialized == 0) {
-            initializeWiremock();
-        }
-        LOGGER.info("Wiremock set up successfully");
         URL configResource = EndToEndTest.class.getClassLoader().getResource(PIPELINE_CONFIG);
         assertNotNull(configResource);
         File configFile = new File(configResource.getFile());
-        pipelineConfig = new YamlConfigLoader().load(configFile, PipelineConfig.class);
+        try {
+            pipelineConfig = new YamlConfigLoader().load(configFile, PipelineConfig.class);
+        } catch (IOException e) {
+            throw new AssertionError("Cannot load pipeline", e);
+        }
         dataRoot = configFile.getAbsoluteFile().getParentFile();
 
-        waitInfrastructure();
+        waitForInfrastructure();
     }
 
     @Test
@@ -135,51 +165,24 @@ public class EndToEndTest {
         fetchRestApi();
     }
 
-    /**
-     * Checks if the test bed is ready to accept data.
-     */
-    private static void waitInfrastructure() throws InterruptedException, MalformedURLException {
+    private static void waitForInfrastructure() throws InterruptedException, IOException {
         LOGGER.info("Waiting on infrastructure ... ");
-
-        List<String> expectedTopics = new LinkedList<>();
-        expectedTopics.add("android_empatica_e4_acceleration");
-        expectedTopics.add("android_empatica_e4_acceleration_output");
-        expectedTopics.add("android_empatica_e4_battery_level");
-        expectedTopics.add("android_empatica_e4_battery_level_output");
-        expectedTopics.add("android_empatica_e4_blood_volume_pulse");
-        expectedTopics.add("android_empatica_e4_blood_volume_pulse_output");
-        expectedTopics.add("android_empatica_e4_electrodermal_activity");
-        expectedTopics.add("android_empatica_e4_electrodermal_activity_output");
-        expectedTopics.add("android_empatica_e4_heartrate");
-        expectedTopics.add("android_empatica_e4_inter_beat_interval");
-        expectedTopics.add("android_empatica_e4_inter_beat_interval_output");
-        expectedTopics.add("android_empatica_e4_sensor_status");
-        expectedTopics.add("android_empatica_e4_sensor_status_output");
-        expectedTopics.add("android_empatica_e4_temperature");
-        expectedTopics.add("android_empatica_e4_temperature_output");
-        expectedTopics.add("application_server_status");
-        expectedTopics.add("application_record_counts");
-        expectedTopics.add("application_uptime");
+        Collection<String> expectedTopics = new HashSet<>(Arrays.asList(REQUIRED_TOPICS));
 
         int retry = 60;
         long sleep = 1000;
 
         try (RestClient client = new RestClient(pipelineConfig.getRestProxy())) {
+            Request request = client.requestBuilder("topics").build();
             for (int i = 0; i < retry; i++) {
-                try (Response response = client.request("topics")) {
-                    if (response.code() == 200) {
-                        String topics = response.body().string();
-                        String[] topicArray = topics.substring(1, topics.length() - 1).replace(
-                                "\"", "").split(",");
+                String topics = client.requestString(request);
+                String[] topicArray = topics.substring(1, topics.length() - 1).replace(
+                        "\"", "").split(",");
 
-                        expectedTopics.removeAll(Arrays.asList(topicArray));
+                expectedTopics.removeAll(Arrays.asList(topicArray));
 
-                        if (expectedTopics.isEmpty()) {
-                            break;
-                        }
-                    }
-                } catch (IOException ex) {
-                    LOGGER.info("Error while waiting infrastructure", ex);
+                if (expectedTopics.isEmpty()) {
+                    break;
                 }
 
                 Thread.sleep(sleep * (i + 1));
@@ -315,7 +318,7 @@ public class EndToEndTest {
 
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory.getDataset(
-                    expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, "EMPATICA",
+                    expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, org.radarcns.unit.config.TestCatalog.EMPATICA,
                     getSensorType(config), stat, TIME_FRAME));
         }
 
@@ -335,52 +338,26 @@ public class EndToEndTest {
     /**
      * Queries the REST-API for each statistical function and for each data.
      */
-    private void fetchRestApi() throws IOException, KeyManagementException,
-            NoSuchAlgorithmException {
+    private void fetchRestApi()
+            throws IOException, GeneralSecurityException, ReflectiveOperationException {
         LOGGER.info("Fetching APIs ...");
 
-        String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/{"
-                + INTERVAL + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", USER_ID_MOCK);
-        path = path.replace("{" + SOURCE_ID + "}", SOURCE_ID_MOCK);
+        final String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/" + TimeWindow.TEN_SECOND
+                + '/' + USER_ID_MOCK + "/" + SOURCE_ID_MOCK;
 
-        path = path.replace("{" + INTERVAL + "}", TimeWindow.TEN_SECOND.name());
+        for (DescriptiveStatistic stat : expectedDataset.keySet()) {
+            String pathStat = path.replace("{" + STAT + "}", stat.name());
 
-        try (RestClient client = new RestClient(pipelineConfig.getRestApi())) {
+            Map<MockDataConfig, Dataset> datasets = expectedDataset.get(stat);
 
-            for (DescriptiveStatistic stat : expectedDataset.keySet()) {
-                String pathStat = path.replace("{" + STAT + "}", stat.name());
+            for (MockDataConfig config : datasets.keySet()) {
+                String pathSensor = pathStat.replace("{" + SENSOR + "}",
+                        getSensorType(config));
 
-                Map<MockDataConfig, Dataset> datasets = expectedDataset.get(stat);
+                Dataset actual = apiClient.requestAvro(pathSensor, Dataset.class, Status.OK);
 
-                for (MockDataConfig config : datasets.keySet()) {
-                    String pathSensor = pathStat.replace("{" + SENSOR + "}",
-                            getSensorType(config));
-
-                    LOGGER.info("Requesting {}", client.getRelativeUrl(pathSensor));
-
-                    Request request = new Request.Builder().
-                            header("Authorization","Bearer "
-                                    + TokenTestUtils.VALID_TOKEN)
-                            .addHeader("Accept", AVRO_BINARY)
-                            .url(client.getRelativeUrl(pathSensor)).build();
-
-                    try (Response response = client.request(request)) {
-                        assertEquals(200, response.code());
-
-                        LOGGER.info("[{}] {}", response.code(), pathSensor);
-
-                        Dataset actual = null;
-
-                        if (response.code() == 200) {
-                            actual = AvroConverter.avroByteToAvro(response.body().bytes(),
-                                    Dataset.getClassSchema());
-                        }
-
-                        assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
-                                config.getMaximumDifference());
-                    }
-                }
+                assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
+                        config.getMaximumDifference());
             }
         }
     }
@@ -497,7 +474,7 @@ public class EndToEndTest {
      * @throws IllegalArgumentException if the specified data does not match any of the already
      *          known ones
      */
-    public static String getSensorType(MockDataConfig config) {
+    private static String getSensorType(MockDataConfig config) {
         if (config.getSensor().equals("BATTERY_LEVEL")) {
             return "BATTERY";
         }
@@ -510,12 +487,10 @@ public class EndToEndTest {
      * @throws MalformedURLException if the used URL is malformed
      */
     @Test
-    public void checkSwaggerConfig()
-        throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        LOGGER.info("Checking Swagger ...");
-
-        assertEquals(Properties.getApiConfig().getApiBasePath(), getSwaggerBasePath(
-                pipelineConfig.getRestApi()));
+    public void checkSwaggerConfig() throws IOException {
+        String swaggerString = apiClient.requestString(SWAGGER_JSON, APPLICATION_JSON, Status.OK);
+        Swagger swagger = new SwaggerParser().parse(swaggerString);
+        assertEquals(Properties.getApiConfig().getApiBasePath(), swagger.getBasePath());
     }
 
     /**
@@ -530,17 +505,11 @@ public class EndToEndTest {
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
         LOGGER.info("Checking Frontend pipelineConfig ...");
 
+        String actual = frontendClient.requestString(
+                "/config/" + CONFIG_JSON, APPLICATION_JSON, Status.OK);
         String expected = Utility.readAll(
                 EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
 
-        try (RestClient client = new RestClient(pipelineConfig.getFrontend());
-                Response response = client.request(new Request.Builder().
-                        header("Authorization","Bearer "
-                                + TokenTestUtils.VALID_TOKEN)
-                        .url(client.getRelativeUrl("/config/" + CONFIG_JSON)).build())) {
-            LOGGER.info("Requested {}", client.getRelativeUrl("/config/" + CONFIG_JSON));
-            assertEquals(200, response.code());
-            assertEquals(expected, response.body().string());
-        }
+        assertEquals(actual, expected);
     }
 }

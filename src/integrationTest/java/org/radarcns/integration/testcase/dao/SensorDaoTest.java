@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.dao.mongo.util.MongoHelper.END;
 import static org.radarcns.dao.mongo.util.MongoHelper.START;
+import static org.radarcns.unit.config.TestCatalog.*;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -52,7 +53,7 @@ public class SensorDaoTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final Unit UNIT = Unit.BEATS_PER_MIN;
     private static final Class ITEM = DoubleSample.class;
@@ -257,7 +258,7 @@ public class SensorDaoTest {
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
 
-        for (String collectionName: dirtyCollections) {
+        for (String collectionName : dirtyCollections) {
             Utility.dropCollection(client, collectionName);
         }
         client.close();

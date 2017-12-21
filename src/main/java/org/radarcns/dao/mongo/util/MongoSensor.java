@@ -193,7 +193,7 @@ public abstract class MongoSensor extends MongoDataAccess {
             try {
                 count += doc.getDouble(Stat.count.getParam());
             } catch (ClassCastException exec) {
-                count += extractCount((Document) doc.get(Stat.count.getParam()));
+                count += extractCount(doc.get(Stat.count.getParam()));
             }
         }
 
@@ -324,7 +324,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @implSpec this function should be override by the subclass
      * @return the count value
      */
-    protected double extractCount(Document doc) {
+    protected int extractCount(Object doc) {
         throw new UnsupportedOperationException("This function must be override by the subclass");
     }
 }

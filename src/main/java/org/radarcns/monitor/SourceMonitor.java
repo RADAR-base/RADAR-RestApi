@@ -107,9 +107,7 @@ public class SourceMonitor {
         SourceSummary sourceState = new SourceSummary(getStatus(1 - avgPerc),
                 (int)countMex, RadarConverter.roundDouble(avgPerc, 2), sensorMap);
 
-        Source device = new Source(source, specification.getType(), sourceState);
-
-        return device;
+        return new Source(source, specification.getType(), sourceState);
     }
 
     /**

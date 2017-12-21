@@ -23,10 +23,6 @@ import static org.radarcns.webapp.util.BasePath.*;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +34,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
@@ -53,7 +51,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Android application status web-app. Function set to access Android app status information.
  */
-@Api
 @Path("/" + ANDROID)
 public class AppStatusEndPoint {
 
@@ -71,18 +68,16 @@ public class AppStatusEndPoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @ApiOperation(
-            value = "Return an Applications status",
-            notes = "The Android application periodically updates its current status")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
-                + "received status"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @Operation(summary = "Return an Applications status",
+            description = "The Android application periodically updates its current status")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
+        + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body"
+        + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "200", description = "Return a application.avsc object containing last"
+        + "received status")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedAppStatusJson(
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
@@ -112,16 +107,14 @@ public class AppStatusEndPoint {
     @GET
     @Produces(AVRO_BINARY)
     @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @ApiOperation(
-            value = "Return an Applications status",
-            notes = "The Android application periodically updates its current status")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing"),
-            @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
-                + "received status"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @Operation(summary = "Return an Applications status",
+            description = "The Android application periodically updates its current status")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
+    @ApiResponse(responseCode = "200", description = "Return a application.avsc object containing last"
+        + "received status")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedAppStatusAvro(
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {

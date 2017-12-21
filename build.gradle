@@ -15,7 +15,7 @@ ext.logback = '1.2.3'
 ext.mongodb = '3.6.0'
 ext.radarCommons = '0.7'
 ext.radarSchema = '0.2.3'
-ext.swagger = '1.5.17'
+ext.swagger = '2.0.0-rc3'
 ext.swaggerParser = '1.0.33'
 ext.tomcat = '8.0.47'
 ext.radarAuthVersion = '0.3.1'
@@ -45,7 +45,7 @@ dependencies {
   compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
 
-  compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: swagger
+  compile group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: swagger
 
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommons
   compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: radarSchema

@@ -19,6 +19,7 @@ package org.radarcns.integration.testcase.dao;
 import static junit.framework.TestCase.assertEquals;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.integration.util.RandomInput.getRandomIpAddress;
+import static org.radarcns.unit.config.TestCatalog.*;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -44,7 +45,7 @@ public class AndroidDaoTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
@@ -120,7 +121,7 @@ public class AndroidDaoTest {
         collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE.concat("1"),
                 SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
 
-        assertEquals("ANDROID",
+        assertEquals(ANDROID,
                 AndroidAppDataAccessObject.getInstance().findSourceType(SOURCE, client));
 
         assertEquals(null,

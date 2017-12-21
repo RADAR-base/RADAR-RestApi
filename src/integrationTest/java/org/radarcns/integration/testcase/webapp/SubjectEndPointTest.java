@@ -1,5 +1,3 @@
-package org.radarcns.integration.testcase.webapp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,71 +14,65 @@ package org.radarcns.integration.testcase.webapp;
  * limitations under the License.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
-import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
-
-import static org.radarcns.webapp.util.Parameter.STUDY_ID;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+package org.radarcns.integration.testcase.webapp;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
 import org.bson.Document;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.config.Properties;
+import org.radarcns.dao.AndroidAppDataAccessObject;
+import org.radarcns.dao.SensorDataAccessObject;
+import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.integration.util.ApiClient;
+import org.radarcns.integration.util.RandomInput;
+import org.radarcns.integration.util.Utility;
 import org.radarcns.restapi.source.Sensor;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.source.SourceSummary;
 import org.radarcns.restapi.source.States;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
-import org.radarcns.config.Properties;
-import org.radarcns.dao.AndroidAppDataAccessObject;
-import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.integration.util.RandomInput;
-import org.radarcns.integration.util.Utility;
-import org.radarcns.util.AvroConverter;
 import org.radarcns.webapp.util.BasePath;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.core.Response.Status;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
+import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
 
 public class SubjectEndPointTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectEndPointTest.class);
-
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String STUDY = "0";
+    private static final String SOURCE_TYPE = org.radarcns.unit.config.TestCatalog.EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
+    @Rule
+    public final ApiClient apiClient = new ApiClient(
+            Properties.getApiConfig().getApiUrl() + BasePath.SUBJECT + '/');
+
     @Test
     public void getAllSubjectsTest204() throws IOException {
-        String path = BasePath.SUBJECT + "/" + GET_ALL_SUBJECTS + "/{"
-                + STUDY_ID + "}";
-        path = path.replace("{" + STUDY_ID + "}", "0");
-
-        LOGGER.info(path);
-
-        assertEquals(Status.NO_CONTENT.getStatusCode(), Utility.makeRequest(
-                Properties.getApiConfig().getApiUrl() + path, AVRO_BINARY).code());
+        apiClient.request(GET_ALL_SUBJECTS + "/" + STUDY, AVRO_BINARY, Status.NO_CONTENT);
     }
 
     @Test
     public void getAllSubjectsTest200()
-            throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
+            throws IOException, ReflectiveOperationException, URISyntaxException {
 
         MongoClient client = Utility.getMongoClient();
 
@@ -93,31 +85,17 @@ public class SubjectEndPointTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT.concat("1"), SOURCE.concat("1")));
 
-        String path = BasePath.SUBJECT + "/" + GET_ALL_SUBJECTS + "/{"
-                + STUDY_ID + "}";
-        path = path.replace("{" + STUDY_ID + "}", "0");
+        Cohort cohort = apiClient.requestAvro(GET_ALL_SUBJECTS + "/" + STUDY, Cohort.class, Status.OK);
 
-        LOGGER.info(path);
-
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
-                AVRO_BINARY);
-        assertEquals(Status.OK.getStatusCode(), response.code());
-
-        byte[] array = response.body().bytes();
-
-        if (response.code() == Status.OK.getStatusCode()) {
-            Cohort cohort = AvroConverter.avroByteToAvro(array, Cohort.getClassSchema());
-
-            for (Subject patient : cohort.getSubjects()) {
-                if (patient.getSubjectId().equalsIgnoreCase(SUBJECT)) {
-                    Source source = patient.getSources().get(0);
-                    assertEquals(SOURCE_TYPE, source.getType());
-                    assertEquals(SOURCE, source.getId());
-                } else if (patient.getSubjectId().equalsIgnoreCase(SUBJECT.concat("1"))) {
-                    Source source = patient.getSources().get(0);
-                    assertEquals("ANDROID", source.getType());
-                    assertEquals(SOURCE.concat("1"), source.getId());
-                }
+        for (Subject patient : cohort.getSubjects()) {
+            if (patient.getSubjectId().equalsIgnoreCase(SUBJECT)) {
+                Source source = patient.getSources().get(0);
+                assertEquals(SOURCE_TYPE, source.getType());
+                assertEquals(SOURCE, source.getId());
+            } else if (patient.getSubjectId().equalsIgnoreCase(SUBJECT.concat("1"))) {
+                Source source = patient.getSources().get(0);
+                assertEquals(org.radarcns.unit.config.TestCatalog.ANDROID, source.getType());
+                assertEquals(SOURCE.concat("1"), source.getId());
             }
         }
 
@@ -126,18 +104,12 @@ public class SubjectEndPointTest {
 
     @Test
     public void getSubjectTest204() throws IOException {
-        String path = BasePath.SUBJECT + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", "0");
-
-        LOGGER.info(path);
-
-        assertEquals(Status.NO_CONTENT.getStatusCode(), Utility.makeRequest(
-                Properties.getApiConfig().getApiUrl() + path, AVRO_BINARY).code());
+        apiClient.request(GET_SUBJECT + '/' + SUBJECT, AVRO_BINARY, Status.NO_CONTENT);
     }
 
     @Test
     public void getSubjectTest200()
-        throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
+            throws IOException, ReflectiveOperationException, URISyntaxException {
 
         MongoClient client = Utility.getMongoClient();
 
@@ -150,42 +122,30 @@ public class SubjectEndPointTest {
 
         collection.insertMany(randomInput);
 
-        String path = BasePath.SUBJECT + "/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
+        Subject actual = apiClient.requestAvro(GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
 
-        LOGGER.info(path);
+        Map<String, Sensor> sensorMap = new HashMap<>();
+        sensorMap.put("INTER_BEAT_INTERVAL",
+                new Sensor("INTER_BEAT_INTERVAL", States.DISCONNECTED, 0, 1.0));
+        sensorMap.put("BATTERY",
+                new Sensor("BATTERY", States.DISCONNECTED, 0, 1.0));
+        sensorMap.put("HEART_RATE",
+                new Sensor("HEART_RATE", States.DISCONNECTED, 0, 1.0));
+        sensorMap.put("THERMOMETER",
+                new Sensor("THERMOMETER", States.DISCONNECTED, 0, 1.0));
+        sensorMap.put("ACCELEROMETER",
+                new Sensor("ACCELEROMETER", States.DISCONNECTED, 0, 1.0));
+        sensorMap.put("ELECTRODERMAL_ACTIVITY",
+                new Sensor("ELECTRODERMAL_ACTIVITY", States.DISCONNECTED, 0, 1.0));
+        sensorMap.put("BLOOD_VOLUME_PULSE",
+                new Sensor("BLOOD_VOLUME_PULSE", States.DISCONNECTED, 0, 1.0));
 
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
-                AVRO_BINARY);
-        assertEquals(Status.OK.getStatusCode(), response.code());
+        Subject expected = new Subject(SUBJECT, true,
+                Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput),
+                Collections.singletonList(new Source(SOURCE, SOURCE_TYPE, new SourceSummary(
+                        States.DISCONNECTED, 0, 1.0, sensorMap))));
 
-        if (response.code() == Status.OK.getStatusCode()) {
-            Subject actual = AvroConverter.avroByteToAvro(
-                        response.body().bytes(), Subject.getClassSchema());
-
-            Map<String, Sensor> sensorMap = new HashMap<>();
-            sensorMap.put("INTER_BEAT_INTERVAL",
-                    new Sensor("INTER_BEAT_INTERVAL", States.DISCONNECTED, 0, 1.0));
-            sensorMap.put("BATTERY",
-                    new Sensor("BATTERY", States.DISCONNECTED, 0, 1.0));
-            sensorMap.put("HEART_RATE",
-                    new Sensor("HEART_RATE", States.DISCONNECTED, 0, 1.0));
-            sensorMap.put("THERMOMETER",
-                    new Sensor("THERMOMETER", States.DISCONNECTED, 0, 1.0));
-            sensorMap.put("ACCELEROMETER",
-                    new Sensor("ACCELEROMETER", States.DISCONNECTED, 0, 1.0));
-            sensorMap.put("ELECTRODERMAL_ACTIVITY",
-                    new Sensor("ELECTRODERMAL_ACTIVITY", States.DISCONNECTED, 0, 1.0));
-            sensorMap.put("BLOOD_VOLUME_PULSE",
-                    new Sensor("BLOOD_VOLUME_PULSE", States.DISCONNECTED, 0, 1.0));
-
-            Subject expected = new Subject(SUBJECT, true,
-                    Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput),
-                    Collections.singletonList(new Source(SOURCE, SOURCE_TYPE, new SourceSummary(
-                            States.DISCONNECTED, 0, 1.0, sensorMap))));
-
-            assertEquals(expected, actual);
-        }
+        assertEquals(expected, actual);
 
         dropAndClose(client);
     }

@@ -1,5 +1,3 @@
-package org.radarcns.integration.testcase.monitor;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,6 +14,8 @@ package org.radarcns.integration.testcase.monitor;
  * limitations under the License.
  */
 
+package org.radarcns.integration.testcase.monitor;
+
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.X_LABEL;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Y_LABEL;
@@ -23,6 +23,7 @@ import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Z_LABEL;
 import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
+import static org.radarcns.unit.config.TestCatalog.*;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -54,7 +55,7 @@ public class SourceMonitorDbTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SOURCE_TYPE = EMPATICA;
 
     private static int WINDOWS = 2;
 
@@ -159,7 +160,7 @@ public class SourceMonitorDbTest {
 
         end = start + TimeUnit.SECONDS.toMillis(1);
         for (String sensorType : count.keySet()) {
-            int sendMessages = count.containsKey(sensorType) ? count.get(sensorType) : 0;
+            int sendMessages = count.getOrDefault(sensorType, 0);
             messages = reducedMessage(
                 definition.getFrequency(sensorType).intValue() * 60, percentage)
                     - sendMessages;
@@ -172,8 +173,8 @@ public class SourceMonitorDbTest {
             }
         }
 
-        return new SourceMonitor(new SourceDefinition("EMPATICA",
-                Properties.getDeviceCatalog().getDevices().get("EMPATICA"))).getState(
+        return new SourceMonitor(new SourceDefinition(EMPATICA,
+                Properties.getDeviceCatalog().getDevices().get(EMPATICA))).getState(
             SUBJECT, SOURCE, timestamp, end, client);
     }
 
@@ -208,35 +209,29 @@ public class SourceMonitorDbTest {
         return new Document(MongoHelper.ID, SUBJECT + "-" + SOURCE + "-" + start + "-" + end)
             .append(MongoHelper.USER, SUBJECT)
             .append(MongoHelper.SOURCE, SOURCE)
-            .append(Stat.min.getParam(), getValue(0))
-            .append(Stat.max.getParam(), getValue(0))
-            .append(Stat.sum.getParam(), getValue(0))
+            .append(Stat.min.getParam(), getValue(0d))
+            .append(Stat.max.getParam(), getValue(0d))
+            .append(Stat.sum.getParam(), getValue(0d))
             .append(Stat.count.getParam(), getValue(samples))
-            .append(Stat.avg.getParam(), getValue(0))
-            .append(Stat.quartile.getParam(), Arrays.asList(new Document[]{
-                new Document(FIRST_QUARTILE, getValue(0)),
-                new Document(SECOND_QUARTILE, getValue(0)),
-                new Document(THIRD_QUARTILE, getValue(0))
-            }))
+            .append(Stat.avg.getParam(), getValue(0d))
+            .append(Stat.quartile.getParam(), getValue(getQuartile()))
             .append(Stat.iqr.getParam(), getValue(0))
             .append(MongoHelper.START, new Date(start))
             .append(MongoHelper.END, new Date(end));
     }
 
     private static List<Document> getQuartile() {
-        return Arrays.asList(new Document[]{
-            new Document(FIRST_QUARTILE, new Double(0)),
-            new Document(SECOND_QUARTILE, new Double(0)),
-            new Document(THIRD_QUARTILE, new Double(0))
-        });
+        return Arrays.asList(
+                new Document(FIRST_QUARTILE, 0d),
+                new Document(SECOND_QUARTILE, 0d),
+                new Document(THIRD_QUARTILE, 0d));
     }
 
-    private static List<Document> getValue(int value) {
-        return Arrays.asList(new Document[]{
-            new Document(X_LABEL, new Double(value)),
-            new Document(Y_LABEL, new Double(value)),
-            new Document(Z_LABEL, new Double(value))
-        });
+    private static List<Document> getValue(Object value) {
+        return Arrays.asList(
+                new Document(X_LABEL, value),
+                new Document(Y_LABEL, value),
+                new Document(Z_LABEL, value));
     }
 
     /** Reduces the frequency rate to mock a data loss. **/

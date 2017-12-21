@@ -1,5 +1,3 @@
-package org.radarcns.listener;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,18 +14,21 @@ package org.radarcns.listener;
  * limitations under the License.
  */
 
+package org.radarcns.listener;
+
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
-import java.net.ConnectException;
-import java.util.List;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import org.bson.Document;
 import org.radarcns.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
+import java.net.ConnectException;
 
 /**
  * pon the web application initialisation, this Context Listener creates a MongoDb client that can
@@ -54,9 +55,9 @@ public class MongoDbContextListener implements ServletContextListener {
         MongoClient mongoClient = null;
 
         try {
-            List<MongoCredential> credentials = Properties.getApiConfig().getMongoDbCredentials();
+            MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();
 
-            mongoClient = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),credentials);
+            mongoClient = new MongoClient(Properties.getApiConfig().getMongoDbHosts(), credentials, MongoClientOptions.builder().build());
 
             if (checkMongoConnection(mongoClient)) {
                 sce.getServletContext().setAttribute(MONGO_CLIENT, mongoClient);
@@ -118,14 +119,13 @@ public class MongoDbContextListener implements ServletContextListener {
         Boolean flag = true;
 
         try {
-            List<MongoCredential> credentials = Properties.getApiConfig().getMongoDbCredentials();
+            MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();
 
-            mongoClient = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),credentials);
+            mongoClient = new MongoClient(Properties.getApiConfig().getMongoDbHosts(), credentials,
+                    MongoClientOptions.builder().build());
 
             try {
-                for (MongoCredential user : credentials) {
-                    mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
-                }
+                mongoClient.getDatabase(credentials.getSource()).runCommand(new Document("ping", 1));
             } catch (Exception exec) {
                 flag = false;
 
@@ -174,24 +174,18 @@ public class MongoDbContextListener implements ServletContextListener {
         }
 
         try {
-            for (MongoCredential user : Properties.getApiConfig().getMongoDbCredentials()) {
-                mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
-            }
+            MongoCredential user = Properties.getApiConfig().getMongoDbCredentials();
+            mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
 
             flag = true;
-
         } catch (Exception exec) {
-            if (mongoClient != null) {
-                mongoClient.close();
-            }
-
+            mongoClient.close();
             context.setAttribute(MONGO_CLIENT, null);
             LOGGER.error("The connection with MongoDb cannot be established", exec);
         }
 
         LOGGER.debug("MongoDB connection is {}", flag);
-
-        return false;
+        return flag;
     }
 
 }

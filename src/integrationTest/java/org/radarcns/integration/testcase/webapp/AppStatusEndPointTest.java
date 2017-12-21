@@ -1,5 +1,3 @@
-package org.radarcns.integration.testcase.webapp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,62 +14,58 @@ package org.radarcns.integration.testcase.webapp;
  * limitations under the License.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.*;
-import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+package org.radarcns.integration.testcase.webapp;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
 import org.bson.Document;
-import org.junit.Test;
 import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.restapi.app.Application;
 import org.radarcns.config.Properties;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.util.AvroConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.radarcns.restapi.app.Application;
+import org.radarcns.webapp.util.BasePath;
+
+import javax.ws.rs.core.Response.Status;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.STATUS;
 
 public class AppStatusEndPointTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppStatusEndPointTest.class);
-
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
+    private static final String SOURCE_PATH = SUBJECT + '/' + SOURCE;
+
+    @Rule
+    public final ApiClient apiClient = new ApiClient(
+            Properties.getApiConfig().getApiUrl() + BasePath.ANDROID + '/' + STATUS + '/');
 
     @Test
     public void getStatusTest204() throws IOException {
-        String path = ANDROID + "/" + STATUS + "/{" + SUBJECT_ID
-                + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT);
-        path = path.replace("{" + SOURCE_ID + "}", SOURCE);
-
-        LOGGER.info(path);
-
-        assertEquals(Status.NO_CONTENT.getStatusCode(), Utility.makeRequest(
-                Properties.getApiConfig().getApiUrl() + path, AVRO_BINARY).code());
+        apiClient.request(SOURCE_PATH, AVRO_BINARY, Status.NO_CONTENT);
     }
 
     @Test
     public void getStatusTest200()
-            throws IOException, IllegalAccessException, InstantiationException, URISyntaxException {
+            throws IOException, ReflectiveOperationException, URISyntaxException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
@@ -84,28 +78,14 @@ public class AppStatusEndPointTest {
         collection.insertMany(list);
 
         Map<String, Document> map = RandomInput.getRandomApplicationStatus(
-                SUBJECT.concat("1"), SOURCE.concat("1"));
+                SUBJECT, SOURCE);
 
         Utility.insertMixedDocs(client, map);
 
         Application expected = Utility.convertDocToApplication(map);
+        Application actual = apiClient.requestAvro(SOURCE_PATH, Application.class, Status.OK);
 
-        String path = ANDROID + "/" + STATUS + "/{"
-                + SUBJECT_ID + "}/{" + SOURCE_ID + "}";
-        path = path.replace("{" + SUBJECT_ID + "}", SUBJECT.concat("1"));
-        path = path.replace("{" + SOURCE_ID + "}", SOURCE.concat("1"));
-
-        LOGGER.info(path);
-
-        Response response = Utility.makeRequest(Properties.getApiConfig().getApiUrl() + path,
-                AVRO_BINARY);
-        assertEquals(Status.OK.getStatusCode(), response.code());
-
-        if (response.code() == Status.OK.getStatusCode()) {
-            Application actual = AvroConverter.avroByteToAvro(response.body().bytes(),
-                    Application.getClassSchema());
-            assertEquals(expected, actual);
-        }
+        assertEquals(expected, actual);
 
         dropAndClose(client);
     }

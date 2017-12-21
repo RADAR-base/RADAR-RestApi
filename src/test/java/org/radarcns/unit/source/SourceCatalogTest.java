@@ -17,6 +17,7 @@
 package org.radarcns.unit.source;
 
 import static org.junit.Assert.assertEquals;
+import static org.radarcns.unit.config.TestCatalog.*;
 
 import org.junit.Test;
 import org.radarcns.source.SourceCatalog;
@@ -25,7 +26,7 @@ public class SourceCatalogTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void sourceCatalogTest() {
-        assertEquals("EMPATICA", SourceCatalog.getInstance("EMPATICA").getType());
+        assertEquals(EMPATICA, SourceCatalog.getInstance(EMPATICA).getType());
 
         SourceCatalog.getInstance("PEBBLE");
     }

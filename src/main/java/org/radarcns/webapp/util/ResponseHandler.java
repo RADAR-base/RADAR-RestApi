@@ -1,5 +1,3 @@
-package org.radarcns.webapp.util;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.webapp.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.webapp.util;
 
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
@@ -32,6 +32,7 @@ import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
 import org.radarcns.util.AvroConverter;
+import org.radarcns.webapp.exception.StatusMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,6 @@ public class ResponseHandler {
      * @param request HTTP request that has to be served
      * @param dataset request result
      * @return the response content formatted in JSON
-     * @see {@link Dataset}
      **/
     public static Response getJsonResponse(HttpServletRequest request, Dataset dataset)
             throws IOException {
@@ -64,7 +64,7 @@ public class ResponseHandler {
 
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
-        LOGGER.debug("{}", json.toString());
+        LOGGER.debug("{}", json);
         LOGGER.debug("[{}] {} records", status.getStatusCode(), size);
 
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
@@ -83,22 +83,14 @@ public class ResponseHandler {
         Status status = getStatus(obj);
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        JsonNode json;
-
-        switch (status) {
-            case OK:
-                json = AvroConverter.avroToJsonNode(obj);
-                break;
-            case NO_CONTENT:
-                json = AvroConverter.avroToJsonNode(new Message("No data for this input"));
-                break;
-            default: return Response.serverError().build();
+        if (status == NO_CONTENT) {
+            return Response.noContent().build();
         }
 
-        LOGGER.debug("{}", json.toString());
-        LOGGER.debug("{}", obj.toString());
-
-        return Response.status(status.getStatusCode()).entity(json).build();
+        JsonNode json = AvroConverter.avroToJsonNode(obj);
+        return Response.status(status.getStatusCode())
+                .entity(json)
+                .build();
     }
 
     //TODO return Status.BAD_REQUEST in case of parameter that does not respect regex.
@@ -112,17 +104,10 @@ public class ResponseHandler {
         Status status = Status.INTERNAL_SERVER_ERROR;
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        SpecificRecord obj = new Message(message);
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-
-        if (json == null) {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity("Internal error!").build();
-        } else {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity(json).build();
-        }
+        LOGGER.debug("[{}] {}", status.getStatusCode(), message);
+        return Response.status(status.getStatusCode())
+                .entity(new StatusMessage("server_error", message, null))
+                .build();
     }
 
     /**
@@ -136,17 +121,10 @@ public class ResponseHandler {
         Status status = Status.UNAUTHORIZED;
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        SpecificRecord obj = new Message(message);
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-
-        if (json == null) {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity("Access Denied!").build();
-        } else {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity(json).build();
-        }
+        LOGGER.debug("[{}] {}", status.getStatusCode(), message);
+        return Response.status(status.getStatusCode())
+                .entity(new StatusMessage("access_denied", message))
+                .build();
     }
 
     /**
@@ -164,13 +142,11 @@ public class ResponseHandler {
 
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
-        if (json == null) {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity("Forbidden!").build();
-        } else {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity(json).build();
-        }
+        LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+
+        return Response.status(status.getStatusCode())
+                .entity(new StatusMessage("forbidden", "Forbidden!", json))
+                .build();
     }
 
 
@@ -189,8 +165,10 @@ public class ResponseHandler {
             case OK:
                 byte[] array = AvroConverter.avroToAvroByte(obj);
                 return Response.ok(array, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
-            case NO_CONTENT: return Response.noContent().build();
-            default: return Response.serverError().build();
+            case NO_CONTENT:
+                return Response.noContent().build();
+            default:
+                return Response.serverError().build();
         }
     }
 

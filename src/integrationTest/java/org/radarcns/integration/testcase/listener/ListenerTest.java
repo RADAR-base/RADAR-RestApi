@@ -1,5 +1,3 @@
-package org.radarcns.integration.testcase.listener;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.integration.testcase.listener;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.integration.testcase.listener;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,7 +38,7 @@ public class ListenerTest {
         assertEquals(true, MongoDbContextListener.checkMongoConnection(client));
 
         client = new MongoClient(new ServerAddress("localhosts", 27017),
-                client.getCredentialsList());
+                client.getCredentialsList().get(0), client.getMongoClientOptions());
         assertEquals(false, MongoDbContextListener.checkMongoConnection(client));
     }
 

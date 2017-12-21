@@ -55,7 +55,7 @@ public class AvroConverterTest {
         EffectiveTimeFrame etf = new EffectiveTimeFrame(
                 RadarConverter.getISO8601(new Date()),
                 RadarConverter.getISO8601(new Date()));
-        Header header = new Header("User", "Source", "EMPATICA", "HEART_RATE",
+        Header header = new Header("User", "Source", org.radarcns.unit.config.TestCatalog.EMPATICA, "HEART_RATE",
                 COUNT, G, TimeWindow.TEN_SECOND, etf);
 
         LinkedList<Item> item = new LinkedList<>();
