@@ -19,6 +19,8 @@ package org.radarcns.pipeline;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.avro.specific.SpecificRecord;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -176,14 +178,18 @@ public class EndToEndTest {
         try (RestClient client = new RestClient(pipelineConfig.getRestProxy())) {
             Request request = client.requestBuilder("topics").build();
             for (int i = 0; i < retry; i++) {
-                String topics = client.requestString(request);
-                String[] topicArray = topics.substring(1, topics.length() - 1).replace(
-                        "\"", "").split(",");
+                Response response = client.request(request);
+                ResponseBody body = response.body();
+                if (response.isSuccessful() && body != null) {
+                    String topics = body.string();
+                    String[] topicArray = topics.substring(1, topics.length() - 1).replace(
+                            "\"", "").split(",");
 
-                expectedTopics.removeAll(Arrays.asList(topicArray));
+                    expectedTopics.removeAll(Arrays.asList(topicArray));
 
-                if (expectedTopics.isEmpty()) {
-                    break;
+                    if (expectedTopics.isEmpty()) {
+                        break;
+                    }
                 }
 
                 Thread.sleep(sleep * (i + 1));
