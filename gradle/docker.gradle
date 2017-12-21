@@ -88,7 +88,8 @@ ext.radarVolumes = file("${radarStackPath}/volumes")
 
 task radarEnv(type: Copy) {
   from "${radarStackPath}/etc/env.template"
-  into "${radarStackPath}/.env"
+  into "${radarStackPath}"
+  rename 'env.template', '.env'
 
   filter { String line ->
     line.replace('/usr/local/var/lib/docker', radarVolumes.getAbsolutePath())
