@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.listener.managementportal.listener;
+package org.radarcns.listener.managementportal;
 
 import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
@@ -43,22 +43,22 @@ public class HttpClientListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        sce.getServletContext().setAttribute(HTTP_CONNECTION_POOL,
-                new TrivialManagedConnectionPool());
+        getPool(sce.getServletContext());
 
-        LOGGER.info("Created general HTTP Client.");
+        LOGGER.info("Created general HTTP connection pool.");
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        TrivialManagedConnectionPool pool = (TrivialManagedConnectionPool) sce.getServletContext()
-                .getAttribute(HTTP_CONNECTION_POOL);
+        removePool(sce.getServletContext());
 
-        if (pool != null) {
-            pool.acquire().evictAll();
-            sce.getServletContext().removeAttribute(HTTP_CONNECTION_POOL);
+        LOGGER.info("Destroyed HTTP connection pool.");
 
-            LOGGER.info("Destroyed HTTP Client.");
+        try {
+            // wait for OkHttp threads to be cleaned up
+            Thread.sleep(2_000L);
+        } catch (InterruptedException e) {
+            // do nothing
         }
     }
 
@@ -79,6 +79,13 @@ public class HttpClientListener implements ServletContextListener {
                 .build();
     }
 
+    /**
+     * Extract a client from the context.
+     * @param context context used to share variables across requests
+     * @param url base URL that the client should connect to.
+     * @return REST Client
+     * @throws MalformedURLException if given URL is not valid.
+     */
     public static RestClient getRestClient(ServletContext context, String url)
             throws MalformedURLException {
         ManagedConnectionPool pool = getPool(context);
@@ -86,8 +93,25 @@ public class HttpClientListener implements ServletContextListener {
         return new RestClient(server, 30, pool);
     }
 
-    private static ManagedConnectionPool getPool(ServletContext context) {
-        return (TrivialManagedConnectionPool) context.getAttribute(HTTP_CONNECTION_POOL);
+    private synchronized static void removePool(ServletContext context) {
+        ManagedConnectionPool pool = (ManagedConnectionPool) context.getAttribute(
+                HTTP_CONNECTION_POOL);
+
+        if (pool != null) {
+            ConnectionPool connectionPool = pool.acquire();
+            connectionPool.evictAll();
+            context.removeAttribute(HTTP_CONNECTION_POOL);
+        }
+    }
+
+    private synchronized static ManagedConnectionPool getPool(ServletContext context) {
+        ManagedConnectionPool pool = (ManagedConnectionPool) context.getAttribute(
+                HTTP_CONNECTION_POOL);
+        if (pool == null) {
+            pool = new TrivialManagedConnectionPool();
+            context.setAttribute(HTTP_CONNECTION_POOL, pool);
+        }
+        return pool;
     }
 
     /** Managed Connection Pool that holds a single connection pool during its lifetime. */

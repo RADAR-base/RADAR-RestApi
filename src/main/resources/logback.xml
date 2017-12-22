@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.radarcns" level="info" additivity="false">
+    <logger name="org.radarcns" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 

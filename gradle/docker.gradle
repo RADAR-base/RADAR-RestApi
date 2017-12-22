@@ -104,9 +104,16 @@ task radarConfigJson(type: Copy) {
   rename '(.+).template', '$1'
 }
 
-task radarMpInfo(type: Copy) {
-  from "${simpleStackPath}/resources"
+task radarRestConfigJson(type: Copy) {
+  from files("${radarStackPath}/etc/rest-api/radar.yml.template")
   into "${radarStackPath}/etc/rest-api"
+  rename '(.+).template', '$1'
+}
+
+task radarMpInfo(type: Copy) {
+  from "${e2ePath}/resources"
+  into "${radarStackPath}/etc/rest-api"
+  exclude 'radar.yml'
 }
 
 task radarDockerComposeOrig(type: Copy) {
@@ -121,7 +128,7 @@ task radarDockerComposeOrig(type: Copy) {
 }
 
 // Sets configuration files for running the entire platform
-task setRadarEnvironmentForDocker(dependsOn: [buildDocker, radarEnv, radarConfigJson, radarMpInfo, radarDockerComposeOrig]) {
+task setRadarEnvironmentForDocker(dependsOn: [buildDocker, radarEnv, radarConfigJson, radarRestConfigJson, radarMpInfo, radarDockerComposeOrig]) {
   doLast {
     def volumes = file("${radarStackPath}/volumes")
     volumes.mkdir()

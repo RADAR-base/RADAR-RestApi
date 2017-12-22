@@ -1,4 +1,4 @@
-package org.radarcns.listener.managementportal.listener;
+package org.radarcns.listener.managementportal;
 
 /*
  * Copyright 2017 King's College London

@@ -36,7 +36,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.radarcns.config.managementportal.Properties;
-import org.radarcns.listener.managementportal.listener.HttpClientListener;
+import org.radarcns.listener.managementportal.HttpClientListener;
+import org.radarcns.listener.managementportal.TokenManagerListener;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.producer.rest.RestException;
 import org.slf4j.Logger;
@@ -57,8 +58,8 @@ public class MpClient {
      * @param context {@link ServletContext} useful to retrieve shared {@link OkHttpClient} and
      *      {@code access token}.
      * @throws IllegalStateException in case the object cannot be created
-     * @see org.radarcns.listener.managementportal.listener.HttpClientListener
-     * @see org.radarcns.listener.managementportal.listener.TokenManagerListener
+     * @see HttpClientListener
+     * @see TokenManagerListener
      */
     public MpClient(ServletContext context) {
         Objects.requireNonNull(context);

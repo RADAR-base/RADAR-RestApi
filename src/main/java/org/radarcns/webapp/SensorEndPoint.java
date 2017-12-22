@@ -180,7 +180,7 @@ public class SensorEndPoint {
             DescriptiveStatistic stat, TimeWindow interval) throws ConnectException {
         Param.isValidInput(subject, source);
 
-        Dataset dataset = new Dataset(null, new LinkedList<Item>());
+        Dataset dataset = new Dataset(null, new LinkedList<>());
 
         if (SubjectDataAccessObject.exist(subject, context)) {
             dataset = SensorDataAccessObject.getInstance()

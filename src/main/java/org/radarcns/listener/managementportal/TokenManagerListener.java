@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.listener.managementportal.listener;
+package org.radarcns.listener.managementportal;
 
 import java.net.MalformedURLException;
 import java.net.URL;

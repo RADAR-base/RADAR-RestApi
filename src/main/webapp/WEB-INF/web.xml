@@ -53,13 +53,13 @@
         <listener-class>org.radarcns.listener.SourceCatalogContextListener</listener-class>
     </listener>
     <listener>
-        <listener-class>org.radarcns.listener.managementportal.listener.HttpClientListener</listener-class>
+        <listener-class>org.radarcns.listener.managementportal.HttpClientListener</listener-class>
     </listener>
     <listener>
-        <listener-class>org.radarcns.listener.managementportal.listener.PropertiesListener</listener-class>
+        <listener-class>org.radarcns.listener.managementportal.PropertiesListener</listener-class>
     </listener>
     <listener>
-        <listener-class>org.radarcns.listener.managementportal.listener.TokenManagerListener</listener-class>
+        <listener-class>org.radarcns.listener.managementportal.TokenManagerListener</listener-class>
     </listener>
 
 </web-app>
