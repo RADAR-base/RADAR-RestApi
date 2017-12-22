@@ -47,8 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *  Management Portal web-app. Function set to access subject and source information from MP.
- *  A subject is a person enrolled for in a study. A source is a device linked to the subject.
+ * Management Portal web-app. Function set to access subject and source information from MP. A
+ * subject is a person enrolled for in a study. A source is a device linked to the subject.
  */
 @Path("/mp")
 public class ManagementPortalEndPoint {
@@ -65,6 +65,7 @@ public class ManagementPortalEndPoint {
     //--------------------------------------------------------------------------------------------//
     //                                        SUBJECTS                                            //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns all available subject.
      */
@@ -75,8 +76,9 @@ public class ManagementPortalEndPoint {
             description = "Each subject can have multiple sourceID associated with him")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body"
-            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description =
+            "No value for the given parameters, in the body"
+                    + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
@@ -112,8 +114,9 @@ public class ManagementPortalEndPoint {
             description = "Each subject can have multiple sourceID associated with him")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body"
-            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description =
+            "No value for the given parameters, in the body"
+                    + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
@@ -152,10 +155,12 @@ public class ManagementPortalEndPoint {
             description = "Source infomation not present right now")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description = "Return the subject.avsc object associated with the "
-            + "given subject identifier")
+    @ApiResponse(responseCode = "204", description =
+            "No value for the given parameters, in the body"
+                    + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "200", description =
+            "Return the subject.avsc object associated with the "
+                    + "given subject identifier")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSubjectJson(
@@ -181,7 +186,6 @@ public class ManagementPortalEndPoint {
         }
     }
 
-
     //--------------------------------------------------------------------------------------------//
     //                                       PROJECTS                                             //
     //--------------------------------------------------------------------------------------------//
@@ -196,8 +200,9 @@ public class ManagementPortalEndPoint {
             description = "Each project can have multiple deviceID associated with it")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body"
-            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description =
+            "No value for the given parameters, in the body"
+                    + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
@@ -233,10 +238,12 @@ public class ManagementPortalEndPoint {
             description = "Each project can have multiple deviceID associated with it")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description = "Return the subject.avsc object associated with the "
-            + "given subject identifier")
+    @ApiResponse(responseCode = "204", description =
+            "No value for the given parameters, in the body"
+                    + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "200", description =
+            "Return the subject.avsc object associated with the "
+                    + "given subject identifier")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getProjectJson(

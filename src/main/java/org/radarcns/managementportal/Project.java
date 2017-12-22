@@ -1,5 +1,3 @@
-package org.radarcns.managementportal;
-
 /*
  * Copyright 2017 King's College London
  *
@@ -16,6 +14,8 @@ package org.radarcns.managementportal;
  * limitations under the License.
  */
 
+package org.radarcns.managementportal;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import okhttp3.Response;
 
 /**
  * Java class defining a RADAR Management Portal Project.

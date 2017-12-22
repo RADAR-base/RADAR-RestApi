@@ -65,7 +65,7 @@ public class AndroidAppDataAccessObject {
      * @throws ConnectException if MongoDb is not available
      */
     public Application getStatus(String subject, String source, ServletContext context)
-        throws ConnectException {
+            throws ConnectException {
         return getStatus(subject, source, MongoHelper.getClient(context));
     }
 

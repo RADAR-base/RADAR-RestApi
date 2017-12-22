@@ -57,12 +57,15 @@ public class AppStatusEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppStatusEndPoint.class);
 
-    @Context private ServletContext context;
-    @Context private HttpServletRequest request;
+    @Context
+    private ServletContext context;
+    @Context
+    private HttpServletRequest request;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns the status app of the given subject.
      */
@@ -72,11 +75,13 @@ public class AppStatusEndPoint {
     @Operation(summary = "Return an Applications status",
             description = "The Android application periodically updates its current status")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-        + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body"
-        + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description = "Return a application.avsc object containing last"
-        + "received status")
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description =
+            "No value for the given parameters, in the body"
+                    + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "200", description =
+            "Return a application.avsc object containing last"
+                    + "received status")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedAppStatusJson(
@@ -88,7 +93,7 @@ public class AppStatusEndPoint {
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getLastReceivedAppStatusWorker(subjectId, sourceId));
+                    getLastReceivedAppStatusWorker(subjectId, sourceId));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -98,7 +103,8 @@ public class AppStatusEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact the service "
+                    + "administrator.");
         }
     }
 
@@ -112,8 +118,9 @@ public class AppStatusEndPoint {
             description = "The Android application periodically updates its current status")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "204", description = "No value for the given parameters")
-    @ApiResponse(responseCode = "200", description = "Return a application.avsc object containing last"
-        + "received status")
+    @ApiResponse(responseCode = "200", description =
+            "Return a application.avsc object containing last"
+                    + "received status")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedAppStatusAvro(
@@ -125,7 +132,7 @@ public class AppStatusEndPoint {
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getLastReceivedAppStatusWorker(subjectId, sourceId));
+                    getLastReceivedAppStatusWorker(subjectId, sourceId));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -149,7 +156,7 @@ public class AppStatusEndPoint {
 
         if (SubjectDataAccessObject.exist(subject, context)) {
             application = AndroidAppDataAccessObject.getInstance().getStatus(
-                subject, source, context);
+                    subject, source, context);
         }
 
         return application;

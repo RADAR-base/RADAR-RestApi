@@ -17,7 +17,7 @@
 package org.radarcns.managementportal;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static org.radarcns.config.managementportal.config.Properties.validateMpUrl;
+import static org.radarcns.config.managementportal.Properties.validateMpUrl;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,9 +35,8 @@ import javax.servlet.ServletContext;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.radarcns.config.managementportal.config.Properties;
+import org.radarcns.config.managementportal.Properties;
 import org.radarcns.listener.managementportal.listener.HttpClientListener;
-import org.radarcns.listener.managementportal.listener.TokenManagerListener;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.producer.rest.RestException;
 import org.slf4j.Logger;
@@ -53,7 +51,6 @@ public class MpClient {
     private final RestClient client;
 
     private ArrayList<Subject> subjects;
-    private ServletContext context;
 
     /**
      * Client to interact with the RADAR Management Portal.
@@ -73,11 +70,7 @@ public class MpClient {
         }
 
         subjects = null;
-
-        this.context = context;
-
     }
-
 
     /**
      * Retrieves all {@link Subject} from the already computed list of subjects

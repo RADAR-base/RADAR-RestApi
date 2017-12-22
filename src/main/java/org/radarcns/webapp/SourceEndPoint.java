@@ -76,14 +76,16 @@ public class SourceEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + STATE + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Return a SourceDefinition values",
-            description = "Using the source sensors values arrived within last 60sec, it computes the"
-                + "sender status for the given subjectID and sourceID")
+            description = "Using the source sensors values arrived within last 60sec, it computes "
+                    + "the"
+                    + "sender status for the given subjectID and sourceID")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-        + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body"
-        + "there is a message.avsc object with more details")
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
+            + "body"
+            + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a source.avsc object containing last"
-        + "computed status")
+            + "computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastComputedSourceStatusJson(
@@ -95,7 +97,7 @@ public class SourceEndPoint {
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getLastComputedSourceStatus(subjectId, sourceId));
+                    getLastComputedSourceStatus(subjectId, sourceId));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -105,7 +107,8 @@ public class SourceEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact the service "
+                    + "administrator.");
         }
     }
 
@@ -116,12 +119,14 @@ public class SourceEndPoint {
     @Produces(AVRO_BINARY)
     @Path("/" + STATE + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Return a SourceDefinition values",
-            description = "Using the source sensors values arrived within last 60sec, it computes the"
-                + "sender status for the given subjectID and sourceID")
+            description = "Using the source sensors values arrived within last 60sec, it computes "
+                    + "the"
+                    + "sender status for the given subjectID and sourceID")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "204", description = "No value for the given parameters")
-    @ApiResponse(responseCode = "200", description = "Return a byte array serialising source.avsc object"
-        + "containing last computed status")
+    @ApiResponse(responseCode = "200", description = "Return a byte array serialising source.avsc "
+            + "object"
+            + "containing last computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastComputedSourceStatusAvro(
@@ -133,7 +138,7 @@ public class SourceEndPoint {
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getLastComputedSourceStatus(subjectId, sourceId));
+                    getLastComputedSourceStatus(subjectId, sourceId));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -175,13 +180,14 @@ public class SourceEndPoint {
     @Path("/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
     @Operation(summary = "Return a SourceDefinition specification",
             description = "Return the data specification of all on-board sensors for the given"
-                + "source type")
+                    + "source type")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-        + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body"
-        + "there is a message.avsc object with more details")
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
+            + "body"
+            + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a source_specification.avsc object"
-        + "containing last computed status")
+            + "containing last computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
@@ -199,7 +205,8 @@ public class SourceEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact the service "
+                    + "administrator.");
         }
     }
 
@@ -211,11 +218,11 @@ public class SourceEndPoint {
     @Path("/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
     @Operation(summary = "Return a SourceDefinition specification",
             description = "Return the data specification of all on-board sensors for the given"
-                + "source type")
+                    + "source type")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "204", description = "No value for the given parameters")
     @ApiResponse(responseCode = "200", description = "Return a source_specification.avsc object"
-        + "containing last computed status")
+            + "containing last computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
@@ -256,9 +263,10 @@ public class SourceEndPoint {
     @Operation(summary = "Return a User value",
             description = "Return all known sources associated with the give subjectID")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-        + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body"
-        + "there is a message.avsc object with more details")
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
+            + "body"
+            + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a subject.avsc object")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")

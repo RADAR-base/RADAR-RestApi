@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.radarcns.config.managementportal.config;
+package org.radarcns.config.managementportal;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Objects;

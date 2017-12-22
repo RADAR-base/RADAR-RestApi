@@ -41,8 +41,6 @@ public class SubjectDataAccessObject {
      *      results cache
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
-     *
-     * @see Subject
      */
     public static Cohort getAllSubjects(ServletContext context) throws ConnectException {
         return getAllSubjects(MongoHelper.getClient(context));
@@ -81,8 +79,6 @@ public class SubjectDataAccessObject {
      *      results cache
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
-     *
-     * @see {@link Subject}
      */
     public static Subject getSubject(String subject, ServletContext context)
             throws ConnectException {

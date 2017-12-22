@@ -66,12 +66,15 @@ public class SensorEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorEndPoint.class);
 
-    @Context private ServletContext context;
-    @Context private HttpServletRequest request;
+    @Context
+    private ServletContext context;
+    @Context
+    private HttpServletRequest request;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns the last seen data value if available.
      */
@@ -81,17 +84,19 @@ public class SensorEndPoint {
             + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
-                + "statistical "
-                + "results. This end-point returns the last computed result of type stat for the "
-                + "given subjectID, sourceID, and sensor. Data can be queried using different "
-                + "time-frame resolutions. The response is formatted in JSON.")
+                    + "statistical "
+                    + "results. This end-point returns the last computed result of type stat for "
+                    + "the "
+                    + "given subjectID, sourceID, and sensor. Data can be queried using different "
+                    + "time-frame resolutions. The response is formatted in JSON.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body "
-        + "there is a message.avsc object with more details.")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body "
-        + "there is a message.avsc object with more details.")
-    @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing last "
-        + "computed sample for the given inputs formatted either Acceleration.avsc or "
-        + "DoubleValue.avsc")
+            + "there is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
+            + "body there is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "200", description =
+            "Returns a dataset.avsc object containing last "
+                    + "computed sample for the given inputs formatted either Acceleration.avsc or "
+                    + "DoubleValue.avsc")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedSampleJson(
@@ -116,7 +121,8 @@ public class SensorEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
-                + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact the service "
+                    + "administrator.");
         }
     }
 
@@ -128,10 +134,13 @@ public class SensorEndPoint {
     @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL
             + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
-            description = "Each collected sample is aggregated to provide near real-time statistical "
-                + "results. This end-point returns the last computed result of type stat for the "
-                + "given subjectID, sourceID, and sensor. Data can be queried using different "
-                + "time-frame resolutions. The response is formatted in Apache AVRO.")
+            description =
+                    "Each collected sample is aggregated to provide near real-time statistical "
+                            + "results. This end-point returns the last computed result of type "
+                            + "stat for the "
+                            + "given subjectID, sourceID, and sensor. Data can be queried using "
+                            + "different "
+                            + "time-frame resolutions. The response is formatted in Apache AVRO.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "204", description = "No value for the given parameters.")
     @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a "
@@ -151,7 +160,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
+                    getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -175,8 +184,8 @@ public class SensorEndPoint {
 
         if (SubjectDataAccessObject.exist(subject, context)) {
             dataset = SensorDataAccessObject.getInstance()
-                .getLastReceivedSample(subject, source,
-                    stat, interval, sensor, context);
+                    .getLastReceivedSample(subject, source,
+                            stat, interval, sensor, context);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subject, source);
@@ -189,6 +198,7 @@ public class SensorEndPoint {
     //--------------------------------------------------------------------------------------------//
     //                                   WHOLE-DATA FUNCTIONS                                     //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns all available samples for the given data.
      */
@@ -199,16 +209,17 @@ public class SensorEndPoint {
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical "
-                + "results. This end-point returns all available results of type stat for the "
-                + "given subjectID, sourceID, and sensor. Data can be queried using different "
-                + "time-frame resolutions. The response is formatted in JSON.")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body there "
-        + "is a message.avsc object with more details.")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body "
-        + "there is a message.avsc object with more details.")
+                    + "results. This end-point returns all available results of type stat for the "
+                    + "given subjectID, sourceID, and sensor. Data can be queried using different "
+                    + "time-frame resolutions. The response is formatted in JSON.")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body "
+            + "there is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "204", description =
+            "No value for the given parameters, in the body "
+                    + "there is a message.avsc object with more details.")
     @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing all "
-        + "available samples for the given inputs formatted either Acceleration.avsc or "
-        + "DoubleValue.avsc")
+            + "available samples for the given inputs formatted either Acceleration.avsc or "
+            + "DoubleValue.avsc")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesJson(
@@ -223,7 +234,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
+                    getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -233,7 +244,8 @@ public class SensorEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
-                + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact the service "
+                    + "administrator.");
         }
     }
 
@@ -247,14 +259,14 @@ public class SensorEndPoint {
     @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical "
-                + "results. This end-point returns all available results of type stat for the "
-                + "given subjectID, sourceID, and sensor. Data can be queried using different "
-                + "time-frame resolutions. The response is formatted in Apache AVRO.")
+                    + "results. This end-point returns all available results of type stat for the "
+                    + "given subjectID, sourceID, and sensor. Data can be queried using different "
+                    + "time-frame resolutions. The response is formatted in Apache AVRO.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing.")
     @ApiResponse(responseCode = "204", description = "No value for the given parameters.")
-    @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a dataset.avsc "
-        + "object containing all available samples for the given inputs formatted either "
-        + "Acceleration.avsc or DoubleValue.avsc")
+    @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a "
+            + "dataset.avsc object containing all available samples for the given inputs formatted "
+            + "either Acceleration.avsc or DoubleValue.avsc")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesAvro(
@@ -269,7 +281,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
+                    getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -289,11 +301,11 @@ public class SensorEndPoint {
             TimeWindow interval, String sensor) throws ConnectException {
         Param.isValidInput(subject, source);
 
-        Dataset dataset = new Dataset(null, new LinkedList<Item>());
+        Dataset dataset = new Dataset(null, new LinkedList<>());
 
         if (SubjectDataAccessObject.exist(subject, context)) {
             dataset = SensorDataAccessObject.getInstance().getSamples(subject,
-                source, stat, interval, sensor, context);
+                    source, stat, interval, sensor, context);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subject, source);
@@ -306,6 +318,7 @@ public class SensorEndPoint {
     //--------------------------------------------------------------------------------------------//
     //                                 WINDOWED-DATA FUNCTIONS                                    //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns all data value inside the time-window [start-end].
      */
@@ -316,17 +329,19 @@ public class SensorEndPoint {
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical "
-                + "results. This end-point returns all available results of type stat for the "
-                + "given subjectID, sourceID, and sensor belonging to the time window "
-                + "[start - end]. Data can be queried using different time-frame resolutions. "
-                + "The response is formatted in JSON.")
+                    + "results. This end-point returns all available results of type stat for the "
+                    + "given subjectID, sourceID, and sensor belonging to the time window "
+                    + "[start - end]. Data can be queried using different time-frame resolutions. "
+                    + "The response is formatted in JSON.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body "
-        + "there is a message.avsc object with more details.")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the body "
-        + "there is a message.avsc object with more details.")
-    @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing samples "
-        + "belonging to the time window [start - end] for the given inputs formatted "
-        + "either Acceleration.avsc or DoubleValue.avsc.")
+            + "there is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
+            + "body "
+            + "there is a message.avsc object with more details.")
+    @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing "
+            + "samples "
+            + "belonging to the time window [start - end] for the given inputs formatted "
+            + "either Acceleration.avsc or DoubleValue.avsc.")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesWithinWindowJson(
@@ -343,8 +358,8 @@ public class SensorEndPoint {
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getSamplesWithinWindowWorker(subjectId, sourceId, stat,
-                        interval, sensor, start, end));
+                    getSamplesWithinWindowWorker(subjectId, sourceId, stat,
+                            interval, sensor, start, end));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -354,7 +369,8 @@ public class SensorEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
-                + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact the service "
+                    + "administrator.");
         }
     }
 
@@ -366,16 +382,19 @@ public class SensorEndPoint {
     @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
-            description = "Each collected sample is aggregated to provide near real-time statistical "
-                + "results. This end-point returns all available results of type stat for the "
-                + "given subjectID, sourceID, and sensor belonging to the time window "
-                + "[start - end]. Data can be queried using different time-frame resolutions. "
-                + "The response is formatted in Apache AVRO.")
+            description = "Each collected sample is aggregated to provide near real-time "
+                    + "statistical "
+                    + "results. This end-point returns all available results of type stat for the "
+                    + "given subjectID, sourceID, and sensor belonging to the time window "
+                    + "[start - end]. Data can be queried using different time-frame resolutions. "
+                    + "The response is formatted in Apache AVRO.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "204", description = "No value for the given parameters")
-    @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a dataset.avsc "
-        + "object containing samples belonging to the time window [start - end] for the "
-        + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")
+    @ApiResponse(responseCode = "200", description =
+            "Returns a byte array serialising a dataset.avsc "
+                    + "object containing samples belonging to the time window [start - end] for "
+                    + "the "
+                    + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesWithinWindowAvro(
@@ -392,8 +411,8 @@ public class SensorEndPoint {
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getSamplesWithinWindowWorker(subjectId, sourceId, stat,
-                        interval, sensor, start, end));
+                    getSamplesWithinWindowWorker(subjectId, sourceId, stat,
+                            interval, sensor, start, end));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -418,7 +437,7 @@ public class SensorEndPoint {
 
         if (SubjectDataAccessObject.exist(subject, context)) {
             dataset = SensorDataAccessObject.getInstance().getSamples(
-                subject, source, stat, interval, start, end, sensor, context);
+                    subject, source, stat, interval, start, end, sensor, context);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subject, source);

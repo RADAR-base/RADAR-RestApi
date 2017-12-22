@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.config.ExposedConfigTest.CONFIG_JSON;
 import static org.radarcns.config.ExposedConfigTest.OPENAPI_JSON;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
 import static org.radarcns.webapp.util.Parameter.STAT;
@@ -54,6 +55,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
+import org.radarcns.config.PipelineConfig;
 import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.util.ApiClient;
@@ -66,7 +68,6 @@ import org.radarcns.mock.data.CsvGenerator;
 import org.radarcns.mock.data.MockRecordValidator;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mock.model.MockAggregator;
-import org.radarcns.config.PipelineConfig;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.restapi.data.Acceleration;
 import org.radarcns.restapi.data.DoubleSample;
@@ -324,7 +325,7 @@ public class EndToEndTest {
 
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory.getDataset(
-                    expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, org.radarcns.unit.config.TestCatalog.EMPATICA,
+                    expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, EMPATICA,
                     getSensorType(config), stat, TIME_FRAME));
         }
 

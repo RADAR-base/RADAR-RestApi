@@ -65,7 +65,7 @@ public class SensorDataAccessObject {
         LOGGER.info("SensorDataAccessObject successfully loaded.");
     }
 
-    /**
+    /*
      * Static initializer.
      */
     static {
@@ -239,9 +239,6 @@ public class SensorDataAccessObject {
      * @param client MongoDb client
      * @return a {@code Set<Source>} containing all {@link Source} used by the given {@code subject}
      * @throws ConnectException if MongoDB is not available
-     *
-     * @see {@link Subject}
-     * @see {@link Source}
      */
     public Set<Source> getAllSources(String subject, MongoClient client)
             throws ConnectException {

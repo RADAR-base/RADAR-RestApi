@@ -137,7 +137,7 @@ public class ManagementPortalWireMock extends ExternalResource {
                 + "\"sub\":\"radar_restapi\","
                 + "\"sources\":[],"
                 + "\"iss\":\"ManagementPortal\","
-                + "\"iat\":"+ (Instant.now().getEpochSecond() - 30L) + ","
+                + "\"iat\":" + (Instant.now().getEpochSecond() - 30L) + ","
                 + "\"jti\":\"c9b29b53-2bf8-4a1b-aed5-1732e0dbce57\"}";
     }
 

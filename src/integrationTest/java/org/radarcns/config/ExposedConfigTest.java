@@ -59,7 +59,8 @@ public class ExposedConfigTest {
     @Test
     public void checkSwaggerDoc()
             throws IOException, GeneralSecurityException {
-        String response = apiClient.requestString(BASE_PATH + '/' + OPENAPI_JSON, APPLICATION_JSON, Status.OK);
+        String response = apiClient.requestString(BASE_PATH + '/' + OPENAPI_JSON,
+                APPLICATION_JSON, Status.OK);
         JsonNode node = new ObjectMapper().readTree(response);
         assertTrue(node.has("servers"));
         String serverUrl = node.get("servers").elements().next().get("url").asText();

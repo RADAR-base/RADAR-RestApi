@@ -45,7 +45,7 @@ public class SourceDataAccessObject {
      * @throws ConnectException if MongoDb instance is not available
      */
     public static String getSourceType(String source, ServletContext context)
-        throws ConnectException {
+            throws ConnectException {
         return getSourceType(source, MongoHelper.getClient(context));
     }
 
@@ -87,7 +87,7 @@ public class SourceDataAccessObject {
      * @throws ConnectException if MongoDB is not available
      */
     public static Subject findAllSourcesByUser(String subject, ServletContext context)
-        throws ConnectException {
+            throws ConnectException {
         return findAllSourcesByUser(subject, MongoHelper.getClient(context));
     }
 
