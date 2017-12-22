@@ -57,17 +57,14 @@ dependencies {
 
   runtimeOnly group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
   runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
-
-  testCompile group: 'junit', name: 'junit', version: junitVersion
-  testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: wireMockVersion
 }
 
 war {
   archiveName 'radar.war'
 }
 
-apply from: 'gradle/docker.gradle'
-apply from: 'gradle/test.gradle'
-apply from: 'gradle/codacy.gradle'
-apply from: 'gradle/style.gradle'
-apply from: 'gradle/utilities.gradle'
+if (!hasProperty('profile')) {
+  ext.profile = 'dev'
+}
+
+apply from: "gradle/profile.${profile}.gradle"

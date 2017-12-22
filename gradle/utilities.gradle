@@ -14,13 +14,6 @@ task downloadDependencies {
     }
 }
 
-task downloadWarDependencies {
-//    configurations.runtime.files
-    description "Pre-downloads war dependencies"
-    configurations.compileClasspath.files
-    configurations.runtimeClasspath.files
-}
-
 idea {
     module {
         downloadSources = true

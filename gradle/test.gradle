@@ -13,8 +13,8 @@ configurations {
 sourceSets {
     integrationTest {
         java {
-            compileClasspath += main.output + test.output
-            runtimeClasspath += main.output + test.output
+            compileClasspath += main.output + test.output + test.compileClasspath
+            runtimeClasspath += main.output + test.output + test.compileClasspath
             srcDir file('src/integrationTest/java')
         }
         resources {
@@ -23,8 +23,8 @@ sourceSets {
     }
     endToEndTest {
         java {
-            compileClasspath += main.output + test.output + integrationTest.output
-            runtimeClasspath += main.output + test.output + integrationTest.output
+            compileClasspath += main.output + test.output + integrationTest.output + integrationTest.compileClasspath
+            runtimeClasspath += main.output + test.output + integrationTest.output + integrationTest.compileClasspath
             srcDir file('src/endToEndTest/java')
         }
         resources {
@@ -34,7 +34,10 @@ sourceSets {
 }
 
 dependencies {
-    integrationTestCompile group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommons
+    testCompile group: 'junit', name: 'junit', version: junitVersion
+
+    integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: wireMockVersion
+    integrationTestImplementation group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommons
 }
 
 task copyFrontendConfigIntegrationTest(type: Copy) {
@@ -126,4 +129,4 @@ task endToEndTest(type: Test, dependsOn: ['copyFrontendConfigEndToEndTest', 'ins
     testLogging.showStandardStreams = true
 }
 
-endToEndTest.finalizedBy 'stopRadarStack'
+//endToEndTest.finalizedBy 'stopRadarStack'

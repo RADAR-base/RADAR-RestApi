@@ -15,13 +15,13 @@ FROM openjdk:8-alpine as builder
 RUN mkdir /code
 WORKDIR /code
 
-ENV GRADLE_OPTS -Dorg.gradle.daemon=false
+ENV GRADLE_OPTS -Dorg.gradle.daemon=false -Dorg.gradle.project.profile=prod
 
 COPY ./gradle/wrapper /code/gradle/wrapper
 COPY ./gradlew /code/
 RUN ./gradlew --version
 
-COPY ./gradle/*.gradle /code/gradle/
+COPY ./gradle/prod.gradle /code/gradle/
 COPY ./build.gradle ./gradle.properties ./settings.gradle /code/
 
 RUN ./gradlew downloadWarDependencies

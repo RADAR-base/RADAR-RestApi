@@ -84,7 +84,6 @@ ext.radarDockerCompose = 'docker-compose.yml'
 ext.radarDockerComposeOriginal = ".${radarDockerCompose}.orig"
 ext.radarVolumes = file("${radarStackPath}/volumes")
 
-
 task radarEnv(type: Copy) {
   from "${radarStackPath}/etc/env.template"
   into "${radarStackPath}"
@@ -95,12 +94,16 @@ task radarEnv(type: Copy) {
             .replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
             .replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
             .replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+            .replace('POSTGRES_USER=<postgresdb-user>', 'POSTGRES_USER=mp')
+            .replace('POSTGRES_PASSWORD=<postgresdb-pwd>', 'POSTGRES_PASSWORD=mpstorages')
+            .replace('FROM_EMAIL=<from-email>', 'FROM_EMAIL=me@example.com')
   }
 }
 
 task radarConfigJson(type: Copy) {
-  from files("${radarStackPath}/etc/radar.yml.template", "${radarStackPath}/etc/smtp.env.template")
+  from "${radarStackPath}/etc"
   into "${radarStackPath}/etc"
+  include { f -> f.name.endsWith '.template' }
   rename '(.+).template', '$1'
 }
 
@@ -127,8 +130,20 @@ task radarDockerComposeOrig(type: Copy) {
   }
 }
 
+task mpRadarEnv(type: Copy) {
+  from "${radarStackPath}/etc/managementportal/config"
+  into "${radarStackPath}/etc/managementportal/config"
+  rename '(.+).template', '$1'
+}
+
+task radarRedcapInfo(type: Copy) {
+  from "${radarStackPath}/etc/redcap-integration/radar.yml.template"
+  into "${radarStackPath}/etc/redcap-integration"
+  rename '(.+).template', '$1'
+}
+
 // Sets configuration files for running the entire platform
-task setRadarEnvironmentForDocker(dependsOn: [buildDocker, radarEnv, radarConfigJson, radarRestConfigJson, radarMpInfo, radarDockerComposeOrig]) {
+task setRadarEnvironmentForDocker(dependsOn: [buildDocker, radarEnv, radarConfigJson, radarRestConfigJson, radarMpInfo, radarRedcapInfo, radarDockerComposeOrig, mpRadarEnv]) {
   doLast {
     def volumes = file("${radarStackPath}/volumes")
     volumes.mkdir()
@@ -157,6 +172,7 @@ task reducedStack(dependsOn: setRadarEnvironmentForDocker) {
     def findContainer = false
     def findDependences = false
     def active = false
+    def containerName = null
 
     LinkedList rowList = new LinkedList()
 
@@ -168,7 +184,7 @@ task reducedStack(dependsOn: setRadarEnvironmentForDocker) {
       if (active) {
         if (row.contains('image:')) {
           findContainer = false
-          def containerName = rowList.last().replace('#', '')
+          containerName = rowList.last().replace('#', '')
           if (containerName.contains('build:')) {
             index--
             containerName = rowList.get(index).replace('#', '')
@@ -211,6 +227,13 @@ task reducedStack(dependsOn: setRadarEnvironmentForDocker) {
 
       comment ? rowList.addLast("#$line") : rowList.addLast(line)
 
+      if (containerName == 'webserver:' && row == 'networks:') {
+        rowList.add('      - kafka')
+      }
+      if (containerName == 'webserver:' && row == 'depends_on:') {
+        rowList.add('      - rest-proxy-1')
+      }
+
       if (row == 'services:') {
         active = true
       }
@@ -224,36 +247,31 @@ task reducedStack(dependsOn: setRadarEnvironmentForDocker) {
 
 task optimiseNginx() {
   doLast {
-    LinkedList rowList = new LinkedList()
-    def nginxConfig = new File("${radarStackPath}/etc/nginx.conf.template")
+    def nginxConfig = file("${radarStackPath}/etc/webserver/nginx.conf.template")
 
+    PrintWriter writer = new PrintWriter(new File("${radarStackPath}/etc/webserver/nginx.conf"))
+
+    def lastBlock = []
     def comment = false
-    def findBlock = false
     nginxConfig.eachLine { line ->
       if (line.contains('{')) {
-        findBlock = true
+        lastBlock.each { writer.println(it) }
+        lastBlock.clear()
+        lastBlock.add(line)
       } else if (line.contains('}')) {
-        findBlock = false
+        lastBlock.add(line)
+        lastBlock.each { writer.println(comment ? "# ${it}" : it) }
+        lastBlock.clear()
+        comment = false
+      } else if (line.contains('http://gateway:8080/radar-gateway/')) {
+        lastBlock.add(line.replace('gateway:8080/radar-gateway', 'rest-proxy-1:8082'))
+      } else {
+        lastBlock.add(line)
+        comment |= line.contains('proxy_pass') && !(containers.any { line.contains(it) })
       }
-
-      if (findBlock && line.contains('proxy_pass')) {
-        comment = true
-        containers.each {container ->
-          if (line.contains(container)) {
-            comment = false
-            rowList.addLast(rowList.removeLast().replace('#', ''))
-          }
-        }
-        if (comment) {
-          rowList.addLast("# ${rowList.removeLast()}")
-        }
-      }
-
-      comment ? rowList.addLast("# $line") : rowList.addLast(line)
     }
+    lastBlock.each { writer.println(comment ? "# ${it}" : it) }
 
-    PrintWriter writer = new PrintWriter(new File("${radarStackPath}/etc/nginx.conf"))
-    rowList.each { row -> writer.println(row) }
     writer.close()
   }
 }
