@@ -41,7 +41,7 @@ import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;
 
 /**
- * Produces {@link Dataset} and {@link org.bson.Document} for {@link ExpectedValue}
+ * Produces {@link Dataset} and {@link org.bson.Document} for {@link ExpectedValue}.
  */
 public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
@@ -57,7 +57,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param timeFrame time interval between two consecutive samples
      * @return {@code Dataset} resulted by the simulation
      * @see Dataset
-     **/
+     */
     public Dataset getDataset(ExpectedValue expectedValue, String subjectId, String sourceId,
             String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeFrame) throws InstantiationException, IllegalAccessException {
@@ -79,7 +79,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param statistic function that has to be simulated
      * @param timeFrame time interval between two consecutive samples
      * @return {@link Header} for a {@link Dataset}
-     **/
+     */
     public Header getHeader(ExpectedValue expectedValue, String subjectId, String sourceId,
             String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeFrame) {
@@ -89,6 +89,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
     /**
+     * Get the effective interval for a value.
      * @return {@code EffectiveTimeFrame} for the simulated inteval.
      * @see EffectiveTimeFrame
      */
@@ -104,6 +105,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
 
     /**
+     * Get the effective time frame for a single time stamp.
      * @param value timestamp.
      * @return {@code EffectiveTimeFrame} starting on value and ending {@link
      * ExpectedValue#DURATION} milliseconds after.
@@ -146,7 +148,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
     /**
-     * It generates the {@code List<Item>} for the resulting {@code Dataset}
+     * It generates the {@code List<Item>} for the resulting {@code Dataset}.
      *
      * @param keys {@code Collection} of timewindow initial time
      * @param statistic function that has to be simulated
@@ -185,6 +187,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
     /**
+     * Quartile object from a list of three doubles.
      * @param list of {@code Double} values representing a quartile.
      * @return the value that has to be stored within a {@code Dataset} {@code Item}
      * @see Quartiles
@@ -194,7 +197,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
     /**
-     * It generates the {@code List<Item>} for the resulting {@code Dataset}
+     * It generates the {@code List<Item>} for the resulting {@code Dataset}.
      *
      * @param keys {@code Collection} of timewindow initial time
      * @param statistic function that has to be simulated
