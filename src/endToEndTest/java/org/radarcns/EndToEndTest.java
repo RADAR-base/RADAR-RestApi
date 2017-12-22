@@ -493,6 +493,7 @@ public class EndToEndTest {
      *
      * @throws MalformedURLException if the used URL is malformed
      */
+    @Test
     public void checkSwaggerConfig() throws IOException {
         String response = apiClient.requestString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
         JsonNode node = new ObjectMapper().readTree(response);
