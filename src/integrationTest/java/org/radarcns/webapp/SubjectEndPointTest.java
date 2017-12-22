@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response.Status;
+import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
@@ -69,7 +70,10 @@ public class SubjectEndPointTest {
 
     @Test
     public void getAllSubjectsTest204() throws IOException {
-        apiClient.request(GET_ALL_SUBJECTS + "/" + STUDY, AVRO_BINARY, Status.NO_CONTENT);
+        try (Response response = apiClient.request(GET_ALL_SUBJECTS + "/" + STUDY, AVRO_BINARY,
+                Status.NO_CONTENT)) {
+            assertNotNull(response);
+        }
     }
 
     @Test
@@ -107,8 +111,10 @@ public class SubjectEndPointTest {
 
     @Test
     public void getSubjectTest204() throws IOException {
-        assertNotNull(apiClient.request(
-                GET_SUBJECT + '/' + SUBJECT, AVRO_BINARY, Status.NO_CONTENT));
+        try (Response response = apiClient.request(
+                GET_SUBJECT + '/' + SUBJECT, AVRO_BINARY, Status.NO_CONTENT)) {
+            assertNotNull(response);
+        }
     }
 
     @Test

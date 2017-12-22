@@ -17,6 +17,7 @@
 package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
@@ -29,6 +30,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
+import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
@@ -59,7 +61,9 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest204() throws IOException {
-        apiClient.request(SOURCE_PATH, AVRO_BINARY, Status.NO_CONTENT);
+        try (Response response = apiClient.request(SOURCE_PATH, AVRO_BINARY, Status.NO_CONTENT)) {
+            assertNotNull(response);
+        }
     }
 
     @Test

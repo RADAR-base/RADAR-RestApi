@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import javax.ws.rs.core.Response.Status;
+import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
@@ -77,7 +78,10 @@ public class SourceEndPointTest {
 
     @Test
     public void getStatusTest204() throws IOException {
-        apiClient.request(STATE + '/' + SUBJECT + '/' + SOURCE, AVRO_BINARY, Status.NO_CONTENT);
+        try (Response response = apiClient.request(STATE + '/' + SUBJECT + '/' + SOURCE,
+                AVRO_BINARY, Status.NO_CONTENT)) {
+            assertNotNull(response);
+        }
     }
 
     @Test
@@ -124,8 +128,10 @@ public class SourceEndPointTest {
 
     @Test
     public void getSpecificationTest500() throws IOException {
-        assertNotNull(apiClient.request(SPECIFICATION + '/' + BIOVOTION, AVRO_BINARY,
-                Status.INTERNAL_SERVER_ERROR));
+        try (Response response = apiClient.request(SPECIFICATION + '/' + BIOVOTION, AVRO_BINARY,
+                Status.INTERNAL_SERVER_ERROR)) {
+            assertNotNull(response);
+        }
     }
 
     @Test
@@ -191,8 +197,10 @@ public class SourceEndPointTest {
 
     @Test
     public void getAllSourcesTest204() throws IOException {
-        assertNotNull(apiClient.request(
-                GET_ALL_SOURCES + "/" + SUBJECT, AVRO_BINARY, Status.NO_CONTENT));
+        try (Response response = apiClient.request(
+                GET_ALL_SOURCES + "/" + SUBJECT, AVRO_BINARY, Status.NO_CONTENT)) {
+            assertNotNull(response);
+        }
     }
 
     @After
