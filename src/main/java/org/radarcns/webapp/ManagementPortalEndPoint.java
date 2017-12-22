@@ -205,7 +205,7 @@ public class ManagementPortalEndPoint {
         try {
             checkPermission(getJWT(request), PROJECT_READ);
             MpClient mpClient = new MpClient(context);
-            Response response = MpClient.getJsonResponse(mpClient.getAllProjects(context));
+            Response response = MpClient.getJsonResponse(mpClient.getAllProjects());
             LOGGER.info("Response : " + response.getEntity());
             return response;
         } catch (AccessDeniedException exc) {
@@ -245,7 +245,7 @@ public class ManagementPortalEndPoint {
         try {
             checkPermissionOnProject(getJWT(request), PROJECT_READ, projectName);
             MpClient mpClient = new MpClient(context);
-            Project project = mpClient.getProject(projectName, context);
+            Project project = mpClient.getProject(projectName);
             Response response = MpClient.getJsonResponse(project);
             LOGGER.info("Response : " + response.toString());
             return response;

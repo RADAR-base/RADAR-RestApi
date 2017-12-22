@@ -16,6 +16,8 @@
 
 package org.radarcns.managementportal;
 
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static org.radarcns.config.managementportal.config.Properties.validateMpUrl;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,8 +28,10 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -35,6 +39,8 @@ import okhttp3.Response;
 import org.radarcns.config.managementportal.config.Properties;
 import org.radarcns.listener.managementportal.listener.HttpClientListener;
 import org.radarcns.listener.managementportal.listener.TokenManagerListener;
+import org.radarcns.producer.rest.RestClient;
+import org.radarcns.producer.rest.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,13 +49,14 @@ import org.slf4j.LoggerFactory;
  */
 public class MpClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MpClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(MpClient.class);
+    private final RestClient client;
 
     private ArrayList<Subject> subjects;
     private ServletContext context;
-    private boolean isSubjectsInitialised = false;
 
     /**
+     * Client to interact with the RADAR Management Portal.
      * @param context {@link ServletContext} useful to retrieve shared {@link OkHttpClient} and
      *      {@code access token}.
      * @throws IllegalStateException in case the object cannot be created
@@ -59,7 +66,13 @@ public class MpClient {
     public MpClient(ServletContext context) {
         Objects.requireNonNull(context);
 
-        // TODO Use try catch and initialize all
+        try {
+            this.client = HttpClientListener.getRestClient(context, validateMpUrl().toString());
+        } catch (MalformedURLException ex) {
+            throw new AssertionError("ManagementPortal URL is invalid");
+        }
+
+        subjects = null;
 
         this.context = context;
 
@@ -73,109 +86,83 @@ public class MpClient {
      * @return {@link ArrayList} of {@link Subject} if a subject is found
      */
     public ArrayList<Subject> getSubjects() {
-        if ( isSubjectsInitialised ) {
-            return subjects;
-        } else {
-            try {
-                return getAllSubjects(context);
-            } catch (MalformedURLException | URISyntaxException exc) {
-                LOGGER.error(exc.getMessage());
-            } catch (IllegalStateException exc) {
-                LOGGER.error("Error : ", exc.fillInStackTrace());
-            }
+        if (subjects == null) {
+            subjects = getAllSubjects();
         }
-        LOGGER.warn("Subjects cannot be retrieved");
-        return null;
+        return subjects;
     }
 
     /**
      * Retrieves all {@link Subject} from Management Portal using {@link ServletContext} entity.
-     * @param context {@link ServletContext} that has been used to authenticate token
      * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
-     * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved
      */
-    private ArrayList<Subject> getAllSubjects(ServletContext context) throws
-            MalformedURLException, URISyntaxException {
-
-        Request request = getBuilder(Properties.getSubjectEndPoint(), context).get().build();
-
+    private ArrayList<Subject> getAllSubjects() {
         ArrayList<Subject> allSubjects;
 
-        try (Response response = HttpClientListener.getClient(context)
-                .newCall(request).execute()) {
-            if (response.isSuccessful()) {
+        try {
+            Request request = client.requestBuilder(Properties.getSubjectPath()).build();
+            String jsonData = client.requestString(request);
 
-                String jsonData = response.body().string();
-                allSubjects = Subject.getAllSubjectsFromJson(jsonData);
-                LOGGER.info("Retrieved Subjects from MP.");
-                isSubjectsInitialised = true;
-                return allSubjects;
-            }
-            LOGGER.info("Subjects is not present");
-            return null;
+            allSubjects = Subject.getAllSubjectsFromJson(jsonData);
+            logger.info("Retrieved Subjects from MP.");
+            return allSubjects;
+        } catch (MalformedURLException ex) {
+            logger.error("Invalid URL {}{}",
+                    client.getConfig(), Properties.getSubjectPath());
         } catch (IOException exc) {
-            throw new IllegalStateException("Subjects could not be retrieved", exc);
+            logger.error("Subjects could not be retrieved", exc);
         }
+        return null;
     }
 
     /**
      * Retrieves a {@link Subject} from the already computed list of subjects
      * using {@link ArrayList} of {@link Subject} entity.
-     * @param subjectId {@link String} that has to be searched.
+     * @param subjectLogin {@link String} that has to be searched.
      * @return {@link Subject} if a subject is found
      */
-    public Subject getSubject(String subjectId) {
-        if (isSubjectsInitialised) {
-            Iterator<Subject> elements = subjects.iterator();
-
-            while (elements.hasNext()) {
-                Subject currentSubject = elements.next();
-                if (subjectId.equals(currentSubject.getLogin())) {
+    public Subject getSubject(@Nonnull String subjectLogin) {
+        if (subjects != null) {
+            for (Subject currentSubject : subjects) {
+                if (subjectLogin.equals(currentSubject.getLogin())) {
                     return currentSubject;
                 }
             }
         } else {
             try {
-                return getSubject(subjectId, context);
-            } catch (MalformedURLException | URISyntaxException exc) {
-                LOGGER.error(exc.getMessage());
-            } catch (IllegalStateException exc) {
-                LOGGER.error("Error : ", exc.fillInStackTrace());
+                return retrieveSubject(subjectLogin);
+            } catch (IOException exc) {
+                logger.error("Error : ", exc.fillInStackTrace());
             }
         }
-        LOGGER.info("Subject is not present");
+        logger.info("Subject could not be retrieved.");
         return null;
     }
 
     /**
      * Retrieves a {@link Subject} from the Management Portal using {@link ServletContext} entity.
-     * @param context {@link ServletContext} that has been used to authenticate token
-     * @param subjectId {@link String} of the Subject that has to be retrieved
+     * @param subjectLogin {@link String} of the Subject that has to be retrieved
      * @return {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
-    private Subject getSubject(String subjectId, ServletContext context) throws
-            MalformedURLException, URISyntaxException {
-
-        if (isSubjectsInitialised) {
-            return getSubject(subjectId);
+    private Subject retrieveSubject(@Nonnull String subjectLogin) throws IOException {
+        if (subjects != null) {
+            return getSubject(subjectLogin);
         }
-        // TODO Use Login instead of Subject ID to get subjects from Management Portal.
 
-        Request request = getBuilder(getUrl(Properties.getSubjectEndPoint(),
-                subjectId), context).get().build();
+        try (Response response = client.request(Properties.getSubjectPath() + subjectLogin)) {
+            String jsonData = RestClient.responseBody(response);
 
-        try (Response response = HttpClientListener.getClient(context)
-                .newCall(request).execute()) {
             if (response.isSuccessful()) {
-                Subject subject = Subject.getObject(response.body().string());
-                LOGGER.info("Subject : " + subject.getJsonString());
+                Subject subject = Subject.getObject(jsonData);
+                logger.info("Subject : " + subject.getJsonString());
                 return subject;
+            } else if (response.code() == HTTP_NOT_FOUND) {
+                logger.info("Subject {} is not present", subjectLogin);
+                return null;
+            } else {
+                throw new RestException(response.code(), jsonData == null ? "" : jsonData);
             }
-            LOGGER.info("Subject is not present");
-            return null;
-        } catch (IOException exc) {
-            throw new IllegalStateException("Subject could not be retrieved", exc);
         }
     }
 
@@ -183,68 +170,54 @@ public class MpClient {
      * Retrieves all {@link Subject} from a study (or project) in the
      * Management Portal using {@link ServletContext} entity.
      * @param studyName {@link String} the study from which subjects to be retrieved
-     * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
+     * @return {@link List} of {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
-    public ArrayList<Subject> getAllSubjectsFromStudy(String studyName) throws
-            MalformedURLException, URISyntaxException {
+    public List<Subject> getAllSubjectsFromStudy(@Nonnull String studyName) throws
+            IOException {
 
-        LOGGER.info(studyName + context.getContextPath());
-        Request request = getBuilder(getUrl(Properties.getProjectEndPoint(),
-                studyName + "/" + SUBJECTS), context).get().build();
-
-        ArrayList<Subject> allSubjects;
-
-        try (Response response = HttpClientListener.getClient(context)
-                .newCall(request).execute()) {
-            if (response.isSuccessful()) {
-
-                String jsonData = response.body().string();
-                allSubjects = Subject.getAllSubjectsFromJson(jsonData);
-                LOGGER.info("Retrieved Subjects from MP from Project " + studyName);
-                return allSubjects;
-            }
-            LOGGER.info("Subjects is not present");
-            return null;
-        } catch (IOException exc) {
-            throw new IllegalStateException("Subjects could not be retrieved from Project "
-                    + studyName, exc);
+        if (subjects != null) {
+            return subjects.stream()
+                    .filter(s -> studyName.equals(s.getProject().getProjectName()))
+                    .collect(Collectors.toList());
         }
-    }
 
-    private URL getUrl(URL endPoint, String path) throws MalformedURLException {
-        URL newUrl = new URL(endPoint + path);
-        return newUrl;
-    }
+        try (Response response = client.request(
+                Properties.getProjectPath() + studyName + '/' + SUBJECTS)) {
 
-    private static Request.Builder getBuilder(URL url, ServletContext context) {
-        return new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Bearer ".concat(
-                        TokenManagerListener.getToken(context)));
+            String jsonData = RestClient.responseBody(response);
+            if (response.isSuccessful()) {
+                List<Subject> allSubjects = Subject.getAllSubjectsFromJson(jsonData);
+                logger.info("Retrieved Subjects from MP from Project " + studyName);
+                return allSubjects;
+            } else if (response.code() == HTTP_NOT_FOUND) {
+                logger.info("Subjects for study {} are not present", studyName);
+                return null;
+            } else {
+                throw new RestException(response.code(), jsonData == null ? "" : jsonData);
+            }
+
+        }
     }
 
     /**
      * Retrieves all {@link Project} from Management Portal using {@link ServletContext} entity.
-     * @param context {@link ServletContext} that has been used to authenticate token
      * @return {@link ArrayList} of {@link Project} retrieved from the Management Portal
      */
-    public ArrayList<Project> getAllProjects(ServletContext context) throws
+    public List<Project> getAllProjects() throws
             MalformedURLException, URISyntaxException {
-        Request request = getBuilder(Properties.getProjectEndPoint(), context).get().build();
-
-        ArrayList<Project> allProjects;
-
-        try (Response response = HttpClientListener.getClient(context)
-                .newCall(request).execute()) {
+        try (Response response = client.request(Properties.getProjectPath())) {
+            String jsonData = RestClient.responseBody(response);
             if (response.isSuccessful()) {
-                allProjects = Project.getAllObjects(response);
-                LOGGER.info("Retrieved Projects from MP.");
-                LOGGER.info(allProjects.toString());
+                List<Project> allProjects = Project.getAllObjects(jsonData);
+                logger.info("Retrieved Projects from MP");
                 return allProjects;
+            } else if (response.code() == HTTP_NOT_FOUND) {
+                logger.info("Projects are not present");
+                return null;
+            } else {
+                throw new RestException(response.code(), jsonData == null ? "" : jsonData);
             }
-            LOGGER.info("Projects not present");
-            return null;
         } catch (IOException exc) {
             throw new IllegalStateException("Projects could not be retrieved", exc);
         }
@@ -252,27 +225,23 @@ public class MpClient {
 
     /**
      * Retrieves a {@link Project} from the Management Portal using {@link ServletContext} entity.
-     * @param context {@link ServletContext} that has been used to authenticate token
      * @param projectName {@link String} of the Project that has to be retrieved
      * @return {@link Project} retrieved from the Management Portal
      */
-    public Project getProject(String projectName, ServletContext context) throws
-            MalformedURLException, URISyntaxException {
+    public Project getProject(String projectName) throws IOException {
 
-        Request request = getBuilder(getUrl(Properties.getProjectEndPoint(), projectName),
-                context).get().build();
-
-        try (Response response = HttpClientListener.getClient(context)
-                .newCall(request).execute()) {
+        try (Response response = client.request(Properties.getProjectPath() + projectName)) {
+            String jsonData = RestClient.responseBody(response);
             if (response.isSuccessful()) {
-                Project project = Project.getObject(response.body().string());
-                LOGGER.info("Project : " + project.toString());
+                Project project = Project.getObject(jsonData);
+                logger.info("Retrieved project {} from MP", projectName);
                 return project;
+            } else if (response.code() == HTTP_NOT_FOUND) {
+                logger.info("Project {} is not present", projectName);
+                return null;
+            } else {
+                throw new RestException(response.code(), jsonData == null ? "" : jsonData);
             }
-            LOGGER.info("Subject is not present");
-            return null;
-        } catch (IOException exc) {
-            throw new IllegalStateException("Subject could not be retrieved", exc);
         }
     }
 

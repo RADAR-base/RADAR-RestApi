@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.radarcns.integration.testcase.webapp;
+package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
 import static org.radarcns.unit.config.TestCatalog.EMPATICA;
@@ -123,7 +124,8 @@ public class SourceEndPointTest {
 
     @Test
     public void getSpecificationTest500() throws IOException {
-        apiClient.request(SPECIFICATION + '/' + BIOVOTION, AVRO_BINARY, Status.INTERNAL_SERVER_ERROR);
+        assertNotNull(apiClient.request(SPECIFICATION + '/' + BIOVOTION, AVRO_BINARY,
+                Status.INTERNAL_SERVER_ERROR));
     }
 
     @Test
@@ -189,7 +191,8 @@ public class SourceEndPointTest {
 
     @Test
     public void getAllSourcesTest204() throws IOException {
-        apiClient.request(GET_ALL_SOURCES + "/" + SUBJECT, AVRO_BINARY, Status.NO_CONTENT);
+        assertNotNull(apiClient.request(
+                GET_ALL_SOURCES + "/" + SUBJECT, AVRO_BINARY, Status.NO_CONTENT));
     }
 
     @After

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.integration.testcase.monitor;
+package org.radarcns.monitor;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.X_LABEL;
@@ -45,7 +45,6 @@ import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.monitor.SourceMonitor;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.source.States;
 import org.radarcns.source.SourceCatalog;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.integration.testcase.webapp;
+package org.radarcns.webapp;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -114,7 +114,7 @@ public class SensorEndPointTest {
     }
 
     @Test
-    public void getTimeWindowTest200 () throws IOException, ReflectiveOperationException {
+    public void getTimeWindowTest200() throws IOException, ReflectiveOperationException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,

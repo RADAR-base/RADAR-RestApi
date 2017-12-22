@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.integration.testcase.dao;
+package org.radarcns.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
@@ -28,9 +28,6 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.dao.AndroidAppDataAccessObject;
-import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;

@@ -1,4 +1,4 @@
-package org.radarcns.pipeline.config;
+package org.radarcns.config;
 
 /*
  * Copyright 2016 King's College London and The Hyve
@@ -17,7 +17,6 @@ package org.radarcns.pipeline.config;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.radarcns.config.ServerConfig;
 import org.radarcns.mock.config.BasicMockConfig;
 
 public class PipelineConfig extends BasicMockConfig {

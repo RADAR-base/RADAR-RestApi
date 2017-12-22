@@ -1,5 +1,3 @@
-package org.radarcns.listener.managementportal.listener;
-
 /*
  * Copyright 2017 King's College London
  *
@@ -16,7 +14,10 @@ package org.radarcns.listener.managementportal.listener;
  * limitations under the License.
  */
 
+package org.radarcns.listener.managementportal.listener;
+
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
@@ -54,9 +55,9 @@ public class TokenManagerListener implements ServletContextListener {
     static {
         try {
             client = new OAuth2Client()
-                        .tokenEndpoint(Properties.getTokenEndPoint())
-                        .clientId(Properties.getOauthClientId())
-                        .clientSecret(Properties.getOauthClientSecret());
+                    .tokenEndpoint(new URL(Properties.validateMpUrl(), Properties.getTokenPath()))
+                    .clientId(Properties.getOauthClientId())
+                    .clientSecret(Properties.getOauthClientSecret());
         } catch (MalformedURLException exc) {
             LOGGER.error("Properties cannot be loaded. Check the log for more information.", exc);
             throw new ExceptionInInitializerError(exc);
@@ -67,12 +68,13 @@ public class TokenManagerListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            client.setHttpClient(HttpClientListener.getClient(sce.getServletContext()));
-            getToken(sce.getServletContext());
+            OAuth2Client.setHttpClient(HttpClientListener.getClient(sce.getServletContext()));
+            if (token.isExpired()) {
+                refresh(sce.getServletContext());
+            }
         } catch (TokenException exc) {
             LOGGER.warn("{} cannot be generated: {}", ACCESS_TOKEN, exc.getMessage());
         }
-
     }
 
     @Override
@@ -85,22 +87,6 @@ public class TokenManagerListener implements ServletContextListener {
         sce.getServletContext().setAttribute(ACCESS_TOKEN, null);
 
         LOGGER.info("{} has been invalidated.", ACCESS_TOKEN);
-    }
-
-    /**
-     * Returns the {@code Access Token} needed to interact with the Management Portal. If the token
-     *      available in {@link ServletContext} is still valid, it will be returned. In case it has
-     *      expired, the functional will automatically renew it.
-     * @param context {@link ServletContext} where the last used {@code Access Token} has been
-     *      stored
-     * @return a valid {@code Access Token} to contact Management Portal
-     * @throws TokenException In case the token was expired, and a new token could not be retrieved.
-     */
-    public static String getToken(ServletContext context) throws TokenException {
-        if (token.isExpired()) {
-            refresh(context);
-        }
-        return token.getAccessToken();
     }
 
     /**

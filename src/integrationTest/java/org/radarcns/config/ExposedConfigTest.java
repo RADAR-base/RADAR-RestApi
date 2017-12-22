@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.integration.testcase.config;
+package org.radarcns.config;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
@@ -29,7 +29,6 @@ import java.security.NoSuchAlgorithmException;
 import javax.ws.rs.core.Response.Status;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.config.Properties;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.Utility;
 

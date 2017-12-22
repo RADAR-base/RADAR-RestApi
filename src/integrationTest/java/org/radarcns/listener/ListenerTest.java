@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.integration.testcase.listener;
+package org.radarcns.listener;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,14 +22,11 @@ import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import org.junit.Test;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.listener.MongoDbContextListener;
 
 /**
  * MongoDbContextListener Test.
  */
 public class ListenerTest {
-
-    //private static final Logger logger = LoggerFactory.getLogger(ListenerTest.class);
 
     @Test
     public void testConnection() throws Exception {

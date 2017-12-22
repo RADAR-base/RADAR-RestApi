@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package org.radarcns.integration.testcase.webapp;
+package org.radarcns.webapp;
 
+import static java.util.function.Function.identity;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
@@ -26,10 +28,11 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
 import org.junit.After;
@@ -84,7 +87,8 @@ public class SubjectEndPointTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT.concat("1"), SOURCE.concat("1")));
 
-        Cohort cohort = apiClient.requestAvro(GET_ALL_SUBJECTS + "/" + STUDY, Cohort.class, Status.OK);
+        Cohort cohort = apiClient.requestAvro(
+                GET_ALL_SUBJECTS + "/" + STUDY, Cohort.class, Status.OK);
 
         for (Subject patient : cohort.getSubjects()) {
             if (patient.getSubjectId().equalsIgnoreCase(SUBJECT)) {
@@ -103,7 +107,8 @@ public class SubjectEndPointTest {
 
     @Test
     public void getSubjectTest204() throws IOException {
-        apiClient.request(GET_SUBJECT + '/' + SUBJECT, AVRO_BINARY, Status.NO_CONTENT);
+        assertNotNull(apiClient.request(
+                GET_SUBJECT + '/' + SUBJECT, AVRO_BINARY, Status.NO_CONTENT));
     }
 
     @Test
@@ -121,23 +126,16 @@ public class SubjectEndPointTest {
 
         collection.insertMany(randomInput);
 
-        Subject actual = apiClient.requestAvro(GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
+        Subject actual = apiClient.requestAvro(
+                GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
 
-        Map<String, Sensor> sensorMap = new HashMap<>();
-        sensorMap.put("INTER_BEAT_INTERVAL",
-                new Sensor("INTER_BEAT_INTERVAL", States.DISCONNECTED, 0, 1.0));
-        sensorMap.put("BATTERY",
-                new Sensor("BATTERY", States.DISCONNECTED, 0, 1.0));
-        sensorMap.put("HEART_RATE",
-                new Sensor("HEART_RATE", States.DISCONNECTED, 0, 1.0));
-        sensorMap.put("THERMOMETER",
-                new Sensor("THERMOMETER", States.DISCONNECTED, 0, 1.0));
-        sensorMap.put("ACCELEROMETER",
-                new Sensor("ACCELEROMETER", States.DISCONNECTED, 0, 1.0));
-        sensorMap.put("ELECTRODERMAL_ACTIVITY",
-                new Sensor("ELECTRODERMAL_ACTIVITY", States.DISCONNECTED, 0, 1.0));
-        sensorMap.put("BLOOD_VOLUME_PULSE",
-                new Sensor("BLOOD_VOLUME_PULSE", States.DISCONNECTED, 0, 1.0));
+        Map<String, Sensor> sensorMap = Arrays.stream(
+                new String[] {
+                        "INTER_BEAT_INTERVAL", "BATTERY", "HEART_RATE", "THERMOMETER",
+                        "ACCELEROMETER", "ELECTRODERMAL_ACTIVITY", "BLOOD_VOLUME_PULSE"
+                })
+                .collect(Collectors.toMap(identity(), s -> new Sensor(
+                        s, States.DISCONNECTED, 0, 1.0)));
 
         Subject expected = new Subject(SUBJECT, true,
                 Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput),

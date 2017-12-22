@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.radarcns.pipeline;
+package org.radarcns;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.CONFIG_JSON;
-import static org.radarcns.integration.testcase.config.ExposedConfigTest.OPENAPI_JSON;
+import static org.radarcns.config.ExposedConfigTest.CONFIG_JSON;
+import static org.radarcns.config.ExposedConfigTest.OPENAPI_JSON;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
 import static org.radarcns.webapp.util.Parameter.STAT;
@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
@@ -67,7 +66,7 @@ import org.radarcns.mock.data.CsvGenerator;
 import org.radarcns.mock.data.MockRecordValidator;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mock.model.MockAggregator;
-import org.radarcns.pipeline.config.PipelineConfig;
+import org.radarcns.config.PipelineConfig;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.restapi.data.Acceleration;
 import org.radarcns.restapi.data.DoubleSample;

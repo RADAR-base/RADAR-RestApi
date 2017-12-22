@@ -1,5 +1,3 @@
-package org.radarcns.listener.managementportal.listener;
-
 /*
  * Copyright 2017 King's College London
  *
@@ -16,47 +14,49 @@ package org.radarcns.listener.managementportal.listener;
  * limitations under the License.
  */
 
-import java.util.Objects;
+package org.radarcns.listener.managementportal.listener;
+
+import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
+import org.radarcns.config.ServerConfig;
+import org.radarcns.producer.rest.ManagedConnectionPool;
+import org.radarcns.producer.rest.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Creates a {@link OkHttpClient} and adds it to the {@link javax.servlet.ServletContext} in this
- *      way multiple function can relay on a single {@link OkHttpClient} instance.
+ *      way multiple function can rely on a single {@link OkHttpClient} instance.
  */
 @WebListener
 public class HttpClientListener implements ServletContextListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientListener.class);
 
-    private static final String HTTP_CLIENT = "HTTP_CLIENT";
+    private static final String HTTP_CONNECTION_POOL = "org.radarcns.HTTP_CONNECTION_POOL";
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build();
-
-        sce.getServletContext().setAttribute(HTTP_CLIENT, client);
+        sce.getServletContext().setAttribute(HTTP_CONNECTION_POOL,
+                new TrivialManagedConnectionPool());
 
         LOGGER.info("Created general HTTP Client.");
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        OkHttpClient client = (OkHttpClient) sce.getServletContext().getAttribute(HTTP_CLIENT);
+        TrivialManagedConnectionPool pool = (TrivialManagedConnectionPool) sce.getServletContext()
+                .getAttribute(HTTP_CONNECTION_POOL);
 
-        if (Objects.nonNull(client)) {
-            client.connectionPool().evictAll();
-            sce.getServletContext().setAttribute(HTTP_CLIENT, null);
+        if (pool != null) {
+            pool.acquire().evictAll();
+            sce.getServletContext().removeAttribute(HTTP_CONNECTION_POOL);
 
             LOGGER.info("Destroyed HTTP Client.");
         }
@@ -69,12 +69,43 @@ public class HttpClientListener implements ServletContextListener {
      * @throws IllegalStateException in case the client is not available
      */
     public static OkHttpClient getClient(ServletContext context) {
-        OkHttpClient client = (OkHttpClient) context.getAttribute(HTTP_CLIENT);
+        ManagedConnectionPool pool = getPool(context);
 
-        if (Objects.isNull(client)) {
-            throw new IllegalStateException("HTTP Client is null.");
+        return new OkHttpClient.Builder()
+                .connectionPool(pool.acquire())
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+    }
+
+    public static RestClient getRestClient(ServletContext context, String url)
+            throws MalformedURLException {
+        ManagedConnectionPool pool = getPool(context);
+        ServerConfig server = new ServerConfig(url);
+        return new RestClient(server, 30, pool);
+    }
+
+    private static ManagedConnectionPool getPool(ServletContext context) {
+        return (TrivialManagedConnectionPool) context.getAttribute(HTTP_CONNECTION_POOL);
+    }
+
+    /** Managed Connection Pool that holds a single connection pool during its lifetime. */
+    private static class TrivialManagedConnectionPool extends ManagedConnectionPool {
+        private final ConnectionPool pool;
+
+        private TrivialManagedConnectionPool() {
+            this.pool = new ConnectionPool();
         }
 
-        return client;
+        @Override
+        public ConnectionPool acquire() {
+            return pool;
+        }
+
+        @Override
+        public void release() {
+            // noop
+        }
     }
 }

@@ -59,6 +59,7 @@ public class ManagementPortalOAuth2 {
         this.algorithm = Algorithm.RSA256(publicKey, privateKey);
     }
 
+    /** Get a valid access token for the REST API. */
     public String getAccessToken() {
         Instant exp = Instant.now().plusSeconds(3600);
         Instant iat = Instant.now().minusSeconds(30);
@@ -82,6 +83,7 @@ public class ManagementPortalOAuth2 {
         return token;
     }
 
+    /** Get the public key associated with the signature of the access token. */
     public String getPublicKey() {
         return publicKey;
     }

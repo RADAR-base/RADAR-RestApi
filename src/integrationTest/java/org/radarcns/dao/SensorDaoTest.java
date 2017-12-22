@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.integration.testcase.dao;
+package org.radarcns.dao;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -33,7 +33,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
-import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.RandomInput;

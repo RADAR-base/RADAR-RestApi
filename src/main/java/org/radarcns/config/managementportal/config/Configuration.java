@@ -1,9 +1,3 @@
-package org.radarcns.config.managementportal.config;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.net.URL;
-
 /*
  * Copyright 2017 King's College London
  *
@@ -19,6 +13,14 @@ import java.net.URL;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.config.managementportal.config;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.net.URL;
+import java.util.Objects;
+import javax.annotation.Nonnull;
 
 /**
  * <p>Java class that defines the configuration required by the web app to handle authentication and
@@ -122,18 +124,33 @@ public class Configuration {
     }
 
     public String getTokenEndpoint() {
-        return tokenEndpoint;
+        return ensureRelativeDirectory(tokenEndpoint);
     }
 
     public String getProjectEndpoint() {
-        return projectEndpoint;
+        return ensureRelativeDirectory(projectEndpoint);
     }
 
     public String getSubjectEndpoint() {
-        return subjectEndpoint;
+        return ensureRelativeDirectory(subjectEndpoint);
     }
 
-
+    /**
+     * Ensures that the resultant string represents a relative directory.
+     * It modifies the string if needed to start with a non-slash and ends with a slash.
+     * If referencing the current directory, this returns an empty string.
+     */
+    private static String ensureRelativeDirectory(@Nonnull String str) {
+        Objects.requireNonNull(str);
+        String result = str;
+        while (!result.isEmpty() && result.charAt(0) == '/') {
+            result = result.substring(1);
+        }
+        if (result.isEmpty()) {
+            return "";
+        }
+        return result.charAt(result.length() - 1) == '/' ? result : result + '/';
+    }
 
     @Override
     public String toString() {

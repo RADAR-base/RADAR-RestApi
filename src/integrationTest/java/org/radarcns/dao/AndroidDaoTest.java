@@ -1,4 +1,4 @@
-package org.radarcns.integration.testcase.dao;
+package org.radarcns.dao;
 
 /*
  * Copyright 2017 King's College London and The Hyve
@@ -29,8 +29,6 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.dao.AndroidAppDataAccessObject;
-import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.Utility;

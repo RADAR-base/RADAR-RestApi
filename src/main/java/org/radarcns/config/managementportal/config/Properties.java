@@ -128,7 +128,7 @@ public final class Properties {
      * @return true if {@code path} points a file, false otherwise
      */
     private static boolean checkFileExist(String path) {
-        return path == null ? false : new File(path).exists();
+        return path != null && new File(path).exists();
     }
 
 
@@ -161,28 +161,25 @@ public final class Properties {
     /**
      * Generates the token end point {@link URL} needed to refresh tokens against Management Portal.
      * @return {@link URL} useful to refresh tokens
-     * @throws MalformedURLException in case the {@link URL} cannot be generated
      */
-    public static URL getTokenEndPoint() throws MalformedURLException {
-        return new URL(validateMpUrl().toString() + CONFIG.getTokenEndpoint());
+    public static String getTokenPath() {
+        return CONFIG.getTokenEndpoint();
     }
 
     /**
      * Generates the token end point {@link URL} needed to manage subjects on Management Portal.
      * @return {@link URL} useful create and update subjects
-     * @throws MalformedURLException in case the {@link URL} cannot be generated
      */
-    public static URL getSubjectEndPoint() throws MalformedURLException {
-        return new URL(validateMpUrl().toString() + CONFIG.getSubjectEndpoint());
+    public static String getSubjectPath() {
+        return CONFIG.getSubjectEndpoint();
     }
 
     /**
      * Generates the token end point {@link URL} needed to reade projects on Management Portal.
      * @return {@link URL} useful to read project information
-     * @throws MalformedURLException in case the {@link URL} cannot be generated
      */
-    public static URL getProjectEndPoint() throws MalformedURLException {
-        return new URL(validateMpUrl().toString() + CONFIG.getProjectEndpoint());
+    public static String getProjectPath() {
+        return CONFIG.getProjectEndpoint();
     }
 
     /**

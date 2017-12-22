@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response.Status;
-import okhttp3.ConnectionPool;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -28,6 +27,9 @@ import org.radarcns.util.AvroConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Client to a REST API. Sets up the Management Portal WireMock and authentication.
+ */
 public class ApiClient extends ExternalResource {
     private static final Logger logger = LoggerFactory.getLogger(ApiClient.class);
 
@@ -36,6 +38,11 @@ public class ApiClient extends ExternalResource {
     private final ManagementPortalWireMock wireMock;
     private RestClient client;
 
+    /**
+     * Client to the REST API with given server and base path.
+     *
+     * @param config server configuration, including HTTPS safety, proxy and base path settings.
+     */
     public ApiClient(ServerConfig config) {
         this.config = config;
         try {
@@ -46,6 +53,11 @@ public class ApiClient extends ExternalResource {
         this.wireMock = new ManagementPortalWireMock();
     }
 
+    /**
+     * Client to the REST API with given server and base path.
+     *
+     * @param url API server root path, with HTTPS safety set to true and no proxies.
+     */
     public ApiClient(String url) {
         this(parseUrl(url));
     }
@@ -67,15 +79,20 @@ public class ApiClient extends ExternalResource {
     /**
      * Makes an HTTP request to given URL.
      *
-     * @param path path
+     * @param relativePath path relative to the base URL, without starting slash.
      * @param accept Accept Header for content negotiation
+     * @param expectedResponse response codes that are considered valid. If none are given, any
+     *                         success response code is considered valid.
      *
      * @return HTTP Response
      * @throws IOException if the request could not be executed
+     * @throws AssertionError if the response code does not match one of expectedResponse or
+     *                        if no expectedResponse is provided if the response code does not
+     *                        indicate success.
      */
-    public Response request(String path, String accept, Status... expectedResponse)
+    public Response request(String relativePath, String accept, Status... expectedResponse)
             throws IOException {
-        Request request = this.client.requestBuilder(path)
+        Request request = this.client.requestBuilder(relativePath)
                 .addHeader("User-Agent", "Mozilla/5.0")
                 .addHeader("Accept", accept)
                 .header("Authorization", "Bearer " + oauth2.getAccessToken())
@@ -95,24 +112,55 @@ public class ApiClient extends ExternalResource {
         return response;
     }
 
+    /**
+     * Request a string from the API, with given relative path.
+     *
+     * @param relativePath path relative to the base URL, without starting slash.
+     * @param accept Accept Header for content negotiation
+     * @param expectedResponse response codes that are considered valid. If none are given, any
+     *                         success response code is considered valid.
+     *
+     * @return HTTP Response body as a string
+     * @throws IOException if the request could not be executed
+     * @throws AssertionError if the response code does not match one of expectedResponse or
+     *                        if no expectedResponse is provided if the response code does not
+     *                        indicate success.
+     */
     @Nonnull
-    public String requestString(String path, String accept, Status... expectedResponse)
+    public String requestString(String relativePath, String accept, Status... expectedResponse)
             throws IOException {
-        try (Response response = request(path, accept, expectedResponse)) {
+        try (Response response = request(relativePath, accept, expectedResponse)) {
             ResponseBody body = response.body();
             assertNotNull(body);
             return body.string();
         }
     }
 
+    /**
+     * Request an Avro SpecificRecord from the API, with given relative path. This sets the
+     * Accept header to {@code avro/binary}.
+     *
+     * @param relativePath path relative to the base URL, without starting slash.
+     * @param avroClass Avro SpecificRecord class to deserialize.
+     * @param expectedResponse response codes that are considered valid. If none are given, any
+     *                         success response code is considered valid.
+     *
+     * @return HTTP Response body as a string
+     * @throws IOException if the request could not be executed
+     * @throws ReflectiveOperationException if the provided class does not have a static
+     *                                      {@code getClassSchema()} method.
+     * @throws AssertionError if the response code does not match one of expectedResponse or
+     *                        if no expectedResponse is provided if the response code does not
+     *                        indicate success.
+     */
     @Nonnull
-    public <K extends SpecificRecord> K requestAvro(String path, Class<K> recordClass,
+    public <K extends SpecificRecord> K requestAvro(String relativePath, Class<K> avroClass,
             Status... expectedResponse) throws IOException, ReflectiveOperationException {
-        try (Response response = request(path, AVRO_BINARY, expectedResponse)) {
+        try (Response response = request(relativePath, AVRO_BINARY, expectedResponse)) {
             ResponseBody body = response.body();
             assertNotNull(body);
             @SuppressWarnings("JavaReflectionMemberAccess")
-            Schema schema = (Schema) recordClass.getMethod("getClassSchema").invoke(null);
+            Schema schema = (Schema) avroClass.getMethod("getClassSchema").invoke(null);
             return AvroConverter.avroByteToAvro(body.bytes(), schema);
         }
     }
