@@ -21,7 +21,7 @@ COPY ./gradle/wrapper /code/gradle/wrapper
 COPY ./gradlew /code/
 RUN ./gradlew --version
 
-COPY ./gradle/prod.gradle /code/gradle/
+COPY ./gradle/profile.prod.gradle /code/gradle/
 COPY ./build.gradle ./gradle.properties ./settings.gradle /code/
 
 RUN ./gradlew downloadWarDependencies
