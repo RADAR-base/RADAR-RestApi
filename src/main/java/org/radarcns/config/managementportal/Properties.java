@@ -158,6 +158,14 @@ public final class Properties {
     }
 
     /**
+     * Get the OAuth2 client scopes to access ManagementPortal.
+     * @return the client scopes
+     */
+    public static String getOauthClientScopes() {
+        return CONFIG.getOauthClientScopes();
+    }
+
+    /**
      * Generates the token end point {@link URL} needed to refresh tokens against Management Portal.
      * @return {@link URL} useful to refresh tokens
      */

@@ -50,7 +50,6 @@ import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.dataset.Item;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
