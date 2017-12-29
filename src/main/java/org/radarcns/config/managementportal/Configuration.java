@@ -134,7 +134,7 @@ public class Configuration {
     }
 
     public String getTokenEndpoint() {
-        return ensureRelativeDirectory(tokenEndpoint);
+        return tokenEndpoint;
     }
 
     public String getProjectEndpoint() {
