@@ -108,7 +108,7 @@ task radarConfigJson(type: Copy) {
 }
 
 task radarRestConfigJson(type: Copy) {
-  from files("${radarStackPath}/etc/rest-api/radar.yml.template")
+  from "${radarStackPath}/etc/rest-api/radar.yml.template"
   into "${radarStackPath}/etc/rest-api"
   rename '(.+).template', '$1'
 }
