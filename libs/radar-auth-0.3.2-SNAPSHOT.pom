@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.radarcns</groupId>
+  <artifactId>radar-auth</artifactId>
+  <version>0.3.2-SNAPSHOT</version>
+  <dependencies>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.auth0</groupId>
+      <artifactId>java-jwt</artifactId>
+      <version>3.2.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.8.5</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>2.8.5</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+  <description/>
+  <name>radar-auth</name>
+  <url>https://github.com/RADAR-CNS/ManagementPortal/tree/master/radar-auth</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>dennyverbeeck</id>
+      <name>Denny Verbeeck</name>
+      <email>dverbeec@its.jnj.com</email>
+      <organization>Janssen R&amp;D</organization>
+    </developer>
+  </developers>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/RADAR-CNS/ManagementPortal/tree/master/radar-auth/issues</url>
+  </issueManagement>
+  <organization>
+    <name>RADAR-CNS</name>
+    <url>http://radar-cns.org/</url>
+  </organization>
+  <scm>
+    <connection>scm:git:https://github.com/RADAR-CNS/ManagementPortal/tree/master/radar-auth</connection>
+    <url>https://github.com/RADAR-CNS/ManagementPortal/tree/master/radar-auth</url>
+  </scm>
+</project>

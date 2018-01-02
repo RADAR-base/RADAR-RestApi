@@ -2,6 +2,9 @@ package org.radarcns.security.utils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import javax.servlet.ServletRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.security.filter.AuthenticationFilter;
 
@@ -9,6 +12,12 @@ import org.radarcns.security.filter.AuthenticationFilter;
  * Utility class for Rest-API Security.
  */
 public final class SecurityUtils {
+
+    private static final ObjectMapper mapper;
+    static {
+        mapper = new ObjectMapper();
+    }
+
 
     /**
      * Parse the {@code "jwt"} attribute from given request.
@@ -30,5 +39,17 @@ public final class SecurityUtils {
                     + jwt.getClass().getName());
         }
         return (DecodedJWT) jwt;
+    }
+
+    public static ObjectNode getJsonError(String message, Exception exc) {
+        ObjectNode root = mapper.createObjectNode();
+
+        TextNode msg = root.textNode(message);
+        TextNode error = root.textNode(exc.getMessage());
+
+        root.set("message", msg);
+        root.set("error",error);
+
+        return root;
     }
 }

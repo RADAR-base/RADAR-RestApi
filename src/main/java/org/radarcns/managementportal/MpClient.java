@@ -52,7 +52,7 @@ public class MpClient {
     private static final Logger logger = LoggerFactory.getLogger(MpClient.class);
     private final OkHttpClient client;
 
-    private static OAuth2AccessTokenDetails token;
+    private OAuth2AccessTokenDetails token;
     private ArrayList<Subject> subjects;
 
 

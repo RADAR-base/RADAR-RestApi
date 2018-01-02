@@ -31,12 +31,14 @@ public class Source {
 
     @JsonProperty("id")
     private Integer id;
-    @JsonProperty("deviceTypeId")
-    private String deviceTypeId;
-    @JsonProperty("deviceTypeProducer")
-    private String deviceTypeProducer;
-    @JsonProperty("deviceTypeModel")
-    private String deviceTypeModel;
+    @JsonProperty("sourceTypeId")
+    private String sourceTypeId;
+    @JsonProperty("sourceTypeProducer")
+    private String sourceTypeProducer;
+    @JsonProperty("sourceTypeModel")
+    private String sourceTypeModel;
+    @JsonProperty("sourceTypeCatalogVersion")
+    private String sourceTypeCatalogVersion;
     @JsonProperty("sourceId")
     private String sourceId;
     @JsonProperty("sourceName")
@@ -44,41 +46,21 @@ public class Source {
     @JsonProperty("assigned")
     private Boolean assigned;
 
-    protected Source(){}
-
-    protected Source(
-            @JsonProperty("id") Integer id,
-            @JsonProperty("deviceTypeId") String deviceTypeId,
-            @JsonProperty("deviceTypeProducer") String deviceTypeProducer,
-            @JsonProperty("deviceTypeModel") String deviceTypeModel,
-            @JsonProperty("sourceId") String sourceId,
-            @JsonProperty("sourceName") String sourceName,
-            @JsonProperty("assigned")  boolean assigned
-    ) {
-        this.id = id;
-        this.deviceTypeId = deviceTypeId;
-        this.deviceTypeModel = deviceTypeModel;
-        this.deviceTypeProducer = deviceTypeProducer;
-        this.sourceId = sourceId;
-        this.sourceName = sourceName;
-        this.assigned = assigned;
-    }
-
 
     public Integer getId() {
         return id;
     }
 
-    public String getDeviceTypeId() {
-        return deviceTypeId;
+    public String getSourceTypeId() {
+        return sourceTypeId;
     }
 
-    public String getDeviceTypeProducer() {
-        return deviceTypeProducer;
+    public String getSourceTypeProducer() {
+        return sourceTypeProducer;
     }
 
-    public String getDeviceTypeModel() {
-        return deviceTypeModel;
+    public String getSourceTypeModel() {
+        return sourceTypeModel;
     }
 
     public String getSourceId() {
@@ -91,6 +73,42 @@ public class Source {
 
     public Boolean getAssigned() {
         return assigned;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setSourceTypeId(String sourceTypeId) {
+        this.sourceTypeId = sourceTypeId;
+    }
+
+    public void setSourceTypeProducer(String sourceTypeProducer) {
+        this.sourceTypeProducer = sourceTypeProducer;
+    }
+
+    public void setSourceTypeModel(String sourceTypeModel) {
+        this.sourceTypeModel = sourceTypeModel;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    public String getSourceTypeCatalogVersion() {
+        return sourceTypeCatalogVersion;
+    }
+
+    public void setSourceTypeCatalogVersion(String sourceTypeCatalogVersion) {
+        this.sourceTypeCatalogVersion = sourceTypeCatalogVersion;
+    }
+
+    public void setAssigned(Boolean assigned) {
+        this.assigned = assigned;
     }
 
     /**

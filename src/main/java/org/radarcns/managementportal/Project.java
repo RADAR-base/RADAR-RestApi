@@ -35,36 +35,46 @@ import java.util.Optional;
 public class Project {
 
     @JsonProperty("id")
-    private final Integer id;
+    private Integer id;
     @JsonProperty("projectName")
-    private final String projectName;
+    private String projectName;
     @JsonProperty("organization")
-    private final String organization;
+    private String organization;
     @JsonProperty("location")
-    private final String location;
+    private String location;
     @JsonProperty("attributes")
-    private final List<Tag> attributes;
+    private List<Tag> attributes;
     @JsonProperty("projectStatus")
-    private final String projectStatus;
-    @JsonProperty("deviceTypes")
-    private final List<DeviceType> deviceTypes;
+    private String projectStatus;
+    @JsonProperty("sourceTypes")
+    private List<SourceType> sourceTypes;
 
-
-    protected Project(
-            @JsonProperty("id") Integer id,
-            @JsonProperty("projectName") String projectName,
-            @JsonProperty("organization") String organization,
-            @JsonProperty("location") String location,
-            @JsonProperty("attributes") List<Tag> attributes,
-            @JsonProperty("projectStatus") String projectStatus,
-            @JsonProperty("deviceTypes") List<DeviceType> deviceTypes) {
+    public void setId(Integer id) {
         this.id = id;
+    }
+
+    public void setProjectName(String projectName) {
         this.projectName = projectName;
+    }
+
+    public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public void setLocation(String location) {
         this.location = location;
+    }
+
+    public void setAttributes(List<Tag> attributes) {
         this.attributes = attributes;
+    }
+
+    public void setProjectStatus(String projectStatus) {
         this.projectStatus = projectStatus;
-        this.deviceTypes = deviceTypes;
+    }
+
+    public void setSourceTypes(List<SourceType> sourceTypes) {
+        this.sourceTypes = sourceTypes;
     }
 
     public Integer getId() {
@@ -91,8 +101,8 @@ public class Project {
         return projectStatus;
     }
 
-    public List<DeviceType> getDeviceTypes() {
-        return deviceTypes;
+    public List<SourceType> getSourceTypes() {
+        return sourceTypes;
     }
 
     /**

@@ -13,11 +13,15 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.authentication.TokenValidator;
 import org.radarcns.auth.config.ServerConfig;
 import org.radarcns.auth.config.YamlServerConfig;
+import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.auth.exception.TokenValidationException;
 import org.radarcns.config.managementportal.Properties;
+import org.radarcns.security.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +49,14 @@ public class AuthenticationFilter implements Filter {
         if (token == null) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
+            res.setHeader("Error", "No Token Provided!");
+            String jsonMsg = SecurityUtils.getJsonError("Please provide a valid token" +
+                            " in the authentication header",
+                    new NotAuthorizedException("No token was provided " +
+                            "with the request and thus the request " +
+                            "cannot be authorized")).toString();
+            res.setContentType(MediaType.APPLICATION_JSON);
+            res.getWriter().write(jsonMsg);
             return;
         }
 
@@ -56,6 +68,11 @@ public class AuthenticationFilter implements Filter {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
             res.setHeader("Error", "Invalid Token!");
+            String jsonMsg = SecurityUtils.getJsonError("The token provided with " +
+                    "the request is invalid and thus the request cannot be authorized",
+                    new NotAuthorizedException(ex)).toString();
+            res.setContentType(MediaType.APPLICATION_JSON);
+            res.getWriter().write(jsonMsg);
         }
     }
 
@@ -67,7 +84,7 @@ public class AuthenticationFilter implements Filter {
             if (mpUrlString != null) {
                 try {
                     YamlServerConfig cfg = new YamlServerConfig();
-                    cfg.setResourceName("res_RestApi");
+                    cfg.setResourceName("res_restApi");
                     cfg.setPublicKeyEndpoint(new URI(mpUrlString + "oauth/token_key"));
                     config = cfg;
                 } catch (URISyntaxException exc) {
@@ -87,7 +104,7 @@ public class AuthenticationFilter implements Filter {
 
     private String getToken(ServletRequest request) {
         HttpServletRequest req = (HttpServletRequest) request;
-        String authorizationHeader = req.getHeader("Authorization");
+        String authorizationHeader = req.getHeader(HttpHeaders.AUTHORIZATION);
 
         // Check if the HTTP Authorization header is present and formatted correctly
         if (authorizationHeader == null

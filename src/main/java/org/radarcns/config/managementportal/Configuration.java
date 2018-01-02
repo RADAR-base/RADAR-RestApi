@@ -150,7 +150,7 @@ public class Configuration {
      * It modifies the string if needed to start with a non-slash and ends with a slash.
      * If referencing the current directory, this returns an empty string.
      */
-    private static String ensureRelativeDirectory(@Nonnull String str) {
+    public static String ensureRelativeDirectory(@Nonnull String str) {
         Objects.requireNonNull(str);
         String result = str;
         while (!result.isEmpty() && result.charAt(0) == '/') {
