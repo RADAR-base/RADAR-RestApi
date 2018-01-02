@@ -138,11 +138,11 @@ public class Configuration {
     }
 
     public String getProjectEndpoint() {
-        return ensureRelativeDirectory(projectEndpoint);
+        return projectEndpoint;
     }
 
     public String getSubjectEndpoint() {
-        return ensureRelativeDirectory(subjectEndpoint);
+        return subjectEndpoint;
     }
 
     /**
