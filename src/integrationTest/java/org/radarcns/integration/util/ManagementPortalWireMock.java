@@ -133,7 +133,7 @@ public class ManagementPortalWireMock extends ExternalResource {
         return "{\"access_token\":\"" + oauth.getAccessToken() + "\","
                 + "\"token_type\":\"bearer\","
                 + "\"expires_in\":3600,"
-                + "\"scope\":\"SUBJECT.READ PROJECT.READ SOURCE.READ DEVICETYPE.READ\","
+                + "\"scope\":\"SUBJECT.READ PROJECT.READ SOURCE.READ SOURCETYPE.READ\","
                 + "\"sub\":\"radar_restapi\","
                 + "\"sources\":[],"
                 + "\"iss\":\"ManagementPortal\","

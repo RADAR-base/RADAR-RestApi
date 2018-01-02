@@ -17,6 +17,7 @@ ext.radarCommons = '0.7.1-SNAPSHOT'
 ext.radarSchema = '0.2.3'
 ext.swagger = '2.0.0-rc3'
 ext.tomcat = '8.0.47'
+ext.radarAuthClientUtilVersion = '0.3.2-SNAPSHOT'
 ext.radarAuthVersion = '0.3.1'
 ext.wireMockVersion = '2.5.1'
 
@@ -36,6 +37,7 @@ repositories {
   maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
   maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
   maven { url 'https://jitpack.io' }
+    flatDir { dir 'libs'}
 }
 
 dependencies {
@@ -49,7 +51,7 @@ dependencies {
   compile group: 'org.radarcns', name: 'radar-commons', version: radarCommons
   compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: radarSchema
 
-  compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthVersion
+  compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthClientUtilVersion
   compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
 
   runtimeOnly group: 'ch.qos.logback', name:'logback-core', version: logback

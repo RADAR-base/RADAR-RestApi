@@ -47,7 +47,7 @@ public class TokenManagerListener implements ServletContextListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenManagerListener.class);
 
-    private static final String ACCESS_TOKEN = "TOKEN";
+    public static final String ACCESS_TOKEN = "TOKEN";
 
     private static final OAuth2Client client;
     private static OAuth2AccessTokenDetails token;
@@ -55,7 +55,7 @@ public class TokenManagerListener implements ServletContextListener {
     static {
         try {
             client = new OAuth2Client()
-                    .tokenEndpoint(new URL(Properties.validateMpUrl(), Properties.getTokenPath()))
+                    .tokenEndpoint(new URL(Properties.validateMpUrl() , Properties.getTokenPath()))
                     .clientId(Properties.getOauthClientId())
                     .clientSecret(Properties.getOauthClientSecret());
             for(String scope : Properties.getOauthClientScopes().split(" ")) {
@@ -71,7 +71,7 @@ public class TokenManagerListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            OAuth2Client.setHttpClient(HttpClientListener.getClient(sce.getServletContext()));
+            client.httpClient(HttpClientListener.getClient(sce.getServletContext()));
             if (token.isExpired()) {
                 refresh(sce.getServletContext());
             }
@@ -107,7 +107,7 @@ public class TokenManagerListener implements ServletContextListener {
 
         token = client.getAccessToken();
 
-        context.setAttribute(ACCESS_TOKEN, token.getAccessToken());
+        context.setAttribute(ACCESS_TOKEN, token);
 
         // we need to supply date in millis, token.getIssueDate() and getExpiresIn() are in seconds
         LOGGER.info("Refreshed token at {} valid till {}", getDate(Instant.now().toEpochMilli()),

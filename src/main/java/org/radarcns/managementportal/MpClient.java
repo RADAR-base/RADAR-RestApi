@@ -17,7 +17,7 @@
 package org.radarcns.managementportal;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static org.radarcns.config.managementportal.Properties.validateMpUrl;
+import static org.radarcns.listener.managementportal.TokenManagerListener.ACCESS_TOKEN;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,8 +39,8 @@ import okhttp3.Response;
 import org.radarcns.config.managementportal.Properties;
 import org.radarcns.listener.managementportal.HttpClientListener;
 import org.radarcns.listener.managementportal.TokenManagerListener;
+import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.producer.rest.RestClient;
-import org.radarcns.producer.rest.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +50,11 @@ import org.slf4j.LoggerFactory;
 public class MpClient {
 
     private static final Logger logger = LoggerFactory.getLogger(MpClient.class);
-    private final RestClient client;
+    private final OkHttpClient client;
 
+    private static OAuth2AccessTokenDetails token;
     private ArrayList<Subject> subjects;
+
 
     /**
      * Client to interact with the RADAR Management Portal.
@@ -64,12 +67,8 @@ public class MpClient {
     public MpClient(ServletContext context) {
         Objects.requireNonNull(context);
 
-        try {
-            this.client = HttpClientListener.getRestClient(context, validateMpUrl().toString());
-        } catch (MalformedURLException ex) {
-            throw new AssertionError("ManagementPortal URL is invalid");
-        }
-
+        this.client = HttpClientListener.getClient(context);
+        this.token = (OAuth2AccessTokenDetails) context.getAttribute(ACCESS_TOKEN);
         subjects = null;
     }
 
@@ -91,22 +90,24 @@ public class MpClient {
      * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
      */
     private ArrayList<Subject> getAllSubjects() {
-        ArrayList<Subject> allSubjects;
 
         try {
-            Request request = client.requestBuilder(Properties.getSubjectPath()).build();
-            String jsonData = client.requestString(request);
-
-            allSubjects = Subject.getAllSubjectsFromJson(jsonData);
+            URL getAllSubjects = new URL(Properties.validateMpUrl(), Properties.getSubjectPath());
+            Request getAllSubjectsRequest = this.buildBaseRequest(getAllSubjects);
+            Response response = this.client.newCall(getAllSubjectsRequest).execute();
+            ArrayList<Subject> allSubjects = Subject
+                    .getAllSubjectsFromJson(response.body().string());
             logger.info("Retrieved Subjects from MP.");
             return allSubjects;
-        } catch (MalformedURLException ex) {
-            logger.error("Invalid URL {}{}",
-                    client.getConfig(), Properties.getSubjectPath());
-        } catch (IOException exc) {
-            logger.error("Subjects could not be retrieved", exc);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            logger.error("Cannot get valid url");
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("Cannot retrieve subjects");
+            return null;
         }
-        return null;
     }
 
     /**
@@ -143,20 +144,25 @@ public class MpClient {
         if (subjects != null) {
             return getSubject(subjectLogin);
         }
-
-        try (Response response = client.request(Properties.getSubjectPath() + subjectLogin)) {
-            String jsonData = RestClient.responseBody(response);
-
+        try {
+            URL getSubject = new URL(Properties.validateMpUrl(),
+                    Properties.getSubjectPath() + "/" + subjectLogin);
+            Request getSubjectsRequest = this.buildBaseRequest(getSubject);
+            Response response = this.client.newCall(getSubjectsRequest).execute();
             if (response.isSuccessful()) {
-                Subject subject = Subject.getObject(jsonData);
+                Subject subject = Subject.getObject(response.body().string());
                 logger.info("Subject : " + subject.getJsonString());
                 return subject;
-            } else if (response.code() == HTTP_NOT_FOUND) {
+            }
+            if (Integer.valueOf(HTTP_NOT_FOUND).equals(response.code())) {
                 logger.info("Subject {} is not present", subjectLogin);
                 return null;
-            } else {
-                throw new RestException(response.code(), jsonData == null ? "" : jsonData);
             }
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("Cannot execute request to retrive subject : {}", subjectLogin);
+            return null;
         }
     }
 
@@ -176,22 +182,26 @@ public class MpClient {
                     .collect(Collectors.toList());
         }
 
-        try (Response response = client.request(
-                Properties.getProjectPath() + studyName + '/' + SUBJECTS)) {
-
-            String jsonData = RestClient.responseBody(response);
+        try {
+            URL getSubjectsFromProject = new URL(Properties.validateMpUrl(),
+                    Properties.getProjectPath() +"/" + studyName + '/' + SUBJECTS);
+            Request getSubjectsRequest = this.buildBaseRequest(getSubjectsFromProject);
+            Response response =  this.client.newCall(getSubjectsRequest).execute();
             if (response.isSuccessful()) {
-                List<Subject> allSubjects = Subject.getAllSubjectsFromJson(jsonData);
+                List<Subject> allSubjects = Subject.getAllSubjectsFromJson(response.body().string());
                 logger.info("Retrieved Subjects from MP from Project " + studyName);
                 return allSubjects;
             } else if (response.code() == HTTP_NOT_FOUND) {
                 logger.info("Subjects for study {} are not present", studyName);
                 return null;
-            } else {
-                throw new RestException(response.code(), jsonData == null ? "" : jsonData);
             }
-
         }
+        catch (IOException e) {
+            e.printStackTrace();
+            logger.error("Cannot execute request to retrieve project : {}" , studyName);
+            return null;
+        }
+        return null;
     }
 
     /**
@@ -200,21 +210,18 @@ public class MpClient {
      */
     public List<Project> getAllProjects() throws
             MalformedURLException, URISyntaxException {
-        try (Response response = client.request(Properties.getProjectPath())) {
-            String jsonData = RestClient.responseBody(response);
-            if (response.isSuccessful()) {
-                List<Project> allProjects = Project.getAllObjects(jsonData);
-                logger.info("Retrieved Projects from MP");
-                return allProjects;
-            } else if (response.code() == HTTP_NOT_FOUND) {
-                logger.info("Projects are not present");
-                return null;
-            } else {
-                throw new RestException(response.code(), jsonData == null ? "" : jsonData);
-            }
-        } catch (IOException exc) {
-            throw new IllegalStateException("Projects could not be retrieved", exc);
+        URL getSubjectsFromProject = new URL(Properties.validateMpUrl(),
+                Properties.getProjectPath());
+        Request getAllProjects = this.buildBaseRequest(getSubjectsFromProject);
+        try (Response response = this.client.newCall(getAllProjects).execute()) {
+            List<Project>  allProjects = Project.getAllObjects(response.body().string());
+            logger.info("Retrieved Projects from MP");
+            return allProjects;
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("Cannot retrieve projects");
         }
+        return null;
     }
 
     /**
@@ -224,7 +231,11 @@ public class MpClient {
      */
     public Project getProject(String projectName) throws IOException {
 
-        try (Response response = client.request(Properties.getProjectPath() + projectName)) {
+        try {
+            URL getSubjectsFromProject = new URL(Properties.validateMpUrl(),
+                    Properties.getProjectPath()+'/'+projectName);
+            Request getProject = this.buildBaseRequest(getSubjectsFromProject);
+            Response response =  this.client.newCall(getProject).execute();
             String jsonData = RestClient.responseBody(response);
             if (response.isSuccessful()) {
                 Project project = Project.getObject(jsonData);
@@ -233,10 +244,14 @@ public class MpClient {
             } else if (response.code() == HTTP_NOT_FOUND) {
                 logger.info("Project {} is not present", projectName);
                 return null;
-            } else {
-                throw new RestException(response.code(), jsonData == null ? "" : jsonData);
             }
         }
+        catch (IOException e) {
+            e.printStackTrace();
+            logger.error("Cannot execute request to retrieve project : {}" , projectName);
+            return null;
+        }
+        return null;
     }
 
     /**
@@ -251,4 +266,12 @@ public class MpClient {
         return javax.ws.rs.core.Response.status(status.getStatusCode()).entity(toJson).build();
     }
 
+    private Request buildBaseRequest(URL url){
+        return new Request.Builder()
+                .addHeader("Accept", "application/json")
+                .addHeader("Authorization", "Bearer "+token.getAccessToken())
+                .url(url)
+                .get()
+                .build();
+    }
 }
