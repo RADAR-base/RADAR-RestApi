@@ -84,7 +84,7 @@ public class AuthenticationFilter implements Filter {
             if (mpUrlString != null) {
                 try {
                     YamlServerConfig cfg = new YamlServerConfig();
-                    cfg.setResourceName("res_restApi");
+                    cfg.setResourceName("res_RestApi");
                     cfg.setPublicKeyEndpoint(new URI(mpUrlString + "oauth/token_key"));
                     config = cfg;
                 } catch (URISyntaxException exc) {

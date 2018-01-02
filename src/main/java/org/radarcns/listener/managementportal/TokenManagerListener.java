@@ -98,7 +98,7 @@ public class TokenManagerListener implements ServletContextListener {
      *      stored
      * @throws TokenException If the token could not be retrieved.
      */
-    private static synchronized void refresh(ServletContext context) throws TokenException {
+    public static synchronized void refresh(ServletContext context) throws TokenException {
         // Multiple threads can be waiting to enter this method when the token is expired, we need
         // only the first one to request a new token, subsequent threads can safely exit immediately
         if (!token.isExpired()) {

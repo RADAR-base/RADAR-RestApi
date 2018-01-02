@@ -10,7 +10,6 @@ targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
 ext.jersey = '2.26'
-ext.jerseymedia = '2.24'
 ext.junitVersion = '4.12'
 ext.logback = '1.2.3'
 ext.mongodb = '3.6.0'
@@ -47,6 +46,8 @@ dependencies {
   providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
 
   compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
+  compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
+
   compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
 
   compile group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: swagger
@@ -57,13 +58,10 @@ dependencies {
   compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthClientUtilVersion
   compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
 
-  compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymedia
   compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: jacksonVersion
 
   runtimeOnly group: 'ch.qos.logback', name:'logback-core', version: logback
   runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logback
-
-
 
   runtimeOnly group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
   runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey

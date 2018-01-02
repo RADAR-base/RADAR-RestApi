@@ -68,7 +68,15 @@ public class MpClient {
         Objects.requireNonNull(context);
 
         this.client = HttpClientListener.getClient(context);
-        this.token = (OAuth2AccessTokenDetails) context.getAttribute(ACCESS_TOKEN);
+        OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context.getAttribute
+                (ACCESS_TOKEN);
+        if(currentToken.isExpired()) {
+            TokenManagerListener.refresh(context);
+            this.token = (OAuth2AccessTokenDetails) context.getAttribute(ACCESS_TOKEN);
+        }
+        else {
+            this.token = currentToken;
+        }
         subjects = null;
     }
 
@@ -93,7 +101,7 @@ public class MpClient {
 
         try {
             URL getAllSubjects = new URL(Properties.validateMpUrl(), Properties.getSubjectPath());
-            Request getAllSubjectsRequest = this.buildBaseRequest(getAllSubjects);
+            Request getAllSubjectsRequest = this.buildRequest(getAllSubjects);
             Response response = this.client.newCall(getAllSubjectsRequest).execute();
             ArrayList<Subject> allSubjects = Subject
                     .getAllSubjectsFromJson(response.body().string());
@@ -147,7 +155,7 @@ public class MpClient {
         try {
             URL getSubject = new URL(Properties.validateMpUrl(),
                     Properties.getSubjectPath() + "/" + subjectLogin);
-            Request getSubjectsRequest = this.buildBaseRequest(getSubject);
+            Request getSubjectsRequest = this.buildRequest(getSubject);
             Response response = this.client.newCall(getSubjectsRequest).execute();
             if (response.isSuccessful()) {
                 Subject subject = Subject.getObject(response.body().string());
@@ -185,7 +193,7 @@ public class MpClient {
         try {
             URL getSubjectsFromProject = new URL(Properties.validateMpUrl(),
                     Properties.getProjectPath() +"/" + studyName + '/' + SUBJECTS);
-            Request getSubjectsRequest = this.buildBaseRequest(getSubjectsFromProject);
+            Request getSubjectsRequest = this.buildRequest(getSubjectsFromProject);
             Response response =  this.client.newCall(getSubjectsRequest).execute();
             if (response.isSuccessful()) {
                 List<Subject> allSubjects = Subject.getAllSubjectsFromJson(response.body().string());
@@ -212,7 +220,7 @@ public class MpClient {
             MalformedURLException, URISyntaxException {
         URL getSubjectsFromProject = new URL(Properties.validateMpUrl(),
                 Properties.getProjectPath());
-        Request getAllProjects = this.buildBaseRequest(getSubjectsFromProject);
+        Request getAllProjects = this.buildRequest(getSubjectsFromProject);
         try (Response response = this.client.newCall(getAllProjects).execute()) {
             List<Project>  allProjects = Project.getAllObjects(response.body().string());
             logger.info("Retrieved Projects from MP");
@@ -234,7 +242,7 @@ public class MpClient {
         try {
             URL getSubjectsFromProject = new URL(Properties.validateMpUrl(),
                     Properties.getProjectPath()+'/'+projectName);
-            Request getProject = this.buildBaseRequest(getSubjectsFromProject);
+            Request getProject = this.buildRequest(getSubjectsFromProject);
             Response response =  this.client.newCall(getProject).execute();
             String jsonData = RestClient.responseBody(response);
             if (response.isSuccessful()) {
@@ -266,7 +274,7 @@ public class MpClient {
         return javax.ws.rs.core.Response.status(status.getStatusCode()).entity(toJson).build();
     }
 
-    private Request buildBaseRequest(URL url){
+    private Request buildRequest(URL url){
         return new Request.Builder()
                 .addHeader("Accept", "application/json")
                 .addHeader("Authorization", "Bearer "+token.getAccessToken())
