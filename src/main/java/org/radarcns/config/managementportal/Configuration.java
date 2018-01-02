@@ -51,6 +51,9 @@ public class Configuration {
     /** OAuth2 client secret. */
     private final String oauthClientSecret;
 
+    /** OAuth2 client scopes. */
+    private final String oauthClientScopes;
+
     /** URL pointing a Management Portal instance. */
     private final URL managementPortalUrl;
 
@@ -76,6 +79,7 @@ public class Configuration {
      * @param released {@link String} reporting the web app released date
      * @param oauthClientId {@link String} representing OAuth2 client identifier
      * @param oauthClientSecret {@link String} representing OAuth2 client identifier
+     * @param oauthClientScopes {@link String} representing OAuth2 client scopes
      * @param managementPortalUrl {@link URL} pointing a Management Portal instane
      * @param tokenEndpoint {@link String} representing Management Portal web root to renew tokens
      * @param projectEndpoint {@link String} representing Management Portal web root to access
@@ -89,6 +93,7 @@ public class Configuration {
             @JsonProperty("released") String released,
             @JsonProperty("oauth_client_id") String oauthClientId,
             @JsonProperty("oauth_client_secret") String oauthClientSecret,
+            @JsonProperty("oauth_client_scopes") String oauthClientScopes,
             @JsonProperty("management_portal_url") URL managementPortalUrl,
             @JsonProperty("token_endpoint") String tokenEndpoint,
             @JsonProperty("project_endpoint") String projectEndpoint,
@@ -97,6 +102,7 @@ public class Configuration {
         this.released = released;
         this.oauthClientId = oauthClientId;
         this.oauthClientSecret = oauthClientSecret;
+        this.oauthClientScopes = oauthClientScopes;
         this.managementPortalUrl = managementPortalUrl;
         this.tokenEndpoint = tokenEndpoint;
         this.projectEndpoint = projectEndpoint;
@@ -119,20 +125,24 @@ public class Configuration {
         return oauthClientSecret;
     }
 
+    public String getOauthClientScopes() {
+        return oauthClientScopes;
+    }
+
     public URL getManagementPortalUrl() {
         return managementPortalUrl;
     }
 
     public String getTokenEndpoint() {
-        return ensureRelativeDirectory(tokenEndpoint);
+        return tokenEndpoint;
     }
 
     public String getProjectEndpoint() {
-        return ensureRelativeDirectory(projectEndpoint);
+        return projectEndpoint;
     }
 
     public String getSubjectEndpoint() {
-        return ensureRelativeDirectory(subjectEndpoint);
+        return subjectEndpoint;
     }
 
     /**
@@ -159,6 +169,7 @@ public class Configuration {
             + "released='" + released + "'\n"
             + "oauthClientId = '" + oauthClientId + "'\n"
             + "oauthClientSecret = '" + oauthClientSecret + "'\n"
+            + "oauthClientScopes = '" + oauthClientScopes + "'\n"
             + "managementPortalUrl = " + managementPortalUrl + "\n"
             + "tokenEndpoint = '" + tokenEndpoint + "'\n"
             + "projectEndpoint = '" + projectEndpoint + "'\n"

@@ -58,6 +58,9 @@ public class TokenManagerListener implements ServletContextListener {
                     .tokenEndpoint(new URL(Properties.validateMpUrl(), Properties.getTokenPath()))
                     .clientId(Properties.getOauthClientId())
                     .clientSecret(Properties.getOauthClientSecret());
+            for(String scope : Properties.getOauthClientScopes().split(" ")) {
+                client.addScope(scope);
+            }
         } catch (MalformedURLException exc) {
             LOGGER.error("Properties cannot be loaded. Check the log for more information.", exc);
             throw new ExceptionInInitializerError(exc);
