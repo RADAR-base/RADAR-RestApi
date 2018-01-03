@@ -64,8 +64,6 @@ public class ManagementPortalEndPoint {
     @Context
     private HttpServletRequest request;
 
-    private static MpClient mpClient;
-
     //--------------------------------------------------------------------------------------------//
     //                                        SUBJECTS                                            //
     //--------------------------------------------------------------------------------------------//

@@ -120,7 +120,7 @@ public class TokenManagerListener implements ServletContextListener {
         return new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS").format(new Date(time));
     }
 
-    public static OAuth2AccessTokenDetails getToken(ServletContext context) {
+    public synchronized static OAuth2AccessTokenDetails getToken(ServletContext context) {
         OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context.getAttribute
                 (ACCESS_TOKEN);
         if(((OAuth2AccessTokenDetails) context.getAttribute
