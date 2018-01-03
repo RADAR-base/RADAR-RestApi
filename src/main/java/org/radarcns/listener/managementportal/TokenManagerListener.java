@@ -50,6 +50,7 @@ public class TokenManagerListener implements ServletContextListener {
     public static final String ACCESS_TOKEN = "TOKEN";
 
     private static final OAuth2Client client;
+
     private static OAuth2AccessTokenDetails token;
 
     static {
@@ -71,6 +72,7 @@ public class TokenManagerListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
+            // set the OkHttpClient created from local managed pool
             client.httpClient(HttpClientListener.getClient(sce.getServletContext()));
             if (token.isExpired()) {
                 refresh(sce.getServletContext());
@@ -98,7 +100,7 @@ public class TokenManagerListener implements ServletContextListener {
      *      stored
      * @throws TokenException If the token could not be retrieved.
      */
-    public static synchronized void refresh(ServletContext context) throws TokenException {
+    private static synchronized void refresh(ServletContext context) throws TokenException {
         // Multiple threads can be waiting to enter this method when the token is expired, we need
         // only the first one to request a new token, subsequent threads can safely exit immediately
         if (!token.isExpired()) {
@@ -116,5 +118,18 @@ public class TokenManagerListener implements ServletContextListener {
 
     private static String getDate(long time) {
         return new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS").format(new Date(time));
+    }
+
+    public static OAuth2AccessTokenDetails getToken(ServletContext context) {
+        OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context.getAttribute
+                (ACCESS_TOKEN);
+        if(((OAuth2AccessTokenDetails) context.getAttribute
+                (ACCESS_TOKEN)).isExpired()) {
+            refresh(context);
+            return  (OAuth2AccessTokenDetails) context.getAttribute(ACCESS_TOKEN);
+        }
+        else {
+           return currentToken;
+        }
     }
 }

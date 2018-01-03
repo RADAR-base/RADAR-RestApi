@@ -37,7 +37,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.radarcns.auth.exception.NotAuthorizedException;
+import org.radarcns.listener.managementportal.TokenManagerListener;
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
@@ -61,6 +63,8 @@ public class ManagementPortalEndPoint {
     private ServletContext context;
     @Context
     private HttpServletRequest request;
+
+    private static MpClient mpClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                        SUBJECTS                                            //
@@ -86,7 +90,9 @@ public class ManagementPortalEndPoint {
         try {
             checkPermission(getJWT(request), SUBJECT_READ);
             MpClient mpClient = new MpClient(context);
-            Response response = MpClient.getJsonResponse(mpClient.getSubjects());
+            Response response = Response.status(Status.OK).entity(mpClient.getAllSubjects(
+                    TokenManagerListener.getToken(context).getAccessToken()))
+                    .build();
             LOGGER.info("Response : " + response.toString());
             return response;
         } catch (AccessDeniedException exc) {
@@ -126,8 +132,9 @@ public class ManagementPortalEndPoint {
         try {
             checkPermissionOnProject(getJWT(request), SUBJECT_READ, studyName);
             MpClient mpClient = new MpClient(context);
-            Response response = MpClient.getJsonResponse(
-                    mpClient.getAllSubjectsFromStudy(studyName));
+            Response response = Response.status(Status.OK).entity(
+                    mpClient.getAllSubjectsFromStudy(studyName , TokenManagerListener.getToken
+                            (context).getAccessToken())).build();
             LOGGER.info("Response : " + response.toString());
             return response;
         } catch (AccessDeniedException exc) {
@@ -168,10 +175,10 @@ public class ManagementPortalEndPoint {
     ) {
         try {
             MpClient mpClient = new MpClient(context);
-            Subject subject = mpClient.getSubject(subjectId);
+            Subject subject = mpClient.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), SUBJECT_READ,
                     subject.getProject().getProjectName());
-            Response response = MpClient.getJsonResponse(subject);
+            Response response = Response.status(Status.OK).entity(subject).build();
             LOGGER.info("Response : " + response.toString());
             return response;
         } catch (AccessDeniedException exc) {
@@ -210,7 +217,9 @@ public class ManagementPortalEndPoint {
         try {
             checkPermission(getJWT(request), PROJECT_READ);
             MpClient mpClient = new MpClient(context);
-            Response response = MpClient.getJsonResponse(mpClient.getAllProjects());
+            Response response = Response.status(Status.OK).entity(mpClient.getAllProjects
+                    (TokenManagerListener.getToken(context)
+                    .getAccessToken())).build();
             LOGGER.info("Response : " + response.getEntity());
             return response;
         } catch (AccessDeniedException exc) {
@@ -252,8 +261,8 @@ public class ManagementPortalEndPoint {
         try {
             checkPermissionOnProject(getJWT(request), PROJECT_READ, projectName);
             MpClient mpClient = new MpClient(context);
-            Project project = mpClient.getProject(projectName);
-            Response response = MpClient.getJsonResponse(project);
+            Project project = mpClient.getProject(projectName , TokenManagerListener.getToken(context).getAccessToken());
+            Response response = Response.status(Status.OK).entity(project).build();
             LOGGER.info("Response : " + response.toString());
             return response;
         } catch (AccessDeniedException exc) {

@@ -41,6 +41,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.listener.managementportal.TokenManagerListener;
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
@@ -171,7 +172,8 @@ public class SubjectEndPoint {
     ) {
         try {
             MpClient client = new MpClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId , TokenManagerListener
+                    .getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), SUBJECT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request, getSubjectWorker(subjectId));
@@ -214,7 +216,7 @@ public class SubjectEndPoint {
     ) {
         try {
             MpClient client = new MpClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), SUBJECT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request, getSubjectWorker(subjectId));

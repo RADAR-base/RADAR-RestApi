@@ -47,6 +47,7 @@ import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.listener.managementportal.TokenManagerListener;
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.dataset.Dataset;
@@ -106,7 +107,7 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String sourceId) {
         try {
             MpClient client = new MpClient(context);
-            Subject sub = client.getSubject(subjectId);
+            Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
@@ -155,7 +156,7 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String sourceId) {
         try {
             MpClient client = new MpClient(context);
-            Subject sub = client.getSubject(subjectId);
+            Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
@@ -229,7 +230,7 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String sourceId) {
         try {
             MpClient client = new MpClient(context);
-            Subject sub = client.getSubject(subjectId);
+            Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
@@ -276,7 +277,7 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String sourceId) {
         try {
             MpClient client = new MpClient(context);
-            Subject sub = client.getSubject(subjectId);
+            Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
@@ -353,7 +354,7 @@ public class SensorEndPoint {
             @PathParam(END) long end) {
         try {
             MpClient client = new MpClient(context);
-            Subject sub = client.getSubject(subjectId);
+            Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
@@ -406,7 +407,7 @@ public class SensorEndPoint {
             @PathParam(END) long end) {
         try {
             MpClient client = new MpClient(context);
-            Subject sub = client.getSubject(subjectId);
+            Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,

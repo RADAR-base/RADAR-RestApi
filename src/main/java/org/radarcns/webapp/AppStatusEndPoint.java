@@ -40,6 +40,7 @@ import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.listener.managementportal.TokenManagerListener;
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.app.Application;
@@ -89,7 +90,7 @@ public class AppStatusEndPoint {
             @PathParam(SOURCE_ID) String sourceId) {
         try {
             MpClient client = new MpClient(context);
-            Subject sub = client.getSubject(subjectId);
+            Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
@@ -128,7 +129,7 @@ public class AppStatusEndPoint {
             @PathParam(SOURCE_ID) String sourceId) {
         try {
             MpClient client = new MpClient(context);
-            Subject sub = client.getSubject(subjectId);
+            Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,

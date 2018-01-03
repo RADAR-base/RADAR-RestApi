@@ -44,6 +44,7 @@ import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.listener.managementportal.TokenManagerListener;
 import org.radarcns.managementportal.MpClient;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.restapi.source.Source;
@@ -93,7 +94,8 @@ public class SourceEndPoint {
             @PathParam(SOURCE_ID) String sourceId) {
         try {
             MpClient client = new MpClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId , TokenManagerListener
+                    .getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
@@ -134,7 +136,7 @@ public class SourceEndPoint {
             @PathParam(SOURCE_ID) String sourceId) {
         try {
             MpClient client = new MpClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
@@ -274,7 +276,7 @@ public class SourceEndPoint {
             @PathParam(SUBJECT_ID) String subjectId) {
         try {
             MpClient client = new MpClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subjectId));
@@ -309,7 +311,7 @@ public class SourceEndPoint {
             @PathParam(SUBJECT_ID) String subjectId) {
         try {
             MpClient client = new MpClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subjectId));
