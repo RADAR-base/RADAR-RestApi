@@ -118,19 +118,6 @@ public class Project {
         return tag.isPresent() ? tag.get().getValue() : null;
     }
 
-    /**
-     * Converts the {@link String} to a {@link Project} entity.
-     * @param response {@link String} that has to be converted
-     * @return {@link Project} stored in the {@link String}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public static Project getObject(String response) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.readValue(response, Project.class);
-    }
-
     @Override
     public String toString() {
         return "Project{" + '\n'
@@ -141,30 +128,5 @@ public class Project {
             + "attributes=" + attributes + '}';
     }
 
-    /**
-     * Converts the {@link String} to a {@link ArrayList} of {@link Project} entity.
-     * @param jsonData {@link String} that has to be converted
-     * @return {@link ArrayList} of {@link Project} stored in the {@link String}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public  static List<Project> getAllObjects(String jsonData) throws IOException {
-        List<Project> allProjects = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        JsonFactory jsonFactory = objectMapper.getFactory();
-        JsonParser jp = jsonFactory.createParser(jsonData);
-
-        JsonNode root = objectMapper.readTree(jp);
-
-        Iterator<JsonNode> elements = root.elements();
-
-        while (elements.hasNext()) {
-            JsonNode currentProject = elements.next();
-            Project project = getObject(currentProject.toString());
-            allProjects.add(project);
-        }
-        return allProjects;
-    }
 }

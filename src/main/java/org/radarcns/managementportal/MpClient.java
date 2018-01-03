@@ -17,9 +17,11 @@
 package org.radarcns.managementportal;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static org.radarcns.listener.managementportal.TokenManagerListener.ACCESS_TOKEN;
+import static java.net.HttpURLConnection.HTTP_OK;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -39,7 +41,6 @@ import okhttp3.Response;
 import org.radarcns.config.managementportal.Properties;
 import org.radarcns.listener.managementportal.HttpClientListener;
 import org.radarcns.listener.managementportal.TokenManagerListener;
-import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.producer.rest.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,12 +51,21 @@ import org.slf4j.LoggerFactory;
 public class MpClient {
 
     private static final Logger logger = LoggerFactory.getLogger(MpClient.class);
+
     private final OkHttpClient client;
 
-    private OAuth2AccessTokenDetails token;
-    private ArrayList<Subject> subjects;
+    private List<Subject> subjects;
 
+    private static final ObjectMapper mapper;
 
+    static {
+        mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
     /**
      * Client to interact with the RADAR Management Portal.
      * @param context {@link ServletContext} useful to retrieve shared {@link OkHttpClient} and
@@ -64,19 +74,8 @@ public class MpClient {
      * @see HttpClientListener
      * @see TokenManagerListener
      */
-    public MpClient(ServletContext context) {
-        Objects.requireNonNull(context);
-
+    public MpClient(@Nonnull ServletContext context) {
         this.client = HttpClientListener.getClient(context);
-        OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context.getAttribute
-                (ACCESS_TOKEN);
-        if(currentToken.isExpired()) {
-            TokenManagerListener.refresh(context);
-            this.token = (OAuth2AccessTokenDetails) context.getAttribute(ACCESS_TOKEN);
-        }
-        else {
-            this.token = currentToken;
-        }
         subjects = null;
     }
 
@@ -86,27 +85,28 @@ public class MpClient {
      * the subjects from MP.
      * @return {@link ArrayList} of {@link Subject} if a subject is found
      */
-    public ArrayList<Subject> getSubjects() {
-        if (subjects == null) {
-            subjects = getAllSubjects();
-        }
-        return subjects;
-    }
+//    public List<Subject> getSubjects() {
+//        if (subjects == null) {
+//            subjects = getAllSubjects();
+//        }
+//        return subjects;
+//    }
 
     /**
      * Retrieves all {@link Subject} from Management Portal using {@link ServletContext} entity.
      * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
      */
-    private ArrayList<Subject> getAllSubjects() {
+    public List<Subject> getAllSubjects(String token) {
 
         try {
             URL getAllSubjects = new URL(Properties.validateMpUrl(), Properties.getSubjectPath());
-            Request getAllSubjectsRequest = this.buildRequest(getAllSubjects);
+            Request getAllSubjectsRequest = this.buildRequest(getAllSubjects, token);
             Response response = this.client.newCall(getAllSubjectsRequest).execute();
-            ArrayList<Subject> allSubjects = Subject
-                    .getAllSubjectsFromJson(response.body().string());
+            List<Subject> allSubjects = mapper.readValue(response.body().string(), mapper
+                    .getTypeFactory().constructCollectionType(List.class, Subject.class));
             logger.info("Retrieved Subjects from MP.");
             return allSubjects;
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
             logger.error("Cannot get valid url");
@@ -124,7 +124,7 @@ public class MpClient {
      * @param subjectLogin {@link String} that has to be searched.
      * @return {@link Subject} if a subject is found
      */
-    public Subject getSubject(@Nonnull String subjectLogin) {
+    public Subject getSubject(@Nonnull String subjectLogin , String token) {
         if (subjects != null) {
             for (Subject currentSubject : subjects) {
                 if (subjectLogin.equals(currentSubject.getLogin())) {
@@ -133,7 +133,7 @@ public class MpClient {
             }
         } else {
             try {
-                return retrieveSubject(subjectLogin);
+                return retrieveSubject(subjectLogin , token);
             } catch (IOException exc) {
                 logger.error("Error : ", exc.fillInStackTrace());
             }
@@ -148,18 +148,19 @@ public class MpClient {
      * @return {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
-    private Subject retrieveSubject(@Nonnull String subjectLogin) throws IOException {
+    private Subject retrieveSubject(@Nonnull String subjectLogin , @Nonnull String token) throws
+            IOException {
         if (subjects != null) {
-            return getSubject(subjectLogin);
+            return getSubject(subjectLogin , token);
         }
         try {
             URL getSubject = new URL(Properties.validateMpUrl(),
                     Properties.getSubjectPath() + "/" + subjectLogin);
-            Request getSubjectsRequest = this.buildRequest(getSubject);
+            Request getSubjectsRequest = this.buildRequest(getSubject , token);
             Response response = this.client.newCall(getSubjectsRequest).execute();
             if (response.isSuccessful()) {
-                Subject subject = Subject.getObject(response.body().string());
-                logger.info("Subject : " + subject.getJsonString());
+                Subject subject = mapper.readValue(response.body().string(), Subject.class);
+                logger.info("Subject : " + subject.toString());
                 return subject;
             }
             if (Integer.valueOf(HTTP_NOT_FOUND).equals(response.code())) {
@@ -181,7 +182,7 @@ public class MpClient {
      * @return {@link List} of {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
      */
-    public List<Subject> getAllSubjectsFromStudy(@Nonnull String studyName) throws
+    public List<Subject> getAllSubjectsFromStudy(@Nonnull String studyName , String token) throws
             IOException {
 
         if (subjects != null) {
@@ -193,10 +194,11 @@ public class MpClient {
         try {
             URL getSubjectsFromProject = new URL(Properties.validateMpUrl(),
                     Properties.getProjectPath() +"/" + studyName + '/' + SUBJECTS);
-            Request getSubjectsRequest = this.buildRequest(getSubjectsFromProject);
+            Request getSubjectsRequest = this.buildRequest(getSubjectsFromProject , token);
             Response response =  this.client.newCall(getSubjectsRequest).execute();
             if (response.isSuccessful()) {
-                List<Subject> allSubjects = Subject.getAllSubjectsFromJson(response.body().string());
+                List<Subject> allSubjects = mapper.readValue(response.body().string(), mapper
+                        .getTypeFactory().constructCollectionType(List.class, Subject.class));
                 logger.info("Retrieved Subjects from MP from Project " + studyName);
                 return allSubjects;
             } else if (response.code() == HTTP_NOT_FOUND) {
@@ -216,13 +218,14 @@ public class MpClient {
      * Retrieves all {@link Project} from Management Portal using {@link ServletContext} entity.
      * @return {@link ArrayList} of {@link Project} retrieved from the Management Portal
      */
-    public List<Project> getAllProjects() throws
+    public List<Project> getAllProjects(String token) throws
             MalformedURLException, URISyntaxException {
         URL getSubjectsFromProject = new URL(Properties.validateMpUrl(),
                 Properties.getProjectPath());
-        Request getAllProjects = this.buildRequest(getSubjectsFromProject);
+        Request getAllProjects = this.buildRequest(getSubjectsFromProject , token);
         try (Response response = this.client.newCall(getAllProjects).execute()) {
-            List<Project>  allProjects = Project.getAllObjects(response.body().string());
+            List<Project>  allProjects = mapper.readValue(response.body().string(), mapper
+                    .getTypeFactory().constructCollectionType(List.class, Project.class));
             logger.info("Retrieved Projects from MP");
             return allProjects;
         } catch (IOException e) {
@@ -237,16 +240,15 @@ public class MpClient {
      * @param projectName {@link String} of the Project that has to be retrieved
      * @return {@link Project} retrieved from the Management Portal
      */
-    public Project getProject(String projectName) throws IOException {
+    public Project getProject(String projectName , String token) throws IOException {
 
         try {
             URL getSubjectsFromProject = new URL(Properties.validateMpUrl(),
                     Properties.getProjectPath()+'/'+projectName);
-            Request getProject = this.buildRequest(getSubjectsFromProject);
+            Request getProject = this.buildRequest(getSubjectsFromProject , token);
             Response response =  this.client.newCall(getProject).execute();
-            String jsonData = RestClient.responseBody(response);
             if (response.isSuccessful()) {
-                Project project = Project.getObject(jsonData);
+                Project project = mapper.readValue(response.body().string(), Project.class);
                 logger.info("Retrieved project {} from MP", projectName);
                 return project;
             } else if (response.code() == HTTP_NOT_FOUND) {
@@ -274,10 +276,10 @@ public class MpClient {
         return javax.ws.rs.core.Response.status(status.getStatusCode()).entity(toJson).build();
     }
 
-    private Request buildRequest(URL url){
+    private Request buildRequest(URL url , String token){
         return new Request.Builder()
                 .addHeader("Accept", "application/json")
-                .addHeader("Authorization", "Bearer "+token.getAccessToken())
+                .addHeader("Authorization", "Bearer " + token)
                 .url(url)
                 .get()
                 .build();

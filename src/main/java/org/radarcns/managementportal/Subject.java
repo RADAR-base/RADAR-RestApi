@@ -120,6 +120,7 @@ public class Subject {
         return sources;
     }
 
+    @JsonIgnore
     public Project getProject() {
         return project;
     }
@@ -143,64 +144,14 @@ public class Subject {
         return attributes.get(key);
     }
 
-    /**
-     * Generates the {@link JsonNode} representation of the current instance.
-     * @return {@link JsonNode} serialising this object
-     * @throws IOException in case the serialisation cannot be complete
-     */
-    @JsonIgnore
-    public JsonNode getJson() throws IOException {
-        return mapper.readTree(getJsonString());
+    @Override
+    public String toString() {
+        return "Subject{" + '\n'
+                + "login=" + login + '\n'
+                + "externalId='" + externalId + "'\n"
+                + "externalLink='" + externalLink + "'\n"
+                + "status='" + status + "'\n"
+                + "project=" + project.getProjectName() + '}';
     }
 
-    /**
-     * Generates the JSON {@link String} representation of the current instance.
-     * @return {@link String} serialising this object
-     * @throws IOException in case the serialisation cannot be complete
-     */
-    @JsonIgnore
-    public String getJsonString() throws IOException {
-        return mapper.writeValueAsString(this);
-    }
-
-    /**
-     * Converts the {@link String} to a {@link Subject} entity.
-     * @param response {@link String} that has to be converted
-     * @return {@link Subject} stored in the {@link String}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public static Subject getObject(String response) throws IOException {
-        return mapper.readValue(response, Subject.class);
-    }
-
-    /**
-     * Converts the JSON {@link String} to a {@link ArrayList} of {@link Subject} entity.
-     * @param jsonString {@link String} that has to be converted
-     * @return {@link ArrayList} of {@link Subject} stored in the JSON {@link String}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public static ArrayList<Subject> getAllSubjectsFromJson(String jsonString) throws
-            IOException {
-
-        ArrayList<Subject> allSubjects = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        JsonFactory jsonFactory = objectMapper.getFactory();
-        JsonParser jp = jsonFactory.createParser(jsonString);
-
-        JsonNode root = objectMapper.readTree(jp);
-
-        Iterator<JsonNode> elements = root.elements();
-
-        while (elements.hasNext()) {
-            JsonNode currentSubject = elements.next();
-            Subject subject = getObject(currentSubject.toString());
-            allSubjects.add(subject);
-        }
-
-        return allSubjects;
-    }
 }
