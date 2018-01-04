@@ -22,7 +22,7 @@ public class ManagementPortalOAuth2 {
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalOAuth2.class);
 
     private static final String[] SCOPES = {"SUBJECT.READ", "PROJECT.READ", "SOURCE.READ",
-            "DEVICETYPE.READ", "MEASUREMENT.READ"};
+            "SOURCETYPE.READ", "MEASUREMENT.READ"};
     private static final String[] AUTHORITIES = {"ROLE_SYS_ADMIN", "ROLE_USER"};
     private static final String[] ROLES = {"PROJECT1:ROLE_PROJECT_ADMIN",
             "PROJECT2:ROLE_PARTICIPANT"};
