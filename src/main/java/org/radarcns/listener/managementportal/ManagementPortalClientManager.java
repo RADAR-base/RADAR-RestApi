@@ -21,6 +21,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -43,55 +44,36 @@ import org.slf4j.LoggerFactory;
  *      the {@link javax.servlet.ServletContext} in this way multiple function can make reuse of it.
  */
 @WebListener
-public class TokenManagerListener implements ServletContextListener {
+public class ManagementPortalClientManager implements ServletContextListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenManagerListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPortalClientManager.class);
 
-    public static final String ACCESS_TOKEN = "TOKEN";
+    private static final String ACCESS_TOKEN = "TOKEN";
+    private static final String MP_CLIENT = "MP_CLIENT";
+    private static final String OAUTH2_CLIENT = "OAUTH2_CLIENT";
 
-    private static final OAuth2Client client;
-
-    private static OAuth2AccessTokenDetails token;
-
-    static {
-        try {
-            client = new OAuth2Client()
-                    .tokenEndpoint(new URL(Properties.validateMpUrl() , Properties.getTokenPath()))
-                    .clientId(Properties.getOauthClientId())
-                    .clientSecret(Properties.getOauthClientSecret());
-            for(String scope : Properties.getOauthClientScopes().split(" ")) {
-                client.addScope(scope);
-            }
-        } catch (MalformedURLException exc) {
-            LOGGER.error("Properties cannot be loaded. Check the log for more information.", exc);
-            throw new ExceptionInInitializerError(exc);
-        }
-        token = new OAuth2AccessTokenDetails();
-    }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        try {
-            // set the OkHttpClient created from local managed pool
-            client.httpClient(HttpClientListener.getClient(sce.getServletContext()));
-            if (token.isExpired()) {
-                refresh(sce.getServletContext());
-            }
-        } catch (TokenException exc) {
-            LOGGER.warn("{} cannot be generated: {}", ACCESS_TOKEN, exc.getMessage());
-        }
+        getOAuth2Client(sce.getServletContext());
+        getToken(sce.getServletContext());
+        getManagementPortalClient(sce.getServletContext());
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // clear connection pool
-        client.getHttpClient().connectionPool().evictAll();
-        // clear current token (set to invalid, expired token)
-        token = new OAuth2AccessTokenDetails();
-        // clear the token from the context
-        sce.getServletContext().setAttribute(ACCESS_TOKEN, null);
+        ((OAuth2Client)sce.getServletContext().getAttribute(OAUTH2_CLIENT)).getHttpClient()
+                .connectionPool()
+                .evictAll();
 
+        // clear current token (set to invalid, expired token)
+        sce.getServletContext().setAttribute(ACCESS_TOKEN, null);
         LOGGER.info("{} has been invalidated.", ACCESS_TOKEN);
+        sce.getServletContext().setAttribute(OAUTH2_CLIENT, null);
+        sce.getServletContext().setAttribute(MP_CLIENT, null);
+
+
     }
 
     /**
@@ -103,33 +85,68 @@ public class TokenManagerListener implements ServletContextListener {
     private static synchronized void refresh(ServletContext context) throws TokenException {
         // Multiple threads can be waiting to enter this method when the token is expired, we need
         // only the first one to request a new token, subsequent threads can safely exit immediately
-        if (!token.isExpired()) {
+        OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context.getAttribute
+                (ACCESS_TOKEN);
+        if (Objects.nonNull(currentToken) && !currentToken.isExpired()) {
             return;
         }
 
-        token = client.getAccessToken();
+        currentToken = getOAuth2Client(context).getAccessToken();
 
-        context.setAttribute(ACCESS_TOKEN, token);
+        context.setAttribute(ACCESS_TOKEN, currentToken);
 
         // we need to supply date in millis, token.getIssueDate() and getExpiresIn() are in seconds
         LOGGER.info("Refreshed token at {} valid till {}", getDate(Instant.now().toEpochMilli()),
-                getDate((token.getIssueDate() + token.getExpiresIn()) * 1000));
+                getDate((currentToken.getIssueDate() + currentToken.getExpiresIn()) * 1000));
     }
 
     private static String getDate(long time) {
         return new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS").format(new Date(time));
     }
 
-    public synchronized static OAuth2AccessTokenDetails getToken(ServletContext context) {
+    private static synchronized OAuth2AccessTokenDetails getToken(ServletContext context) {
         OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context.getAttribute
                 (ACCESS_TOKEN);
-        if(((OAuth2AccessTokenDetails) context.getAttribute
-                (ACCESS_TOKEN)).isExpired()) {
+        if(Objects.isNull(currentToken) || currentToken.isExpired()) {
             refresh(context);
             return  (OAuth2AccessTokenDetails) context.getAttribute(ACCESS_TOKEN);
         }
         else {
            return currentToken;
         }
+    }
+
+    public static ManagementPortalClient getManagementPortalClient(ServletContext context) {
+        ManagementPortalClient managementPortalClient = (ManagementPortalClient) context.getAttribute(MP_CLIENT);
+        if(Objects.isNull(managementPortalClient)){
+            managementPortalClient = new ManagementPortalClient
+                    (HttpClientListener.getClient(context));
+        }
+        managementPortalClient.updateToken(getToken(context));
+        return managementPortalClient;
+    }
+
+    private static OAuth2Client getOAuth2Client(ServletContext context) {
+        OAuth2Client oAuth2Client = (OAuth2Client) context.getAttribute(OAUTH2_CLIENT);
+        if (Objects.isNull(oAuth2Client)) {
+            try {
+                oAuth2Client = new OAuth2Client()
+                        .tokenEndpoint(
+                                new URL(Properties.validateMpUrl(), Properties.getTokenPath()))
+                        .clientId(Properties.getOauthClientId())
+                        .clientSecret(Properties.getOauthClientSecret());
+
+                oAuth2Client.httpClient(HttpClientListener.getClient(context));
+
+                for (String scope : Properties.getOauthClientScopes().split(" ")) {
+                    oAuth2Client.addScope(scope);
+                }
+            } catch (MalformedURLException exc) {
+                LOGGER.error("Properties cannot be loaded. Check the log for more information.",
+                        exc);
+                throw new ExceptionInInitializerError(exc);
+            }
+        }
+        return oAuth2Client;
     }
 }

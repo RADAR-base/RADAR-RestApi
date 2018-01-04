@@ -28,6 +28,8 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.io.IOException;
+import java.util.Objects;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -39,8 +41,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.listener.managementportal.TokenManagerListener;
-import org.radarcns.managementportal.MpClient;
+import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.security.exception.AccessDeniedException;
@@ -87,9 +89,10 @@ public class ManagementPortalEndPoint {
     public Response getAllSubjectsJson() {
         try {
             checkPermission(getJWT(request), SUBJECT_READ);
-            MpClient mpClient = new MpClient(context);
-            Response response = Response.status(Status.OK).entity(mpClient.getAllSubjects(
-                    TokenManagerListener.getToken(context).getAccessToken()))
+            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
+            Response response = Response.status(Status.OK)
+                    .entity(managementPortalClient.getAllSubjects())
                     .build();
             LOGGER.info("Response : " + response.toString());
             return response;
@@ -99,11 +102,9 @@ public class ManagementPortalEndPoint {
         } catch (NotAuthorizedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                    + "completed. If this error persists, please contact "
-                    + "the service administrator.");
+        } catch (IOException exe) {
+            LOGGER.error(exe.getMessage(), exe);
+            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
         }
     }
 
@@ -124,15 +125,13 @@ public class ManagementPortalEndPoint {
     @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getAllSubjectsJsonFromStudy(
-            @PathParam(STUDY_NAME) String studyName
-    ) {
+    public Response getAllSubjectsJsonFromStudy(@PathParam(STUDY_NAME) String studyName) {
         try {
             checkPermissionOnProject(getJWT(request), SUBJECT_READ, studyName);
-            MpClient mpClient = new MpClient(context);
+            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
             Response response = Response.status(Status.OK).entity(
-                    mpClient.getAllSubjectsFromStudy(studyName , TokenManagerListener.getToken
-                            (context).getAccessToken())).build();
+                    managementPortalClient.getAllSubjectsFromStudy(studyName)).build();
             LOGGER.info("Response : " + response.toString());
             return response;
         } catch (AccessDeniedException exc) {
@@ -141,11 +140,11 @@ public class ManagementPortalEndPoint {
         } catch (NotAuthorizedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
+        } catch (IOException exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
                     + "completed. If this error persists, please contact "
-                    + "the service administrator.");
+                    + "the service administrator. \n " + exec.getMessage());
         }
     }
 
@@ -168,12 +167,15 @@ public class ManagementPortalEndPoint {
                     + "given subject identifier")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getSubjectJson(
-            @PathParam(SUBJECT_ID) String subjectId
-    ) {
+    public Response getSubjectJson(@PathParam(SUBJECT_ID) String subjectId) {
         try {
-            MpClient mpClient = new MpClient(context);
-            Subject subject = mpClient.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
+            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
+            Subject subject = managementPortalClient.getSubject(subjectId);
+            if (Objects.isNull(subject)) {
+                return ResponseHandler.getJsonNotFoundResponse(request, "Subject not found "
+                        + "with subject-id :" + subjectId);
+            }
             checkPermissionOnProject(getJWT(request), SUBJECT_READ,
                     subject.getProject().getProjectName());
             Response response = Response.status(Status.OK).entity(subject).build();
@@ -214,10 +216,11 @@ public class ManagementPortalEndPoint {
     public Response getAllProjectsJson() {
         try {
             checkPermission(getJWT(request), PROJECT_READ);
-            MpClient mpClient = new MpClient(context);
-            Response response = Response.status(Status.OK).entity(mpClient.getAllProjects
-                    (TokenManagerListener.getToken(context)
-                    .getAccessToken())).build();
+            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
+            Response response = Response.status(Status.OK)
+                    .entity(managementPortalClient.getAllProjects
+                            ()).build();
             LOGGER.info("Response : " + response.getEntity());
             return response;
         } catch (AccessDeniedException exc) {
@@ -253,13 +256,12 @@ public class ManagementPortalEndPoint {
                     + "given subject identifier")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getProjectJson(
-            @PathParam(PROJECT_NAME) String projectName
-    ) {
+    public Response getProjectJson(@PathParam(PROJECT_NAME) String projectName) {
         try {
             checkPermissionOnProject(getJWT(request), PROJECT_READ, projectName);
-            MpClient mpClient = new MpClient(context);
-            Project project = mpClient.getProject(projectName , TokenManagerListener.getToken(context).getAccessToken());
+            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
+            Project project = managementPortalClient.getProject(projectName);
             Response response = Response.status(Status.OK).entity(project).build();
             LOGGER.info("Response : " + response.toString());
             return response;

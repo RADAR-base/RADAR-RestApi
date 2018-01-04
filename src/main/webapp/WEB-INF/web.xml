@@ -60,7 +60,7 @@
         <listener-class>org.radarcns.listener.managementportal.PropertiesListener</listener-class>
     </listener>
     <listener>
-        <listener-class>org.radarcns.listener.managementportal.TokenManagerListener</listener-class>
+        <listener-class>org.radarcns.listener.managementportal.ManagementPortalClientManager</listener-class>
     </listener>
 
 </web-app>

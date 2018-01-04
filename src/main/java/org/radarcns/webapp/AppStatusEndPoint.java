@@ -40,8 +40,8 @@ import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
-import org.radarcns.listener.managementportal.TokenManagerListener;
-import org.radarcns.managementportal.MpClient;
+import org.radarcns.listener.managementportal.ManagementPortalClientManager;
+import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.security.Param;
@@ -89,8 +89,9 @@ public class AppStatusEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
         try {
-            MpClient client = new MpClient(context);
-            Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
+            Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
@@ -128,8 +129,9 @@ public class AppStatusEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
         try {
-            MpClient client = new MpClient(context);
-            Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
+            Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getJWT(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,

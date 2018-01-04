@@ -172,6 +172,7 @@ public class ResponseHandler {
         }
     }
 
+
     //TODO return 400 in case of parameter does not respect regex
     /**
      * It sets the status code.
@@ -216,5 +217,27 @@ public class ResponseHandler {
                 + obj.getSchema().getName() + " is not supported yet");
         }
         return Status.OK;
+    }
+
+    /**
+     * It sets the suitable status code and return a JSON message containing the input String.
+     * @param request HTTP request that has to be served
+     * @param message to provide more information about the error
+     * @return the response content formatted in JSON
+     **/
+    public static Response getJsonNotFoundResponse(HttpServletRequest request,
+            String message) {
+        Status status = Status.NO_CONTENT;
+        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
+
+        SpecificRecord obj = new Message(message);
+
+        JsonNode json = AvroConverter.avroToJsonNode(obj);
+
+        LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+
+        return Response.status(status.getStatusCode())
+                .entity(new StatusMessage("notfound", "Not Found!", json))
+                .build();
     }
 }

@@ -41,8 +41,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.SubjectDataAccessObject;
-import org.radarcns.listener.managementportal.TokenManagerListener;
-import org.radarcns.managementportal.MpClient;
+import org.radarcns.listener.managementportal.ManagementPortalClientManager;
+import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
 import org.radarcns.security.Param;
@@ -171,9 +171,9 @@ public class SubjectEndPoint {
             @PathParam(SUBJECT_ID) String subjectId
     ) {
         try {
-            MpClient client = new MpClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId , TokenManagerListener
-                    .getToken(context).getAccessToken());
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getJWT(request), SUBJECT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request, getSubjectWorker(subjectId));
@@ -215,8 +215,9 @@ public class SubjectEndPoint {
             @PathParam(SUBJECT_ID) String subjectId
     ) {
         try {
-            MpClient client = new MpClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId , TokenManagerListener.getToken(context).getAccessToken());
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
+            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getJWT(request), SUBJECT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request, getSubjectWorker(subjectId));
