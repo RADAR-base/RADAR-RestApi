@@ -29,15 +29,12 @@ configurations {
 }
 
 repositories {
-  // Use 'jcenter' for resolving your dependencies.
-  // You can declare any Maven/Ivy/file repository here.
-  // For working with dev-branches
   jcenter()
-  mavenCentral()
-  maven { url 'http://packages.confluent.io/maven/' }
-  maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
+  // Non-jcenter radar releases
   maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
+  // For working with dev-branches
   maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
+  // Github code
   maven { url 'https://jitpack.io' }
 }
 
