@@ -63,10 +63,11 @@ public class ManagementPortalClientManager implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // clear connection pool
-        ((OAuth2Client)sce.getServletContext().getAttribute(OAUTH2_CLIENT)).getHttpClient()
-                .connectionPool()
-                .evictAll();
-
+       OAuth2Client oAuth2Client = (OAuth2Client)sce.getServletContext().getAttribute
+                (OAUTH2_CLIENT);
+       if(Objects.nonNull(oAuth2Client)) {
+           oAuth2Client.getHttpClient().connectionPool().evictAll();
+       }
         // clear current token (set to invalid, expired token)
         sce.getServletContext().setAttribute(ACCESS_TOKEN, null);
         LOGGER.info("{} has been invalidated.", ACCESS_TOKEN);
