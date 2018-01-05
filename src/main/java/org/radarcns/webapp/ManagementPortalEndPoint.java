@@ -16,20 +16,16 @@
 
 package org.radarcns.webapp;
 
-import static org.radarcns.auth.authorization.Permission.PROJECT_READ;
 import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
-import static org.radarcns.webapp.util.BasePath.PROJECT;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
-import static org.radarcns.webapp.util.Parameter.STUDY_NAME;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Objects;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -45,7 +41,6 @@ import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.exception.TokenException;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
-import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -111,48 +106,6 @@ public class ManagementPortalEndPoint {
     }
 
 
-    /**
-     * JSON function that returns all available subject based on the Study ID (Project ID).
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + PROJECT + "/{" + STUDY_NAME + "}" + "/" + SUBJECTS)
-    @Operation(summary = "Return a list of subjects contained within a study",
-            description = "Each subject can have multiple sourceID associated with him")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description =
-            "No value for the given parameters, in the body"
-                    + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getAllSubjectsJsonFromStudy(@PathParam(STUDY_NAME) String studyName) {
-        try {
-            checkPermissionOnProject(getJWT(request), SUBJECT_READ, studyName);
-            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Response response = Response.status(Status.OK).entity(
-                    managementPortalClient.getAllSubjectsFromStudy(studyName)).build();
-            LOGGER.info("Response : " + response.toString());
-            return response;
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (IOException exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                    + "completed. If this error persists, please contact "
-                    + "the service administrator. \n " + exec.getMessage());
-        } catch (TokenException exe) {
-            LOGGER.error(exe.getMessage(), exe);
-            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
-        }
-    }
-
 
     /**
      * JSON function that returns all information related to the given subject identifier.
@@ -198,89 +151,6 @@ public class ManagementPortalEndPoint {
         }
     }
 
-    //--------------------------------------------------------------------------------------------//
-    //                                       PROJECTS                                             //
-    //--------------------------------------------------------------------------------------------//
-
-    /**
-     * JSON function that returns all available projects.
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + PROJECT)
-    @Operation(summary = "Return a list of projects",
-            description = "Each project can have multiple deviceID associated with it")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description =
-            "No value for the given parameters, in the body"
-                    + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getAllProjectsJson() {
-        try {
-            checkPermission(getJWT(request), PROJECT_READ);
-            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Response response = Response.status(Status.OK)
-                    .entity(managementPortalClient.getAllProjects
-                            ()).build();
-            LOGGER.info("Response : " + response.getEntity());
-            return response;
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (TokenException | MalformedURLException exe) {
-            LOGGER.error(exe.getMessage(), exe);
-            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
-        }
-    }
 
 
-    /**
-     * JSON function that returns all information related to the given project identifier.
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + PROJECT + "/{" + PROJECT_NAME + "}")
-    @Operation(summary = "Return the information related to given project identifier",
-            description = "Each project can have multiple deviceID associated with it")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description =
-            "No value for the given parameters, in the body"
-                    + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description =
-            "Return the subject.avsc object associated with the "
-                    + "given subject identifier")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getProjectJson(@PathParam(PROJECT_NAME) String projectName) {
-        try {
-            checkPermissionOnProject(getJWT(request), PROJECT_READ, projectName);
-            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Project project = managementPortalClient.getProject(projectName);
-            Response response = Response.status(Status.OK).entity(project).build();
-            LOGGER.info("Response : " + response.toString());
-            return response;
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (TokenException | MalformedURLException exe) {
-            LOGGER.error(exe.getMessage(), exe);
-            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
-        } catch (IOException exe) {
-            LOGGER.error(exe.getMessage(), exe);
-            return ResponseHandler.getJsonErrorResponse(request, "Cannot deserialize  "
-                    + "project response received");
-        }
-    }
 }
