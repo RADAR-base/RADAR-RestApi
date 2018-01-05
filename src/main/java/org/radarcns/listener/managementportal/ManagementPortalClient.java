@@ -210,7 +210,7 @@ public class ManagementPortalClient {
      * @return {@link ArrayList} of {@link Project} retrieved from the Management Portal
      */
     public List<Project> getAllProjects() throws
-            MalformedURLException, URISyntaxException {
+            MalformedURLException {
         URL getAllProjectsUrl = new URL(Properties.validateMpUrl(),
                 Properties.getProjectPath());
         Request getAllProjects = this.buildGetRequest(getAllProjectsUrl);

@@ -29,6 +29,7 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Objects;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +42,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.radarcns.auth.exception.NotAuthorizedException;
+import org.radarcns.exception.TokenException;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Project;
@@ -102,7 +104,7 @@ public class ManagementPortalEndPoint {
         } catch (NotAuthorizedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (IOException exe) {
+        } catch (IOException | TokenException exe) {
             LOGGER.error(exe.getMessage(), exe);
             return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
         }
@@ -145,6 +147,9 @@ public class ManagementPortalEndPoint {
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
                     + "completed. If this error persists, please contact "
                     + "the service administrator. \n " + exec.getMessage());
+        } catch (TokenException exe) {
+            LOGGER.error(exe.getMessage(), exe);
+            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
         }
     }
 
@@ -187,9 +192,9 @@ public class ManagementPortalEndPoint {
         } catch (NotAuthorizedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
+        } catch (TokenException exe) {
+            LOGGER.error(exe.getMessage(), exe);
+            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
         }
     }
 
@@ -229,11 +234,9 @@ public class ManagementPortalEndPoint {
         } catch (NotAuthorizedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                    + "completed. If this error persists, please contact"
-                    + " the service administrator.");
+        } catch (TokenException | MalformedURLException exe) {
+            LOGGER.error(exe.getMessage(), exe);
+            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
         }
     }
 
@@ -271,9 +274,13 @@ public class ManagementPortalEndPoint {
         } catch (NotAuthorizedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
+        } catch (TokenException | MalformedURLException exe) {
+            LOGGER.error(exe.getMessage(), exe);
+            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
+        } catch (IOException exe) {
+            LOGGER.error(exe.getMessage(), exe);
+            return ResponseHandler.getJsonErrorResponse(request, "Cannot deserialize  "
+                    + "project response received");
         }
     }
 }

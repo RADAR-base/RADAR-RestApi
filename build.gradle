@@ -17,7 +17,7 @@ ext.radarCommons = '0.7.1-SNAPSHOT'
 ext.radarSchema = '0.2.3'
 ext.swagger = '2.0.0-rc3'
 ext.tomcat = '8.0.47'
-ext.radarAuthClientUtilVersion = '0.3.2'
+ext.radarAuthClientUtilVersion = '0.3.3-SNAPSHOT'
 ext.radarAuthVersion = '0.3.2'
 ext.wireMockVersion = '2.5.1'
 ext.jacksonVersion = '2.9.3'
@@ -36,6 +36,7 @@ repositories {
   maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
   // Github code
   maven { url 'https://jitpack.io' }
+  flatDir { dir 'localrepo'}
 }
 
 dependencies {

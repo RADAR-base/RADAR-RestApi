@@ -56,8 +56,13 @@ public class ManagementPortalClientManager implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         getOAuth2Client(sce.getServletContext());
-        getToken(sce.getServletContext());
-        getManagementPortalClient(sce.getServletContext());
+        try {
+            getToken(sce.getServletContext());
+            getManagementPortalClient(sce.getServletContext());
+        } catch (TokenException e) {
+            LOGGER.warn("Cannot initialize ManagementPortal Client due to Token exception " , e);
+        }
+
     }
 
     @Override
@@ -105,7 +110,8 @@ public class ManagementPortalClientManager implements ServletContextListener {
         return new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS").format(new Date(time));
     }
 
-    private static synchronized OAuth2AccessTokenDetails getToken(ServletContext context) {
+    private static synchronized OAuth2AccessTokenDetails getToken(ServletContext context)
+            throws TokenException {
         OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context.getAttribute
                 (ACCESS_TOKEN);
         if(Objects.isNull(currentToken) || currentToken.isExpired()) {
@@ -117,7 +123,8 @@ public class ManagementPortalClientManager implements ServletContextListener {
         }
     }
 
-    public static ManagementPortalClient getManagementPortalClient(ServletContext context) {
+    public static ManagementPortalClient getManagementPortalClient(ServletContext context)
+            throws TokenException {
         ManagementPortalClient managementPortalClient = (ManagementPortalClient) context.getAttribute(MP_CLIENT);
         if(Objects.isNull(managementPortalClient)){
             managementPortalClient = new ManagementPortalClient
