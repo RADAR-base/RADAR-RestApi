@@ -65,7 +65,7 @@ public class SourceEndPointTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceEndPointTest.class);
 
-    private static final String SUBJECT = "UserID_0";
+    private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";

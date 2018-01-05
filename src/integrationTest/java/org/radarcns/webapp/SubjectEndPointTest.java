@@ -56,7 +56,7 @@ import org.radarcns.restapi.subject.Subject;
 import org.radarcns.webapp.util.BasePath;
 
 public class SubjectEndPointTest {
-    private static final String SUBJECT = "UserID_0";
+    private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
     private static final String STUDY = "0";
     private static final String SOURCE_TYPE = org.radarcns.unit.config.TestCatalog.EMPATICA;

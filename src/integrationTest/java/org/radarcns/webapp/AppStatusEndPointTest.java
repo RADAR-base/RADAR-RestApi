@@ -47,7 +47,7 @@ import org.radarcns.restapi.app.Application;
 import org.radarcns.webapp.util.BasePath;
 
 public class AppStatusEndPointTest {
-    private static final String SUBJECT = "UserID_0";
+    private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
