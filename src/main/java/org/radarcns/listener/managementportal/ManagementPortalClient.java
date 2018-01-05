@@ -37,6 +37,7 @@ import org.radarcns.config.managementportal.Properties;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
+import org.radarcns.webapp.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,31 +175,32 @@ public class ManagementPortalClient {
      * Retrieves all {@link Subject} from a study (or project) in the Management Portal using {@link
      * ServletContext} entity.
      *
-     * @param studyName {@link String} the study from which subjects to be retrieved
+     * @param projectName {@link String} the study from which subjects to be retrieved
      * @return {@link List} of {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException in case the subjects cannot be retrieved.
      */
-    public List<Subject> getAllSubjectsFromStudy(@Nonnull String studyName) throws
-            IOException {
+    public List<Subject> getAllSubjectsFromProject(@Nonnull String projectName) throws
+            IOException, NotFoundException {
 
         if (subjects != null) {
             return subjects.stream()
-                    .filter(s -> studyName.equals(s.getProject().getProjectName()))
+                    .filter(s -> projectName.equals(s.getProject().getProjectName()))
                     .collect(Collectors.toList());
         }
 
         URL getSubjectFromProjectUrl = new URL(Properties.validateMpUrl(),
-                Properties.getProjectPath() + "/" + studyName + '/' + SUBJECTS);
+                Properties.getProjectPath() + "/" + projectName + '/' + SUBJECTS);
         Request getSubjectsRequest = this.buildGetRequest(getSubjectFromProjectUrl);
         Response response = this.client.newCall(getSubjectsRequest).execute();
         if (response.isSuccessful()) {
             List<Subject> allSubjects = mapper.readValue(response.body().string(), mapper
                     .getTypeFactory().constructCollectionType(List.class, Subject.class));
-            logger.info("Retrieved Subjects from MP from Project " + studyName);
+            logger.info("Retrieved Subjects from MP from Project " + projectName);
             return allSubjects;
         } else if (response.code() == HTTP_NOT_FOUND) {
-            logger.info("Subjects for study {} are not present", studyName);
-            return null;
+            logger.info("Couldn't get any subjects for project :", projectName);
+            throw  new NotFoundException("Cannot find any subjects under project : " +projectName
+                    + "No subjects registered under this project or invalid projectName" );
         }
         return null;
     }
@@ -209,18 +211,16 @@ public class ManagementPortalClient {
      * @return {@link ArrayList} of {@link Project} retrieved from the Management Portal
      */
     public List<Project> getAllProjects() throws
-            MalformedURLException {
+            IOException {
         URL getAllProjectsUrl = new URL(Properties.validateMpUrl(),
                 Properties.getProjectPath());
         Request getAllProjects = this.buildGetRequest(getAllProjectsUrl);
-        try (Response response = this.client.newCall(getAllProjects).execute()) {
+        Response response = this.client.newCall(getAllProjects).execute();
+        if (response.isSuccessful()) {
             List<Project> allProjects = mapper.readValue(response.body().string(), mapper
                     .getTypeFactory().constructCollectionType(List.class, Project.class));
             logger.info("Retrieved Projects from MP");
             return allProjects;
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error("Cannot retrieve projects");
         }
         return null;
     }
@@ -231,9 +231,9 @@ public class ManagementPortalClient {
      * @param projectName {@link String} of the Project that has to be retrieved
      * @return {@link Project} retrieved from the Management Portal
      */
-    public Project getProject(String projectName) throws IOException {
+    public Project getProject(String projectName) throws IOException, NotFoundException {
 
-        try {
+
             URL getProjectFromProjectName = new URL(Properties.validateMpUrl(),
                     Properties.getProjectPath() + '/' + projectName);
             Request getProject = this.buildGetRequest(getProjectFromProjectName);
@@ -243,15 +243,11 @@ public class ManagementPortalClient {
                 logger.info("Retrieved project {} from MP", projectName);
                 return project;
             } else if (response.code() == HTTP_NOT_FOUND) {
-                logger.info("Project {} is not present", projectName);
-                return null;
+                logger.info("Couldn't get project details for project :", projectName);
+                throw  new NotFoundException("Cannot project data for project-name : " +projectName
+                        + " Invalid projectName" );
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error("Cannot execute request to retrieve project : {}", projectName);
             return null;
-        }
-        return null;
     }
 
 //    /**

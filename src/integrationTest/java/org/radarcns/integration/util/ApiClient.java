@@ -103,7 +103,7 @@ public class ApiClient extends ExternalResource {
      *
      * @param relativePath path relative to the base URL, without starting slash.
      * @param accept Accept Header for content negotiation
-     * @param expectedResponse response codes that are considered valid. If none are given, any
+     * @param expectedResponseCode response codes that are considered valid. If none are given, any
      *                         success response code is considered valid.
      *
      * @return HTTP Response
@@ -112,7 +112,7 @@ public class ApiClient extends ExternalResource {
      *                        if no expectedResponse is provided if the response code does not
      *                        indicate success.
      */
-    public Response request(String relativePath, String accept, Status... expectedResponse)
+    public Response request(String relativePath, String accept, Status... expectedResponseCode)
             throws IOException {
         Request request = this.client.requestBuilder(relativePath)
                 .addHeader("User-Agent", "Mozilla/5.0")
@@ -120,14 +120,14 @@ public class ApiClient extends ExternalResource {
                 .header("Authorization", "Bearer " + token.getAccessToken())
                 .build();
 
-        logger.info("Requesting {} expecting code {}", request.url(), expectedResponse);
+        logger.info("Requesting {} expecting code {}", request.url(), expectedResponseCode);
 
         Response response = client.request(request);
-        if (expectedResponse.length == 0) {
+        if (expectedResponseCode.length == 0) {
             assertTrue(response.isSuccessful());
         } else {
             assertThat(Status.fromStatusCode(response.code()),
-                    anyOf(Arrays.stream(expectedResponse)
+                    anyOf(Arrays.stream(expectedResponseCode)
                             .map(CoreMatchers::equalTo)
                             .collect(Collectors.toList())));
         }

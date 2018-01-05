@@ -16,6 +16,7 @@
 
 package org.radarcns.webapp.util;
 
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -227,7 +228,7 @@ public class ResponseHandler {
      **/
     public static Response getJsonNotFoundResponse(HttpServletRequest request,
             String message) {
-        Status status = NO_CONTENT;
+        Status status = NOT_FOUND;
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
         SpecificRecord obj = new Message(message);
