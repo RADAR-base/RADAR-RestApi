@@ -83,7 +83,7 @@ public class UserDaoTest {
         Cohort cohort = SubjectDataAccessObject.getAllSubjects(client);
 
         assertEquals(1, cohort.getSubjects().size());
-        assertEquals(3, cohort.getSubjects().get(0).getSources().size());
+        assertEquals(2, cohort.getSubjects().get(0).getSources().size());
 
         dropAndClose(client);
     }
