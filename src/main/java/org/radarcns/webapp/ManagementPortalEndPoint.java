@@ -56,8 +56,6 @@ public class ManagementPortalEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPortalEndPoint.class);
 
-    private static final String PROJECT_NAME = "projectName";
-
     @Context
     private ServletContext context;
     @Context
