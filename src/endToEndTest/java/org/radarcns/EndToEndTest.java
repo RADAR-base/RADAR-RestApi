@@ -84,7 +84,7 @@ public class EndToEndTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EndToEndTest.class);
 
-    private static final String USER_ID_MOCK = "UserID_0";
+    private static final String USER_ID_MOCK = "sub-1";
     private static final String SOURCE_ID_MOCK = "SourceID_0";
 
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
