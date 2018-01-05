@@ -50,8 +50,8 @@ task installSimpleStack(type: Exec, dependsOn: [buildDocker, simpleConfigJson, s
   commandLine sudoLinux + [dockerCompose, 'up', '-d', '--build']
 
   doLast {
-    // wait until the hotstorage is ready
-    sleep(10_000)
+    // wait until the hotstorage and managementportal are ready
+    sleep(60_000)
   }
 }
 
