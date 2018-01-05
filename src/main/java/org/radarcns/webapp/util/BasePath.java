@@ -19,27 +19,23 @@ package org.radarcns.webapp.util;
 /**
  * Static class listing of constants used to created End Point base path.
  */
-public class BasePath {
+public interface BasePath {
 
-    public static final String ANDROID = "android";
-    public static final String AVRO = "avro";
-    public static final String DATA = "data";
-    public static final String GET_ALL_SOURCES = "getAllSources";
-    public static final String GET_ALL_SUBJECTS = "getAllSubjects";
-    public static final String GET_SUBJECT = "getSubject";
-    public static final String REALTIME = "realTime";
-    public static final String SPECIFICATION = "specification";
-    public static final String SOURCE = "source";
-    public static final String SUBJECT = "subject";
-    public static final String STATUS = "status";
-    public static final String STATE = "state";
-    public static final String PROJECT = "projects";
-    public static final String SUBJECTS = "subjects";
-    public static final String AVRO_BINARY = "avro/binary";
+    String ANDROID = "android";
+    String AVRO = "avro";
+    String DATA = "data";
+    String GET_ALL_SOURCES = "getAllSources";
+    String GET_ALL_SUBJECTS = "getAllSubjects";
+    String GET_SUBJECT = "getSubject";
+    String REALTIME = "realTime";
+    String SPECIFICATION = "specification";
+    String SOURCE = "source";
+    String SUBJECT = "subject";
+    String STATUS = "status";
+    String STATE = "state";
+    String PROJECT = "projects";
+    String SUBJECTS = "subjects";
+    String AVRO_BINARY = "avro/binary";
 
-
-    private BasePath() {
-        //Static Class
-    }
 
 }
