@@ -8,7 +8,7 @@ import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.security.GeneralSecurityException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -21,6 +21,10 @@ import org.apache.avro.specific.SpecificRecord;
 import org.hamcrest.CoreMatchers;
 import org.junit.rules.ExternalResource;
 import org.radarcns.config.ServerConfig;
+import org.radarcns.config.managementportal.Properties;
+import org.radarcns.exception.TokenException;
+import org.radarcns.oauth.OAuth2AccessTokenDetails;
+import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.producer.rest.ManagedConnectionPool;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
@@ -28,14 +32,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Client to a REST API. Sets up the Management Portal WireMock and authentication.
+ * Client to a REST API. Sets up the authorization against Management Portal
  */
 public class ApiClient extends ExternalResource {
     private static final Logger logger = LoggerFactory.getLogger(ApiClient.class);
 
     private final ServerConfig config;
-    private final ManagementPortalOAuth2 oauth2;
-    private final ManagementPortalWireMock wireMock;
+
+    private final OAuth2Client oAuth2Client;
+
+    private final OAuth2AccessTokenDetails token ;
+
     private RestClient client;
 
     /**
@@ -45,12 +52,28 @@ public class ApiClient extends ExternalResource {
      */
     public ApiClient(ServerConfig config) {
         this.config = config;
+
         try {
-            this.oauth2 = new ManagementPortalOAuth2();
-        } catch (GeneralSecurityException | IOException e) {
-            throw new AssertionError("Token Utils cannot be initialized", e);
+            RestApiClientDetails restApiClientDetails  = RestApiClientDetails
+                    .getRestApiClientDetails();
+            this.oAuth2Client = new OAuth2Client()
+                    .clientId(restApiClientDetails.getClientId())
+                    .clientSecret(restApiClientDetails.getClientSecret())
+                    .tokenEndpoint(
+                            new URL(new URL(restApiClientDetails.getManagementPortalUrl()),
+                                    restApiClientDetails.getTokenEndpoint()));
+
+            for (String scope : restApiClientDetails.getClientScopes().split(" ")) {
+                oAuth2Client.addScope(scope);
+            }
+
+            this.token = this.oAuth2Client.getAccessToken();
+
+        } catch (MalformedURLException e) {
+            throw new AssertionError("Cannot create a valid url to access management portal", e);
+        } catch (TokenException e) {
+            throw new AssertionError("Cannot get a valid access token", e);
         }
-        this.wireMock = new ManagementPortalWireMock();
     }
 
     /**
@@ -71,9 +94,9 @@ public class ApiClient extends ExternalResource {
     }
 
     @Override
-    protected void before() throws Throwable {
+    protected void before() throws TokenException {
+
         this.client = new RestClient(config, 120, new ManagedConnectionPool());
-        this.wireMock.before();
     }
 
     /**
@@ -95,7 +118,7 @@ public class ApiClient extends ExternalResource {
         Request request = this.client.requestBuilder(relativePath)
                 .addHeader("User-Agent", "Mozilla/5.0")
                 .addHeader("Accept", accept)
-                .header("Authorization", "Bearer " + oauth2.getAccessToken())
+                .header("Authorization", "Bearer " + token.getAccessToken())
                 .build();
 
         logger.info("Requesting {} expecting code {}", request.url(), expectedResponse);
@@ -167,7 +190,7 @@ public class ApiClient extends ExternalResource {
 
     @Override
     protected void after() {
-        this.wireMock.after();
         this.client.close();
+        this.oAuth2Client.getHttpClient().connectionPool().evictAll();
     }
 }

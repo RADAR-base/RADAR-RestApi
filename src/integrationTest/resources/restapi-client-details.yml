@@ -1,0 +1,5 @@
+oauth_client_id: radar_dashboard
+oauth_client_secret: secret
+oauth_client_scopes: SUBJECT.READ PROJECT.READ SOURCE.READ SOURCETYPE.READ MEASUREMENT.READ
+management_portal_url: http://localhost:8090/
+token_endpoint: oauth/token
