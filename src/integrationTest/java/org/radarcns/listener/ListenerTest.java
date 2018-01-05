@@ -34,9 +34,21 @@ public class ListenerTest {
 
         assertEquals(true, MongoDbContextListener.checkMongoConnection(client));
 
+        client = new MongoClient(new ServerAddress("localhost", 27017),
+                client.getCredentialsList().get(0), client.getMongoClientOptions());
+        assertEquals(true, MongoDbContextListener.checkMongoConnection(client));
+    }
+
+    @Test
+    public void testWrongConfigConnection() throws Exception {
+        MongoClient client = Utility.getMongoClient();
+
+        assertEquals(true, MongoDbContextListener.checkMongoConnection(client));
+
         client = new MongoClient(new ServerAddress("localhosts", 27017),
                 client.getCredentialsList().get(0), client.getMongoClientOptions());
         assertEquals(false, MongoDbContextListener.checkMongoConnection(client));
     }
+
 
 }

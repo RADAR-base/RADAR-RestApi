@@ -76,14 +76,14 @@ public class UserDaoTest {
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE,
                 SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
-        docs.addAll(RandomInput.getDocumentsRandom(SUBJECT, SOURCE.concat("1"),
+        docs.addAll(RandomInput.getDocumentsRandom(SUBJECT, SOURCE.concat("XYZ1"),
                 SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
         collection.insertMany(docs);
 
         Cohort cohort = SubjectDataAccessObject.getAllSubjects(client);
 
         assertEquals(1, cohort.getSubjects().size());
-        assertEquals(2, cohort.getSubjects().get(0).getSources().size());
+        assertEquals(3, cohort.getSubjects().get(0).getSources().size());
 
         dropAndClose(client);
     }
