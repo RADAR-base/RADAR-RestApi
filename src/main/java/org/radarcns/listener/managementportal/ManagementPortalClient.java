@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,9 +83,9 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link Subject} from the already computed list of subjects
-     * using {@link ArrayList} of {@link Subject} else it calls a method for retrieving
-     * the subjects from MP.
+     * Retrieves all {@link Subject} from the already computed list of subjects using {@link
+     * ArrayList} of {@link Subject} else it calls a method for retrieving the subjects from MP.
+     *
      * @return {@link ArrayList} of {@link Subject} if a subject is found
      */
     public List<Subject> getSubjects() throws IOException {
@@ -142,7 +141,7 @@ public class ManagementPortalClient {
      *
      * @param subjectLogin {@link String} of the Subject that has to be retrieved
      * @return {@link Subject} retrieved from the Management Portal
-     * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
+     * @throws MalformedURLException in case the subjects cannot be retrieved.
      */
     private Subject retrieveSubject(@Nonnull String subjectLogin) throws
             IOException {
@@ -177,7 +176,7 @@ public class ManagementPortalClient {
      *
      * @param studyName {@link String} the study from which subjects to be retrieved
      * @return {@link List} of {@link Subject} retrieved from the Management Portal
-     * @throws MalformedURLException,URISyntaxException in case the subjects cannot be retrieved.
+     * @throws MalformedURLException in case the subjects cannot be retrieved.
      */
     public List<Subject> getAllSubjectsFromStudy(@Nonnull String studyName) throws
             IOException {
@@ -199,7 +198,7 @@ public class ManagementPortalClient {
             return allSubjects;
         } else if (response.code() == HTTP_NOT_FOUND) {
             logger.info("Subjects for study {} are not present", studyName);
-            String body = response.message();
+            return null;
         }
         return null;
     }

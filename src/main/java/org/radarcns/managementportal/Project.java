@@ -18,14 +18,6 @@ package org.radarcns.managementportal;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,6 +99,7 @@ public class Project {
 
     /**
      * Gets the project attribute (e.g. tag) associated with the given {@link String} key.
+     *
      * @param key {@link String} tag key
      * @return {@link String} value associated with the given key
      */
@@ -121,11 +114,11 @@ public class Project {
     @Override
     public String toString() {
         return "Project{" + '\n'
-            + "id=" + id + '\n'
-            + "projectName='" + projectName + "'\n"
-            + "organization='" + organization + "'\n"
-            + "location='" + location + "'\n"
-            + "attributes=" + attributes + '}';
+                + "id=" + id + '\n'
+                + "projectName='" + projectName + "'\n"
+                + "organization='" + organization + "'\n"
+                + "location='" + location + "'\n"
+                + "attributes=" + attributes + '}';
     }
 
 

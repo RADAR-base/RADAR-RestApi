@@ -227,7 +227,7 @@ public class ResponseHandler {
      **/
     public static Response getJsonNotFoundResponse(HttpServletRequest request,
             String message) {
-        Status status = Status.NO_CONTENT;
+        Status status = NO_CONTENT;
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
         SpecificRecord obj = new Message(message);

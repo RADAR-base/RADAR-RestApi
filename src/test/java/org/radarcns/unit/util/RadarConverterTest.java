@@ -142,6 +142,7 @@ public class RadarConverterTest {
         assertEquals("temperature", RadarConverter.getSensorName("THERMOMETER"));
     }
 
+    @Test
     public void getSourceTypeTest() {
         assertEquals(ANDROID,
                 RadarConverter.getSourceType(ANDROID));

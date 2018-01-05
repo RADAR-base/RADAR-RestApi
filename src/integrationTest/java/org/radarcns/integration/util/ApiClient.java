@@ -21,7 +21,6 @@ import org.apache.avro.specific.SpecificRecord;
 import org.hamcrest.CoreMatchers;
 import org.junit.rules.ExternalResource;
 import org.radarcns.config.ServerConfig;
-import org.radarcns.config.managementportal.Properties;
 import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.oauth.OAuth2Client;
