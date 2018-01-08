@@ -111,7 +111,7 @@ task integrationTest(type: Test, dependsOn: ['copyFrontendConfigIntegrationTest'
 }
 integrationTest.finalizedBy 'stopSimpleStack'
 
-task endToEndTest(type: Test, dependsOn: ['copyFrontendConfigEndToEndTest', 'installRadarStack', 'listDockerProcesses']) {
+task endToEndTest(type: Test, dependsOn: ['copyFrontendConfigEndToEndTest', 'installRadarStack']) {
     description = "Run end to end tests (located in src/endToEndTest/...)."
 
     testClassesDirs = sourceSets.endToEndTest.output.classesDirs

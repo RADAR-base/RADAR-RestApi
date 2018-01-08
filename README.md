@@ -4,7 +4,7 @@
 
 A REST-FULL Service using Tomcat 8.0.37, MongoDb 3.2.10, Swagger 2.0, Apache Avro 1.7.7 and Jersey 2.
 
-Thi project implements the downstream REST API for the RADAR-CNS project'
+This project implements the downstream REST API for the RADAR-CNS project'
 
 ## Setup
 This project uses `git submodule`. When cloning, please use the command `git clone --recursive`. For already cloned repos, use `git submodule update --init --recursive` to update modules.

@@ -24,7 +24,7 @@ public class PipelineConfig extends BasicMockConfig {
     @JsonProperty("rest_api")
     private ServerConfig restApi;
 
-    private ServerConfig frontend;
+//    private ServerConfig frontend;
 
     public ServerConfig getRestApi() {
         return restApi;
@@ -34,11 +34,11 @@ public class PipelineConfig extends BasicMockConfig {
         this.restApi = restApi;
     }
 
-    public ServerConfig getFrontend() {
-        return frontend;
-    }
+//    public ServerConfig getFrontend() {
+//        return frontend;
+//    }
 
-    public void setFrontend(ServerConfig frontend) {
-        this.frontend = frontend;
-    }
+//    public void setFrontend(ServerConfig frontend) {
+//        this.frontend = frontend;
+//    }
 }

@@ -107,10 +107,10 @@ public class EndToEndTest {
         "android_empatica_e4_inter_beat_interval",
         "android_empatica_e4_inter_beat_interval_10sec",
         "android_empatica_e4_temperature",
-        "android_empatica_e4_temperature_10sec",
-        "application_server_status",
-        "application_record_counts",
-        "application_uptime"
+        "android_empatica_e4_temperature_10sec"
+//        "application_server_status",
+//        "application_record_counts",
+//        "application_uptime"
     };
 
     // Latency expressed in second
@@ -119,16 +119,16 @@ public class EndToEndTest {
     private static File dataRoot;
     private static PipelineConfig pipelineConfig;
 
-    @Rule
-    public ManagementPortalWireMock wireMock = new ManagementPortalWireMock();
+//    @Rule
+//    public ManagementPortalWireMock wireMock = new ManagementPortalWireMock();
 
     @SuppressWarnings("ConstantConditions")
     @Rule
     public ApiClient apiClient = new ApiClient(pipelineConfig.getRestApi());
 
-    @SuppressWarnings("ConstantConditions")
-    @Rule
-    public ApiClient frontendClient = new ApiClient(pipelineConfig.getFrontend());
+//    @SuppressWarnings("ConstantConditions")
+//    @Rule
+//    public ApiClient frontendClient = new ApiClient(pipelineConfig.getFrontend());
 
     /**
      * Test initialisation. It loads the config file and waits that the infrastructure is ready
@@ -491,14 +491,14 @@ public class EndToEndTest {
      *
      * @throws MalformedURLException if the used URL is malformed
      */
-    @Test
-    public void checkSwaggerConfig() throws IOException {
-        String response = apiClient.requestString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
-        JsonNode node = new ObjectMapper().readTree(response);
-        assertTrue(node.has("servers"));
-        String serverUrl = node.get("servers").elements().next().get("url").asText();
-        assertEquals(Properties.getApiConfig().getApiUrl(), serverUrl);
-    }
+//    @Test
+//    public void checkSwaggerConfig() throws IOException {
+//        String response = apiClient.requestString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
+//        JsonNode node = new ObjectMapper().readTree(response);
+//        assertTrue(node.has("servers"));
+//        String serverUrl = node.get("servers").elements().next().get("url").asText();
+//        assertEquals(Properties.getApiConfig().getApiUrl(), serverUrl);
+//    }
 
     /**
      * Checks the correctness of the deployed frontend configuration file making the request via
@@ -507,16 +507,16 @@ public class EndToEndTest {
      * @throws IOException either if the used URL is malformed or the response containing the
      *      downloaded file cannot be parsed.
      */
-    @Test
-    public void checkFrontendConfig()
-            throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        LOGGER.info("Checking Frontend pipelineConfig ...");
-
-        String actual = frontendClient.requestString(
-                "/config/" + CONFIG_JSON, APPLICATION_JSON, Status.OK);
-        String expected = Utility.readAll(
-                EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
-
-        assertEquals(actual, expected);
-    }
+//    @Test
+//    public void checkFrontendConfig()
+//            throws IOException, NoSuchAlgorithmException, KeyManagementException {
+//        LOGGER.info("Checking Frontend pipelineConfig ...");
+//
+//        String actual = frontendClient.requestString(
+//                "/config/" + CONFIG_JSON, APPLICATION_JSON, Status.OK);
+//        String expected = Utility.readAll(
+//                EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
+//
+//        assertEquals(actual, expected);
+//    }
 }

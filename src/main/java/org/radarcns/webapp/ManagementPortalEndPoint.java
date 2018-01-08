@@ -130,7 +130,7 @@ public class ManagementPortalEndPoint {
             Subject subject = managementPortalClient.getSubject(subjectId);
             if (Objects.isNull(subject)) {
                 return ResponseHandler.getJsonNotFoundResponse(request, "Subject not found "
-                        + "with subject-id :" + subjectId);
+                        + "with subject-id : " + subjectId);
             }
             checkPermissionOnProject(getJWT(request), SUBJECT_READ,
                     subject.getProject().getProjectName());
