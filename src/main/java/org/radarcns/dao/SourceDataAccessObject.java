@@ -1,5 +1,3 @@
-package org.radarcns.dao;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,6 +14,8 @@ package org.radarcns.dao;
  * limitations under the License.
  */
 
+package org.radarcns.dao;
+
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.ArrayList;
@@ -23,12 +23,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
-import org.radarcns.avro.restapi.source.Source;
-import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.mongo.util.MongoDataAccess;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.monitor.Monitors;
+import org.radarcns.restapi.source.Source;
+import org.radarcns.restapi.subject.Subject;
 
 /**
  * Data Access Object for subject management.
@@ -41,12 +40,12 @@ public class SourceDataAccessObject {
      * @param source is the SourceID
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
-     * @return {@link SourceType} associated with the given source
+     * @return source type associated with the given source
      *
      * @throws ConnectException if MongoDb instance is not available
      */
-    public static SourceType getSourceType(String source, ServletContext context)
-        throws ConnectException {
+    public static String getSourceType(String source, ServletContext context)
+            throws ConnectException {
         return getSourceType(source, MongoHelper.getClient(context));
     }
 
@@ -55,13 +54,13 @@ public class SourceDataAccessObject {
      *
      * @param source is the SourceID
      * @param client MongoDB client
-     * @return {@link SourceType} associated with the given source
+     * @return source type associated with the given source
      *
      * @throws ConnectException if MongoDb instance is not available
      */
-    public static SourceType getSourceType(String source, MongoClient client)
+    public static String getSourceType(String source, MongoClient client)
             throws ConnectException {
-        SourceType type = MongoDataAccess.getSourceType(source, client);
+        String type = MongoDataAccess.getSourceType(source, client);
 
         if (type == null) {
             type = SensorDataAccessObject.getInstance().getSourceType(source, client);
@@ -86,11 +85,9 @@ public class SourceDataAccessObject {
      *      results cache
      * @return a {@code Subject} object
      * @throws ConnectException if MongoDB is not available
-     *
-     * @see {@link Subject}
      */
     public static Subject findAllSourcesByUser(String subject, ServletContext context)
-        throws ConnectException {
+            throws ConnectException {
         return findAllSourcesByUser(subject, MongoHelper.getClient(context));
     }
 
@@ -101,8 +98,6 @@ public class SourceDataAccessObject {
      * @param client MongoDb client
      * @return a {@code Subject} object
      * @throws ConnectException if MongoDB is not available
-     *
-     * @see {@link Subject}
      */
     public static Subject findAllSourcesByUser(String subject, MongoClient client)
             throws ConnectException {

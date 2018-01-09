@@ -1,5 +1,3 @@
-package org.radarcns.dao.mongo.data.sensor;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,20 +14,22 @@ package org.radarcns.dao.mongo.data.sensor;
  * limitations under the License.
  */
 
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MEDIAN;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
+package org.radarcns.dao.mongo.data.sensor;
+
 import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
+import static org.radarcns.restapi.header.DescriptiveStatistic.MEDIAN;
+import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.bson.Document;
-import org.radarcns.avro.restapi.data.Acceleration;
-import org.radarcns.avro.restapi.data.Quartiles;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.mongo.util.MongoSensor;
+import org.radarcns.restapi.data.Acceleration;
+import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -43,7 +43,7 @@ public class AccelerationFormat extends MongoSensor {
 
     //private static final Logger LOGGER = LoggerFactory.getLogger(AccelerationFormat.class);
 
-    public AccelerationFormat(SensorType sensorType) {
+    public AccelerationFormat(String sensorType) {
         super(DataFormat.ACCELERATION_FORMAT, sensorType);
     }
 
@@ -77,8 +77,8 @@ public class AccelerationFormat extends MongoSensor {
             case QUARTILES: return new Acceleration(
                     new Quartiles(
                         x.get(0).getDouble(FIRST_QUARTILE),
-                        x.get(1).getDouble(SECOND_QUARTILE),
-                        x.get(2).getDouble(THIRD_QUARTILE)),
+                        x.get(1).getDouble(FIRST_QUARTILE),
+                        x.get(2).getDouble(FIRST_QUARTILE)),
                     new Quartiles(
                         y.get(0).getDouble(FIRST_QUARTILE),
                         y.get(1).getDouble(SECOND_QUARTILE),
@@ -105,7 +105,15 @@ public class AccelerationFormat extends MongoSensor {
     }
 
     @Override
-    protected double extractCount(Document doc ) {
-        return (doc.getDouble(X_LABEL) + doc.getDouble(Y_LABEL) + doc.getDouble(Z_LABEL)) / 3.0d;
+    @SuppressWarnings("unchecked")
+    protected int extractCount(Object value) {
+        List<Document> docs = (List<Document>) value;
+        return (intProperty(docs.get(0), X_LABEL)
+                + intProperty(docs.get(1), Y_LABEL)
+                + intProperty(docs.get(2), Z_LABEL)) / 3;
+    }
+
+    private static int intProperty(Document doc, String key) {
+        return ((Number)doc.get(key)).intValue();
     }
 }

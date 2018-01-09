@@ -1,14 +1,10 @@
 package org.radarcns.security.filter;
 
-import org.apache.http.HttpHeaders;
-import org.radarcns.auth.authentication.TokenValidator;
-import org.radarcns.auth.config.ServerConfig;
-import org.radarcns.auth.config.YamlServerConfig;
-import org.radarcns.auth.exception.TokenValidationException;
-import org.radarcns.config.managementportal.config.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Locale;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -17,11 +13,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Locale;
+import org.radarcns.auth.authentication.TokenValidator;
+import org.radarcns.auth.config.ServerConfig;
+import org.radarcns.auth.config.YamlServerConfig;
+import org.radarcns.auth.exception.TokenValidationException;
+import org.radarcns.config.managementportal.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by dverbeec on 27/09/2017. Updated in Rest-Api by yatharthranjan on 10/11/2017.
@@ -89,7 +87,7 @@ public class AuthenticationFilter implements Filter {
 
     private String getToken(ServletRequest request) {
         HttpServletRequest req = (HttpServletRequest) request;
-        String authorizationHeader = req.getHeader(HttpHeaders.AUTHORIZATION);
+        String authorizationHeader = req.getHeader("Authorization");
 
         // Check if the HTTP Authorization header is present and formatted correctly
         if (authorizationHeader == null

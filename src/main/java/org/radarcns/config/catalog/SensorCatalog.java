@@ -1,12 +1,3 @@
-package org.radarcns.config.catalog;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.HashMap;
-import org.radarcns.avro.restapi.sensor.DataType;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.sensor.Unit;
-import org.radarcns.dao.mongo.data.sensor.DataFormat;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -23,13 +14,21 @@ import org.radarcns.dao.mongo.data.sensor.DataFormat;
  * limitations under the License.
  */
 
+package org.radarcns.config.catalog;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashMap;
+import org.radarcns.catalogue.ProcessingState;
+import org.radarcns.catalogue.Unit;
+import org.radarcns.dao.mongo.data.sensor.DataFormat;
+
 /**
  * Sensor specification. It is used to define a sensor providing all available information.
  */
 public class SensorCatalog {
 
     /** Sensor name. **/
-    private SensorType name;
+    private String name;
 
     /** Sample rate measured in Hz: number of samples generated within a second. **/
     private Double frequency;
@@ -41,10 +40,9 @@ public class SensorCatalog {
 
     /** Explains if the sample is a RAW data or it is the result of a computation. In the second
      *      case, it reports who has computed the value.
-     * @see DataType
      **/
     @JsonProperty("data_type")
-    private DataType dataType;
+    private ProcessingState dataType;
 
     /**
      * Defines at which {@code Data Class} the sensor belongs to. A {@code Data Class} is a
@@ -63,8 +61,8 @@ public class SensorCatalog {
     }
 
     /** Constructor. **/
-    public SensorCatalog(SensorType name, Double frequency, Unit unit,
-            DataType dataType, DataFormat dataFormat, HashMap<String, String> collections) {
+    public SensorCatalog(String name, Double frequency, Unit unit,
+            ProcessingState dataType, DataFormat dataFormat, HashMap<String, String> collections) {
         this.name = name;
         this.frequency = frequency;
         this.unit = unit;
@@ -73,11 +71,11 @@ public class SensorCatalog {
         this.collections = collections;
     }
 
-    public SensorType getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(SensorType name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -97,11 +95,11 @@ public class SensorCatalog {
         this.unit = unit;
     }
 
-    public DataType getDataType() {
+    public ProcessingState getDataType() {
         return dataType;
     }
 
-    public void setDataType(DataType dataType) {
+    public void setDataType(ProcessingState dataType) {
         this.dataType = dataType;
     }
 

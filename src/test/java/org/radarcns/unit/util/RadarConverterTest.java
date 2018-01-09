@@ -1,5 +1,3 @@
-package org.radarcns.unit.util;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,22 +14,20 @@ package org.radarcns.unit.util;
  * limitations under the License.
  */
 
+package org.radarcns.unit.util;
+
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.AVERAGE;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MAXIMUM;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MEDIAN;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MINIMUM;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.SUM;
-import static org.radarcns.avro.restapi.sensor.SensorType.ACCELEROMETER;
-import static org.radarcns.avro.restapi.sensor.SensorType.BATTERY;
-import static org.radarcns.avro.restapi.sensor.SensorType.BLOOD_VOLUME_PULSE;
-import static org.radarcns.avro.restapi.sensor.SensorType.ELECTRODERMAL_ACTIVITY;
-import static org.radarcns.avro.restapi.sensor.SensorType.HEART_RATE;
-import static org.radarcns.avro.restapi.sensor.SensorType.INTER_BEAT_INTERVAL;
-import static org.radarcns.avro.restapi.sensor.SensorType.THERMOMETER;
+import static org.radarcns.restapi.header.DescriptiveStatistic.AVERAGE;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
+import static org.radarcns.restapi.header.DescriptiveStatistic.MAXIMUM;
+import static org.radarcns.restapi.header.DescriptiveStatistic.MEDIAN;
+import static org.radarcns.restapi.header.DescriptiveStatistic.MINIMUM;
+import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
+import static org.radarcns.restapi.header.DescriptiveStatistic.SUM;
+import static org.radarcns.unit.config.TestCatalog.ANDROID;
+import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
+import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -40,10 +36,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
-import org.radarcns.avro.restapi.app.ServerStatus;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.util.RadarConverter;
 
 public class RadarConverterTest {
@@ -135,40 +130,36 @@ public class RadarConverterTest {
 
     @Test
     public void getSensorNameTest() {
-        assertEquals("acceleration", RadarConverter.getSensorName(ACCELEROMETER));
-        assertEquals("battery", RadarConverter.getSensorName(BATTERY));
+        assertEquals("acceleration", RadarConverter.getSensorName("ACCELEROMETER"));
+        assertEquals("battery", RadarConverter.getSensorName("BATTERY"));
         assertEquals("blood_volume_pulse",
-                RadarConverter.getSensorName(BLOOD_VOLUME_PULSE));
+                RadarConverter.getSensorName("BLOOD_VOLUME_PULSE"));
         assertEquals("electrodermal_activity",
-                RadarConverter.getSensorName(ELECTRODERMAL_ACTIVITY));
-        assertEquals("heart_rate", RadarConverter.getSensorName(HEART_RATE));
+                RadarConverter.getSensorName("ELECTRODERMAL_ACTIVITY"));
+        assertEquals("heart_rate", RadarConverter.getSensorName("HEART_RATE"));
         assertEquals("inter_beat_interval",
-                RadarConverter.getSensorName(INTER_BEAT_INTERVAL));
-        assertEquals("temperature", RadarConverter.getSensorName(THERMOMETER));
+                RadarConverter.getSensorName("INTER_BEAT_INTERVAL"));
+        assertEquals("temperature", RadarConverter.getSensorName("THERMOMETER"));
     }
 
-    @Test( expected = IllegalArgumentException.class)
     public void getSourceTypeTest() {
-        assertEquals(SourceType.ANDROID,
-                RadarConverter.getSourceType(SourceType.ANDROID.toString()));
-        assertEquals(SourceType.BIOVOTION,
-                RadarConverter.getSourceType(SourceType.BIOVOTION.toString()));
-        assertEquals(SourceType.EMPATICA,
-                RadarConverter.getSourceType(SourceType.EMPATICA.toString()));
-        assertEquals(SourceType.PEBBLE,
-                RadarConverter.getSourceType(SourceType.PEBBLE.toString()));
-
-        RadarConverter.getSourceType(SourceType.PEBBLE.toString().concat("test"));
+        assertEquals(ANDROID,
+                RadarConverter.getSourceType(ANDROID));
+        assertEquals(BIOVOTION,
+                RadarConverter.getSourceType(BIOVOTION));
+        assertEquals(EMPATICA,
+                RadarConverter.getSourceType(EMPATICA));
+        assertEquals("PEBBLE",
+                RadarConverter.getSourceType("PEBBLE"));
     }
 
     @Test
     public void getSecondTest() {
-        assertEquals(10, RadarConverter.getSecond(TimeFrame.TEN_SECOND), 0);
-        assertEquals(30, RadarConverter.getSecond(TimeFrame.THIRTY_SECOND), 0);
-        assertEquals(60, RadarConverter.getSecond(TimeFrame.ONE_MIN), 0);
-        assertEquals(600, RadarConverter.getSecond(TimeFrame.TEN_MIN), 0);
-        assertEquals(3600, RadarConverter.getSecond(TimeFrame.ONE_HOUR), 0);
-        assertEquals(3600 * 24, RadarConverter.getSecond(TimeFrame.ONE_DAY), 0);
-        assertEquals(3600 * 24 * 7, RadarConverter.getSecond(TimeFrame.ONE_WEEK), 0);
+        assertEquals(10, RadarConverter.getSecond(TimeWindow.TEN_SECOND), 0);
+        assertEquals(60, RadarConverter.getSecond(TimeWindow.ONE_MIN), 0);
+        assertEquals(600, RadarConverter.getSecond(TimeWindow.TEN_MIN), 0);
+        assertEquals(3600, RadarConverter.getSecond(TimeWindow.ONE_HOUR), 0);
+        assertEquals(3600 * 24, RadarConverter.getSecond(TimeWindow.ONE_DAY), 0);
+        assertEquals(3600 * 24 * 7, RadarConverter.getSecond(TimeWindow.ONE_WEEK), 0);
     }
 }

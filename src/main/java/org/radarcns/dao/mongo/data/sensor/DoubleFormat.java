@@ -1,5 +1,3 @@
-package org.radarcns.dao.mongo.data.sensor;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,18 +14,19 @@ package org.radarcns.dao.mongo.data.sensor;
  * limitations under the License.
  */
 
+package org.radarcns.dao.mongo.data.sensor;
+
 import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
 
 import java.util.ArrayList;
 import org.bson.Document;
-import org.radarcns.avro.restapi.data.DoubleSample;
-import org.radarcns.avro.restapi.data.Quartiles;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.mongo.util.MongoSensor;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -37,7 +36,7 @@ public class DoubleFormat extends MongoSensor {
 
     //private static final Logger LOGGER = LoggerFactory.getLogger(DoubleFormat.class);
 
-    public DoubleFormat(SensorType sensorType) {
+    public DoubleFormat(String sensorType) {
         super(DataFormat.DOUBLE_FORMAT, sensorType);
     }
 

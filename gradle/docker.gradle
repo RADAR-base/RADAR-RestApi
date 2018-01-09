@@ -1,0 +1,343 @@
+//---------------------------------------------------------------------------//
+// Preparing WAR                                                             //
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+// Docker Utility                                                            //
+//---------------------------------------------------------------------------//
+ext.dockerCompose = hasProperty('dockerComposePath') ? property('dockerComposePath') : 'docker-compose'
+ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
+
+//---------------------------------------------------------------------------//
+// Simple Stack [ for integration test ]                                     //
+//---------------------------------------------------------------------------//
+ext.simpleStackPath = 'src/integrationTest'
+ext.simpleStackLock = "${simpleStackPath}/.RUNNING_INSTANCE_LOCK"
+ext.radarVolumePath = "${simpleStackPath}/volumes/radar"
+
+task buildDocker(type: Exec) {
+  commandLine sudoLinux + ['docker', 'image', 'build', '-t', 'radarcns/radar-restapi:dev', '.']
+}
+
+task simpleConfigJson(type: Copy) {
+  from "${simpleStackPath}/resources"
+  exclude 'radar.yml'
+  exclude 'keystore.jks'
+  into "${radarVolumePath}"
+}
+
+task simpleRadarJson(type: Copy) {
+  from "${simpleStackPath}/resources/radar.yml"
+  into "${radarVolumePath}"
+
+  filter { String line ->
+    line.replace("localhost: 27017", "hotstorage: 27017")
+  }
+}
+
+task installSimpleStack(type: Exec, dependsOn: [buildDocker, simpleConfigJson, simpleRadarJson]) {
+  doFirst{
+    def lockFile = new File(simpleStackLock)
+    if (lockFile.exists()) {
+      throw new GradleException("A previous instance of the simple stack is still running. Please stop it first and then try again.")
+    } else {
+      lockFile.createNewFile()
+    }
+  }
+
+  workingDir simpleStackPath
+  standardInput = System.in
+  commandLine sudoLinux + [dockerCompose, 'up', '-d', '--build']
+
+  doLast {
+    // wait until the hotstorage is ready
+    sleep(10_000)
+  }
+}
+
+task stopSimpleStack(type: Exec) {
+  onlyIf {
+    new File(simpleStackLock).exists()
+  }
+  standardInput = System.in
+  workingDir simpleStackPath
+  commandLine sudoLinux + [dockerCompose, 'down', '-v']
+  doLast{
+    new File(simpleStackLock).delete()
+  }
+}
+
+task cleanSimpleStack(type: Delete, dependsOn: stopSimpleStack) {
+  delete "${simpleStackPath}/volumes"
+  delete simpleStackLock
+}
+
+stopSimpleStack.finalizedBy cleanSimpleStack
+
+//---------------------------------------------------------------------------//
+// End to End Test                                                           //
+//---------------------------------------------------------------------------//
+ext.e2ePath = 'src/endToEndTest'
+ext.radarStackPath = "${e2ePath}/dockerRadar/dcompose-stack/radar-cp-hadoop-stack"
+ext.radarStackLock = "${radarStackPath}/.RUNNING_INSTANCE_LOCK"
+ext.radarDockerCompose = 'docker-compose.yml'
+ext.radarDockerComposeOriginal = ".${radarDockerCompose}.orig"
+ext.radarVolumes = file("${radarStackPath}/volumes")
+
+task radarEnv(type: Copy) {
+  from "${radarStackPath}/etc/env.template"
+  into "${radarStackPath}"
+  rename 'env.template', '.env'
+
+  filter { String line ->
+    line.replace('/usr/local/var/lib/docker', radarVolumes.getAbsolutePath())
+            .replace('HOTSTORAGE_USERNAME=<mongodb-user>', 'HOTSTORAGE_USERNAME=restapi')
+            .replace('HOTSTORAGE_PASSWORD=XXXXXXXX', 'HOTSTORAGE_PASSWORD=radarcns')
+            .replace('HOTSTORAGE_NAME=<mongodb-database>', 'HOTSTORAGE_NAME=hotstorage')
+            .replace('POSTGRES_USER=<postgresdb-user>', 'POSTGRES_USER=mp')
+            .replace('POSTGRES_PASSWORD=<postgresdb-pwd>', 'POSTGRES_PASSWORD=mpstorages')
+            .replace('FROM_EMAIL=<from-email>', 'FROM_EMAIL=me@example.com')
+  }
+}
+
+task radarConfigJson(type: Copy) {
+  from "${radarStackPath}/etc"
+  into "${radarStackPath}/etc"
+  include { f -> f.name.endsWith '.template' }
+  rename '(.+).template', '$1'
+}
+
+task radarRestConfigJson(type: Copy) {
+  from "${radarStackPath}/etc/rest-api/radar.yml.template"
+  into "${radarStackPath}/etc/rest-api"
+  rename '(.+).template', '$1'
+}
+
+task radarMpInfo(type: Copy) {
+  from "${e2ePath}/resources"
+  into "${radarStackPath}/etc/rest-api"
+  exclude 'radar.yml'
+}
+
+task radarDockerComposeOrig(type: Copy) {
+  from "${radarStackPath}/docker-compose.yml"
+  into radarStackPath
+  rename 'docker-compose.yml', '.docker-compose.yml.orig'
+  eachFile {
+    if (it.getRelativePath().getFile(file(radarStackPath)).exists()) {
+      it.exclude()
+    }
+  }
+}
+
+task mpRadarEnv(type: Copy) {
+  from "${radarStackPath}/etc/managementportal/config"
+  into "${radarStackPath}/etc/managementportal/config"
+  rename '(.+).template', '$1'
+}
+
+task radarRedcapInfo(type: Copy) {
+  from "${radarStackPath}/etc/redcap-integration/radar.yml.template"
+  into "${radarStackPath}/etc/redcap-integration"
+  rename '(.+).template', '$1'
+}
+
+// Sets configuration files for running the entire platform
+task setRadarEnvironmentForDocker(dependsOn: [buildDocker, radarEnv, radarConfigJson, radarRestConfigJson, radarMpInfo, radarRedcapInfo, radarDockerComposeOrig, mpRadarEnv]) {
+  doLast {
+    def volumes = file("${radarStackPath}/volumes")
+    volumes.mkdir()
+
+    def installScript = file("${radarStackPath}/install-radar-stack.sh")
+    installScript.text = installScript.text.replace(' docker-compose ', " ${dockerCompose} ")
+
+    def dockerComposeYml = file("${radarStackPath}/${radarDockerCompose}")
+    dockerComposeYml.text = dockerComposeYml.text.replaceAll('radarcns/radar-restapi:.*', 'radarcns/radar-restapi:dev')
+    dockerComposeYml.text += "\n\n  wiremock:\n" +
+            "    image: radarcns/wiremock\n" +
+            "    networks:\n" +
+            "      - api\n" +
+            "      - default\n" +
+            "    ports:\n" +
+            "      - \"8089:8089\""
+  }
+}
+
+ext.containers = ['zookeeper-1', 'kafka-1', 'kafka-2', 'kafka-3', 'schema-registry-1',
+                  'rest-proxy-1', 'kafka-init', 'hotstorage', 'rest-api',
+                  'radar-mongodb-connector', 'radar-backend-stream', 'webserver', 'wiremock']
+task reducedStack(dependsOn: setRadarEnvironmentForDocker) {
+  doLast {
+    def dockerComposeYml = file("${radarStackPath}/${radarDockerCompose}")
+    def findContainer = false
+    def findDependences = false
+    def active = false
+    def containerName = null
+
+    LinkedList rowList = new LinkedList()
+
+    dockerComposeYml.eachLine { line ->
+      def row = line.trim()
+      def comment = false
+      def index = rowList.size() - 1
+
+      if (active) {
+        if (row.contains('image:')) {
+          findContainer = false
+          containerName = rowList.last().replace('#', '')
+          if (containerName.contains('build:')) {
+            index--
+            containerName = rowList.get(index).replace('#', '')
+          }
+          containerName = containerName.trim()
+          containers.each {container ->
+            if ( containerName == "$container:") {
+              findContainer = true
+            }
+          }
+
+          if (findContainer) {
+            for (def i = rowList.size() - 1 ; i >= index; i--) {
+              rowList.add(i, rowList.remove(i).replace('#', ''))
+            }
+          } else {
+            for (def i = rowList.size() - 1 ; i >= index; i--) {
+              rowList.add(i, "#${rowList.remove(i)}")
+            }
+          }
+        }
+
+        comment = !findContainer
+
+        if (findContainer && row == 'depends_on:') {
+          findDependences = true
+        } else if (findContainer && findDependences && !row.contains('-')) {
+          findDependences = false
+        }
+
+        if (findContainer && findDependences && row != 'depends_on:') {
+          comment = true
+          containers.each {container ->
+            if (row.contains(container)) {
+              comment = false
+            }
+          }
+        }
+      }
+
+      comment ? rowList.addLast("#$line") : rowList.addLast(line)
+
+      if (containerName == 'webserver:' && row == 'networks:') {
+        rowList.add('      - kafka')
+      }
+      if (containerName == 'webserver:' && row == 'depends_on:') {
+        rowList.add('      - rest-proxy-1')
+      }
+
+      if (row == 'services:') {
+        active = true
+      }
+    }
+
+    PrintWriter writer = new PrintWriter(new File("${radarStackPath}/${radarDockerCompose}"))
+    rowList.each { row -> writer.println(row) }
+    writer.close()
+  }
+}
+
+task optimiseNginx() {
+  doLast {
+    def nginxConfig = file("${radarStackPath}/etc/webserver/nginx.conf.template")
+
+    PrintWriter writer = new PrintWriter(new File("${radarStackPath}/etc/webserver/nginx.conf"))
+
+    def lastBlock = []
+    def comment = false
+    nginxConfig.eachLine { line ->
+      if (line.contains('{')) {
+        lastBlock.each { writer.println(it) }
+        lastBlock.clear()
+        lastBlock.add(line)
+      } else if (line.contains('}')) {
+        lastBlock.add(line)
+        lastBlock.each { writer.println(comment ? "# ${it}" : it) }
+        lastBlock.clear()
+        comment = false
+      } else if (line.contains('http://gateway:8080/radar-gateway/')) {
+        lastBlock.add(line.replace('gateway:8080/radar-gateway', 'rest-proxy-1:8082'))
+      } else {
+        lastBlock.add(line)
+        comment |= line.contains('proxy_pass') && !(containers.any { line.contains(it) })
+      }
+    }
+    lastBlock.each { writer.println(comment ? "# ${it}" : it) }
+
+    writer.close()
+  }
+}
+reducedStack.finalizedBy optimiseNginx
+
+task validateCompose(type: Exec, dependsOn: reducedStack) {
+  workingDir radarStackPath
+  standardInput = System.in
+  commandLine sudoLinux + [dockerCompose, 'config', '-q']
+}
+
+task installRadarStack(type: Exec, dependsOn: validateCompose) {
+  doFirst{
+    def lockFile = new File(radarStackLock)
+    if (lockFile.exists()) {
+      throw new GradleException("A previous instance of RADAR Platform is still running. Please stop it first and then try again.")
+    } else {
+      lockFile.createNewFile()
+    }
+  }
+
+  workingDir radarStackPath
+  standardInput = System.in
+  commandLine sudoLinux + ['./install-radar-stack.sh']
+}
+
+task listDockerProcesses(type: Exec) {
+  workingDir radarStackPath
+  standardInput = System.in
+  commandLine sudoLinux + [dockerCompose, 'ps']
+}
+listDockerProcesses.mustRunAfter 'installRadarStack'
+
+ext.stoppingStack = false
+task stopRadarStack(type: Exec) {
+  onlyIf{
+    new File(radarStackLock).exists() && !stoppingStack
+  }
+  doFirst{
+    stoppingStack = true
+  }
+
+  standardInput = System.in
+  workingDir radarStackPath
+  commandLine sudoLinux + [dockerCompose, 'down', '-v']
+
+  doLast{
+    stoppingStack = false
+  }
+}
+
+task cleanRadarStack(type: Exec, dependsOn: stopRadarStack) {
+  onlyIf{
+    !stoppingStack
+  }
+  commandLine sudoLinux + ['rm', '-rf', "${radarStackPath}/volumes", radarStackLock]
+  doLast{
+    file("${radarStackPath}/${radarDockerComposeOriginal}").renameTo("${radarStackPath}/${radarDockerCompose}")
+  }
+}
+
+stopRadarStack.finalizedBy cleanRadarStack
+
+//---------------------------------------------------------------------------//
+// Clean definition                                                          //
+//---------------------------------------------------------------------------//
+clean.dependsOn cleanSimpleStack
+clean.dependsOn cleanRadarStack
+

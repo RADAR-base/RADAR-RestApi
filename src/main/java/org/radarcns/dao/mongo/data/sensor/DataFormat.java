@@ -1,9 +1,3 @@
-package org.radarcns.dao.mongo.data.sensor;
-
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.dao.mongo.util.MongoSensor;
-import org.radarcns.source.SourceCatalog;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -19,6 +13,12 @@ import org.radarcns.source.SourceCatalog;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.dao.mongo.data.sensor;
+
+import org.radarcns.dao.mongo.util.MongoSensor;
+import org.radarcns.source.SourceCatalog;
+
 public enum DataFormat {
     ACCELERATION_FORMAT("AccelerationFormat"),
     DOUBLE_FORMAT("DoubleFormat");
@@ -40,7 +40,7 @@ public enum DataFormat {
      *
      * @see MongoSensor
      */
-    public static MongoSensor getMongoSensor(SensorType sensorType) {
+    public static MongoSensor getMongoSensor(String sensorType) {
         DataFormat dataFormat = SourceCatalog.getInstance().getFormat(sensorType);
         switch (dataFormat) {
             case ACCELERATION_FORMAT: return new AccelerationFormat(sensorType);

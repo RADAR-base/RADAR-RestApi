@@ -1,5 +1,3 @@
-package org.radarcns.integration.util;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -16,6 +14,8 @@ package org.radarcns.integration.util;
  * limitations under the License.
  */
 
+package org.radarcns.integration.util;
+
 import static org.radarcns.mock.model.ExpectedValue.DURATION;
 
 import java.util.ArrayList;
@@ -25,25 +25,23 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.avro.restapi.data.Acceleration;
-import org.radarcns.avro.restapi.data.DoubleSample;
-import org.radarcns.avro.restapi.data.Quartiles;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.mock.model.ExpectedValue;
+import org.radarcns.restapi.data.Acceleration;
+import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.dataset.Item;
+import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.source.SourceCatalog;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;
 
 /**
- * Produces {@link Dataset} and {@link org.bson.Document} for {@link ExpectedValue}
+ * Produces {@link Dataset} and {@link org.bson.Document} for {@link ExpectedValue}.
  */
 public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
@@ -59,10 +57,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param timeFrame time interval between two consecutive samples
      * @return {@code Dataset} resulted by the simulation
      * @see Dataset
-     **/
+     */
     public Dataset getDataset(ExpectedValue expectedValue, String subjectId, String sourceId,
-            SourceType sourceType, SensorType sensorType, DescriptiveStatistic statistic,
-            TimeFrame timeFrame) throws InstantiationException, IllegalAccessException {
+            String sourceType, String sensorType, DescriptiveStatistic statistic,
+            TimeWindow timeFrame) throws InstantiationException, IllegalAccessException {
 
         Header header = getHeader(expectedValue, subjectId, sourceId, sourceType, sensorType,
                 statistic, timeFrame);
@@ -81,16 +79,17 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param statistic function that has to be simulated
      * @param timeFrame time interval between two consecutive samples
      * @return {@link Header} for a {@link Dataset}
-     **/
+     */
     public Header getHeader(ExpectedValue expectedValue, String subjectId, String sourceId,
-            SourceType sourceType, SensorType sensorType, DescriptiveStatistic statistic,
-            TimeFrame timeFrame) {
+            String sourceType, String sensorType, DescriptiveStatistic statistic,
+            TimeWindow timeFrame) {
         return new Header(subjectId, sourceId, sourceType, sensorType, statistic,
                 SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType), timeFrame,
                 getEffectiveTimeFrame(expectedValue));
     }
 
     /**
+     * Get the effective interval for a value.
      * @return {@code EffectiveTimeFrame} for the simulated inteval.
      * @see EffectiveTimeFrame
      */
@@ -98,16 +97,15 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
 
-        EffectiveTimeFrame eft = new EffectiveTimeFrame(
+        return new EffectiveTimeFrame(
                 RadarConverter.getISO8601(new Date(windows.get(0))),
                 RadarConverter.getISO8601(new Date(windows.get(windows.size() - 1)
                         + DURATION)));
-
-        return eft;
     }
 
 
     /**
+     * Get the effective time frame for a single time stamp.
      * @param value timestamp.
      * @return {@code EffectiveTimeFrame} starting on value and ending {@link
      * ExpectedValue#DURATION} milliseconds after.
@@ -140,35 +138,32 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
         if (singleExpectedValue instanceof DoubleArrayCollector) {
             return getArrayItems(expectedValue, keys, header.getDescriptiveStatistic(),
-                    header.getSensor());
+                    header.getType());
         } else if (singleExpectedValue instanceof DoubleValueCollector) {
             return getSingletonItems(expectedValue, keys, header.getDescriptiveStatistic(),
-                header.getSensor());
+                header.getType());
         } else {
-            throw new IllegalArgumentException(header.getSensor().name() + " not supported yet");
+            throw new IllegalArgumentException(header.getType() + " not supported yet");
         }
     }
 
     /**
-     * It generates the {@code List<Item>} for the resulting {@code Dataset}
+     * It generates the {@code List<Item>} for the resulting {@code Dataset}.
      *
      * @param keys {@code Collection} of timewindow initial time
      * @param statistic function that has to be simulated
-     * @param sensor @return {@code List<Item>} for a
-     *      {@link org.radarcns.avro.restapi.dataset.Dataset}
-     * @see org.radarcns.avro.restapi.dataset.Item containg data data that can be
-     *      represented as array of {@code Double}.
-     **/
+     * @param sensor @return {@code List<Item>} for a dataset
+     */
     private List<Item> getArrayItems(ExpectedValue expectedValue,
             Collection<Long> keys, DescriptiveStatistic statistic,
-            SensorType sensor) {
+            String sensor) {
         List<Item> items = new LinkedList<>();
 
         for (Long key : keys) {
             DoubleArrayCollector dac = (DoubleArrayCollector) expectedValue.getSeries().get(key);
 
             switch (sensor) {
-                case ACCELEROMETER:
+                case "ACCELEROMETER":
                     Object content;
 
                     if (statistic.name().equals(DescriptiveStatistic.QUARTILES.name())) {
@@ -184,8 +179,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                     items.add(new Item(content, getEffectiveTimeFrame(key).getStartDateTime()));
                     break;
                 default:
-                    throw new IllegalArgumentException(sensor.name()
-                            + " is not a supported test case");
+                    throw new IllegalArgumentException(sensor + " is not a supported test case");
             }
         }
 
@@ -193,6 +187,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
     /**
+     * Quartile object from a list of three doubles.
      * @param list of {@code Double} values representing a quartile.
      * @return the value that has to be stored within a {@code Dataset} {@code Item}
      * @see Quartiles
@@ -202,18 +197,16 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
     /**
-     * It generates the {@code List<Item>} for the resulting {@code Dataset}
+     * It generates the {@code List<Item>} for the resulting {@code Dataset}.
      *
      * @param keys {@code Collection} of timewindow initial time
      * @param statistic function that has to be simulated
-     * @param sensor @return {@code List<Item>} for a
-     *      {@link org.radarcns.avro.restapi.dataset.Dataset}
-     * @see org.radarcns.avro.restapi.dataset.Item containg data data that can be
+     * @param sensor @return {@code List<Item>} for a data set
      *      represented as {@code Double}.
      **/
     private List<Item> getSingletonItems(ExpectedValue expectedValue,
             Collection<Long> keys, DescriptiveStatistic statistic,
-            SensorType sensor) throws InstantiationException, IllegalAccessException {
+            String sensor) throws InstantiationException, IllegalAccessException {
         List<Item> items = new LinkedList<>();
 
         for (Long key : keys) {
@@ -248,25 +241,12 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         return content;
     }
 
-    private Class getSensorClass(SensorType sensor) {
+    private Class getSensorClass(String sensor) {
         switch (sensor) {
-            case ACCELEROMETER:
+            case "ACCELEROMETER":
                 return Acceleration.class;
-            case BATTERY:
-                return DoubleSample.class;
-            case BLOOD_VOLUME_PULSE:
-                return DoubleSample.class;
-            case ELECTRODERMAL_ACTIVITY:
-                return DoubleSample.class;
-            case INTER_BEAT_INTERVAL:
-                return DoubleSample.class;
-            case HEART_RATE:
-                return DoubleSample.class;
-            case THERMOMETER:
-                return DoubleSample.class;
             default:
-                throw new IllegalArgumentException(sensor.name()
-                        + " is not a supported test case");
+                return DoubleSample.class;
         }
     }
 }

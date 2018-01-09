@@ -1,5 +1,3 @@
-package org.radarcns.monitor;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,15 +14,15 @@ package org.radarcns.monitor;
  * limitations under the License.
  */
 
+package org.radarcns.monitor;
+
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.HashMap;
 import javax.servlet.ServletContext;
-import org.radarcns.avro.restapi.sensor.SensorSpecification;
-import org.radarcns.avro.restapi.source.Source;
-import org.radarcns.avro.restapi.source.SourceSpecification;
-import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.restapi.source.Source;
+import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.source.SourceCatalog;
 
 /**
@@ -33,7 +31,7 @@ import org.radarcns.source.SourceCatalog;
 public class Monitors {
 
     /** Map containing actual implementations of each source monitor. **/
-    private final HashMap<SourceType, SourceMonitor> hooks;
+    private final HashMap<String, SourceMonitor> hooks;
 
     /** Singleton instance. **/
     private static final Monitors INSTANCE;
@@ -42,12 +40,12 @@ public class Monitors {
     private Monitors(SourceCatalog catalog) {
         hooks = new HashMap<>();
 
-        for (SourceType sourceType : catalog.getSupportedSource()) {
+        for (String sourceType : catalog.getSupportedSource()) {
             hooks.put(sourceType, new SourceMonitor(catalog.getDefinition(sourceType)));
         }
     }
 
-    /**
+    /*
      * Static initializer.
      */
     static {
@@ -75,7 +73,7 @@ public class Monitors {
      *
      * @see {@link Source}
      */
-    public Source getState(String subject, String source, SourceType sourceType,
+    public Source getState(String subject, String source, String sourceType,
             ServletContext context) throws ConnectException {
         return getState(subject, source, sourceType, MongoHelper.getClient(context));
     }
@@ -92,13 +90,12 @@ public class Monitors {
      *
      * @see Source
      */
-    public Source getState(String subject, String source, SourceType sourceType, MongoClient client)
+    public Source getState(String subject, String source, String sourceType, MongoClient client)
             throws ConnectException {
         SourceMonitor monitor = hooks.get(sourceType);
 
         if (monitor == null) {
-            throw new UnsupportedOperationException(sourceType.name()
-                    + "is not currently supported");
+            throw new UnsupportedOperationException(sourceType + "is not currently supported");
         }
 
         return monitor.getState(subject, source, client);
@@ -108,17 +105,13 @@ public class Monitors {
      * Returns the SourceDefinition Specification used by the monitor associated with the monitor.
      *
      * @return {@code SourceSpecification} containing all data names and related frequencies
-     *
-     * @see SensorSpecification
-     * @see SourceSpecification
      */
-    public SourceSpecification getSpecification(SourceType sourceType)
+    public SourceSpecification getSpecification(String sourceType)
             throws ConnectException {
         SourceMonitor monitor = hooks.get(sourceType);
 
         if (monitor == null) {
-            throw new UnsupportedOperationException(sourceType.name()
-                + " is not currently supported");
+            throw new UnsupportedOperationException(sourceType + " is not currently supported");
         }
 
         return monitor.getSource().getSpecification();

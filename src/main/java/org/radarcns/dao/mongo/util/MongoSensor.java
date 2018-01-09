@@ -1,5 +1,3 @@
-package org.radarcns.dao.mongo.util;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -16,6 +14,8 @@ package org.radarcns.dao.mongo.util;
  * limitations under the License.
  */
 
+package org.radarcns.dao.mongo.util;
+
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
@@ -26,16 +26,14 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import org.bson.Document;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.dataset.Item;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.EffectiveTimeFrame;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.header.TimeFrame;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.dataset.Item;
+import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.source.SourceCatalog;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
@@ -48,10 +46,10 @@ public abstract class MongoSensor extends MongoDataAccess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoSensor.class);
 
-    private final Map<SourceType, Map<TimeFrame, String>> deviceCollections;
-    private final Map<String, SourceType> collectionToSource;
+    private final Map<String, Map<TimeWindow, String>> deviceCollections;
+    private final Map<String, String> collectionToSource;
 
-    private final SensorType sensorType;
+    private final String sensorType;
     private final DataFormat dataFormat;
 
     /**
@@ -59,7 +57,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      *
      * @param sensorType sensor of the given source that will be consume from this instance
      */
-    public MongoSensor(DataFormat format, SensorType sensorType) {
+    public MongoSensor(DataFormat format, String sensorType) {
 
         deviceCollections = new HashMap<>();
         collectionToSource = new HashMap<>();
@@ -67,7 +65,7 @@ public abstract class MongoSensor extends MongoDataAccess {
         this.sensorType = sensorType;
         this.dataFormat = format;
 
-        for (SourceType sourceType : SourceCatalog.getInstance().getSupportedSource()) {
+        for (String sourceType : SourceCatalog.getInstance().getSupportedSource()) {
             if (!SourceCatalog.getInstance(sourceType).isSupported(sensorType)) {
                 continue;
             }
@@ -87,7 +85,7 @@ public abstract class MongoSensor extends MongoDataAccess {
     /**
      * Returns the {@code SensorType} related to this instance.
      */
-    public SensorType getSensorType() {
+    public String getSensorType() {
         return sensorType;
     }
 
@@ -195,7 +193,7 @@ public abstract class MongoSensor extends MongoDataAccess {
             try {
                 count += doc.getDouble(Stat.count.getParam());
             } catch (ClassCastException exec) {
-                count += extractCount((Document) doc.get(Stat.count.getParam()));
+                count += extractCount(doc.get(Stat.count.getParam()));
             }
         }
 
@@ -265,7 +263,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @param collection name
      */
     @Override
-    public SourceType getSourceType(String collection) {
+    public String getSourceType(String collection) {
         if (!collectionToSource.containsKey(collection)) {
             throw new IllegalArgumentException(collection + " is an unknown collection");
         }
@@ -282,7 +280,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @return the MongoDB Collection name
      */
     @Override
-    public String getCollectionName(SourceType source, TimeFrame interval) {
+    public String getCollectionName(String source, TimeWindow interval) {
         if (deviceCollections.containsKey(source)) {
             return deviceCollections.get(source).get(interval);
         }
@@ -326,7 +324,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @implSpec this function should be override by the subclass
      * @return the count value
      */
-    protected double extractCount(Document doc) {
+    protected int extractCount(Object doc) {
         throw new UnsupportedOperationException("This function must be override by the subclass");
     }
 }

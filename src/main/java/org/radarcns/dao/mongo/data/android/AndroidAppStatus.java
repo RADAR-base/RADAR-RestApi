@@ -1,9 +1,3 @@
-package org.radarcns.dao.mongo.data.android;
-
-import org.bson.Document;
-import org.radarcns.avro.restapi.app.Application;
-import org.radarcns.dao.mongo.util.MongoAndroidApp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -19,6 +13,13 @@ import org.radarcns.dao.mongo.util.MongoAndroidApp;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.dao.mongo.data.android;
+
+import org.bson.Document;
+import org.radarcns.dao.mongo.util.MongoAndroidApp;
+import org.radarcns.restapi.app.Application;
+
 public class AndroidAppStatus extends MongoAndroidApp {
 
     public static final String UPTIME_COLLECTION = "application_uptime";

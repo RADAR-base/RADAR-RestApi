@@ -1,5 +1,3 @@
-package org.radarcns.managementportal;
-
 /*
  * Copyright 2017 King's College London
  *
@@ -16,6 +14,8 @@ package org.radarcns.managementportal;
  * limitations under the License.
  */
 
+package org.radarcns.managementportal;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-
-import okhttp3.Response;
 
 /**
  * Java class defining a RADAR Management Portal Project.
@@ -135,18 +133,18 @@ public class Project {
 
     /**
      * Converts the {@link String} to a {@link ArrayList} of {@link Project} entity.
-     * @param response {@link String} that has to be converted
+     * @param jsonData {@link String} that has to be converted
      * @return {@link ArrayList} of {@link Project} stored in the {@link String}
      * @throws IOException in case the conversion cannot be computed
      */
     @JsonIgnore
-    public  static ArrayList<Project> getAllObjects(Response response) throws IOException {
-        ArrayList<Project> allProjects = new ArrayList<>();
+    public  static List<Project> getAllObjects(String jsonData) throws IOException {
+        List<Project> allProjects = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         JsonFactory jsonFactory = objectMapper.getFactory();
-        JsonParser jp = jsonFactory.createParser(response.body().string());
+        JsonParser jp = jsonFactory.createParser(jsonData);
 
         JsonNode root = objectMapper.readTree(jp);
 
@@ -157,7 +155,6 @@ public class Project {
             Project project = getObject(currentProject.toString());
             allProjects.add(project);
         }
-        response.close();
         return allProjects;
     }
 }

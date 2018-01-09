@@ -24,8 +24,6 @@ device_catalog:
         collections:
           #Time-frame of 10 seconds
           10sec: android_empatica_e4_acceleration_output
-          #Time-frame of 30 seconds
-          30sec: android_empatica_e4_acceleration_output_30sec
           #Time-frame of 1 minute
           1min: android_empatica_e4_acceleration_output_1min
           #Time-frame of 10 minutes
