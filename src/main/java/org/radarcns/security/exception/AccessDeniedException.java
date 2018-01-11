@@ -1,6 +1,8 @@
 package org.radarcns.security.exception;
 
-public class AccessDeniedException extends Exception {
+import java.security.GeneralSecurityException;
+
+public class AccessDeniedException extends GeneralSecurityException {
     public AccessDeniedException() {
 
     }
