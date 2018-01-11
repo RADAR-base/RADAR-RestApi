@@ -148,7 +148,7 @@ public class ManagementPortalConfig {
      * @param url {@link URL} to check
      * @return {@code true} if the protocol is {@code HTTPS}, {@code false} otherwise
      */
-    private static boolean isSecureConnection(URL url) {
+    public static boolean isSecureConnection(URL url) {
         return url.getProtocol().equals(HTTPS);
     }
 

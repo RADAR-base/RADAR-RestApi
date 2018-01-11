@@ -130,6 +130,7 @@ public class ManagementPortalClientManager implements ServletContextListener {
         if(Objects.isNull(managementPortalClient)){
             managementPortalClient = new ManagementPortalClient
                     (HttpClientListener.getClient(context));
+            context.setAttribute(MP_CLIENT , managementPortalClient);
         }
         managementPortalClient.updateToken(getToken(context));
         return managementPortalClient;
@@ -158,6 +159,7 @@ public class ManagementPortalClientManager implements ServletContextListener {
                 throw new ExceptionInInitializerError(exc);
             }
         }
+        context.setAttribute(OAUTH2_CLIENT, oAuth2Client);
         return oAuth2Client;
     }
 }
