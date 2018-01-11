@@ -32,17 +32,6 @@ public class TestApiConfig {
         assertEquals("device-catalog.yml", Properties.getApiConfig().getDeviceCatalog());
     }
 
-    @Test
-    public void loadApiConfigApiOk() throws IOException {
-        ApiConfig config = new YamlConfigLoader().load(new File(
-                TestApiConfig.class.getClassLoader()
-                .getResource("radar_test_1_ok.yml").getFile()), ApiConfig.class);
-
-        assertEquals("/api", config.getApiBasePath());
-
-        Assert.assertArrayEquals(new String[]{"http", "https", "test", "test"},
-                config.getApplicationProtocols());
-    }
 
     @Test(expected = com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.class)
     public void readCatalogKoUnit() throws IOException {
@@ -51,9 +40,4 @@ public class TestApiConfig {
                 .getResource("radar_dev_catalog_ko.yml").getFile()), ApiConfig.class);
     }
 
-    @Test
-    public void testUrlPath() throws IOException {
-        assertEquals("http://localhost:8080/radar/api/",
-                Properties.getApiConfig().getApiUrl());
-    }
 }

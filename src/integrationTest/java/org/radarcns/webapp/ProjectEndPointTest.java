@@ -26,7 +26,7 @@ public class ProjectEndPointTest {
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            Properties.getApiConfig().getApiUrl());
+            Properties.getApiConfig().getApplicationConfig().getUrlString());
 
     private static ObjectMapper objectMapper;
 

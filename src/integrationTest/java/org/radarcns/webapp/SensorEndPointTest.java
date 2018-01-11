@@ -61,7 +61,7 @@ public class SensorEndPointTest {
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            Properties.getApiConfig().getApiUrl() + DATA + '/');
+            Properties.getApiConfig().getApplicationConfig().getUrlString()+ DATA + '/');
 
     @Test
     public void getRealtimeTest()

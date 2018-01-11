@@ -497,7 +497,7 @@ public class EndToEndTest {
         JsonNode node = new ObjectMapper().readTree(response);
         assertTrue(node.has("servers"));
         String serverUrl = node.get("servers").elements().next().get("url").asText();
-        assertEquals(Properties.getApiConfig().getApiUrl(), serverUrl);
+        assertEquals(Properties.getApiConfig().getApplicationConfig().getUrlString(), serverUrl);
     }
 
     /**
