@@ -16,35 +16,35 @@ package org.radarcns.listener.managementportal;
  * limitations under the License.
  */
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
-import org.radarcns.config.managementportal.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import javax.servlet.ServletContextEvent;
+//import javax.servlet.ServletContextListener;
+//import javax.servlet.annotation.WebListener;
+//import org.radarcns.config.managementportal.Properties;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
-/**
- * Loads the service configuration.
- * @see Properties
- */
-@WebListener
-public class PropertiesListener implements ServletContextListener {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesListener.class);
-
-    @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        try {
-            LOGGER.info(Properties.validate());
-
-        } catch (Exception exc) {
-            LOGGER.error("Properties cannot be load. Check the log for more information.", exc);
-            throw new ExceptionInInitializerError(exc);
-        }
-    }
-
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
-        //Nothing to do
-    }
-}
+///**
+// * Loads the service configuration.
+// * @see Properties
+// */
+//@WebListener
+//public class PropertiesListener implements ServletContextListener {
+//
+//    private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesListener.class);
+//
+//    @Override
+//    public void contextInitialized(ServletContextEvent sce) {
+//        try {
+//            LOGGER.info(Properties.validate());
+//
+//        } catch (Exception exc) {
+//            LOGGER.error("Properties cannot be load. Check the log for more information.", exc);
+//            throw new ExceptionInInitializerError(exc);
+//        }
+//    }
+//
+//    @Override
+//    public void contextDestroyed(ServletContextEvent sce) {
+//        //Nothing to do
+//    }
+//}

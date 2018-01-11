@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.config.managementportal;
+package org.radarcns.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,14 +37,9 @@ import javax.annotation.Nonnull;
  *      <li>{@code subjectEndpoint}</li>
  * </ul>
  */
-public class Configuration {
+public class ManagementPortalConfig {
 
-    /** Service version. */
-    private final String version;
-
-    /** Release date. */
-    private final String released;
-
+    private static final String HTTPS = "https";
     /** OAuth2 client identifier. */
     private final String oauthClientId;
 
@@ -75,8 +70,6 @@ public class Configuration {
 
     /**
      * Constructor.
-     * @param version {@link String} reporting the web app current version
-     * @param released {@link String} reporting the web app released date
      * @param oauthClientId {@link String} representing OAuth2 client identifier
      * @param oauthClientSecret {@link String} representing OAuth2 client identifier
      * @param oauthClientScopes {@link String} representing OAuth2 client scopes
@@ -88,9 +81,7 @@ public class Configuration {
      *      subject
      */
     @JsonCreator
-    protected Configuration(
-            @JsonProperty("version") String version,
-            @JsonProperty("released") String released,
+    protected ManagementPortalConfig(
             @JsonProperty("oauth_client_id") String oauthClientId,
             @JsonProperty("oauth_client_secret") String oauthClientSecret,
             @JsonProperty("oauth_client_scopes") String oauthClientScopes,
@@ -98,8 +89,6 @@ public class Configuration {
             @JsonProperty("token_endpoint") String tokenEndpoint,
             @JsonProperty("project_endpoint") String projectEndpoint,
             @JsonProperty("subject_endpoint") String subjectEndpoint) {
-        this.version = version;
-        this.released = released;
         this.oauthClientId = oauthClientId;
         this.oauthClientSecret = oauthClientSecret;
         this.oauthClientScopes = oauthClientScopes;
@@ -107,14 +96,6 @@ public class Configuration {
         this.tokenEndpoint = tokenEndpoint;
         this.projectEndpoint = projectEndpoint;
         this.subjectEndpoint = subjectEndpoint;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public String getReleased() {
-        return released;
     }
 
     public String getOauthClientId() {
@@ -162,11 +143,18 @@ public class Configuration {
         return result.charAt(result.length() - 1) == '/' ? result : result + '/';
     }
 
+    /**
+     * Checks if the provided {@link URL} is using a secure connection or not.
+     * @param url {@link URL} to check
+     * @return {@code true} if the protocol is {@code HTTPS}, {@code false} otherwise
+     */
+    private static boolean isSecureConnection(URL url) {
+        return url.getProtocol().equals(HTTPS);
+    }
+
     @Override
     public String toString() {
         return "Configuration {" + "\n"
-            + "version='" + version + "'\n"
-            + "released='" + released + "'\n"
             + "oauthClientId = '" + oauthClientId + "'\n"
             + "oauthClientSecret = '" + oauthClientSecret + "'\n"
             + "oauthClientScopes = '" + oauthClientScopes + "'\n"

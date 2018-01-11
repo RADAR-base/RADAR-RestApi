@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.config.api;
+package org.radarcns.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mongodb.MongoCredential;
@@ -37,10 +37,10 @@ public class ApiConfig {
     private String version;
 
     /** MongoDb hosts. **/
-    @JsonProperty("mongo_hosts")
+    @JsonProperty("mongodb_hosts")
     private Map<String,String> mongoHosts;
     /** MongoDb users. **/
-    @JsonProperty("mongo_user")
+    @JsonProperty("mongodb_credentials")
     private Map<String,String> mongoUser;
 
     /** DeviceItem Catalog path. **/
@@ -62,6 +62,9 @@ public class ApiConfig {
     /** Base or Root path for the RESTFul interface. **/
     @JsonProperty("api_base_path")
     private String apiBasePath;
+
+    @JsonProperty("management_portal_config")
+    private ManagementPortalConfig managementPortalConfig;
 
     /** Returns the release date. **/
     public Date getReleased() {
@@ -197,8 +200,8 @@ public class ApiConfig {
      * @return a {@code List} of {@link MongoCredential}
      */
     public MongoCredential getMongoDbCredentials() {
-        return MongoCredential.createCredential(mongoUser.get("usr"),
-                mongoUser.get("db"), mongoUser.get("pwd").toCharArray());
+        return MongoCredential.createCredential(mongoUser.get("username"),
+                mongoUser.get("database_name"), mongoUser.get("password").toCharArray());
     }
 
     /**
@@ -206,6 +209,10 @@ public class ApiConfig {
      * @return MongoDB database name as {@code String}
      */
     public String getMongoDbName() {
-        return mongoUser.get("db");
+        return mongoUser.get("database_name");
+    }
+
+    public ManagementPortalConfig getManagementPortalConfig() {
+        return managementPortalConfig;
     }
 }

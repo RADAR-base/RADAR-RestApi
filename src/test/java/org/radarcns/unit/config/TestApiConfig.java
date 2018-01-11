@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
-import org.radarcns.config.api.ApiConfig;
+import org.radarcns.config.ApiConfig;
 
 /*
  * Copyright 2016 King's College London and The Hyve

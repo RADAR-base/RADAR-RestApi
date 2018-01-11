@@ -57,9 +57,6 @@
         <listener-class>org.radarcns.listener.managementportal.HttpClientListener</listener-class>
     </listener>
     <listener>
-        <listener-class>org.radarcns.listener.managementportal.PropertiesListener</listener-class>
-    </listener>
-    <listener>
         <listener-class>org.radarcns.listener.managementportal.ManagementPortalClientManager</listener-class>
     </listener>
 

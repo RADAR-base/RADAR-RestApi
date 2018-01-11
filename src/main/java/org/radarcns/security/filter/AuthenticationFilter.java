@@ -20,7 +20,7 @@ import org.radarcns.auth.config.ServerConfig;
 import org.radarcns.auth.config.YamlServerConfig;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.auth.exception.TokenValidationException;
-import org.radarcns.config.managementportal.Properties;
+import org.radarcns.config.Properties;
 import org.radarcns.security.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +80,8 @@ public class AuthenticationFilter implements Filter {
         TokenValidator localValidator = validator.get();
         if (localValidator == null) {
             ServerConfig config = null;
-            String mpUrlString = Properties.validateMpUrl().toString();
+            String mpUrlString = Properties.getApiConfig().getManagementPortalConfig()
+                    .getManagementPortalUrl().toString();
             if (mpUrlString != null) {
                 try {
                     YamlServerConfig cfg = new YamlServerConfig();

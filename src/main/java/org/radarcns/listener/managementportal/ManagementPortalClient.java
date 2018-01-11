@@ -33,9 +33,10 @@ import javax.servlet.ServletContext;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.radarcns.config.managementportal.Properties;
-import org.radarcns.managementportal.Project;
-import org.radarcns.managementportal.Subject;
+import org.radarcns.config.Properties;
+import org.radarcns.config.ManagementPortalConfig;
+import org.radarcns.dto.managementportal.Project;
+import org.radarcns.dto.managementportal.Subject;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.slf4j.Logger;
@@ -103,7 +104,8 @@ public class ManagementPortalClient {
      */
     public List<Subject> getAllSubjects() throws IOException, MalformedURLException {
 
-        URL url = new URL(Properties.validateMpUrl(), Properties.getSubjectPath());
+        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
+        URL url = new URL(config.getManagementPortalUrl(), config.getSubjectEndpoint());
         Request getAllSubjectsRequest = this.buildGetRequest(url);
         Response response = this.client.newCall(getAllSubjectsRequest).execute();
         List<Subject> allSubjects = mapper.readValue(response.body().string(), mapper
@@ -150,8 +152,9 @@ public class ManagementPortalClient {
             return getSubject(subjectLogin);
         }
         try {
-            URL url = new URL(Properties.validateMpUrl(),
-                    Properties.getSubjectPath() + "/" + subjectLogin);
+            ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
+            URL url = new URL(config.getManagementPortalUrl(),
+                    config.getSubjectEndpoint() + "/" + subjectLogin);
             Request getSubjectsRequest = this.buildGetRequest(url);
             Response response = this.client.newCall(getSubjectsRequest).execute();
             if (response.isSuccessful()) {
@@ -188,8 +191,9 @@ public class ManagementPortalClient {
                     .collect(Collectors.toList());
         }
 
-        URL getSubjectFromProjectUrl = new URL(Properties.validateMpUrl(),
-                Properties.getProjectPath() + "/" + projectName + '/' + SUBJECTS);
+        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
+        URL getSubjectFromProjectUrl = new URL(config.getManagementPortalUrl(),
+                config.getProjectEndpoint() + "/" + projectName + '/' + SUBJECTS);
         Request getSubjectsRequest = this.buildGetRequest(getSubjectFromProjectUrl);
         Response response = this.client.newCall(getSubjectsRequest).execute();
         if (response.isSuccessful()) {
@@ -212,8 +216,9 @@ public class ManagementPortalClient {
      */
     public List<Project> getAllProjects() throws
             IOException {
-        URL getAllProjectsUrl = new URL(Properties.validateMpUrl(),
-                Properties.getProjectPath());
+        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
+        URL getAllProjectsUrl = new URL(config.getManagementPortalUrl(),
+                config.getProjectEndpoint());
         Request getAllProjects = this.buildGetRequest(getAllProjectsUrl);
         Response response = this.client.newCall(getAllProjects).execute();
         if (response.isSuccessful()) {
@@ -233,21 +238,21 @@ public class ManagementPortalClient {
      */
     public Project getProject(String projectName) throws IOException, NotFoundException {
 
-
-            URL getProjectFromProjectName = new URL(Properties.validateMpUrl(),
-                    Properties.getProjectPath() + '/' + projectName);
-            Request getProject = this.buildGetRequest(getProjectFromProjectName);
-            Response response = this.client.newCall(getProject).execute();
-            if (response.isSuccessful()) {
-                Project project = mapper.readValue(response.body().string(), Project.class);
-                logger.info("Retrieved project {} from MP", projectName);
-                return project;
-            } else if (response.code() == HTTP_NOT_FOUND) {
-                logger.info("Couldn't get project details for project :", projectName);
-                throw  new NotFoundException("Cannot project data for project-name : " +projectName
-                        + " Invalid projectName" );
-            }
-            return null;
+        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
+        URL getProjectFromProjectName = new URL(config.getManagementPortalUrl(),
+                config.getProjectEndpoint()+ '/' + projectName);
+        Request getProject = this.buildGetRequest(getProjectFromProjectName);
+        Response response = this.client.newCall(getProject).execute();
+        if (response.isSuccessful()) {
+            Project project = mapper.readValue(response.body().string(), Project.class);
+            logger.info("Retrieved project {} from MP", projectName);
+            return project;
+        } else if (response.code() == HTTP_NOT_FOUND) {
+            logger.info("Couldn't get project details for project :", projectName);
+            throw new NotFoundException("Cannot project data for project-name : " + projectName
+                    + " Invalid projectName");
+        }
+        return null;
     }
 
 //    /**

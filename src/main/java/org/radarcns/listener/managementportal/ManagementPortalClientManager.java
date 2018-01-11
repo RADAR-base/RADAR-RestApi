@@ -26,7 +26,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import org.radarcns.config.managementportal.Properties;
+import org.radarcns.config.Properties;
+import org.radarcns.config.ManagementPortalConfig;
 import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.oauth.OAuth2Client;
@@ -138,15 +139,17 @@ public class ManagementPortalClientManager implements ServletContextListener {
         OAuth2Client oAuth2Client = (OAuth2Client) context.getAttribute(OAUTH2_CLIENT);
         if (Objects.isNull(oAuth2Client)) {
             try {
+                ManagementPortalConfig config = Properties.getApiConfig()
+                        .getManagementPortalConfig();
                 oAuth2Client = new OAuth2Client()
                         .tokenEndpoint(
-                                new URL(Properties.validateMpUrl(), Properties.getTokenPath()))
-                        .clientId(Properties.getOauthClientId())
-                        .clientSecret(Properties.getOauthClientSecret());
+                                new URL(config.getManagementPortalUrl(), config.getTokenEndpoint()))
+                        .clientId(config.getOauthClientId())
+                        .clientSecret(config.getOauthClientSecret());
 
                 oAuth2Client.httpClient(HttpClientListener.getClient(context));
 
-                for (String scope : Properties.getOauthClientScopes().split(" ")) {
+                for (String scope : config.getOauthClientScopes().split(" ")) {
                     oAuth2Client.addScope(scope);
                 }
             } catch (MalformedURLException exc) {
