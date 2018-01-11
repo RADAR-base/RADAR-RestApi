@@ -4,11 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
-import org.junit.Assert;
 import org.junit.Test;
+import org.radarcns.config.ApiConfig;
 import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
-import org.radarcns.config.ApiConfig;
 
 /*
  * Copyright 2016 King's College London and The Hyve
@@ -37,7 +36,7 @@ public class TestApiConfig {
     public void readCatalogKoUnit() throws IOException {
         new YamlConfigLoader().load(new File(
                 TestApiConfig.class.getClassLoader()
-                .getResource("radar_dev_catalog_ko.yml").getFile()), ApiConfig.class);
+                        .getResource("radar_dev_catalog_ko.yml").getFile()), ApiConfig.class);
     }
 
 }
