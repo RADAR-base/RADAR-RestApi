@@ -1,7 +1,4 @@
 
-# Swagger documentation version
-swagger_version: 1.0.0
-
 # Mongodb hosts a map of hostname and port
 mongodb_hosts:
     localhost: 27017

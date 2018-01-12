@@ -14,9 +14,6 @@ To deploy the war do:
 - edit the `radar.yml` config file and then copy it your config folder. Paths checked to find the config file are
   - `/usr/share/tomcat8/conf/`
   - `/usr/local/tomcat/conf/radar/`
-  - edit the `mp_info.yml` config file for Management Portal Configuration and then copy it your config folder. Paths checked to find the config file are
-  - `/usr/share/tomcat8/conf/`
-  - `/usr/local/tomcat/conf/radar/`
 - run `./gradlew build`
 - Copy the radar.war located at `build/libs/` in `/usr/local/tomcat/webapp/`
 
@@ -28,7 +25,7 @@ For accessing the end-points of this API, you will need JWT tokens from the [Man
 (https://github.com/RADAR-CNS/ManagementPortal) and send it with each request in the header. In order for your token to allow access to the Rest-Api you will need to add the resource name of rest-api (ie - `res_RestApi`) in the oauth client details of the Management Portal(MP). For example, if you want a client named `dashboard` to have access to the REST API just add this line to the OAuth client credentials csv file of MP - 
 ```
 dashboard;res_RestApi;my-secret-token-to-change-in-production;SUBJECT.READ,PROJECT.READ,SOURCE
-.READ,SOURCETYPE.READ;client_credentials;;;1800;3600;{};true
+.READ,SOURCETYPE.READ,MEASUREMENT.READ;client_credentials;;;1800;3600;{};true
 ```
 You can change the secret, scope, name, etc according to your needs. For more info, read the configuration in the Readme of Management Portal
 

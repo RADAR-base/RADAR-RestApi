@@ -41,10 +41,6 @@ public class ApplicationConfig {
     @JsonProperty("device_catalog")
     private String deviceCatalog;
 
-    /** Swagger Documentation version. **/
-    @JsonProperty("swagger_version")
-    private String swaggerVersion;
-
 
     @JsonProperty("management_portal_config")
     private ManagementPortalConfig managementPortalConfig;
@@ -77,16 +73,6 @@ public class ApplicationConfig {
     /** Sets DeviceItem Catalog path. **/
     public void setDeviceCatalog(String deviceCatalog) {
         this.deviceCatalog = deviceCatalog;
-    }
-
-    /** Returns Swagger Documentation version. **/
-    public String getSwaggerVersion() {
-        return swaggerVersion;
-    }
-
-    /** Sets Swagger Documentation version. **/
-    public void setSwaggerVersion(String swaggerVersion) {
-        this.swaggerVersion = swaggerVersion;
     }
 
     /**
