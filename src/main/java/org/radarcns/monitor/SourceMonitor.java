@@ -20,12 +20,12 @@ import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
+import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.restapi.source.Sensor;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.source.SourceSummary;
 import org.radarcns.restapi.source.States;
-import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.util.RadarConverter;
 
 /**

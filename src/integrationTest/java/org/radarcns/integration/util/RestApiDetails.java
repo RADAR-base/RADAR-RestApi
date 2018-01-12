@@ -68,7 +68,7 @@ public class RestApiDetails {
     }
 
     /**
-     * Get rest-api configs
+     * Get rest-api configs.
      */
     public static RestApiDetails getRestApiClientDetails() {
         if (Objects.isNull(instance)) {

@@ -44,10 +44,10 @@ public final class SecurityUtils {
     }
 
     /**
-     *
-     * @param message
-     * @param exc
-     * @return
+     * Gets json object of given exception details.
+     * @param message exception message
+     * @param exc exception
+     * @return jsonNode created
      */
     public static ObjectNode getJsonError(String message, Exception exc) {
         ObjectNode root = mapper.createObjectNode();

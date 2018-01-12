@@ -22,14 +22,13 @@ public class CsvDataController {
     public static int curr = 0;
 
     /**
-     *
+     * gets all topics available
      * @param csvDataList
      * @return
      */
     public static HashSet<String> getAllTopics(List<CsvData> csvDataList) {
         HashSet<String> topics = new HashSet<>();
-        for (CsvData line : csvDataList
-                ) {
+        for (CsvData line : csvDataList) {
             topics.add(line.getTopic());
         }
         return topics;
@@ -72,16 +71,16 @@ public class CsvDataController {
 
                                                 if (compareTimestamp(data.getLastUpdate(),
                                                         p.getTimestamp()) < 0) {
-                                                    sources.get(curr).
-                                                            setLastUpdate(
+                                                    sources.get(curr)
+                                                            .setLastUpdate(
                                                                     convertTimestamp(p.getTimestamp()));
-                                                    sources.get(curr).
-                                                            setStatus(checkStatus(
+                                                    sources.get(curr)
+                                                            .setStatus(checkStatus(
                                                                     convertTimestamp(p.getTimestamp())));
                                                 }
 
-                                                sources.get(curr).setTotal(data.getTotal() +
-                                                        Long.parseLong(p.getCount()));
+                                                sources.get(curr).setTotal(data.getTotal()
+                                                        + Long.parseLong(p.getCount()));
 
                                             } else {
                                                 sources.add(new SourceData(p.getDevice(),

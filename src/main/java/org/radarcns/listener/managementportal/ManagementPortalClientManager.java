@@ -70,8 +70,8 @@ public class ManagementPortalClientManager implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // clear connection pool
-        OAuth2Client oAuth2Client = (OAuth2Client) sce.getServletContext().getAttribute
-                (OAUTH2_CLIENT);
+        OAuth2Client oAuth2Client = (OAuth2Client) sce.getServletContext()
+                .getAttribute(OAUTH2_CLIENT);
         if (Objects.nonNull(oAuth2Client)) {
             oAuth2Client.getHttpClient().connectionPool().evictAll();
         }
@@ -85,10 +85,9 @@ public class ManagementPortalClientManager implements ServletContextListener {
     }
 
     /**
-     * Refresh the access token stored in the {@link ServletContext}
+     * Refresh the access token stored in the {@link ServletContext}.
      *
-     * @param context {@link ServletContext} where the last used {@code Access Token} has been
-     * stored
+     * @param context {@link ServletContext} where the {@code Access Token} has been stored
      * @throws TokenException If the token could not be retrieved.
      */
     private static synchronized void refresh(ServletContext context) throws TokenException {
@@ -115,8 +114,8 @@ public class ManagementPortalClientManager implements ServletContextListener {
 
     private static synchronized OAuth2AccessTokenDetails getToken(ServletContext context)
             throws TokenException {
-        OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context.getAttribute
-                (ACCESS_TOKEN);
+        OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context
+                .getAttribute(ACCESS_TOKEN);
         if (Objects.isNull(currentToken) || currentToken.isExpired()) {
             refresh(context);
             return (OAuth2AccessTokenDetails) context.getAttribute(ACCESS_TOKEN);
@@ -125,13 +124,20 @@ public class ManagementPortalClientManager implements ServletContextListener {
         }
     }
 
+    /**
+     * Gets the instance of {@link ManagementPortalClient} from given context, if not available
+     * creates one and stores in the context.
+     * @param context
+     * @return instance of {@link ManagementPortalClient}
+     * @throws TokenException
+     */
     public static ManagementPortalClient getManagementPortalClient(ServletContext context)
             throws TokenException {
         ManagementPortalClient managementPortalClient = (ManagementPortalClient) context
                 .getAttribute(MP_CLIENT);
         if (Objects.isNull(managementPortalClient)) {
-            managementPortalClient = new ManagementPortalClient
-                    (HttpClientListener.getClient(context));
+            managementPortalClient = new ManagementPortalClient(
+                    HttpClientListener.getClient(context));
             context.setAttribute(MP_CLIENT, managementPortalClient);
         }
         managementPortalClient.updateToken(getToken(context));

@@ -40,7 +40,7 @@ public class ApiClient extends ExternalResource {
 
     private final OAuth2Client oAuth2Client;
 
-    private final OAuth2AccessTokenDetails token ;
+    private final OAuth2AccessTokenDetails token;
 
     private RestClient client;
 

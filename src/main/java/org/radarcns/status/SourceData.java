@@ -15,12 +15,12 @@ public class SourceData {
     private Long total;
 
     /**
-     * Constructor
-     * @param device
-     * @param status
-     * @param lastUpdate
-     * @param count
-     * @param total
+     * Constructor.
+     * @param device device
+     * @param status device status
+     * @param lastUpdate late updated timestamp
+     * @param count number of records
+     * @param total total records
      */
     public SourceData(String device, String status, String lastUpdate, Long count, Long total) {
         this.device = device;

@@ -33,7 +33,7 @@ import org.radarcns.status.CsvData;
 
 
 /**
- * @Provider class for producing csv media type in a http response.
+ * Provider class for producing csv media type in a http response.
  */
 @Provider
 @Produces("text/csv")

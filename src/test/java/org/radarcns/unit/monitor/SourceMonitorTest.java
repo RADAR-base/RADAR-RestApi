@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.Test;
+import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.catalogue.ProcessingState;
 import org.radarcns.catalogue.Unit;
 import org.radarcns.config.catalog.DeviceItem;
@@ -30,7 +31,6 @@ import org.radarcns.config.catalog.SensorCatalog;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.monitor.SourceMonitor;
 import org.radarcns.restapi.source.States;
-import org.radarcns.catalog.SourceDefinition;
 
 public class SourceMonitorTest {
 

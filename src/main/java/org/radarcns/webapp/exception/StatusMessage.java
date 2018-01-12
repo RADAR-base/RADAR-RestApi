@@ -17,6 +17,12 @@ public class StatusMessage {
         this(error, message, null);
     }
 
+    /**
+     * Creates an instance of {@link StatusMessage}.
+     * @param error error code
+     * @param message error message
+     * @param data related data
+     */
     public StatusMessage(String error, String message, Object data) {
         this.error = error;
         this.message = message;
