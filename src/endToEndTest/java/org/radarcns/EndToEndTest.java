@@ -497,7 +497,8 @@ public class EndToEndTest {
         JsonNode node = new ObjectMapper().readTree(response);
         assertTrue(node.has("servers"));
         String serverUrl = node.get("servers").elements().next().get("url").asText();
-        assertEquals(RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString(), serverUrl);
+        assertEquals(RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString(),
+                serverUrl);
         // TODO change the above line to use local resources
     }
 

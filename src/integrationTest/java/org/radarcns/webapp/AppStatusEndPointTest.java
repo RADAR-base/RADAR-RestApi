@@ -57,7 +57,8 @@ public class AppStatusEndPointTest {
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()+ BasePath.ANDROID + '/' + STATUS + '/');
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()
+                    + BasePath.ANDROID + '/' + STATUS + '/');
 
     @Test
     public void getStatusTest204() throws IOException {

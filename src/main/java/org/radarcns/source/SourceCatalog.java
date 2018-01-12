@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.config.Properties;
 import org.radarcns.config.catalog.DeviceCatalog;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;

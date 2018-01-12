@@ -1,10 +1,10 @@
 package org.radarcns.security.utils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import javax.servlet.ServletRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import javax.servlet.ServletRequest;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.security.filter.AuthenticationFilter;
 
@@ -14,6 +14,7 @@ import org.radarcns.security.filter.AuthenticationFilter;
 public final class SecurityUtils {
 
     private static final ObjectMapper mapper;
+
     static {
         mapper = new ObjectMapper();
     }
@@ -21,10 +22,11 @@ public final class SecurityUtils {
 
     /**
      * Parse the {@code "jwt"} attribute from given request.
+     *
      * @param request servlet request
      * @return decoded JWT
      * @throws AccessDeniedException if the {@code "jwt"} attribute is missing or does not contain a
-     *                               decoded JWT
+     * decoded JWT
      */
     public static DecodedJWT getJWT(ServletRequest request) throws AccessDeniedException {
         Object jwt = request.getAttribute(AuthenticationFilter.TOKEN_ATTRIBUTE);
@@ -41,6 +43,12 @@ public final class SecurityUtils {
         return (DecodedJWT) jwt;
     }
 
+    /**
+     *
+     * @param message
+     * @param exc
+     * @return
+     */
     public static ObjectNode getJsonError(String message, Exception exc) {
         ObjectNode root = mapper.createObjectNode();
 
@@ -48,7 +56,7 @@ public final class SecurityUtils {
         TextNode error = root.textNode(exc.getMessage());
 
         root.set("message", msg);
-        root.set("error",error);
+        root.set("error", error);
 
         return root;
     }

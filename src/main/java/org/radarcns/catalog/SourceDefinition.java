@@ -1,4 +1,4 @@
-package org.radarcns.source;
+package org.radarcns.catalog;
 
 /*
  * Copyright 2016 King's College London and The Hyve

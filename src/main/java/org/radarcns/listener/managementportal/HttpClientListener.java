@@ -93,7 +93,7 @@ public class HttpClientListener implements ServletContextListener {
         return new RestClient(server, 30, pool);
     }
 
-    private synchronized static void removePool(ServletContext context) {
+    private static synchronized void removePool(ServletContext context) {
         ManagedConnectionPool pool = (ManagedConnectionPool) context.getAttribute(
                 HTTP_CONNECTION_POOL);
 
@@ -104,7 +104,7 @@ public class HttpClientListener implements ServletContextListener {
         }
     }
 
-    private synchronized static ManagedConnectionPool getPool(ServletContext context) {
+    private static synchronized ManagedConnectionPool getPool(ServletContext context) {
         ManagedConnectionPool pool = (ManagedConnectionPool) context.getAttribute(
                 HTTP_CONNECTION_POOL);
         if (pool == null) {

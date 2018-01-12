@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * pon the web application initialisation, this Context Listener creates a MongoDb client that can
- *      be reused by each call. A Mongo Client should be seen like a Thread Pool.
+ * be reused by each call. A Mongo Client should be seen like a Thread Pool.
  */
 @WebListener
 public class MongoDbContextListener implements ServletContextListener {
@@ -56,7 +56,8 @@ public class MongoDbContextListener implements ServletContextListener {
         try {
             MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();
 
-            mongoClient = new MongoClient(Properties.getApiConfig().getMongoDbHosts(), credentials, MongoClientOptions.builder().build());
+            mongoClient = new MongoClient(Properties.getApiConfig().getMongoDbHosts(), credentials,
+                    MongoClientOptions.builder().build());
 
             if (checkMongoConnection(mongoClient)) {
                 sce.getServletContext().setAttribute(MONGO_CLIENT, mongoClient);
@@ -78,7 +79,7 @@ public class MongoDbContextListener implements ServletContextListener {
 
     /**
      * Checks if with the given client and credential is it possible to establish a connection
-     *      towards the MongoDB host.
+     * towards the MongoDB host.
      *
      * @param mongoClient client for MongoDB
      * @return {@code true} if the connection can be established false otherwise
@@ -97,10 +98,10 @@ public class MongoDbContextListener implements ServletContextListener {
                 mongoClient.close();
             }
 
-            LOGGER.error("Error during connection test",exec);
+            LOGGER.error("Error during connection test", exec);
         }
 
-        LOGGER.info("MongoDB connection is {}",flag.toString());
+        LOGGER.info("MongoDB connection is {}", flag.toString());
 
         return flag;
     }
@@ -124,7 +125,8 @@ public class MongoDbContextListener implements ServletContextListener {
                     MongoClientOptions.builder().build());
 
             try {
-                mongoClient.getDatabase(credentials.getSource()).runCommand(new Document("ping", 1));
+                mongoClient.getDatabase(credentials.getSource())
+                        .runCommand(new Document("ping", 1));
             } catch (Exception exec) {
                 flag = false;
 

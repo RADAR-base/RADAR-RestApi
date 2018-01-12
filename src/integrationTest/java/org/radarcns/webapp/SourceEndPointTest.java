@@ -74,7 +74,8 @@ public class SourceEndPointTest {
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString() + BasePath.SOURCE + '/');
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()
+                    + BasePath.SOURCE + '/');
 
     @Test
     public void getStatusTest204() throws IOException {

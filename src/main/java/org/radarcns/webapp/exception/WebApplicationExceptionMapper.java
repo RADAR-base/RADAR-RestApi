@@ -7,8 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Provider
-public class WebApplicationExceptionMapper extends javax.ws.rs.WebApplicationException implements ExceptionMapper<javax.ws.rs.WebApplicationException> {
-    private static final Logger logger = LoggerFactory.getLogger(WebApplicationExceptionMapper.class);
+public class WebApplicationExceptionMapper extends javax.ws.rs.WebApplicationException implements
+        ExceptionMapper<javax.ws.rs.WebApplicationException> {
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(WebApplicationExceptionMapper.class);
 
     @Override
     public Response toResponse(javax.ws.rs.WebApplicationException exception) {

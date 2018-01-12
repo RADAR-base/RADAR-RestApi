@@ -14,6 +14,14 @@ public class SourceData {
     @JsonProperty
     private Long total;
 
+    /**
+     * Constructor
+     * @param device
+     * @param status
+     * @param lastUpdate
+     * @param count
+     * @param total
+     */
     public SourceData(String device, String status, String lastUpdate, Long count, Long total) {
         this.device = device;
         this.status = status;

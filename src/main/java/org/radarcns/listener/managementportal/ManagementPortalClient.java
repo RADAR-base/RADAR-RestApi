@@ -33,8 +33,8 @@ import javax.servlet.ServletContext;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.radarcns.config.Properties;
 import org.radarcns.config.ManagementPortalConfig;
+import org.radarcns.config.Properties;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
@@ -203,8 +203,8 @@ public class ManagementPortalClient {
             return allSubjects;
         } else if (response.code() == HTTP_NOT_FOUND) {
             logger.info("Couldn't get any subjects for project :", projectName);
-            throw  new NotFoundException("Cannot find any subjects under project : " +projectName
-                    + "No subjects registered under this project or invalid projectName" );
+            throw new NotFoundException("Cannot find any subjects under project : " + projectName
+                    + "No subjects registered under this project or invalid projectName");
         }
         return null;
     }
@@ -240,7 +240,7 @@ public class ManagementPortalClient {
 
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL getProjectFromProjectName = new URL(config.getManagementPortalUrl(),
-                config.getProjectEndpoint()+ '/' + projectName);
+                config.getProjectEndpoint() + '/' + projectName);
         Request getProject = this.buildGetRequest(getProjectFromProjectName);
         Response response = this.client.newCall(getProject).execute();
         if (response.isSuccessful()) {
@@ -254,18 +254,6 @@ public class ManagementPortalClient {
         }
         return null;
     }
-
-//    /**
-//     * Creates a {@link Response} entity from a provided {@link Object}.
-//     */
-//    public static javax.ws.rs.core.Response getJsonResponse(Object obj) throws IOException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-//        JsonNode toJson = objectMapper.valueToTree(obj);
-//
-//        javax.ws.rs.core.Response.Status status = javax.ws.rs.core.Response.Status.OK;
-//        return javax.ws.rs.core.Response.status(status.getStatusCode()).entity(toJson).build();
-//    }
 
     private Request buildGetRequest(URL url) {
         return new Request.Builder()

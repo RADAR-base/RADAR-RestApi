@@ -34,10 +34,11 @@ import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 
 /**
- * Checks if the config file for the Front-End ecosystem is where expected, and checks the
- *      validity of the swagger documentation.
+ * Checks if the config file for the Front-End ecosystem is where expected, and checks the validity
+ * of the swagger documentation.
  */
 public class ExposedConfigTest {
+
     public static final String CONFIG_JSON = "config.json";
     public static final String OPENAPI_JSON = "openapi.json";
 
@@ -50,7 +51,8 @@ public class ExposedConfigTest {
     @Test
     public void checkFrontEndConfig()
             throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        String actual = apiClient.requestString(FRONTEND + '/' + CONFIG_JSON, "*/*", Status.OK);
+        String actual = apiClient.requestString(FRONTEND + '/'
+                + CONFIG_JSON, "*/*", Status.OK);
         String expected = Utility.readAll(
                 ExposedConfigTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
 
@@ -65,6 +67,7 @@ public class ExposedConfigTest {
         JsonNode node = new ObjectMapper().readTree(response);
         assertTrue(node.has("servers"));
         String serverUrl = node.get("servers").elements().next().get("url").asText();
-        assertEquals(RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString(), serverUrl);
+        assertEquals(RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString(),
+                serverUrl);
     }
 }

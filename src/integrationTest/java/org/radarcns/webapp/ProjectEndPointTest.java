@@ -22,6 +22,7 @@ import org.radarcns.managementportal.Subject;
 import org.radarcns.webapp.util.BasePath;
 
 public class ProjectEndPointTest {
+
     private static final String PROJECT_NAME = "radar";
 
     @Rule
@@ -43,10 +44,10 @@ public class ProjectEndPointTest {
                 Status.OK);
         assertTrue(actual.isSuccessful());
         List<Project> projects = objectMapper.readValue(actual.body().string(), objectMapper
-                    .getTypeFactory().constructCollectionType(List.class, Project.class));
+                .getTypeFactory().constructCollectionType(List.class, Project.class));
 
         assertNotNull(projects);
-        assertTrue(projects.size()>0);
+        assertTrue(projects.size() > 0);
     }
 
     @Test
@@ -80,14 +81,14 @@ public class ProjectEndPointTest {
             throws IOException, ReflectiveOperationException, URISyntaxException {
 
         Response actual = apiClient
-                .request(BasePath.PROJECT + "/" + PROJECT_NAME +"/" + SUBJECTS, "application/json",
+                .request(BasePath.PROJECT + "/" + PROJECT_NAME + "/" + SUBJECTS, "application/json",
                         Status.OK);
         assertTrue(actual.isSuccessful());
         List<Subject> subjects = objectMapper.readValue(actual.body().string(), objectMapper
                 .getTypeFactory().constructCollectionType(List.class, Subject.class));
 
         assertNotNull(subjects);
-        assertTrue(subjects.size()>0);
+        assertTrue(subjects.size() > 0);
 
     }
 

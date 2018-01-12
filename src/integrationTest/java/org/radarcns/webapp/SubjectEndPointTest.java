@@ -66,7 +66,8 @@ public class SubjectEndPointTest {
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString() + BasePath.SUBJECT + '/');
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()
+                    + BasePath.SUBJECT + '/');
 
     @Test
     public void getAllSubjectsTest204() throws IOException {

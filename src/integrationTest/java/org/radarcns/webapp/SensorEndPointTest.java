@@ -49,6 +49,7 @@ import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.util.RadarConverter;
 
 public class SensorEndPointTest {
+
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = org.radarcns.unit.config.TestCatalog.EMPATICA;
@@ -61,7 +62,9 @@ public class SensorEndPointTest {
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()+ DATA + '/');
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()
+                    + DATA
+                    + '/');
 
     @Test
     public void getRealtimeTest()
@@ -70,7 +73,7 @@ public class SensorEndPointTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                        SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
                 SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
@@ -80,7 +83,6 @@ public class SensorEndPointTest {
         Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
                 SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
                 Unit.BEATS_PER_MIN, TIME_FRAME, ITEM);
-
 
         Dataset actual = apiClient.requestAvro(REALTIME + "/" + SOURCE_PATH,
                 Dataset.class, Status.OK);
@@ -97,7 +99,7 @@ public class SensorEndPointTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                        SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
                 SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
@@ -121,13 +123,13 @@ public class SensorEndPointTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                        SOURCE_TYPE, TIME_FRAME));
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
                 SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
         while (docs.size() < 6) {
             docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, TIME_FRAME, SAMPLES, false);
+                    COUNT, TIME_FRAME, SAMPLES, false);
         }
         collection.insertMany(docs);
 
@@ -160,14 +162,15 @@ public class SensorEndPointTest {
         dropAndClose(Utility.getMongoClient());
     }
 
-    /** Drops all used collections to bring the database back to the initial state, and close the
-     *          database connection.
+    /**
+     * Drops all used collections to bring the database back to the initial state, and close the
+     * database connection.
      **/
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         Utility.dropCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                        SOURCE_TYPE, TIME_FRAME));
         Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
         client.close();
     }

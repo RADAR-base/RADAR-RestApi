@@ -44,8 +44,8 @@ import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
-import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
@@ -64,12 +64,15 @@ public class SourceEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceEndPoint.class);
 
-    @Context private ServletContext context;
-    @Context private HttpServletRequest request;
+    @Context
+    private ServletContext context;
+    @Context
+    private HttpServletRequest request;
 
     //--------------------------------------------------------------------------------------------//
     //                                       STATE FUNCTIONS                                      //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns the status of the given source.
      */
@@ -175,6 +178,7 @@ public class SourceEndPoint {
     //--------------------------------------------------------------------------------------------//
     //                               SOURCE SPECIFICATION FUNCTIONS                               //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns the specification of the given source.
      */
@@ -257,6 +261,7 @@ public class SourceEndPoint {
     //--------------------------------------------------------------------------------------------//
     //                                         ALL SOURCES                                        //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns all known sources for the given subject.
      */

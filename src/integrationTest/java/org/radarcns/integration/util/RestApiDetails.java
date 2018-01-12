@@ -40,7 +40,8 @@ public class RestApiDetails {
     @JsonProperty("token_endpoint")
     private String tokenEndpoint;
 
-    private RestApiDetails() {}
+    private RestApiDetails() {
+    }
 
     public String getClientId() {
         return clientId;
@@ -66,12 +67,15 @@ public class RestApiDetails {
         return applicationConfig;
     }
 
+    /**
+     * Get rest-api configs
+     */
     public static RestApiDetails getRestApiClientDetails() {
-        if(Objects.isNull(instance)) {
+        if (Objects.isNull(instance)) {
             String path = Properties.class.getClassLoader().getResource(CONFIG_FILE_NAME).getFile();
             LOGGER.info("Loading RestAPI client Config file located at : {}", path);
             try {
-                instance =new YamlConfigLoader().load(new File(path), RestApiDetails.class);
+                instance = new YamlConfigLoader().load(new File(path), RestApiDetails.class);
             } catch (IOException e) {
                 LOGGER.error("Cannot load rest-api client details, returning default configs");
                 RestApiDetails restApiDetails = new RestApiDetails();

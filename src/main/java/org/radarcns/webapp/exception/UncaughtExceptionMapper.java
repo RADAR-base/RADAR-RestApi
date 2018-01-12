@@ -15,7 +15,7 @@ public class UncaughtExceptionMapper extends Throwable implements ExceptionMappe
         logger.error("Uncaught exception", exception);
         return Response.status(500)
                 .entity(new StatusMessage("server_error",
-                        exception.getClass() + ": "+ exception.getMessage()))
+                        exception.getClass() + ": " + exception.getMessage()))
                 .build();
     }
 }

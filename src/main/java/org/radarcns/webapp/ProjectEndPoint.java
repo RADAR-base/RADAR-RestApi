@@ -46,7 +46,6 @@ public class ProjectEndPoint {
     @Context
     private HttpServletRequest request;
 
-
     //--------------------------------------------------------------------------------------------//
     //                                       PROJECTS                                             //
     //--------------------------------------------------------------------------------------------//
@@ -148,7 +147,8 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "200", description = "Return a list of subjects objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getAllSubjectsJsonFromStudy(@PathParam(Parameter.PROJECT_NAME) String projectName) {
+    public Response getAllSubjectsJsonFromStudy(
+            @PathParam(Parameter.PROJECT_NAME) String projectName) {
         try {
             checkPermissionOnProject(getJWT(request), SUBJECT_READ, projectName);
             ManagementPortalClient managementPortalClient = ManagementPortalClientManager

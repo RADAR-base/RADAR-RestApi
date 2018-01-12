@@ -30,7 +30,7 @@ import org.radarcns.config.catalog.SensorCatalog;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.monitor.SourceMonitor;
 import org.radarcns.restapi.source.States;
-import org.radarcns.source.SourceDefinition;
+import org.radarcns.catalog.SourceDefinition;
 
 public class SourceMonitorTest {
 

@@ -3,6 +3,7 @@ package org.radarcns.webapp.exception;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StatusMessage {
+
     @JsonProperty
     private String error;
 

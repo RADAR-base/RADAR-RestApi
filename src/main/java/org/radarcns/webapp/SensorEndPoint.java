@@ -357,7 +357,7 @@ public class SensorEndPoint {
             @PathParam(START) long start,
             @PathParam(END) long end) {
         try {
-            ManagementPortalClient client =ManagementPortalClientManager
+            ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,

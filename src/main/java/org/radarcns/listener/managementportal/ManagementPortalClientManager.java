@@ -26,8 +26,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import org.radarcns.config.Properties;
 import org.radarcns.config.ManagementPortalConfig;
+import org.radarcns.config.Properties;
 import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.oauth.OAuth2Client;
@@ -42,12 +42,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Refreshes the OAuth2 token needed to authenticate against the Management Portal and adds it to
- *      the {@link javax.servlet.ServletContext} in this way multiple function can make reuse of it.
+ * the {@link javax.servlet.ServletContext} in this way multiple function can make reuse of it.
  */
 @WebListener
 public class ManagementPortalClientManager implements ServletContextListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPortalClientManager.class);
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(ManagementPortalClientManager.class);
 
     private static final String ACCESS_TOKEN = "TOKEN";
     private static final String MP_CLIENT = "MP_CLIENT";
@@ -61,7 +62,7 @@ public class ManagementPortalClientManager implements ServletContextListener {
             getToken(sce.getServletContext());
             getManagementPortalClient(sce.getServletContext());
         } catch (TokenException e) {
-            LOGGER.warn("Cannot initialize ManagementPortal Client due to Token exception " , e);
+            LOGGER.warn("Cannot initialize ManagementPortal Client due to Token exception ", e);
         }
 
     }
@@ -69,11 +70,11 @@ public class ManagementPortalClientManager implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // clear connection pool
-       OAuth2Client oAuth2Client = (OAuth2Client)sce.getServletContext().getAttribute
+        OAuth2Client oAuth2Client = (OAuth2Client) sce.getServletContext().getAttribute
                 (OAUTH2_CLIENT);
-       if(Objects.nonNull(oAuth2Client)) {
-           oAuth2Client.getHttpClient().connectionPool().evictAll();
-       }
+        if (Objects.nonNull(oAuth2Client)) {
+            oAuth2Client.getHttpClient().connectionPool().evictAll();
+        }
         // clear current token (set to invalid, expired token)
         sce.getServletContext().setAttribute(ACCESS_TOKEN, null);
         LOGGER.info("{} has been invalidated.", ACCESS_TOKEN);
@@ -85,8 +86,9 @@ public class ManagementPortalClientManager implements ServletContextListener {
 
     /**
      * Refresh the access token stored in the {@link ServletContext}
+     *
      * @param context {@link ServletContext} where the last used {@code Access Token} has been
-     *      stored
+     * stored
      * @throws TokenException If the token could not be retrieved.
      */
     private static synchronized void refresh(ServletContext context) throws TokenException {
@@ -115,22 +117,22 @@ public class ManagementPortalClientManager implements ServletContextListener {
             throws TokenException {
         OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context.getAttribute
                 (ACCESS_TOKEN);
-        if(Objects.isNull(currentToken) || currentToken.isExpired()) {
+        if (Objects.isNull(currentToken) || currentToken.isExpired()) {
             refresh(context);
-            return  (OAuth2AccessTokenDetails) context.getAttribute(ACCESS_TOKEN);
-        }
-        else {
-           return currentToken;
+            return (OAuth2AccessTokenDetails) context.getAttribute(ACCESS_TOKEN);
+        } else {
+            return currentToken;
         }
     }
 
     public static ManagementPortalClient getManagementPortalClient(ServletContext context)
             throws TokenException {
-        ManagementPortalClient managementPortalClient = (ManagementPortalClient) context.getAttribute(MP_CLIENT);
-        if(Objects.isNull(managementPortalClient)){
+        ManagementPortalClient managementPortalClient = (ManagementPortalClient) context
+                .getAttribute(MP_CLIENT);
+        if (Objects.isNull(managementPortalClient)) {
             managementPortalClient = new ManagementPortalClient
                     (HttpClientListener.getClient(context));
-            context.setAttribute(MP_CLIENT , managementPortalClient);
+            context.setAttribute(MP_CLIENT, managementPortalClient);
         }
         managementPortalClient.updateToken(getToken(context));
         return managementPortalClient;

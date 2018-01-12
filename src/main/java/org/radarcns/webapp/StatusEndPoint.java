@@ -1,23 +1,12 @@
 package org.radarcns.webapp;
 
+import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.security.utils.SecurityUtils.getJWT;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.security.exception.AccessDeniedException;
-import org.radarcns.status.CSVData;
-import org.radarcns.status.CSVDataController;
-import org.radarcns.webapp.util.ResponseHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -25,10 +14,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
-import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
-import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
-import static org.radarcns.security.utils.SecurityUtils.getJWT;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import org.radarcns.auth.exception.NotAuthorizedException;
+import org.radarcns.security.exception.AccessDeniedException;
+import org.radarcns.status.CsvData;
+import org.radarcns.status.CsvDataController;
+import org.radarcns.webapp.util.ResponseHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("/status")
 public class StatusEndPoint {
@@ -37,8 +36,8 @@ public class StatusEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatusEndPoint.class);
 
-    @Context private HttpServletRequest request;
-
+    @Context
+    private HttpServletRequest request;
 
 
     @GET
@@ -58,10 +57,10 @@ public class StatusEndPoint {
     public Response getJsonData() {
         try {
             checkPermission(getJWT(request), MEASUREMENT_READ);
-            List<CSVData> data = getListFromCSVFile(CSV_FILE_PATH);
-            HashSet<String> topics = CSVDataController.getAllTopics(data);
+            List<CsvData> data = getListFromCSVFile(CSV_FILE_PATH);
+            HashSet<String> topics = CsvDataController.getAllTopics(data);
             return Response.status(Response.Status.OK).entity(topics + "\n" +
-                    CSVDataController.getDataOfTopics(data)).build();
+                    CsvDataController.getDataOfTopics(data)).build();
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -102,7 +101,7 @@ public class StatusEndPoint {
     public Response getData() {
         try {
             checkPermission(getJWT(request), MEASUREMENT_READ);
-            List<CSVData> data = getListFromCSVFile(CSV_FILE_PATH);
+            List<CsvData> data = getListFromCSVFile(CSV_FILE_PATH);
             return Response.status(Response.Status.OK).entity(data).build();
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
@@ -126,9 +125,9 @@ public class StatusEndPoint {
         }
     }
 
-    public List<CSVData> getListFromCSVFile(String csvFileToRead) throws FileNotFoundException,
-            IOException{
-        List<CSVData> dataList = new ArrayList<>();
+    public List<CsvData> getListFromCSVFile(String csvFileToRead) throws FileNotFoundException,
+            IOException {
+        List<CsvData> dataList = new ArrayList<>();
         BufferedReader br = new BufferedReader(new FileReader(csvFileToRead));
         String line;
 
@@ -137,7 +136,7 @@ public class StatusEndPoint {
 
             String[] dataCsv = line.split(",");
 
-            CSVData dataObj = new CSVData();
+            CsvData dataObj = new CsvData();
 
             dataObj.setTopic(dataCsv[0]);
             dataObj.setDevice(dataCsv[1]);

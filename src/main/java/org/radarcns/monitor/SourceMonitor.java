@@ -25,7 +25,7 @@ import org.radarcns.restapi.source.Sensor;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.source.SourceSummary;
 import org.radarcns.restapi.source.States;
-import org.radarcns.source.SourceDefinition;
+import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.util.RadarConverter;
 
 /**

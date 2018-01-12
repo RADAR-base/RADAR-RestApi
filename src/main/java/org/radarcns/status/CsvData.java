@@ -1,6 +1,6 @@
 package org.radarcns.status;
 
-public class CSVData {
+public class CsvData {
 
     private String topic;
     private String device;
