@@ -23,7 +23,7 @@ public class CsvDataController {
 
     /**
      * Gets all topics available.
-     * @param csvDataList
+     * @param csvDataList list of {@link CsvData}
      * @return Set of available topics
      */
     public static HashSet<String> getAllTopics(List<CsvData> csvDataList) {
