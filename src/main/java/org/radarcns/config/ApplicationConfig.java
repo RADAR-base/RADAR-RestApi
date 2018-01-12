@@ -19,7 +19,6 @@ package org.radarcns.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

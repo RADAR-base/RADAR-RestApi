@@ -35,8 +35,9 @@ public class TestApplicationConfig {
     @Test(expected = com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.class)
     public void readCatalogKoUnit() throws IOException {
         new YamlConfigLoader().load(new File(
-                TestApplicationConfig.class.getClassLoader()
-                        .getResource("radar_dev_catalog_ko.yml").getFile()), ApplicationConfig.class);
+                        TestApplicationConfig.class.getClassLoader()
+                                .getResource("radar_dev_catalog_ko.yml").getFile()),
+                ApplicationConfig.class);
     }
 
 }
