@@ -37,12 +37,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
-import org.radarcns.config.Properties;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
+import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.restapi.data.DoubleSample;
 import org.radarcns.restapi.dataset.Dataset;
@@ -61,7 +61,7 @@ public class SensorEndPointTest {
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            Properties.getApiConfig().getApplicationConfig().getUrlString()+ DATA + '/');
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()+ DATA + '/');
 
     @Test
     public void getRealtimeTest()

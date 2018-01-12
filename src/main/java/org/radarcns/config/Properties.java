@@ -53,7 +53,7 @@ public final class Properties {
      *      those contain the expected file, the {@code ClassLoader} is used to load file from the
      *      resources folder.
      **/
-    private static final ApiConfig API_CONFIG_INSTANCE;
+    private static final ApplicationConfig API_CONFIG_INSTANCE;
     private static final DeviceCatalog DEVICE_CATALOG_INSTANCE;
 
     static {
@@ -70,7 +70,7 @@ public final class Properties {
      * Gives access to the singleton API properties.
      * @return Properties
      */
-    public static ApiConfig getApiConfig() {
+    public static ApplicationConfig getApiConfig() {
         return API_CONFIG_INSTANCE;
     }
 
@@ -88,14 +88,14 @@ public final class Properties {
      *      and Docker image deployment are checked. In the last instance, the config file is
      *      searched inside the default projects resources folder.
      */
-    private static ApiConfig loadApiConfig() throws IOException {
+    private static ApplicationConfig loadApiConfig() throws IOException {
         String[] paths = new String[]{
                 System.getenv(CONFIG_FOLDER),
                 PATH_FILE_AWS,
                 PATH_FILE_DOCKER
         };
 
-        ApiConfig config;
+        ApplicationConfig config;
         for (int i = 0; i < paths.length; i++) {
             config = loadApiConfig(paths[i]);
             if (config != null) {
@@ -108,16 +108,16 @@ public final class Properties {
 
         LOGGER.info("Loading Config file located at : {}", path);
 
-        return new YamlConfigLoader().load(new File(path), ApiConfig.class);
+        return new YamlConfigLoader().load(new File(path), ApplicationConfig.class);
     }
 
-    private static ApiConfig loadApiConfig(String path) throws IOException {
+    private static ApplicationConfig loadApiConfig(String path) throws IOException {
         validPath = path;
         String filePath = path + NAME_CONFIG_FILE;
 
         if (checkFileExist(filePath)) {
             LOGGER.info("Loading Config file located at : {}", path);
-            return new YamlConfigLoader().load(new File(filePath), ApiConfig.class);
+            return new YamlConfigLoader().load(new File(filePath), ApplicationConfig.class);
         }
 
         validPath = null;

@@ -15,8 +15,8 @@ import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.config.Properties;
 import org.radarcns.integration.util.ApiClient;
+import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.webapp.util.BasePath;
@@ -26,7 +26,7 @@ public class ProjectEndPointTest {
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            Properties.getApiConfig().getApplicationConfig().getUrlString());
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
     private static ObjectMapper objectMapper;
 

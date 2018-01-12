@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response.Status;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.integration.util.ApiClient;
+import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 
 /**
@@ -64,6 +65,6 @@ public class ExposedConfigTest {
         JsonNode node = new ObjectMapper().readTree(response);
         assertTrue(node.has("servers"));
         String serverUrl = node.get("servers").elements().next().get("url").asText();
-        assertEquals(Properties.getApiConfig().getApplicationConfig().getUrlString(), serverUrl);
+        assertEquals(RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString(), serverUrl);
     }
 }

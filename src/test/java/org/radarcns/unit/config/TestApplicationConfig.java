@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import org.junit.Test;
-import org.radarcns.config.ApiConfig;
+import org.radarcns.config.ApplicationConfig;
 import org.radarcns.config.Properties;
 import org.radarcns.config.YamlConfigLoader;
 
@@ -24,7 +24,7 @@ import org.radarcns.config.YamlConfigLoader;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class TestApiConfig {
+public class TestApplicationConfig {
 
     @Test
     public void loadApiConfigOk() throws IOException {
@@ -35,8 +35,8 @@ public class TestApiConfig {
     @Test(expected = com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.class)
     public void readCatalogKoUnit() throws IOException {
         new YamlConfigLoader().load(new File(
-                TestApiConfig.class.getClassLoader()
-                        .getResource("radar_dev_catalog_ko.yml").getFile()), ApiConfig.class);
+                TestApplicationConfig.class.getClassLoader()
+                        .getResource("radar_dev_catalog_ko.yml").getFile()), ApplicationConfig.class);
     }
 
 }

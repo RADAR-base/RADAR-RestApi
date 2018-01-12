@@ -36,12 +36,12 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.config.Properties;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
+import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.webapp.util.BasePath;
@@ -57,7 +57,7 @@ public class AppStatusEndPointTest {
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            Properties.getApiConfig().getApplicationConfig().getUrlString()+ BasePath.ANDROID + '/' + STATUS + '/');
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()+ BasePath.ANDROID + '/' + STATUS + '/');
 
     @Test
     public void getStatusTest204() throws IOException {

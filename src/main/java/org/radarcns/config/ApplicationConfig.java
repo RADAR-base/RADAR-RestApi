@@ -27,14 +27,9 @@ import java.util.Map;
 /**
  * Yaml deserializer.
  */
-public class ApiConfig {
+public class ApplicationConfig {
 
-    //private final Logger LOGGER = LoggerFactory.getLogger(ApiConfig.class);
-
-    /** Release date. **/
-    private Date released;
-    /** Release version. **/
-    private String version;
+    //private final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfig.class);
 
     /** MongoDb hosts. **/
     @JsonProperty("mongodb_hosts")
@@ -51,31 +46,9 @@ public class ApiConfig {
     @JsonProperty("swagger_version")
     private String swaggerVersion;
 
-    @JsonProperty("application")
-    private ServerConfig applicationConfig;
 
     @JsonProperty("management_portal_config")
     private ManagementPortalConfig managementPortalConfig;
-
-    /** Returns the release date. **/
-    public Date getReleased() {
-        return released;
-    }
-
-    /** Sets the release date. **/
-    public void setReleased(Date released) {
-        this.released = released;
-    }
-
-    /** Returns the version number. **/
-    public String getVersion() {
-        return version;
-    }
-
-    /** Sets the version number. **/
-    public void setVersion(String version) {
-        this.version = version;
-    }
 
     /** Returns MongoDb hosts. **/
     public Map<String, String> getMongoHosts() {
@@ -152,7 +125,4 @@ public class ApiConfig {
         return managementPortalConfig;
     }
 
-    public ServerConfig getApplicationConfig() {
-        return applicationConfig;
-    }
 }

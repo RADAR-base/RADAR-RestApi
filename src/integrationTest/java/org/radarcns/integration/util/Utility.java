@@ -140,9 +140,9 @@ public class Utility {
     }
 
     /**
-     * Converts Bson Document into an Application.
-     * @param documents map containing variables to create the Application class
-     * @return an Application class
+     * Converts Bson Document into an ApplicationConfig.
+     * @param documents map containing variables to create the ApplicationConfig class
+     * @return an ApplicationConfig class
      *
      * @see Application
      */

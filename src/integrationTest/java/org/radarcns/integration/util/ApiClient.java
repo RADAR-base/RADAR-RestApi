@@ -53,16 +53,16 @@ public class ApiClient extends ExternalResource {
         this.config = config;
 
         try {
-            RestApiClientDetails restApiClientDetails  = RestApiClientDetails
+            RestApiDetails restApiDetails = RestApiDetails
                     .getRestApiClientDetails();
             this.oAuth2Client = new OAuth2Client()
-                    .clientId(restApiClientDetails.getClientId())
-                    .clientSecret(restApiClientDetails.getClientSecret())
+                    .clientId(restApiDetails.getClientId())
+                    .clientSecret(restApiDetails.getClientSecret())
                     .tokenEndpoint(
-                            new URL(new URL(restApiClientDetails.getManagementPortalUrl()),
-                                    restApiClientDetails.getTokenEndpoint()));
+                            new URL(new URL(restApiDetails.getManagementPortalUrl()),
+                                    restApiDetails.getTokenEndpoint()));
 
-            for (String scope : restApiClientDetails.getClientScopes().split(" ")) {
+            for (String scope : restApiDetails.getClientScopes().split(" ")) {
                 oAuth2Client.addScope(scope);
             }
 

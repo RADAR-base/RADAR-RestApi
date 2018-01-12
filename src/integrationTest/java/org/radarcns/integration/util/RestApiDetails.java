@@ -6,20 +6,24 @@ import java.io.IOException;
 import java.util.Objects;
 import net.minidev.json.annotate.JsonIgnore;
 import org.radarcns.config.Properties;
+import org.radarcns.config.ServerConfig;
 import org.radarcns.config.YamlConfigLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RestApiClientDetails {
+public class RestApiDetails {
 
     @JsonIgnore
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiClient.class);
 
     @JsonIgnore
-    private static final String CONFIG_FILE_NAME = "restapi-client-details.yml";
+    private static final String CONFIG_FILE_NAME = "restapi-details.yml";
 
     @JsonIgnore
-    private static RestApiClientDetails instance = null;
+    private static RestApiDetails instance = null;
+
+    @JsonProperty("application")
+    private ServerConfig applicationConfig;
 
     @JsonProperty("oauth_client_id")
     private String clientId;
@@ -36,7 +40,7 @@ public class RestApiClientDetails {
     @JsonProperty("token_endpoint")
     private String tokenEndpoint;
 
-    private RestApiClientDetails () {}
+    private RestApiDetails() {}
 
     public String getClientId() {
         return clientId;
@@ -58,22 +62,26 @@ public class RestApiClientDetails {
         return tokenEndpoint;
     }
 
-    public static RestApiClientDetails getRestApiClientDetails() {
+    public ServerConfig getApplicationConfig() {
+        return applicationConfig;
+    }
+
+    public static RestApiDetails getRestApiClientDetails() {
         if(Objects.isNull(instance)) {
             String path = Properties.class.getClassLoader().getResource(CONFIG_FILE_NAME).getFile();
             LOGGER.info("Loading RestAPI client Config file located at : {}", path);
             try {
-                instance =new YamlConfigLoader().load(new File(path), RestApiClientDetails.class);
+                instance =new YamlConfigLoader().load(new File(path), RestApiDetails.class);
             } catch (IOException e) {
                 LOGGER.error("Cannot load rest-api client details, returning default configs");
-                RestApiClientDetails restApiClientDetails = new RestApiClientDetails();
-                restApiClientDetails.clientId = "radar_dashboard";
-                restApiClientDetails.clientSecret = "secret";
-                restApiClientDetails.clientScopes = "SUBJECT.READ PROJECT.READ SOURCE.READ "
+                RestApiDetails restApiDetails = new RestApiDetails();
+                restApiDetails.clientId = "radar_dashboard";
+                restApiDetails.clientSecret = "secret";
+                restApiDetails.clientScopes = "SUBJECT.READ PROJECT.READ SOURCE.READ "
                         + "SOURCETYPE.READ MEASUREMENT.READ";
-                restApiClientDetails.managementPortalUrl = "http://localhost:8090/";
-                restApiClientDetails.tokenEndpoint = "oauth/token";
-                return restApiClientDetails;
+                restApiDetails.managementPortalUrl = "http://localhost:8090/";
+                restApiDetails.tokenEndpoint = "oauth/token";
+                return restApiDetails;
 
             }
         }

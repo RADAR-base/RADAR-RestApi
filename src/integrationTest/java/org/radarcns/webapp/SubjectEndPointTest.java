@@ -40,12 +40,12 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.config.Properties;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
+import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.restapi.source.Sensor;
 import org.radarcns.restapi.source.Source;
@@ -66,7 +66,7 @@ public class SubjectEndPointTest {
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            Properties.getApiConfig().getApplicationConfig().getUrlString() + BasePath.SUBJECT + '/');
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString() + BasePath.SUBJECT + '/');
 
     @Test
     public void getAllSubjectsTest204() throws IOException {

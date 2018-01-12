@@ -61,6 +61,7 @@ import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
 import org.radarcns.integration.util.ManagementPortalWireMock;
+import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.MockDataConfig;
@@ -497,7 +498,8 @@ public class EndToEndTest {
         JsonNode node = new ObjectMapper().readTree(response);
         assertTrue(node.has("servers"));
         String serverUrl = node.get("servers").elements().next().get("url").asText();
-        assertEquals(Properties.getApiConfig().getApplicationConfig().getUrlString(), serverUrl);
+        assertEquals(RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString(), serverUrl);
+        // TODO change the above line to use local resources
     }
 
     /**
