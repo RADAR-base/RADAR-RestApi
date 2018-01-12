@@ -25,8 +25,8 @@ public final class SecurityUtils {
      *
      * @param request servlet request
      * @return decoded JWT
-     * @throws AccessDeniedException if the {@code "jwt"} attribute is missing or does not contain a
-     * decoded JWT
+     * @throws AccessDeniedException if the "jwt" attribute does not contain a valid decoded JWT
+     *
      */
     public static DecodedJWT getJWT(ServletRequest request) throws AccessDeniedException {
         Object jwt = request.getAttribute(AuthenticationFilter.TOKEN_ATTRIBUTE);

@@ -93,8 +93,8 @@ public class ManagementPortalClientManager implements ServletContextListener {
     private static synchronized void refresh(ServletContext context) throws TokenException {
         // Multiple threads can be waiting to enter this method when the token is expired, we need
         // only the first one to request a new token, subsequent threads can safely exit immediately
-        OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context.getAttribute
-                (ACCESS_TOKEN);
+        OAuth2AccessTokenDetails currentToken = (OAuth2AccessTokenDetails) context
+                .getAttribute(ACCESS_TOKEN);
         if (Objects.nonNull(currentToken) && !currentToken.isExpired()) {
             return;
         }
@@ -127,9 +127,10 @@ public class ManagementPortalClientManager implements ServletContextListener {
     /**
      * Gets the instance of {@link ManagementPortalClient} from given context, if not available
      * creates one and stores in the context.
-     * @param context
+     *
+     * @param context current servlet context.
      * @return instance of {@link ManagementPortalClient}
-     * @throws TokenException
+     * @throws TokenException if cannot get a valid token while initializing the client.
      */
     public static ManagementPortalClient getManagementPortalClient(ServletContext context)
             throws TokenException {

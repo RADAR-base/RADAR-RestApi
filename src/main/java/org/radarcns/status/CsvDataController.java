@@ -22,9 +22,9 @@ public class CsvDataController {
     public static int curr = 0;
 
     /**
-     * gets all topics available
+     * Gets all topics available.
      * @param csvDataList
-     * @return
+     * @return Set of available topics
      */
     public static HashSet<String> getAllTopics(List<CsvData> csvDataList) {
         HashSet<String> topics = new HashSet<>();
@@ -45,8 +45,8 @@ public class CsvDataController {
 
         sources = new ArrayList<>();
 
-        Map<String, List<CsvData>> groupedData = csvDataList.stream().collect(Collectors.groupingBy(
-                CsvData::getTopic));
+        Map<String, List<CsvData>> groupedData = csvDataList.stream()
+                .collect(Collectors.groupingBy(CsvData::getTopic));
 
         Map<String, List<SourceData>> listMap = new HashMap<>();
 
@@ -56,43 +56,46 @@ public class CsvDataController {
                 .forEach(x -> {
                     x.getValue().stream()
                             .forEach(p -> {
-                                        try {
-                                            if (sources.isEmpty()) {
+                                try {
+                                    if (sources.isEmpty()) {
 
-                                                sources.add(new SourceData(p.getDevice(),
-                                                        checkStatus(convertTimestamp(p.getTimestamp())),
-                                                        convertTimestamp(p.getTimestamp()),
-                                                        1L, Long.parseLong(p.getCount())));
+                                        sources.add(new SourceData(p.getDevice(),
+                                                checkStatus(
+                                                        convertTimestamp(p.getTimestamp())),
+                                                convertTimestamp(p.getTimestamp()),
+                                                1L, Long.parseLong(p.getCount())));
 
-                                            } else if (containsSource(p.getDevice())) {
+                                    } else if (containsSource(p.getDevice())) {
 
-                                                SourceData data = sources.get(curr);
-                                                sources.get(curr).setCount(data.getCount() + 1L);
+                                        SourceData data = sources.get(curr);
+                                        sources.get(curr).setCount(data.getCount() + 1L);
 
-                                                if (compareTimestamp(data.getLastUpdate(),
-                                                        p.getTimestamp()) < 0) {
-                                                    sources.get(curr)
-                                                            .setLastUpdate(
-                                                                    convertTimestamp(p.getTimestamp()));
-                                                    sources.get(curr)
-                                                            .setStatus(checkStatus(
-                                                                    convertTimestamp(p.getTimestamp())));
-                                                }
-
-                                                sources.get(curr).setTotal(data.getTotal()
-                                                        + Long.parseLong(p.getCount()));
-
-                                            } else {
-                                                sources.add(new SourceData(p.getDevice(),
-                                                        checkStatus(convertTimestamp(p.getTimestamp())),
-                                                        convertTimestamp(p.getTimestamp()),
-                                                        1L, Long.parseLong(p.getCount())));
-                                            }
-                                        } catch (DateTimeParseException exc) {
-                                            exc.printStackTrace();
+                                        if (compareTimestamp(data.getLastUpdate(),
+                                                p.getTimestamp()) < 0) {
+                                            sources.get(curr)
+                                                    .setLastUpdate(
+                                                            convertTimestamp(
+                                                                    p.getTimestamp()));
+                                            sources.get(curr)
+                                                    .setStatus(checkStatus(
+                                                            convertTimestamp(
+                                                                    p.getTimestamp())));
                                         }
+
+                                        sources.get(curr).setTotal(data.getTotal()
+                                                + Long.parseLong(p.getCount()));
+
+                                    } else {
+                                        sources.add(new SourceData(p.getDevice(),
+                                                checkStatus(
+                                                        convertTimestamp(p.getTimestamp())),
+                                                convertTimestamp(p.getTimestamp()),
+                                                1L, Long.parseLong(p.getCount())));
                                     }
-                            );
+                                } catch (DateTimeParseException exc) {
+                                    exc.printStackTrace();
+                                }
+                            });
                     listMap.put(x.getKey(), sources);
                     sources = new ArrayList<>();
                     curr = 0;
@@ -177,8 +180,7 @@ public class CsvDataController {
      */
     public static boolean containsSource(String sourceId) {
 
-        for (SourceData data : sources
-                ) {
+        for (SourceData data : sources) {
             if (data.getDevice().equals(sourceId)) {
                 curr = sources.indexOf(data);
                 return true;
