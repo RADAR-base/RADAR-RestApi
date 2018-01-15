@@ -19,13 +19,7 @@ package org.radarcns.dao.mongo.data.sensor;
 import static org.radarcns.dao.mongo.data.sensor.DataFormat.getQuartiles;
 import static org.radarcns.dao.mongo.util.MongoHelper.COUNT;
 import static org.radarcns.dao.mongo.util.MongoHelper.FIELDS;
-import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
-import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
-import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
-import static org.radarcns.restapi.header.DescriptiveStatistic.MEDIAN;
-import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.bson.Document;
 import org.radarcns.dao.mongo.util.MongoSensor;
