@@ -1,5 +1,3 @@
-package org.radarcns.util;
-
 /*
  * Copyright 2016 King's College London
  *
@@ -15,6 +13,8 @@ package org.radarcns.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.webapp.media;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -54,9 +54,9 @@ public class CsvMessageBodyWriter implements MessageBodyWriter {
 
     @Override
     public void writeTo(Object o, Class type, Type genericType, Annotation[] annotations,
-            MediaType mediaType,
-            MultivaluedMap httpHeaders, OutputStream entityStream) throws IOException,
-            WebApplicationException {
+                        MediaType mediaType,
+                        MultivaluedMap httpHeaders, OutputStream entityStream) throws IOException,
+            WebApplicationException, ClassCastException {
         List<CsvData> data = (List<CsvData>) o;
         if (data != null && data.size() > 0) {
             CsvMapper mapper = new CsvMapper();

@@ -127,8 +127,7 @@ public class StatusEndPoint {
         }
     }
 
-    private List<CsvData> getListFromCsvFile(String csvFileToRead) throws FileNotFoundException,
-            IOException {
+    private List<CsvData> getListFromCsvFile(String csvFileToRead) throws IOException {
         List<CsvData> dataList = new ArrayList<>();
         BufferedReader br = new BufferedReader(new FileReader(csvFileToRead));
         String line;

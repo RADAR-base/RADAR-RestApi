@@ -32,7 +32,7 @@
                 io.swagger.v3.jaxrs2.integration.resources,
                 org.radarcns.webapp,
                 org.radarcns.webapp.exception
-                org.radarcns.util
+                org.radarcns.webapp.media
             </param-value>
         </init-param>
         <init-param>
