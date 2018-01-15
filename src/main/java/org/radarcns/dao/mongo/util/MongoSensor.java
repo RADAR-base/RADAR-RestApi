@@ -16,6 +16,9 @@
 
 package org.radarcns.dao.mongo.util;
 
+import static org.radarcns.dao.mongo.util.MongoHelper.KEY;
+import static org.radarcns.dao.mongo.util.MongoHelper.VALUE;
+
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
@@ -188,13 +191,8 @@ public abstract class MongoSensor extends MongoDataAccess {
         }
 
         while (cursor.hasNext()) {
-            Document doc = cursor.next();
-
-            try {
-                count += doc.getDouble(Stat.count.getParam());
-            } catch (ClassCastException exec) {
-                count += extractCount(doc.get(Stat.count.getParam()));
-            }
+            Document doc = (Document) cursor.next().get(VALUE);
+            count += extractCount(doc);
         }
 
         cursor.close();
@@ -228,15 +226,27 @@ public abstract class MongoSensor extends MongoDataAccess {
         }
 
         while (cursor.hasNext()) {
-
             Document doc = cursor.next();
 
-            if (start == null) {
-                start = doc.getDate(MongoHelper.START);
-            }
-            end = doc.getDate(MongoHelper.END);
+            Document key = (Document) doc.get(KEY);
 
-            Item item = new Item(docToAvro(doc, field, stat, header),
+            Date localStart = key.getDate(MongoHelper.START);
+            Date localEnd = key.getDate(MongoHelper.END);
+
+            if (start == null) {
+                start = localStart;
+                end = localEnd;
+            } else {
+                if (start.after(localStart)) {
+                    start = localStart;
+                }
+                if (end.before(localEnd)) {
+                    end = localEnd;
+                }
+            }
+
+            Document value = (Document) doc.get(VALUE);
+            Item item = new Item(docToAvro(value, field, stat, header),
                     RadarConverter.getISO8601(doc.getDate(MongoHelper.START)));
 
             list.addLast(item);
@@ -324,7 +334,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @implSpec this function should be override by the subclass
      * @return the count value
      */
-    protected int extractCount(Object doc) {
+    protected int extractCount(Document doc) {
         throw new UnsupportedOperationException("This function must be override by the subclass");
     }
 }

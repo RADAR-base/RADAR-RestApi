@@ -133,9 +133,9 @@ public class RadarConverter {
             throw new IllegalArgumentException();
         }
 
-        BigDecimal bd = new BigDecimal(Double.toString(value));
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
+        return BigDecimal.valueOf(value)
+                .setScale(places, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     /**

@@ -43,11 +43,16 @@ public class MongoHelper {
     //private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
 
     public static final String ID = "_id";
+    public static final String KEY = "key";
+    public static final String VALUE = "value";
     public static final String USER = "user";
     public static final String SOURCE = "source";
-    public static final String START = "start";
-    public static final String END = "end";
+    public static final String START = "timeStart";
+    public static final String END = "timeEend";
     public static final String SOURCE_TYPE = "sourceType";
+    public static final String FIELDS = "fields";
+    public static final String QUARTILE = "quartile";
+    public static final String COUNT = "count";
 
     public static final String FIRST_QUARTILE = "25";
     public static final String SECOND_QUARTILE = "50";

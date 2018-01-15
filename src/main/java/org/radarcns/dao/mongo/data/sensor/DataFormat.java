@@ -16,6 +16,10 @@
 
 package org.radarcns.dao.mongo.data.sensor;
 
+import static org.radarcns.dao.mongo.util.MongoHelper.QUARTILE;
+
+import java.util.List;
+import org.bson.Document;
 import org.radarcns.dao.mongo.util.MongoSensor;
 import org.radarcns.source.SourceCatalog;
 
@@ -47,5 +51,10 @@ public enum DataFormat {
             case DOUBLE_FORMAT: return new DoubleFormat(sensorType);
             default: throw new IllegalArgumentException(dataFormat.format + ": unknown DataFormat");
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Double> getQuartiles(Document doc) {
+        return (List<Double>)doc.get(QUARTILE);
     }
 }

@@ -16,11 +16,15 @@
 
 package org.radarcns.dao.mongo.data.sensor;
 
+import static org.radarcns.dao.mongo.data.sensor.DataFormat.getQuartiles;
+import static org.radarcns.dao.mongo.util.MongoHelper.COUNT;
+import static org.radarcns.dao.mongo.util.MongoHelper.FIELDS;
 import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.bson.Document;
 import org.radarcns.dao.mongo.util.MongoSensor;
 import org.radarcns.restapi.data.DoubleSample;
@@ -45,20 +49,26 @@ public class DoubleFormat extends MongoSensor {
             Header header) {
         switch (stat) {
             case MEDIAN:
-                return new DoubleSample(((ArrayList<Document>) doc.get(field)).get(1).getDouble(
-                        SECOND_QUARTILE));
+                return new DoubleSample(getQuartiles(doc).get(1));
             case QUARTILES:
-                ArrayList<Document> quartilesList = (ArrayList<Document>) doc.get(field);
+                List<Double> quartiles = getQuartiles(doc);
                 return new DoubleSample( new Quartiles(
-                    quartilesList.get(0).getDouble(FIRST_QUARTILE),
-                    quartilesList.get(1).getDouble(SECOND_QUARTILE),
-                    quartilesList.get(2).getDouble(THIRD_QUARTILE)));
+                    quartiles.get(0),
+                    quartiles.get(1),
+                    quartiles.get(2)));
             case RECEIVED_MESSAGES:
                 return new DoubleSample(RadarConverter.roundDouble(
                         doc.getDouble(field) / RadarConverter.getExpectedMessages(header),
                     2));
-            default: return new DoubleSample(doc.getDouble(field));
+            default:
+                return new DoubleSample(doc.getDouble(field));
         }
     }
 
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected int extractCount(Document doc) {
+        return ((Number)doc.get(COUNT)).intValue();
+    }
 }
