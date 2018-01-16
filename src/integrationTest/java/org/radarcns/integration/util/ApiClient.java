@@ -38,24 +38,17 @@ public class ApiClient extends ExternalResource {
 
     private final ServerConfig config;
 
-    private final OAuth2Client oAuth2Client;
+    private static final OAuth2Client oAuth2Client;
 
-    private final OAuth2AccessTokenDetails token;
+    private static final OAuth2AccessTokenDetails token;
 
     private RestClient client;
 
-    /**
-     * Client to the REST API with given server and base path.
-     *
-     * @param config server configuration, including HTTPS safety, proxy and base path settings.
-     */
-    public ApiClient(ServerConfig config) {
-        this.config = config;
-
+    static {
         try {
             RestApiDetails restApiDetails = RestApiDetails
                     .getRestApiClientDetails();
-            this.oAuth2Client = new OAuth2Client()
+            oAuth2Client = new OAuth2Client()
                     .clientId(restApiDetails.getClientId())
                     .clientSecret(restApiDetails.getClientSecret())
                     .tokenEndpoint(
@@ -66,13 +59,24 @@ public class ApiClient extends ExternalResource {
                 oAuth2Client.addScope(scope);
             }
 
-            this.token = this.oAuth2Client.getAccessToken();
+            token = oAuth2Client.getAccessToken();
 
         } catch (MalformedURLException e) {
             throw new AssertionError("Cannot create a valid url to access management portal", e);
         } catch (TokenException e) {
             throw new AssertionError("Cannot get a valid access token", e);
         }
+    }
+
+    /**
+     * Client to the REST API with given server and base path.
+     *
+     * @param config server configuration, including HTTPS safety, proxy and base path settings.
+     */
+    public ApiClient(ServerConfig config) {
+        this.config = config;
+
+
     }
 
     /**
@@ -190,6 +194,6 @@ public class ApiClient extends ExternalResource {
     @Override
     protected void after() {
         this.client.close();
-        this.oAuth2Client.getHttpClient().connectionPool().evictAll();
+        oAuth2Client.getHttpClient().connectionPool().evictAll();
     }
 }
