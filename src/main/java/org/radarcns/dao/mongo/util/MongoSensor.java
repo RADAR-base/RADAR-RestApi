@@ -16,9 +16,6 @@
 
 package org.radarcns.dao.mongo.util;
 
-import static org.radarcns.dao.mongo.util.MongoHelper.ID;
-import static org.radarcns.dao.mongo.util.MongoHelper.VALUE;
-
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
