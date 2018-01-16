@@ -16,7 +16,7 @@
 
 package org.radarcns.dao.mongo.util;
 
-import static org.radarcns.dao.mongo.util.MongoHelper.KEY;
+import static org.radarcns.dao.mongo.util.MongoHelper.ID;
 import static org.radarcns.dao.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.client.MongoCollection;
@@ -191,7 +191,7 @@ public abstract class MongoSensor extends MongoDataAccess {
         }
 
         while (cursor.hasNext()) {
-            Document doc = (Document) cursor.next().get(VALUE);
+            Document doc = (Document) cursor.next();
             count += extractCount(doc);
         }
 
@@ -228,10 +228,10 @@ public abstract class MongoSensor extends MongoDataAccess {
         while (cursor.hasNext()) {
             Document doc = cursor.next();
 
-            Document key = (Document) doc.get(KEY);
+//            Document key = (Document) doc.get(ID);
 
-            Date localStart = key.getDate(MongoHelper.START);
-            Date localEnd = key.getDate(MongoHelper.END);
+            Date localStart = doc.getDate(MongoHelper.START);
+            Date localEnd = doc.getDate(MongoHelper.END);
 
             if (start == null) {
                 start = localStart;
@@ -245,8 +245,8 @@ public abstract class MongoSensor extends MongoDataAccess {
                 }
             }
 
-            Document value = (Document) doc.get(VALUE);
-            Item item = new Item(docToAvro(value, field, stat, header),
+//            Document value = (Document) doc.get(VALUE);
+            Item item = new Item(docToAvro(doc, field, stat, header),
                     RadarConverter.getISO8601(doc.getDate(MongoHelper.START)));
 
             list.addLast(item);

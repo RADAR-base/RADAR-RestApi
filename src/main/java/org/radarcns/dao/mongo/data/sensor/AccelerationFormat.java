@@ -87,10 +87,10 @@ public class AccelerationFormat extends MongoSensor {
     @Override
     @SuppressWarnings("unchecked")
     protected int extractCount(Document doc) {
-        List<Document> fields = (List<Document>) doc.get(FIELDS);
-        return (intProperty(fields.get(0), COUNT)
-                + intProperty(fields.get(1), COUNT)
-                + intProperty(fields.get(2), COUNT)) / 3;
+        List<Document> fields = (List<Document>) doc.get(COUNT);
+        return (intProperty(fields.get(0), X_LABEL)
+                + intProperty(fields.get(1), Y_LABEL)
+                + intProperty(fields.get(2), Z_LABEL)) / 3;
     }
 
     private static int intProperty(Document doc, String key) {
