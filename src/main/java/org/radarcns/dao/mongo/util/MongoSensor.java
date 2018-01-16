@@ -225,8 +225,6 @@ public abstract class MongoSensor extends MongoDataAccess {
         while (cursor.hasNext()) {
             Document doc = cursor.next();
 
-//            Document key = (Document) doc.get(ID);
-
             Date localStart = doc.getDate(MongoHelper.START);
             Date localEnd = doc.getDate(MongoHelper.END);
 
@@ -242,7 +240,6 @@ public abstract class MongoSensor extends MongoDataAccess {
                 }
             }
 
-//            Document value = (Document) doc.get(VALUE);
             Item item = new Item(docToAvro(doc, field, stat, header),
                     RadarConverter.getISO8601(doc.getDate(MongoHelper.START)));
 
