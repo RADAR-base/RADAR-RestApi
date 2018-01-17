@@ -1,4 +1,4 @@
-package org.radarcns.integration.util;
+package org.radarcns.wiremock;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
