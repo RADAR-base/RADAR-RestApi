@@ -59,7 +59,7 @@ public class SubjectEndPointTest {
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
     private static final String STUDY = "0";
-    private static final String SOURCE_TYPE = org.radarcns.unit.config.TestCatalog.EMPATICA;
+    private static final String SOURCE_TYPE = org.radarcns.config.TestCatalog.EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
@@ -102,7 +102,7 @@ public class SubjectEndPointTest {
                 assertEquals(SOURCE, source.getId());
             } else if (patient.getSubjectId().equalsIgnoreCase(SUBJECT.concat("1"))) {
                 Source source = patient.getSources().get(0);
-                assertEquals(org.radarcns.unit.config.TestCatalog.ANDROID, source.getType());
+                assertEquals(org.radarcns.config.TestCatalog.ANDROID, source.getType());
                 assertEquals(SOURCE.concat("1"), source.getId());
             }
         }

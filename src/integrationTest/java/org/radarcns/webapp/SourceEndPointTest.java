@@ -19,8 +19,8 @@ package org.radarcns.webapp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
+import static org.radarcns.config.TestCatalog.BIOVOTION;
+import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
 import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
@@ -184,7 +184,7 @@ public class SourceEndPointTest {
 
         while (iterator.hasNext()) {
             switch (iterator.next().getType()) {
-                case org.radarcns.unit.config.TestCatalog.ANDROID: case EMPATICA:
+                case org.radarcns.config.TestCatalog.ANDROID: case EMPATICA:
                     iterator.remove();
                     break;
                 default:

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.unit.config;
+package org.radarcns.config;
 
 import java.io.File;
 import java.io.IOException;

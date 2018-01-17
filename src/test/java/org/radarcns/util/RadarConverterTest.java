@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.unit.util;
+package org.radarcns.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.restapi.header.DescriptiveStatistic.AVERAGE;
@@ -25,9 +25,9 @@ import static org.radarcns.restapi.header.DescriptiveStatistic.MEDIAN;
 import static org.radarcns.restapi.header.DescriptiveStatistic.MINIMUM;
 import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.restapi.header.DescriptiveStatistic.SUM;
-import static org.radarcns.unit.config.TestCatalog.ANDROID;
-import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
+import static org.radarcns.config.TestCatalog.ANDROID;
+import static org.radarcns.config.TestCatalog.BIOVOTION;
+import static org.radarcns.config.TestCatalog.EMPATICA;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -39,7 +39,6 @@ import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.monitor.application.ServerStatus;
-import org.radarcns.util.RadarConverter;
 
 public class RadarConverterTest {
 

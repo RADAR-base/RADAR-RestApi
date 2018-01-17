@@ -18,7 +18,7 @@ package org.radarcns.integration.unit;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
+import static org.radarcns.config.TestCatalog.EMPATICA;
 
 import java.util.List;
 import java.util.Map;

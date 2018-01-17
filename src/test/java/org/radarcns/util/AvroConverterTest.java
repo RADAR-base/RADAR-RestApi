@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.unit.util;
+package org.radarcns.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.catalogue.Unit.G;
@@ -36,8 +36,6 @@ import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.dataset.Item;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.header.Header;
-import org.radarcns.util.AvroConverter;
-import org.radarcns.util.RadarConverter;
 
 public class AvroConverterTest {
 
@@ -56,7 +54,7 @@ public class AvroConverterTest {
                 RadarConverter.getISO8601(new Date()),
                 RadarConverter.getISO8601(new Date()));
         Header header = new Header("User", "Source",
-                org.radarcns.unit.config.TestCatalog.EMPATICA,
+                org.radarcns.config.TestCatalog.EMPATICA,
                 "HEART_RATE",
                 COUNT, G, TimeWindow.TEN_SECOND, etf);
 

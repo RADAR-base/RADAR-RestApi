@@ -1,4 +1,4 @@
-package org.radarcns.unit.monitor;
+package org.radarcns.monitor;
 
 /*
  * Copyright 2016 King's College London and The Hyve
@@ -17,8 +17,8 @@ package org.radarcns.unit.monitor;
  */
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
+import static org.radarcns.config.TestCatalog.BIOVOTION;
+import static org.radarcns.config.TestCatalog.EMPATICA;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -26,7 +26,6 @@ import javax.servlet.ServletException;
 import org.junit.Test;
 import org.radarcns.catalogue.ProcessingState;
 import org.radarcns.catalogue.Unit;
-import org.radarcns.monitor.Monitors;
 import org.radarcns.restapi.spec.SensorSpecification;
 import org.radarcns.restapi.spec.SourceSpecification;
 

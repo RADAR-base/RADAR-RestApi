@@ -52,7 +52,7 @@ public class SensorEndPointTest {
 
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = org.radarcns.unit.config.TestCatalog.EMPATICA;
+    private static final String SOURCE_TYPE = org.radarcns.config.TestCatalog.EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
     private static final Class<DoubleSample> ITEM = DoubleSample.class;

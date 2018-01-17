@@ -1,3 +1,5 @@
+package org.radarcns.dao;
+
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -14,21 +16,14 @@
  * limitations under the License.
  */
 
-package org.radarcns.unit.source;
-
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
 
 import org.junit.Test;
-import org.radarcns.source.SourceCatalog;
 
-public class SourceCatalogTest {
+public class SensorAccessObjectTest {
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void sourceCatalogTest() {
-        assertEquals(EMPATICA, SourceCatalog.getInstance(EMPATICA).getType());
-
-        SourceCatalog.getInstance("PEBBLE");
+    @Test
+    public void instanceAllocationTest() {
+        assertEquals(7, SensorDataAccessObject.getInstance().getSupportedSensor().size());
     }
-
 }

@@ -1,4 +1,4 @@
-package org.radarcns.unit.security;
+package org.radarcns.security;
 
 /*
  * Copyright 2016 King's College London and The Hyve
@@ -19,7 +19,6 @@ package org.radarcns.unit.security;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.radarcns.security.Param;
 
 public class ParamTest {
 

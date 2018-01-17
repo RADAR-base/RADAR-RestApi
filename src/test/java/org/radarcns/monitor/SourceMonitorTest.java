@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.radarcns.unit.monitor;
+package org.radarcns.monitor;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
+import static org.radarcns.config.TestCatalog.EMPATICA;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,7 +29,6 @@ import org.radarcns.catalogue.Unit;
 import org.radarcns.config.catalog.DeviceItem;
 import org.radarcns.config.catalog.SensorCatalog;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
-import org.radarcns.monitor.SourceMonitor;
 import org.radarcns.restapi.source.States;
 
 public class SourceMonitorTest {

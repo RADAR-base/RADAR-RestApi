@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.config.ExposedConfigTest.CONFIG_JSON;
 import static org.radarcns.config.ExposedConfigTest.OPENAPI_JSON;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
+import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
 import static org.radarcns.webapp.util.Parameter.STAT;
