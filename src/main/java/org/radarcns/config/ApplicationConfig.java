@@ -40,8 +40,8 @@ public class ApplicationConfig {
     private String deviceCatalog;
 
     /** Bins location. */
-    @JsonProperty("hdfs_bins_path")
-    private String hdfsBinsPath;
+    @JsonProperty("hdfs_output_dir")
+    private String hdfsOutputDir;
 
     @JsonProperty("management_portal_config")
     private ManagementPortalConfig managementPortalConfig;
@@ -111,11 +111,11 @@ public class ApplicationConfig {
         return managementPortalConfig;
     }
 
-    public String getHdfsBinsPath() {
-        return hdfsBinsPath;
+    public String getHdfsOutputDir() {
+        return hdfsOutputDir;
     }
 
-    public void setHdfsBinsPath(String hdfsBinsPath) {
-        this.hdfsBinsPath = hdfsBinsPath;
+    public void setHdfsOutputDir(String hdfsOutputDir) {
+        this.hdfsOutputDir = hdfsOutputDir;
     }
 }

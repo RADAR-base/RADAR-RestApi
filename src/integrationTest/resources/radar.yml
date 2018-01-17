@@ -20,3 +20,5 @@ management_portal_config:
 
 # Path to the Device Catalog
 device_catalog: device-catalog.yml
+
+hdfs_output_dir: /var/lib/hdfs/output

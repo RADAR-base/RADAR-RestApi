@@ -1,13 +1,14 @@
 package org.radarcns.status.hdfs;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public class HdfsBinsData {
      * @throws IOException if the file cannot be read.
      */
     public static HdfsBinsData parse(Path path) throws IOException {
-        ZonedDateTime healthyCutoff = ZonedDateTime.now(ZoneOffset.UTC).minus(Duration.ofHours(3));
+        Instant healthyCutoff = Instant.now().minus(Duration.ofHours(3));
         try (BufferedReader br = Files.newBufferedReader(path)) {
             // header line to skip
             String line = br.readLine();
@@ -65,11 +66,10 @@ public class HdfsBinsData {
 
     /** Parses a single line in bins.csv and adds it to a topic map. */
     private static void parseLine(String[] line, int lineNumber,
-            Map<String, HdfsTopicStatistics> topics, ZonedDateTime healthyCutoff) {
-        ZonedDateTime timestamp;
+            Map<String, HdfsTopicStatistics> topics, Instant healthyCutoff) {
+        Instant timestamp;
         try {
-            timestamp = ZonedDateTime.parse(line[2], HDFS_STATUS_TIME_FORMAT)
-                    .withZoneSameInstant(ZoneOffset.UTC);
+            timestamp = HDFS_STATUS_TIME_FORMAT.parse(line[2], Instant::from);
         } catch (DateTimeParseException ex) {
             logger.warn("Failed to parse date {} on line {}", line[2], lineNumber, ex);
             return;
@@ -103,7 +103,8 @@ public class HdfsBinsData {
         });
     }
 
-    public HdfsBinsData(Map<String, HdfsTopicStatistics> topics) {
+    @JsonCreator
+    public HdfsBinsData(@JsonProperty("topics") Map<String, HdfsTopicStatistics> topics) {
         this.topics = topics;
     }
 

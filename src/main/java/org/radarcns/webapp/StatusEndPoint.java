@@ -50,12 +50,12 @@ public class StatusEndPoint {
     public Response getJsonData() {
         try {
             checkPermission(getJWT(request), MEASUREMENT_READ);
-            String path = Properties.getApiConfig().getHdfsBinsPath();
-            if (path == null) {
+            String hdfsPath = Properties.getApiConfig().getHdfsOutputDir();
+            if (hdfsPath == null) {
                 return ResponseHandler.getJsonErrorResponse(
-                        request, "The HDFS bins.csv file was not configured.");
+                        request, "The HDFS output directory was not configured.");
             }
-            HdfsBinsData data = HdfsBinsData.parse(Paths.get(path));
+            HdfsBinsData data = HdfsBinsData.parse(Paths.get(hdfsPath).resolve("bins.csv"));
             return Response.status(Response.Status.OK).entity(data).build();
         } catch (AccessDeniedException exc) {
             logger.error(exc.getMessage(), exc);

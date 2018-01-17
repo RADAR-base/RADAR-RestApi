@@ -1,9 +1,9 @@
 package org.radarcns.status.hdfs;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.util.Objects;
 
 public class HdfsSourceStatus {
@@ -18,7 +18,22 @@ public class HdfsSourceStatus {
     @JsonProperty
     private long total;
     @JsonIgnore
-    private ZonedDateTime timestamp;
+    private Instant timestamp;
+
+    @JsonCreator
+    public HdfsSourceStatus(
+            @JsonProperty("sourceId") String sourceId,
+            @JsonProperty("status") String status,
+            @JsonProperty("lastUpdate") String lastUpdate,
+            @JsonProperty("count") long count,
+            @JsonProperty("total") long total) {
+        this.sourceId = sourceId;
+        this.status = status;
+        this.lastUpdate = lastUpdate;
+        this.count = count;
+        this.total = total;
+        this.timestamp = Instant.parse(lastUpdate);
+    }
 
     /**
      * Constructor.
@@ -28,11 +43,11 @@ public class HdfsSourceStatus {
      * @param count number of records
      * @param total total records
      */
-    public HdfsSourceStatus(String sourceId, String status, ZonedDateTime lastUpdate, long count,
+    public HdfsSourceStatus(String sourceId, String status, Instant lastUpdate, long count,
             long total) {
         this.sourceId = sourceId;
         this.status = status;
-        this.lastUpdate = lastUpdate.format(DateTimeFormatter.ISO_INSTANT);
+        this.lastUpdate = lastUpdate.toString();
         this.count = count;
         this.total = total;
         this.timestamp = lastUpdate;
@@ -78,11 +93,11 @@ public class HdfsSourceStatus {
         this.total = total;
     }
 
-    public ZonedDateTime getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(ZonedDateTime timestamp) {
+    public void setTimestamp(Instant timestamp) {
         this.timestamp = timestamp;
     }
 
