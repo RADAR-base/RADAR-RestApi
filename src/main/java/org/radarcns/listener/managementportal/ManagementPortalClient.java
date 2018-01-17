@@ -27,7 +27,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import okhttp3.OkHttpClient;
@@ -50,8 +49,6 @@ public class ManagementPortalClient {
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalClient.class);
 
     private final OkHttpClient client;
-
-    private List<Subject> subjects;
 
     private static final ObjectMapper mapper;
 
@@ -76,25 +73,11 @@ public class ManagementPortalClient {
      */
     protected ManagementPortalClient(@Nonnull OkHttpClient okHttpClient) {
         this.client = okHttpClient;
-        subjects = null;
     }
 
 
     protected void updateToken(OAuth2AccessTokenDetails tokenDetails) {
         this.token = tokenDetails;
-    }
-
-    /**
-     * Retrieves all {@link Subject} from the already computed list of subjects using {@link
-     * ArrayList} of {@link Subject} else it calls a method for retrieving the subjects from MP.
-     *
-     * @return {@link ArrayList} of {@link Subject} if a subject is found
-     */
-    public List<Subject> getSubjects() throws IOException {
-        if (subjects == null) {
-            subjects = getAllSubjects();
-        }
-        return subjects;
     }
 
     /**
@@ -115,42 +98,14 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves a {@link Subject} from the already computed list of subjects using {@link
-     * ArrayList} of {@link Subject} entity.
-     *
-     * @param subjectLogin {@link String} that has to be searched.
-     * @return {@link Subject} if a subject is found
-     */
-    public Subject getSubject(@Nonnull String subjectLogin) {
-        if (subjects != null) {
-            for (Subject currentSubject : subjects) {
-                if (subjectLogin.equals(currentSubject.getLogin())) {
-                    return currentSubject;
-                }
-            }
-        } else {
-            try {
-                return retrieveSubject(subjectLogin);
-            } catch (IOException exc) {
-                logger.error("Error : ", exc.fillInStackTrace());
-            }
-        }
-        logger.info("Subject could not be retrieved.");
-        return null;
-    }
-
-    /**
      * Retrieves a {@link Subject} from the Management Portal using {@link ServletContext} entity.
      *
      * @param subjectLogin {@link String} of the Subject that has to be retrieved
      * @return {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException in case the subjects cannot be retrieved.
      */
-    private Subject retrieveSubject(@Nonnull String subjectLogin) throws
+    private Subject getSubject(@Nonnull String subjectLogin) throws
             IOException {
-        if (subjects != null) {
-            return getSubject(subjectLogin);
-        }
         try {
             ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
             URL url = new URL(config.getManagementPortalUrl(),
@@ -184,12 +139,6 @@ public class ManagementPortalClient {
      */
     public List<Subject> getAllSubjectsFromProject(@Nonnull String projectName) throws
             IOException, NotFoundException {
-
-        if (subjects != null) {
-            return subjects.stream()
-                    .filter(s -> projectName.equals(s.getProject().getProjectName()))
-                    .collect(Collectors.toList());
-        }
 
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL getSubjectFromProjectUrl = new URL(config.getManagementPortalUrl(),
