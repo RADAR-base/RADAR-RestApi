@@ -107,6 +107,7 @@ public class HdfsBinsData {
         });
     }
 
+    /** Constructor from parsed HDFS bins data. */
     @JsonCreator
     public HdfsBinsData(@JsonProperty("topics") Map<String, HdfsTopicStatistics> topics) {
         this.topics = topics;

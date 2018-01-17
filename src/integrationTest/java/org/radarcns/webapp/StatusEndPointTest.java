@@ -43,7 +43,7 @@ public class StatusEndPointTest {
                 APPLICATION_JSON, Status.OK)) {
             assertTrue(response.isSuccessful());
             HdfsBinsData bins = mapper.readValue(response.body().byteStream(), HdfsBinsData.class);
-            HdfsBinsDataTest.testBinsResponse(bins);
+            HdfsBinsDataTest.assertBinsMatchFile(bins);
         }
     }
 }

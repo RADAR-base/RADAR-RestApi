@@ -18,10 +18,11 @@ public class HdfsBinsDataTest {
     public void parse() throws IOException, URISyntaxException {
         Path binsPath = Paths.get(HdfsBinsData.class.getResource("bins.csv").toURI());
 
-        testBinsResponse(HdfsBinsData.parse(binsPath));
+        assertBinsMatchFile(HdfsBinsData.parse(binsPath));
     }
 
-    public static void testBinsResponse(HdfsBinsData data) {
+    /** Test that HDFS bins data matches the data in the resource file. */
+    public static void assertBinsMatchFile(HdfsBinsData data) {
         assertThat(data.getTopics().keySet(), hasItems("t1", "t2"));
         assertThat(data.getTopics().get("t1").getSources().keySet(), hasItems("d1", "d2"));
         assertThat(data.getTopics().get("t2").getSources().keySet(), hasItems("d1"));

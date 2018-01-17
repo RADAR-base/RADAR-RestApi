@@ -17,10 +17,10 @@ package org.radarcns.dao;
  */
 
 import static junit.framework.TestCase.assertEquals;
-import static org.radarcns.integration.util.RandomInput.getRandomIpAddress;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.config.TestCatalog.ANDROID;
 import static org.radarcns.config.TestCatalog.EMPATICA;
+import static org.radarcns.integration.util.RandomInput.getRandomIpAddress;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;

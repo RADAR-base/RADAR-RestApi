@@ -17,13 +17,13 @@
 package org.radarcns.monitor;
 
 import static org.junit.Assert.assertEquals;
+import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.X_LABEL;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Y_LABEL;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Z_LABEL;
 import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
 import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;

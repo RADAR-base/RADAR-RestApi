@@ -24,6 +24,14 @@ public class HdfsSourceStatus {
     @JsonIgnore
     private Instant timestamp;
 
+    /**
+     * Constructor from JSON response.
+     * @param sourceId sourceId
+     * @param status sourceId status
+     * @param lastUpdate late updated timestamp
+     * @param count number of records
+     * @param total total records
+     */
     @JsonCreator
     public HdfsSourceStatus(
             @JsonProperty("sourceId") String sourceId,
@@ -114,11 +122,11 @@ public class HdfsSourceStatus {
             return false;
         }
         HdfsSourceStatus that = (HdfsSourceStatus) o;
-        return count == that.count &&
-                total == that.total &&
-                Objects.equals(sourceId, that.sourceId) &&
-                Objects.equals(status, that.status) &&
-                Objects.equals(lastUpdate, that.lastUpdate);
+        return count == that.count
+                && total == that.total
+                && Objects.equals(sourceId, that.sourceId)
+                && Objects.equals(status, that.status)
+                && Objects.equals(lastUpdate, that.lastUpdate);
     }
 
     @Override
