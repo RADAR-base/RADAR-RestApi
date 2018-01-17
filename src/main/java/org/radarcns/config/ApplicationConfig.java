@@ -28,8 +28,6 @@ import java.util.Map;
  */
 public class ApplicationConfig {
 
-    //private final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfig.class);
-
     /** MongoDb hosts. **/
     @JsonProperty("mongodb_hosts")
     private Map<String,String> mongoHosts;
@@ -41,6 +39,9 @@ public class ApplicationConfig {
     @JsonProperty("device_catalog")
     private String deviceCatalog;
 
+    /** Bins location. */
+    @JsonProperty("hdfs_bins_path")
+    private String hdfsBinsPath;
 
     @JsonProperty("management_portal_config")
     private ManagementPortalConfig managementPortalConfig;
@@ -110,4 +111,11 @@ public class ApplicationConfig {
         return managementPortalConfig;
     }
 
+    public String getHdfsBinsPath() {
+        return hdfsBinsPath;
+    }
+
+    public void setHdfsBinsPath(String hdfsBinsPath) {
+        this.hdfsBinsPath = hdfsBinsPath;
+    }
 }

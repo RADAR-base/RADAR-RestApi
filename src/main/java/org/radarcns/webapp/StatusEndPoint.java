@@ -18,6 +18,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
+import org.radarcns.config.Properties;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.status.hdfs.HdfsBinsData;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -26,10 +27,7 @@ import org.slf4j.LoggerFactory;
 
 @Path("/status")
 public class StatusEndPoint {
-    private static final java.nio.file.Path CSV_FILE_PATH = Paths.get(
-            "/usr/local/tomcat/bin/radar/bins.csv");
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StatusEndPoint.class);
+    private static final Logger logger = LoggerFactory.getLogger(StatusEndPoint.class);
 
     @Context
     private HttpServletRequest request;
@@ -52,24 +50,29 @@ public class StatusEndPoint {
     public Response getJsonData() {
         try {
             checkPermission(getJWT(request), MEASUREMENT_READ);
-            HdfsBinsData data = HdfsBinsData.parse(CSV_FILE_PATH);
+            String path = Properties.getApiConfig().getHdfsBinsPath();
+            if (path == null) {
+                return ResponseHandler.getJsonErrorResponse(
+                        request, "The HDFS bins.csv file was not configured.");
+            }
+            HdfsBinsData data = HdfsBinsData.parse(Paths.get(path));
             return Response.status(Response.Status.OK).entity(data).build();
         } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
+            logger.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
         } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
+            logger.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (FileNotFoundException exc) {
-            LOGGER.error(exc.getMessage(), exc);
+            logger.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonErrorResponse(request, "The bins.csv file could "
                     + "not be found. Please make sure its in the right directory.");
         } catch (IOException exc) {
-            LOGGER.error(exc.getMessage(), exc);
+            logger.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonErrorResponse(request, "The bins.csv file could "
                     + "not be read. Please make sure its in the right format.");
         } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
+            logger.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
                     + "completed. If this error persists, please contact "
                     + "the service administrator.");
