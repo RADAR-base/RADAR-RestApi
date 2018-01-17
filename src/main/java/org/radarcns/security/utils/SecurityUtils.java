@@ -54,8 +54,10 @@ public final class SecurityUtils {
 
         TextNode msg = root.textNode(message);
         TextNode error = root.textNode(exc.getMessage());
+        TextNode errorClass = root.textNode(exc.getClass().getName());
 
         root.set("message", msg);
+        root.set("class", errorClass);
         root.set("error", error);
 
         return root;

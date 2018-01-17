@@ -49,7 +49,6 @@ public class AuthenticationFilter implements Filter {
         if (token == null) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
-            res.setHeader("Error", "No Token Provided!");
             String jsonMsg = SecurityUtils.getJsonError("Please provide a valid token"
                             + " in the authentication header",
                     new NotAuthorizedException("No token was provided "
@@ -67,7 +66,6 @@ public class AuthenticationFilter implements Filter {
             log.error(ex.getMessage(), ex);
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
-            res.setHeader("Error", "Invalid Token!");
             String jsonMsg = SecurityUtils.getJsonError("The token provided with "
                             + "the request is invalid and thus the request cannot be authorized",
                     new NotAuthorizedException(ex)).toString();
