@@ -104,7 +104,7 @@ public class ManagementPortalClient {
      * @return {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException in case the subjects cannot be retrieved.
      */
-    private Subject getSubject(@Nonnull String subjectLogin) throws
+    public Subject getSubject(@Nonnull String subjectLogin) throws
             IOException {
         try {
             ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();

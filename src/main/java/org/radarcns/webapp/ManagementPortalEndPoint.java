@@ -146,6 +146,9 @@ public class ManagementPortalEndPoint {
         } catch (TokenException exe) {
             LOGGER.error(exe.getMessage(), exe);
             return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
+        } catch (IOException exe) {
+            LOGGER.error(exe.getMessage(), exe);
+            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
         }
     }
 
