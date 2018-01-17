@@ -50,8 +50,7 @@ public class ResponseHandler {
      * @param dataset request result
      * @return the response content formatted in JSON
      **/
-    public static Response getJsonResponse(HttpServletRequest request, Dataset dataset)
-            throws IOException {
+    public static Response getJsonResponse(HttpServletRequest request, Dataset dataset) {
         Status status = Status.OK;
         int size = 0;
         SpecificRecord obj = dataset;
@@ -150,7 +149,6 @@ public class ResponseHandler {
                 .build();
     }
 
-
     /**
      * It sets the status code and serialises the given {@code SpecificRecord} in bytes array.
      * @param request HTTP request that has to be served
@@ -238,7 +236,7 @@ public class ResponseHandler {
         LOGGER.debug("[{}] {}", status.getStatusCode(), json);
 
         return Response.status(status.getStatusCode())
-                .entity(new StatusMessage("notfound", "Not Found!", json))
+                .entity(new StatusMessage("not_found", "Not Found!", json))
                 .build();
     }
 }

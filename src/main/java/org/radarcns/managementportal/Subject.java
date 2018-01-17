@@ -1,16 +1,5 @@
-package org.radarcns.managementportal;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import org.radarcns.managementportal.util.UrlDeseralizer;
 /*
- * Copyright 2017 King's College London
+ * Copyright 2017 The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +13,16 @@ import org.radarcns.managementportal.util.UrlDeseralizer;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.managementportal;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import org.radarcns.managementportal.util.UrlDeseralizer;
 
 /**
  * Java Class representing a RADAR Management Portal Subject.
@@ -48,13 +47,6 @@ public class Subject {
     private final Map<String,String> attributes;
     @JsonProperty("project")
     private final Project project;
-
-    private static final ObjectMapper mapper;
-
-    static {
-        mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
 
     /**
      * Constructor.

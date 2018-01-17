@@ -6,8 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -19,6 +18,7 @@ import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
+import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.util.BasePath;
 
 public class ProjectEndPointTest {
@@ -29,13 +29,6 @@ public class ProjectEndPointTest {
     public final ApiClient apiClient = new ApiClient(
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
-    private static ObjectMapper objectMapper;
-
-    static {
-        objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
-
     @Test
     public void getAllProjectsStatusTest200()
             throws IOException, ReflectiveOperationException, URISyntaxException {
@@ -43,8 +36,8 @@ public class ProjectEndPointTest {
         Response actual = apiClient.request(BasePath.PROJECT, "application/json",
                 Status.OK);
         assertTrue(actual.isSuccessful());
-        List<Project> projects = objectMapper.readValue(actual.body().string(), objectMapper
-                .getTypeFactory().constructCollectionType(List.class, Project.class));
+        ObjectReader reader = RadarConverter.readerForCollection(List.class, Project.class);
+        List<Project> projects = reader.readValue(actual.body().byteStream());
 
         assertNotNull(projects);
         assertTrue(projects.size() > 0);
@@ -58,7 +51,8 @@ public class ProjectEndPointTest {
                 .request(BasePath.PROJECT + "/" + PROJECT_NAME, "application/json",
                         Status.OK);
         assertTrue(actual.isSuccessful());
-        Project project = objectMapper.readValue(actual.body().string(), Project.class);
+        ObjectReader reader = RadarConverter.readerFor(Project.class);
+        Project project = reader.readValue(actual.body().byteStream());
         assertEquals(PROJECT_NAME, project.getProjectName());
 
     }
@@ -84,8 +78,9 @@ public class ProjectEndPointTest {
                 .request(BasePath.PROJECT + "/" + PROJECT_NAME + "/" + SUBJECTS, "application/json",
                         Status.OK);
         assertTrue(actual.isSuccessful());
-        List<Subject> subjects = objectMapper.readValue(actual.body().string(), objectMapper
-                .getTypeFactory().constructCollectionType(List.class, Subject.class));
+
+        ObjectReader reader = RadarConverter.readerForCollection(List.class, Subject.class);
+        List<Subject> subjects = reader.readValue(actual.body().byteStream());
 
         assertNotNull(subjects);
         assertTrue(subjects.size() > 0);

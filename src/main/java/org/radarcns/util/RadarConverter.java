@@ -16,11 +16,22 @@
 
 package org.radarcns.util;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.Temporal;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -40,8 +51,25 @@ import org.slf4j.LoggerFactory;
  * Set of converting functions.
  */
 public class RadarConverter {
-
     private static Logger logger = LoggerFactory.getLogger(RadarConverter.class);
+    public static final JsonFactory JSON_FACTORY = new JsonFactory();
+    private static final ObjectMapper OBJECT_MAPPER;
+    public static final ObjectWriter AVRO_JSON_WRITER;
+    public static final ObjectReader GENERIC_JSON_READER;
+
+    static {
+        OBJECT_MAPPER = new ObjectMapper(JSON_FACTORY);
+        OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+        OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+        AVRO_JSON_WRITER = OBJECT_MAPPER.writer();
+
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        OBJECT_MAPPER.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false);
+
+        GENERIC_JSON_READER = OBJECT_MAPPER.reader();
+    }
 
     /**
      * Converts {@code long} to ISO8601 {@code String}.
@@ -207,5 +235,22 @@ public class RadarConverter {
             case ONE_WEEK: return TimeUnit.DAYS.toSeconds(7);
             default: throw new IllegalArgumentException(timeFrame.name() + " is not yet supported");
         }
+    }
+
+    public static ObjectWriter writerFor(Class<?> cls) {
+        return OBJECT_MAPPER.writerFor(cls);
+    }
+
+    public static ObjectReader readerFor(Class<?> cls) {
+        return OBJECT_MAPPER.readerFor(cls);
+    }
+
+    public static ObjectReader readerForCollection(Class<? extends Collection> collCls,
+            Class<?> cls) {
+        return OBJECT_MAPPER.readerFor(OBJECT_MAPPER.getTypeFactory().constructCollectionType(collCls, cls));
+    }
+
+    public static boolean isThresholdPassed(Temporal time, Duration duration) {
+        return Duration.between(time, Instant.now()).compareTo(duration) > 0;
     }
 }

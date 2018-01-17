@@ -43,6 +43,7 @@ import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.security.exception.AccessDeniedException;
+import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +88,7 @@ public class ManagementPortalEndPoint {
             ManagementPortalClient managementPortalClient = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Response response = Response.status(Status.OK)
-                    .entity(managementPortalClient.getAllSubjects())
+                    .entity(managementPortalClient.getSubjects().values())
                     .build();
             LOGGER.info("Response : " + response.toString());
             return response;
@@ -143,9 +144,12 @@ public class ManagementPortalEndPoint {
         } catch (NotAuthorizedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (TokenException exe) {
+        } catch (TokenException | IOException exe) {
             LOGGER.error(exe.getMessage(), exe);
             return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
+        } catch (NotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
+            return ResponseHandler.getJsonNotFoundResponse(request, e.getMessage());
         }
     }
 

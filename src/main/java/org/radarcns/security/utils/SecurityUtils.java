@@ -1,24 +1,19 @@
 package org.radarcns.security.utils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import javax.servlet.ServletRequest;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.security.filter.AuthenticationFilter;
+import org.radarcns.util.RadarConverter;
+import org.radarcns.webapp.exception.StatusMessage;
 
 /**
  * Utility class for Rest-API Security.
  */
 public final class SecurityUtils {
-
-    private static final ObjectMapper mapper;
-
-    static {
-        mapper = new ObjectMapper();
-    }
-
+    private static final ObjectWriter statusWriter = RadarConverter.writerFor(StatusMessage.class);
 
     /**
      * Parse the {@code "jwt"} attribute from given request.
@@ -46,18 +41,14 @@ public final class SecurityUtils {
     /**
      * Gets json object of given exception details.
      * @param message exception message
-     * @param exc exception
      * @return jsonNode created
      */
-    public static ObjectNode getJsonError(String message, Exception exc) {
-        ObjectNode root = mapper.createObjectNode();
-
-        TextNode msg = root.textNode(message);
-        TextNode error = root.textNode(exc.getMessage());
-
-        root.set("message", msg);
-        root.set("error", error);
-
-        return root;
+    public static String getJsonError(String error, String message) {
+        StatusMessage statusMessage = new StatusMessage(error, message);
+        try {
+            return statusWriter.writeValueAsString(statusMessage);
+        } catch (JsonProcessingException e) {
+            return "{\"error\": \"server_error\"}";
+        }
     }
 }

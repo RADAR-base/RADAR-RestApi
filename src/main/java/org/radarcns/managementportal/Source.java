@@ -1,11 +1,6 @@
 package org.radarcns.managementportal;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 
 /*
  * Copyright 2017 King's College London
@@ -109,22 +104,5 @@ public class Source {
 
     public void setAssigned(Boolean assigned) {
         this.assigned = assigned;
-    }
-
-    /**
-     * Converts the {@link String} to a {@link Source} entity.
-     * @param response {@link String} that has to be converted
-     * @return {@link Source} stored in the {@link byte[]}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public static Source getObject(String response) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
-        mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
-        mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return mapper.readValue(response, Source.class);
     }
 }

@@ -1,5 +1,3 @@
-package org.radarcns.util;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,8 +14,9 @@ package org.radarcns.util;
  * limitations under the License.
  */
 
+package org.radarcns.util;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.avro.Schema;
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
  * Utility to convert AVRO object to JSON and Bytes array.
  */
 public class AvroConverter {
-
     private static Logger logger = LoggerFactory.getLogger(AvroConverter.class);
 
     /**
@@ -48,8 +46,8 @@ public class AvroConverter {
      */
     public static JsonNode avroToJsonNode(SpecificRecord record) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readTree(record.toString());
+            return RadarConverter.GENERIC_JSON_READER.readTree(
+                    RadarConverter.AVRO_JSON_WRITER.writeValueAsString(record));
         } catch (IOException exec) {
             logger.error("Impossible to generate error message", exec);
         }

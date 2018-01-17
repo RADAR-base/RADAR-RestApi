@@ -16,17 +16,15 @@
 
 package org.radarcns.listener.managementportal;
 
-import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static org.radarcns.webapp.util.BasePath.SUBJECTS;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
@@ -38,6 +36,9 @@ import org.radarcns.config.Properties;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
+import org.radarcns.producer.rest.RestClient;
+import org.radarcns.util.CachedMap;
+import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,25 +47,21 @@ import org.slf4j.LoggerFactory;
  * Client to interact with the RADAR Management Portal.
  */
 public class ManagementPortalClient {
-
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalClient.class);
+
+    private static final ObjectReader SUBJECT_LIST_READER = RadarConverter.readerForCollection(
+            List.class, Subject.class);
+    private static final ObjectReader PROJECT_LIST_READER = RadarConverter.readerForCollection(
+            List.class, Project.class);
+    private static final Duration CACHE_INVALIDATE = Duration.ofMinutes(1);
+    private static final Duration CACHE_RETRY = Duration.ofHours(1);
 
     private final OkHttpClient client;
 
-    private List<Subject> subjects;
-
-    private static final ObjectMapper mapper;
+    private final CachedMap<String, Subject> subjects;
+    private final CachedMap<String, Project> projects;
 
     private OAuth2AccessTokenDetails token;
-
-    static {
-        mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
-        mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
-        mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    }
 
     /**
      * Client to interact with the RADAR Management Portal.
@@ -76,9 +73,11 @@ public class ManagementPortalClient {
      */
     protected ManagementPortalClient(@Nonnull OkHttpClient okHttpClient) {
         this.client = okHttpClient;
-        subjects = null;
+        subjects = new CachedMap<>(this::retrieveSubjects, Subject::getLogin,
+                CACHE_RETRY, CACHE_INVALIDATE);
+        projects = new CachedMap<>(this::retrieveProjects, Project::getProjectName,
+                CACHE_RETRY, CACHE_INVALIDATE);
     }
-
 
     protected void updateToken(OAuth2AccessTokenDetails tokenDetails) {
         this.token = tokenDetails;
@@ -90,28 +89,28 @@ public class ManagementPortalClient {
      *
      * @return {@link ArrayList} of {@link Subject} if a subject is found
      */
-    public List<Subject> getSubjects() throws IOException {
-        if (subjects == null) {
-            subjects = getAllSubjects();
-        }
-        return subjects;
+    public Map<String, Subject> getSubjects() throws IOException {
+        return subjects.get();
     }
 
     /**
      * Retrieves all {@link Subject} from Management Portal using {@link ServletContext} entity.
      *
-     * @return {@link ArrayList} of {@link Subject} retrieved from the Management Portal
+     * @return subjects retrieved from the Management Portal
      */
-    public List<Subject> getAllSubjects() throws IOException, MalformedURLException {
-
+    private List<Subject> retrieveSubjects() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL url = new URL(config.getManagementPortalUrl(), config.getSubjectEndpoint());
         Request getAllSubjectsRequest = this.buildGetRequest(url);
-        Response response = this.client.newCall(getAllSubjectsRequest).execute();
-        List<Subject> allSubjects = mapper.readValue(response.body().string(), mapper
-                .getTypeFactory().constructCollectionType(List.class, Subject.class));
-        logger.info("Retrieved Subjects from MP.");
-        return allSubjects;
+        try (Response response = this.client.newCall(getAllSubjectsRequest).execute()) {
+            String responseBody = RestClient.responseBody(response);
+            if (!response.isSuccessful()) {
+                throw new IOException("Failed to retrieve all subjects: " + responseBody);
+            }
+            List<Subject> allSubjects = SUBJECT_LIST_READER.readValue(responseBody);
+            logger.info("Retrieved Subjects from MP.");
+            return allSubjects;
+        }
     }
 
     /**
@@ -121,56 +120,11 @@ public class ManagementPortalClient {
      * @param subjectLogin {@link String} that has to be searched.
      * @return {@link Subject} if a subject is found
      */
-    public Subject getSubject(@Nonnull String subjectLogin) {
-        if (subjects != null) {
-            for (Subject currentSubject : subjects) {
-                if (subjectLogin.equals(currentSubject.getLogin())) {
-                    return currentSubject;
-                }
-            }
-        } else {
-            try {
-                return retrieveSubject(subjectLogin);
-            } catch (IOException exc) {
-                logger.error("Error : ", exc.fillInStackTrace());
-            }
-        }
-        logger.info("Subject could not be retrieved.");
-        return null;
-    }
-
-    /**
-     * Retrieves a {@link Subject} from the Management Portal using {@link ServletContext} entity.
-     *
-     * @param subjectLogin {@link String} of the Subject that has to be retrieved
-     * @return {@link Subject} retrieved from the Management Portal
-     * @throws MalformedURLException in case the subjects cannot be retrieved.
-     */
-    private Subject retrieveSubject(@Nonnull String subjectLogin) throws
-            IOException {
-        if (subjects != null) {
-            return getSubject(subjectLogin);
-        }
+    public Subject getSubject(@Nonnull String subjectLogin) throws IOException, NotFoundException {
         try {
-            ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-            URL url = new URL(config.getManagementPortalUrl(),
-                    config.getSubjectEndpoint() + "/" + subjectLogin);
-            Request getSubjectsRequest = this.buildGetRequest(url);
-            Response response = this.client.newCall(getSubjectsRequest).execute();
-            if (response.isSuccessful()) {
-                Subject subject = mapper.readValue(response.body().string(), Subject.class);
-                logger.info("Subject : " + subject.toString());
-                return subject;
-            }
-            if (Integer.valueOf(HTTP_NOT_FOUND).equals(response.code())) {
-                logger.info("Subject {} is not present", subjectLogin);
-                return null;
-            }
-            return null;
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.error("Cannot execute request to retrive subject : {}", subjectLogin);
-            return null;
+            return subjects.get(subjectLogin);
+        } catch (NoSuchElementException ex) {
+            throw new NotFoundException("Subject " + subjectLogin + " not found.");
         }
     }
 
@@ -184,29 +138,20 @@ public class ManagementPortalClient {
      */
     public List<Subject> getAllSubjectsFromProject(@Nonnull String projectName) throws
             IOException, NotFoundException {
+        // will throw not found if relevant.
+        getProject(projectName);
 
-        if (subjects != null) {
-            return subjects.stream()
+        List<Subject> result = subjects.get().values().stream()
+                .filter(s -> projectName.equals(s.getProject().getProjectName()))
+                .collect(Collectors.toList());
+
+        if (result.isEmpty() && subjects.mayRetry()) {
+            result = subjects.get(true).values().stream()
                     .filter(s -> projectName.equals(s.getProject().getProjectName()))
                     .collect(Collectors.toList());
         }
 
-        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL getSubjectFromProjectUrl = new URL(config.getManagementPortalUrl(),
-                config.getProjectEndpoint() + "/" + projectName + '/' + SUBJECTS);
-        Request getSubjectsRequest = this.buildGetRequest(getSubjectFromProjectUrl);
-        Response response = this.client.newCall(getSubjectsRequest).execute();
-        if (response.isSuccessful()) {
-            List<Subject> allSubjects = mapper.readValue(response.body().string(), mapper
-                    .getTypeFactory().constructCollectionType(List.class, Subject.class));
-            logger.info("Retrieved Subjects from MP from Project " + projectName);
-            return allSubjects;
-        } else if (response.code() == HTTP_NOT_FOUND) {
-            logger.info("Couldn't get any subjects for project :", projectName);
-            throw new NotFoundException("Cannot find any subjects under project : " + projectName
-                    + "No subjects registered under this project or invalid projectName");
-        }
-        return null;
+        return result;
     }
 
     /**
@@ -214,20 +159,29 @@ public class ManagementPortalClient {
      *
      * @return {@link ArrayList} of {@link Project} retrieved from the Management Portal
      */
-    public List<Project> getAllProjects() throws
-            IOException {
+    public Map<String, Project> getProjects() throws IOException {
+        return projects.get();
+    }
+
+    /**
+     * Retrieves all {@link Project} from Management Portal using {@link ServletContext} entity.
+     *
+     * @return projects retrieved from the management portal.
+     */
+    private List<Project> retrieveProjects() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL getAllProjectsUrl = new URL(config.getManagementPortalUrl(),
                 config.getProjectEndpoint());
         Request getAllProjects = this.buildGetRequest(getAllProjectsUrl);
-        Response response = this.client.newCall(getAllProjects).execute();
-        if (response.isSuccessful()) {
-            List<Project> allProjects = mapper.readValue(response.body().string(), mapper
-                    .getTypeFactory().constructCollectionType(List.class, Project.class));
+        try (Response response = this.client.newCall(getAllProjects).execute()) {
+            String responseBody = RestClient.responseBody(response);
+            if (!response.isSuccessful()) {
+                throw new IOException("Failed to retrieve all subjects: " + responseBody);
+            }
+            List<Project> allProjects = PROJECT_LIST_READER.readValue(responseBody);
             logger.info("Retrieved Projects from MP");
             return allProjects;
         }
-        return null;
     }
 
     /**
@@ -237,22 +191,11 @@ public class ManagementPortalClient {
      * @return {@link Project} retrieved from the Management Portal
      */
     public Project getProject(String projectName) throws IOException, NotFoundException {
-
-        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL getProjectFromProjectName = new URL(config.getManagementPortalUrl(),
-                config.getProjectEndpoint() + '/' + projectName);
-        Request getProject = this.buildGetRequest(getProjectFromProjectName);
-        Response response = this.client.newCall(getProject).execute();
-        if (response.isSuccessful()) {
-            Project project = mapper.readValue(response.body().string(), Project.class);
-            logger.info("Retrieved project {} from MP", projectName);
-            return project;
-        } else if (response.code() == HTTP_NOT_FOUND) {
-            logger.info("Couldn't get project details for project :", projectName);
-            throw new NotFoundException("Cannot project data for project-name : " + projectName
-                    + " Invalid projectName");
+        try {
+            return projects.get(projectName);
+        } catch (NoSuchElementException ex) {
+            throw new NotFoundException("Project " + projectName + " not found");
         }
-        return null;
     }
 
     private Request buildGetRequest(URL url) {

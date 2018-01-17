@@ -18,7 +18,6 @@ import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.authentication.TokenValidator;
 import org.radarcns.auth.config.ServerConfig;
 import org.radarcns.auth.config.YamlServerConfig;
-import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.auth.exception.TokenValidationException;
 import org.radarcns.config.Properties;
 import org.radarcns.security.utils.SecurityUtils;
@@ -49,12 +48,9 @@ public class AuthenticationFilter implements Filter {
         if (token == null) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
-            res.setHeader("Error", "No Token Provided!");
-            String jsonMsg = SecurityUtils.getJsonError("Please provide a valid token"
-                            + " in the authentication header",
-                    new NotAuthorizedException("No token was provided "
-                            + "with the request and thus the request "
-                            + "cannot be authorized")).toString();
+            String jsonMsg = SecurityUtils.getJsonError("token_missing",
+                    "No token was provided with the request and thus the request "
+                            + "cannot be authorized");
             res.setContentType(MediaType.APPLICATION_JSON);
             res.getWriter().write(jsonMsg);
             return;
@@ -67,10 +63,9 @@ public class AuthenticationFilter implements Filter {
             log.error(ex.getMessage(), ex);
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
-            res.setHeader("Error", "Invalid Token!");
-            String jsonMsg = SecurityUtils.getJsonError("The token provided with "
-                            + "the request is invalid and thus the request cannot be authorized",
-                    new NotAuthorizedException(ex)).toString();
+            String jsonMsg = SecurityUtils.getJsonError("token_invalid",
+                    "The token provided with "
+                            + "the request is invalid and thus the request cannot be authorized");
             res.setContentType(MediaType.APPLICATION_JSON);
             res.getWriter().write(jsonMsg);
         }

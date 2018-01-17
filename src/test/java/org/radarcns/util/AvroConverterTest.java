@@ -100,13 +100,4 @@ public class AvroConverterTest {
             }
         }
     }
-
-    @Test
-    public void avroBytes() throws IOException {
-        Message mex = new Message("Test");
-        byte[] bytes = AvroConverter.avroToAvroByte(mex);
-        Message test = AvroConverter.avroByteToAvro(bytes, Message.getClassSchema());
-        assertEquals(mex.getMessage(), test.getMessage());
-    }
-
 }

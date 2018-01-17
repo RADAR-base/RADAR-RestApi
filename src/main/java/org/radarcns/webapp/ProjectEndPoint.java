@@ -68,7 +68,7 @@ public class ProjectEndPoint {
             ManagementPortalClient managementPortalClient = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Response response = Response.status(Status.OK)
-                    .entity(managementPortalClient.getAllProjects()).build();
+                    .entity(managementPortalClient.getProjects()).build();
             LOGGER.info("Response : " + response.getEntity());
             return response;
         } catch (AccessDeniedException exc) {
