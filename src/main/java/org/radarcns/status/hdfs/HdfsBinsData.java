@@ -1,5 +1,8 @@
 package org.radarcns.status.hdfs;
 
+import static org.radarcns.status.hdfs.HdfsSourceStatus.Status.HEALTHY;
+import static org.radarcns.status.hdfs.HdfsSourceStatus.Status.UNHEALTHY;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.BufferedReader;
@@ -14,6 +17,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.radarcns.status.hdfs.HdfsSourceStatus.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +82,7 @@ public class HdfsBinsData {
         String topic = line[0];
         String sourceId = line[1];
         long numRecords = Long.parseLong(line[3]);
-        String status = timestamp.isAfter(healthyCutoff) ? "healthy" : "unhealthy";
+        Status status = timestamp.isAfter(healthyCutoff) ? HEALTHY : UNHEALTHY;
 
         HdfsSourceStatus source = new HdfsSourceStatus(sourceId, status, timestamp,1L, numRecords);
 

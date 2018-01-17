@@ -7,10 +7,14 @@ import java.time.Instant;
 import java.util.Objects;
 
 public class HdfsSourceStatus {
+    public enum Status {
+        HEALTHY, UNHEALTHY
+    }
+
     @JsonProperty
     private String sourceId;
     @JsonProperty
-    private String status;
+    private Status status;
     @JsonProperty
     private String lastUpdate;
     @JsonProperty
@@ -23,7 +27,7 @@ public class HdfsSourceStatus {
     @JsonCreator
     public HdfsSourceStatus(
             @JsonProperty("sourceId") String sourceId,
-            @JsonProperty("status") String status,
+            @JsonProperty("status") Status status,
             @JsonProperty("lastUpdate") String lastUpdate,
             @JsonProperty("count") long count,
             @JsonProperty("total") long total) {
@@ -43,7 +47,7 @@ public class HdfsSourceStatus {
      * @param count number of records
      * @param total total records
      */
-    public HdfsSourceStatus(String sourceId, String status, Instant lastUpdate, long count,
+    public HdfsSourceStatus(String sourceId, Status status, Instant lastUpdate, long count,
             long total) {
         this.sourceId = sourceId;
         this.status = status;
@@ -61,11 +65,11 @@ public class HdfsSourceStatus {
         this.sourceId = sourceId;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
