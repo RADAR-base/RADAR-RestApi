@@ -1,4 +1,4 @@
-package org.radarcns.integration.util;
+package org.radarcns.wiremock;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;

@@ -59,7 +59,6 @@ import org.radarcns.config.PipelineConfig;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
-import org.radarcns.integration.util.ManagementPortalWireMock;
 import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.mock.MockProducer;
@@ -77,6 +76,7 @@ import org.radarcns.restapi.dataset.Item;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
+import org.radarcns.wiremock.ManagementPortalWireMock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
