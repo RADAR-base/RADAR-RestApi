@@ -36,7 +36,7 @@ public class CachedMapTest {
     public void get() throws IOException, InterruptedException {
         assertThat(map.get(), hasEntry("test1", "test1"));
         assertThat(calls.get(), is(1));
-        Thread.sleep(300);
+        Thread.sleep(350);
         assertThat(map.get(), hasEntry("test2", "test2"));
         assertThat(calls.get(), is(2));
         assertThat(map.get(), hasEntry("test2", "test2"));
@@ -64,7 +64,7 @@ public class CachedMapTest {
             // success
         }
         assertThat(calls.get(), is(1));
-        Thread.sleep(150);
+        Thread.sleep(200);
         try {
             map.get("test3");
             fail();
