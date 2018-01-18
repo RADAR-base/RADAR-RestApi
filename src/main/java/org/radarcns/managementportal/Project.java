@@ -25,20 +25,25 @@ import java.util.Optional;
  * Java class defining a RADAR Management Portal Project.
  */
 public class Project {
-
-    @JsonProperty("id")
+    @JsonProperty
     private Integer id;
-    @JsonProperty("projectName")
+
+    @JsonProperty
     private String projectName;
-    @JsonProperty("organization")
+
+    @JsonProperty
     private String organization;
-    @JsonProperty("location")
+
+    @JsonProperty
     private String location;
-    @JsonProperty("attributes")
+
+    @JsonProperty
     private List<Tag> attributes;
-    @JsonProperty("projectStatus")
+
+    @JsonProperty
     private String projectStatus;
-    @JsonProperty("sourceTypes")
+
+    @JsonProperty
     private List<SourceType> sourceTypes;
 
     public void setId(Integer id) {

@@ -70,10 +70,10 @@ public class ManagementPortalClientManager implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // clear connection pool
-        OAuth2Client oAuth2Client = (OAuth2Client) sce.getServletContext()
+        OAuth2Client authClient = (OAuth2Client) sce.getServletContext()
                 .getAttribute(OAUTH2_CLIENT);
-        if (Objects.nonNull(oAuth2Client)) {
-            oAuth2Client.getHttpClient().connectionPool().evictAll();
+        if (Objects.nonNull(authClient)) {
+            authClient.getHttpClient().connectionPool().evictAll();
         }
         // clear current token (set to invalid, expired token)
         sce.getServletContext().setAttribute(ACCESS_TOKEN, null);
@@ -136,7 +136,7 @@ public class ManagementPortalClientManager implements ServletContextListener {
             throws TokenException {
         ManagementPortalClient managementPortalClient = (ManagementPortalClient) context
                 .getAttribute(MP_CLIENT);
-        if (Objects.isNull(managementPortalClient)) {
+        if (managementPortalClient == null) {
             managementPortalClient = new ManagementPortalClient(
                     HttpClientListener.getClient(context));
             context.setAttribute(MP_CLIENT, managementPortalClient);
@@ -146,21 +146,21 @@ public class ManagementPortalClientManager implements ServletContextListener {
     }
 
     private static OAuth2Client getOAuth2Client(ServletContext context) {
-        OAuth2Client oAuth2Client = (OAuth2Client) context.getAttribute(OAUTH2_CLIENT);
-        if (Objects.isNull(oAuth2Client)) {
+        OAuth2Client authClient = (OAuth2Client) context.getAttribute(OAUTH2_CLIENT);
+        if (authClient == null) {
             try {
                 ManagementPortalConfig config = Properties.getApiConfig()
                         .getManagementPortalConfig();
-                oAuth2Client = new OAuth2Client()
+                authClient = new OAuth2Client()
                         .tokenEndpoint(
                                 new URL(config.getManagementPortalUrl(), config.getTokenEndpoint()))
                         .clientId(config.getOauthClientId())
                         .clientSecret(config.getOauthClientSecret());
 
-                oAuth2Client.httpClient(HttpClientListener.getClient(context));
+                authClient.httpClient(HttpClientListener.getClient(context));
 
                 for (String scope : config.getOauthClientScopes().split(" ")) {
-                    oAuth2Client.addScope(scope);
+                    authClient.addScope(scope);
                 }
             } catch (MalformedURLException exc) {
                 LOGGER.error("Properties cannot be loaded. Check the log for more information.",
@@ -168,7 +168,7 @@ public class ManagementPortalClientManager implements ServletContextListener {
                 throw new ExceptionInInitializerError(exc);
             }
         }
-        context.setAttribute(OAUTH2_CLIENT, oAuth2Client);
-        return oAuth2Client;
+        context.setAttribute(OAUTH2_CLIENT, authClient);
+        return authClient;
     }
 }

@@ -17,8 +17,8 @@
 package org.radarcns.webapp;
 
 import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
-import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
+import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnSubject;
 import static org.radarcns.security.utils.SecurityUtils.getJWT;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
@@ -47,6 +47,7 @@ import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
+import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,13 +90,11 @@ public class SubjectEndPoint {
             @PathParam(STUDY_ID) String study
     ) {
         try {
-            checkPermission(getJWT(request), SUBJECT_READ);
+            checkPermissionOnProject(getJWT(request), SUBJECT_READ, study);
             return ResponseHandler.getJsonResponse(request, getAllSubjectsWorker());
         } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
         } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
@@ -123,13 +122,11 @@ public class SubjectEndPoint {
             @PathParam(STUDY_ID) String study
     ) {
         try {
-            checkPermission(getJWT(request), SUBJECT_READ);
+            checkPermissionOnProject(getJWT(request), SUBJECT_READ, study);
             return ResponseHandler.getAvroResponse(request, getAllSubjectsWorker());
         } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
         } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
@@ -174,15 +171,15 @@ public class SubjectEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SUBJECT_READ,
-                    sub.getProject().getProjectName());
+            checkPermissionOnSubject(getJWT(request), SUBJECT_READ,
+                    sub.getProject().getProjectName(), subjectId);
             return ResponseHandler.getJsonResponse(request, getSubjectWorker(subjectId));
         } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
         } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
+        } catch (NotFoundException ex) {
+            return ResponseHandler.getJsonNotFoundResponse(request, ex.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
@@ -218,15 +215,15 @@ public class SubjectEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SUBJECT_READ,
-                    sub.getProject().getProjectName());
+            checkPermissionOnSubject(getJWT(request), SUBJECT_READ,
+                    sub.getProject().getProjectName(), subjectId);
             return ResponseHandler.getAvroResponse(request, getSubjectWorker(subjectId));
         } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
         } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
+        } catch (NotFoundException ex) {
+            return ResponseHandler.getJsonNotFoundResponse(request, ex.getMessage());
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getAvroErrorResponse(request);

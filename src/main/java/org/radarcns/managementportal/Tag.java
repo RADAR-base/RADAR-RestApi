@@ -22,16 +22,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Management Portal {@link Subject} support tags: a key-value attribute.
  */
 public class Tag {
+    @JsonProperty
+    private String key;
 
-    private final String key;
-    private final String value;
-
-    public Tag(
-            @JsonProperty("key") String key,
-            @JsonProperty("value") String value) {
-        this.key = key;
-        this.value = value;
-    }
+    @JsonProperty
+    private String value;
 
     public String getKey() {
         return key;

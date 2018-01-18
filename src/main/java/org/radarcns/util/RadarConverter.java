@@ -17,6 +17,7 @@
 package org.radarcns.util;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -25,16 +26,14 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.mongo.util.MongoHelper;
@@ -61,6 +60,7 @@ public class RadarConverter {
         OBJECT_MAPPER = new ObjectMapper(JSON_FACTORY);
         OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
         OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+        OBJECT_MAPPER.setSerializationInclusion(Include.NON_NULL);
         AVRO_JSON_WRITER = OBJECT_MAPPER.writer();
 
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -78,11 +78,8 @@ public class RadarConverter {
      * @see <a href="http://www.iso.org/iso/home/standards/iso8601.htm>ISO8601 specification</a>
      **/
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public static String getISO8601(long value) {
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        df.setTimeZone(tz);
-        return df.format(new Date(value));
+    public static String getISO8601(long value) throws DateTimeException {
+        return Instant.ofEpochMilli(value).toString();
     }
 
     /**
@@ -93,10 +90,7 @@ public class RadarConverter {
      **/
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public static String getISO8601(Date value) {
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        df.setTimeZone(tz);
-        return df.format(value);
+        return value.toInstant().toString();
     }
 
     /**
@@ -106,11 +100,8 @@ public class RadarConverter {
      * @see <a href="http://www.iso.org/iso/home/standards/iso8601.htm>ISO8601 specification</a>
      **/
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public static Date getISO8601(String value) throws ParseException {
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        df.setTimeZone(tz);
-        return df.parse(value);
+    public static Date getISO8601(String value) throws DateTimeParseException {
+        return Date.from(Instant.parse(value));
     }
 
     /**
@@ -247,7 +238,13 @@ public class RadarConverter {
 
     public static ObjectReader readerForCollection(Class<? extends Collection> collCls,
             Class<?> cls) {
-        return OBJECT_MAPPER.readerFor(OBJECT_MAPPER.getTypeFactory().constructCollectionType(collCls, cls));
+        try {
+            return OBJECT_MAPPER.readerFor(
+                    OBJECT_MAPPER.getTypeFactory().constructCollectionType(collCls, cls));
+        } catch (RuntimeException ex) {
+            logger.error("Failed to construct object reader for collection", ex);
+            throw ex;
+        }
     }
 
     public static boolean isThresholdPassed(Temporal time, Duration duration) {

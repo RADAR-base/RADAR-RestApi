@@ -1,7 +1,3 @@
-package org.radarcns.managementportal;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /*
  * Copyright 2017 King's College London
  *
@@ -18,27 +14,36 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * limitations under the License.
  */
 
+package org.radarcns.managementportal;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Java class defining a RADAR Management Portal Source.
  */
 public class Source {
-
-    @JsonProperty("id")
+    @JsonProperty
     private Integer id;
-    @JsonProperty("sourceTypeId")
+
+    @JsonProperty
     private String sourceTypeId;
-    @JsonProperty("sourceTypeProducer")
+
+    @JsonProperty
     private String sourceTypeProducer;
-    @JsonProperty("sourceTypeModel")
+
+    @JsonProperty
     private String sourceTypeModel;
-    @JsonProperty("sourceTypeCatalogVersion")
+
+    @JsonProperty
     private String sourceTypeCatalogVersion;
-    @JsonProperty("sourceId")
+
+    @JsonProperty
     private String sourceId;
-    @JsonProperty("sourceName")
+
+    @JsonProperty
     private String sourceName;
-    @JsonProperty("assigned")
+
+    @JsonProperty
     private Boolean assigned;
 
 

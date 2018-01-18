@@ -10,6 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/** Map that caches the result of a list for a limited time. */
 public class CachedMap<S, T> {
     private final ThrowingSupplier<? extends Collection<T>> retriever;
     private final Function<T, S> keyExtractor;
@@ -18,6 +19,14 @@ public class CachedMap<S, T> {
     private Temporal lastFetch;
     private Map<S, T> cache;
 
+    /**
+     * Map that retrieves data from a supplier and converts that to a map with given key extractor.
+     * If the
+     * @param retriever supplier of data.
+     * @param keyExtractor key extractor of individial data points.
+     * @param invalidateAfter invalidate the set of valid results after this duration.
+     * @param retryAfter retry on a missing key after this duration.
+     */
     public CachedMap(ThrowingSupplier<? extends Collection<T>> retriever,
             Function<T, S> keyExtractor, Duration invalidateAfter, Duration retryAfter) {
         this.retriever = retriever;
@@ -27,10 +36,21 @@ public class CachedMap<S, T> {
         this.lastFetch = Instant.MIN;
     }
 
+    /**
+     * Get the cached map, or retrieve a new one if the current one is old.
+     * @return map of data
+     * @throws IOException if the data could not be retrieved.
+     */
     public Map<S, T> get() throws IOException {
         return get(false);
     }
 
+    /**
+     * Get the cached map, or retrieve a new one if the current one is old.
+     * @param force if true, the cache will be refreshed even if it is recent.
+     * @return map of data
+     * @throws IOException if the data could not be retrieved.
+     */
     public Map<S, T> get(boolean force) throws IOException {
         if (cache == null
                 || RadarConverter.isThresholdPassed(lastFetch, invalidateAfter)
@@ -42,6 +62,14 @@ public class CachedMap<S, T> {
         return cache;
     }
 
+    /**
+     * Get a key from the map. If the key is missing, it will check with {@link #mayRetry()} whether
+     * the cache may be updated. If so, it will fetch the cache again and look the key up.
+     * @param key key of the value to find.
+     * @return element
+     * @throws IOException if the cache cannot be refreshed.
+     * @throws NoSuchElementException if the element is not found.
+     */
     public T get(S key) throws IOException, NoSuchElementException {
         T value = get().get(key);
         if (value == null) {
@@ -55,11 +83,17 @@ public class CachedMap<S, T> {
         return value;
     }
 
+    /**
+     * Whether the cache may be refreshed.
+     */
     public boolean mayRetry() {
         return RadarConverter.isThresholdPassed(lastFetch, retryAfter);
     }
 
-
+    /**
+     * Supplier that may throw an exception. Otherwise similar to
+     * {@link java.util.function.Supplier}.
+     */
     @FunctionalInterface
     public interface ThrowingSupplier<T> {
         T get() throws IOException;

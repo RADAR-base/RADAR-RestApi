@@ -1,5 +1,3 @@
-package org.radarcns.monitor;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,10 +14,13 @@ package org.radarcns.monitor;
  * limitations under the License.
  */
 
+package org.radarcns.monitor;
+
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.restapi.source.Sensor;
@@ -57,8 +58,9 @@ public class SourceMonitor {
     public Source getState(String subject, String source, MongoClient client)
             throws ConnectException {
 
-        long end = (System.currentTimeMillis() / 10000) * 10000;
-        long start = end - 60000;
+        long tenSec = TimeUnit.SECONDS.toMillis(10);
+        long end = (System.currentTimeMillis() / tenSec) * tenSec;
+        long start = end - TimeUnit.MINUTES.toMillis(1);
 
         return getState(subject, source, start, end, client);
     }

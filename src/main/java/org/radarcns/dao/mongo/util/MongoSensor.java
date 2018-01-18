@@ -207,7 +207,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @param cursor the mongoD cursor
      * @return data dataset for the given input, otherwise empty dataset
      *
-     * @see Dataset;
+     * @see Dataset
      */
     private Dataset getDataSet(String field, DescriptiveStatistic stat, Header header,
             MongoCursor<Document> cursor) {

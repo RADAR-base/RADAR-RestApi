@@ -47,7 +47,7 @@ public class DoubleFormat extends MongoSensor {
                 return new DoubleSample(getQuartiles(doc).get(1));
             case QUARTILES:
                 List<Double> quartiles = getQuartiles(doc);
-                return new DoubleSample( new Quartiles(
+                return new DoubleSample(new Quartiles(
                     quartiles.get(0),
                     quartiles.get(1),
                     quartiles.get(2)));

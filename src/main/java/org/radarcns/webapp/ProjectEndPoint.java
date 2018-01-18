@@ -68,7 +68,7 @@ public class ProjectEndPoint {
             ManagementPortalClient managementPortalClient = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Response response = Response.status(Status.OK)
-                    .entity(managementPortalClient.getProjects()).build();
+                    .entity(managementPortalClient.getProjects().values()).build();
             LOGGER.info("Response : " + response.getEntity());
             return response;
         } catch (AccessDeniedException exc) {
@@ -111,12 +111,12 @@ public class ProjectEndPoint {
             LOGGER.info("Response : " + response.toString());
             return response;
         } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
         } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (TokenException | MalformedURLException exe) {
+        } catch (TokenException exe) {
+            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
+        } catch (MalformedURLException exe) {
             LOGGER.error(exe.getMessage(), exe);
             return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
         } catch (IOException exe) {
@@ -124,7 +124,6 @@ public class ProjectEndPoint {
             return ResponseHandler.getJsonErrorResponse(request, "Cannot deserialize  "
                     + "project response received");
         } catch (NotFoundException exe) {
-            LOGGER.error(exe.getMessage(), exe);
             return ResponseHandler.getJsonNotFoundResponse(request, exe.getMessage());
         }
     }
@@ -168,10 +167,8 @@ public class ProjectEndPoint {
                     + "completed. If this error persists, please contact "
                     + "the service administrator. \n " + exec.getMessage());
         } catch (TokenException exe) {
-            LOGGER.error(exe.getMessage(), exe);
             return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
         } catch (NotFoundException exe) {
-            LOGGER.error(exe.getMessage(), exe);
             return ResponseHandler.getJsonNotFoundResponse(request, exe.getMessage());
         }
     }

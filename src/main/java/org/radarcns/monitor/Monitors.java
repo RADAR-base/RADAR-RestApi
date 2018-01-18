@@ -71,7 +71,7 @@ public class Monitors {
      * @return {@code SourceDefinition} representing a source source
      * @throws ConnectException if the connection with MongoDb is faulty
      *
-     * @see {@link Source}
+     * @see Source
      */
     public Source getState(String subject, String source, String sourceType,
             ServletContext context) throws ConnectException {

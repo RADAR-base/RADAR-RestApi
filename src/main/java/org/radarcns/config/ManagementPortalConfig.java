@@ -38,8 +38,6 @@ import javax.annotation.Nonnull;
  * </ul>
  */
 public class ManagementPortalConfig {
-
-    private static final String HTTPS = "https";
     /** OAuth2 client identifier. */
     private final String oauthClientId;
 
@@ -67,6 +65,10 @@ public class ManagementPortalConfig {
      */
     private final String subjectEndpoint;
 
+    /** Time until subject and project caches are invalidated. */
+    private String cacheInvalidateDuration;
+    /** Time until subject and project caches can be retried on failed requests. */
+    private String cacheRetryDuration;
 
     /**
      * Constructor.
@@ -88,7 +90,9 @@ public class ManagementPortalConfig {
             @JsonProperty("management_portal_url") URL managementPortalUrl,
             @JsonProperty("token_endpoint") String tokenEndpoint,
             @JsonProperty("project_endpoint") String projectEndpoint,
-            @JsonProperty("subject_endpoint") String subjectEndpoint) {
+            @JsonProperty("subject_endpoint") String subjectEndpoint,
+            @JsonProperty("cache_invalidate_duration") String invalidate,
+            @JsonProperty("cache_retry_duration") String retry) {
         this.oauthClientId = oauthClientId;
         this.oauthClientSecret = oauthClientSecret;
         this.oauthClientScopes = oauthClientScopes;
@@ -96,6 +100,8 @@ public class ManagementPortalConfig {
         this.tokenEndpoint = tokenEndpoint;
         this.projectEndpoint = projectEndpoint;
         this.subjectEndpoint = subjectEndpoint;
+        this.cacheInvalidateDuration = invalidate;
+        this.cacheRetryDuration = retry;
     }
 
     public String getOauthClientId() {
@@ -143,13 +149,12 @@ public class ManagementPortalConfig {
         return result.charAt(result.length() - 1) == '/' ? result : result + '/';
     }
 
-    /**
-     * Checks if the provided {@link URL} is using a secure connection or not.
-     * @param url {@link URL} to check
-     * @return {@code true} if the protocol is {@code HTTPS}, {@code false} otherwise
-     */
-    public static boolean isSecureConnection(URL url) {
-        return url.getProtocol().equals(HTTPS);
+    public String getCacheInvalidateDuration() {
+        return cacheInvalidateDuration;
+    }
+
+    public String getCacheRetryDuration() {
+        return cacheRetryDuration;
     }
 
     @Override

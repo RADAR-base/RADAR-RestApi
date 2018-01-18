@@ -17,6 +17,8 @@
 package org.radarcns.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.radarcns.config.TestCatalog.ANDROID;
 import static org.radarcns.config.TestCatalog.BIOVOTION;
 import static org.radarcns.config.TestCatalog.EMPATICA;
@@ -32,6 +34,9 @@ import static org.radarcns.restapi.header.DescriptiveStatistic.SUM;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.Temporal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -53,7 +58,7 @@ public class RadarConverterTest {
 
         String dateString = RadarConverter.getISO8601(date);
 
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Date dateResult = format.parse(dateString);
         Calendar calActual = Calendar.getInstance();
         calActual.setTime(dateResult);
@@ -161,5 +166,14 @@ public class RadarConverterTest {
         assertEquals(3600, RadarConverter.getSecond(TimeWindow.ONE_HOUR), 0);
         assertEquals(3600 * 24, RadarConverter.getSecond(TimeWindow.ONE_DAY), 0);
         assertEquals(3600 * 24 * 7, RadarConverter.getSecond(TimeWindow.ONE_WEEK), 0);
+    }
+
+    @Test
+    public void isThresholdPassed() {
+        Temporal hourAgo = Instant.now().minus(Duration.ofHours(1));
+        Duration lessThanAnHour = Duration.ofHours(1).minus(Duration.ofMinutes(1));
+        Duration moreThanAnHour = lessThanAnHour.plus(Duration.ofMinutes(2));
+        assertTrue(RadarConverter.isThresholdPassed(hourAgo, lessThanAnHour));
+        assertFalse(RadarConverter.isThresholdPassed(hourAgo, moreThanAnHour));
     }
 }

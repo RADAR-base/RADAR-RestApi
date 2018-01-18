@@ -9,34 +9,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 public class SourceType {
+    @JsonProperty
+    private Integer id;
 
-    @JsonProperty("id")
-    private final Integer id;
-    @JsonProperty("producer")
-    private final String producer;
-    @JsonProperty("model")
-    private final String model;
-    @JsonProperty("catalogVersion")
-    private final String catalogVersion;
-    @JsonProperty("sourceTypeScope")
-    private final String sourceTypeScope;
-    @JsonProperty("canRegisterDynamically")
-    private final Boolean canRegisterDynamically;
+    @JsonProperty
+    private String producer;
 
-    protected SourceType(
-            @JsonProperty("id") Integer id,
-            @JsonProperty("producer") String producer,
-            @JsonProperty("model") String model,
-            @JsonProperty("catalogVersion") String catalogVersion,
-            @JsonProperty("sourceTypeScope") String sourceTypeScope,
-            @JsonProperty("canRegisterDynamically") Boolean canRegisterDynamically) {
-        this.id = id;
-        this.producer = producer;
-        this.model = model;
-        this.catalogVersion = catalogVersion;
-        this.sourceTypeScope = sourceTypeScope;
-        this.canRegisterDynamically = canRegisterDynamically;
-    }
+    @JsonProperty
+    private String model;
+
+    @JsonProperty
+    private String catalogVersion;
+
+    @JsonProperty
+    private String sourceTypeScope;
+
+    @JsonProperty
+    private Boolean canRegisterDynamically;
 
     public Integer getId() {
         return id;

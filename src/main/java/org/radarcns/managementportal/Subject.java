@@ -18,68 +18,41 @@ package org.radarcns.managementportal;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import org.radarcns.managementportal.util.UrlDeseralizer;
 
 /**
  * Java Class representing a RADAR Management Portal Subject.
  */
 public class Subject {
-
     public static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
 
-    private final String login;
-    @JsonProperty("externalId")
-    private final String externalId;
-    @JsonDeserialize(using = UrlDeseralizer.class)
-    @JsonProperty("externalLink")
-    private final URL externalLink;
-    @JsonProperty("email")
-    private final String email;
-    @JsonProperty("status")
-    private final String status;
-    @JsonProperty("sources")
-    private final List<Source> sources;
-    @JsonProperty("attributes")
-    private final Map<String,String> attributes;
-    @JsonProperty("project")
-    private final Project project;
+    @JsonProperty
+    private String id;
+    @JsonProperty
+    private String externalId;
+    @JsonProperty
+    private URL externalLink;
+    @JsonProperty
+    private String email;
+    @JsonProperty
+    private String status;
+    @JsonProperty
+    private List<Source> sources;
+    @JsonProperty
+    private Map<String,String> attributes;
+    @JsonProperty
+    private Project project;
 
-    /**
-     * Constructor.
-     * @param login {@link String} representing Management Portal Subject identifier
-     * @param externalId {@link Integer} representing the REDCap Record identifier
-     * @param externalLink {@link URL} pointing the REDCap integration form / instrument
-     * @param attributes {@link Map} representing the value associated with
-     * @param status {@link String} representing the status of the subject
-     * @param sources {@link List} of {@link Tag} representing the sources of a subject
-     * @param project {@link Project} representing the value associated with
-     *      {@link #HUMAN_READABLE_IDENTIFIER_KEY}
-     */
-    public Subject(@JsonProperty("login") String login,
-                   @JsonProperty("externalId") String externalId,
-                   @JsonProperty("externalLink") URL externalLink,
-                   @JsonProperty("attributes") Map<String,String> attributes,
-                   @JsonProperty("status") String status,
-                   @JsonProperty("sources") List<Source> sources,
-                   @JsonProperty("email") String email,
-                   @JsonProperty("project") Project project) {
-        this.login = login;
-        this.externalId = externalId;
-        this.externalLink = externalLink;
-        this.attributes = attributes;
-        this.status = status;
-        this.sources = sources;
-        this.email = email;
-        this.project = project;
+    @JsonSetter("login")
+    public void setLogin(String login) {
+        this.id = login;
     }
 
-    @JsonProperty("id")
-    public String getLogin() {
-        return login;
+    public String getId() {
+        return id;
     }
 
     public String getExternalId() {
@@ -113,11 +86,16 @@ public class Subject {
 
     /**
      * Returns the Human Readable Identifier associated with this subject.
-     * @return {@link String} stating the Human Readable Identifier associated with this subject
+     * @return {@link String} stating the Human Readable Identifier associated with this subject or
+     * {@code null} if not set.
      */
     @JsonIgnore
     public String getHumanReadableIdentifier() {
-        return getAttribute(HUMAN_READABLE_IDENTIFIER_KEY);
+        return attributes.entrySet().stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(HUMAN_READABLE_IDENTIFIER_KEY))
+                .findAny()
+                .map(Map.Entry::getValue)
+                .orElse(null);
     }
 
     /**
@@ -133,7 +111,7 @@ public class Subject {
     @Override
     public String toString() {
         return "Subject{" + '\n'
-                + "login=" + login + '\n'
+                + "id=" + id + '\n'
                 + "externalId='" + externalId + "'\n"
                 + "externalLink='" + externalLink + "'\n"
                 + "status='" + status + "'\n"

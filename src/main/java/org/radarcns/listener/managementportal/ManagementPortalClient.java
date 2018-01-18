@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,8 +54,8 @@ public class ManagementPortalClient {
             List.class, Subject.class);
     private static final ObjectReader PROJECT_LIST_READER = RadarConverter.readerForCollection(
             List.class, Project.class);
-    private static final Duration CACHE_INVALIDATE = Duration.ofMinutes(1);
-    private static final Duration CACHE_RETRY = Duration.ofHours(1);
+    private static final Duration CACHE_INVALIDATE_DEFAULT = Duration.ofMinutes(1);
+    private static final Duration CACHE_RETRY_DEFAULT = Duration.ofHours(1);
 
     private final OkHttpClient client;
 
@@ -71,12 +72,33 @@ public class ManagementPortalClient {
      * @see HttpClientListener
      * @see ManagementPortalClientManager
      */
-    protected ManagementPortalClient(@Nonnull OkHttpClient okHttpClient) {
+    public ManagementPortalClient(@Nonnull OkHttpClient okHttpClient) {
         this.client = okHttpClient;
-        subjects = new CachedMap<>(this::retrieveSubjects, Subject::getLogin,
-                CACHE_RETRY, CACHE_INVALIDATE);
+
+        Duration invalidate = CACHE_INVALIDATE_DEFAULT;
+        Duration retry = CACHE_RETRY_DEFAULT;
+        ManagementPortalConfig mpConfig = Properties.getApiConfig().getManagementPortalConfig();
+        if (mpConfig != null) {
+            invalidate = parseDuration(mpConfig.getCacheInvalidateDuration(), invalidate);
+            retry = parseDuration(mpConfig.getCacheRetryDuration(), retry);
+        }
+
+        subjects = new CachedMap<>(this::retrieveSubjects, Subject::getId, invalidate, retry);
         projects = new CachedMap<>(this::retrieveProjects, Project::getProjectName,
-                CACHE_RETRY, CACHE_INVALIDATE);
+                invalidate, retry);
+    }
+
+    private static Duration parseDuration(String duration, Duration defaultValue) {
+        if (duration != null) {
+            try {
+                return Duration.parse(duration);
+            } catch (DateTimeParseException ex) {
+                logger.warn("Management Portal cache duration {} is invalid."
+                        + " Use ISO 8601 duration format, e.g.,"
+                        + " PT1M for one minute or PT1H for one hour.", duration);
+            }
+        }
+        return defaultValue;
     }
 
     protected void updateToken(OAuth2AccessTokenDetails tokenDetails) {

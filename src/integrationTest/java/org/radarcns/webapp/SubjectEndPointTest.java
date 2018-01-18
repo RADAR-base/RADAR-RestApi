@@ -17,10 +17,10 @@
 package org.radarcns.webapp;
 
 import static java.util.function.Function.identity;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
 import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
 
@@ -53,6 +53,7 @@ import org.radarcns.restapi.source.SourceSummary;
 import org.radarcns.restapi.source.States;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
+import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.util.BasePath;
 
 public class SubjectEndPointTest {
@@ -71,7 +72,7 @@ public class SubjectEndPointTest {
 
     @Test
     public void getAllSubjectsTest204() throws IOException {
-        try (Response response = apiClient.request(GET_ALL_SUBJECTS + "/" + STUDY, AVRO_BINARY,
+        try (Response response = apiClient.request(GET_ALL_SUBJECTS + "/" + STUDY, APPLICATION_JSON,
                 Status.NO_CONTENT)) {
             assertNotNull(response);
         }
@@ -79,7 +80,7 @@ public class SubjectEndPointTest {
 
     @Test
     public void getAllSubjectsTest200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+            throws IOException, ReflectiveOperationException {
 
         MongoClient client = Utility.getMongoClient();
 
@@ -92,8 +93,8 @@ public class SubjectEndPointTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT.concat("1"), SOURCE.concat("1")));
 
-        Cohort cohort = apiClient.requestAvro(
-                GET_ALL_SUBJECTS + "/" + STUDY, Cohort.class, Status.OK);
+        Cohort cohort = RadarConverter.readerFor(Cohort.class).readValue(apiClient.requestString(
+                GET_ALL_SUBJECTS + "/" + STUDY, APPLICATION_JSON, Status.OK));
 
         for (Subject patient : cohort.getSubjects()) {
             if (patient.getSubjectId().equalsIgnoreCase(SUBJECT)) {
@@ -113,7 +114,7 @@ public class SubjectEndPointTest {
     @Test
     public void getSubjectTest204() throws IOException {
         try (Response response = apiClient.request(
-                GET_SUBJECT + '/' + SUBJECT, AVRO_BINARY, Status.NO_CONTENT)) {
+                GET_SUBJECT + '/' + SUBJECT, APPLICATION_JSON, Status.NO_CONTENT)) {
             assertNotNull(response);
         }
     }

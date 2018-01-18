@@ -1,5 +1,6 @@
 package org.radarcns.webapp;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -31,10 +32,9 @@ public class ProjectEndPointTest {
 
     @Test
     public void getAllProjectsStatusTest200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+            throws IOException, URISyntaxException {
 
-        Response actual = apiClient.request(BasePath.PROJECT, "application/json",
-                Status.OK);
+        Response actual = apiClient.request(BasePath.PROJECT, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
         ObjectReader reader = RadarConverter.readerForCollection(List.class, Project.class);
         List<Project> projects = reader.readValue(actual.body().byteStream());
@@ -48,7 +48,7 @@ public class ProjectEndPointTest {
             throws IOException, ReflectiveOperationException, URISyntaxException {
 
         Response actual = apiClient
-                .request(BasePath.PROJECT + "/" + PROJECT_NAME, "application/json",
+                .request(BasePath.PROJECT + "/" + PROJECT_NAME, APPLICATION_JSON,
                         Status.OK);
         assertTrue(actual.isSuccessful());
         ObjectReader reader = RadarConverter.readerFor(Project.class);
@@ -62,7 +62,7 @@ public class ProjectEndPointTest {
             throws IOException, ReflectiveOperationException, URISyntaxException {
 
         Response actual = apiClient
-                .request(BasePath.PROJECT + "/" + "SOMETHING", "application/json",
+                .request(BasePath.PROJECT + "/" + "SOMETHING", APPLICATION_JSON,
                         Status.NOT_FOUND);
         assertFalse(actual.isSuccessful());
         assertEquals(actual.code(), Status.NOT_FOUND.getStatusCode());
@@ -75,7 +75,7 @@ public class ProjectEndPointTest {
             throws IOException, ReflectiveOperationException, URISyntaxException {
 
         Response actual = apiClient
-                .request(BasePath.PROJECT + "/" + PROJECT_NAME + "/" + SUBJECTS, "application/json",
+                .request(BasePath.PROJECT + "/" + PROJECT_NAME + "/" + SUBJECTS, APPLICATION_JSON,
                         Status.OK);
         assertTrue(actual.isSuccessful());
 

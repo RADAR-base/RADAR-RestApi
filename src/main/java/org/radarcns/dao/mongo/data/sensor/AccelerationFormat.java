@@ -60,14 +60,14 @@ public class AccelerationFormat extends MongoSensor {
                     getQuartiles(y).get(1),
                     getQuartiles(z).get(1));
             case QUARTILES:
-                List<Double> xQuartile = getQuartiles(x);
-                List<Double> yQuartile = getQuartiles(y);
-                List<Double> zQuartile = getQuartiles(z);
+                List<Double> xq = getQuartiles(x);
+                List<Double> yq = getQuartiles(y);
+                List<Double> zq = getQuartiles(z);
 
                 return new Acceleration(
-                        new Quartiles(xQuartile.get(0), xQuartile.get(1), xQuartile.get(2)),
-                        new Quartiles(yQuartile.get(0), yQuartile.get(1), yQuartile.get(2)),
-                        new Quartiles(zQuartile.get(0), zQuartile.get(1), zQuartile.get(2)));
+                        new Quartiles(xq.get(0), xq.get(1), xq.get(2)),
+                        new Quartiles(yq.get(0), yq.get(1), yq.get(2)),
+                        new Quartiles(zq.get(0), zq.get(1), zq.get(2)));
             case RECEIVED_MESSAGES:
                 return new Acceleration(
                     RadarConverter.roundDouble(
