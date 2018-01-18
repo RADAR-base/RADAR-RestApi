@@ -1,6 +1,6 @@
 plugins {
-  id 'java'
-  id 'war'
+    id 'java'
+    id 'war'
 }
 
 group 'org.radarcns'
@@ -18,58 +18,53 @@ ext.radarCommons = '0.7'
 ext.radarSchema = '0.2.3'
 ext.swagger = '2.0.0-rc3'
 ext.tomcat = '8.0.47'
-ext.radarAuthClientUtilVersion = '0.3.3-SNAPSHOT'
-ext.radarAuthVersion = '0.3.2'
+ext.radarAuthVersion = '0.3.3-SNAPSHOT'
 ext.wireMockVersion = '2.5.1'
 ext.jacksonVersion = '2.9.3'
 
 
 configurations {
-  provided
-  compile.extendsFrom provided
+    provided
+    compile.extendsFrom provided
 }
 
 repositories {
-  jcenter()
-  // Non-jcenter radar releases
-  maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
-  // For working with dev-branches
-  maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
-  // Github code
-  maven { url 'https://jitpack.io' }
+    jcenter()
+    // Non-jcenter radar releases
+    maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
+    // For working with dev-branches
+    maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
+    // Github code
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-  providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
+    providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
 
-  compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
-  compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
+    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
+    compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
 
-  compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
+    compile group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: swagger
 
-  compile group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: swagger
+    compile group: 'org.radarcns', name: 'radar-commons', version: radarCommons
+    compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: radarSchema
 
-  compile group: 'org.radarcns', name: 'radar-commons', version: radarCommons
-  compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: radarSchema
+    compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthVersion
+    compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
 
-  compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthClientUtilVersion
-  compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
+    runtimeOnly group: 'ch.qos.logback', name:'logback-core', version: logback
+    runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logback
 
-  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: jacksonVersion
-
-  runtimeOnly group: 'ch.qos.logback', name:'logback-core', version: logback
-  runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logback
-
-  runtimeOnly group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
-  runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
+    runtimeOnly group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
+    runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
 }
 
 war {
-  archiveName 'radar.war'
+    archiveName 'radar.war'
 }
 
 if (!hasProperty('profile')) {
-  ext.profile = 'dev'
+    ext.profile = 'dev'
 }
 
 apply from: "gradle/profile.${profile}.gradle"

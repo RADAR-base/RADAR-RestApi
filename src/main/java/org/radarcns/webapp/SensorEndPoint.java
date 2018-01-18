@@ -18,7 +18,7 @@ package org.radarcns.webapp;
 
 import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getJWT;
+import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
@@ -109,7 +109,7 @@ public class SensorEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
                     getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
@@ -159,7 +159,7 @@ public class SensorEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
                     getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
@@ -234,7 +234,7 @@ public class SensorEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
                     getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
@@ -282,7 +282,7 @@ public class SensorEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
                     getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
@@ -360,7 +360,7 @@ public class SensorEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
                     getSamplesWithinWindowWorker(subjectId, sourceId, stat,
@@ -414,7 +414,7 @@ public class SensorEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), MEASUREMENT_READ,
+            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
                     getSamplesWithinWindowWorker(subjectId, sourceId, stat,

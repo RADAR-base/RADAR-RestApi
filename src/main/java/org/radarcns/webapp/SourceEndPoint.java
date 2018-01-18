@@ -19,7 +19,7 @@ package org.radarcns.webapp;
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getJWT;
+import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
 import static org.radarcns.webapp.util.BasePath.SOURCE;
@@ -99,7 +99,7 @@ public class SourceEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
                     getLastComputedSourceStatus(subjectId, sourceId));
@@ -141,7 +141,7 @@ public class SourceEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
                     getLastComputedSourceStatus(subjectId, sourceId));
@@ -201,7 +201,7 @@ public class SourceEndPoint {
     public Response getSourceSpecificationJson(
             @PathParam(SOURCE_TYPE) String source) {
         try {
-            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getRadarToken(request), SOURCE_READ);
             return ResponseHandler.getJsonResponse(request, getSourceSpecificationWorker(source));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
@@ -236,7 +236,7 @@ public class SourceEndPoint {
     public Response getSourceSpecificationAvro(
             @PathParam(SOURCE_TYPE) String source) {
         try {
-            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getRadarToken(request), SOURCE_READ);
             return ResponseHandler.getAvroResponse(request, getSourceSpecificationWorker(source));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
@@ -284,7 +284,7 @@ public class SourceEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subjectId));
         } catch (AccessDeniedException exc) {
@@ -320,7 +320,7 @@ public class SourceEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subjectId));
         } catch (AccessDeniedException exc) {

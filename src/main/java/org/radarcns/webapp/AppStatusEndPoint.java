@@ -18,7 +18,7 @@ package org.radarcns.webapp;
 
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getJWT;
+import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.webapp.util.BasePath.ANDROID;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.STATUS;
@@ -92,7 +92,7 @@ public class AppStatusEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
                     getLastReceivedAppStatusWorker(subjectId, sourceId));
@@ -132,7 +132,7 @@ public class AppStatusEndPoint {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
                     getLastReceivedAppStatusWorker(subjectId, sourceId));

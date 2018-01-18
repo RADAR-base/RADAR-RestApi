@@ -35,7 +35,7 @@ public class AuthenticationFilter implements Filter {
     private static SoftReference<TokenValidator> validator = new SoftReference<>(null);
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         //this.context = filterConfig.getServletContext();
         log.info("Authentication filter initialized");
     }

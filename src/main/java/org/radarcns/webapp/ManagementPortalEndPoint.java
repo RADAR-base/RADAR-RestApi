@@ -19,7 +19,7 @@ package org.radarcns.webapp;
 import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getJWT;
+import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
@@ -84,7 +84,7 @@ public class ManagementPortalEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getAllSubjectsJson() {
         try {
-            checkPermission(getJWT(request), SUBJECT_READ);
+            checkPermission(getRadarToken(request), SUBJECT_READ);
             ManagementPortalClient managementPortalClient = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Response response = Response.status(Status.OK)
@@ -133,7 +133,7 @@ public class ManagementPortalEndPoint {
                 return ResponseHandler.getJsonNotFoundResponse(request, "Subject not found "
                         + "with subject-id :" + subjectId);
             }
-            checkPermissionOnProject(getJWT(request), SUBJECT_READ,
+            checkPermissionOnProject(getRadarToken(request), SUBJECT_READ,
                     subject.getProject().getProjectName());
             Response response = Response.status(Status.OK).entity(subject).build();
             LOGGER.info("Response : " + response.toString());

@@ -2,7 +2,7 @@ package org.radarcns.webapp;
 
 import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
-import static org.radarcns.security.utils.SecurityUtils.getJWT;
+import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -49,7 +49,7 @@ public class StatusEndPoint {
             @ApiResponse(responseCode = "403", description = "Not Authorised error occured")})
     public Response getJsonData() {
         try {
-            checkPermission(getJWT(request), MEASUREMENT_READ);
+            checkPermission(getRadarToken(request), MEASUREMENT_READ);
             String hdfsPath = Properties.getApiConfig().getHdfsOutputDir();
             if (hdfsPath == null) {
                 return ResponseHandler.getJsonErrorResponse(
