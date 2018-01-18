@@ -54,10 +54,12 @@ public class CachedMap<S, T> {
      * @throws IOException if the data could not be retrieved.
      */
     public Map<S, T> get(boolean forceRefresh) throws IOException {
-        synchronized (this) {
-            if (!forceRefresh && cache != null
-                    && !RadarConverter.isThresholdPassed(lastFetch, invalidateAfter)) {
-                return cache;
+        if (!forceRefresh) {
+            synchronized (this) {
+                if (cache != null
+                        && !RadarConverter.isThresholdPassed(lastFetch, invalidateAfter)) {
+                    return cache;
+                }
             }
         }
         Map<S, T> result = retriever.get().stream()
