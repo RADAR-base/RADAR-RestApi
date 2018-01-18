@@ -54,16 +54,16 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param sourceType source that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
-     * @param timeFrame time interval between two consecutive samples
+     * @param timeWindow time interval between two consecutive samples
      * @return {@code Dataset} resulted by the simulation
      * @see Dataset
      */
     public Dataset getDataset(ExpectedValue expectedValue, String subjectId, String sourceId,
             String sourceType, String sensorType, DescriptiveStatistic statistic,
-            TimeWindow timeFrame) throws InstantiationException, IllegalAccessException {
+            TimeWindow timeWindow) throws InstantiationException, IllegalAccessException {
 
         Header header = getHeader(expectedValue, subjectId, sourceId, sourceType, sensorType,
-                statistic, timeFrame);
+                statistic, timeWindow);
 
         return new Dataset(header, getItem(expectedValue, header));
     }
@@ -77,14 +77,14 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param sourceType source that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
-     * @param timeFrame time interval between two consecutive samples
+     * @param timeWindow time interval between two consecutive samples
      * @return {@link Header} for a {@link Dataset}
      */
     public Header getHeader(ExpectedValue expectedValue, String subjectId, String sourceId,
             String sourceType, String sensorType, DescriptiveStatistic statistic,
-            TimeWindow timeFrame) {
+            TimeWindow timeWindow) {
         return new Header(subjectId, sourceId, sourceType, sensorType, statistic,
-                SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType), timeFrame,
+                SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType), timeWindow,
                 getEffectiveTimeFrame(expectedValue));
     }
 

@@ -44,7 +44,7 @@ public class UserDaoTest {
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
-    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
+    private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test
@@ -53,10 +53,10 @@ public class UserDaoTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                    SOURCE_TYPE, TIME_WINDOW));
 
         collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
+                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false));
 
         Cohort cohort = SubjectDataAccessObject.getAllSubjects(client);
 
@@ -72,12 +72,12 @@ public class UserDaoTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                    SOURCE_TYPE, TIME_WINDOW));
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE,
-                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
+                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
         docs.addAll(RandomInput.getDocumentsRandom(SUBJECT, SOURCE.concat("XYZ1"),
-                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
+                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false));
         collection.insertMany(docs);
 
         Cohort cohort = SubjectDataAccessObject.getAllSubjects(client);
@@ -99,16 +99,16 @@ public class UserDaoTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                    SOURCE_TYPE, TIME_WINDOW));
         // USER1
         // SOURCE1 -> EMPATICA
         collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT.concat("1"),
-                SOURCE.concat("1"), SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME,
+                SOURCE.concat("1"), SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_WINDOW,
                 SAMPLES, false));
         // SUBJECT
         // SOURCE2 -> EMPATICA
         collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE.concat("2"),
-                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
+                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false));
 
         Cohort cohort = SubjectDataAccessObject.getAllSubjects(client);
 
@@ -142,7 +142,7 @@ public class UserDaoTest {
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         Utility.dropCollection(client, SensorDataAccessObject.getInstance(
-                SENSOR_TYPE).getCollectionName(SOURCE_TYPE, TIME_FRAME));
+                SENSOR_TYPE).getCollectionName(SOURCE_TYPE, TIME_WINDOW));
         Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
         client.close();
     }

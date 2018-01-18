@@ -225,19 +225,19 @@ public final class RadarConverter {
     /**
      * Converts a time window to seconds.
      *
-     * @param timeFrame time window that has to be converted in seconds
+     * @param timeWindow time window that has to be converted in seconds
      *
      * @return a {@link Long} representing the amount of seconds
      */
-    public static Long getSecond(TimeWindow timeFrame) {
-        switch (timeFrame) {
+    public static Long getSecond(TimeWindow timeWindow) {
+        switch (timeWindow) {
             case TEN_SECOND: return TimeUnit.SECONDS.toSeconds(10);
             case ONE_MIN: return TimeUnit.MINUTES.toSeconds(1);
             case TEN_MIN: return TimeUnit.MINUTES.toSeconds(10);
             case ONE_HOUR: return TimeUnit.HOURS.toSeconds(1);
             case ONE_DAY: return TimeUnit.DAYS.toSeconds(1);
             case ONE_WEEK: return TimeUnit.DAYS.toSeconds(7);
-            default: throw new IllegalArgumentException(timeFrame.name() + " is not yet supported");
+            default: throw new IllegalArgumentException(timeWindow + " is not yet supported");
         }
     }
 

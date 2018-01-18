@@ -105,7 +105,7 @@ public class Utility {
      * @param sourceId source identifier
      * @param stat filed extracted from the document
      * @param unit measurement unit useful to generate the dataset's header
-     * @param timeFrame time interval between two consecutive samples
+     * @param timeWindow time interval between two consecutive samples
      * @param recordClass class used compute the Item
      * @return a Dataset rep all required document
      * @throws IllegalAccessException if the item class or its nullary constructor is not accessible
@@ -113,7 +113,7 @@ public class Utility {
      */
     public static Dataset convertDocToDataset(List<Document> docs, String subjectId,
             String sourceId, String sourceType, String sensorType, Stat stat, Unit unit,
-            TimeWindow timeFrame, Class<? extends SpecificRecord> recordClass)
+            TimeWindow timeWindow, Class<? extends SpecificRecord> recordClass)
             throws IllegalAccessException, InstantiationException {
         EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(
                 RadarConverter.getISO8601(docs.get(0).getDate(START)),
@@ -134,7 +134,7 @@ public class Utility {
         }
 
         Header header = new Header(subjectId, sourceId, sourceType, sensorType,
-                    RadarConverter.getDescriptiveStatistic(stat), unit, timeFrame, eftHeader);
+                    RadarConverter.getDescriptiveStatistic(stat), unit, timeWindow, eftHeader);
 
         return new Dataset(header, itemList);
     }

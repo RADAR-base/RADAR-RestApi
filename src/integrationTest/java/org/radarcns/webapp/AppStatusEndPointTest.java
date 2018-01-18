@@ -51,7 +51,7 @@ public class AppStatusEndPointTest {
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
-    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
+    private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
     private static final String SOURCE_PATH = SUBJECT + '/' + SOURCE;
 
@@ -74,10 +74,10 @@ public class AppStatusEndPointTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                    SOURCE_TYPE, TIME_WINDOW));
 
         List<Document> list = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
+                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
 
         collection.insertMany(list);
 
@@ -106,7 +106,7 @@ public class AppStatusEndPointTest {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         Utility.dropCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                    SOURCE_TYPE, TIME_WINDOW));
         Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
         client.close();
     }

@@ -56,7 +56,7 @@ public class SensorDaoTest {
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final Unit UNIT = Unit.BEATS_PER_MIN;
     private static final Class ITEM = DoubleSample.class;
-    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
+    private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     private Set<String> dirtyCollections = new HashSet<>();
@@ -67,25 +67,25 @@ public class SensorDaoTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                    SOURCE_TYPE, TIME_WINDOW));
 
         dirtyCollections.add(SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                SOURCE_TYPE, TIME_FRAME));
+                SOURCE_TYPE, TIME_WINDOW));
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
+                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
 
         collection.insertMany(docs);
 
         Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
-                    Unit.BEATS_PER_MIN, TIME_FRAME, null);
+                    Unit.BEATS_PER_MIN, TIME_WINDOW, null);
 
         Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueRTByUserSource(
                 SUBJECT, SOURCE, header, RadarConverter.getMongoStat(COUNT), collection);
 
         Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
                 SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), UNIT,
-                TIME_FRAME, ITEM);
+                TIME_WINDOW, ITEM);
 
         assertEquals(expected, actual);
 
@@ -98,25 +98,25 @@ public class SensorDaoTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                    SOURCE_TYPE, TIME_WINDOW));
 
         dirtyCollections.add(SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                SOURCE_TYPE, TIME_FRAME));
+                SOURCE_TYPE, TIME_WINDOW));
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
+                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
 
         collection.insertMany(docs);
 
         Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
-                Unit.BEATS_PER_MIN, TIME_FRAME, null);
+                Unit.BEATS_PER_MIN, TIME_WINDOW, null);
 
         Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueByUserSource(SUBJECT,
                 SOURCE, header, RadarConverter.getMongoStat(COUNT), collection);
 
         Dataset expected = Utility.convertDocToDataset(docs,
                 SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), UNIT,
-                TIME_FRAME, ITEM);
+                TIME_WINDOW, ITEM);
 
         assertEquals(expected, actual);
 
@@ -129,16 +129,16 @@ public class SensorDaoTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                    SOURCE_TYPE, TIME_WINDOW));
 
         dirtyCollections.add(SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                SOURCE_TYPE, TIME_FRAME));
+                SOURCE_TYPE, TIME_WINDOW));
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
+                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
         while (docs.size() < 6) {
             docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, TIME_FRAME, SAMPLES, false);
+                COUNT, TIME_WINDOW, SAMPLES, false);
         }
         collection.insertMany(docs);
 
@@ -148,7 +148,7 @@ public class SensorDaoTest {
         long end = docs.get(index + 1).getDate(END).getTime();
 
         Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
-                Unit.BEATS_PER_MIN, TIME_FRAME, null);
+                Unit.BEATS_PER_MIN, TIME_WINDOW, null);
 
         Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueByUserSourceWindow(
                 SUBJECT, SOURCE, header, RadarConverter.getMongoStat(COUNT), start, end,
@@ -156,7 +156,7 @@ public class SensorDaoTest {
 
         Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
                 SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), UNIT,
-                TIME_FRAME, ITEM);
+                TIME_WINDOW, ITEM);
 
         assertEquals(expected, actual);
 
@@ -169,16 +169,16 @@ public class SensorDaoTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                    SOURCE_TYPE, TIME_WINDOW));
 
         dirtyCollections.add(SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                SOURCE_TYPE, TIME_FRAME));
+                SOURCE_TYPE, TIME_WINDOW));
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
+                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
         while (docs.size() < 6) {
             docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE,
-                COUNT, TIME_FRAME, SAMPLES, false);
+                COUNT, TIME_WINDOW, SAMPLES, false);
         }
         collection.insertMany(docs);
 
@@ -207,13 +207,13 @@ public class SensorDaoTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance("HEART_RATE").getCollectionName(
-                SOURCE_TYPE, TIME_FRAME));
+                SOURCE_TYPE, TIME_WINDOW));
 
         dirtyCollections.add(SensorDataAccessObject.getInstance("HEART_RATE").getCollectionName(
-                SOURCE_TYPE, TIME_FRAME));
+                SOURCE_TYPE, TIME_WINDOW));
 
         List<Document> randomInput = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                "HEART_RATE", COUNT, TIME_FRAME, SAMPLES, false);
+                "HEART_RATE", COUNT, TIME_WINDOW, SAMPLES, false);
 
         collection.insertMany(randomInput);
 
@@ -223,13 +223,13 @@ public class SensorDaoTest {
 
         collection = MongoHelper.getCollection(client,
             SensorDataAccessObject.getInstance("ACCELEROMETER").getCollectionName(SOURCE_TYPE,
-                TIME_FRAME));
+                TIME_WINDOW));
 
         dirtyCollections.add(SensorDataAccessObject.getInstance("ACCELEROMETER").getCollectionName(
-                SOURCE_TYPE, TIME_FRAME));
+                SOURCE_TYPE, TIME_WINDOW));
 
         randomInput = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE, "ACCELEROMETER",
-                COUNT, TIME_FRAME, SAMPLES, false);
+                COUNT, TIME_WINDOW, SAMPLES, false);
 
         collection.insertMany(randomInput);
 

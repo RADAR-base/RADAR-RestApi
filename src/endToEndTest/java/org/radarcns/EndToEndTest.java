@@ -91,7 +91,7 @@ public class EndToEndTest {
 
     private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
 
-    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
+    private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
 
     public static final String PIPELINE_CONFIG = "pipeline.yml";
     private static final String[] REQUIRED_TOPICS = {
@@ -324,7 +324,7 @@ public class EndToEndTest {
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory.getDataset(
                     expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, EMPATICA,
-                    getSensorType(config), stat, TIME_FRAME));
+                    getSensorType(config), stat, TIME_WINDOW));
         }
 
         return map;

@@ -46,7 +46,7 @@ public class AndroidDaoTest {
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
-    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
+    private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test
@@ -116,9 +116,9 @@ public class AndroidDaoTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,
                 SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+                    SOURCE_TYPE, TIME_WINDOW));
         collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE.concat("1"),
-                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
+                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false));
 
         assertEquals(ANDROID,
                 AndroidAppDataAccessObject.getInstance().findSourceType(SOURCE, client));
