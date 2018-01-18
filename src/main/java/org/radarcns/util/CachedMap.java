@@ -10,7 +10,9 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Map that caches the result of a list for a limited time. */
+/** Map that caches the result of a list for a limited time.
+ * @implNote This class is thread-safe if given retriever and key extractors are thread-safe.
+ */
 public class CachedMap<S, T> {
     private final ThrowingSupplier<? extends Collection<T>> retriever;
     private final Function<T, S> keyExtractor;
@@ -21,7 +23,7 @@ public class CachedMap<S, T> {
 
     /**
      * Map that retrieves data from a supplier and converts that to a map with given key extractor.
-     * If the
+     * Given retriever and key extractor should be thread-safe to make this class thread-safe.
      * @param retriever supplier of data.
      * @param keyExtractor key extractor of individial data points.
      * @param invalidateAfter invalidate the set of valid results after this duration.
@@ -47,19 +49,25 @@ public class CachedMap<S, T> {
 
     /**
      * Get the cached map, or retrieve a new one if the current one is old.
-     * @param force if true, the cache will be refreshed even if it is recent.
+     * @param forceRefresh if true, the cache will be refreshed even if it is recent.
      * @return map of data
      * @throws IOException if the data could not be retrieved.
      */
-    public Map<S, T> get(boolean force) throws IOException {
-        if (cache == null
-                || RadarConverter.isThresholdPassed(lastFetch, invalidateAfter)
-                || force) {
-            cache = retriever.get().stream()
-                .collect(Collectors.toMap(keyExtractor, Function.identity()));
-            lastFetch = Instant.now();
+    public Map<S, T> get(boolean forceRefresh) throws IOException {
+        synchronized (this) {
+            if (!forceRefresh && cache != null
+                    && !RadarConverter.isThresholdPassed(lastFetch, invalidateAfter)) {
+                return cache;
+            }
         }
-        return cache;
+        Map<S, T> result = retriever.get().stream()
+                .collect(Collectors.toMap(keyExtractor, Function.identity()));
+
+        synchronized (this) {
+            cache = result;
+            lastFetch = Instant.now();
+            return cache;
+        }
     }
 
     /**
@@ -86,7 +94,7 @@ public class CachedMap<S, T> {
     /**
      * Whether the cache may be refreshed.
      */
-    public boolean mayRetry() {
+    public synchronized boolean mayRetry() {
         return RadarConverter.isThresholdPassed(lastFetch, retryAfter);
     }
 
