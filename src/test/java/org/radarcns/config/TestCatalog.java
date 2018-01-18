@@ -16,6 +16,8 @@
 
 package org.radarcns.config;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.File;
 import java.io.IOException;
 import org.junit.Test;
@@ -28,10 +30,10 @@ public class TestCatalog {
 
     @Test
     public void readCatalogOk() throws IOException {
-        DeviceCatalog.load(new File(
+        assertNotNull(DeviceCatalog.load(new File(
                 TestCatalog.class.getClassLoader()
                 .getResource("device-catalog_ok.yml").getFile()
-        ));
+        )));
     }
 
     @Test(expected = com.fasterxml.jackson.databind.exc.InvalidFormatException.class)
@@ -44,18 +46,17 @@ public class TestCatalog {
 
     @Test
     public void readCatalogKoDevice() throws IOException {
-        DeviceCatalog.load(new File(
+        assertNotNull(DeviceCatalog.load(new File(
                     TestCatalog.class.getClassLoader()
                     .getResource("device-catalog_ko_device.yml").getFile()
-        ));
+        )));
     }
 
     @Test
     public void readCatalogKoSensor() throws IOException {
-        DeviceCatalog.load(new File(
+        assertNotNull(DeviceCatalog.load(new File(
                 TestCatalog.class.getClassLoader()
                 .getResource("device-catalog_ko_sensor.yml").getFile()
-        ));
+        )));
     }
-
 }

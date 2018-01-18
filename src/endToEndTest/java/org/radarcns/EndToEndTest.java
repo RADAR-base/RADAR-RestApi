@@ -163,7 +163,7 @@ public class EndToEndTest {
         LOGGER.info("Waiting on data ({} seconds) ... ", LATENCY);
         Thread.sleep(TimeUnit.SECONDS.toMillis(LATENCY));
 
-        fetchRestApi();
+        assertRestApiMatches();
     }
 
     private static void waitForInfrastructure() throws InterruptedException, IOException {
@@ -343,7 +343,7 @@ public class EndToEndTest {
     /**
      * Queries the REST-API for each statistical function and for each data.
      */
-    private void fetchRestApi()
+    private void assertRestApiMatches()
             throws IOException, GeneralSecurityException, ReflectiveOperationException {
         LOGGER.info("Fetching APIs ...");
 

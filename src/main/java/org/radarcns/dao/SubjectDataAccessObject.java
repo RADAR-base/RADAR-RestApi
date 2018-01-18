@@ -93,7 +93,7 @@ public class SubjectDataAccessObject {
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link Subject}
+     * @see Subject
      */
     public static Subject getSubject(String subjectId, MongoClient client) throws ConnectException {
         return SourceDataAccessObject.findAllSourcesByUser(subjectId, client);

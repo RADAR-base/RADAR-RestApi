@@ -135,7 +135,7 @@ public class SourceMonitor {
             return States.OK;
         } else if (percentage > 0.0 && percentage <= 0.80) {
             return States.WARNING;
-        } else if (percentage == 0.0 ) {
+        } else if (percentage == 0.0) {
             return States.DISCONNECTED;
         } else {
             return States.UNKNOWN;

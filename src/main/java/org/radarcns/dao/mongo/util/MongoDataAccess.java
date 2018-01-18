@@ -28,7 +28,6 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import java.net.ConnectException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -54,22 +53,21 @@ public abstract class MongoDataAccess {
      *
      * @return all distinct subjectIDs for the current DAO instance, otherwise an empty Collection
      */
-    public Collection<String> findAllUser(MongoClient client) throws ConnectException {
+    public Collection<String> findAllUser(MongoClient client) {
         Set<String> set = new HashSet<>();
 
-        MongoCursor<String> cursor;
         for (String collection : getCollectionNames()) {
-            cursor = MongoHelper.findAllUser(MongoHelper.getCollection(client, collection));
+            try (MongoCursor<String> cursor = MongoHelper.findAllUser(
+                    MongoHelper.getCollection(client, collection))) {
 
-            if (!cursor.hasNext()) {
-                LOGGER.debug("Empty cursor for collection {}", collection);
+                if (!cursor.hasNext()) {
+                    LOGGER.debug("Empty cursor for collection {}", collection);
+                }
+
+                while (cursor.hasNext()) {
+                    set.add(cursor.next());
+                }
             }
-
-            while (cursor.hasNext()) {
-                set.add(cursor.next());
-            }
-
-            cursor.close();
         }
 
         return set;
@@ -83,24 +81,21 @@ public abstract class MongoDataAccess {
      *
      * @return all distinct sourceIDs for the given collection, otherwise empty Collection
      */
-    public Collection<Source> findAllSourcesByUser(String subject, MongoClient client)
-            throws ConnectException {
+    public Collection<Source> findAllSourcesByUser(String subject, MongoClient client) {
         Set<Source> list = new HashSet<>();
 
-        MongoCursor<String> cursor;
         for (String collection : getCollectionNames()) {
-            cursor = MongoHelper.findAllSourceByUser(subject,
-                    MongoHelper.getCollection(client, collection));
+            try (MongoCursor<String> cursor = MongoHelper.findAllSourceByUser(subject,
+                    MongoHelper.getCollection(client, collection))) {
 
-            if (!cursor.hasNext()) {
-                LOGGER.debug("Empty cursor");
+                if (!cursor.hasNext()) {
+                    LOGGER.debug("Empty cursor");
+                }
+
+                while (cursor.hasNext()) {
+                    list.add(new Source(cursor.next(), getSourceType(collection), null));
+                }
             }
-
-            while (cursor.hasNext()) {
-                list.add(new Source(cursor.next(), getSourceType(collection), null));
-            }
-
-            cursor.close();
         }
         return list;
     }
@@ -113,24 +108,21 @@ public abstract class MongoDataAccess {
      *
      * @return source type for the given sourceID, otherwise null
      */
-    public String findSourceType(String source, MongoClient client)
-            throws ConnectException {
+    public String findSourceType(String source, MongoClient client) {
         String type;
 
-        MongoCursor<Document> cursor;
         for (String collection : getCollectionNames()) {
+            try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
+                    source, null, 0, 1,
+                    MongoHelper.getCollection(client, collection))) {
 
-            cursor = MongoHelper.findDocumentBySource(source, null, 0, 1,
-                MongoHelper.getCollection(client, collection));
-
-            if (cursor.hasNext()) {
-                type = getSourceType(collection);
-                if (type != null) {
-                    return type;
+                if (cursor.hasNext()) {
+                    type = getSourceType(collection);
+                    if (type != null) {
+                        return type;
+                    }
                 }
             }
-
-            cursor.close();
         }
 
         return null;
@@ -143,11 +135,10 @@ public abstract class MongoDataAccess {
      * @param type the source type that is assigned to the sourceID
      * @param client MongoDb client
      *
-     * @throws ConnectException if MongoDB is not available
      * @throws MongoException if something goes wrong with the write
      */
     public static void writeSourceType(String source, String type, MongoClient client)
-            throws ConnectException, MongoException {
+            throws MongoException {
         Document doc = new Document().append(ID, source).append(SOURCE_TYPE, type);
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client, DEVICE_CATALOG);
@@ -165,7 +156,7 @@ public abstract class MongoDataAccess {
      * @return the MongoDb collection
      */
     protected MongoCollection<Document> getCollection(MongoClient client, String source,
-            TimeWindow interval) throws ConnectException {
+            TimeWindow interval) {
         return MongoHelper.getCollection(client,getCollectionName(source, interval));
     }
 
@@ -180,11 +171,8 @@ public abstract class MongoDataAccess {
      * @param client {@link MongoClient} used to connect to the database
      *
      * @return the minimum available timestamp as {@link Date}
-     *
-     * @throws ConnectException if the connection with MongoDb cannot be established
      */
-    public Date getTimestamp(String subject, String source, boolean min, MongoClient client)
-            throws ConnectException {
+    public Date getTimestamp(String subject, String source, boolean min, MongoClient client) {
         long timestamp = Long.MIN_VALUE;
         int order = DESCENDING;
         String field = END;
@@ -224,8 +212,7 @@ public abstract class MongoDataAccess {
      * @param source is the sourceID
      * @return source type for the given sourceID, otherwise null
      */
-    public static String getSourceType(String source, MongoClient client)
-        throws ConnectException {
+    public static String getSourceType(String source, MongoClient client) {
         String type = null;
 
         MongoCursor<Document> cursor = MongoHelper.findDocumentById(source, null,
@@ -247,21 +234,20 @@ public abstract class MongoDataAccess {
     }
 
     /**
-     * @implSpec this function must be override by the subclass.
+     * Get the source type of a MongoDB collection name.
      * @return covert collection name to the source type.
      */
     public abstract String getSourceType(String collection);
 
     /**
-     * @implSpec this function must be override by the subclass.
+     * Get the name of the collection belonging to a source with given time window.
      * @return the MongoDB Collection name associated to the source type for the given time frame
      */
     public abstract String getCollectionName(String source, TimeWindow interval);
 
     /**
-     * @implSpec this function must be override by the subclass.
+     * Names of collections in the database.
      * @return all available collection for the current instance.
      */
     public abstract Set<String> getCollectionNames();
-
 }

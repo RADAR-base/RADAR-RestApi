@@ -32,6 +32,7 @@ public class StatusEndPoint {
     @Context
     private HttpServletRequest request;
 
+    /** HDFS status. */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/hdfs")
