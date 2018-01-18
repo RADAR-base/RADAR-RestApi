@@ -37,7 +37,6 @@ repositories {
   maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
   // Github code
   maven { url 'https://jitpack.io' }
-  flatDir { dir 'localrepo'}
 }
 
 dependencies {

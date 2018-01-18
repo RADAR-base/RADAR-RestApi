@@ -18,7 +18,6 @@ WORKDIR /code
 ENV GRADLE_OPTS -Dorg.gradle.daemon=false -Dorg.gradle.project.profile=prod
 
 COPY ./gradle/wrapper /code/gradle/wrapper
-COPY ./localrepo /code/localrepo
 COPY ./gradlew /code/
 RUN ./gradlew --version
 
