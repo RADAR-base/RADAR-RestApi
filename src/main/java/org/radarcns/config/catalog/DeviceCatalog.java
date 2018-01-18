@@ -1,5 +1,3 @@
-package org.radarcns.config.catalog;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,21 +14,22 @@ package org.radarcns.config.catalog;
  * limitations under the License.
  */
 
+package org.radarcns.config.catalog;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.radarcns.avro.restapi.source.SourceType;
 import org.radarcns.config.YamlConfigLoader;
 
 public class DeviceCatalog {
 
     @JsonProperty("device_catalog")
-    private Map<SourceType, DeviceItem> devices = new HashMap();
+    private Map<String, DeviceItem> devices = new HashMap<>();
 
-    public Map<SourceType, DeviceItem> getDevices() {
+    public Map<String, DeviceItem> getDevices() {
         return devices;
     }
 
@@ -40,10 +39,10 @@ public class DeviceCatalog {
     }
 
     /**
-     * Returns all supported {@link SourceType}s.
-     * @return collection of all {@link SourceType} defined in the catalog configuration file.
+     * Returns all supported source types.
+     * @return collection of all source types defined in the catalog configuration file.
      */
-    public Collection<SourceType> getSupportedSources() {
+    public Collection<String> getSupportedSources() {
         return devices.keySet();
     }
 

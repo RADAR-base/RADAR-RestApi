@@ -4,7 +4,7 @@
 
 A REST-FULL Service using Tomcat 8.0.37, MongoDb 3.2.10, Swagger 2.0, Apache Avro 1.7.7 and Jersey 2.
 
-Thi project implents the downstream REST API for the RADAR-CNS project'
+Thi project implements the downstream REST API for the RADAR-CNS project'
 
 ## Setup
 This project uses `git submodule`. When cloning, please use the command `git clone --recursive`. For already cloned repos, use `git submodule update --init --recursive` to update modules.
@@ -14,21 +14,22 @@ To deploy the war do:
 - edit the `radar.yml` config file and then copy it your config folder. Paths checked to find the config file are
   - `/usr/share/tomcat8/conf/`
   - `/usr/local/tomcat/conf/radar/`
-  - edit the `mp_info.yml` config file for Management Portal Configuration and then copy it your config folder. Paths checked to find the config file are
-  - `/usr/share/tomcat8/conf/`
-  - `/usr/local/tomcat/conf/radar/`
 - run `./gradlew build`
 - Copy the radar.war located at `build/libs/` in `/usr/local/tomcat/webapp/`
 
 By default, log messages are redirected to the `STDOUT`.
 
-The api documentation is located at `<your-server-address>:<port>/radar/api/swagger.json`
+The api documentation is located at `<your-server-address>:<port>/radar/api/openapi.json`
 
-For accessing the end-points of this API, you will need JWT tokens from the [Management Portal](https://github.com/RADAR-CNS/ManagementPortal) and send it with each request in the header. In order for your token to allow access to the Rest-Api you will need to add the resource name of rest-api (ie - `res_RestApi`) in the oauth client details of the Management Portal(MP). For example, if you want a client named `dashboard` to have access to the REST API just add this line to the OAuth client credentials csv file of MP - 
+For accessing the end-points of this API, you will need JWT tokens from the [Management Portal]
+(https://github.com/RADAR-CNS/ManagementPortal) and send it with each request in the header. In order for your token to allow access to the Rest-Api you will need to add the resource name of rest-api (ie - `res_RestApi`) in the oauth client details of the Management Portal(MP). For example, if you want a client named `dashboard` to have access to the REST API just add this line to the OAuth client credentials csv file of MP - 
 ```
-dashbard;res_RestApi;my-secret-token-to-change-in-production;SUBJECT.READ,PROJECT.READ,SOURCE.READ,DEVICETYPE.READ;client_credentials;;;1800;3600;{};true
+dashboard;res_RestApi;my-secret-token-to-change-in-production;SUBJECT.READ,PROJECT.READ,SOURCE
+.READ,SOURCETYPE.READ,MEASUREMENT.READ;client_credentials;;;1800;3600;{};true
 ```
 You can change the secret, scope, name, etc according to your needs. For more info, read the configuration in the Readme of Management Portal
+
+The Rest-api is capable of reading `bins.csv` file generated while restructuring the HDFS file system. See [hdfs_restructure.sh](https://github.com/RADAR-CNS/RADAR-Docker/tree/dev/dcompose-stack/radar-cp-hadoop-stack). This file gives a summary of records being received by the Radar Platform. An example of this file is included here in the root directory. Please place it in the `/usr/local/tomcat/bin/radar/bins.csv` for it to be readable by the RestApi. This is available at the end-point `<your-server-address>:<port>/radar/api/status/hdfs` and can be obtained as a `CSV` or `JSON` as specified by the Accept header in your request.
 
 ## Dev Environment
 Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json) to see documentation of dev deploy instance.
@@ -39,7 +40,7 @@ Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/subject/get
 Swagger provides a tool to automatically generate a client in several programming language.
 - Access this [link](http://editor.swagger.io)
 - Click on `File / Import URL`
-- Paste `http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json` 
+- Paste your public URL to `openapi.json`
 - Click on `Import`
 - Click on `Generate Client` and select your programming language
 
@@ -66,8 +67,8 @@ Test case settings are located at `src/endToEndTest/resources/pipeline.yml`. Eac
   sensor: ACCELEROMETER
   frequency: 32.0
   file: accelerometer.csv
-  key_schema: org.radarcns.key.MeasurementKey
-  value_schema: org.radarcns.empatica.EmpaticaE4Acceleration
+  key_schema: org.radarcns.kafka.ObservationKey
+  value_schema: org.radarcns.passive.empatica.EmpaticaE4Acceleration
   value_fields: [x, y, z]
   minimum: -2.0
   maximum: 2.0

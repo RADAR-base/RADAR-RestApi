@@ -1,5 +1,3 @@
-package org.radarcns.webapp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,17 +14,19 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+package org.radarcns.webapp;
+
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getJWT;
-import static org.radarcns.webapp.util.BasePath.*;
+import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
+import static org.radarcns.webapp.util.BasePath.ANDROID;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.STATUS;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -37,13 +37,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.avro.restapi.app.Application;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
-import org.radarcns.managementportal.MpClient;
+import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Subject;
+import org.radarcns.restapi.app.Application;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -53,46 +53,49 @@ import org.slf4j.LoggerFactory;
 /**
  * Android application status web-app. Function set to access Android app status information.
  */
-@Api
 @Path("/" + ANDROID)
 public class AppStatusEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppStatusEndPoint.class);
 
-    @Context private ServletContext context;
-    @Context private HttpServletRequest request;
+    @Context
+    private ServletContext context;
+    @Context
+    private HttpServletRequest request;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns the status app of the given subject.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @ApiOperation(
-            value = "Return an Applications status",
-            notes = "The Android application periodically updates its current status")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
-                + "received status"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @Operation(summary = "Return an Applications status",
+            description = "The Android application periodically updates its current status")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description =
+            "No value for the given parameters, in the body"
+                    + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "200", description =
+            "Return a application.avsc object containing last"
+                    + "received status")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedAppStatusJson(
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
         try {
-            MpClient client = new MpClient(context);
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getLastReceivedAppStatusWorker(subjectId, sourceId));
+                    getLastReceivedAppStatusWorker(subjectId, sourceId));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -102,7 +105,8 @@ public class AppStatusEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact the service "
+                    + "administrator.");
         }
     }
 
@@ -112,26 +116,26 @@ public class AppStatusEndPoint {
     @GET
     @Produces(AVRO_BINARY)
     @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @ApiOperation(
-            value = "Return an Applications status",
-            notes = "The Android application periodically updates its current status")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing"),
-            @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a application.avsc object containing last"
-                + "received status"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @Operation(summary = "Return an Applications status",
+            description = "The Android application periodically updates its current status")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
+    @ApiResponse(responseCode = "200", description =
+            "Return a application.avsc object containing last"
+                    + "received status")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedAppStatusAvro(
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
         try {
-            MpClient client = new MpClient(context);
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
             Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getLastReceivedAppStatusWorker(subjectId, sourceId));
+                    getLastReceivedAppStatusWorker(subjectId, sourceId));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -155,7 +159,7 @@ public class AppStatusEndPoint {
 
         if (SubjectDataAccessObject.exist(subject, context)) {
             application = AndroidAppDataAccessObject.getInstance().getStatus(
-                subject, source, context);
+                    subject, source, context);
         }
 
         return application;

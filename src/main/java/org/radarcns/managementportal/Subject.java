@@ -1,23 +1,5 @@
-package org.radarcns.managementportal;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.radarcns.managementportal.util.UrlDeseralizer;
 /*
- * Copyright 2017 King's College London
+ * Copyright 2017 The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,69 +14,45 @@ import org.radarcns.managementportal.util.UrlDeseralizer;
  * limitations under the License.
  */
 
+package org.radarcns.managementportal;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Java Class representing a RADAR Management Portal Subject.
  */
 public class Subject {
-
     public static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
 
-    private final String login;
-    @JsonProperty("externalId")
-    private final String externalId;
-    @JsonDeserialize(using = UrlDeseralizer.class)
-    @JsonProperty("externalLink")
-    private final URL externalLink;
-    @JsonProperty("email")
-    private final String email;
-    @JsonProperty("status")
-    private final String status;
-    @JsonProperty("sources")
-    private final List<Source> sources;
-    @JsonProperty("attributes")
-    private final Map<String,String> attributes;
-    @JsonProperty("project")
-    private final Project project;
+    @JsonProperty
+    private String id;
+    @JsonProperty
+    private String externalId;
+    @JsonProperty
+    private URL externalLink;
+    @JsonProperty
+    private String email;
+    @JsonProperty
+    private String status;
+    @JsonProperty
+    private List<Source> sources;
+    @JsonProperty
+    private Map<String,String> attributes;
+    @JsonProperty
+    private Project project;
 
-    private static final ObjectMapper mapper;
-
-    static {
-        mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    @JsonSetter("login")
+    public void setLogin(String login) {
+        this.id = login;
     }
 
-    /**
-     * Constructor.
-     * @param login {@link String} representing Management Portal Subject identifier
-     * @param externalId {@link Integer} representing the REDCap Record identifier
-     * @param externalLink {@link URL} pointing the REDCap integration form / instrument
-     * @param attributes {@link Map} representing the value associated with
-     * @param status {@link String} representing the status of the subject
-     * @param sources {@link List} of {@link Tag} representing the sources of a subject
-     * @param project {@link Project} representing the value associated with
-     *      {@link #HUMAN_READABLE_IDENTIFIER_KEY}
-     */
-    public Subject(@JsonProperty("login") String login,
-                   @JsonProperty("externalId") String externalId,
-                   @JsonProperty("externalLink") URL externalLink,
-                   @JsonProperty("attributes") Map<String,String> attributes,
-                   @JsonProperty("status") String status,
-                   @JsonProperty("sources") List<Source> sources,
-                   @JsonProperty("email") String email,
-                   @JsonProperty("project") Project project) {
-        this.login = login;
-        this.externalId = externalId;
-        this.externalLink = externalLink;
-        this.attributes = attributes;
-        this.status = status;
-        this.sources = sources;
-        this.email = email;
-        this.project = project;
-    }
-
-    @JsonProperty("id")
-    public String getLogin() {
-        return login;
+    public String getId() {
+        return id;
     }
 
     public String getExternalId() {
@@ -121,17 +79,23 @@ public class Subject {
         return sources;
     }
 
+    @JsonIgnore
     public Project getProject() {
         return project;
     }
 
     /**
      * Returns the Human Readable Identifier associated with this subject.
-     * @return {@link String} stating the Human Readable Identifier associated with this subject
+     * @return {@link String} stating the Human Readable Identifier associated with this subject or
+     * {@code null} if not set.
      */
     @JsonIgnore
     public String getHumanReadableIdentifier() {
-        return getAttribute(HUMAN_READABLE_IDENTIFIER_KEY);
+        return attributes.entrySet().stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(HUMAN_READABLE_IDENTIFIER_KEY))
+                .findAny()
+                .map(Map.Entry::getValue)
+                .orElse(null);
     }
 
     /**
@@ -144,64 +108,14 @@ public class Subject {
         return attributes.get(key);
     }
 
-    /**
-     * Generates the {@link JsonNode} representation of the current instance.
-     * @return {@link JsonNode} serialising this object
-     * @throws IOException in case the serialisation cannot be complete
-     */
-    @JsonIgnore
-    public JsonNode getJson() throws IOException {
-        return mapper.readTree(getJsonString());
+    @Override
+    public String toString() {
+        return "Subject{" + '\n'
+                + "id=" + id + '\n'
+                + "externalId='" + externalId + "'\n"
+                + "externalLink='" + externalLink + "'\n"
+                + "status='" + status + "'\n"
+                + "project=" + project.getProjectName() + '}';
     }
 
-    /**
-     * Generates the JSON {@link String} representation of the current instance.
-     * @return {@link String} serialising this object
-     * @throws IOException in case the serialisation cannot be complete
-     */
-    @JsonIgnore
-    public String getJsonString() throws IOException {
-        return mapper.writeValueAsString(this);
-    }
-
-    /**
-     * Converts the {@link String} to a {@link Subject} entity.
-     * @param response {@link String} that has to be converted
-     * @return {@link Subject} stored in the {@link String}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public static Subject getObject(String response) throws IOException {
-        return mapper.readValue(response, Subject.class);
-    }
-
-    /**
-     * Converts the JSON {@link String} to a {@link ArrayList} of {@link Subject} entity.
-     * @param jsonString {@link String} that has to be converted
-     * @return {@link ArrayList} of {@link Subject} stored in the JSON {@link String}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public static ArrayList<Subject> getAllSubjectsFromJson(String jsonString) throws
-            IOException {
-
-        ArrayList<Subject> allSubjects = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        JsonFactory jsonFactory = objectMapper.getFactory();
-        JsonParser jp = jsonFactory.createParser(jsonString);
-
-        JsonNode root = objectMapper.readTree(jp);
-
-        Iterator<JsonNode> elements = root.elements();
-
-        while (elements.hasNext()) {
-            JsonNode currentSubject = elements.next();
-            Subject subject = getObject(currentSubject.toString());
-            allSubjects.add(subject);
-        }
-
-        return allSubjects;
-    }
 }

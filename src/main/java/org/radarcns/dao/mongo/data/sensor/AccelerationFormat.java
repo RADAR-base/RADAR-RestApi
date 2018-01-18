@@ -1,5 +1,3 @@
-package org.radarcns.dao.mongo.data.sensor;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,20 +14,19 @@ package org.radarcns.dao.mongo.data.sensor;
  * limitations under the License.
  */
 
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MEDIAN;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
-import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
-import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
-import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
+package org.radarcns.dao.mongo.data.sensor;
 
-import java.util.ArrayList;
+import static org.radarcns.dao.mongo.data.sensor.DataFormat.getQuartiles;
+import static org.radarcns.dao.mongo.util.MongoHelper.COUNT;
+import static org.radarcns.dao.mongo.util.MongoHelper.FIELDS;
+
+import java.util.List;
 import org.bson.Document;
-import org.radarcns.avro.restapi.data.Acceleration;
-import org.radarcns.avro.restapi.data.Quartiles;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.avro.restapi.header.Header;
-import org.radarcns.avro.restapi.sensor.SensorType;
 import org.radarcns.dao.mongo.util.MongoSensor;
+import org.radarcns.restapi.data.Acceleration;
+import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -43,69 +40,60 @@ public class AccelerationFormat extends MongoSensor {
 
     //private static final Logger LOGGER = LoggerFactory.getLogger(AccelerationFormat.class);
 
-    public AccelerationFormat(SensorType sensorType) {
+    public AccelerationFormat(String sensorType) {
         super(DataFormat.ACCELERATION_FORMAT, sensorType);
     }
 
     @Override
     protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat,
             Header header) {
-        Document component = (Document) doc.get(field);
+        @SuppressWarnings("unchecked")
+        List<Document> fields = (List<Document>) doc.get(FIELDS);
 
-        @SuppressWarnings("checkstyle:LocalVariableName")
-        ArrayList<Document> x = null;
-        @SuppressWarnings("checkstyle:LocalVariableName")
-        ArrayList<Document> y = null;
-        @SuppressWarnings("checkstyle:LocalVariableName")
-        ArrayList<Document> z = null;
-
-        Document data = null;
-
-        if (stat.equals(MEDIAN) || stat.equals(QUARTILES)) {
-            x = (ArrayList<Document>) component.get(X_LABEL);
-            y = (ArrayList<Document>) component.get(Y_LABEL);
-            z = (ArrayList<Document>) component.get(Z_LABEL);
-        } else {
-            data = (Document) doc.get(field);
-        }
+        Document x = fields.get(0);
+        Document y = fields.get(1);
+        Document z = fields.get(2);
 
         switch (stat) {
             case MEDIAN: return new Acceleration(
-                    x.get(1).getDouble(SECOND_QUARTILE),
-                    y.get(1).getDouble(SECOND_QUARTILE),
-                    z.get(1).getDouble(SECOND_QUARTILE));
-            case QUARTILES: return new Acceleration(
-                    new Quartiles(
-                        x.get(0).getDouble(FIRST_QUARTILE),
-                        x.get(1).getDouble(SECOND_QUARTILE),
-                        x.get(2).getDouble(THIRD_QUARTILE)),
-                    new Quartiles(
-                        y.get(0).getDouble(FIRST_QUARTILE),
-                        y.get(1).getDouble(SECOND_QUARTILE),
-                        y.get(2).getDouble(THIRD_QUARTILE)),
-                    new Quartiles(
-                        z.get(0).getDouble(FIRST_QUARTILE),
-                        z.get(1).getDouble(SECOND_QUARTILE),
-                        z.get(2).getDouble(THIRD_QUARTILE)));
+                    getQuartiles(x).get(1),
+                    getQuartiles(y).get(1),
+                    getQuartiles(z).get(1));
+            case QUARTILES:
+                List<Double> xq = getQuartiles(x);
+                List<Double> yq = getQuartiles(y);
+                List<Double> zq = getQuartiles(z);
+
+                return new Acceleration(
+                        new Quartiles(xq.get(0), xq.get(1), xq.get(2)),
+                        new Quartiles(yq.get(0), yq.get(1), yq.get(2)),
+                        new Quartiles(zq.get(0), zq.get(1), zq.get(2)));
             case RECEIVED_MESSAGES:
                 return new Acceleration(
-                    RadarConverter.roundDouble(data.getDouble(X_LABEL)
-                            / RadarConverter.getExpectedMessages(header), 2),
-                    RadarConverter.roundDouble(data.getDouble(Y_LABEL)
-                            / RadarConverter.getExpectedMessages(header), 2),
-                    RadarConverter.roundDouble(data.getDouble(Z_LABEL)
-                            / RadarConverter.getExpectedMessages(header), 2)
-                );
+                    RadarConverter.roundDouble(
+                            x.getDouble(field) / RadarConverter.getExpectedMessages(header), 2),
+                    RadarConverter.roundDouble(
+                            y.getDouble(field) / RadarConverter.getExpectedMessages(header), 2),
+                    RadarConverter.roundDouble(
+                            z.getDouble(field) / RadarConverter.getExpectedMessages(header), 2));
             default:
                 return new Acceleration(
-                    data.getDouble(X_LABEL),
-                    data.getDouble(Y_LABEL),
-                    data.getDouble(Z_LABEL));
+                    x.get(field),
+                    y.get(field),
+                    z.get(field));
         }
     }
 
     @Override
-    protected double extractCount(Document doc ) {
-        return (doc.getDouble(X_LABEL) + doc.getDouble(Y_LABEL) + doc.getDouble(Z_LABEL)) / 3.0d;
+    @SuppressWarnings("unchecked")
+    protected int extractCount(Document doc) {
+        List<Document> fields = (List<Document>) doc.get(COUNT);
+        return (intProperty(fields.get(0), X_LABEL)
+                + intProperty(fields.get(1), Y_LABEL)
+                + intProperty(fields.get(2), Z_LABEL)) / 3;
+    }
+
+    private static int intProperty(Document doc, String key) {
+        return ((Number)doc.get(key)).intValue();
     }
 }

@@ -1,5 +1,3 @@
-package org.radarcns.monitor;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,17 +14,19 @@ package org.radarcns.monitor;
  * limitations under the License.
  */
 
+package org.radarcns.monitor;
+
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
-import org.radarcns.avro.restapi.sensor.Sensor;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.source.Source;
-import org.radarcns.avro.restapi.source.SourceSummary;
-import org.radarcns.avro.restapi.source.State;
+import java.util.concurrent.TimeUnit;
+import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.source.SourceDefinition;
+import org.radarcns.restapi.source.Sensor;
+import org.radarcns.restapi.source.Source;
+import org.radarcns.restapi.source.SourceSummary;
+import org.radarcns.restapi.source.States;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -58,8 +58,9 @@ public class SourceMonitor {
     public Source getState(String subject, String source, MongoClient client)
             throws ConnectException {
 
-        long end = (System.currentTimeMillis() / 10000) * 10000;
-        long start = end - 60000;
+        long tenSec = TimeUnit.SECONDS.toMillis(10);
+        long end = (System.currentTimeMillis() / tenSec) * tenSec;
+        long start = end - TimeUnit.MINUTES.toMillis(1);
 
         return getState(subject, source, start, end, client);
     }
@@ -84,14 +85,14 @@ public class SourceMonitor {
 
         double countTemp;
         double percentTemp;
-        for (SensorType type : specification.getSensorTypes()) {
+        for (String type : specification.getSensorTypes()) {
 
             countTemp = SensorDataAccessObject.getInstance().count(
                 subject, source, start, end, type, specification.getType(), client);
 
             percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);
 
-            sensorMap.put(type.name(), new Sensor(type, getStatus(percentTemp), (int)countTemp,
+            sensorMap.put(type, new Sensor(type, getStatus(percentTemp), (int)countTemp,
                     RadarConverter.roundDouble(1.0 - percentTemp, 2)));
         }
 
@@ -107,9 +108,7 @@ public class SourceMonitor {
         SourceSummary sourceState = new SourceSummary(getStatus(1 - avgPerc),
                 (int)countMex, RadarConverter.roundDouble(avgPerc, 2), sensorMap);
 
-        Source device = new Source(source, specification.getType(), sourceState);
-
-        return device;
+        return new Source(source, specification.getType(), sourceState);
     }
 
     /**
@@ -128,20 +127,18 @@ public class SourceMonitor {
      *
      * @param percentage numerical value that has to be converted int Status
      * @return the current {@code Status}
-     *
-     * @see State
      */
-    public static State getStatus(double percentage) {
+    public static States getStatus(double percentage) {
         if (percentage > 0.95) {
-            return State.FINE;
+            return States.FINE;
         } else if (percentage > 0.80 && percentage <= 0.95) {
-            return State.OK;
+            return States.OK;
         } else if (percentage > 0.0 && percentage <= 0.80) {
-            return State.WARNING;
-        } else if (percentage == 0.0 ) {
-            return State.DISCONNECTED;
+            return States.WARNING;
+        } else if (percentage == 0.0) {
+            return States.DISCONNECTED;
         } else {
-            return State.UNKNOWN;
+            return States.UNKNOWN;
         }
     }
 

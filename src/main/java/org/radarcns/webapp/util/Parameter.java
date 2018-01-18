@@ -19,20 +19,15 @@ package org.radarcns.webapp.util;
 /**
  * Static class listing End Point parameter.
  */
-public class Parameter {
-    public static final String END = "end";
-    public static final String INTERVAL = "interval";
-    public static final String SENSOR = "sensor";
-    public static final String SOURCE_ID = "sourceId";
-    public static final String SOURCE_TYPE = "sourceType";
-    public static final String START = "start";
-    public static final String STAT = "stat";
-    public static final String STUDY_ID = "studyId";
-    public static final String STUDY_NAME = "studyName";
-    public static final String SUBJECT_ID = "subjectId";
-
-    private Parameter() {
-        //Static Class
-    }
-
+public interface Parameter {
+    String END = "end";
+    String INTERVAL = "interval";
+    String SENSOR = "sensor";
+    String SOURCE_ID = "sourceId";
+    String SOURCE_TYPE = "sourceType";
+    String START = "start";
+    String STAT = "stat";
+    String STUDY_ID = "studyId";
+    String PROJECT_NAME = "projectName";
+    String SUBJECT_ID = "subjectId";
 }

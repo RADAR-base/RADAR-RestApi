@@ -1,0 +1,22 @@
+
+# Mongodb hosts a map of hostname and port
+mongodb_hosts:
+    localhost: 27017
+
+# Mongodb User
+mongodb_credentials:
+    username: restapi
+    password: radar
+    database_name: hotstorage
+
+management_portal_config:
+    oauth_client_id: radar_restapi #OAuth2 clientId used by the webApp for making requests
+    oauth_client_secret: secret #OAuth2 client secret
+    oauth_client_scopes: SUBJECT.READ PROJECT.READ SOURCE.READ SOURCETYPE.READ
+    management_portal_url: http://managementportal-app:8090/ #URL pointing Management Portal
+    token_endpoint: oauth/token #URL managing tokens
+    project_endpoint: api/projects/ #URL managing project function
+    subject_endpoint: api/subjects/
+
+# Path to the Device Catalog
+device_catalog: device-catalog.yml

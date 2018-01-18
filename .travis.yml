@@ -14,6 +14,7 @@ env:
 addons:
   hosts:
     - hotstorage
+    - managementportal-app
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -36,7 +37,7 @@ script:
   - ./gradlew check
   - ./gradlew war
   - ./gradlew -PdockerComposePath="$HOME/bin/docker-compose" integrationTest
-  - ./gradlew -PdockerComposePath="$HOME/bin/docker-compose" endToEndTest
+#  - ./gradlew -PdockerComposePath="$HOME/bin/docker-compose" endToEndTest
 
 after_script:
   - ./gradlew sendCoverageToCodacy

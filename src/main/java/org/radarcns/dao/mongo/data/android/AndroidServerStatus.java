@@ -1,10 +1,3 @@
-package org.radarcns.dao.mongo.data.android;
-
-import org.bson.Document;
-import org.radarcns.avro.restapi.app.Application;
-import org.radarcns.dao.mongo.util.MongoAndroidApp;
-import org.radarcns.util.RadarConverter;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -20,6 +13,14 @@ import org.radarcns.util.RadarConverter;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.dao.mongo.data.android;
+
+import org.bson.Document;
+import org.radarcns.dao.mongo.util.MongoAndroidApp;
+import org.radarcns.restapi.app.Application;
+import org.radarcns.util.RadarConverter;
+
 public class AndroidServerStatus extends MongoAndroidApp {
 
     public static final String STATUS_COLLECTION = "application_server_status";

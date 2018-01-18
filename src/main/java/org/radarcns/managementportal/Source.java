@@ -1,13 +1,3 @@
-package org.radarcns.managementportal;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-
 /*
  * Copyright 2017 King's College London
  *
@@ -24,62 +14,53 @@ import java.io.IOException;
  * limitations under the License.
  */
 
+package org.radarcns.managementportal;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Java class defining a RADAR Management Portal Source.
  */
 public class Source {
-
-    @JsonProperty("id")
+    @JsonProperty
     private Integer id;
-    @JsonProperty("deviceTypeId")
-    private String deviceTypeId;
-    @JsonProperty("deviceTypeProducer")
-    private String deviceTypeProducer;
-    @JsonProperty("deviceTypeModel")
-    private String deviceTypeModel;
-    @JsonProperty("sourceId")
+
+    @JsonProperty
+    private String sourceTypeId;
+
+    @JsonProperty
+    private String sourceTypeProducer;
+
+    @JsonProperty
+    private String sourceTypeModel;
+
+    @JsonProperty
+    private String sourceTypeCatalogVersion;
+
+    @JsonProperty
     private String sourceId;
-    @JsonProperty("sourceName")
+
+    @JsonProperty
     private String sourceName;
-    @JsonProperty("assigned")
+
+    @JsonProperty
     private Boolean assigned;
-
-    protected Source(){}
-
-    protected Source(
-            @JsonProperty("id") Integer id,
-            @JsonProperty("deviceTypeId") String deviceTypeId,
-            @JsonProperty("deviceTypeProducer") String deviceTypeProducer,
-            @JsonProperty("deviceTypeModel") String deviceTypeModel,
-            @JsonProperty("sourceId") String sourceId,
-            @JsonProperty("sourceName") String sourceName,
-            @JsonProperty("assigned")  boolean assigned
-    ) {
-        this.id = id;
-        this.deviceTypeId = deviceTypeId;
-        this.deviceTypeModel = deviceTypeModel;
-        this.deviceTypeProducer = deviceTypeProducer;
-        this.sourceId = sourceId;
-        this.sourceName = sourceName;
-        this.assigned = assigned;
-    }
 
 
     public Integer getId() {
         return id;
     }
 
-    public String getDeviceTypeId() {
-        return deviceTypeId;
+    public String getSourceTypeId() {
+        return sourceTypeId;
     }
 
-    public String getDeviceTypeProducer() {
-        return deviceTypeProducer;
+    public String getSourceTypeProducer() {
+        return sourceTypeProducer;
     }
 
-    public String getDeviceTypeModel() {
-        return deviceTypeModel;
+    public String getSourceTypeModel() {
+        return sourceTypeModel;
     }
 
     public String getSourceId() {
@@ -94,20 +75,39 @@ public class Source {
         return assigned;
     }
 
-    /**
-     * Converts the {@link String} to a {@link Source} entity.
-     * @param response {@link String} that has to be converted
-     * @return {@link Source} stored in the {@link byte[]}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public static Source getObject(String response) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
-        mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
-        mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return mapper.readValue(response, Source.class);
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setSourceTypeId(String sourceTypeId) {
+        this.sourceTypeId = sourceTypeId;
+    }
+
+    public void setSourceTypeProducer(String sourceTypeProducer) {
+        this.sourceTypeProducer = sourceTypeProducer;
+    }
+
+    public void setSourceTypeModel(String sourceTypeModel) {
+        this.sourceTypeModel = sourceTypeModel;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    public String getSourceTypeCatalogVersion() {
+        return sourceTypeCatalogVersion;
+    }
+
+    public void setSourceTypeCatalogVersion(String sourceTypeCatalogVersion) {
+        this.sourceTypeCatalogVersion = sourceTypeCatalogVersion;
+    }
+
+    public void setAssigned(Boolean assigned) {
+        this.assigned = assigned;
     }
 }

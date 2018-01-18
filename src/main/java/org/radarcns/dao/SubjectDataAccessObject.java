@@ -23,9 +23,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
-import org.radarcns.avro.restapi.subject.Cohort;
-import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.restapi.subject.Cohort;
+import org.radarcns.restapi.subject.Subject;
 
 /**
  * Data Access Object for user management.
@@ -41,8 +41,6 @@ public class SubjectDataAccessObject {
      *      results cache
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
-     *
-     * @see {@link Subject}
      */
     public static Cohort getAllSubjects(ServletContext context) throws ConnectException {
         return getAllSubjects(MongoHelper.getClient(context));
@@ -55,7 +53,7 @@ public class SubjectDataAccessObject {
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link Subject}
+     * @see Subject
      */
     public static Cohort getAllSubjects(MongoClient client) throws ConnectException {
 
@@ -81,8 +79,6 @@ public class SubjectDataAccessObject {
      *      results cache
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
-     *
-     * @see {@link Subject}
      */
     public static Subject getSubject(String subject, ServletContext context)
             throws ConnectException {
@@ -97,7 +93,7 @@ public class SubjectDataAccessObject {
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
      *
-     * @see {@link Subject}
+     * @see Subject
      */
     public static Subject getSubject(String subjectId, MongoClient client) throws ConnectException {
         return SourceDataAccessObject.findAllSourcesByUser(subjectId, client);

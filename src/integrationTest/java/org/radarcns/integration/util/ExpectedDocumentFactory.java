@@ -16,14 +16,14 @@ package org.radarcns.integration.util;
  * limitations under the License.
  */
 
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.AVERAGE;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MAXIMUM;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MINIMUM;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.SUM;
 import static org.radarcns.mock.model.ExpectedValue.DURATION;
+import static org.radarcns.restapi.header.DescriptiveStatistic.AVERAGE;
+import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
+import static org.radarcns.restapi.header.DescriptiveStatistic.MAXIMUM;
+import static org.radarcns.restapi.header.DescriptiveStatistic.MINIMUM;
+import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
+import static org.radarcns.restapi.header.DescriptiveStatistic.SUM;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,11 +32,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
 import org.radarcns.dao.mongo.data.sensor.AccelerationFormat;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.mock.model.ExpectedValue;
+import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 

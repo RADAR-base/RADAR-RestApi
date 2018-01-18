@@ -15,8 +15,6 @@ services:
         - "28017:28017"
       networks:
         - simplestack
-      depends_on:
-        - wiremock
       environment:
         RADAR_USER: restapi
         RADAR_PWD: radar
@@ -26,26 +24,40 @@ services:
     #             RADAR Rest Api             #
     #----------------------------------------#
     rest-api:
-      build: image
-      image: radarcns/radar-restapi:0.1
+      image: radarcns/radar-restapi:dev
       depends_on:
         - hotstorage
-        - wiremock
+        - managementportal-app
       networks:
         - simplestack
       ports:
         - "8080:8080"
       volumes:
-        - "./volumes/radar:/usr/local/tomcat/conf/radar"
+        - ./volumes/radar:/usr/local/tomcat/conf/radar
+        - ../test/resources/org/radarcns/status/hdfs/bins.csv:/var/lib/hdfs/output/bins.csv
 
-
-    #----------------------------------------#
-    #             RADAR Wiremock             #
-    #----------------------------------------#
-    wiremock:
-      build: image/wiremock
-      image: radarcns/wiremock
+    #---------------------------------------------------------------------------#
+    # Management Portal                                                         #
+    #---------------------------------------------------------------------------#
+    managementportal-app:
+      image: radarcns/management-portal:0.3.2
       networks:
+        - default
         - simplestack
+      environment:
+        SERVER_PORT : 8090
+        SPRING_PROFILES_ACTIVE: dev,swagger
+        MANAGEMENTPORTAL_FRONTEND_CLIENT_SECRET: my-secret
+        MANAGEMENTPORTAL_OAUTH_CLIENTS_FILE: /mp-includes/config/oauth_client_details.csv
+        MANAGEMENTPORTAL_CATALOGUE_SERVER_ENABLE_AUTO_IMPORT: "false"
+        JHIPSTER_SLEEP: 10 # gives time for the database to boot before the application
+        JAVA_OPTS: -Xmx256m  # maximum heap size for the JVM running ManagementPortal, increase this as necessary
+      volumes:
+        - ./volumes/radar/:/mp-includes/
       ports:
-        - "8089:8089"
+        - "8090:8090"
+      healthcheck:
+        test: ["CMD", "wget", "--spider", "localhost:8090/oauth/token_key"]
+        interval: 1m30s
+        timeout: 5s
+        retries: 3

@@ -1,14 +1,10 @@
 package org.radarcns.security.filter;
 
-import org.apache.http.HttpHeaders;
-import org.radarcns.auth.authentication.TokenValidator;
-import org.radarcns.auth.config.ServerConfig;
-import org.radarcns.auth.config.YamlServerConfig;
-import org.radarcns.auth.exception.TokenValidationException;
-import org.radarcns.config.managementportal.config.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Locale;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -17,11 +13,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Locale;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import org.radarcns.auth.authentication.TokenValidator;
+import org.radarcns.auth.config.ServerConfig;
+import org.radarcns.auth.config.YamlServerConfig;
+import org.radarcns.auth.exception.TokenValidationException;
+import org.radarcns.config.Properties;
+import org.radarcns.security.utils.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by dverbeec on 27/09/2017. Updated in Rest-Api by yatharthranjan on 10/11/2017.
@@ -34,7 +35,7 @@ public class AuthenticationFilter implements Filter {
     private static SoftReference<TokenValidator> validator = new SoftReference<>(null);
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         //this.context = filterConfig.getServletContext();
         log.info("Authentication filter initialized");
     }
@@ -47,6 +48,11 @@ public class AuthenticationFilter implements Filter {
         if (token == null) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
+            String jsonMsg = SecurityUtils.getJsonError("token_missing",
+                    "No token was provided with the request and thus the request "
+                            + "cannot be authorized");
+            res.setContentType(MediaType.APPLICATION_JSON);
+            res.getWriter().write(jsonMsg);
             return;
         }
 
@@ -57,7 +63,11 @@ public class AuthenticationFilter implements Filter {
             log.error(ex.getMessage(), ex);
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setHeader("WWW-Authenticate", "Bearer");
-            res.setHeader("Error", "Invalid Token!");
+            String jsonMsg = SecurityUtils.getJsonError("token_invalid",
+                    "The token provided with "
+                            + "the request is invalid and thus the request cannot be authorized");
+            res.setContentType(MediaType.APPLICATION_JSON);
+            res.getWriter().write(jsonMsg);
         }
     }
 
@@ -65,7 +75,8 @@ public class AuthenticationFilter implements Filter {
         TokenValidator localValidator = validator.get();
         if (localValidator == null) {
             ServerConfig config = null;
-            String mpUrlString = Properties.validateMpUrl().toString();
+            String mpUrlString = Properties.getApiConfig().getManagementPortalConfig()
+                    .getManagementPortalUrl().toString();
             if (mpUrlString != null) {
                 try {
                     YamlServerConfig cfg = new YamlServerConfig();

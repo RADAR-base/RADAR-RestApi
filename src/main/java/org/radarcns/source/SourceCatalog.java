@@ -1,5 +1,3 @@
-package org.radarcns.source;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,12 +14,13 @@ package org.radarcns.source;
  * limitations under the License.
  */
 
+package org.radarcns.source;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.radarcns.avro.restapi.sensor.SensorType;
-import org.radarcns.avro.restapi.source.SourceType;
+import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.config.Properties;
 import org.radarcns.config.catalog.DeviceCatalog;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
@@ -36,9 +35,9 @@ public class SourceCatalog {
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceCatalog.class);
 
     /** Variables. **/
-    private final Map<SourceType, SourceDefinition> sourceCatalog;
-    private final Set<SensorType> supportedSensor;
-    private final Map<SensorType, DataFormat> formatMap;
+    private final Map<String, SourceDefinition> sourceCatalog;
+    private final Set<String> supportedSensor;
+    private final Map<String, DataFormat> formatMap;
 
     /** Singleton instance. **/
     private static final SourceCatalog INSTANCE;
@@ -67,11 +66,11 @@ public class SourceCatalog {
      * Returns the {@code SourceDefinition} associated with the given {@code SourceType}.
      * @return the singleton {@code SourceDefinition} instance
      */
-    public static SourceDefinition getInstance(SourceType sourceType) {
+    public static SourceDefinition getInstance(String sourceType) {
         SourceDefinition definition = INSTANCE.sourceCatalog.get(sourceType);
 
         if (definition == null) {
-            throw new UnsupportedOperationException(sourceType.name() + " is not supported yet.");
+            throw new UnsupportedOperationException(sourceType + " is not supported yet.");
         }
 
         return definition;
@@ -82,7 +81,7 @@ public class SourceCatalog {
         supportedSensor = new HashSet<>();
         formatMap = new HashMap<>();
 
-        for (SourceType source : catalog.getSupportedSources()) {
+        for (String source : catalog.getSupportedSources()) {
             sourceCatalog.put(source, new SourceDefinition(
                     source, catalog.getDevices().get(source)));
 
@@ -90,7 +89,7 @@ public class SourceCatalog {
 
             SourceDefinition definition = sourceCatalog.get(source);
 
-            for (SensorType sensor : definition.getFormats().keySet()) {
+            for (String sensor : definition.getFormats().keySet()) {
                 if (formatMap.get(sensor) == null) {
                     formatMap.put(sensor, definition.getFormats().get(sensor));
                 } else if (!formatMap.get(sensor).equals(definition.getFormats().get(sensor))) {
@@ -110,21 +109,21 @@ public class SourceCatalog {
      * @return the SourceDefinition related to the input
      * @see SourceDefinition
      */
-    public SourceDefinition getDefinition(SourceType source) {
+    public SourceDefinition getDefinition(String source) {
         SourceDefinition definition = sourceCatalog.get(source);
 
         if (definition != null) {
             return definition;
         }
 
-        throw new UnsupportedOperationException(source.name() + " is not currently supported.");
+        throw new UnsupportedOperationException(source + " is not currently supported.");
     }
 
     /**
      * Returns the supported source type.
      * @return a set containing all supported sourceType
      */
-    public Set<SourceType> getSupportedSource() {
+    public Set<String> getSupportedSource() {
         return sourceCatalog.keySet();
     }
 
@@ -132,21 +131,21 @@ public class SourceCatalog {
      * Returns the supported sensor set.
      * @return a set containing all supported sourceType
      */
-    public Set<SensorType> getSupportedSensor() {
+    public Set<String> getSupportedSensor() {
         return supportedSensor;
     }
 
     /**
      * Returns the DataFormat associated with the sensor.
      */
-    public DataFormat getFormat(SensorType sensor) {
+    public DataFormat getFormat(String sensor) {
         DataFormat format = formatMap.get(sensor);
 
         if (format != null) {
             return format;
         }
 
-        throw new UnsupportedOperationException(sensor.name() + " is not currently supported.");
+        throw new UnsupportedOperationException(sensor + " is not currently supported.");
     }
 
 }

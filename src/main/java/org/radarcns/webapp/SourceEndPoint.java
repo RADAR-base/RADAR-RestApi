@@ -1,5 +1,3 @@
-package org.radarcns.webapp;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,19 +14,23 @@ package org.radarcns.webapp;
  * limitations under the License.
  */
 
+package org.radarcns.webapp;
+
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getJWT;
-import static org.radarcns.webapp.util.BasePath.*;
+import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
+import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
+import static org.radarcns.webapp.util.BasePath.SOURCE;
+import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
+import static org.radarcns.webapp.util.BasePath.STATE;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SOURCE_TYPE;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -39,16 +41,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.avro.restapi.source.Source;
-import org.radarcns.avro.restapi.source.SourceSpecification;
-import org.radarcns.avro.restapi.source.SourceType;
-import org.radarcns.avro.restapi.subject.Subject;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
-import org.radarcns.managementportal.MpClient;
+import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.monitor.Monitors;
+import org.radarcns.restapi.source.Source;
+import org.radarcns.restapi.spec.SourceSpecification;
+import org.radarcns.restapi.subject.Subject;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -58,47 +59,50 @@ import org.slf4j.LoggerFactory;
 /**
  * SourceDefinition web-app. Function set to access source information.
  */
-@Api
 @Path("/" + SOURCE)
 public class SourceEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceEndPoint.class);
 
-    @Context private ServletContext context;
-    @Context private HttpServletRequest request;
+    @Context
+    private ServletContext context;
+    @Context
+    private HttpServletRequest request;
 
     //--------------------------------------------------------------------------------------------//
     //                                       STATE FUNCTIONS                                      //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns the status of the given source.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + STATE + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @ApiOperation(
-            value = "Return a SourceDefinition values",
-            notes = "Using the source sensors values arrived within last 60sec, it computes the"
-                + "sender status for the given subjectID and sourceID")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a source.avsc object containing last"
-                + "computed status"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @Operation(summary = "Return a SourceDefinition values",
+            description = "Using the source sensors values arrived within last 60sec, it computes "
+                    + "the"
+                    + "sender status for the given subjectID and sourceID")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
+            + "body"
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "200", description = "Return a source.avsc object containing last"
+            + "computed status")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastComputedSourceStatusJson(
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
         try {
-            MpClient client = new MpClient(context);
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
             org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                getLastComputedSourceStatus(subjectId, sourceId));
+                    getLastComputedSourceStatus(subjectId, sourceId));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -108,7 +112,8 @@ public class SourceEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact the service "
+                    + "administrator.");
         }
     }
 
@@ -118,27 +123,28 @@ public class SourceEndPoint {
     @GET
     @Produces(AVRO_BINARY)
     @Path("/" + STATE + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @ApiOperation(
-            value = "Return a SourceDefinition values",
-            notes = "Using the source sensors values arrived within last 60sec, it computes the"
-                + "sender status for the given subjectID and sourceID")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing"),
-            @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a byte array serialising source.avsc object"
-                + "containing last computed status"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @Operation(summary = "Return a SourceDefinition values",
+            description = "Using the source sensors values arrived within last 60sec, it computes "
+                    + "the"
+                    + "sender status for the given subjectID and sourceID")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
+    @ApiResponse(responseCode = "200", description = "Return a byte array serialising source.avsc "
+            + "object"
+            + "containing last computed status")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastComputedSourceStatusAvro(
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) {
         try {
-            MpClient client = new MpClient(context);
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
             org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                getLastComputedSourceStatus(subjectId, sourceId));
+                    getLastComputedSourceStatus(subjectId, sourceId));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -158,7 +164,7 @@ public class SourceEndPoint {
             throws ConnectException {
         Param.isValidInput(subject, source);
 
-        SourceType sourceType = SourceDataAccessObject.getSourceType(source, context);
+        String sourceType = SourceDataAccessObject.getSourceType(source, context);
 
         if (sourceType == null) {
             return null;
@@ -172,30 +178,30 @@ public class SourceEndPoint {
     //--------------------------------------------------------------------------------------------//
     //                               SOURCE SPECIFICATION FUNCTIONS                               //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns the specification of the given source.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
-    @ApiOperation(
-            value = "Return a SourceDefinition specification",
-            notes = "Return the data specification of all on-board sensors for the given"
-                + "source type")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a source_specification.avsc object"
-                + "containing last computed status"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @Operation(summary = "Return a SourceDefinition specification",
+            description = "Return the data specification of all on-board sensors for the given"
+                    + "source type")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
+            + "body"
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "200", description = "Return a source_specification.avsc object"
+            + "containing last computed status")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationJson(
-            @PathParam(SOURCE_TYPE) SourceType source) {
+            @PathParam(SOURCE_TYPE) String source) {
         try {
-            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getRadarToken(request), SOURCE_READ);
             return ResponseHandler.getJsonResponse(request, getSourceSpecificationWorker(source));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
@@ -206,7 +212,8 @@ public class SourceEndPoint {
         } catch (Exception exec) {
             LOGGER.error(exec.getMessage(), exec);
             return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                + "completed. If this error persists, please contact the service administrator.");
+                    + "completed. If this error persists, please contact the service "
+                    + "administrator.");
         }
     }
 
@@ -216,22 +223,20 @@ public class SourceEndPoint {
     @GET
     @Produces(AVRO_BINARY)
     @Path("/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
-    @ApiOperation(
-            value = "Return a SourceDefinition specification",
-            notes = "Return the data specification of all on-board sensors for the given"
-                + "source type")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing"),
-            @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a source_specification.avsc object"
-                + "containing last computed status"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @Operation(summary = "Return a SourceDefinition specification",
+            description = "Return the data specification of all on-board sensors for the given"
+                    + "source type")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
+    @ApiResponse(responseCode = "200", description = "Return a source_specification.avsc object"
+            + "containing last computed status")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationAvro(
-            @PathParam(SOURCE_TYPE) SourceType source) {
+            @PathParam(SOURCE_TYPE) String source) {
         try {
-            checkPermission(getJWT(request), SOURCE_READ);
+            checkPermission(getRadarToken(request), SOURCE_READ);
             return ResponseHandler.getAvroResponse(request, getSourceSpecificationWorker(source));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
@@ -248,39 +253,38 @@ public class SourceEndPoint {
     /**
      * Actual implementation of AVRO and JSON getSpecification.
      **/
-    private SourceSpecification getSourceSpecificationWorker(SourceType source)
+    private SourceSpecification getSourceSpecificationWorker(String source)
             throws ConnectException {
-        SourceSpecification device = Monitors.getInstance().getSpecification(source);
-
-        return device;
+        return Monitors.getInstance().getSpecification(source);
     }
 
     //--------------------------------------------------------------------------------------------//
     //                                         ALL SOURCES                                        //
     //--------------------------------------------------------------------------------------------//
+
     /**
      * JSON function that returns all known sources for the given subject.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/" + GET_ALL_SOURCES + "/{" + SUBJECT_ID + "}")
-    @ApiOperation(
-            value = "Return a User value",
-            notes = "Return all known sources associated with the give subjectID")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 204, message = "No value for the given parameters, in the body"
-                + "there is a message.avsc object with more details"),
-            @ApiResponse(code = 200, message = "Return a subject.avsc object"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @Operation(summary = "Return a User value",
+            description = "Return all known sources associated with the give subjectID")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
+            + "body"
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "200", description = "Return a subject.avsc object")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getAllSourcesJson(
             @PathParam(SUBJECT_ID) String subjectId) {
         try {
-            MpClient client = new MpClient(context);
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
             org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subjectId));
         } catch (AccessDeniedException exc) {
@@ -303,21 +307,20 @@ public class SourceEndPoint {
     @GET
     @Produces(AVRO_BINARY)
     @Path("/" + GET_ALL_SOURCES + "/{" + SUBJECT_ID + "}")
-    @ApiOperation(
-            value = "Return a User value",
-            notes = "Return all known sources associated with the give subjectID")
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "An error occurs while executing"),
-            @ApiResponse(code = 204, message = "No value for the given parameters"),
-            @ApiResponse(code = 200, message = "Return a subject.avsc object"),
-            @ApiResponse(code = 401, message = "Access denied error occured"),
-            @ApiResponse(code = 403, message = "Not Authorised error occured")})
+    @Operation(summary = "Return a User value",
+            description = "Return all known sources associated with the give subjectID")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
+    @ApiResponse(responseCode = "200", description = "Return a subject.avsc object")
+    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getAllSourcesAvro(
             @PathParam(SUBJECT_ID) String subjectId) {
         try {
-            MpClient client = new MpClient(context);
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
             org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getJWT(request), SOURCE_READ,
+            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subjectId));
         } catch (AccessDeniedException exc) {

@@ -1,0 +1,133 @@
+configurations {
+    //Integration test for REST API only
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+    //End to end tests
+    endToEndTestCompile.extendsFrom integrationTestCompile
+    endToEndTestCompile.extendsFrom integrationTestRuntime
+}
+
+//---------------------------------------------------------------------------//
+// Source Set                                                                //
+//---------------------------------------------------------------------------//
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output + test.compileClasspath
+            runtimeClasspath += main.output + test.output + test.compileClasspath
+            srcDir file('src/integrationTest/java')
+        }
+        resources {
+            srcDir 'src/integrationTest/resources'
+        }
+    }
+    endToEndTest {
+        java {
+            compileClasspath += main.output + test.output + integrationTest.output + integrationTest.compileClasspath
+            runtimeClasspath += main.output + test.output + integrationTest.output + integrationTest.compileClasspath
+            srcDir file('src/endToEndTest/java')
+        }
+        resources {
+            srcDir 'src/endToEndTest/resources'
+        }
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: junitVersion
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
+
+    integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: wireMockVersion
+    integrationTestImplementation group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommons
+}
+
+task copyFrontendConfigIntegrationTest(type: Copy) {
+    from "${projectDir}/src/main/webapp/frontend"
+    into "${projectDir}/src/integrationTest/resources"
+}
+
+task copyFrontendConfigEndToEndTest(type: Copy) {
+    from "${projectDir}/src/main/webapp/frontend"
+    into "${projectDir}/src/endToEndTest/resources"
+}
+
+task removeFrontendConfig(type: Delete) {
+    delete "${projectDir}/src/integrationTest/resources/config.json"
+    delete "${projectDir}/src/endToEndTest/resources/config.json"
+}
+
+tasks.matching {it instanceof Test}.all {
+    def stdout = new LinkedList<String>()
+    beforeTest { TestDescriptor td ->
+        stdout.clear()
+    }
+
+    onOutput { TestDescriptor td, TestOutputEvent toe ->
+        stdout.addAll(toe.getMessage().split('(?m)$'))
+        while (stdout.size() > 100) {
+            stdout.remove()
+        }
+    }
+
+    afterTest { TestDescriptor td, TestResult tr ->
+        if (tr.resultType == TestResult.ResultType.FAILURE) {
+            println()
+            print("${td.className}.${td.name} FAILED")
+            if (stdout.empty) {
+                println(" without any output")
+            } else {
+                println(" with last 100 lines of output:")
+                println('=' * 100)
+                stdout.each { print(it) }
+                println('=' * 100)
+            }
+        }
+    }
+
+    testLogging {
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+        exceptionFormat "full"
+    }
+}
+
+test {
+    testLogging {
+        // Show that tests are run in the command-line output
+        events "skipped", "failed"
+    }
+}
+
+task integrationTest(type: Test, dependsOn: ['copyFrontendConfigIntegrationTest', 'installSimpleStack']) {
+    description = "Run integration tests (located in src/integrationTest/...)."
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
+    // This is not needed, but I like to see which tests have run
+    testLogging {
+        events "skipped", "failed", "passed"
+    }
+}
+integrationTest.finalizedBy 'stopSimpleStack'
+
+task endToEndTest(type: Test, dependsOn: ['copyFrontendConfigEndToEndTest', 'installRadarStack', 'listDockerProcesses']) {
+    description = "Run end to end tests (located in src/endToEndTest/...)."
+
+    testClassesDirs = sourceSets.endToEndTest.output.classesDirs
+    classpath = sourceSets.endToEndTest.runtimeClasspath
+
+    testLogging {
+        events "failed"
+
+        debug {
+            events "started", "skipped", "failed"
+            exceptionFormat "full"
+        }
+    }
+
+    testLogging.showStandardStreams = true
+}
+
+//endToEndTest.finalizedBy 'stopRadarStack'

@@ -1,35 +1,54 @@
 package org.radarcns.security.utils;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import javax.servlet.ServletRequest;
+import org.radarcns.auth.token.RadarToken;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.security.filter.AuthenticationFilter;
-
-import javax.servlet.ServletRequest;
+import org.radarcns.util.RadarConverter;
+import org.radarcns.webapp.exception.StatusMessage;
 
 /**
  * Utility class for Rest-API Security.
  */
 public final class SecurityUtils {
+    private static final ObjectWriter statusWriter = RadarConverter.writerFor(StatusMessage.class);
 
     /**
      * Parse the {@code "jwt"} attribute from given request.
+     *
      * @param request servlet request
      * @return decoded JWT
-     * @throws AccessDeniedException if the {@code "jwt"} attribute is missing or does not contain a
-     *                               decoded JWT
+     * @throws AccessDeniedException if the "jwt" attribute does not contain a valid decoded JWT
+     *
      */
-    public static DecodedJWT getJWT(ServletRequest request) throws AccessDeniedException {
+    public static RadarToken getRadarToken(ServletRequest request) throws AccessDeniedException {
         Object jwt = request.getAttribute(AuthenticationFilter.TOKEN_ATTRIBUTE);
         if (jwt == null) {
             // should not happen, the AuthenticationFilter would throw an exception first if it
             // can not decode the authorization header into a valid JWT
             throw new AccessDeniedException("No token was found in the request context.");
         }
-        if (!(jwt instanceof DecodedJWT)) {
+        if (!(jwt instanceof RadarToken)) {
             // should not happen, the AuthenticationFilter will only set a DecodedJWT object
             throw new AccessDeniedException("Expected token to be of type DecodedJWT but was "
                     + jwt.getClass().getName());
         }
-        return (DecodedJWT) jwt;
+        return (RadarToken) jwt;
+    }
+
+    /**
+     * Gets json object of given exception details.
+     * @param message exception message
+     * @return jsonNode created
+     */
+    public static String getJsonError(String error, String message) {
+        StatusMessage statusMessage = new StatusMessage(error, message);
+        try {
+            return statusWriter.writeValueAsString(statusMessage);
+        } catch (JsonProcessingException e) {
+            return "{\"error\": \"server_error\"}";
+        }
     }
 }

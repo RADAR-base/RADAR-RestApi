@@ -1,5 +1,3 @@
-package org.radarcns.managementportal;
-
 /*
  * Copyright 2017 King's College London
  *
@@ -16,57 +14,64 @@ package org.radarcns.managementportal;
  * limitations under the License.
  */
 
+package org.radarcns.managementportal;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-
-import okhttp3.Response;
 
 /**
  * Java class defining a RADAR Management Portal Project.
  */
 public class Project {
+    @JsonProperty
+    private Integer id;
 
-    @JsonProperty("id")
-    private final Integer id;
-    @JsonProperty("projectName")
-    private final String projectName;
-    @JsonProperty("organization")
-    private final String organization;
-    @JsonProperty("location")
-    private final String location;
-    @JsonProperty("attributes")
-    private final List<Tag> attributes;
-    @JsonProperty("projectStatus")
-    private final String projectStatus;
-    @JsonProperty("deviceTypes")
-    private final List<DeviceType> deviceTypes;
+    @JsonProperty
+    private String projectName;
 
+    @JsonProperty
+    private String organization;
 
-    protected Project(
-            @JsonProperty("id") Integer id,
-            @JsonProperty("projectName") String projectName,
-            @JsonProperty("organization") String organization,
-            @JsonProperty("location") String location,
-            @JsonProperty("attributes") List<Tag> attributes,
-            @JsonProperty("projectStatus") String projectStatus,
-            @JsonProperty("deviceTypes") List<DeviceType> deviceTypes) {
+    @JsonProperty
+    private String location;
+
+    @JsonProperty
+    private List<Tag> attributes;
+
+    @JsonProperty
+    private String projectStatus;
+
+    @JsonProperty
+    private List<SourceType> sourceTypes;
+
+    public void setId(Integer id) {
         this.id = id;
+    }
+
+    public void setProjectName(String projectName) {
         this.projectName = projectName;
+    }
+
+    public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public void setLocation(String location) {
         this.location = location;
+    }
+
+    public void setAttributes(List<Tag> attributes) {
         this.attributes = attributes;
+    }
+
+    public void setProjectStatus(String projectStatus) {
         this.projectStatus = projectStatus;
-        this.deviceTypes = deviceTypes;
+    }
+
+    public void setSourceTypes(List<SourceType> sourceTypes) {
+        this.sourceTypes = sourceTypes;
     }
 
     public Integer getId() {
@@ -93,12 +98,13 @@ public class Project {
         return projectStatus;
     }
 
-    public List<DeviceType> getDeviceTypes() {
-        return deviceTypes;
+    public List<SourceType> getSourceTypes() {
+        return sourceTypes;
     }
 
     /**
      * Gets the project attribute (e.g. tag) associated with the given {@link String} key.
+     *
      * @param key {@link String} tag key
      * @return {@link String} value associated with the given key
      */
@@ -110,54 +116,15 @@ public class Project {
         return tag.isPresent() ? tag.get().getValue() : null;
     }
 
-    /**
-     * Converts the {@link String} to a {@link Project} entity.
-     * @param response {@link String} that has to be converted
-     * @return {@link Project} stored in the {@link String}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public static Project getObject(String response) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.readValue(response, Project.class);
-    }
-
     @Override
     public String toString() {
         return "Project{" + '\n'
-            + "id=" + id + '\n'
-            + "projectName='" + projectName + "'\n"
-            + "organization='" + organization + "'\n"
-            + "location='" + location + "'\n"
-            + "attributes=" + attributes + '}';
+                + "id=" + id + '\n'
+                + "projectName='" + projectName + "'\n"
+                + "organization='" + organization + "'\n"
+                + "location='" + location + "'\n"
+                + "attributes=" + attributes + '}';
     }
 
-    /**
-     * Converts the {@link String} to a {@link ArrayList} of {@link Project} entity.
-     * @param response {@link String} that has to be converted
-     * @return {@link ArrayList} of {@link Project} stored in the {@link String}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public  static ArrayList<Project> getAllObjects(Response response) throws IOException {
-        ArrayList<Project> allProjects = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        JsonFactory jsonFactory = objectMapper.getFactory();
-        JsonParser jp = jsonFactory.createParser(response.body().string());
-
-        JsonNode root = objectMapper.readTree(jp);
-
-        Iterator<JsonNode> elements = root.elements();
-
-        while (elements.hasNext()) {
-            JsonNode currentProject = elements.next();
-            Project project = getObject(currentProject.toString());
-            allProjects.add(project);
-        }
-        response.close();
-        return allProjects;
-    }
 }

@@ -1,5 +1,3 @@
-package org.radarcns.webapp.util;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,6 +14,9 @@ package org.radarcns.webapp.util;
  * limitations under the License.
  */
 
+package org.radarcns.webapp.util;
+
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,12 +27,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.avro.restapi.app.Application;
-import org.radarcns.avro.restapi.avro.Message;
-import org.radarcns.avro.restapi.dataset.Dataset;
-import org.radarcns.avro.restapi.subject.Cohort;
-import org.radarcns.avro.restapi.subject.Subject;
+import org.radarcns.restapi.app.Application;
+import org.radarcns.restapi.avro.Message;
+import org.radarcns.restapi.dataset.Dataset;
+import org.radarcns.restapi.subject.Cohort;
+import org.radarcns.restapi.subject.Subject;
 import org.radarcns.util.AvroConverter;
+import org.radarcns.webapp.exception.StatusMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +49,8 @@ public class ResponseHandler {
      * @param request HTTP request that has to be served
      * @param dataset request result
      * @return the response content formatted in JSON
-     * @see {@link Dataset}
      **/
-    public static Response getJsonResponse(HttpServletRequest request, Dataset dataset)
-            throws IOException {
+    public static Response getJsonResponse(HttpServletRequest request, Dataset dataset) {
         Status status = Status.OK;
         int size = 0;
         SpecificRecord obj = dataset;
@@ -64,7 +64,7 @@ public class ResponseHandler {
 
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
-        LOGGER.debug("{}", json.toString());
+        LOGGER.debug("{}", json);
         LOGGER.debug("[{}] {} records", status.getStatusCode(), size);
 
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
@@ -83,22 +83,14 @@ public class ResponseHandler {
         Status status = getStatus(obj);
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        JsonNode json;
-
-        switch (status) {
-            case OK:
-                json = AvroConverter.avroToJsonNode(obj);
-                break;
-            case NO_CONTENT:
-                json = AvroConverter.avroToJsonNode(new Message("No data for this input"));
-                break;
-            default: return Response.serverError().build();
+        if (status == NO_CONTENT) {
+            return Response.noContent().build();
         }
 
-        LOGGER.debug("{}", json.toString());
-        LOGGER.debug("{}", obj.toString());
-
-        return Response.status(status.getStatusCode()).entity(json).build();
+        JsonNode json = AvroConverter.avroToJsonNode(obj);
+        return Response.status(status.getStatusCode())
+                .entity(json)
+                .build();
     }
 
     //TODO return Status.BAD_REQUEST in case of parameter that does not respect regex.
@@ -112,17 +104,10 @@ public class ResponseHandler {
         Status status = Status.INTERNAL_SERVER_ERROR;
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        SpecificRecord obj = new Message(message);
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-
-        if (json == null) {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity("Internal error!").build();
-        } else {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity(json).build();
-        }
+        LOGGER.debug("[{}] {}", status.getStatusCode(), message);
+        return Response.status(status.getStatusCode())
+                .entity(new StatusMessage("server_error", message, null))
+                .build();
     }
 
     /**
@@ -136,17 +121,10 @@ public class ResponseHandler {
         Status status = Status.UNAUTHORIZED;
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        SpecificRecord obj = new Message(message);
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-
-        if (json == null) {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity("Access Denied!").build();
-        } else {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity(json).build();
-        }
+        LOGGER.debug("[{}] {}", status.getStatusCode(), message);
+        return Response.status(status.getStatusCode())
+                .entity(new StatusMessage("access_denied", message))
+                .build();
     }
 
     /**
@@ -164,15 +142,12 @@ public class ResponseHandler {
 
         JsonNode json = AvroConverter.avroToJsonNode(obj);
 
-        if (json == null) {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity("Forbidden!").build();
-        } else {
-            LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-            return Response.status(status.getStatusCode()).entity(json).build();
-        }
-    }
+        LOGGER.debug("[{}] {}", status.getStatusCode(), json);
 
+        return Response.status(status.getStatusCode())
+                .entity(new StatusMessage("forbidden", "Forbidden!", json))
+                .build();
+    }
 
     /**
      * It sets the status code and serialises the given {@code SpecificRecord} in bytes array.
@@ -189,10 +164,13 @@ public class ResponseHandler {
             case OK:
                 byte[] array = AvroConverter.avroToAvroByte(obj);
                 return Response.ok(array, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
-            case NO_CONTENT: return Response.noContent().build();
-            default: return Response.serverError().build();
+            case NO_CONTENT:
+                return Response.noContent().build();
+            default:
+                return Response.serverError().build();
         }
     }
+
 
     //TODO return 400 in case of parameter does not respect regex
     /**
@@ -238,5 +216,27 @@ public class ResponseHandler {
                 + obj.getSchema().getName() + " is not supported yet");
         }
         return Status.OK;
+    }
+
+    /**
+     * It sets the suitable status code and return a JSON message containing the input String.
+     * @param request HTTP request that has to be served
+     * @param message to provide more information about the error
+     * @return the response content formatted in JSON
+     **/
+    public static Response getJsonNotFoundResponse(HttpServletRequest request,
+            String message) {
+        Status status = NOT_FOUND;
+        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
+
+        SpecificRecord obj = new Message(message);
+
+        JsonNode json = AvroConverter.avroToJsonNode(obj);
+
+        LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+
+        return Response.status(status.getStatusCode())
+                .entity(new StatusMessage("not_found", "Not Found!", json))
+                .build();
     }
 }
