@@ -47,7 +47,7 @@ public class SourceCatalog {
      */
     static {
         try {
-            INSTANCE = new SourceCatalog(Properties.getDeviceCatalog());
+            INSTANCE = new SourceCatalog(null);
         } catch (ClassNotFoundException exec) {
             LOGGER.error(exec.getMessage(), exec);
             throw new ExceptionInInitializerError(exec);

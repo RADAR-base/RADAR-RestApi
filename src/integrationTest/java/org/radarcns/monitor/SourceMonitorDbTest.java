@@ -173,7 +173,7 @@ public class SourceMonitorDbTest {
         }
 
         return new SourceMonitor(new SourceDefinition(EMPATICA,
-                Properties.getDeviceCatalog().getDevices().get(EMPATICA))).getState(
+                null)).getState(
             SUBJECT, SOURCE, timestamp, end, client);
     }
 

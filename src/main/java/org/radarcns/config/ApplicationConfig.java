@@ -35,10 +35,6 @@ public class ApplicationConfig {
     @JsonProperty("mongodb_credentials")
     private Map<String,String> mongoUser;
 
-    /** DeviceItem Catalog path. **/
-    @JsonProperty("device_catalog")
-    private String deviceCatalog;
-
     /** Bins location. */
     @JsonProperty("hdfs_output_dir")
     private String hdfsOutputDir;
@@ -64,16 +60,6 @@ public class ApplicationConfig {
     /** Sets MongoDb users. **/
     public void setMongoUser(Map<String, String> mongoUser) {
         this.mongoUser = mongoUser;
-    }
-
-    /** Returns DeviceItem Catalog path. **/
-    public String getDeviceCatalog() {
-        return deviceCatalog;
-    }
-
-    /** Sets DeviceItem Catalog path. **/
-    public void setDeviceCatalog(String deviceCatalog) {
-        this.deviceCatalog = deviceCatalog;
     }
 
     /**

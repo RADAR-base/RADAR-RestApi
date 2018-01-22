@@ -18,5 +18,3 @@ management_portal_config:
     project_endpoint: api/projects/ #URL managing project function
     subject_endpoint: api/subjects/
     source_type_endpoint: api/source-types/
-# Path to the Device Catalog
-device_catalog: device-catalog.yml

@@ -18,7 +18,6 @@ package org.radarcns.config;
 
 import java.io.File;
 import java.io.IOException;
-import org.radarcns.config.catalog.DeviceCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,9 +41,6 @@ public final class Properties {
     /** API Config file name. **/
     public static final String NAME_CONFIG_FILE = "radar.yml";
 
-    /** Device Catalog file name. **/
-    public static final String NAME_DEV_CATALOG_FILE = "device-catalog.yml";
-
     /** Path where the config file is located. **/
     private static String validPath;
 
@@ -54,12 +50,10 @@ public final class Properties {
      *      resources folder.
      **/
     private static final ApplicationConfig API_CONFIG_INSTANCE;
-    private static final DeviceCatalog DEVICE_CATALOG_INSTANCE;
 
     static {
         try {
             API_CONFIG_INSTANCE = loadApiConfig();
-            DEVICE_CATALOG_INSTANCE = loadDeviceCatalog();
         } catch (IOException exec) {
             LOGGER.error(exec.getMessage(), exec);
             throw new ExceptionInInitializerError(exec);
@@ -72,14 +66,6 @@ public final class Properties {
      */
     public static ApplicationConfig getApiConfig() {
         return API_CONFIG_INSTANCE;
-    }
-
-    /**
-     * Gives access to the singleton Device Catalog.
-     * @return Properties
-     */
-    public static DeviceCatalog getDeviceCatalog() {
-        return DEVICE_CATALOG_INSTANCE;
     }
 
     /**
@@ -124,24 +110,6 @@ public final class Properties {
         }
     }
 
-    /**
-     * Loads the Device Catalog configuration file.
-     */
-    private static DeviceCatalog loadDeviceCatalog() throws IOException {
-        String path = API_CONFIG_INSTANCE.getDeviceCatalog();
-
-        if (! (new File(path).isAbsolute())) {
-            path = validPath + path;
-        }
-
-        if (!fileExists(path)) {
-            path = Properties.class.getClassLoader().getResource(NAME_DEV_CATALOG_FILE).getFile();
-        }
-
-        LOGGER.info("Loading Device Catalog file located at : {}", path);
-
-        return DeviceCatalog.load(new File(path));
-    }
 
     /**
      * Checks whether the give path points a file.
