@@ -36,7 +36,6 @@ import org.radarcns.config.ManagementPortalConfig;
 import org.radarcns.config.Properties;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.SourceType;
-import org.radarcns.managementportal.SourceTypeIdentifier;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.producer.rest.RestClient;
@@ -56,7 +55,6 @@ public class ManagementPortalClient {
             List.class, Subject.class);
     private static final ObjectReader PROJECT_LIST_READER = RadarConverter.readerForCollection(
             List.class, Project.class);
-
     private static final ObjectReader SOURCETYPE_LIST_READER = RadarConverter.readerForCollection(
             List.class, SourceType.class);
 
@@ -67,7 +65,7 @@ public class ManagementPortalClient {
 
     private final CachedMap<String, Subject> subjects;
     private final CachedMap<String, Project> projects;
-    private final CachedMap<SourceTypeIdentifier, SourceType> sourceTypes;
+
 
     private OAuth2AccessTokenDetails token;
 
@@ -92,9 +90,6 @@ public class ManagementPortalClient {
 
         subjects = new CachedMap<>(this::retrieveSubjects, Subject::getId, invalidate, retry);
         projects = new CachedMap<>(this::retrieveProjects, Project::getProjectName,
-                invalidate, retry);
-        sourceTypes = new CachedMap<>(this::retrieveSourceTypes,
-                SourceType::getSourceTypeIdentifier,
                 invalidate, retry);
     }
 
@@ -230,34 +225,6 @@ public class ManagementPortalClient {
         }
     }
 
-    /**
-     * Retrieves all {@link SourceType} from Management Portal using {@link ServletContext} entity.
-     *
-     * @return {@link ArrayList} of {@link SourceType} retrieved from the Management Portal
-     */
-    public Map<SourceTypeIdentifier, SourceType> getSourceTypes() throws IOException {
-        return sourceTypes.get();
-    }
-
-    /**
-     * Retrieves a {@link SourceType} from the Management Portal using {@link ServletContext}
-     * entity.
-     *
-     * @param producer {@link String} of the Source-type that has to be retrieved
-     * @param model {@link String} of the Source-type that has to be retrieved
-     * @param catalogVersion {@link String} of the Source-type that has to be retrieved
-     * @return {@link SourceType} retrieved from the Management Portal
-     */
-    public SourceType getSourceType(String producer, String model, String catalogVersion) throws
-            IOException,
-            NotFoundException {
-        try {
-            return sourceTypes.get(new SourceTypeIdentifier(producer, model, catalogVersion));
-        } catch (NoSuchElementException ex) {
-            throw new NotFoundException("Source-type " + producer + " : " + model + " : "
-                    + catalogVersion + " not found");
-        }
-    }
 
 
     /**
@@ -288,5 +255,9 @@ public class ManagementPortalClient {
                 .url(url)
                 .get()
                 .build();
+    }
+
+    public SourceCatalog getSourceCatalog() throws IOException {
+        return new SourceCatalog(this.retrieveSourceTypes());
     }
 }

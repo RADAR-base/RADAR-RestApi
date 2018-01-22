@@ -42,7 +42,7 @@ import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.Header;
 import org.radarcns.security.Param;
-import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.listener.managementportal.SourceCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,9 +217,10 @@ public final class RadarConverter {
      *
      * @return the number of expected messages
      */
-    public static Double getExpectedMessages(Header header) {
-        return SourceCatalog.getInstance(header.getSource()).getFrequency(
-                header.getType()) * getSecond(header.getTimeWindow()).doubleValue();
+    public static Double getExpectedMessages(Header  header) {
+//        return SourceCatalog.getInstance(header.getSource()).getFrequency(
+//                header.getType()) * getSecond(header.getTimeWindow()).doubleValue();
+        return null;
     }
 
     /**

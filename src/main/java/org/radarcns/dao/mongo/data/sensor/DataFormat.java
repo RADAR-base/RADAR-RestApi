@@ -21,7 +21,8 @@ import static org.radarcns.dao.mongo.util.MongoHelper.QUARTILE;
 import java.util.List;
 import org.bson.Document;
 import org.radarcns.dao.mongo.util.MongoSensor;
-import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.listener.managementportal.SourceCatalog;
+import org.radarcns.managementportal.SourceData;
 
 public enum DataFormat {
     ACCELERATION_FORMAT("AccelerationFormat"),
@@ -39,17 +40,16 @@ public enum DataFormat {
 
     /**
      * Returns the {@code MongoSensor} associated with the given sensor.
-     * @param sensorType sensor for which the MongoSensor has to be instantiated
+     * @param sourceData sensor for which the MongoSensor has to be instantiated
      * @return {@code MongoSensor}
      *
      * @see MongoSensor
      */
-    public static MongoSensor getMongoSensor(String sensorType) {
-        DataFormat dataFormat = SourceCatalog.getInstance().getFormat(sensorType);
-        switch (dataFormat) {
-            case ACCELERATION_FORMAT: return new AccelerationFormat(sensorType);
-            case DOUBLE_FORMAT: return new DoubleFormat(sensorType);
-            default: throw new IllegalArgumentException(dataFormat.format + ": unknown DataFormat");
+    public static MongoSensor getMongoSensor(SourceData sourceData) {
+        String sourceDataType = sourceData.getSourceDataType();
+        switch (sourceDataType) {
+            case "ACCELEROMETER": return new AccelerationFormat(sourceDataType);
+            default: return new DoubleFormat(sourceDataType);
         }
     }
 

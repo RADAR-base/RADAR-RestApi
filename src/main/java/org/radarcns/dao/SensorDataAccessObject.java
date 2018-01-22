@@ -17,25 +17,32 @@
 package org.radarcns.dao;
 
 import com.mongodb.MongoClient;
+import java.io.IOException;
 import java.net.ConnectException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoSensor;
+import org.radarcns.exception.TokenException;
+import org.radarcns.listener.managementportal.ManagementPortalClientManager;
+import org.radarcns.managementportal.SourceData;
+import org.radarcns.managementportal.SourceType;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.header.Header;
 import org.radarcns.restapi.source.Source;
-import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.listener.managementportal.SourceCatalog;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,28 +56,39 @@ public class SensorDataAccessObject {
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorDataAccessObject.class);
 
     /** Map containing actual implementations of each data DAO. **/
-    private final Map<String, MongoSensor> hooks;
+    private final Map<String, MongoSensor> hooks = new HashMap<>();
 
     /** Singleton INSTANCE. **/
     private static SensorDataAccessObject INSTANCE;
 
+    private SourceCatalog sourceCatalog;
+
     /** Constructor. **/
-    private SensorDataAccessObject() {
-        hooks = new HashMap<>();
+    private SensorDataAccessObject(ServletContext servletContext) {
 
-        for (String sensor : SourceCatalog.getInstance().getSupportedSensor()) {
-            hooks.put(sensor, DataFormat.getMongoSensor(sensor));
+        try {
+            this.sourceCatalog = ManagementPortalClientManager.getSourceCatalogue(servletContext);
+            this.sourceCatalog.getSourceTypes().forEach(sourceType -> {
+                List<SourceData> sourceTypeConsumer = sourceType.getSourceData();
+                sourceTypeConsumer.forEach(sourceData -> {
+                    hooks.put(sourceData.getSourceDataName(), DataFormat.getMongoSensor
+                            (sourceData));
+                });
+            });
+        } catch (TokenException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
         LOGGER.info("SensorDataAccessObject successfully loaded.");
     }
 
-    /*
-     * Static initializer.
-     */
-    static {
-        INSTANCE = new SensorDataAccessObject();
-    }
+//    /*
+//     * Static initializer.
+//     */
+//    static {
+//        INSTANCE = new SensorDataAccessObject();
+//    }
 
     /**
      * Returns the singleton.
@@ -97,7 +115,7 @@ public class SensorDataAccessObject {
      * @param source is the sourceID
      * @param stat is the required statistical value
      * @param timeWindow time frame resolution
-     * @param sensorType is the required sensor type
+     * @param sourceData is the required sensor type
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
      * @return the last seen data value stat for the given subject and source, otherwise
@@ -106,18 +124,18 @@ public class SensorDataAccessObject {
      * @see Dataset
      */
     public Dataset getLastReceivedSample(String subject, String source, DescriptiveStatistic stat,
-            TimeWindow timeWindow, String sensorType, ServletContext context)
+            TimeWindow timeWindow, SourceData sourceData, ServletContext context)
             throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
 
-        Header header = getHeader(subject, source, sensorType, stat,
+        Header header = getHeader(subject, source, sourceData, stat,
                 timeWindow, client);
 
         if (header == null) {
             return new Dataset(null, new LinkedList<>());
         }
 
-        MongoSensor sensorDao = hooks.get(sensorType);
+        MongoSensor sensorDao = hooks.get(sourceData);
 
         return sensorDao.valueRTByUserSource(subject, source, header,
                     RadarConverter.getMongoStat(stat), MongoHelper.getCollection(context,
@@ -131,7 +149,7 @@ public class SensorDataAccessObject {
      * @param source is the sourceID
      * @param stat is the required statistical value
      * @param timeWindow time frame resolution
-     * @param sensorType is the required sensor type
+     * @param sourceData is the required sensor type
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
      * @return data dataset for the given subject and source, otherwise empty dataset
@@ -139,18 +157,18 @@ public class SensorDataAccessObject {
      * @see Dataset
      */
     public Dataset getSamples(String subject, String source, DescriptiveStatistic stat,
-            TimeWindow timeWindow, String sensorType, ServletContext context)
+            TimeWindow timeWindow, SourceData sourceData, ServletContext context)
             throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
 
-        Header header = getHeader(subject, source, sensorType, stat,
+        Header header = getHeader(subject, source, sourceData, stat,
                 timeWindow, client);
 
         if (header == null) {
             return new Dataset(null, new LinkedList<>());
         }
 
-        MongoSensor sensorDao = hooks.get(sensorType);
+        MongoSensor sensorDao = hooks.get(sourceData);
 
         return sensorDao.valueByUserSource(subject, source, header,
                 RadarConverter.getMongoStat(stat), MongoHelper.getCollection(context,
@@ -166,7 +184,7 @@ public class SensorDataAccessObject {
      * @param timeWindow time frame resolution
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
-     * @param sensorType is the required sensor type
+     * @param sourceData is the required sensor type
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
      * @return data dataset for the given subject and source within the start and end time window,
@@ -176,17 +194,17 @@ public class SensorDataAccessObject {
      */
     public Dataset getSamples(String subject, String source,
             DescriptiveStatistic stat, TimeWindow timeWindow, Long start, Long end,
-            String sensorType, ServletContext context) throws ConnectException {
+            SourceData sourceData, ServletContext context) throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
 
-        Header header = getHeader(subject, source, sensorType, stat,
+        Header header = getHeader(subject, source, sourceData, stat,
                 timeWindow, client);
 
         if (header == null) {
             return new Dataset(null, new LinkedList<>());
         }
 
-        MongoSensor sensorDao = hooks.get(sensorType);
+        MongoSensor sensorDao = hooks.get(sourceData);
 
         return sensorDao.valueByUserSourceWindow(subject, source, header,
                 RadarConverter.getMongoStat(stat), start, end, MongoHelper.getCollection(context,
@@ -338,7 +356,8 @@ public class SensorDataAccessObject {
 
         switch (statistic) {
             case RECEIVED_MESSAGES: return Unit.PERCENTAGE;
-            default: return SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
+            default: return null;
+//            default: return SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
         }
     }
 
@@ -347,7 +366,7 @@ public class SensorDataAccessObject {
      *
      * @param subject is the subjectID
      * @param source is the sourceID
-     * @param sensorType is sensor type involved in the operation
+     * @param sourceData is sourceData involved in the operation
      * @param stat {@link DescriptiveStatistic} stating the required statistical value
      * @param timeWindow time window is the time interval between two consecutive samples
      * @param client {@link MongoClient} used to connect to the database
@@ -358,7 +377,7 @@ public class SensorDataAccessObject {
      *
      * @see Dataset
      */
-    private static Header getHeader(String subject, String source, String sensorType,
+    private static Header getHeader(String subject, String source, SourceData sourceData,
             DescriptiveStatistic stat, TimeWindow timeWindow, MongoClient client)
             throws ConnectException {
         String sourceType = SourceDataAccessObject.getSourceType(source, client);
@@ -367,9 +386,9 @@ public class SensorDataAccessObject {
             return null;
         }
 
-        Unit unit = getUnit(sourceType, sensorType, stat);
+//        Unit unit = getUnit(sourceType, sensorType, stat);
 
-        return new Header(subject, source, sourceType, sensorType, stat, unit,
-            timeWindow, null);
+        return new Header(subject, source, sourceType, sourceData.getSourceDataType(), stat,
+                sourceData.getUnit(), timeWindow, null);
     }
 }

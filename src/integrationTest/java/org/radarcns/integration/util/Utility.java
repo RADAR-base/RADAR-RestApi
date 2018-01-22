@@ -112,7 +112,7 @@ public class Utility {
      * @throws InstantiationException if item class cannot be instantiated
      */
     public static Dataset convertDocToDataset(List<Document> docs, String subjectId,
-            String sourceId, String sourceType, String sensorType, Stat stat, Unit unit,
+            String sourceId, String sourceType, String sensorType, Stat stat, String unit,
             TimeWindow timeWindow, Class<? extends SpecificRecord> recordClass)
             throws IllegalAccessException, InstantiationException {
         EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(

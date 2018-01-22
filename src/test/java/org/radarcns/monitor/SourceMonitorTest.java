@@ -17,7 +17,6 @@
 package org.radarcns.monitor;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -66,7 +65,7 @@ public class SourceMonitorTest {
                 getCollections("android_empatica_e4_inter_beat_interval_output")));
 
 
-        SourceDefinition empatica = new SourceDefinition(EMPATICA,
+        SourceDefinition empatica = new SourceDefinition("EMPATICA",
                 new DeviceItem(sensors));
 
         SourceMonitor monitor = new SourceMonitor(empatica);

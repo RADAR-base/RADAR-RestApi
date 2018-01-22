@@ -18,7 +18,6 @@ package org.radarcns.dao;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.dao.mongo.util.MongoHelper.END;
 import static org.radarcns.dao.mongo.util.MongoHelper.START;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
@@ -52,7 +51,7 @@ public class SensorDaoTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = EMPATICA;
+    private static final String SOURCE_TYPE = "EMPATICA";
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final Unit UNIT = Unit.BEATS_PER_MIN;
     private static final Class ITEM = DoubleSample.class;
@@ -78,13 +77,14 @@ public class SensorDaoTest {
         collection.insertMany(docs);
 
         Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
-                    Unit.BEATS_PER_MIN, TIME_WINDOW, null);
+                    "BEATS_PER_MIN", TIME_WINDOW, null);
 
         Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueRTByUserSource(
                 SUBJECT, SOURCE, header, RadarConverter.getMongoStat(COUNT), collection);
 
         Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
-                SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), UNIT,
+                SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
+                UNIT.toString(),
                 TIME_WINDOW, ITEM);
 
         assertEquals(expected, actual);
@@ -109,13 +109,14 @@ public class SensorDaoTest {
         collection.insertMany(docs);
 
         Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
-                Unit.BEATS_PER_MIN, TIME_WINDOW, null);
+                Unit.BEATS_PER_MIN.toString(), TIME_WINDOW, null);
 
         Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueByUserSource(SUBJECT,
                 SOURCE, header, RadarConverter.getMongoStat(COUNT), collection);
 
         Dataset expected = Utility.convertDocToDataset(docs,
-                SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), UNIT,
+                SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
+                UNIT.toString(),
                 TIME_WINDOW, ITEM);
 
         assertEquals(expected, actual);
@@ -148,14 +149,15 @@ public class SensorDaoTest {
         long end = docs.get(index + 1).getDate(END).getTime();
 
         Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
-                Unit.BEATS_PER_MIN, TIME_WINDOW, null);
+                Unit.BEATS_PER_MIN.toString(), TIME_WINDOW, null);
 
         Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueByUserSourceWindow(
                 SUBJECT, SOURCE, header, RadarConverter.getMongoStat(COUNT), start, end,
                 collection);
 
         Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
-                SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), UNIT,
+                SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
+                UNIT.toString(),
                 TIME_WINDOW, ITEM);
 
         assertEquals(expected, actual);

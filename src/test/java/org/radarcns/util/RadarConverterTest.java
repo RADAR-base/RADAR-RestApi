@@ -19,9 +19,6 @@ package org.radarcns.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.config.TestCatalog.ANDROID;
-import static org.radarcns.config.TestCatalog.BIOVOTION;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.restapi.header.DescriptiveStatistic.AVERAGE;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
@@ -46,6 +43,10 @@ import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.monitor.application.ServerStatus;
 
 public class RadarConverterTest {
+
+    private static final String ANDROID = "ANDROID";
+    private static final String BIOVOTION = "BIOVOTION";
+    private static final String EMPATICA = "EMPATICA";
 
     @Test
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")

@@ -19,7 +19,7 @@ package org.radarcns.listener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.listener.managementportal.SourceCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class SourceCatalogContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            SourceCatalog.getInstance();
+//            SourceCatalog.getInstance();
         } catch (Exception exec) {
             LOGGER.error("Source Catalog cannot be load. Check the log for more information.",
                     exec);

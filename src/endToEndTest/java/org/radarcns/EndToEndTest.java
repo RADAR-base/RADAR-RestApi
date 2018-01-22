@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.config.ExposedConfigTest.CONFIG_JSON;
 import static org.radarcns.config.ExposedConfigTest.OPENAPI_JSON;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
 import static org.radarcns.webapp.util.Parameter.STAT;
@@ -270,7 +269,7 @@ public class EndToEndTest {
 
             Header updatedHeader = dataset.getHeader();
             updatedHeader.setDescriptiveStatistic(DescriptiveStatistic.RECEIVED_MESSAGES);
-            updatedHeader.setUnit(Unit.PERCENTAGE);
+            updatedHeader.setUnit(Unit.PERCENTAGE.toString());
             dataset.setHeader(updatedHeader);
 
             for (Item item : dataset.getDataset()) {
@@ -323,7 +322,7 @@ public class EndToEndTest {
 
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory.getDataset(
-                    expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, EMPATICA,
+                    expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, "EMPATICA",
                     getSensorType(config), stat, TIME_WINDOW));
         }
 

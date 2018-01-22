@@ -34,7 +34,7 @@ import org.radarcns.restapi.dataset.Item;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.header.Header;
-import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.listener.managementportal.SourceCatalog;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,21 +65,21 @@ public abstract class MongoSensor extends MongoDataAccess {
         this.sensorType = sensorType;
         this.dataFormat = format;
 
-        for (String sourceType : SourceCatalog.getInstance().getSupportedSource()) {
-            if (!SourceCatalog.getInstance(sourceType).isSupported(sensorType)) {
-                continue;
-            }
-
-            deviceCollections.put(sourceType,
-                    SourceCatalog.getInstance(sourceType).getCollections().get(sensorType));
-
-            Set<String> names = new HashSet<>(SourceCatalog.getInstance(
-                    sourceType).getCollections().get(sensorType).values());
-
-            for (String name : names) {
-                collectionToSource.put(name, sourceType);
-            }
-        }
+//        for (String sourceType : SourceCatalog.getInstance().getSupportedSource()) {
+//            if (!SourceCatalog.getInstance(sourceType).isSupported(sensorType)) {
+//                continue;
+//            }
+//
+//            deviceCollections.put(sourceType,
+//                    SourceCatalog.getInstance(sourceType).getCollections().get(sensorType));
+//
+//            Set<String> names = new HashSet<>(SourceCatalog.getInstance(
+//                    sourceType).getCollections().get(sensorType).values());
+//
+//            for (String name : names) {
+//                collectionToSource.put(name, sourceType);
+//            }
+//        }
     }
 
     /**

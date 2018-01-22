@@ -35,7 +35,7 @@ import org.radarcns.restapi.dataset.Item;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.header.Header;
-import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.listener.managementportal.SourceCatalog;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;
@@ -84,7 +84,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeWindow) {
         return new Header(subjectId, sourceId, sourceType, sensorType, statistic,
-                SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType), timeWindow,
+                null, timeWindow,
                 getEffectiveTimeFrame(expectedValue));
     }
 

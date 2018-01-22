@@ -22,8 +22,8 @@ import org.junit.Test;
 
 public class SensorAccessObjectTest {
 
-    @Test
-    public void instanceAllocationTest() {
-        assertEquals(7, SensorDataAccessObject.getInstance().getSupportedSensor().size());
-    }
+//    @Test
+//    public void instanceAllocationTest() {
+//        assertEquals(7, SensorDataAccessObject.getInstance().getSupportedSensor().size());
+//    }
 }

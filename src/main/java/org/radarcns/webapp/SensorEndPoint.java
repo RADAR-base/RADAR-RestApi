@@ -32,8 +32,10 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.io.IOException;
 import java.net.ConnectException;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -47,13 +49,18 @@ import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.exception.TokenException;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
+import org.radarcns.managementportal.Source;
+import org.radarcns.managementportal.SourceData;
+import org.radarcns.managementportal.SourceType;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
+import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +119,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                    getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
+                    getLastReceivedSampleWorker(sub, sourceId, sensor, stat, interval));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -162,7 +169,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                    getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
+                    getLastReceivedSampleWorker(sub, sourceId, sensor, stat, interval));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -178,16 +185,17 @@ public class SensorEndPoint {
     /**
      * Actual implementation of AVRO and JSON getRealTimeSubject.
      **/
-    private Dataset getLastReceivedSampleWorker(String subject, String source, String sensor,
-            DescriptiveStatistic stat, TimeWindow interval) throws ConnectException {
-        Param.isValidInput(subject, source);
+    private Dataset getLastReceivedSampleWorker(Subject subject, String source, String sourceDataType,
+            DescriptiveStatistic stat, TimeWindow interval)
+            throws IOException, NotFoundException, TokenException {
+        Param.isValidInput(subject.getId(), source);
 
         Dataset dataset = new Dataset(null, new LinkedList<>());
-
-        if (SubjectDataAccessObject.exist(subject, context)) {
+        SourceData sourceData = this.getSourceDataForRequest(subject , source , sourceDataType);
+        if (SubjectDataAccessObject.exist(subject.getId(), context)) {
             dataset = SensorDataAccessObject.getInstance()
-                    .getLastReceivedSample(subject, source,
-                            stat, interval, sensor, context);
+                    .getLastReceivedSample(subject.getId(), source,
+                            stat, interval, sourceData, context);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subject, source);
@@ -237,7 +245,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                    getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
+                    getSamplesWorker(sub, sourceId, stat, interval, sensor));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -285,7 +293,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
-                    getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
+                    getSamplesWorker(sub, sourceId, stat, interval, sensor));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -301,15 +309,15 @@ public class SensorEndPoint {
     /**
      * Actual implementation of AVRO and JSON getAllBySubject.
      **/
-    private Dataset getSamplesWorker(String subject, String source, DescriptiveStatistic stat,
-            TimeWindow interval, String sensor) throws ConnectException {
-        Param.isValidInput(subject, source);
+    private Dataset getSamplesWorker(Subject subject, String source, DescriptiveStatistic stat,
+            TimeWindow interval, String sensor)
+            throws IOException, NotFoundException, TokenException {
 
         Dataset dataset = new Dataset(null, new LinkedList<>());
-
-        if (SubjectDataAccessObject.exist(subject, context)) {
-            dataset = SensorDataAccessObject.getInstance().getSamples(subject,
-                    source, stat, interval, sensor, context);
+        SourceData sourceData = this.getSourceDataForRequest(subject , source , sensor);
+        if (SubjectDataAccessObject.exist(subject.getId(), context)) {
+            dataset = SensorDataAccessObject.getInstance().getSamples(subject.getId(),
+                    source, stat, interval, sourceData, context);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subject, source);
@@ -363,7 +371,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
-                    getSamplesWithinWindowWorker(subjectId, sourceId, stat,
+                    getSamplesWithinWindowWorker(sub, sourceId, stat,
                             interval, sensor, start, end));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
@@ -416,8 +424,9 @@ public class SensorEndPoint {
             Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
+
             return ResponseHandler.getAvroResponse(request,
-                    getSamplesWithinWindowWorker(subjectId, sourceId, stat,
+                    getSamplesWithinWindowWorker(sub, sourceId, stat,
                             interval, sensor, start, end));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
@@ -434,23 +443,39 @@ public class SensorEndPoint {
     /**
      * Actual implementation of AVRO and JSON getBySubjectForWindow.
      **/
-    private Dataset getSamplesWithinWindowWorker(String subject, String source,
+    private Dataset getSamplesWithinWindowWorker(Subject subject, String sourceId,
             DescriptiveStatistic stat, TimeWindow interval, String sensor, long start,
-            long end) throws ConnectException {
-        Param.isValidInput(subject, source);
+            long end) throws IOException, TokenException, NotFoundException {
+        // assuming only one would fit
+
+        SourceData sourceData = this.getSourceDataForRequest(subject, sourceId , sensor);
+        Param.isValidInput(subject.getId(), sourceId);
 
         Dataset dataset = new Dataset(null, new LinkedList<>());
 
-        if (SubjectDataAccessObject.exist(subject, context)) {
+        if (SubjectDataAccessObject.exist(subject.getId(), context)) {
             dataset = SensorDataAccessObject.getInstance().getSamples(
-                    subject, source, stat, interval, start, end, sensor, context);
+                    subject.getId(), sourceId, stat, interval, start, end, sourceData, context);
 
             if (dataset.getDataset().isEmpty()) {
-                LOGGER.debug("No data for the subject {} with source {}", subject, source);
+                LOGGER.debug("No data for the subject {} with source {}", subject, sourceId);
             }
         }
 
         return dataset;
     }
 
+    private SourceData getSourceDataForRequest(Subject subject, String sourceId, String
+            sourceDataType) throws IOException, TokenException, NotFoundException {
+        Source source = subject.getSources().stream().filter(p -> p.getSourceId().equals
+                (sourceId))
+                .collect(Collectors.toList()).get(0);
+        SourceType sourceType = ManagementPortalClientManager.getSourceCatalogue(context)
+                .getSourceType(source.getSourceTypeProducer() , source
+                        .getSourceTypeModel() , source.getSourceTypeCatalogVersion());
+        // assuming only one would fit, having sourceDataName as the param is better since it
+        // is unique. TODO discuss this
+        return sourceType.getSourceData().stream().filter(p -> p
+                .getSourceDataType().equals(sourceDataType)).collect(Collectors.toList()).get(0);
+    }
 }

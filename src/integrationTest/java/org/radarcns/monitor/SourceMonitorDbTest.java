@@ -17,7 +17,6 @@
 package org.radarcns.monitor;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.X_LABEL;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Y_LABEL;
 import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Z_LABEL;
@@ -47,13 +46,13 @@ import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.source.States;
-import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.listener.managementportal.SourceCatalog;
 
 public class SourceMonitorDbTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = EMPATICA;
+    private static final String SOURCE_TYPE = "EMPATICA";
 
     private static int WINDOWS = 2;
 
@@ -111,7 +110,7 @@ public class SourceMonitorDbTest {
      **/
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-        SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
+        SourceDefinition definition = null;
         for (String sensorType : definition.getSensorTypes()) {
             Utility.dropCollection(client,
                     SensorDataAccessObject.getInstance().getCollectionName(
@@ -132,7 +131,7 @@ public class SourceMonitorDbTest {
 
         String collectionName;
 
-        SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
+        SourceDefinition definition = null;
         for (int i = 0; i < window; i++) {
             for (String sensorType : definition.getSensorTypes()) {
                 messages = reducedMessage(
@@ -171,7 +170,7 @@ public class SourceMonitorDbTest {
             }
         }
 
-        return new SourceMonitor(new SourceDefinition(EMPATICA,
+        return new SourceMonitor(new SourceDefinition("EMPATICA",
                 null)).getState(
             SUBJECT, SOURCE, timestamp, end, client);
     }

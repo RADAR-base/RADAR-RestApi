@@ -16,6 +16,7 @@
 
 package org.radarcns.listener.managementportal;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -53,6 +54,7 @@ public class ManagementPortalClientManager implements ServletContextListener {
     private static final String ACCESS_TOKEN = "TOKEN";
     private static final String MP_CLIENT = "MP_CLIENT";
     private static final String OAUTH2_CLIENT = "OAUTH2_CLIENT";
+    private static final String SOURCE_CATALOGUE = "SOURCE_CATALOGUE";
 
 
     @Override
@@ -170,5 +172,24 @@ public class ManagementPortalClientManager implements ServletContextListener {
         }
         context.setAttribute(OAUTH2_CLIENT, authClient);
         return authClient;
+    }
+
+    /**
+     * Returns the singleton.
+     * @return the singleton {@code SourceCatalog} instance
+     */
+    public static SourceCatalog getSourceCatalogue(ServletContext context)
+            throws TokenException, IOException {
+
+        SourceCatalog sourceCatalog = (SourceCatalog) context
+                .getAttribute(SOURCE_CATALOGUE);
+        if (sourceCatalog == null) {
+            ManagementPortalClient client = ManagementPortalClientManager
+                    .getManagementPortalClient(context);
+
+            sourceCatalog = client.getSourceCatalog();
+            context.setAttribute(SOURCE_CATALOGUE, sourceCatalog);
+        }
+        return sourceCatalog;
     }
 }

@@ -66,7 +66,7 @@ public class SourceTypeEndPoint {
             ManagementPortalClient managementPortalClient = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Response response = Response.status(Status.OK)
-                    .entity(managementPortalClient.getSourceTypes().values()).build();
+                    .entity(managementPortalClient.getSourceCatalog().getSourceTypes()).build();
             LOGGER.info("Response : " + response.getEntity());
             return response;
         } catch (AccessDeniedException exc) {
@@ -103,7 +103,8 @@ public class SourceTypeEndPoint {
             ManagementPortalClient managementPortalClient = ManagementPortalClientManager
                     .getManagementPortalClient(context);
             Response response = Response.status(Status.OK)
-                    .entity(managementPortalClient.getSourceType(producer, model, catalogVersion))
+                    .entity(managementPortalClient.getSourceCatalog().getSourceType(producer,
+                            model, catalogVersion))
                     .build();
             LOGGER.info("Response : " + response.getEntity());
             return response;

@@ -17,18 +17,17 @@
 package org.radarcns.source;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 
 import org.junit.Test;
-import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.listener.managementportal.SourceCatalog;
 
 public class SourceCatalogTest {
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void sourceCatalogTest() {
-        assertEquals(EMPATICA, SourceCatalog.getInstance(EMPATICA).getType());
-
-        SourceCatalog.getInstance("PEBBLE");
-    }
+//    @Test(expected = UnsupportedOperationException.class)
+//    public void sourceCatalogTest() {
+//        assertEquals(EMPATICA, SourceCatalog.getInstance(EMPATICA).getType());
+//
+//        SourceCatalog.getInstance("PEBBLE");
+//    }
 
 }

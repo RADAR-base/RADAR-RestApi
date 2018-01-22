@@ -52,7 +52,7 @@ public class SensorEndPointTest {
 
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = org.radarcns.config.TestCatalog.EMPATICA;
+    private static final String SOURCE_TYPE = "EMPATICA";
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final Class<DoubleSample> ITEM = DoubleSample.class;
@@ -82,7 +82,7 @@ public class SensorEndPointTest {
 
         Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
                 SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
-                Unit.BEATS_PER_MIN, TIME_WINDOW, ITEM);
+                Unit.BEATS_PER_MIN.toString(), TIME_WINDOW, ITEM);
 
         Dataset actual = apiClient.requestAvro(REALTIME + "/" + SOURCE_PATH,
                 Dataset.class, Status.OK);
@@ -107,7 +107,7 @@ public class SensorEndPointTest {
         collection.insertMany(docs);
 
         Dataset expected = Utility.convertDocToDataset(docs, SUBJECT, SOURCE, SOURCE_TYPE,
-                SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_WINDOW,
+                SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN.toString(), TIME_WINDOW,
                 ITEM);
 
         Dataset actual = apiClient.requestAvro(SOURCE_PATH, Dataset.class, Status.OK);
@@ -143,7 +143,7 @@ public class SensorEndPointTest {
 
         Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
                 SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
-                Unit.BEATS_PER_MIN, TIME_WINDOW, ITEM);
+                Unit.BEATS_PER_MIN.toString(), TIME_WINDOW, ITEM);
 
         assertEquals(expected, actual);
 

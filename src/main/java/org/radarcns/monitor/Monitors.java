@@ -23,7 +23,7 @@ import javax.servlet.ServletContext;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
-import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.listener.managementportal.SourceCatalog;
 
 /**
  * Generic Data Accesss Object database independent.
@@ -41,7 +41,7 @@ public class Monitors {
         hooks = new HashMap<>();
 
         for (String sourceType : catalog.getSupportedSource()) {
-            hooks.put(sourceType, new SourceMonitor(catalog.getDefinition(sourceType)));
+            hooks.put(sourceType, new SourceMonitor(null));
         }
     }
 
@@ -49,7 +49,7 @@ public class Monitors {
      * Static initializer.
      */
     static {
-        INSTANCE = new Monitors(SourceCatalog.getInstance());
+        INSTANCE = new Monitors(null);
     }
 
     /**

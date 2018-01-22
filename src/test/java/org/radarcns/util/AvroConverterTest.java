@@ -17,7 +17,6 @@
 package org.radarcns.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.catalogue.Unit.G;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -54,9 +53,9 @@ public class AvroConverterTest {
                 RadarConverter.getISO8601(new Date()),
                 RadarConverter.getISO8601(new Date()));
         Header header = new Header("User", "Source",
-                org.radarcns.config.TestCatalog.EMPATICA,
+                "EMPATICA",
                 "HEART_RATE",
-                COUNT, G, TimeWindow.TEN_SECOND, etf);
+                COUNT, "G", TimeWindow.TEN_SECOND, etf);
 
         LinkedList<Item> item = new LinkedList<>();
         item.add(new Item(new DoubleSample(1.0), RadarConverter.getISO8601(new Date())));
