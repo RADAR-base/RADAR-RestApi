@@ -15,7 +15,7 @@ public class SourceTypeIdentifier {
     private String catalogVersion;
 
     /**
-     * Creates a source-type identifier from parameters
+     * Creates a source-type identifier from parameters.
      * @param producer of source-type
      * @param model of source-type
      * @param catalogVersion of source-type
