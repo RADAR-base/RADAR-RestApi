@@ -35,6 +35,7 @@ public interface BasePath {
     String STATE = "state";
     String PROJECT = "projects";
     String SUBJECTS = "subjects";
+    String SOURCE_TYPES = "source-types";
     String AVRO_BINARY = "avro/binary";
 
 
