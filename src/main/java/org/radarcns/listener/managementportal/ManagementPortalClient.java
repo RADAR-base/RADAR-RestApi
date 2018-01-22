@@ -93,7 +93,8 @@ public class ManagementPortalClient {
         subjects = new CachedMap<>(this::retrieveSubjects, Subject::getId, invalidate, retry);
         projects = new CachedMap<>(this::retrieveProjects, Project::getProjectName,
                 invalidate, retry);
-        sourceTypes = new CachedMap<>(this::retrieveSourceTypes, SourceType::getSourceTypeIdentifier,
+        sourceTypes = new CachedMap<>(this::retrieveSourceTypes,
+                SourceType::getSourceTypeIdentifier,
                 invalidate, retry);
     }
 
@@ -247,17 +248,16 @@ public class ManagementPortalClient {
      * @param catalogVersion {@link String} of the Source-type that has to be retrieved
      * @return {@link SourceType} retrieved from the Management Portal
      */
-    public SourceType getSourceType(String producer, String model , String catalogVersion) throws
+    public SourceType getSourceType(String producer, String model, String catalogVersion) throws
             IOException,
             NotFoundException {
         try {
             return sourceTypes.get(new SourceTypeIdentifier(producer, model, catalogVersion));
         } catch (NoSuchElementException ex) {
-            throw new NotFoundException("Source-type " + producer + " : " + model +" : "+
-                    catalogVersion+ " not found");
+            throw new NotFoundException("Source-type " + producer + " : " + model + " : "
+                    + catalogVersion + " not found");
         }
     }
-
 
 
     /**
