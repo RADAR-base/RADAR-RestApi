@@ -1,8 +1,5 @@
 package org.radarcns.managementportal;
 
-import org.radarcns.catalogue.ProcessingState;
-import org.radarcns.catalogue.Unit;
-
 public class SourceData {
 
     private Long id;
@@ -13,9 +10,9 @@ public class SourceData {
 
     private Double frequency;
 
-    private Unit unit;
+    private String unit;
 
-    private ProcessingState processingState;
+    private String processingState;
 
     private String keySchema;
 
@@ -41,11 +38,11 @@ public class SourceData {
         return frequency;
     }
 
-    public Unit getUnit() {
+    public String getUnit() {
         return unit;
     }
 
-    public ProcessingState getProcessingState() {
+    public String getProcessingState() {
         return processingState;
     }
 
