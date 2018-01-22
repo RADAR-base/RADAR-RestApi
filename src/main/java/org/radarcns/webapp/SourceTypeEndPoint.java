@@ -86,7 +86,7 @@ public class SourceTypeEndPoint {
      * JSON function that returns all available projects.
      */
     @GET
-    @Path("/{"+PRODUCER+"}/{"+MODEL+"}/{"+CATALOGUE_VERSION+"}")
+    @Path("/{" + PRODUCER + "}/{" + MODEL + "}/{" + CATALOGUE_VERSION + "}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Returns a list of projects",
             description = "Each project can have multiple source-types associated with it")
