@@ -41,14 +41,13 @@ import org.junit.After;
 import org.junit.Test;
 import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.config.Properties;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.source.States;
-import org.radarcns.source.SourceCatalog;
+import org.radarcns.catalog.SourceCatalog;
 
 public class SourceMonitorDbTest {
 

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.radarcns.config.TestCatalog.EMPATICA;
 
 import org.junit.Test;
+import org.radarcns.catalog.SourceCatalog;
 
 public class SourceCatalogTest {
 

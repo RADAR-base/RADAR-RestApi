@@ -35,7 +35,7 @@ import org.radarcns.restapi.dataset.Item;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.header.Header;
-import org.radarcns.source.SourceCatalog;
+import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;

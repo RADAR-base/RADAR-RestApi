@@ -23,7 +23,7 @@ import javax.servlet.ServletContext;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
-import org.radarcns.source.SourceCatalog;
+import org.radarcns.catalog.SourceCatalog;
 
 /**
  * Generic Data Accesss Object database independent.

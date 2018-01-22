@@ -35,7 +35,7 @@ import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.header.Header;
 import org.radarcns.restapi.source.Source;
-import org.radarcns.source.SourceCatalog;
+import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

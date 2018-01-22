@@ -19,7 +19,7 @@ package org.radarcns.listener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import org.radarcns.source.SourceCatalog;
+import org.radarcns.catalog.SourceCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
