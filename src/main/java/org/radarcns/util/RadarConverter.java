@@ -42,7 +42,6 @@ import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.Header;
 import org.radarcns.security.Param;
-import org.radarcns.listener.managementportal.SourceCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

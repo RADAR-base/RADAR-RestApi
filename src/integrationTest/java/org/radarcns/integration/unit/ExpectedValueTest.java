@@ -17,7 +17,6 @@
 package org.radarcns.integration.unit;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 
 import java.util.List;
@@ -47,7 +46,7 @@ public class ExpectedValueTest {
     @Test
     public void matchDatasetOnDocuments() throws Exception {
         Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(SUBJECT, SOURCE,
-                EMPATICA, "HEART_RATE", COUNT, TIME_WINDOW, SAMPLES, false);
+                "EMPATICA", "HEART_RATE", COUNT, TIME_WINDOW, SAMPLES, false);
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
         int count = 0;

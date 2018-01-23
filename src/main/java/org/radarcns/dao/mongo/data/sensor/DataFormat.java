@@ -21,7 +21,6 @@ import static org.radarcns.dao.mongo.util.MongoHelper.QUARTILE;
 import java.util.List;
 import org.bson.Document;
 import org.radarcns.dao.mongo.util.MongoSensor;
-import org.radarcns.listener.managementportal.SourceCatalog;
 import org.radarcns.managementportal.SourceData;
 
 public enum DataFormat {

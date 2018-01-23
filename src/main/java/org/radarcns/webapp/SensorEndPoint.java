@@ -50,6 +50,7 @@ import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.exception.TokenException;
+import org.radarcns.listener.ContextResourceManager;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Source;
@@ -60,6 +61,7 @@ import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
+import org.radarcns.service.SubjectService;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
@@ -77,6 +79,12 @@ public class SensorEndPoint {
     private ServletContext context;
     @Context
     private HttpServletRequest request;
+
+    private SubjectService subjectService;
+
+    public SensorEndPoint() {
+        this.subjectService = new SubjectService(this.context);
+    }
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
@@ -470,7 +478,7 @@ public class SensorEndPoint {
         Source source = subject.getSources().stream().filter(p -> p.getSourceId().equals
                 (sourceId))
                 .collect(Collectors.toList()).get(0);
-        SourceType sourceType = ManagementPortalClientManager.getSourceCatalogue(context)
+        SourceType sourceType = ContextResourceManager.getSourceCatalogue(context)
                 .getSourceType(source.getSourceTypeProducer() , source
                         .getSourceTypeModel() , source.getSourceTypeCatalogVersion());
         // assuming only one would fit, having sourceDataName as the param is better since it

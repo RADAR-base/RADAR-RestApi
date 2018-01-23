@@ -16,9 +16,6 @@
 
 package org.radarcns.integration.util;
 
-import static org.radarcns.config.TestCatalog.ANDROID;
-import static org.radarcns.config.TestCatalog.BIOVOTION;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
@@ -114,9 +111,9 @@ public class RandomInput {
             TimeWindow timeWindow, int samples, boolean singleWindow) throws InstantiationException,
             IllegalAccessException {
         switch (sourceType) {
-            case ANDROID: break;
-            case BIOVOTION: break;
-            case EMPATICA: return getBoth(user, source, sourceType, sensorType, stat, timeWindow,
+            case "ANDROID": break;
+            case "BIOVOTION": break;
+            case "EMPATICA": return getBoth(user, source, sourceType, sensorType, stat, timeWindow,
                     samples, singleWindow);
             case "PEBBLE": break;
             default: break;
@@ -135,9 +132,10 @@ public class RandomInput {
             int samples, boolean singleWindow) throws InstantiationException,
             IllegalAccessException {
         switch (sourceType) {
-            case ANDROID: break;
-            case BIOVOTION: break;
-            case EMPATICA: return getDataset(user, source, sourceType, sensorType, stat, timeWindow,
+            case "ANDROID": break;
+            case "BIOVOTION": break;
+            case "EMPATICA": return getDataset(user, source, sourceType, sensorType, stat,
+                    timeWindow,
                             samples, singleWindow);
             case "PEBBLE": break;
             default: break;
@@ -156,7 +154,7 @@ public class RandomInput {
             TimeWindow timeWindow, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         switch (sourceType) {
-            case EMPATICA:
+            case "EMPATICA":
                 return getDocument(user, source, sourceType, sensorType, stat,
                             timeWindow, samples, singleWindow);
             default:

@@ -18,8 +18,8 @@ package org.radarcns.dao;
 
 import static com.mongodb.client.model.Filters.eq;
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.config.TestCatalog.ANDROID;
-import static org.radarcns.config.TestCatalog.EMPATICA;
+import static org.radarcns.dao.AndroidDaoTest.ANDROID;
+import static org.radarcns.dao.AndroidDaoTest.EMPATICA;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 
 import com.mongodb.MongoClient;

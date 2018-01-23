@@ -26,7 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
@@ -34,15 +33,15 @@ import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoSensor;
 import org.radarcns.exception.TokenException;
+import org.radarcns.listener.ContextResourceManager;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.SourceData;
-import org.radarcns.managementportal.SourceType;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.header.Header;
 import org.radarcns.restapi.source.Source;
-import org.radarcns.listener.managementportal.SourceCatalog;
+import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +66,7 @@ public class SensorDataAccessObject {
     private SensorDataAccessObject(ServletContext servletContext) {
 
         try {
-            this.sourceCatalog = ManagementPortalClientManager.getSourceCatalogue(servletContext);
+            this.sourceCatalog = ContextResourceManager.getSourceCatalogue(servletContext);
             this.sourceCatalog.getSourceTypes().forEach(sourceType -> {
                 List<SourceData> sourceTypeConsumer = sourceType.getSourceData();
                 sourceTypeConsumer.forEach(sourceData -> {

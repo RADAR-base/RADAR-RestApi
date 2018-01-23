@@ -17,8 +17,6 @@ package org.radarcns.dao;
  */
 
 import static junit.framework.TestCase.assertEquals;
-import static org.radarcns.config.TestCatalog.ANDROID;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.integration.util.RandomInput.getRandomIpAddress;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 
@@ -42,6 +40,9 @@ public class AndroidDaoTest {
 
     //private static final Logger logger = LoggerFactory.getLogger(SourceDaoTest.class);
 
+    public static final String EMPATICA = "EMPATICA";
+    public static final String ANDROID = "ANDROID";
+    public static final String BIOVOTION = "BIOVOTION";
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = EMPATICA;

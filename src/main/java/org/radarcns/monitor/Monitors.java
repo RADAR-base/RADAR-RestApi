@@ -17,13 +17,14 @@
 package org.radarcns.monitor;
 
 import com.mongodb.MongoClient;
+import java.io.IOException;
 import java.net.ConnectException;
 import java.util.HashMap;
 import javax.servlet.ServletContext;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
-import org.radarcns.listener.managementportal.SourceCatalog;
+import org.radarcns.catalog.SourceCatalog;
 
 /**
  * Generic Data Accesss Object database independent.
@@ -40,8 +41,12 @@ public class Monitors {
     private Monitors(SourceCatalog catalog) {
         hooks = new HashMap<>();
 
-        for (String sourceType : catalog.getSupportedSource()) {
-            hooks.put(sourceType, new SourceMonitor(null));
+        try {
+            for (String sourceType : catalog.getSupportedSource()) {
+                hooks.put(sourceType, new SourceMonitor(null));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

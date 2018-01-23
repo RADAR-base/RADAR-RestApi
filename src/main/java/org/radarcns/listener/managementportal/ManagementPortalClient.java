@@ -35,6 +35,7 @@ import okhttp3.Response;
 import org.radarcns.config.ManagementPortalConfig;
 import org.radarcns.config.Properties;
 import org.radarcns.managementportal.Project;
+import org.radarcns.managementportal.SourceData;
 import org.radarcns.managementportal.SourceType;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
@@ -55,8 +56,10 @@ public class ManagementPortalClient {
             List.class, Subject.class);
     private static final ObjectReader PROJECT_LIST_READER = RadarConverter.readerForCollection(
             List.class, Project.class);
-    private static final ObjectReader SOURCETYPE_LIST_READER = RadarConverter.readerForCollection(
+    private static final ObjectReader SOURCE_TYPE_LIST_READER = RadarConverter.readerForCollection(
             List.class, SourceType.class);
+    private static final ObjectReader SOURCE_DATA_LIST_READER = RadarConverter.readerForCollection(
+            List.class, SourceData.class);
 
     private static final Duration CACHE_INVALIDATE_DEFAULT = Duration.ofMinutes(1);
     private static final Duration CACHE_RETRY_DEFAULT = Duration.ofHours(1);
@@ -232,7 +235,7 @@ public class ManagementPortalClient {
      *
      * @return source-types retrieved from the management portal.
      */
-    private List<SourceType> retrieveSourceTypes() throws IOException {
+    public List<SourceType> retrieveSourceTypes() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL getAllSourceTypesUrl = new URL(config.getManagementPortalUrl(),
                 config.getSourceTypeEndpoint());
@@ -242,9 +245,31 @@ public class ManagementPortalClient {
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to retrieve all source-types: " + responseBody);
             }
-            List<SourceType> allSourceTypes = SOURCETYPE_LIST_READER.readValue(responseBody);
+            List<SourceType> allSourceTypes = SOURCE_TYPE_LIST_READER.readValue(responseBody);
             logger.info("Retrieved SourceTypes from MP");
             return allSourceTypes;
+        }
+    }
+
+    /**
+     * Retrieves all {@link org.radarcns.managementportal.SourceData} from Management Portal
+     * using {@link ServletContext} entity.
+     *
+     * @return source-types retrieved from the management portal.
+     */
+    public List<SourceData> retrieveSourceData() throws IOException {
+        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
+        URL getAllSourceTypesUrl = new URL(config.getManagementPortalUrl(),
+                config.getSourceDataEndpoint());
+        Request getAllSourceTypes = this.buildGetRequest(getAllSourceTypesUrl);
+        try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
+            String responseBody = RestClient.responseBody(response);
+            if (!response.isSuccessful()) {
+                throw new IOException("Failed to retrieve all source-data: " + responseBody);
+            }
+            List<SourceData> allSourceData = SOURCE_DATA_LIST_READER.readValue(responseBody);
+            logger.info("Retrieved SourceTypes from MP");
+            return allSourceData;
         }
     }
 
@@ -257,7 +282,4 @@ public class ManagementPortalClient {
                 .build();
     }
 
-    public SourceCatalog getSourceCatalog() throws IOException {
-        return new SourceCatalog(this.retrieveSourceTypes());
-    }
 }

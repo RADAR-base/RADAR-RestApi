@@ -18,7 +18,6 @@ package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.STATUS;
@@ -49,7 +48,7 @@ import org.radarcns.webapp.util.BasePath;
 public class AppStatusEndPointTest {
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = EMPATICA;
+    private static final String SOURCE_TYPE = "EMPATICA";
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;

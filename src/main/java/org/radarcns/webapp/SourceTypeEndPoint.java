@@ -19,9 +19,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.radarcns.auth.exception.NotAuthorizedException;
+import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.exception.TokenException;
-import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.listener.managementportal.ManagementPortalClientManager;
+import org.radarcns.listener.ContextResourceManager;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -63,10 +63,10 @@ public class SourceTypeEndPoint {
     public Response getAllSourceTypesJson() {
         try {
             checkPermission(getRadarToken(request), SOURCETYPE_READ);
-            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
+            SourceCatalog sourceCatalogue = ContextResourceManager.getSourceCatalogue
+                    (context);
             Response response = Response.status(Status.OK)
-                    .entity(managementPortalClient.getSourceCatalog().getSourceTypes()).build();
+                    .entity(sourceCatalogue.getSourceTypes()).build();
             LOGGER.info("Response : " + response.getEntity());
             return response;
         } catch (AccessDeniedException exc) {
@@ -100,11 +100,10 @@ public class SourceTypeEndPoint {
             catalogVersion) {
         try {
             checkPermission(getRadarToken(request), SOURCETYPE_READ);
-            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
+            SourceCatalog sourceCatalogue = ContextResourceManager.getSourceCatalogue
+                    (context);
             Response response = Response.status(Status.OK)
-                    .entity(managementPortalClient.getSourceCatalog().getSourceType(producer,
-                            model, catalogVersion))
+                    .entity(sourceCatalogue.getSourceType(producer, model, catalogVersion))
                     .build();
             LOGGER.info("Response : " + response.getEntity());
             return response;

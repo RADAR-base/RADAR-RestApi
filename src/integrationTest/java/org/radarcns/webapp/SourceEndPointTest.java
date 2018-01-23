@@ -18,8 +18,6 @@ package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.radarcns.config.TestCatalog.BIOVOTION;
-import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
@@ -67,7 +65,7 @@ public class SourceEndPointTest {
 
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = EMPATICA;
+    private static final String SOURCE_TYPE = "EMPATICA";
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
@@ -106,7 +104,7 @@ public class SourceEndPointTest {
 
         List<SensorSpecification> spec = new LinkedList<>(
                 Monitors.getInstance().getSpecification(
-                    EMPATICA).getSensors().values());
+                    SOURCE_TYPE).getSensors().values());
 
         for (Sensor sensor : summary.getSensors().values()) {
             assertEquals(States.DISCONNECTED, sensor.getState());
@@ -129,7 +127,7 @@ public class SourceEndPointTest {
 
     @Test
     public void getSpecificationTest500() throws IOException {
-        try (Response response = apiClient.request(SPECIFICATION + '/' + BIOVOTION, AVRO_BINARY,
+        try (Response response = apiClient.request(SPECIFICATION + '/' + "BIOVOTION", AVRO_BINARY,
                 Status.INTERNAL_SERVER_ERROR)) {
             assertNotNull(response);
         }
@@ -184,7 +182,8 @@ public class SourceEndPointTest {
 
         while (iterator.hasNext()) {
             switch (iterator.next().getType()) {
-                case org.radarcns.config.TestCatalog.ANDROID: case EMPATICA:
+                case "EMPATICA":
+                case "ANDROID":
                     iterator.remove();
                     break;
                 default:

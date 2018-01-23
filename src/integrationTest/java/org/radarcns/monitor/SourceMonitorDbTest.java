@@ -46,7 +46,6 @@ import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.source.States;
-import org.radarcns.listener.managementportal.SourceCatalog;
 
 public class SourceMonitorDbTest {
 

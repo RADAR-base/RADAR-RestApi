@@ -18,9 +18,6 @@ package org.radarcns.source;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
-import org.radarcns.listener.managementportal.SourceCatalog;
-
 public class SourceCatalogTest {
 
 //    @Test(expected = UnsupportedOperationException.class)
