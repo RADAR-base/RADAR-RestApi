@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.radarcns.config.ExposedConfigTest.CONFIG_JSON;
 import static org.radarcns.config.ExposedConfigTest.OPENAPI_JSON;
 import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.Parameter.SENSOR;
+import static org.radarcns.webapp.util.Parameter.SOURCEDATATYPE;
 import static org.radarcns.webapp.util.Parameter.STAT;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -346,7 +346,7 @@ public class EndToEndTest {
             throws IOException, GeneralSecurityException, ReflectiveOperationException {
         LOGGER.info("Fetching APIs ...");
 
-        final String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/" + TimeWindow.TEN_SECOND
+        final String path = DATA + "/{" + SOURCEDATATYPE + "}/{" + STAT + "}/" + TimeWindow.TEN_SECOND
                 + '/' + USER_ID_MOCK + "/" + SOURCE_ID_MOCK;
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
@@ -355,7 +355,7 @@ public class EndToEndTest {
             Map<MockDataConfig, Dataset> datasets = expectedDataset.get(stat);
 
             for (MockDataConfig config : datasets.keySet()) {
-                String pathSensor = pathStat.replace("{" + SENSOR + "}",
+                String pathSensor = pathStat.replace("{" + SOURCEDATATYPE + "}",
                         getSensorType(config));
 
                 Dataset actual = apiClient.requestAvro(pathSensor, Dataset.class, Status.OK);

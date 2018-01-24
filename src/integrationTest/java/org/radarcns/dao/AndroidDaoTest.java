@@ -46,7 +46,8 @@ public class AndroidDaoTest {
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = EMPATICA;
-    private static final String SENSOR_TYPE = "HEART_RATE";
+    private static final String SENSOR_TYPE = "BATTERY";
+    private static final String COLLECTION_NAME = "android_empatica_e4_battery_level_10sec";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
@@ -115,9 +116,7 @@ public class AndroidDaoTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE));
 
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_WINDOW));
+        MongoCollection<Document> collection = MongoHelper.getCollection(client,COLLECTION_NAME);
         collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE.concat("1"),
                 SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false));
 

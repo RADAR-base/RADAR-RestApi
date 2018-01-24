@@ -19,12 +19,14 @@ package org.radarcns.webapp;
 import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
+import static org.radarcns.service.SubjectService.checkSourceAssignedToSubject;
+import static org.radarcns.service.SubjectService.getSourceFromSubject;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
 import static org.radarcns.webapp.util.Parameter.END;
 import static org.radarcns.webapp.util.Parameter.INTERVAL;
-import static org.radarcns.webapp.util.Parameter.SENSOR;
+import static org.radarcns.webapp.util.Parameter.SOURCEDATATYPE;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.START;
 import static org.radarcns.webapp.util.Parameter.STAT;
@@ -33,7 +35,6 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
@@ -47,7 +48,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.exception.TokenException;
 import org.radarcns.listener.ContextResourceManager;
@@ -56,12 +56,13 @@ import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Source;
 import org.radarcns.managementportal.SourceData;
 import org.radarcns.managementportal.SourceType;
+import org.radarcns.managementportal.SourceTypeIdentifier;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
-import org.radarcns.service.SubjectService;
+import org.radarcns.service.SourceTypeService;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
@@ -80,12 +81,6 @@ public class SensorEndPoint {
     @Context
     private HttpServletRequest request;
 
-    private SubjectService subjectService;
-
-    public SensorEndPoint() {
-        this.subjectService = new SubjectService(this.context);
-    }
-
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
     //--------------------------------------------------------------------------------------------//
@@ -95,7 +90,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID
+    @Path("/" + REALTIME + "/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{"
+            + SUBJECT_ID
             + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
@@ -115,7 +111,7 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedSampleJson(
-            @PathParam(SENSOR) String sensor,
+            @PathParam(SOURCEDATATYPE) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
@@ -126,8 +122,12 @@ public class SensorEndPoint {
             Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
+            checkSourceAssignedToSubject(sub, sourceId);
+            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+                    (getSourceFromSubject(sub, sourceId));
             return ResponseHandler.getJsonResponse(request,
-                    getLastReceivedSampleWorker(sub, sourceId, sensor, stat, interval));
+                    getLastReceivedSampleWorker(sub, sourceId, sensor, stat,
+                            interval , sourceTypeIdentifier.toString()));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -147,7 +147,7 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(AVRO_BINARY)
-    @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL
+    @Path("/" + REALTIME + "/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL
             + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
             description =
@@ -165,7 +165,7 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getLastReceivedSampleAvro(
-            @PathParam(SENSOR) String sensor,
+            @PathParam(SOURCEDATATYPE) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
@@ -176,8 +176,12 @@ public class SensorEndPoint {
             Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
+            checkSourceAssignedToSubject(sub, sourceId);
+            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+                    (getSourceFromSubject(sub, sourceId));
             return ResponseHandler.getAvroResponse(request,
-                    getLastReceivedSampleWorker(sub, sourceId, sensor, stat, interval));
+                    getLastReceivedSampleWorker(sub, sourceId, sensor, stat,
+                            interval , sourceTypeIdentifier.toString()));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -190,29 +194,6 @@ public class SensorEndPoint {
         }
     }
 
-    /**
-     * Actual implementation of AVRO and JSON getRealTimeSubject.
-     **/
-    private Dataset getLastReceivedSampleWorker(Subject subject, String source, String sourceDataType,
-            DescriptiveStatistic stat, TimeWindow interval)
-            throws IOException, NotFoundException, TokenException {
-        Param.isValidInput(subject.getId(), source);
-
-        Dataset dataset = new Dataset(null, new LinkedList<>());
-        SourceData sourceData = this.getSourceDataForRequest(subject , source , sourceDataType);
-        if (SubjectDataAccessObject.exist(subject.getId(), context)) {
-            dataset = SensorDataAccessObject.getInstance()
-                    .getLastReceivedSample(subject.getId(), source,
-                            stat, interval, sourceData, context);
-
-            if (dataset.getDataset().isEmpty()) {
-                LOGGER.debug("No data for the subject {} with source {}", subject, source);
-            }
-        }
-
-        return dataset;
-    }
-
     //--------------------------------------------------------------------------------------------//
     //                                   WHOLE-DATA FUNCTIONS                                     //
     //--------------------------------------------------------------------------------------------//
@@ -222,7 +203,7 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
@@ -241,7 +222,7 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesJson(
-            @PathParam(SENSOR) String sensor,
+            @PathParam(SOURCEDATATYPE) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
@@ -252,8 +233,12 @@ public class SensorEndPoint {
             Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
+            checkSourceAssignedToSubject(sub, sourceId);
+            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+                    (getSourceFromSubject(sub, sourceId));
             return ResponseHandler.getJsonResponse(request,
-                    getSamplesWorker(sub, sourceId, stat, interval, sensor));
+                    getSamplesWorker(sub, sourceId, stat, interval, sensor , sourceTypeIdentifier
+                            .toString()));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -273,7 +258,7 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(AVRO_BINARY)
-    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
             description = "Each collected sample is aggregated to provide near real-time "
@@ -289,7 +274,7 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesAvro(
-            @PathParam(SENSOR) String sensor,
+            @PathParam(SOURCEDATATYPE) String sourceDataType,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
@@ -300,8 +285,12 @@ public class SensorEndPoint {
             Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
+            checkSourceAssignedToSubject(sub, sourceId);
+            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+                    (getSourceFromSubject(sub, sourceId));
             return ResponseHandler.getAvroResponse(request,
-                    getSamplesWorker(sub, sourceId, stat, interval, sensor));
+                    getSamplesWorker(sub, sourceId, stat, interval, sourceDataType ,
+                            sourceTypeIdentifier.toString()));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -314,27 +303,6 @@ public class SensorEndPoint {
         }
     }
 
-    /**
-     * Actual implementation of AVRO and JSON getAllBySubject.
-     **/
-    private Dataset getSamplesWorker(Subject subject, String source, DescriptiveStatistic stat,
-            TimeWindow interval, String sensor)
-            throws IOException, NotFoundException, TokenException {
-
-        Dataset dataset = new Dataset(null, new LinkedList<>());
-        SourceData sourceData = this.getSourceDataForRequest(subject , source , sensor);
-        if (SubjectDataAccessObject.exist(subject.getId(), context)) {
-            dataset = SensorDataAccessObject.getInstance().getSamples(subject.getId(),
-                    source, stat, interval, sourceData, context);
-
-            if (dataset.getDataset().isEmpty()) {
-                LOGGER.debug("No data for the subject {} with source {}", subject, source);
-            }
-        }
-
-        return dataset;
-    }
-
     //--------------------------------------------------------------------------------------------//
     //                                 WINDOWED-DATA FUNCTIONS                                    //
     //--------------------------------------------------------------------------------------------//
@@ -344,7 +312,7 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
@@ -365,7 +333,7 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesWithinWindowJson(
-            @PathParam(SENSOR) String sensor,
+            @PathParam(SOURCEDATATYPE) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId,
@@ -378,9 +346,12 @@ public class SensorEndPoint {
             Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
-            return ResponseHandler.getJsonResponse(request,
-                    getSamplesWithinWindowWorker(sub, sourceId, stat,
-                            interval, sensor, start, end));
+            checkSourceAssignedToSubject(sub, sourceId);
+            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+                    (getSourceFromSubject(sub, sourceId));
+            return ResponseHandler
+                    .getJsonResponse(request, getSamplesWithinWindowWorker(sub, sourceId, stat,
+                            interval, sensor, start, end , sourceTypeIdentifier.toString()));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -400,7 +371,7 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(AVRO_BINARY)
-    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
             description = "Each collected sample is aggregated to provide near real-time "
@@ -419,7 +390,7 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occured")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
     public Response getSamplesWithinWindowAvro(
-            @PathParam(SENSOR) String sensor,
+            @PathParam(SOURCEDATATYPE) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
@@ -432,10 +403,12 @@ public class SensorEndPoint {
             Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
-
-            return ResponseHandler.getAvroResponse(request,
-                    getSamplesWithinWindowWorker(sub, sourceId, stat,
-                            interval, sensor, start, end));
+            checkSourceAssignedToSubject(sub, sourceId);
+            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+                    (getSourceFromSubject(sub, sourceId));
+            return ResponseHandler
+                    .getAvroResponse(request, getSamplesWithinWindowWorker(sub, sourceId, stat,
+                            interval, sensor, start, end, sourceTypeIdentifier.toString()));
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -448,25 +421,20 @@ public class SensorEndPoint {
         }
     }
 
-    /**
-     * Actual implementation of AVRO and JSON getBySubjectForWindow.
-     **/
-    private Dataset getSamplesWithinWindowWorker(Subject subject, String sourceId,
-            DescriptiveStatistic stat, TimeWindow interval, String sensor, long start,
-            long end) throws IOException, TokenException, NotFoundException {
-        // assuming only one would fit
 
-        SourceData sourceData = this.getSourceDataForRequest(subject, sourceId , sensor);
-        Param.isValidInput(subject.getId(), sourceId);
+    public Dataset getSamplesWorker(Subject subject, String source, DescriptiveStatistic stat,
+            TimeWindow interval, String sensor , String sourceTypeId)
+            throws IOException, NotFoundException, TokenException {
 
         Dataset dataset = new Dataset(null, new LinkedList<>());
-
-        if (SubjectDataAccessObject.exist(subject.getId(), context)) {
-            dataset = SensorDataAccessObject.getInstance().getSamples(
-                    subject.getId(), sourceId, stat, interval, start, end, sourceData, context);
+        SourceData sourceData = this.getSourceDataForRequest(subject, source, sensor);
+        if (ContextResourceManager.getSubjectDataAccessObject(context).exist(subject.getId(), context)) {
+            dataset = ContextResourceManager.getSensorDataAccessObject(context)
+                    .getSamples(subject.getId(),
+                            source, stat, interval, sourceData, context , sourceTypeId);
 
             if (dataset.getDataset().isEmpty()) {
-                LOGGER.debug("No data for the subject {} with source {}", subject, sourceId);
+                LOGGER.debug("No data for the subject {} with source {}", subject, source);
             }
         }
 
@@ -479,11 +447,60 @@ public class SensorEndPoint {
                 (sourceId))
                 .collect(Collectors.toList()).get(0);
         SourceType sourceType = ContextResourceManager.getSourceCatalogue(context)
-                .getSourceType(source.getSourceTypeProducer() , source
-                        .getSourceTypeModel() , source.getSourceTypeCatalogVersion());
+                .getSourceType(source.getSourceTypeProducer(), source
+                        .getSourceTypeModel(), source.getSourceTypeCatalogVersion());
         // assuming only one would fit, having sourceDataName as the param is better since it
         // is unique. TODO discuss this
         return sourceType.getSourceData().stream().filter(p -> p
                 .getSourceDataType().equals(sourceDataType)).collect(Collectors.toList()).get(0);
     }
+
+    /**
+     * Actual implementation of AVRO and JSON getBySubjectForWindow.
+     **/
+    public Dataset getSamplesWithinWindowWorker(Subject subject, String sourceId,
+            DescriptiveStatistic stat, TimeWindow interval, String sensor, long start,
+            long end , String sourceTypeId) throws IOException, TokenException, NotFoundException {
+        // assuming only one would fit
+
+        SourceData sourceData = this.getSourceDataForRequest(subject, sourceId, sensor);
+        Param.isValidInput(subject.getId(), sourceId);
+
+        Dataset dataset = new Dataset(null, new LinkedList<>());
+
+        dataset = ContextResourceManager.getSensorDataAccessObject(context).getSamples(
+                subject.getId(), sourceId, stat, interval, start, end, sourceData, context , sourceTypeId);
+
+        if (dataset.getDataset().isEmpty()) {
+            LOGGER.debug("No data for the subject {} with source {}", subject, sourceId);
+        }
+
+        return dataset;
+    }
+
+    /**
+     * Actual implementation of AVRO and JSON getRealTimeSubject.
+     **/
+    public Dataset getLastReceivedSampleWorker(Subject subject, String source,
+            String sourceDataType,
+            DescriptiveStatistic stat, TimeWindow interval , String sourceTypeId)
+            throws IOException, NotFoundException, TokenException {
+        Param.isValidInput(subject.getId(), source);
+
+        Dataset dataset = new Dataset(null, new LinkedList<>());
+        SourceData sourceData = this.getSourceDataForRequest(subject, source, sourceDataType);
+        if (ContextResourceManager.getSubjectDataAccessObject(context).exist(subject.getId(), context)) {
+            dataset = ContextResourceManager.getSensorDataAccessObject(context)
+                    .getLastReceivedSample(subject.getId(), source,
+                            stat, interval, sourceData, context , sourceTypeId);
+
+            if (dataset.getDataset().isEmpty()) {
+                LOGGER.debug("No data for the subject {} with source {}", subject, source);
+            }
+        }
+
+        return dataset;
+    }
+
+
 }

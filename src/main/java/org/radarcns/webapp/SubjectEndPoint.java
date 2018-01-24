@@ -29,6 +29,7 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.io.IOException;
 import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +42,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.exception.TokenException;
+import org.radarcns.listener.ContextResourceManager;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.restapi.subject.Cohort;
@@ -137,8 +140,8 @@ public class SubjectEndPoint {
     /**
      * Actual implementation of AVRO and JSON getAllSubjects.
      **/
-    private Cohort getAllSubjectsWorker() throws ConnectException {
-        return SubjectDataAccessObject.getAllSubjects(context);
+    private Cohort getAllSubjectsWorker() throws IOException, TokenException {
+        return ContextResourceManager.getSubjectDataAccessObject(context).getAllSubjects(context);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -233,13 +236,14 @@ public class SubjectEndPoint {
     /**
      * Actual implementation of AVRO and JSON getSubject.
      **/
-    private Subject getSubjectWorker(String subjectId) throws ConnectException {
+    private Subject getSubjectWorker(String subjectId) throws IOException, TokenException {
         Param.isValidSubject(subjectId);
 
         Subject subject = new Subject();
-
-        if (SubjectDataAccessObject.exist(subjectId, context)) {
-            subject = SubjectDataAccessObject.getSubject(subjectId, context);
+        SubjectDataAccessObject subjectDataAccessObject = ContextResourceManager
+                .getSubjectDataAccessObject(context);
+        if (subjectDataAccessObject.exist(subjectId, context)) {
+            subject = subjectDataAccessObject.getSubject(subjectId, context);
         }
 
         return subject;

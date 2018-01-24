@@ -51,9 +51,10 @@ import org.radarcns.util.RadarConverter;
 public class SensorEndPointTest {
 
     private static final String SUBJECT = "sub-1";
-    private static final String SOURCE = "SourceID_0";
+    private static final String SOURCE = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
     private static final String SOURCE_TYPE = "EMPATICA";
-    private static final String SENSOR_TYPE = "HEART_RATE";
+    private static final String SENSOR_TYPE = "BATTERY";
+    private static final String COLLECTION_NAME = "android_empatica_e4_battery_level_10sec";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final Class<DoubleSample> ITEM = DoubleSample.class;
     private static final int SAMPLES = 10;
@@ -71,9 +72,7 @@ public class SensorEndPointTest {
             throws IOException, ReflectiveOperationException, URISyntaxException {
         MongoClient client = Utility.getMongoClient();
 
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                        SOURCE_TYPE, TIME_WINDOW));
+        MongoCollection<Document> collection = MongoHelper.getCollection(client,COLLECTION_NAME);
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
                 SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
@@ -97,9 +96,7 @@ public class SensorEndPointTest {
             throws IOException, ReflectiveOperationException, URISyntaxException {
         MongoClient client = Utility.getMongoClient();
 
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                        SOURCE_TYPE, TIME_WINDOW));
+        MongoCollection<Document> collection = MongoHelper.getCollection(client,COLLECTION_NAME);
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
                 SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
@@ -121,9 +118,7 @@ public class SensorEndPointTest {
     public void getTimeWindowTest200() throws IOException, ReflectiveOperationException {
         MongoClient client = Utility.getMongoClient();
 
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                        SOURCE_TYPE, TIME_WINDOW));
+        MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
 
         List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
                 SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
@@ -168,9 +163,7 @@ public class SensorEndPointTest {
      **/
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-        Utility.dropCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                        SOURCE_TYPE, TIME_WINDOW));
+        Utility.dropCollection(client, COLLECTION_NAME);
         Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
         client.close();
     }

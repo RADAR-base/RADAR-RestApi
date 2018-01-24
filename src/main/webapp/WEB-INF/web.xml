@@ -51,13 +51,13 @@
         <listener-class>org.radarcns.listener.MongoDbContextListener</listener-class>
     </listener>
     <listener>
-        <listener-class>org.radarcns.listener.SourceCatalogContextListener</listener-class>
-    </listener>
-    <listener>
         <listener-class>org.radarcns.listener.managementportal.HttpClientListener</listener-class>
     </listener>
     <listener>
         <listener-class>org.radarcns.listener.managementportal.ManagementPortalClientManager</listener-class>
+    </listener>
+    <listener>
+        <listener-class>org.radarcns.listener.ContextResourceManager</listener-class>
     </listener>
 
 </web-app>

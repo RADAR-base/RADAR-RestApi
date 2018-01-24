@@ -18,12 +18,15 @@ package org.radarcns.dao;
 
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
 import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.monitor.Monitors;
+import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
 
@@ -33,7 +36,15 @@ import org.radarcns.restapi.subject.Subject;
 public class SubjectDataAccessObject {
 
     //private static final Logger LOGGER = LoggerFactory.getLogger(SubjectDataAccessObject.class);
+    private SensorDataAccessObject sensorDataAccessObject;
 
+    private SourceDataAccessObject sourceDataAccessObject;
+
+    public SubjectDataAccessObject(SensorDataAccessObject sensorDataAccessObject,
+            SourceDataAccessObject sourceDataAccessObject) {
+        this.sourceDataAccessObject = sourceDataAccessObject;
+        this.sensorDataAccessObject = sensorDataAccessObject;
+    }
     /**
      * Finds all subjects checking all available collections.
      *
@@ -42,7 +53,7 @@ public class SubjectDataAccessObject {
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
      */
-    public static Cohort getAllSubjects(ServletContext context) throws ConnectException {
+    public  Cohort getAllSubjects(ServletContext context) throws ConnectException {
         return getAllSubjects(MongoHelper.getClient(context));
     }
 
@@ -55,17 +66,16 @@ public class SubjectDataAccessObject {
      *
      * @see Subject
      */
-    public static Cohort getAllSubjects(MongoClient client) throws ConnectException {
+    public  Cohort getAllSubjects(MongoClient client) throws ConnectException {
 
         List<Subject> patients = new LinkedList<>();
 
-        Set<String> subjects = new HashSet<>(
-                SensorDataAccessObject.getInstance().getAllSubject(client));
+        Set<String> subjects = new HashSet<>(this.sensorDataAccessObject.getAllSubject(client));
 
         subjects.addAll(AndroidAppDataAccessObject.getInstance().findAllUser(client));
 
         for (String user : subjects) {
-            patients.add(SourceDataAccessObject.findAllSourcesByUser(user, client));
+            patients.add(findAllSourcesByUser(user, client));
         }
 
         return new Cohort(0, patients);
@@ -80,7 +90,7 @@ public class SubjectDataAccessObject {
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
      */
-    public static Subject getSubject(String subject, ServletContext context)
+    public  Subject getSubject(String subject, ServletContext context)
             throws ConnectException {
         return getSubject(subject, MongoHelper.getClient(context));
     }
@@ -95,8 +105,8 @@ public class SubjectDataAccessObject {
      *
      * @see Subject
      */
-    public static Subject getSubject(String subjectId, MongoClient client) throws ConnectException {
-        return SourceDataAccessObject.findAllSourcesByUser(subjectId, client);
+    public  Subject getSubject(String subjectId, MongoClient client) throws ConnectException {
+        return this.findAllSourcesByUser(subjectId, client);
     }
 
     /**
@@ -108,7 +118,7 @@ public class SubjectDataAccessObject {
      * @return {@code boolean}, {@code true} if the patient is still active meaning that he/she
      *      is still enrolled in some studies. {@code false} otherwise.
      */
-    public static boolean isSubjectActive(String subject) {
+    public  boolean isSubjectActive(String subject) {
         //TODO must be integrated with the suggested user management tool.
         return true;
     }
@@ -124,7 +134,7 @@ public class SubjectDataAccessObject {
      *
      * @throws ConnectException if the connection with MongoDb cannot be established
      */
-    public static boolean exist(String subject, ServletContext context) throws ConnectException {
+    public  boolean exist(String subject, ServletContext context) throws ConnectException {
         MongoClient client = MongoHelper.getClient(context);
 
         return exist(subject, client);
@@ -140,9 +150,58 @@ public class SubjectDataAccessObject {
      *
      * @throws ConnectException if the connection with MongoDb cannot be established
      */
-    public static boolean exist(String subject, MongoClient client) throws ConnectException {
+    public  boolean exist(String subject, MongoClient client) throws ConnectException {
         //TODO Temporary implementation. It must integrated with the suggested user management tool.
-        return !SourceDataAccessObject.findAllSourcesByUser(subject, client).getSources().isEmpty();
+        return !this.findAllSourcesByUser(subject, client).getSources().isEmpty();
+    }
+
+    /**
+     * Returns all available sources for the given patient.
+     *
+     * @param subject subject identifier.
+     * @param context {@link ServletContext} used to retrieve the client for accessing the
+     *      results cache
+     * @return a {@code Subject} object
+     * @throws ConnectException if MongoDB is not available
+     */
+    public  Subject findAllSourcesByUser(String subject, ServletContext context)
+            throws ConnectException {
+        return findAllSourcesByUser(subject, MongoHelper.getClient(context));
+    }
+
+    /**
+     * Returns all available sources for the given patient.
+     *
+     * @param subject subject identifier.
+     * @param client MongoDb client
+     * @return a {@code Subject} object
+     * @throws ConnectException if MongoDB is not available
+     */
+    public  Subject findAllSourcesByUser(String subject, MongoClient client)
+            throws ConnectException {
+        Set<Source> sources = new HashSet<>();
+
+        sources.addAll(this.sensorDataAccessObject.getAllSources(
+                subject, client));
+        sources.addAll(AndroidAppDataAccessObject.getInstance().findAllSourcesBySubject(
+                subject, client));
+
+        Monitors monitor = Monitors.getInstance();
+
+        List<Source> updatedSources = new ArrayList<>(sources.size());
+
+        for (Source source : sources) {
+            try {
+                updatedSources.add(monitor.getState(subject, source.getId(), source.getType(),
+                        client));
+            } catch (UnsupportedOperationException ex) {
+                updatedSources.add(source);
+            }
+        }
+
+        return new Subject(subject, isSubjectActive(subject),
+                this.sensorDataAccessObject.getEffectiveTimeFrame(subject, client),
+                updatedSources);
     }
 
 }

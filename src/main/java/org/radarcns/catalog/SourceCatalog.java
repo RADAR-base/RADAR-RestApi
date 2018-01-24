@@ -19,10 +19,8 @@ package org.radarcns.catalog;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
@@ -31,7 +29,6 @@ import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.managementportal.SourceData;
 import org.radarcns.managementportal.SourceType;
 import org.radarcns.managementportal.SourceTypeIdentifier;
-import org.radarcns.managementportal.Subject;
 import org.radarcns.util.CachedMap;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.slf4j.Logger;
@@ -75,7 +72,7 @@ public class SourceCatalog {
      * @return {@link ArrayList} of {@link SourceType} retrieved from the Management Portal
      */
     public List<SourceType> getSourceTypes() throws IOException {
-        return sourceTypes.get().values().stream().collect(Collectors.toList());
+        return new ArrayList<>(sourceTypes.get().values());
     }
 
     /**
@@ -87,16 +84,48 @@ public class SourceCatalog {
      * @param catalogVersion {@link String} of the Source-type that has to be retrieved
      * @return {@link SourceType} retrieved from the Management Portal
      */
-    public SourceType getSourceType(String producer, String model, String catalogVersion) throws
-            IOException,
-            NotFoundException {
-        try {
-            return sourceTypes.get(true).get(new SourceTypeIdentifier(producer, model,
+    public SourceType getSourceType(String producer, String model, String catalogVersion)
+            throws NotFoundException, IOException {
+        SourceType result = sourceTypes.get(new SourceTypeIdentifier(producer, model,
+                catalogVersion));
+        if (Objects.isNull(result)) {
+            result = sourceTypes.get(true).get(new SourceTypeIdentifier(producer, model,
                     catalogVersion));
-        } catch (NoSuchElementException ex) {
-            throw new NotFoundException("Source-type " + producer + " : " + model + " : "
-                    + catalogVersion + " not found");
         }
+        if (Objects.isNull(result)) {
+            throw new NotFoundException("Cannot find source-type of identifier "
+                    + producer + ":" + model + ":" + catalogVersion);
+        }
+        return result;
+    }
+
+
+    /**
+     * Retrieves all {@link SourceData} from Management Portal using {@link ServletContext} entity.
+     *
+     * @return {@link ArrayList} of {@link SourceData} retrieved from the Management Portal
+     */
+    public List<SourceData> getSourceData() throws IOException {
+        return new ArrayList<>(sourceData.get().values());
+    }
+
+    /**
+     * Retrieves a {@link SourceData} from the Management Portal using {@link ServletContext}
+     * entity.
+     *
+     * @param sourceDataName {@link String} of the Source-Data that has to be retrieved
+     * @return {@link SourceType} retrieved from the Management Portal
+     */
+    public SourceData getSourceData(String sourceDataName)
+            throws NotFoundException, IOException {
+        SourceData result = sourceData.get(sourceDataName);
+        if (Objects.isNull(result)) {
+            result = sourceData.get(true).get(sourceDataName);
+        }
+        if (Objects.isNull(result)) {
+            throw new NotFoundException("Cannot find source-data of identifier " + sourceDataName);
+        }
+        return result;
     }
 
 //    /**

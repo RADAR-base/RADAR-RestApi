@@ -110,10 +110,10 @@ public class SourceMonitorDbTest {
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         SourceDefinition definition = null;
+        String collectionName = "android_empatica_e4_battery_level_10sec";
         for (String sensorType : definition.getSensorTypes()) {
-            Utility.dropCollection(client,
-                    SensorDataAccessObject.getInstance().getCollectionName(
-                        SOURCE_TYPE, sensorType, TimeWindow.TEN_SECOND));
+            collectionName = collectionName.replace("battery", sensorType.toLowerCase());
+            Utility.dropCollection(client,collectionName);
         }
 
         client.close();
@@ -128,8 +128,7 @@ public class SourceMonitorDbTest {
         long end = start + TimeUnit.SECONDS.toMillis(60 / (window + 1));
         int messages;
 
-        String collectionName;
-
+        String collectionName = "android_empatica_e4_battery_level_10sec";
         SourceDefinition definition = null;
         for (int i = 0; i < window; i++) {
             for (String sensorType : definition.getSensorTypes()) {
@@ -137,8 +136,7 @@ public class SourceMonitorDbTest {
                     definition.getFrequency(sensorType).intValue() * 60, percentage)
                         / window;
 
-                collectionName = SensorDataAccessObject.getInstance().getCollectionName(
-                    SOURCE_TYPE, sensorType, TimeWindow.TEN_SECOND);
+                collectionName = collectionName.replace("battery", sensorType.toLowerCase());
 
                 insertDoc(sensorType, messages, start, end,
                         MongoHelper.getCollection(client, collectionName));
@@ -163,15 +161,13 @@ public class SourceMonitorDbTest {
 
             if (messages > 0) {
                 insertDoc(sensorType, messages, start, end,
-                        MongoHelper.getCollection(client,
-                            SensorDataAccessObject.getInstance().getCollectionName(SOURCE_TYPE,
-                                sensorType, TimeWindow.TEN_SECOND)));
+                        MongoHelper.getCollection(client,collectionName));
             }
         }
 
         return new SourceMonitor(new SourceDefinition("EMPATICA",
                 null)).getState(
-            SUBJECT, SOURCE, timestamp, end, client);
+            SUBJECT, SOURCE, timestamp, end, client , 0);
     }
 
     private static void insertDoc(String sensorType, int messages, long start, long end,

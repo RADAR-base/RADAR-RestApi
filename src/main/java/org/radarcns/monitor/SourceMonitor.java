@@ -55,14 +55,14 @@ public class SourceMonitor {
      *
      * @see Source
      */
-    public Source getState(String subject, String source, MongoClient client)
+    public Source getState(String subject, String source, MongoClient client ,  double countTemp)
             throws ConnectException {
 
         long tenSec = TimeUnit.SECONDS.toMillis(10);
         long end = (System.currentTimeMillis() / tenSec) * tenSec;
         long start = end - TimeUnit.MINUTES.toMillis(1);
 
-        return getState(subject, source, start, end, client);
+        return getState(subject, source, start, end, client , countTemp);
     }
 
     /**
@@ -79,16 +79,13 @@ public class SourceMonitor {
      *
      * @see Source
      */
-    public Source getState(String subject, String source, long start, long end, MongoClient client)
+    public Source getState(String subject, String source, long start, long end, MongoClient
+            client ,  double countTemp)
             throws ConnectException {
         Map<String, Sensor> sensorMap = new HashMap<>();
 
-        double countTemp;
         double percentTemp;
         for (String type : specification.getSensorTypes()) {
-
-            countTemp = SensorDataAccessObject.getInstance().count(
-                subject, source, start, end, type, specification.getType(), client);
 
             percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);
 

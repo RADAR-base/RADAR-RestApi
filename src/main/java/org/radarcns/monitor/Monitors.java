@@ -102,8 +102,8 @@ public class Monitors {
         if (monitor == null) {
             throw new UnsupportedOperationException(sourceType + "is not currently supported");
         }
-
-        return monitor.getState(subject, source, client);
+        // TODO find the number of records available and get the state
+        return monitor.getState(subject, source, client , 0);
     }
 
     /**

@@ -31,6 +31,7 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.io.IOException;
 import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -44,6 +45,8 @@ import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.exception.TokenException;
+import org.radarcns.listener.ContextResourceManager;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.monitor.Monitors;
@@ -161,10 +164,11 @@ public class SourceEndPoint {
      * Actual implementation of AVRO and JSON getRTStateByUserDevice.
      **/
     private Source getLastComputedSourceStatus(String subject, String source)
-            throws ConnectException {
+            throws IOException, TokenException {
         Param.isValidInput(subject, source);
 
-        String sourceType = SourceDataAccessObject.getSourceType(source, context);
+        String sourceType = ContextResourceManager.getSourceDataAccessObject(context).getSourceType
+                (source, context);
 
         if (sourceType == null) {
             return null;
@@ -338,13 +342,14 @@ public class SourceEndPoint {
     /**
      * Actual implementation of AVRO and JSON getAllSources.
      **/
-    private Subject getAllSourcesWorker(String subjectId) throws ConnectException {
+    private Subject getAllSourcesWorker(String subjectId) throws IOException, TokenException {
         Param.isValidSubject(subjectId);
 
         Subject subject = new Subject();
 
-        if (SubjectDataAccessObject.exist(subjectId, context)) {
-            subject = SourceDataAccessObject.findAllSourcesByUser(subjectId, context);
+        if (ContextResourceManager.getSubjectDataAccessObject(context).exist(subjectId, context)) {
+            subject = ContextResourceManager.getSubjectDataAccessObject(context).findAllSourcesByUser
+                    (subjectId, context);
         }
 
         return subject;

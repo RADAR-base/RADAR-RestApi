@@ -34,6 +34,12 @@ import org.radarcns.restapi.subject.Subject;
  */
 public class SourceDataAccessObject {
 
+
+    private SensorDataAccessObject sensorDataAccessObject ;
+
+    public SourceDataAccessObject(SensorDataAccessObject sensorDataAccessObject) {
+        this.sensorDataAccessObject = sensorDataAccessObject;
+    }
     /**
      * Given a sourceID, it finds what is the associated source type.
      *
@@ -44,7 +50,7 @@ public class SourceDataAccessObject {
      *
      * @throws ConnectException if MongoDb instance is not available
      */
-    public static String getSourceType(String source, ServletContext context)
+    public String getSourceType(String source, ServletContext context)
             throws ConnectException {
         return getSourceType(source, MongoHelper.getClient(context));
     }
@@ -58,12 +64,12 @@ public class SourceDataAccessObject {
      *
      * @throws ConnectException if MongoDb instance is not available
      */
-    public static String getSourceType(String source, MongoClient client)
+    public String getSourceType(String source, MongoClient client)
             throws ConnectException {
         String type = MongoDataAccess.getSourceType(source, client);
 
         if (type == null) {
-            type = SensorDataAccessObject.getInstance().getSourceType(source, client);
+            type = this.sensorDataAccessObject.getSourceType(source, client);
 
             if (type == null) {
                 type = AndroidAppDataAccessObject.getInstance().findSourceType(source, client);
@@ -77,53 +83,5 @@ public class SourceDataAccessObject {
         return type;
     }
 
-    /**
-     * Returns all available sources for the given patient.
-     *
-     * @param subject subject identifier.
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return a {@code Subject} object
-     * @throws ConnectException if MongoDB is not available
-     */
-    public static Subject findAllSourcesByUser(String subject, ServletContext context)
-            throws ConnectException {
-        return findAllSourcesByUser(subject, MongoHelper.getClient(context));
-    }
-
-    /**
-     * Returns all available sources for the given patient.
-     *
-     * @param subject subject identifier.
-     * @param client MongoDb client
-     * @return a {@code Subject} object
-     * @throws ConnectException if MongoDB is not available
-     */
-    public static Subject findAllSourcesByUser(String subject, MongoClient client)
-            throws ConnectException {
-        Set<Source> sources = new HashSet<>();
-
-        sources.addAll(SensorDataAccessObject.getInstance().getAllSources(
-                subject, client));
-        sources.addAll(AndroidAppDataAccessObject.getInstance().findAllSourcesBySubject(
-                subject, client));
-
-        Monitors monitor = Monitors.getInstance();
-
-        List<Source> updatedSources = new ArrayList<>(sources.size());
-
-        for (Source source : sources) {
-            try {
-                updatedSources.add(monitor.getState(subject, source.getId(), source.getType(),
-                        client));
-            } catch (UnsupportedOperationException ex) {
-                updatedSources.add(source);
-            }
-        }
-
-        return new Subject(subject, SubjectDataAccessObject.isSubjectActive(subject),
-                SensorDataAccessObject.getInstance().getEffectiveTimeFrame(subject, client),
-                updatedSources);
-    }
 
 }

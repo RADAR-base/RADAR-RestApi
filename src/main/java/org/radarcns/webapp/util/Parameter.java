@@ -22,7 +22,7 @@ package org.radarcns.webapp.util;
 public interface Parameter {
     String END = "end";
     String INTERVAL = "interval";
-    String SENSOR = "sensor";
+    String SOURCEDATATYPE = "sensor";
     String SOURCE_ID = "sourceId";
     String SOURCE_TYPE = "sourceType";
     String START = "start";

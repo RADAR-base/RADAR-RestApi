@@ -27,6 +27,7 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.io.IOException;
 import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +41,8 @@ import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.exception.TokenException;
+import org.radarcns.listener.ContextResourceManager;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Subject;
@@ -152,12 +155,12 @@ public class AppStatusEndPoint {
      * Actual implementation of AVRO and JSON getRealTimeUser.
      **/
     private Application getLastReceivedAppStatusWorker(String subject, String source)
-            throws ConnectException {
+            throws IOException, TokenException {
         Param.isValidInput(subject, source);
 
         Application application = new Application();
 
-        if (SubjectDataAccessObject.exist(subject, context)) {
+        if (ContextResourceManager.getSubjectDataAccessObject(context).exist(subject, context)) {
             application = AndroidAppDataAccessObject.getInstance().getStatus(
                     subject, source, context);
         }
