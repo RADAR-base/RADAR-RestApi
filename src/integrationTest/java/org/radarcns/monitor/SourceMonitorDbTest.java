@@ -17,227 +17,100 @@
 package org.radarcns.monitor;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.X_LABEL;
-import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Y_LABEL;
-import static org.radarcns.dao.mongo.data.sensor.AccelerationFormat.Z_LABEL;
-import static org.radarcns.dao.mongo.util.MongoHelper.FIRST_QUARTILE;
-import static org.radarcns.dao.mongo.util.MongoHelper.SECOND_QUARTILE;
-import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.catalog.SourceDefinition;
-import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.restapi.source.Source;
-import org.radarcns.restapi.source.States;
+import org.radarcns.managementportal.SourceType;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
+import org.radarcns.util.RadarConverter;
 
 public class SourceMonitorDbTest {
 
-    private static final String SUBJECT = "UserID_0";
-    private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = "EMPATICA";
+    private static final String SUBJECT_ID = "sub-1";
+    private static final String SOURCE_ID = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
+    private static final String SOURCETYPE_PRODUCER = "EMPATICA";
+    private static final String SOURCETYPE_MODEL = "E4";
+    private static final String SOURCETYPE_CATALOGUE_VERSION = "v1";
+    private static final String MONITOR_STATISTICS_TOPIC = "empatica_e4_statistics";
 
     private static int WINDOWS = 2;
 
-    @Test
-    public void testGetStateFine() throws IOException, URISyntaxException {
-        MongoClient client = getClient();
+    private static MongoClient mongoClient = Utility.getMongoClient();
 
-        Source source = getSource(WINDOWS,0, client);
+    private static SourceType sourceType;
 
-        assertEquals(States.FINE, source.getSummary().getState());
+    @Before
+    public void setUp() {
+        sourceType = new SourceType();
+        sourceType.setId(1);
+        sourceType.setProducer(SOURCETYPE_PRODUCER);
+        sourceType.setCanRegisterDynamically(false);
+        sourceType.setModel(SOURCETYPE_MODEL);
+        sourceType.setCatalogVersion(SOURCETYPE_CATALOGUE_VERSION);
+        sourceType.setSourceStatisticsMonitorTopic(MONITOR_STATISTICS_TOPIC);
+        sourceType.setSourceTypeScope("PASSIVE");
 
-        dropAndClose(client);
     }
 
     @Test
-    public void testGetStateOk() throws ConnectException, URISyntaxException {
-        MongoClient client = getClient();
+    public void testEffectiveTime() {
+        long start = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
+        long end = start + TimeUnit.SECONDS.toMillis(60 / (WINDOWS + 1));
+        Document doc = getDocumentsForStatistics(start, end);
+        MongoCollection collection = MongoHelper.getCollection(mongoClient, sourceType
+                .getSourceStatisticsMonitorTopic());
+        collection.insertOne(doc);
 
-        Source source = getSource(WINDOWS, 0.05, client);
+        SourceMonitor monitor = new SourceMonitor(mongoClient);
 
-        assertEquals(States.OK, source.getSummary().getState());
+        EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(SUBJECT_ID, SOURCE_ID, sourceType);
 
-        dropAndClose(client);
+        assertEquals(result.getStartDateTime(), RadarConverter.getISO8601(start));
+        assertEquals(result.getEndDateTime(), RadarConverter.getISO8601(end));
     }
 
-    @Test
-    public void testGetStateWarining() throws ConnectException, URISyntaxException {
-        MongoClient client = getClient();
-
-        Source source = getSource(WINDOWS, 0.50, client);
-
-        assertEquals(States.WARNING, source.getSummary().getState());
-
-        dropAndClose(client);
-    }
 
     @Test
-    public void testGetStateDisconnected() throws ConnectException, URISyntaxException {
-        MongoClient client = getClient();
+    public void testEffectiveTimeWithMultipleDocuments() {
+        long start = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
+        long end = start + TimeUnit.SECONDS.toMillis(60 / (WINDOWS + 1));
+        long later = end + TimeUnit.SECONDS.toMillis(60 / (WINDOWS + 1));
+        Document doc = getDocumentsForStatistics(start, end);
+        Document second = getDocumentsForStatistics(start, later);
+        MongoCollection collection = MongoHelper.getCollection(mongoClient, sourceType
+                .getSourceStatisticsMonitorTopic());
+        collection.insertMany(Arrays.asList(doc, second));
 
-        Source source = getSource(WINDOWS, 1, client);
+        SourceMonitor monitor = new SourceMonitor(mongoClient);
 
-        assertEquals(States.DISCONNECTED, source.getSummary().getState());
+        EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(SUBJECT_ID, SOURCE_ID, sourceType);
 
-        dropAndClose(client);
+        assertEquals(result.getStartDateTime(), RadarConverter.getISO8601(start));
+        assertEquals(result.getEndDateTime(), RadarConverter.getISO8601(later));
     }
 
     @After
-    public void dropAndClose() {
-        dropAndClose(Utility.getMongoClient());
-    }
-
-    /** Drops all used collections to bring the database back to the initial state, and close the
-     *      database connection.
-     **/
-    public void dropAndClose(MongoClient client) {
-        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-        SourceDefinition definition = null;
-        String collectionName = "android_empatica_e4_battery_level_10sec";
-        for (String sensorType : definition.getSensorTypes()) {
-            collectionName = collectionName.replace("battery", sensorType.toLowerCase());
-            Utility.dropCollection(client,collectionName);
-        }
-
-        client.close();
-    }
-
-    private Source getSource(int window, double percentage, MongoClient client)
-            throws ConnectException {
-        long timestamp = System.currentTimeMillis();
-
-        Map<String, Integer> count = new HashMap<>();
-        long start = timestamp + TimeUnit.SECONDS.toMillis(10);
-        long end = start + TimeUnit.SECONDS.toMillis(60 / (window + 1));
-        int messages;
-
-        String collectionName = "android_empatica_e4_battery_level_10sec";
-        SourceDefinition definition = null;
-        for (int i = 0; i < window; i++) {
-            for (String sensorType : definition.getSensorTypes()) {
-                messages = reducedMessage(
-                    definition.getFrequency(sensorType).intValue() * 60, percentage)
-                        / window;
-
-                collectionName = collectionName.replace("battery", sensorType.toLowerCase());
-
-                insertDoc(sensorType, messages, start, end,
-                        MongoHelper.getCollection(client, collectionName));
-
-                if (count.containsKey(sensorType)) {
-                    count.put(sensorType, count.get(sensorType) + messages);
-                } else {
-                    count.put(sensorType, messages);
-                }
-            }
-
-            start = end;
-            end = start + TimeUnit.SECONDS.toMillis(60 / (window + 1));
-        }
-
-        end = start + TimeUnit.SECONDS.toMillis(1);
-        for (String sensorType : count.keySet()) {
-            int sendMessages = count.getOrDefault(sensorType, 0);
-            messages = reducedMessage(
-                definition.getFrequency(sensorType).intValue() * 60, percentage)
-                    - sendMessages;
-
-            if (messages > 0) {
-                insertDoc(sensorType, messages, start, end,
-                        MongoHelper.getCollection(client,collectionName));
-            }
-        }
-
-        return new SourceMonitor(new SourceDefinition("EMPATICA",
-                null)).getState(
-            SUBJECT, SOURCE, timestamp, end, client , 0);
-    }
-
-    private static void insertDoc(String sensorType, int messages, long start, long end,
-            MongoCollection collection) {
-        Document doc;
-        if (sensorType.equals("ACCELEROMETER")) {
-            doc = getDocumentsByArray(messages, start, end);
-        } else {
-            doc = getDocumentsBySingle(messages, start, end);
-        }
-        collection.insertOne(doc);
+    public void cleanUp() {
+        Utility.dropCollection(mongoClient, sourceType.getSourceStatisticsMonitorTopic());
     }
 
 
-    private static Document getDocumentsBySingle(int samples, long start, long end) {
-        return new Document(MongoHelper.ID, SUBJECT + "-" + SOURCE + "-" + start + "-" + end)
-            .append(MongoHelper.USER, SUBJECT)
-            .append(MongoHelper.SOURCE, SOURCE)
-            .append(Stat.min.getParam(), 0d)
-            .append(Stat.max.getParam(), 0d)
-            .append(Stat.sum.getParam(), 0d)
-            .append(Stat.count.getParam(), (double) samples)
-            .append(Stat.avg.getParam(), 0d)
-            .append(Stat.quartile.getParam(), getQuartile())
-            .append(Stat.iqr.getParam(), 0d)
-            .append(MongoHelper.START, new Date(start))
-            .append(MongoHelper.END, new Date(end));
+    private static Document getDocumentsForStatistics(long start, long end) {
+        return new Document(MongoHelper.ID, SUBJECT_ID + "-" + SOURCE_ID + "-" + start + "-" + end)
+                .append(MongoHelper.USER_ID, SUBJECT_ID)
+                .append(MongoHelper.SOURCE_ID, SOURCE_ID)
+                .append(MongoHelper.PROJECT_ID, "radar")
+                .append(MongoHelper.START, new Date(start))
+                .append(MongoHelper.END, new Date(end));
     }
 
-    private static Document getDocumentsByArray(int samples, long start, long end) {
-        return new Document(MongoHelper.ID, SUBJECT + "-" + SOURCE + "-" + start + "-" + end)
-            .append(MongoHelper.USER, SUBJECT)
-            .append(MongoHelper.SOURCE, SOURCE)
-            .append(Stat.min.getParam(), getValue(0d))
-            .append(Stat.max.getParam(), getValue(0d))
-            .append(Stat.sum.getParam(), getValue(0d))
-            .append(Stat.count.getParam(), getValue(samples))
-            .append(Stat.avg.getParam(), getValue(0d))
-            .append(Stat.quartile.getParam(), getValue(getQuartile()))
-            .append(Stat.iqr.getParam(), getValue(0))
-            .append(MongoHelper.START, new Date(start))
-            .append(MongoHelper.END, new Date(end));
-    }
-
-    private static List<Document> getQuartile() {
-        return Arrays.asList(
-                new Document(FIRST_QUARTILE, 0d),
-                new Document(SECOND_QUARTILE, 0d),
-                new Document(THIRD_QUARTILE, 0d));
-    }
-
-    private static List<Document> getValue(Object value) {
-        return Arrays.asList(
-                new Document(X_LABEL, value),
-                new Document(Y_LABEL, value),
-                new Document(Z_LABEL, value));
-    }
-
-    /** Reduces the frequency rate to mock a data loss. **/
-    public static int reducedMessage(double frequency, double reduction) {
-        if (frequency == 1.0 && reduction == 1.0) {
-            return 0;
-        } else if (frequency == 1.0) {
-            return Double.valueOf(frequency).intValue();
-        }
-
-        return Double.valueOf(frequency * (1 - reduction)).intValue();
-    }
-
-    private MongoClient getClient() throws URISyntaxException {
-        return Utility.getMongoClient();
-    }
 }

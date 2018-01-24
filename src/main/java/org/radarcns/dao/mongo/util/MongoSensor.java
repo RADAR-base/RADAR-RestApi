@@ -111,7 +111,7 @@ public abstract class MongoSensor extends MongoDataAccess {
     public Dataset valueRTByUserSource(String subject, String source, Header header, Stat stat,
             MongoCollection<Document> collection) throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSource(subject, source, MongoHelper.END, -1, 1,
+                .findDocumentBySubjectAndSource(subject, source, MongoHelper.END, -1, 1,
                 collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
@@ -133,7 +133,7 @@ public abstract class MongoSensor extends MongoDataAccess {
     public Dataset valueByUserSource(String subject, String source, Header header,
             MongoHelper.Stat stat, MongoCollection<Document> collection) throws ConnectException {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSource(subject, source,MongoHelper.START, 1, null,
+                .findDocumentBySubjectAndSource(subject, source,MongoHelper.START, 1, null,
                 collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,

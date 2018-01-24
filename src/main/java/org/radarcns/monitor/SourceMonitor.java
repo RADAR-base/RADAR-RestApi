@@ -16,54 +16,83 @@
 
 package org.radarcns.monitor;
 
+import static org.radarcns.dao.mongo.util.MongoHelper.DESCENDING;
+
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import org.radarcns.catalog.SourceDefinition;
-import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.restapi.source.Sensor;
+import org.bson.Document;
+import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.managementportal.SourceType;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.source.Source;
-import org.radarcns.restapi.source.SourceSummary;
 import org.radarcns.restapi.source.States;
 import org.radarcns.util.RadarConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generic source monitor.
  */
 public class SourceMonitor {
 
-    //private static final Logger logger = LoggerFactory.getLogger(SourceMonitor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SourceMonitor.class);
 
-    private final SourceDefinition specification;
+    private final MongoClient mongoClient;
 
+    private static final String TIME_START ="timeStart";
+    private static final String TIME_END ="timeEnd";
     /** Constructor. **/
-    public SourceMonitor(SourceDefinition source) {
-        this.specification = source;
+    public SourceMonitor(MongoClient mongoClient) {
+        this.mongoClient = mongoClient;
     }
 
+
+    public EffectiveTimeFrame getEffectiveTimeFrame(String subjectId, String sourceId ,
+            SourceType sourceType) {
+
+        // get the last document sorted by timeEnd
+        MongoCursor<Document> cursor = MongoHelper.findDocumentBySubjectAndSource(subjectId, sourceId,
+                TIME_END, DESCENDING, 1,
+                MongoHelper.getCollection(this.mongoClient, sourceType.getSourceStatisticsMonitorTopic()));
+
+        if (!cursor.hasNext()) {
+            LOGGER.debug("Empty cursor for collection {}", sourceType.getSourceStatisticsMonitorTopic());
+        }
+        long timeStart = Long.MIN_VALUE;
+        long timeEnd = Long.MAX_VALUE;
+        if (cursor.hasNext()) {
+            Document document = cursor.next();
+            timeStart = Math.max(timeStart , document.getDate(TIME_START).getTime());
+            timeEnd = Math.min(timeEnd, document.getDate(TIME_END).getTime());
+        }
+
+        cursor.close();
+        return new EffectiveTimeFrame(RadarConverter.getISO8601(timeStart) , RadarConverter
+                .getISO8601(timeEnd));
+
+    }
     /**
      * Checks the status for the given source counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
      *
-     * @param subject identifier
-     * @param source identifier
+     * @param subjectId identifier
+     * @param sourceId identifier
      * @param client is the MongoDB client
      * @return {@code SourceDefinition} representing a source source
      * @throws ConnectException if the connection with MongoDb is faulty
      *
      * @see Source
      */
-    public Source getState(String subject, String source, MongoClient client ,  double countTemp)
-            throws ConnectException {
-
-        long tenSec = TimeUnit.SECONDS.toMillis(10);
-        long end = (System.currentTimeMillis() / tenSec) * tenSec;
-        long start = end - TimeUnit.MINUTES.toMillis(1);
-
-        return getState(subject, source, start, end, client , countTemp);
-    }
+//    public Source getState(String subjectId, String sourceId, MongoClient client ,  double countTemp)
+//            throws ConnectException {
+//
+//        long tenSec = TimeUnit.SECONDS.toMillis(10);
+//        long end = (System.currentTimeMillis() / tenSec) * tenSec;
+//        long start = end - TimeUnit.MINUTES.toMillis(1);
+//
+//        return getState(subjectId, sourceId, start, end, client , countTemp);
+//    }
 
     /**
      * Checks the status for the given source counting the number of received messages and
@@ -79,34 +108,34 @@ public class SourceMonitor {
      *
      * @see Source
      */
-    public Source getState(String subject, String source, long start, long end, MongoClient
-            client ,  double countTemp)
-            throws ConnectException {
-        Map<String, Sensor> sensorMap = new HashMap<>();
-
-        double percentTemp;
-        for (String type : specification.getSensorTypes()) {
-
-            percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);
-
-            sensorMap.put(type, new Sensor(type, getStatus(percentTemp), (int)countTemp,
-                    RadarConverter.roundDouble(1.0 - percentTemp, 2)));
-        }
-
-        double countMex = 0;
-        double avgPerc = 0;
-        for (Sensor sensor : sensorMap.values()) {
-            countMex += sensor.getReceivedMessage();
-            avgPerc += sensor.getMessageLoss();
-        }
-
-        avgPerc = avgPerc / 7.0;
-
-        SourceSummary sourceState = new SourceSummary(getStatus(1 - avgPerc),
-                (int)countMex, RadarConverter.roundDouble(avgPerc, 2), sensorMap);
-
-        return new Source(source, specification.getType(), sourceState);
-    }
+//    public Source getState(String subject, String source, long start, long end, MongoClient
+//            client ,  double countTemp)
+//            throws ConnectException {
+//        Map<String, Sensor> sensorMap = new HashMap<>();
+//
+//        double percentTemp;
+//        for (String type : specification.getSensorTypes()) {
+//
+//            percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);
+//
+//            sensorMap.put(type, new Sensor(type, getStatus(percentTemp), (int)countTemp,
+//                    RadarConverter.roundDouble(1.0 - percentTemp, 2)));
+//        }
+//
+//        double countMex = 0;
+//        double avgPerc = 0;
+//        for (Sensor sensor : sensorMap.values()) {
+//            countMex += sensor.getReceivedMessage();
+//            avgPerc += sensor.getMessageLoss();
+//        }
+//
+//        avgPerc = avgPerc / 7.0;
+//
+//        SourceSummary sourceState = new SourceSummary(getStatus(1 - avgPerc),
+//                (int)countMex, RadarConverter.roundDouble(avgPerc, 2), sensorMap);
+//
+//        return new Source(source, specification.getType(), sourceState);
+//    }
 
     /**
      * Returns the percentage of received message with respect to the expected value.
@@ -139,7 +168,7 @@ public class SourceMonitor {
         }
     }
 
-    public SourceDefinition getSource() {
-        return specification;
-    }
+//    public SourceDefinition getSource() {
+//        return specification;
+//    }
 }

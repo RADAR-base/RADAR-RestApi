@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -86,15 +87,13 @@ public class SourceCatalog {
      */
     public SourceType getSourceType(String producer, String model, String catalogVersion)
             throws NotFoundException, IOException {
-        SourceType result = sourceTypes.get(new SourceTypeIdentifier(producer, model,
-                catalogVersion));
-        if (Objects.isNull(result)) {
-            result = sourceTypes.get(true).get(new SourceTypeIdentifier(producer, model,
+        SourceType result;
+        try {
+            result = sourceTypes.get(new SourceTypeIdentifier(producer, model,
                     catalogVersion));
-        }
-        if (Objects.isNull(result)) {
+        } catch (NoSuchElementException exe) {
             throw new NotFoundException("Cannot find source-type of identifier "
-                    + producer + ":" + model + ":" + catalogVersion);
+                    + producer + ":" + model + ":" + catalogVersion , exe);
         }
         return result;
     }

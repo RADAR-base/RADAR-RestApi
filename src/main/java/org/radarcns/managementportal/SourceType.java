@@ -31,6 +31,9 @@ public class SourceType {
     @JsonProperty
     private List<SourceData> sourceData;
 
+    @JsonProperty
+    private String sourceStatisticsMonitorTopic;
+
     public Integer getId() {
         return id;
     }
@@ -59,8 +62,44 @@ public class SourceType {
         return sourceData;
     }
 
+    public String getSourceStatisticsMonitorTopic() {
+        return sourceStatisticsMonitorTopic;
+    }
+
     @JsonIgnore
     public SourceTypeIdentifier getSourceTypeIdentifier() {
         return new SourceTypeIdentifier(producer, model, catalogVersion);
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setProducer(String producer) {
+        this.producer = producer;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public void setCatalogVersion(String catalogVersion) {
+        this.catalogVersion = catalogVersion;
+    }
+
+    public void setSourceTypeScope(String sourceTypeScope) {
+        this.sourceTypeScope = sourceTypeScope;
+    }
+
+    public void setCanRegisterDynamically(Boolean canRegisterDynamically) {
+        this.canRegisterDynamically = canRegisterDynamically;
+    }
+
+    public void setSourceData(List<SourceData> sourceData) {
+        this.sourceData = sourceData;
+    }
+
+    public void setSourceStatisticsMonitorTopic(String sourceStatisticsMonitorTopic) {
+        this.sourceStatisticsMonitorTopic = sourceStatisticsMonitorTopic;
     }
 }

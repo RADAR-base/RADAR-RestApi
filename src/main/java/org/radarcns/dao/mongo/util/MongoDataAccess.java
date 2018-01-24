@@ -185,7 +185,7 @@ public abstract class MongoDataAccess {
 
         MongoCursor<Document> cursor;
         for (String collection : getCollectionNames()) {
-            cursor = MongoHelper.findDocumentByUserSource(subject, source, field, order, 1,
+            cursor = MongoHelper.findDocumentBySubjectAndSource(subject, source, field, order, 1,
                     MongoHelper.getCollection(client, collection));
 
             if (!cursor.hasNext()) {

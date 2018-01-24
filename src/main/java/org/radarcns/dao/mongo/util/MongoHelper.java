@@ -45,10 +45,11 @@ public class MongoHelper {
     public static final String ID = "_id";
     public static final String KEY = "key";
     public static final String VALUE = "value";
-    public static final String USER = "user";
-    public static final String SOURCE = "source";
+    public static final String USER_ID = "userId";
+    public static final String SOURCE_ID = "sourceId";
+    public static final String PROJECT_ID = "projectId";
     public static final String START = "timeStart";
-    public static final String END = "timeEend";
+    public static final String END = "timeEnd";
     public static final String SOURCE_TYPE = "sourceType";
     public static final String FIELDS = "fields";
     public static final String QUARTILE = "quartile";
@@ -104,8 +105,8 @@ public class MongoHelper {
             String source, Long start, Long end, MongoCollection<Document> collection) {
         FindIterable<Document> result = collection.find(
                 Filters.and(
-                        eq(USER, subject),
-                        eq(SOURCE, source),
+                        eq(USER_ID, subject),
+                        eq(SOURCE_ID, source),
                         gte(START, new Date(start)),
                         lte(END, new Date(end)))).sort(new BasicDBObject(START, 1));
 
@@ -124,20 +125,21 @@ public class MongoHelper {
      * @return a MongoDB cursor containing all documents for the given User, SourceDefinition
      *      and MongoDB collection
      */
-    protected static MongoCursor<Document> findDocumentByUserSource(String subject, String source,
+    public static MongoCursor<Document> findDocumentBySubjectAndSource(String subject, String
+            source,
             String sortBy, int order, Integer limit, MongoCollection<Document> collection) {
         FindIterable<Document> result;
 
         if (sortBy == null) {
             result = collection.find(
                 Filters.and(
-                    eq(USER, subject),
-                    eq(SOURCE, source)));
+                    eq(USER_ID, subject),
+                    eq(SOURCE_ID, source)));
         } else {
             result = collection.find(
                 Filters.and(
-                    eq(USER, subject),
-                    eq(SOURCE, source))
+                    eq(USER_ID, subject),
+                    eq(SOURCE_ID, source))
             ).sort(new BasicDBObject(sortBy, order));
         }
 
@@ -166,11 +168,11 @@ public class MongoHelper {
         if (sortBy == null) {
             result = collection.find(
                 Filters.and(
-                    eq(SOURCE, source)));
+                    eq(SOURCE_ID, source)));
         } else {
             result = collection.find(
                 Filters.and(
-                    eq(SOURCE, source))
+                    eq(SOURCE_ID, source))
             ).sort(new BasicDBObject(sortBy, order));
         }
 
@@ -219,7 +221,7 @@ public class MongoHelper {
      * @return a MongoDB cursor containing all distinct subjects for the given MongoDB collection
      */
     public static MongoCursor<String> findAllUser(MongoCollection<Document> collection) {
-        return collection.distinct(USER, String.class).iterator();
+        return collection.distinct(USER_ID, String.class).iterator();
     }
 
     /**
@@ -232,8 +234,8 @@ public class MongoHelper {
      */
     public static MongoCursor<String> findAllSourceByUser(String subject,
                 MongoCollection<Document> collection) {
-        return collection.distinct(SOURCE, String.class)
-                .filter(eq(USER,subject)).iterator();
+        return collection.distinct(SOURCE_ID, String.class)
+                .filter(eq(USER_ID,subject)).iterator();
     }
 
     /**

@@ -47,7 +47,7 @@ public abstract class MongoAndroidApp extends MongoDataAccess {
             MongoClient client) throws ConnectException {
 
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSource(subject, source, null, -1, 1,
+                .findDocumentBySubjectAndSource(subject, source, null, -1, 1,
                     MongoHelper.getCollection(client, getCollectionName()));
 
         if (!cursor.hasNext()) {
