@@ -24,7 +24,7 @@ import java.net.ConnectException;
 import org.bson.Document;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.domain.managementportal.SourceType;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.EffectiveTimeFrame;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.source.States;
 import org.radarcns.util.RadarConverter;
