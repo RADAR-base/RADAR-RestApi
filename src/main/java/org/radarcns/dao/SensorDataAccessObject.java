@@ -33,7 +33,7 @@ import org.radarcns.catalogue.Unit;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.dao.mongo.util.MongoSensor;
-import org.radarcns.managementportal.SourceData;
+import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.EffectiveTimeFrame;

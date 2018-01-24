@@ -1,4 +1,4 @@
-package org.radarcns.managementportal;
+package org.radarcns.domain.managementportal;
 
 public class SourceData {
 

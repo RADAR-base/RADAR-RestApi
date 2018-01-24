@@ -43,8 +43,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.dao.SourceDataAccessObject;
-import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.exception.TokenException;
 import org.radarcns.listener.ContextResourceManager;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
@@ -101,7 +99,7 @@ public class SourceEndPoint {
         try {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.domain.managementportal.Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request,
@@ -143,7 +141,7 @@ public class SourceEndPoint {
         try {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.domain.managementportal.Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request,
@@ -287,7 +285,7 @@ public class SourceEndPoint {
         try {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.domain.managementportal.Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subjectId));
@@ -323,7 +321,7 @@ public class SourceEndPoint {
         try {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.domain.managementportal.Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
             return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subjectId));

@@ -30,7 +30,6 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
-import java.net.ConnectException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -173,7 +172,7 @@ public class SubjectEndPoint {
         try {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.domain.managementportal.Subject sub = client.getSubject(subjectId);
             checkPermissionOnSubject(getRadarToken(request), SUBJECT_READ,
                     sub.getProject().getProjectName(), subjectId);
             return ResponseHandler.getJsonResponse(request, getSubjectWorker(subjectId));
@@ -217,7 +216,7 @@ public class SubjectEndPoint {
         try {
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+            org.radarcns.domain.managementportal.Subject sub = client.getSubject(subjectId);
             checkPermissionOnSubject(getRadarToken(request), SUBJECT_READ,
                     sub.getProject().getProjectName(), subjectId);
             return ResponseHandler.getAvroResponse(request, getSubjectWorker(subjectId));

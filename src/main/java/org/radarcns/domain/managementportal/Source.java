@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.managementportal;
+package org.radarcns.domain.managementportal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

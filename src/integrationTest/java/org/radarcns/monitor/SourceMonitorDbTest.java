@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.managementportal.SourceType;
+import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.util.RadarConverter;
 

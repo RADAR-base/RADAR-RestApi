@@ -1,4 +1,4 @@
-package org.radarcns.managementportal;
+package org.radarcns.domain.managementportal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;

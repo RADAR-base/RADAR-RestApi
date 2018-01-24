@@ -2,8 +2,8 @@ package org.radarcns.service;
 
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
-import org.radarcns.managementportal.Source;
-import org.radarcns.managementportal.Subject;
+import org.radarcns.domain.managementportal.Source;
+import org.radarcns.domain.managementportal.Subject;
 
 public class SubjectService {
 

@@ -34,10 +34,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.radarcns.config.ManagementPortalConfig;
 import org.radarcns.config.Properties;
-import org.radarcns.managementportal.Project;
-import org.radarcns.managementportal.SourceData;
-import org.radarcns.managementportal.SourceType;
-import org.radarcns.managementportal.Subject;
+import org.radarcns.domain.managementportal.Project;
+import org.radarcns.domain.managementportal.SourceData;
+import org.radarcns.domain.managementportal.SourceType;
+import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.CachedMap;
@@ -252,7 +252,7 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link org.radarcns.managementportal.SourceData} from Management Portal
+     * Retrieves all {@link org.radarcns.domain.managementportal.SourceData} from Management Portal
      * using {@link ServletContext} entity.
      *
      * @return source-types retrieved from the management portal.

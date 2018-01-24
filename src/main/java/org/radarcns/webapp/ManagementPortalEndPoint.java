@@ -41,7 +41,7 @@ import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.exception.TokenException;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
-import org.radarcns.managementportal.Subject;
+import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;

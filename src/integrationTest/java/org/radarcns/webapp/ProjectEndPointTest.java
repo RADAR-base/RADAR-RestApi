@@ -17,8 +17,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.managementportal.Project;
-import org.radarcns.managementportal.Subject;
+import org.radarcns.domain.managementportal.Project;
+import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.util.BasePath;
 

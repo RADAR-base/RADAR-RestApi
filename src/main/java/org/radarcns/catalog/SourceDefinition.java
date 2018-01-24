@@ -22,7 +22,7 @@
 //import org.radarcns.catalogue.TimeWindow;
 //import org.radarcns.catalogue.Unit;
 //import org.radarcns.dao.mongo.data.sensor.DataFormat;
-//import org.radarcns.managementportal.SourceType;
+//import org.radarcns.domain.managementportal.SourceType;
 //import org.radarcns.restapi.spec.SensorSpecification;
 //import org.radarcns.restapi.spec.SourceSpecification;
 //

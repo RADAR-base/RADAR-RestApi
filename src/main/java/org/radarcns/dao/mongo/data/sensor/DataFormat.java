@@ -21,7 +21,7 @@ import static org.radarcns.dao.mongo.util.MongoHelper.QUARTILE;
 import java.util.List;
 import org.bson.Document;
 import org.radarcns.dao.mongo.util.MongoSensor;
-import org.radarcns.managementportal.SourceData;
+import org.radarcns.domain.managementportal.SourceData;
 
 public enum DataFormat {
     ACCELERATION_FORMAT("AccelerationFormat"),

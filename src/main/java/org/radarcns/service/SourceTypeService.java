@@ -1,7 +1,7 @@
 package org.radarcns.service;
 
-import org.radarcns.managementportal.Source;
-import org.radarcns.managementportal.SourceTypeIdentifier;
+import org.radarcns.domain.managementportal.Source;
+import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 
 public class SourceTypeService {
 

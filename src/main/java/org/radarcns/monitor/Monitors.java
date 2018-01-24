@@ -103,7 +103,8 @@ public class Monitors {
             throw new UnsupportedOperationException(sourceType + "is not currently supported");
         }
         // TODO find the number of records available and get the state
-        return monitor.getState(subject, source, client , 0);
+//        return monitor.getState(subject, source, client , 0);
+        return null;
     }
 
     /**
@@ -119,7 +120,8 @@ public class Monitors {
             throw new UnsupportedOperationException(sourceType + " is not currently supported");
         }
 
-        return monitor.getSource().getSpecification();
+//        return monitor.getSource().getSpecification();
+        return null;
     }
 
 
