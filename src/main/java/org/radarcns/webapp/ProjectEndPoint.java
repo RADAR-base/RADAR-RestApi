@@ -24,10 +24,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.exception.TokenException;
+import org.radarcns.listener.ContextResourceManager;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.domain.managementportal.Project;
 import org.radarcns.security.exception.AccessDeniedException;
+import org.radarcns.service.SubjectService;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.Parameter;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -149,10 +151,9 @@ public class ProjectEndPoint {
             @PathParam(Parameter.PROJECT_NAME) String projectName) {
         try {
             checkPermissionOnProject(getRadarToken(request), SUBJECT_READ, projectName);
-            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
+            SubjectService subjectService = ContextResourceManager.getSubjectService(context);
             Response response = Response.status(Status.OK).entity(
-                    managementPortalClient.getAllSubjectsFromProject(projectName)).build();
+                   subjectService.getAllSubjectsFromProject(projectName)).build();
             LOGGER.info("Response : " + response.toString());
             return response;
         } catch (AccessDeniedException exc) {

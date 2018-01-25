@@ -19,6 +19,7 @@ package org.radarcns.webapp;
 import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
+import static org.radarcns.service.SourceService.getSourceTypeIdFromSource;
 import static org.radarcns.service.SubjectService.checkSourceAssignedToSubject;
 import static org.radarcns.service.SubjectService.getSourceFromSubject;
 import static org.radarcns.webapp.util.BasePath.DATA;
@@ -60,7 +61,7 @@ import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
-import org.radarcns.service.SourceTypeService;
+import org.radarcns.service.SourceService;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
@@ -121,8 +122,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             checkSourceAssignedToSubject(sub, sourceId);
-            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
-                    (getSourceFromSubject(sub, sourceId));
+            SourceTypeIdentifier sourceTypeIdentifier= getSourceTypeIdFromSource(getSourceFromSubject(sub, sourceId));
             return ResponseHandler.getJsonResponse(request,
                     getLastReceivedSampleWorker(sub, sourceId, sensor, stat,
                             interval , sourceTypeIdentifier.toString()));
@@ -232,7 +232,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             checkSourceAssignedToSubject(sub, sourceId);
-            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+            SourceTypeIdentifier sourceTypeIdentifier= getSourceTypeIdFromSource
                     (getSourceFromSubject(sub, sourceId));
             return ResponseHandler.getJsonResponse(request,
                     getSamplesWorker(sub, sourceId, stat, interval, sensor , sourceTypeIdentifier
@@ -345,7 +345,7 @@ public class SensorEndPoint {
             checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
                     sub.getProject().getProjectName());
             checkSourceAssignedToSubject(sub, sourceId);
-            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+            SourceTypeIdentifier sourceTypeIdentifier= getSourceTypeIdFromSource
                     (getSourceFromSubject(sub, sourceId));
             return ResponseHandler
                     .getJsonResponse(request, getSamplesWithinWindowWorker(sub, sourceId, stat,

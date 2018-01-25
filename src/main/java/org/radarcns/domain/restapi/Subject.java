@@ -2,7 +2,6 @@ package org.radarcns.domain.restapi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import org.radarcns.domain.managementportal.Project;
 
 public class Subject {
 
@@ -16,7 +15,7 @@ public class Subject {
     private String humanReadableId;
 
     @JsonProperty
-    private Project project;
+    private String projectName;
 
     @JsonProperty
     private List<Source> sources;
@@ -37,9 +36,9 @@ public class Subject {
      * @param active True if the subject is engaged, false otherwise. False means the subject is no longer monitored.
      * @param sources List of sources used by the subject.
      */
-    public Subject(java.lang.String subjectId, java.lang.Boolean active, List<Source> sources) {
+    public Subject(String subjectId, Boolean active, List<Source> sources) {
         this.subjectId = subjectId;
-        this.status = active?"ACTIVATED" : "DISCONNECTED";
+        this.status = active ? "ACTIVATED" : "DISCONNECTED";
         this.sources = sources;
     }
     public Subject subjectId(String subjectId) {
@@ -81,17 +80,17 @@ public class Subject {
         this.humanReadableId = humanReadableId;
     }
 
-    public Subject project(Project project) {
-        this.project = project;
+    public Subject projectName(String projectName) {
+        this.projectName = projectName;
         return this;
     }
 
-    public Project getProject() {
-        return project;
+    public String getProject() {
+        return projectName;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
+    public void setProject(String projectName) {
+        this.projectName = projectName;
     }
 
 

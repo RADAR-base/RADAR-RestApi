@@ -3,6 +3,7 @@ package org.radarcns.domain.managementportal;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -10,6 +11,9 @@ import java.util.List;
  */
 
 public class SourceType {
+
+    @JsonIgnore
+    private static final String SOURCE_STATISTICS_MONITOR = "source_statistics";
     @JsonProperty
     private Integer id;
 
@@ -63,6 +67,10 @@ public class SourceType {
     }
 
     public String getSourceStatisticsMonitorTopic() {
+        // TODO remove setting default logic
+        if(Objects.isNull(sourceStatisticsMonitorTopic) || sourceStatisticsMonitorTopic.isEmpty()){
+            return SOURCE_STATISTICS_MONITOR+"_"+this.producer+"_"+this.model.toLowerCase();
+        }
         return sourceStatisticsMonitorTopic;
     }
 

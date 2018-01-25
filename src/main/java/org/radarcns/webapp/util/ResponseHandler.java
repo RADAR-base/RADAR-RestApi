@@ -21,7 +21,6 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.webapp.exception.StatusMessage;
 import org.slf4j.Logger;
@@ -43,7 +42,7 @@ public class ResponseHandler {
     public static Response getJsonResponse(HttpServletRequest request, Dataset dataset) {
         Status status = Status.OK;
         int size = 0;
-        SpecificRecord obj =null;
+//        SpecificRecord obj =null;
 
 //        if (dataset.getDataset().isEmpty()) {
 //            status = OK;

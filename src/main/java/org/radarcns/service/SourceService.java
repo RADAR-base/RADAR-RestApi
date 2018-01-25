@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.Source;
 import org.radarcns.domain.managementportal.SourceType;
-import org.radarcns.monitor.SourceMonitor;
+import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,18 +14,18 @@ import org.slf4j.LoggerFactory;
 public class SourceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubjectService.class);
-    private SourceMonitor sourceMonitor;
+    private SourceMonitorService sourceMonitorService;
 
     private SourceCatalog sourceCatalog;
 
-    public SourceService(SourceMonitor sourceMonitor, SourceCatalog sourceCatalog) {
-        this.sourceMonitor = sourceMonitor;
+    public SourceService(SourceMonitorService sourceMonitorService, SourceCatalog sourceCatalog) {
+        this.sourceMonitorService = sourceMonitorService;
         this.sourceCatalog = sourceCatalog;
     }
 
 
-    public List<org.radarcns.domain.restapi.Source> buildSources(String subjectId, List<Source>
-            sources) {
+    public List<org.radarcns.domain.restapi.Source> buildSources(String subjectId,
+            List<Source> sources) {
         return sources.stream().map(p -> buildSource(subjectId, p)).collect(Collectors.toList());
     }
 
@@ -49,7 +49,13 @@ public class SourceService {
                 .sourceTypeCatalogVersion(source.getSourceTypeCatalogVersion())
                 .sourceTypeProducer(source.getSourceTypeProducer())
                 .sourceTypeModel(source.getSourceTypeModel())
-                .effectiveTimeFrame(this.sourceMonitor.getEffectiveTimeFrame(subjectId, source
-                        .getSourceId(), sourceType));
+                .effectiveTimeFrame(this.sourceMonitorService
+                        .getEffectiveTimeFrame(subjectId, source.getSourceId(), sourceType));
     }
+
+    public static SourceTypeIdentifier getSourceTypeIdFromSource(Source source) {
+        return new SourceTypeIdentifier(source.getSourceTypeProducer() , source
+                .getSourceTypeModel() ,source.getSourceTypeCatalogVersion());
+    }
+
 }

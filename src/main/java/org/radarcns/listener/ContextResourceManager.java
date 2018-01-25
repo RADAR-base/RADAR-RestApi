@@ -11,6 +11,10 @@ import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.exception.TokenException;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
+import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.service.SourceMonitorService;
+import org.radarcns.service.SourceService;
+import org.radarcns.service.SubjectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +28,22 @@ public class ContextResourceManager implements ServletContextListener {
     private static final String SENSOR_DATA_ACCESS_OBJECT = "SENSOR_DATA_ACCESS_OBJECT";
     private static final String SOURCE_DATA_ACCESS_OBJECT = "SOURCE_DATA_ACCESS_OBJECT";
     private static final String SUBJECT_DATA_ACCESS_OBJECT = "SUBJECT_DATA_ACCESS_OBJECT";
+    private static final String SOURCE_SERVICE = "SOURCE_SERVICE";
+    private static final String SUBJECT_SERVICE = "SUBJECT_SERVICE";
+    private static final String SOURCE_MONITOR = "SOURCE_MONITOR";
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
+            LOGGER.info("Initializing context resources...");
             getSourceCatalogue(sce.getServletContext());
+            getSourceMonitor(sce.getServletContext());
+            getSourceService(sce.getServletContext());
+            getSubjectService(sce.getServletContext());
+
             getSourceDataAccessObject(sce.getServletContext());
             getSubjectDataAccessObject(sce.getServletContext());
+
         } catch (TokenException | IOException e) {
             LOGGER.warn("Cannot initialize ManagementPortal Client due to Token exception ", e);
         }
@@ -52,13 +65,72 @@ public class ContextResourceManager implements ServletContextListener {
         SourceCatalog sourceCatalog = (SourceCatalog) context
                 .getAttribute(SOURCE_CATALOGUE);
         if (sourceCatalog == null) {
+            LOGGER.info("Initializing SourceCatalog");
             ManagementPortalClient client = ManagementPortalClientManager
                     .getManagementPortalClient(context);
-
             sourceCatalog = new SourceCatalog(client);
             context.setAttribute(SOURCE_CATALOGUE, sourceCatalog);
         }
         return sourceCatalog;
+    }
+
+    /**
+     * Returns the singleton.
+     *
+     * @return the {@code SourceMonitorService} instance
+     */
+    public static SourceMonitorService getSourceMonitor(ServletContext context)
+            throws TokenException, IOException {
+
+        SourceMonitorService sourceMonitorService = (SourceMonitorService) context
+                .getAttribute(SOURCE_MONITOR);
+        if (sourceMonitorService == null) {
+            LOGGER.info("Initializing SourceMonitorService");
+            sourceMonitorService = new SourceMonitorService(MongoHelper.getClient(context));
+            context.setAttribute(SOURCE_MONITOR, sourceMonitorService);
+        }
+        return sourceMonitorService;
+    }
+
+
+
+    /**
+     * Returns the singleton.
+     *
+     * @return the {@code SourceService} instance
+     */
+    public static SourceService getSourceService(ServletContext context)
+            throws TokenException, IOException {
+
+        SourceService sourceService = (SourceService) context
+                .getAttribute(SOURCE_SERVICE);
+        if (sourceService == null) {
+            LOGGER.info("Initializing SourceService");
+            sourceService = new SourceService(getSourceMonitor(context) ,
+                    getSourceCatalogue(context));
+            context.setAttribute(SOURCE_SERVICE, sourceService);
+        }
+        return sourceService;
+    }
+
+
+    /**
+     * Returns the singleton.
+     *
+     * @return the {@code SubjectService} instance
+     */
+    public static SubjectService getSubjectService(ServletContext context)
+            throws TokenException, IOException {
+
+        SubjectService subjectService = (SubjectService) context
+                .getAttribute(SUBJECT_SERVICE);
+        if (subjectService == null) {
+            LOGGER.info("Initializing SubjectService");
+            subjectService = new SubjectService(ManagementPortalClientManager
+                    .getManagementPortalClient(context) , getSourceService(context));
+            context.setAttribute(SUBJECT_SERVICE, subjectService);
+        }
+        return subjectService;
     }
 
     /**

@@ -25,6 +25,7 @@ import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.service.SourceMonitorService;
 
 /**
  * Generic Data Accesss Object database independent.
@@ -32,7 +33,7 @@ import org.radarcns.catalog.SourceCatalog;
 public class Monitors {
 
     /** Map containing actual implementations of each sourceType monitor. **/
-    private final HashMap<String, SourceMonitor> hooks;
+    private final HashMap<String, SourceMonitorService> hooks;
 
     /** Singleton instance. **/
     private static final Monitors INSTANCE;
@@ -43,7 +44,7 @@ public class Monitors {
 
         try {
             for (String sourceType : catalog.getSupportedSource()) {
-                hooks.put(sourceType, new SourceMonitor(null));
+                hooks.put(sourceType, new SourceMonitorService(null));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -97,7 +98,7 @@ public class Monitors {
      */
     public Source getState(String subject, String source, String sourceType, MongoClient client)
             throws ConnectException {
-        SourceMonitor monitor = hooks.get(sourceType);
+        SourceMonitorService monitor = hooks.get(sourceType);
 
         if (monitor == null) {
             throw new UnsupportedOperationException(sourceType + "is not currently supported");
@@ -114,7 +115,7 @@ public class Monitors {
      */
     public SourceType getSpecification(String sourceType)
             throws ConnectException {
-        SourceMonitor monitor = hooks.get(sourceType);
+        SourceMonitorService monitor = hooks.get(sourceType);
 
         if (monitor == null) {
             throw new UnsupportedOperationException(sourceType + " is not currently supported");

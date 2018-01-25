@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.monitor;
+package org.radarcns.service;
 
 import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
 
@@ -33,16 +33,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Generic sourceType monitor.
  */
-public class SourceMonitor {
+public class SourceMonitorService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SourceMonitor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SourceMonitorService.class);
 
     private final MongoClient mongoClient;
 
     private static final String TIME_START ="timeStart";
     private static final String TIME_END ="timeEnd";
     /** Constructor. **/
-    public SourceMonitor(MongoClient mongoClient) {
+    public SourceMonitorService(MongoClient mongoClient) {
         this.mongoClient = mongoClient;
     }
 
