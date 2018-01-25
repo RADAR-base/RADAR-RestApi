@@ -17,9 +17,6 @@ management_portal_config:
     token_endpoint: oauth/token #URL managing tokens
     project_endpoint: api/projects/ #URL managing project function
     subject_endpoint: api/subjects/
-    source_type_endpoint: api/sourceType-types/
-
-# Path to the Device Catalog
-device_catalog: device-catalog.yml
+    source_type_endpoint: api/source-types/
 
 hdfs_output_dir: /var/lib/hdfs/output

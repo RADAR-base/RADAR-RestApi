@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
@@ -220,19 +219,16 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
 
-    private <T extends SpecificRecord> T getContent(Object object, DescriptiveStatistic stat,
+    private <T> T getContent(Object object, DescriptiveStatistic stat,
             Class<T> sampleClass) throws IllegalAccessException, InstantiationException {
         T content;
 
         switch (stat) {
             case QUARTILES:
-                content = sampleClass.newInstance();
-                content.put(content.getSchema().getField("value").pos(),
-                        getQuartile((List<Double>) object));
+                content = (T)getQuartile((List<Double>) object);
                 break;
             default:
-                content = sampleClass.newInstance();
-                content.put(content.getSchema().getField("value").pos(), object);
+                content = (T)object;
                 break;
         }
 

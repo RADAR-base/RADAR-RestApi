@@ -1,4 +1,20 @@
-package org.radarcns.service;
+/*
+ * Copyright 2016 King's College London and The Hyve
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.radarcns.monitor;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,22 +27,21 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.monitor.SourceMonitor;
+import org.radarcns.domain.managementportal.SourceType;
+import org.radarcns.service.SourceMonitorService;
 import org.radarcns.util.RadarConverter;
 
-public class SourceServiceTest {
+public class SourceMonitorServiceDbTest {
 
     private static final String SUBJECT_ID = "sub-1";
     private static final String SOURCE_ID = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
     private static final String SOURCETYPE_PRODUCER = "EMPATICA";
     private static final String SOURCETYPE_MODEL = "E4";
     private static final String SOURCETYPE_CATALOGUE_VERSION = "v1";
-    private static final String MONITOR_STATISTICS_TOPIC = "empatica_e4_statistics";
+    private static final String MONITOR_STATISTICS_TOPIC = "Empatica_E4_statistics";
 
     private static int WINDOWS = 2;
 
@@ -34,11 +49,7 @@ public class SourceServiceTest {
 
     private static SourceType sourceType;
 
-    private static SourceMonitor sourceMonitor;
-
-    private static SourceCatalog sourceCatalog;
-
-    private static SourceService sourceService;
+    private static SourceMonitorService monitor;
 
     @Before
     public void setUp() {
@@ -50,9 +61,7 @@ public class SourceServiceTest {
         sourceType.setCatalogVersion(SOURCETYPE_CATALOGUE_VERSION);
         sourceType.setSourceStatisticsMonitorTopic(MONITOR_STATISTICS_TOPIC);
         sourceType.setSourceTypeScope("PASSIVE");
-
-        sourceMonitor = new SourceMonitor(mongoClient);
-        sourceService = new SourceService(sourceMonitor ,null);
+        monitor = new SourceMonitorService(mongoClient);
     }
 
     @Test
@@ -63,8 +72,6 @@ public class SourceServiceTest {
         MongoCollection collection = MongoHelper.getCollection(mongoClient, sourceType
                 .getSourceStatisticsMonitorTopic());
         collection.insertOne(doc);
-
-        SourceMonitor monitor = new SourceMonitor(mongoClient);
 
         EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(SUBJECT_ID, SOURCE_ID, sourceType);
 
@@ -83,8 +90,6 @@ public class SourceServiceTest {
         MongoCollection collection = MongoHelper.getCollection(mongoClient, sourceType
                 .getSourceStatisticsMonitorTopic());
         collection.insertMany(Arrays.asList(doc, second));
-
-        SourceMonitor monitor = new SourceMonitor(mongoClient);
 
         EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(SUBJECT_ID, SOURCE_ID, sourceType);
 
@@ -106,4 +111,5 @@ public class SourceServiceTest {
                 .append(MongoHelper.START, new Date(start))
                 .append(MongoHelper.END, new Date(end));
     }
+
 }
