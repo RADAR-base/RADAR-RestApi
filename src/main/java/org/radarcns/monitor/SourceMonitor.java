@@ -16,13 +16,13 @@
 
 package org.radarcns.monitor;
 
-import static org.radarcns.dao.mongo.util.MongoHelper.DESCENDING;
+import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
 import org.bson.Document;
-import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.restapi.EffectiveTimeFrame;
 import org.radarcns.restapi.source.Source;

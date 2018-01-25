@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.dao.mongo.util;
+package org.radarcns.mongo.util;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;

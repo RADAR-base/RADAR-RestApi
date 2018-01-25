@@ -18,8 +18,8 @@
 //
 //import static java.util.Collections.singletonList;
 //import static org.junit.Assert.assertEquals;
-//import static org.radarcns.dao.mongo.util.MongoHelper.END;
-//import static org.radarcns.dao.mongo.util.MongoHelper.START;
+//import static org.radarcns.mongo.util.MongoHelper.END;
+//import static org.radarcns.mongo.util.MongoHelper.START;
 //import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 //
 //import com.mongodb.MongoClient;
@@ -32,8 +32,8 @@
 //import org.junit.Test;
 //import org.radarcns.catalogue.TimeWindow;
 //import org.radarcns.catalogue.Unit;
-//import org.radarcns.dao.mongo.util.MongoHelper;
-//import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+//import org.radarcns.mongo.util.MongoHelper;
+//import org.radarcns.mongo.util.MongoHelper.Stat;
 //import org.radarcns.integration.util.RandomInput;
 //import org.radarcns.integration.util.Utility;
 //import org.radarcns.restapi.data.DoubleSample;

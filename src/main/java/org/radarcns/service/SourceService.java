@@ -37,7 +37,7 @@ public class SourceService {
                     .getSourceTypeCatalogVersion());
         } catch (NotFoundException | IOException e) {
 
-            LOGGER.error("Cannot retrive source-type for given source " + source.getSourceId());
+            LOGGER.error("Cannot retrieve source-type for given source " + source.getSourceId());
             throw new IllegalStateException("Cannot retrive source-type for given source " + source
                     .getSourceId());
         }

@@ -39,7 +39,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.monitor.application.ServerStatus;
 
 public class RadarConverterTest {

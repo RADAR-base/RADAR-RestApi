@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.radarcns.dao.mongo.data.sensor;
+package org.radarcns.mongo.data.sensor;
 
-import static org.radarcns.dao.mongo.data.sensor.DataFormat.getQuartiles;
-import static org.radarcns.dao.mongo.util.MongoHelper.COUNT;
-import static org.radarcns.dao.mongo.util.MongoHelper.FIELDS;
+import static org.radarcns.mongo.data.sensor.DataFormat.getQuartiles;
+import static org.radarcns.mongo.util.MongoHelper.COUNT;
+import static org.radarcns.mongo.util.MongoHelper.FIELDS;
 
 import java.util.List;
 import org.bson.Document;
-import org.radarcns.dao.mongo.util.MongoSensor;
+import org.radarcns.mongo.util.MongoSensor;
 import org.radarcns.restapi.data.Acceleration;
 import org.radarcns.restapi.data.Quartiles;
 import org.radarcns.restapi.header.DescriptiveStatistic;

@@ -24,7 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
-import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.subject.Cohort;

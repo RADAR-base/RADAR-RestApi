@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.radarcns.dao.mongo.data.sensor;
+package org.radarcns.mongo.data.sensor;
 
-import static org.radarcns.dao.mongo.util.MongoHelper.QUARTILE;
+import static org.radarcns.mongo.util.MongoHelper.QUARTILE;
 
 import java.util.List;
 import org.bson.Document;
-import org.radarcns.dao.mongo.util.MongoSensor;
+import org.radarcns.mongo.util.MongoSensor;
 import org.radarcns.domain.managementportal.SourceData;
 
 public enum DataFormat {

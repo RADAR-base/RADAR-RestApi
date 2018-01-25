@@ -30,7 +30,7 @@
 //import org.junit.After;
 //import org.junit.Test;
 //import org.radarcns.catalogue.TimeWindow;
-//import org.radarcns.dao.mongo.util.MongoHelper;
+//import org.radarcns.mongo.util.MongoHelper;
 //import org.radarcns.integration.util.RandomInput;
 //import org.radarcns.integration.util.Utility;
 //

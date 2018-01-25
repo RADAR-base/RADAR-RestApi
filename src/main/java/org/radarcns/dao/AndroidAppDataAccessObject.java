@@ -25,11 +25,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
-import org.radarcns.dao.mongo.data.android.AndroidAppStatus;
-import org.radarcns.dao.mongo.data.android.AndroidRecordCounter;
-import org.radarcns.dao.mongo.data.android.AndroidServerStatus;
-import org.radarcns.dao.mongo.util.MongoAndroidApp;
-import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.mongo.data.android.AndroidAppStatus;
+import org.radarcns.mongo.data.android.AndroidRecordCounter;
+import org.radarcns.mongo.data.android.AndroidServerStatus;
+import org.radarcns.mongo.util.MongoAndroidApp;
+import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.restapi.source.Source;
 

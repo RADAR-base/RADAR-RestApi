@@ -16,11 +16,11 @@
 
 package org.radarcns.integration.util;
 
-import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
-import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
-import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
-import static org.radarcns.dao.mongo.util.MongoHelper.END;
-import static org.radarcns.dao.mongo.util.MongoHelper.START;
+import static org.radarcns.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
+import static org.radarcns.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
+import static org.radarcns.mongo.util.MongoHelper.END;
+import static org.radarcns.mongo.util.MongoHelper.START;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
@@ -35,10 +35,9 @@ import java.util.Map;
 import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
 import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.catalogue.Unit;
 import org.radarcns.config.Properties;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.restapi.data.Acceleration;

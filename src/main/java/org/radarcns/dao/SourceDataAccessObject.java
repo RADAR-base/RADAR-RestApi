@@ -18,16 +18,9 @@ package org.radarcns.dao;
 
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import javax.servlet.ServletContext;
-import org.radarcns.dao.mongo.util.MongoDataAccess;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.monitor.Monitors;
-import org.radarcns.restapi.source.Source;
-import org.radarcns.restapi.subject.Subject;
+import org.radarcns.mongo.util.MongoDataAccess;
+import org.radarcns.mongo.util.MongoHelper;
 
 /**
  * Data Access Object for subject management.

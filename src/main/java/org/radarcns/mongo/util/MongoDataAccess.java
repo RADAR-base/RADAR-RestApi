@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.radarcns.dao.mongo.util;
+package org.radarcns.mongo.util;
 
-import static org.radarcns.dao.mongo.util.MongoHelper.ASCENDING;
-import static org.radarcns.dao.mongo.util.MongoHelper.DESCENDING;
-import static org.radarcns.dao.mongo.util.MongoHelper.DEVICE_CATALOG;
-import static org.radarcns.dao.mongo.util.MongoHelper.END;
-import static org.radarcns.dao.mongo.util.MongoHelper.ID;
-import static org.radarcns.dao.mongo.util.MongoHelper.SOURCE_TYPE;
-import static org.radarcns.dao.mongo.util.MongoHelper.START;
+import static org.radarcns.mongo.util.MongoHelper.ASCENDING;
+import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
+import static org.radarcns.mongo.util.MongoHelper.DEVICE_CATALOG;
+import static org.radarcns.mongo.util.MongoHelper.END;
+import static org.radarcns.mongo.util.MongoHelper.ID;
+import static org.radarcns.mongo.util.MongoHelper.SOURCE_TYPE;
+import static org.radarcns.mongo.util.MongoHelper.START;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;

@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.util.HashMap;
 import javax.servlet.ServletContext;
-import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.catalog.SourceCatalog;

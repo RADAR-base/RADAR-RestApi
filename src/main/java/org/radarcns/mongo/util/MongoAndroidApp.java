@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.dao.mongo.util;
+package org.radarcns.mongo.util;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;

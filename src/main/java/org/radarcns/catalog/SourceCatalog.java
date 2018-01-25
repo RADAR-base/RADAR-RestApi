@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
-import org.radarcns.dao.mongo.data.sensor.DataFormat;
+import org.radarcns.mongo.data.sensor.DataFormat;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.managementportal.SourceType;

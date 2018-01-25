@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-package org.radarcns.dao.mongo.data.android;
+package org.radarcns.mongo.data.android;
 
 import org.bson.Document;
-import org.radarcns.dao.mongo.util.MongoAndroidApp;
+import org.radarcns.mongo.util.MongoAndroidApp;
 import org.radarcns.restapi.app.Application;
 
-public class AndroidAppStatus extends MongoAndroidApp {
+public class AndroidRecordCounter extends MongoAndroidApp {
 
-    public static final String UPTIME_COLLECTION = "application_uptime";
+    public static final String RECORD_COLLECTION = "application_record_counts";
 
     //TODO take field names from RADAR MongoDb Connector
     @Override
     protected Application getApplication(Document doc, Application app) {
-        app.setUptime(doc.getDouble("applicationUptime"));
+        app.setRecordsCached(doc.getInteger("recordsCached"));
+        app.setRecordsSent(doc.getInteger("recordsSent"));
+        app.setRecordsUnsent(doc.getInteger("recordsUnsent"));
 
         return app;
     }
 
     @Override
     protected String getCollectionName() {
-        return UPTIME_COLLECTION;
+        return RECORD_COLLECTION;
     }
 }

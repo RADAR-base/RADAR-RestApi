@@ -37,7 +37,7 @@
 //import org.radarcns.catalogue.TimeWindow;
 //import org.radarcns.dao.AndroidAppDataAccessObject;
 //import org.radarcns.dao.SensorDataAccessObject;
-//import org.radarcns.dao.mongo.util.MongoHelper;
+//import org.radarcns.mongo.util.MongoHelper;
 //import org.radarcns.integration.util.ApiClient;
 //import org.radarcns.integration.util.RandomInput;
 //import org.radarcns.integration.util.RestApiDetails;

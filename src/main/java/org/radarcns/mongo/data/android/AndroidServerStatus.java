@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.radarcns.dao.mongo.data.android;
+package org.radarcns.mongo.data.android;
 
 import org.bson.Document;
-import org.radarcns.dao.mongo.util.MongoAndroidApp;
+import org.radarcns.mongo.util.MongoAndroidApp;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.util.RadarConverter;
 
