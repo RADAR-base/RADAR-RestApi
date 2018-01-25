@@ -29,7 +29,6 @@ import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.Subject;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.monitor.Monitors;
-import org.radarcns.restapi.subject.Cohort;
 
 /**
  * Data Access Object for user management.
@@ -51,7 +50,7 @@ public class SubjectDataAccessObject {
      *
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
-     * @return a study {@link Cohort}
+     * @return a list of  {@link Subject}
      * @throws ConnectException if MongoDB is not available
      */
     public   List<Subject> getAllSubjects(ServletContext context) throws ConnectException {
@@ -62,7 +61,7 @@ public class SubjectDataAccessObject {
      * Finds all subjects checking all available collections.
      *
      * @param client {@link MongoClient} used to connect to the database
-     * @return a study {@link Cohort}
+     * @return a list of  {@link Subject}
      * @throws ConnectException if MongoDB is not available
      *
      * @see Subject
@@ -88,7 +87,7 @@ public class SubjectDataAccessObject {
      * @param subject Subject Identifier
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
-     * @return a study {@link Cohort}
+     * @return a {@link Subject}
      * @throws ConnectException if MongoDB is not available
      */
     public  Subject getSubject(String subject, ServletContext context)
@@ -101,7 +100,7 @@ public class SubjectDataAccessObject {
      *
      * @param subjectId Subject Identifier
      * @param client {@link MongoClient} used to connect to the database
-     * @return a study {@link Cohort}
+     * @return a {@link Subject}
      * @throws ConnectException if MongoDB is not available
      *
      * @see Subject

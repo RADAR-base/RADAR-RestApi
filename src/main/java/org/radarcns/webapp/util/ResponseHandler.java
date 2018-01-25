@@ -17,16 +17,12 @@
 package org.radarcns.webapp.util;
 
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.domain.restapi.data.Dataset;
-import org.radarcns.restapi.avro.Message;
-import org.radarcns.util.AvroConverter;
+import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.webapp.exception.StatusMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,19 +45,19 @@ public class ResponseHandler {
         int size = 0;
         SpecificRecord obj =null;
 
-        if (dataset.getDataset().isEmpty()) {
-            status = NO_CONTENT;
-            obj = new Message("No data for this input");
-        } else {
-            size = dataset.getDataset().size();
-        }
+//        if (dataset.getDataset().isEmpty()) {
+//            status = OK;
+//            obj = new Message("No data for this input");
+//        } else {
+//            size = dataset.getDataset().size();
+//        }
 
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-
-        LOGGER.debug("{}", json);
-        LOGGER.debug("[{}] {} records", status.getStatusCode(), size);
-
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
+//        JsonNode json = AvroConverter.avroToJsonNode(obj);
+//
+//        LOGGER.debug("{}", json);
+//        LOGGER.debug("[{}] {} records", status.getStatusCode(), size);
+//
+//        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
         return Response.status(status.getStatusCode()).entity(dataset).build();
     }
@@ -132,14 +128,14 @@ public class ResponseHandler {
         Status status = Status.FORBIDDEN;
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        SpecificRecord obj = new Message(message);
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-
-        LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+//        SpecificRecord obj = new Message(message);
+//
+//        JsonNode json = AvroConverter.avroToJsonNode(obj);
+//
+//        LOGGER.debug("[{}] {}", status.getStatusCode(), json);
 
         return Response.status(status.getStatusCode())
-                .entity(new StatusMessage("forbidden", "Forbidden!", json))
+                .entity(new StatusMessage("forbidden", "Forbidden!", message))
                 .build();
     }
 //
@@ -223,14 +219,14 @@ public class ResponseHandler {
         Status status = NOT_FOUND;
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        SpecificRecord obj = new Message(message);
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-
-        LOGGER.debug("[{}] {}", status.getStatusCode(), json);
+//        SpecificRecord obj = new Message(message);
+//
+//        JsonNode json = AvroConverter.avroToJsonNode(obj);
+//
+//        LOGGER.debug("[{}] {}", status.getStatusCode(), json);
 
         return Response.status(status.getStatusCode())
-                .entity(new StatusMessage("not_found", "Not Found!", json))
+                .entity(new StatusMessage("not_found", "Not Found!", message))
                 .build();
     }
 }

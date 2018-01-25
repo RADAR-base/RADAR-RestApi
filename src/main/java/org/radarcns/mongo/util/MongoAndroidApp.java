@@ -23,8 +23,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.bson.Document;
+import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.TimeWindow;
-import org.radarcns.restapi.app.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

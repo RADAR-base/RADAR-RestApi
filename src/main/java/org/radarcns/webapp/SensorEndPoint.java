@@ -52,7 +52,7 @@ import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.domain.restapi.TimeWindow;
-import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.exception.TokenException;
 import org.radarcns.listener.ContextResourceManager;

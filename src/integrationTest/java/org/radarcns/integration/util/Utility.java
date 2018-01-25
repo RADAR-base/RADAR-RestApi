@@ -35,17 +35,16 @@ import java.util.Map;
 import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
 import org.radarcns.config.Properties;
+import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.TimeWindow;
-import org.radarcns.domain.restapi.data.DataItem;
-import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.dataset.DataItem;
+import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.listener.MongoDbContextListener;
-import org.radarcns.restapi.app.Application;
-import org.radarcns.restapi.data.Acceleration;
-import org.radarcns.restapi.data.DoubleSample;
+import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.util.RadarConverter;
 
 public class Utility {
@@ -218,11 +217,11 @@ public class Utility {
 
 
         List<DataItem> cloneItem = new ArrayList<>();
-        SpecificRecord value;
+        Object value;
         for (DataItem item : input.getDataset()) {
 
-            if (item.getSample() instanceof DoubleSample) {
-                value = new DoubleSample(((DoubleSample)item.getSample()).getValue());
+            if (item.getSample() instanceof Double) {
+                value = item.getSample();
             } else if (item.getSample() instanceof Acceleration) {
                 Acceleration temp = (Acceleration)item.getSample();
                 value = new Acceleration(temp.getX(), temp.getY(), temp.getZ());

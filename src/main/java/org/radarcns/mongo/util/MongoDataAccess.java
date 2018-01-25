@@ -94,7 +94,7 @@ public abstract class MongoDataAccess {
                 }
 
                 while (cursor.hasNext()) {
-                    list.add(new Source(cursor.next(), getSourceType(collection), null));
+                    list.add(new Source(cursor.next(), getSourceType(collection)));
                 }
             }
         }

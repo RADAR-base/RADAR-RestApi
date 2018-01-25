@@ -1,4 +1,4 @@
-package org.radarcns.domain.restapi.data;
+package org.radarcns.domain.restapi.dataset;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -21,7 +21,8 @@ public class DataItem {
 
     /**
      * All-args constructor.
-     * @param sample Sample value. For more details, check org.radarcns.restapi.data.Acceleration, org.radarcns.restapi.data.DoubleSample and org.radarcns.questionnaire.Questionnaire.
+     * @param sample Sample value. For more details, check org.radarcns.domain.restapi
+     * .Acceleration, java.lang.Double and org.radarcns.questionnaire.Questionnaire.
      * @param startDateTime Point in time (ISO8601) with UTC timezone. It represents the timestamp of the first sample contained inside the aggregated data.
      */
     public DataItem(java.lang.Object sample, java.lang.String startDateTime) {

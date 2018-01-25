@@ -25,8 +25,8 @@ import org.bson.Document;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.util.MongoSensor;
-import org.radarcns.restapi.data.Acceleration;
-import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.domain.restapi.format.Acceleration;
+import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.util.RadarConverter;
 
 /**

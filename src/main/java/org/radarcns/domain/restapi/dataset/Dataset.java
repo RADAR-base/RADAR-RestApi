@@ -1,4 +1,4 @@
-package org.radarcns.domain.restapi.data;
+package org.radarcns.domain.restapi.dataset;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;

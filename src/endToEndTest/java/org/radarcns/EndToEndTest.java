@@ -55,8 +55,8 @@ import org.junit.Test;
 import org.radarcns.config.PipelineConfig;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.domain.restapi.TimeWindow;
-import org.radarcns.domain.restapi.data.DataItem;
-import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.dataset.DataItem;
+import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.integration.util.ApiClient;
@@ -70,9 +70,8 @@ import org.radarcns.mock.data.MockRecordValidator;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mock.model.MockAggregator;
 import org.radarcns.producer.rest.RestClient;
-import org.radarcns.restapi.data.Acceleration;
-import org.radarcns.restapi.data.DoubleSample;
-import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.domain.restapi.format.Acceleration;
+import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.wiremock.ManagementPortalWireMock;
 import org.slf4j.Logger;
@@ -272,10 +271,10 @@ public class EndToEndTest {
             dataset.setHeader(updatedHeader);
 
             for (DataItem item : dataset.getDataset()) {
-                if (item.getSample() instanceof DoubleSample) {
-                    DoubleSample sample = (DoubleSample)item.getSample();
-                    item.setSample(new DoubleSample(RadarConverter.roundDouble(
-                            (Double) sample.getValue() / RadarConverter.getExpectedMessages(
+                if (item.getSample() instanceof Double) {
+                    Double sample = (Double)item.getSample();
+                    item.setSample(new Double(RadarConverter.roundDouble(
+                            (Double) sample / RadarConverter.getExpectedMessages(
                             updatedHeader), 2)));
                 } else if (item.getSample() instanceof Acceleration) {
                     Acceleration sample = (Acceleration)item.getSample();

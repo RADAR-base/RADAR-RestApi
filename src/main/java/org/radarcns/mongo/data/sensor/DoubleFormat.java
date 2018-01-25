@@ -24,8 +24,7 @@ import org.bson.Document;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.util.MongoSensor;
-import org.radarcns.restapi.data.DoubleSample;
-import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -44,19 +43,19 @@ public class DoubleFormat extends MongoSensor {
             Header header) {
         switch (stat) {
             case MEDIAN:
-                return new DoubleSample(getQuartiles(doc).get(1));
+                return new Double(getQuartiles(doc).get(1));
             case QUARTILES:
                 List<Double> quartiles = getQuartiles(doc);
-                return new DoubleSample(new Quartiles(
+                return new Quartiles(
                     quartiles.get(0),
                     quartiles.get(1),
-                    quartiles.get(2)));
+                    quartiles.get(2));
             case RECEIVED_MESSAGES:
-                return new DoubleSample(RadarConverter.roundDouble(
+                return new Double(RadarConverter.roundDouble(
                         doc.getDouble(field) / RadarConverter.getExpectedMessages(header),
                     2));
             default:
-                return new DoubleSample(doc.getDouble(field));
+                return new Double(doc.getDouble(field));
         }
     }
 

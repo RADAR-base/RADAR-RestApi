@@ -28,7 +28,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 import org.radarcns.domain.restapi.TimeWindow;
-import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.mock.model.ExpectedArrayValue;

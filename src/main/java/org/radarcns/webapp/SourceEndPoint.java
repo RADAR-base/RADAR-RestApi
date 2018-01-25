@@ -44,6 +44,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.radarcns.auth.exception.NotAuthorizedException;
+import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.Subject;
 import org.radarcns.exception.TokenException;
@@ -51,7 +52,6 @@ import org.radarcns.listener.ContextResourceManager;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.monitor.Monitors;
-import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -256,7 +256,7 @@ public class SourceEndPoint {
     /**
      * Actual implementation of AVRO and JSON getSpecification.
      **/
-    private SourceSpecification getSourceSpecificationWorker(String source)
+    private SourceType getSourceSpecificationWorker(String source)
             throws ConnectException {
         return Monitors.getInstance().getSpecification(source);
     }

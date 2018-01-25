@@ -40,9 +40,8 @@ public class Source {
      * All-args constructor.
      * @param id Source identifier.
      * @param type Source name.
-     * @param summary Source details.
      */
-    public Source(java.lang.String id, java.lang.String type, org.radarcns.restapi.source.SourceSummary summary) {
+    public Source(java.lang.String id, java.lang.String type) {
         this.sourceId = id;
         this.sourceTypeModel = type;
 //        this.summary = summary;

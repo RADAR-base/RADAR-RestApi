@@ -15,7 +15,6 @@ ext.hamcrestVersion = '1.3'
 ext.logback = '1.2.2'
 ext.mongodb = '3.6.0'
 ext.radarCommons = '0.7'
-ext.radarSchema = '0.2.3'
 ext.swagger = '2.0.0-rc3'
 ext.tomcat = '8.0.47'
 ext.radarAuthVersion = '0.3.3-SNAPSHOT'
@@ -47,7 +46,6 @@ dependencies {
     compile group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: swagger
 
     compile group: 'org.radarcns', name: 'radar-commons', version: radarCommons
-    compile group: 'org.radarcns' , name: 'radar-schemas-restapi' , version: radarSchema
 
     compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthVersion
     compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion

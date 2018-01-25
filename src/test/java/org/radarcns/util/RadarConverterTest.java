@@ -38,9 +38,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
+import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.mongo.util.MongoHelper.Stat;
-import org.radarcns.monitor.application.ServerStatus;
 
 public class RadarConverterTest {
 

@@ -23,13 +23,11 @@ import org.apache.avro.specific.SpecificRecord;
 import org.hamcrest.CoreMatchers;
 import org.junit.rules.ExternalResource;
 import org.radarcns.config.ServerConfig;
-import org.radarcns.domain.managementportal.Project;
 import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.producer.rest.ManagedConnectionPool;
 import org.radarcns.producer.rest.RestClient;
-import org.radarcns.util.AvroConverter;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,17 +181,17 @@ public class ApiClient extends ExternalResource {
      *                        if no expectedResponse is provided if the response code does not
      *                        indicate success.
      */
-    @Nonnull
-    public <K extends SpecificRecord> K requestAvro(String relativePath, Class<K> avroClass,
-            Status... expectedResponse) throws IOException, ReflectiveOperationException {
-        try (Response response = request(relativePath, AVRO_BINARY, expectedResponse)) {
-            ResponseBody body = response.body();
-            assertNotNull(body);
-            @SuppressWarnings("JavaReflectionMemberAccess")
-            Schema schema = (Schema) avroClass.getMethod("getClassSchema").invoke(null);
-            return AvroConverter.avroByteToAvro(body.bytes(), schema);
-        }
-    }
+//    @Nonnull
+//    public <K extends SpecificRecord> K requestAvro(String relativePath, Class<K> avroClass,
+//            Status... expectedResponse) throws IOException, ReflectiveOperationException {
+//        try (Response response = request(relativePath, AVRO_BINARY, expectedResponse)) {
+//            ResponseBody body = response.body();
+//            assertNotNull(body);
+//            @SuppressWarnings("JavaReflectionMemberAccess")
+//            Schema schema = (Schema) avroClass.getMethod("getClassSchema").invoke(null);
+//            return AvroConverter.avroByteToAvro(body.bytes(), schema);
+//        }
+//    }
 
 
     /**

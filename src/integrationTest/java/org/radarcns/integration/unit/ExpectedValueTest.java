@@ -24,13 +24,12 @@ import java.util.Map;
 import org.bson.Document;
 import org.junit.Test;
 import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.dataset.DataItem;
+import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.RandomInput;
-import org.radarcns.restapi.data.DoubleSample;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.dataset.Item;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -58,8 +57,8 @@ public class ExpectedValueTest {
         Dataset dataset = (Dataset) map.get(RandomInput.DATASET);
 
         count = 0;
-        for (Item item : dataset.getDataset()) {
-            count += (Double) ((DoubleSample) item.get("sample")).getValue();
+        for (DataItem item : dataset.getDataset()) {
+            count += (Double)  item.getSample();
         }
         assertEquals(SAMPLES, count);
 

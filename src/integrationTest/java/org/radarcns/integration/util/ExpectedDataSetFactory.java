@@ -26,15 +26,14 @@ import java.util.LinkedList;
 import java.util.List;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.domain.restapi.TimeWindow;
-import org.radarcns.domain.restapi.data.DataItem;
-import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.dataset.DataItem;
+import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mock.model.ExpectedValue;
-import org.radarcns.restapi.data.Acceleration;
-import org.radarcns.restapi.data.DoubleSample;
-import org.radarcns.restapi.data.Quartiles;
+import org.radarcns.domain.restapi.format.Acceleration;
+import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;
@@ -245,7 +244,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             case "ACCELEROMETER":
                 return Acceleration.class;
             default:
-                return DoubleSample.class;
+                return Double.class;
         }
     }
 }

@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.util.HashMap;
 import javax.servlet.ServletContext;
+import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.catalog.SourceCatalog;
 
 /**
@@ -112,7 +112,7 @@ public class Monitors {
      *
      * @return {@code SourceSpecification} containing all data names and related frequencies
      */
-    public SourceSpecification getSpecification(String sourceType)
+    public SourceType getSpecification(String sourceType)
             throws ConnectException {
         SourceMonitor monitor = hooks.get(sourceType);
 

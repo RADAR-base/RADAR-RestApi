@@ -31,7 +31,7 @@ import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.TimeWindow;
-import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
