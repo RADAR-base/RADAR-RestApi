@@ -68,7 +68,7 @@
 //        SourceDefinition empatica = new SourceDefinition("EMPATICA",
 //                new DeviceItem(sensors));
 //
-//        SourceMonitor monitor = new SourceMonitor(empatica);
+//        SourceMonitorService monitor = new SourceMonitorService(empatica);
 //
 //        assertEquals(empatica, monitor.getSourceType());
 //    }
@@ -88,33 +88,33 @@
 //
 //    @Test
 //    public void getStatusTest() {
-//        assertEquals(States.FINE, SourceMonitor.getStatus(1d));
-//        assertEquals(States.FINE, SourceMonitor.getStatus(0.951));
+//        assertEquals(States.FINE, SourceMonitorService.getStatus(1d));
+//        assertEquals(States.FINE, SourceMonitorService.getStatus(0.951));
 //
-//        assertEquals(States.OK, SourceMonitor.getStatus(0.95));
-//        assertEquals(States.OK, SourceMonitor.getStatus(0.90));
-//        assertEquals(States.OK, SourceMonitor.getStatus(0.801));
+//        assertEquals(States.OK, SourceMonitorService.getStatus(0.95));
+//        assertEquals(States.OK, SourceMonitorService.getStatus(0.90));
+//        assertEquals(States.OK, SourceMonitorService.getStatus(0.801));
 //
-//        assertEquals(States.WARNING, SourceMonitor.getStatus(0.80));
-//        assertEquals(States.WARNING, SourceMonitor.getStatus(0.40));
-//        assertEquals(States.WARNING, SourceMonitor.getStatus(0.01));
+//        assertEquals(States.WARNING, SourceMonitorService.getStatus(0.80));
+//        assertEquals(States.WARNING, SourceMonitorService.getStatus(0.40));
+//        assertEquals(States.WARNING, SourceMonitorService.getStatus(0.01));
 //
-//        assertEquals(States.DISCONNECTED, SourceMonitor.getStatus(0d));
+//        assertEquals(States.DISCONNECTED, SourceMonitorService.getStatus(0d));
 //
-//        assertEquals(States.UNKNOWN, SourceMonitor.getStatus(-1d));
+//        assertEquals(States.UNKNOWN, SourceMonitorService.getStatus(-1d));
 //    }
 //
 //    @Test
 //    public void getPercentageTest() {
-//        assertEquals(1d, SourceMonitor.getPercentage(100d, 100d),
+//        assertEquals(1d, SourceMonitorService.getPercentage(100d, 100d),
 //                0d);
-//        assertEquals(0.95d, SourceMonitor.getPercentage(95d, 100d),
+//        assertEquals(0.95d, SourceMonitorService.getPercentage(95d, 100d),
 //                0d);
-//        assertEquals(0.50d, SourceMonitor.getPercentage(50d, 100d),
+//        assertEquals(0.50d, SourceMonitorService.getPercentage(50d, 100d),
 //                0d);
-//        assertEquals(0.1d, SourceMonitor.getPercentage(10d, 100d),
+//        assertEquals(0.1d, SourceMonitorService.getPercentage(10d, 100d),
 //                0d);
-//        assertEquals(0d, SourceMonitor.getPercentage(0d, 100d),
+//        assertEquals(0d, SourceMonitorService.getPercentage(0d, 100d),
 //                0d);
 //    }
 //

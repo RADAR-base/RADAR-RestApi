@@ -16,7 +16,6 @@
 
 package org.radarcns.listener.managementportal;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -27,12 +26,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.config.ManagementPortalConfig;
 import org.radarcns.config.Properties;
 import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.oauth.OAuth2Client;
+import org.radarcns.util.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,6 +100,16 @@ public class ManagementPortalClientManager implements ServletContextListener {
         if (Objects.nonNull(currentToken) && !currentToken.isExpired()) {
             return;
         }
+
+        do {
+            try {
+                Thread.sleep(30000L);
+            } catch (InterruptedException e) {
+                LOGGER.error("Thread interrupted while waiting for MP");
+            }
+        } while (!HttpUtil.isReachable(
+                Properties.getApiConfig().getManagementPortalConfig().getManagementPortalUrl()));
+
 
         currentToken = getOAuth2Client(context).getAccessToken();
 

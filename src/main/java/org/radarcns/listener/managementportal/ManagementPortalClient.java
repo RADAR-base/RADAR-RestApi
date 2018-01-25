@@ -164,7 +164,6 @@ public class ManagementPortalClient {
      *
      * @param projectName {@link String} the study from which subjects to be retrieved
      * @return {@link List} of {@link Subject} retrieved from the Management Portal
-     * @throws MalformedURLException in case the subjects cannot be retrieved.
      */
     public List<Subject> getAllSubjectsFromProject(@Nonnull String projectName) throws
             IOException, NotFoundException {
