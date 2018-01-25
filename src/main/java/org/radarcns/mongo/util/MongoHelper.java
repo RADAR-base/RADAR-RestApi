@@ -91,7 +91,7 @@ public class MongoHelper {
     }
 
     /**
-     * Finds all Documents within [start-end] belonging to the given subject for the give source.
+     * Finds all Documents within [start-end] belonging to the given subject for the give sourceType.
      *
      * @param subject is the subjectID
      * @param source is the sourceID
@@ -114,7 +114,7 @@ public class MongoHelper {
     }
 
     /**
-     * Finds all Documents belonging to the given subject for the give source.
+     * Finds all Documents belonging to the given subject for the give sourceType.
      *
      * @param subject is the subjectID
      * @param source is the sourceID
@@ -151,7 +151,7 @@ public class MongoHelper {
     }
 
     /**
-     * Finds all Documents belonging to the given source.
+     * Finds all Documents belonging to the given sourceType.
      *
      * @param source is the sourceID
      * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}

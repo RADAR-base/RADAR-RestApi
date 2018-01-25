@@ -31,7 +31,7 @@
 //import org.radarcns.mongo.util.MongoHelper;
 //import org.radarcns.integration.util.RandomInput;
 //import org.radarcns.integration.util.Utility;
-//import org.radarcns.restapi.source.Source;
+//import org.radarcns.restapi.sourceType.Source;
 //import org.radarcns.restapi.subject.Cohort;
 //import org.radarcns.restapi.subject.Subject;
 //

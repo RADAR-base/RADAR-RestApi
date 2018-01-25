@@ -1,11 +1,13 @@
 package org.radarcns.integration.util;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 
+import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,12 +23,14 @@ import org.apache.avro.specific.SpecificRecord;
 import org.hamcrest.CoreMatchers;
 import org.junit.rules.ExternalResource;
 import org.radarcns.config.ServerConfig;
+import org.radarcns.domain.managementportal.Project;
 import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.producer.rest.ManagedConnectionPool;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
+import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,6 +192,35 @@ public class ApiClient extends ExternalResource {
             @SuppressWarnings("JavaReflectionMemberAccess")
             Schema schema = (Schema) avroClass.getMethod("getClassSchema").invoke(null);
             return AvroConverter.avroByteToAvro(body.bytes(), schema);
+        }
+    }
+
+
+    /**
+     * Request an Avro SpecificRecord from the API, with given relative path. This sets the
+     * Accept header to {@code avro/binary}.
+     *
+     * @param relativePath path relative to the base URL, without starting slash.
+     * @param avroClass Avro SpecificRecord class to deserialize.
+     * @param expectedResponse response codes that are considered valid. If none are given, any
+     *                         success response code is considered valid.
+     *
+     * @return HTTP Response body as a string
+     * @throws IOException if the request could not be executed
+     * @throws ReflectiveOperationException if the provided class does not have a static
+     *                                      {@code getClassSchema()} method.
+     * @throws AssertionError if the response code does not match one of expectedResponse or
+     *                        if no expectedResponse is provided if the response code does not
+     *                        indicate success.
+     */
+    @Nonnull
+    public <K> K requestJson(String relativePath, Class<K> avroClass,
+            Status... expectedResponse) throws IOException, ReflectiveOperationException {
+        try (Response response = request(relativePath, APPLICATION_JSON, expectedResponse)) {
+            ResponseBody body = response.body();
+            assertNotNull(body);
+            ObjectReader reader = RadarConverter.readerFor(avroClass);
+            return reader.readValue(body.byteStream());
         }
     }
 

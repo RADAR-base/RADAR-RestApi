@@ -35,12 +35,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
+import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.monitor.application.ServerStatus;
-import org.radarcns.restapi.header.DescriptiveStatistic;
-import org.radarcns.restapi.header.Header;
 import org.radarcns.security.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,22 +202,22 @@ public final class RadarConverter {
     }
 
     /**
-     * Converts a String to the related source type.
+     * Converts a String to the related sourceType type.
      **/
     public static String getSourceType(String value) {
         return value.toUpperCase();
     }
 
     /**
-     * Returns the amount of expected data related to the source type, sensor type and
+     * Returns the amount of expected data related to the sourceType type, sensor type and
      *      {@link TimeWindow} specified in the {@link Header}.
      *
      * @param header {@link Header} to provide data context
      *
      * @return the number of expected messages
      */
-    public static Double getExpectedMessages(Header  header) {
-//        return SourceCatalog.getInstance(header.getSource()).getFrequency(
+    public static Double getExpectedMessages(Header header) {
+//        return SourceCatalog.getInstance(header.getSourceType()).getFrequency(
 //                header.getType()) * getSecond(header.getTimeWindow()).doubleValue();
         return null;
     }

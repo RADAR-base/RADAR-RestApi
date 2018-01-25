@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Stores all the source-type definition and source-data.
+ * Stores all the sourceType-type definition and sourceType-data.
  */
 public class SourceCatalog {
 
@@ -92,7 +92,7 @@ public class SourceCatalog {
             result = sourceTypes.get(new SourceTypeIdentifier(producer, model,
                     catalogVersion));
         } catch (NoSuchElementException exe) {
-            throw new NotFoundException("Cannot find source-type of identifier "
+            throw new NotFoundException("Cannot find sourceType-type of identifier "
                     + producer + ":" + model + ":" + catalogVersion , exe);
         }
         return result;
@@ -122,7 +122,7 @@ public class SourceCatalog {
             result = sourceData.get(true).get(sourceDataName);
         }
         if (Objects.isNull(result)) {
-            throw new NotFoundException("Cannot find source-data of identifier " + sourceDataName);
+            throw new NotFoundException("Cannot find sourceType-data of identifier " + sourceDataName);
         }
         return result;
     }
@@ -144,23 +144,23 @@ public class SourceCatalog {
 
 
 //    /**
-//     * Returns source's SourceDefinition.
-//     * @param source sourceType involved in the interaction
+//     * Returns sourceType's SourceDefinition.
+//     * @param sourceType sourceType involved in the interaction
 //     * @return the SourceDefinition related to the input
 //     * @see SourceDefinition
 //     */
-//    public SourceDefinition getDefinition(String source) {
-//        SourceDefinition definition = sourceCatalog.get(source);
+//    public SourceDefinition getDefinition(String sourceType) {
+//        SourceDefinition definition = sourceCatalog.get(sourceType);
 //
 //        if (definition != null) {
 //            return definition;
 //        }
 //
-//        throw new UnsupportedOperationException(source + " is not currently supported.");
+//        throw new UnsupportedOperationException(sourceType + " is not currently supported.");
 //    }
 
     /**
-     * Returns the supported source type.
+     * Returns the supported sourceType type.
      * @return a set containing all supported sourceType
      */
     public Set<String> getSupportedSource() throws IOException {

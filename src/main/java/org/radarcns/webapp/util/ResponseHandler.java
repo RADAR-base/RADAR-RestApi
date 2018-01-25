@@ -20,18 +20,12 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.restapi.app.Application;
+import org.radarcns.domain.restapi.data.Dataset;
 import org.radarcns.restapi.avro.Message;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.subject.Cohort;
-import org.radarcns.restapi.subject.Subject;
 import org.radarcns.util.AvroConverter;
 import org.radarcns.webapp.exception.StatusMessage;
 import org.slf4j.Logger;
@@ -53,7 +47,7 @@ public class ResponseHandler {
     public static Response getJsonResponse(HttpServletRequest request, Dataset dataset) {
         Status status = Status.OK;
         int size = 0;
-        SpecificRecord obj = dataset;
+        SpecificRecord obj =null;
 
         if (dataset.getDataset().isEmpty()) {
             status = NO_CONTENT;
@@ -69,29 +63,29 @@ public class ResponseHandler {
 
         LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
 
-        return Response.status(status.getStatusCode()).entity(json).build();
+        return Response.status(status.getStatusCode()).entity(dataset).build();
     }
 
-    /**
-     * It serialises the {@code SpecificRecord} in input in JSON and sets the suitable status code.
-     * @param request HTTP request that has to be served
-     * @param obj request result
-     * @return the response content formatted in JSON
-     **/
-    public static Response getJsonResponse(HttpServletRequest request, SpecificRecord obj)
-            throws IOException {
-        Status status = getStatus(obj);
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
-
-        if (status == NO_CONTENT) {
-            return Response.noContent().build();
-        }
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-        return Response.status(status.getStatusCode())
-                .entity(json)
-                .build();
-    }
+//    /**
+//     * It serialises the {@code SpecificRecord} in input in JSON and sets the suitable status code.
+//     * @param request HTTP request that has to be served
+//     * @param obj request result
+//     * @return the response content formatted in JSON
+//     **/
+//    public static Response getJsonResponse(HttpServletRequest request, SpecificRecord obj)
+//            throws IOException {
+//        Status status = getStatus(obj);
+//        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
+//
+//        if (status == NO_CONTENT) {
+//            return Response.noContent().build();
+//        }
+//
+//        JsonNode json = AvroConverter.avroToJsonNode(obj);
+//        return Response.status(status.getStatusCode())
+//                .entity(json)
+//                .build();
+//    }
 
     //TODO return Status.BAD_REQUEST in case of parameter that does not respect regex.
     /**
@@ -148,28 +142,28 @@ public class ResponseHandler {
                 .entity(new StatusMessage("forbidden", "Forbidden!", json))
                 .build();
     }
-
-    /**
-     * It sets the status code and serialises the given {@code SpecificRecord} in bytes array.
-     * @param request HTTP request that has to be served
-     * @param obj request result
-     * @return the response content formatted in AVRO
-     **/
-    public static Response getAvroResponse(HttpServletRequest request, SpecificRecord obj)
-            throws IOException {
-        Status status = getStatus(obj);
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
-
-        switch (status) {
-            case OK:
-                byte[] array = AvroConverter.avroToAvroByte(obj);
-                return Response.ok(array, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
-            case NO_CONTENT:
-                return Response.noContent().build();
-            default:
-                return Response.serverError().build();
-        }
-    }
+//
+//    /**
+//     * It sets the status code and serialises the given {@code SpecificRecord} in bytes array.
+//     * @param request HTTP request that has to be served
+//     * @param obj request result
+//     * @return the response content formatted in AVRO
+//     **/
+//    public static Response getAvroResponse(HttpServletRequest request, SpecificRecord obj)
+//            throws IOException {
+//        Status status = getStatus(obj);
+//        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
+//
+//        switch (status) {
+//            case OK:
+//                byte[] array = AvroConverter.avroToAvroByte(obj);
+//                return Response.ok(array, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
+//            case NO_CONTENT:
+//                return Response.noContent().build();
+//            default:
+//                return Response.serverError().build();
+//        }
+//    }
 
 
     //TODO return 400 in case of parameter does not respect regex
@@ -184,39 +178,39 @@ public class ResponseHandler {
         return Response.serverError().build();
     }
 
-    private static Status getStatus(SpecificRecord obj) throws UnsupportedEncodingException {
-        if (obj == null) {
-            return NO_CONTENT;
-        }
-
-        switch (obj.getSchema().getName()) {
-            case "Cohort" :
-                if (((Cohort) obj).getSubjects().isEmpty()) {
-                    return NO_CONTENT;
-                }
-                break;
-            case "Dataset" :
-                if (((Dataset) obj).getDataset().isEmpty()) {
-                    return NO_CONTENT;
-                }
-                break;
-            case "Application" :
-                if (((Application) obj).getServerStatus() == null) {
-                    return NO_CONTENT;
-                }
-                break;
-            case "Subject" :
-                if (((Subject) obj).getSubjectId() == null) {
-                    return NO_CONTENT;
-                }
-                break;
-            case "Source" : break;
-            case "SourceSpecification" : break;
-            default: throw new UnsupportedEncodingException("SpecificRecord "
-                + obj.getSchema().getName() + " is not supported yet");
-        }
-        return Status.OK;
-    }
+//    private static Status getStatus(SpecificRecord obj) throws UnsupportedEncodingException {
+//        if (obj == null) {
+//            return NO_CONTENT;
+//        }
+//
+//        switch (obj.getSchema().getName()) {
+//            case "Cohort" :
+//                if (((Cohort) obj).getSubjects().isEmpty()) {
+//                    return NO_CONTENT;
+//                }
+//                break;
+//            case "Dataset" :
+//                if (((Dataset) obj).getDataset().isEmpty()) {
+//                    return NO_CONTENT;
+//                }
+//                break;
+//            case "Application" :
+//                if (((Application) obj).getServerStatus() == null) {
+//                    return NO_CONTENT;
+//                }
+//                break;
+//            case "Subject" :
+//                if (((Subject) obj).getSubjectId() == null) {
+//                    return NO_CONTENT;
+//                }
+//                break;
+//            case "Source" : break;
+//            case "SourceSpecification" : break;
+//            default: throw new UnsupportedEncodingException("SpecificRecord "
+//                + obj.getSchema().getName() + " is not supported yet");
+//        }
+//        return Status.OK;
+//    }
 
     /**
      * It sets the suitable status code and return a JSON message containing the input String.

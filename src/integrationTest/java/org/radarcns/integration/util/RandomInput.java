@@ -27,13 +27,13 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.bson.Document;
-import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.mock.model.ExpectedArrayValue;
 import org.radarcns.mock.model.ExpectedDoubleValue;
 import org.radarcns.monitor.application.ServerStatus;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.header.DescriptiveStatistic;
 
 /**
  * All supported sources specifications.
@@ -226,18 +226,18 @@ public class RandomInput {
 
         Document uptimeDoc = new Document("_id", id)
                 .append("user", user)
-                .append("source", source)
+                .append("sourceType", source)
                 .append("applicationUptime", uptime);
 
         Document statusDoc = new Document("_id", id)
                 .append("user", user)
-                .append("source", source)
+                .append("sourceType", source)
                 .append("clientIP", ipAddress)
                 .append("serverStatus", serverStatus.toString());
 
         Document recordsDoc = new Document("_id", id)
                 .append("user", user)
-                .append("source", source)
+                .append("sourceType", source)
                 .append("recordsCached", recordsCached)
                 .append("recordsSent", recordsSent)
                 .append("recordsUnsent", recordsUnsent);

@@ -56,7 +56,7 @@ public class ProjectEndPoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Returns a list of projects",
-            description = "Each project can have multiple source-types associated with it")
+            description = "Each project can have multiple sourceType-types associated with it")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a list of project objects")

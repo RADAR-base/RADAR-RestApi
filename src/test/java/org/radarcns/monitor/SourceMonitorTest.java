@@ -28,7 +28,7 @@
 //import org.radarcns.config.catalog.DeviceItem;
 //import org.radarcns.config.catalog.SensorCatalog;
 //import org.radarcns.mongo.data.sensor.DataFormat;
-//import org.radarcns.restapi.source.States;
+//import org.radarcns.restapi.sourceType.States;
 //
 //public class SourceMonitorTest {
 //
@@ -70,7 +70,7 @@
 //
 //        SourceMonitor monitor = new SourceMonitor(empatica);
 //
-//        assertEquals(empatica, monitor.getSource());
+//        assertEquals(empatica, monitor.getSourceType());
 //    }
 //
 //    private HashMap<String, String> getCollections(String prefix) {

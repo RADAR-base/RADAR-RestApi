@@ -24,7 +24,7 @@ import java.net.ConnectException;
 import org.bson.Document;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.domain.managementportal.SourceType;
-import org.radarcns.domain.restapi.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.source.States;
 import org.radarcns.util.RadarConverter;
@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generic source monitor.
+ * Generic sourceType monitor.
  */
 public class SourceMonitor {
 
@@ -73,13 +73,13 @@ public class SourceMonitor {
 
     }
     /**
-     * Checks the status for the given source counting the number of received messages and
+     * Checks the status for the given sourceType counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
      *
      * @param subjectId identifier
      * @param sourceId identifier
      * @param client is the MongoDB client
-     * @return {@code SourceDefinition} representing a source source
+     * @return {@code SourceDefinition} representing a sourceType sourceType
      * @throws ConnectException if the connection with MongoDb is faulty
      *
      * @see Source
@@ -95,20 +95,20 @@ public class SourceMonitor {
 //    }
 
     /**
-     * Checks the status for the given source counting the number of received messages and
+     * Checks the status for the given sourceType counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
      *
      * @param subject identifier
-     * @param source identifier
+     * @param sourceType identifier
      * @oaram start initial time that has to be monitored
      * @param end final time that has to be monitored
      * @param client is the MongoDB client
-     * @return {@code SourceDefinition} representing a source source
+     * @return {@code SourceDefinition} representing a sourceType sourceType
      * @throws ConnectException if the connection with MongoDb is faulty
      *
      * @see Source
      */
-//    public Source getState(String subject, String source, long start, long end, MongoClient
+//    public Source getState(String subject, String sourceType, long start, long end, MongoClient
 //            client ,  double countTemp)
 //            throws ConnectException {
 //        Map<String, Sensor> sensorMap = new HashMap<>();
@@ -134,7 +134,7 @@ public class SourceMonitor {
 //        SourceSummary sourceState = new SourceSummary(getStatus(1 - avgPerc),
 //                (int)countMex, RadarConverter.roundDouble(avgPerc, 2), sensorMap);
 //
-//        return new Source(source, specification.getType(), sourceState);
+//        return new Source(sourceType, specification.getType(), sourceState);
 //    }
 
     /**
@@ -149,7 +149,7 @@ public class SourceMonitor {
     }
 
     /**
-     * Convert numerical percentage to source status.
+     * Convert numerical percentage to sourceType status.
      *
      * @param percentage numerical value that has to be converted int Status
      * @return the current {@code Status}
@@ -168,7 +168,7 @@ public class SourceMonitor {
         }
     }
 
-//    public SourceDefinition getSource() {
+//    public SourceDefinition getSourceType() {
 //        return specification;
 //    }
 }

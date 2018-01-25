@@ -34,12 +34,12 @@ public class SourceDataAccessObject {
         this.sensorDataAccessObject = sensorDataAccessObject;
     }
     /**
-     * Given a sourceID, it finds what is the associated source type.
+     * Given a sourceID, it finds what is the associated sourceType type.
      *
      * @param source is the SourceID
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
-     * @return source type associated with the given source
+     * @return sourceType type associated with the given sourceType
      *
      * @throws ConnectException if MongoDb instance is not available
      */
@@ -49,11 +49,11 @@ public class SourceDataAccessObject {
     }
 
     /**
-     * Given a sourceID, it finds what is the associated source type.
+     * Given a sourceID, it finds what is the associated sourceType type.
      *
      * @param source is the SourceID
      * @param client MongoDB client
-     * @return source type associated with the given source
+     * @return sourceType type associated with the given sourceType
      *
      * @throws ConnectException if MongoDb instance is not available
      */

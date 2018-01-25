@@ -33,8 +33,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import org.bson.Document;
-import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.restapi.source.Source;
+//import org.radarcns.restapi.source.Source;
+import org.radarcns.domain.restapi.Source;
+import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,12 +102,12 @@ public abstract class MongoDataAccess {
     }
 
     /**
-     * Finds source type for the given subject checking all available source device collections.
+     * Finds sourceType type for the given subject checking all available sourceType device collections.
      *
      * @param source is the sourceID
      * @param client is the MongoDb client instance
      *
-     * @return source type for the given sourceID, otherwise null
+     * @return sourceType type for the given sourceID, otherwise null
      */
     public String findSourceType(String source, MongoClient client) {
         String type;
@@ -129,10 +130,10 @@ public abstract class MongoDataAccess {
     }
 
     /**
-     * Writes the source type on the source catalog.
+     * Writes the sourceType type on the sourceType catalog.
      *
      * @param source is the sourceID
-     * @param type the source type that is assigned to the sourceID
+     * @param type the sourceType type that is assigned to the sourceID
      * @param client MongoDb client
      *
      * @throws MongoException if something goes wrong with the write
@@ -150,7 +151,7 @@ public abstract class MongoDataAccess {
      * Returns the current collection.
      *
      * @param client is the MongoDb client instance
-     * @param source is the source type related to the required collection
+     * @param source is the sourceType type related to the required collection
      * @param interval useful to identify which collection has to be queried. A sensor has a
      *      collection for each time frame or time window
      * @return the MongoDb collection
@@ -165,7 +166,7 @@ public abstract class MongoDataAccess {
      *      {@link MongoCollection} according to the value of {@code min}.
      *
      * @param subject subject identifier
-     * @param source source identifier
+     * @param source sourceType identifier
      * @param min if {@code true}, it returns the minimum timestamp, while {@code false} the
      *      maximum
      * @param client {@link MongoClient} used to connect to the database
@@ -207,10 +208,10 @@ public abstract class MongoDataAccess {
     }
 
     /**
-     * Finds source type for the given subject using the source catalog.
+     * Finds sourceType type for the given subject using the sourceType catalog.
      *
      * @param source is the sourceID
-     * @return source type for the given sourceID, otherwise null
+     * @return sourceType type for the given sourceID, otherwise null
      */
     public static String getSourceType(String source, MongoClient client) {
         String type = null;
@@ -234,14 +235,14 @@ public abstract class MongoDataAccess {
     }
 
     /**
-     * Get the source type of a MongoDB collection name.
-     * @return covert collection name to the source type.
+     * Get the sourceType type of a MongoDB collection name.
+     * @return covert collection name to the sourceType type.
      */
     public abstract String getSourceType(String collection);
 
     /**
-     * Get the name of the collection belonging to a source with given time window.
-     * @return the MongoDB Collection name associated to the source type for the given time frame
+     * Get the name of the collection belonging to a sourceType with given time window.
+     * @return the MongoDB Collection name associated to the sourceType type for the given time frame
      */
     public abstract String getCollectionName(String source, TimeWindow interval);
 

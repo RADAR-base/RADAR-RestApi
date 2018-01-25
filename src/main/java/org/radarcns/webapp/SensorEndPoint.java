@@ -21,7 +21,6 @@ import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission
 import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.service.SubjectService.checkSourceAssignedToSubject;
 import static org.radarcns.service.SubjectService.getSourceFromSubject;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
 import static org.radarcns.webapp.util.Parameter.END;
@@ -47,18 +46,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.exception.TokenException;
-import org.radarcns.listener.ContextResourceManager;
-import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.domain.managementportal.Source;
 import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.domain.managementportal.Subject;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
+import org.radarcns.exception.TokenException;
+import org.radarcns.listener.ContextResourceManager;
+import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.security.Param;
 import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.service.SourceTypeService;
@@ -141,57 +140,57 @@ public class SensorEndPoint {
         }
     }
 
-    /**
-     * AVRO function that returns the last seen data value if available.
-     */
-    @GET
-    @Produces(AVRO_BINARY)
-    @Path("/" + REALTIME + "/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL
-            + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
-            description =
-                    "Each collected sample is aggregated to provide near real-time statistical "
-                            + "results. This end-point returns the last computed result of type "
-                            + "stat for the "
-                            + "given subjectID, sourceID, and sensor. Data can be queried using "
-                            + "different "
-                            + "time-frame resolutions. The response is formatted in Apache AVRO.")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters.")
-    @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a "
-            + "dataset.avsc object containing last computed sample for the given inputs formatted "
-            + "either Acceleration.avsc or DoubleValue.avsc")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getLastReceivedSampleAvro(
-            @PathParam(SOURCEDATATYPE) String sensor,
-            @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(INTERVAL) TimeWindow interval,
-            @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
-                    sub.getProject().getProjectName());
-            checkSourceAssignedToSubject(sub, sourceId);
-            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
-                    (getSourceFromSubject(sub, sourceId));
-            return ResponseHandler.getAvroResponse(request,
-                    getLastReceivedSampleWorker(sub, sourceId, sensor, stat,
-                            interval , sourceTypeIdentifier.toString()));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
-        }
-    }
+//    /**
+//     * AVRO function that returns the last seen data value if available.
+//     */
+//    @GET
+//    @Produces(AVRO_BINARY)
+//    @Path("/" + REALTIME + "/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL
+//            + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+//    @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
+//            description =
+//                    "Each collected sample is aggregated to provide near real-time statistical "
+//                            + "results. This end-point returns the last computed result of type "
+//                            + "stat for the "
+//                            + "given subjectID, sourceID, and sensor. Data can be queried using "
+//                            + "different "
+//                            + "time-frame resolutions. The response is formatted in Apache AVRO.")
+//    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+//    @ApiResponse(responseCode = "204", description = "No value for the given parameters.")
+//    @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a "
+//            + "dataset.avsc object containing last computed sample for the given inputs formatted "
+//            + "either Acceleration.avsc or DoubleValue.avsc")
+//    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+//    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+//    public Response getLastReceivedSampleAvro(
+//            @PathParam(SOURCEDATATYPE) String sensor,
+//            @PathParam(STAT) DescriptiveStatistic stat,
+//            @PathParam(INTERVAL) TimeWindow interval,
+//            @PathParam(SUBJECT_ID) String subjectId,
+//            @PathParam(SOURCE_ID) String sourceId) {
+//        try {
+//            ManagementPortalClient client = ManagementPortalClientManager
+//                    .getManagementPortalClient(context);
+//            Subject sub = client.getSubject(subjectId);
+//            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+//                    sub.getProject().getProjectName());
+//            checkSourceAssignedToSubject(sub, sourceId);
+//            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+//                    (getSourceFromSubject(sub, sourceId));
+//            return ResponseHandler.getAvroResponse(request,
+//                    getLastReceivedSampleWorker(sub, sourceId, sensor, stat,
+//                            interval , sourceTypeIdentifier.toString()));
+//        } catch (AccessDeniedException exc) {
+//            LOGGER.error(exc.getMessage(), exc);
+//            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+//        } catch (NotAuthorizedException exc) {
+//            LOGGER.error(exc.getMessage(), exc);
+//            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
+//        } catch (Exception exec) {
+//            LOGGER.error(exec.getMessage(), exec);
+//            return ResponseHandler.getAvroErrorResponse(request);
+//        }
+//    }
 
     //--------------------------------------------------------------------------------------------//
     //                                   WHOLE-DATA FUNCTIONS                                     //
@@ -252,55 +251,55 @@ public class SensorEndPoint {
         }
     }
 
-    /**
-     * AVRO function that returns all available samples for the given data.
-     */
-    @GET
-    @Produces(AVRO_BINARY)
-    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
-            + SOURCE_ID + "}")
-    @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
-            description = "Each collected sample is aggregated to provide near real-time "
-                    + "statistical "
-                    + "results. This end-point returns all available results of type stat for the "
-                    + "given subjectID, sourceID, and sensor. Data can be queried using different "
-                    + "time-frame resolutions. The response is formatted in Apache AVRO.")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing.")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters.")
-    @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a "
-            + "dataset.avsc object containing all available samples for the given inputs formatted "
-            + "either Acceleration.avsc or DoubleValue.avsc")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getSamplesAvro(
-            @PathParam(SOURCEDATATYPE) String sourceDataType,
-            @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(INTERVAL) TimeWindow interval,
-            @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
-                    sub.getProject().getProjectName());
-            checkSourceAssignedToSubject(sub, sourceId);
-            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
-                    (getSourceFromSubject(sub, sourceId));
-            return ResponseHandler.getAvroResponse(request,
-                    getSamplesWorker(sub, sourceId, stat, interval, sourceDataType ,
-                            sourceTypeIdentifier.toString()));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
-        }
-    }
+//    /**
+//     * AVRO function that returns all available samples for the given data.
+//     */
+//    @GET
+//    @Produces(AVRO_BINARY)
+//    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+//            + SOURCE_ID + "}")
+//    @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
+//            description = "Each collected sample is aggregated to provide near real-time "
+//                    + "statistical "
+//                    + "results. This end-point returns all available results of type stat for the "
+//                    + "given subjectID, sourceID, and sensor. Data can be queried using different "
+//                    + "time-frame resolutions. The response is formatted in Apache AVRO.")
+//    @ApiResponse(responseCode = "500", description = "An error occurs while executing.")
+//    @ApiResponse(responseCode = "204", description = "No value for the given parameters.")
+//    @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a "
+//            + "dataset.avsc object containing all available samples for the given inputs formatted "
+//            + "either Acceleration.avsc or DoubleValue.avsc")
+//    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+//    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+//    public Response getSamplesAvro(
+//            @PathParam(SOURCEDATATYPE) String sourceDataType,
+//            @PathParam(STAT) DescriptiveStatistic stat,
+//            @PathParam(INTERVAL) TimeWindow interval,
+//            @PathParam(SUBJECT_ID) String subjectId,
+//            @PathParam(SOURCE_ID) String sourceId) {
+//        try {
+//            ManagementPortalClient client = ManagementPortalClientManager
+//                    .getManagementPortalClient(context);
+//            Subject sub = client.getSubject(subjectId);
+//            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+//                    sub.getProject().getProjectName());
+//            checkSourceAssignedToSubject(sub, sourceId);
+//            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+//                    (getSourceFromSubject(sub, sourceId));
+//            return ResponseHandler.getAvroResponse(request,
+//                    getSamplesWorker(sub, sourceId, stat, interval, sourceDataType ,
+//                            sourceTypeIdentifier.toString()));
+//        } catch (AccessDeniedException exc) {
+//            LOGGER.error(exc.getMessage(), exc);
+//            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+//        } catch (NotAuthorizedException exc) {
+//            LOGGER.error(exc.getMessage(), exc);
+//            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
+//        } catch (Exception exec) {
+//            LOGGER.error(exec.getMessage(), exec);
+//            return ResponseHandler.getAvroErrorResponse(request);
+//        }
+//    }
 
     //--------------------------------------------------------------------------------------------//
     //                                 WINDOWED-DATA FUNCTIONS                                    //
@@ -365,60 +364,60 @@ public class SensorEndPoint {
         }
     }
 
-    /**
-     * AVRO function that returns all data value inside the time-window [start-end].
-     */
-    @GET
-    @Produces(AVRO_BINARY)
-    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
-            + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
-    @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
-            description = "Each collected sample is aggregated to provide near real-time "
-                    + "statistical "
-                    + "results. This end-point returns all available results of type stat for the "
-                    + "given subjectID, sourceID, and sensor belonging to the time window "
-                    + "[start - end]. Data can be queried using different time-frame resolutions. "
-                    + "The response is formatted in Apache AVRO.")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
-    @ApiResponse(responseCode = "200", description =
-            "Returns a byte array serialising a dataset.avsc "
-                    + "object containing samples belonging to the time window [start - end] for "
-                    + "the "
-                    + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getSamplesWithinWindowAvro(
-            @PathParam(SOURCEDATATYPE) String sensor,
-            @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(INTERVAL) TimeWindow interval,
-            @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId,
-            @PathParam(START) long start,
-            @PathParam(END) long end) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
-                    sub.getProject().getProjectName());
-            checkSourceAssignedToSubject(sub, sourceId);
-            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
-                    (getSourceFromSubject(sub, sourceId));
-            return ResponseHandler
-                    .getAvroResponse(request, getSamplesWithinWindowWorker(sub, sourceId, stat,
-                            interval, sensor, start, end, sourceTypeIdentifier.toString()));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
-        }
-    }
+//    /**
+//     * AVRO function that returns all data value inside the time-window [start-end].
+//     */
+//    @GET
+//    @Produces(AVRO_BINARY)
+//    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+//            + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
+//    @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
+//            description = "Each collected sample is aggregated to provide near real-time "
+//                    + "statistical "
+//                    + "results. This end-point returns all available results of type stat for the "
+//                    + "given subjectID, sourceID, and sensor belonging to the time window "
+//                    + "[start - end]. Data can be queried using different time-frame resolutions. "
+//                    + "The response is formatted in Apache AVRO.")
+//    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+//    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
+//    @ApiResponse(responseCode = "200", description =
+//            "Returns a byte array serialising a dataset.avsc "
+//                    + "object containing samples belonging to the time window [start - end] for "
+//                    + "the "
+//                    + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")
+//    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+//    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+//    public Response getSamplesWithinWindowAvro(
+//            @PathParam(SOURCEDATATYPE) String sensor,
+//            @PathParam(STAT) DescriptiveStatistic stat,
+//            @PathParam(INTERVAL) TimeWindow interval,
+//            @PathParam(SUBJECT_ID) String subjectId,
+//            @PathParam(SOURCE_ID) String sourceId,
+//            @PathParam(START) long start,
+//            @PathParam(END) long end) {
+//        try {
+//            ManagementPortalClient client = ManagementPortalClientManager
+//                    .getManagementPortalClient(context);
+//            Subject sub = client.getSubject(subjectId);
+//            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+//                    sub.getProject().getProjectName());
+//            checkSourceAssignedToSubject(sub, sourceId);
+//            SourceTypeIdentifier sourceTypeIdentifier= SourceTypeService.getSourceTypeIdFromSource
+//                    (getSourceFromSubject(sub, sourceId));
+//            return ResponseHandler
+//                    .getAvroResponse(request, getSamplesWithinWindowWorker(sub, sourceId, stat,
+//                            interval, sensor, start, end, sourceTypeIdentifier.toString()));
+//        } catch (AccessDeniedException exc) {
+//            LOGGER.error(exc.getMessage(), exc);
+//            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+//        } catch (NotAuthorizedException exc) {
+//            LOGGER.error(exc.getMessage(), exc);
+//            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
+//        } catch (Exception exec) {
+//            LOGGER.error(exec.getMessage(), exec);
+//            return ResponseHandler.getAvroErrorResponse(request);
+//        }
+//    }
 
 
     public Dataset getSamplesWorker(Subject subject, String source, DescriptiveStatistic stat,
@@ -433,7 +432,7 @@ public class SensorEndPoint {
                             source, stat, interval, sourceData, context , sourceTypeId);
 
             if (dataset.getDataset().isEmpty()) {
-                LOGGER.debug("No data for the subject {} with source {}", subject, source);
+                LOGGER.debug("No data for the subject {} with sourceType {}", subject, source);
             }
         }
 
@@ -471,7 +470,7 @@ public class SensorEndPoint {
                 subject.getId(), sourceId, stat, interval, start, end, sourceData, context , sourceTypeId);
 
         if (dataset.getDataset().isEmpty()) {
-            LOGGER.debug("No data for the subject {} with source {}", subject, sourceId);
+            LOGGER.debug("No data for the subject {} with sourceType {}", subject, sourceId);
         }
 
         return dataset;
@@ -494,7 +493,7 @@ public class SensorEndPoint {
                             stat, interval, sourceData, context , sourceTypeId);
 
             if (dataset.getDataset().isEmpty()) {
-                LOGGER.debug("No data for the subject {} with source {}", subject, source);
+                LOGGER.debug("No data for the subject {} with sourceType {}", subject, source);
             }
         }
 

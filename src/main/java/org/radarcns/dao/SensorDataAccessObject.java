@@ -28,17 +28,16 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
 import org.radarcns.catalog.SourceCatalog;
-import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.catalogue.Unit;
+import org.radarcns.domain.managementportal.SourceData;
+import org.radarcns.domain.restapi.Source;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.data.sensor.DataFormat;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoSensor;
-import org.radarcns.domain.managementportal.SourceData;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.header.DescriptiveStatistic;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
-import org.radarcns.restapi.header.Header;
-import org.radarcns.restapi.source.Source;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,17 +67,17 @@ public class SensorDataAccessObject {
     }
 
     /**
-     * Returns the singleton Data Access Object associated with the sensor for the given source.
+     * Returns the singleton Data Access Object associated with the sensor for the given sourceType.
      *
      * @param sensorType sensor of interest
-     * @return {@code MongoSensor} associated with the requested sensor for the given source
+     * @return {@code MongoSensor} associated with the requested sensor for the given sourceType
      */
     public MongoSensor getInstance(String sensorType) {
         return this.mongoSensorMap.get(sensorType);
     }
 
     /**
-     * Returns a {@code Dataset} containing the last seen value for the couple subject source.
+     * Returns a {@code Dataset} containing the last seen value for the couple subject sourceType.
      *
      * @param subject is the subjectID
      * @param source is the sourceID
@@ -87,7 +86,7 @@ public class SensorDataAccessObject {
      * @param sourceData is the required sensor type
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
-     * @return the last seen data value stat for the given subject and source, otherwise
+     * @return the last seen data value stat for the given subject and sourceType, otherwise
      *      empty dataset
      *
      * @see Dataset
@@ -109,11 +108,11 @@ public class SensorDataAccessObject {
 
         return sensorDao.valueRTByUserSource(subject, source, header,
                     RadarConverter.getMongoStat(stat), MongoHelper.getCollection(context,
-                        sensorDao.getCollectionName(header.getSource(), timeWindow)));
+                        sensorDao.getCollectionName(header.getSourceType(), timeWindow)));
     }
 
     /**
-     * Returns a {@code Dataset} containing alla available values for the couple subject source.
+     * Returns a {@code Dataset} containing alla available values for the couple subject sourceType.
      *
      * @param subject is the subjectID
      * @param source is the sourceID
@@ -122,7 +121,7 @@ public class SensorDataAccessObject {
      * @param sourceData is the required sensor type
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
-     * @return data dataset for the given subject and source, otherwise empty dataset
+     * @return data dataset for the given subject and sourceType, otherwise empty dataset
      *
      * @see Dataset
      */
@@ -143,7 +142,7 @@ public class SensorDataAccessObject {
 
         return sensorDao.valueByUserSource(subject, source, header,
                 RadarConverter.getMongoStat(stat), MongoHelper.getCollection(context,
-                    sensorDao.getCollectionName(header.getSource(), timeWindow)));
+                    sensorDao.getCollectionName(header.getSourceType(), timeWindow)));
     }
 
     /**
@@ -158,7 +157,7 @@ public class SensorDataAccessObject {
      * @param sourceData is the required sensor type
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
-     * @return data dataset for the given subject and source within the start and end time window,
+     * @return data dataset for the given subject and sourceType within the start and end time window,
      *      otherwise empty dataset
      *
      * @see Dataset
@@ -180,18 +179,18 @@ public class SensorDataAccessObject {
 
         return sensorDao.valueByUserSourceWindow(subject, source, header,
                 RadarConverter.getMongoStat(stat), start, end, MongoHelper.getCollection(context,
-                    sensorDao.getCollectionName(header.getSource(), timeWindow)));
+                    sensorDao.getCollectionName(header.getSourceType(), timeWindow)));
     }
 
     /**
      * Counts the received messages within the time-window [start-end] for the couple subject
-     *      source.
+     *      sourceType.
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
      * @param sensorType is the required sensor type
-     * @param sourceType is the required source type
+     * @param sourceType is the required sourceType type
      * @return the number of received messages within the time-window [start-end].
      */
     public double count(String subject, String source, Long start,
@@ -242,9 +241,9 @@ public class SensorDataAccessObject {
     }
 
     /**
-     * Finds the source type for the given sourceID.
+     * Finds the sourceType type for the given sourceID.
      *
-     * @param source source identifier
+     * @param source sourceType identifier
      * @param client {@link MongoClient} used to connect to the database
      * @return a study {@code SourceType}
      *
@@ -283,9 +282,9 @@ public class SensorDataAccessObject {
         for (MongoSensor mongoSensor : mongoSensorMap.values()) {
             for (Source source : sources) {
                 start = Math.min(start,
-                        mongoSensor.getTimestamp(subject, source.getId(), true, client).getTime());
+                        mongoSensor.getTimestamp(subject, source.getSourceId(), true, client).getTime());
                 end = Math.max(end,
-                    mongoSensor.getTimestamp(subject, source.getId(), false, client).getTime());
+                    mongoSensor.getTimestamp(subject, source.getSourceId(), false, client).getTime());
             }
         }
 
@@ -311,27 +310,27 @@ public class SensorDataAccessObject {
         return mongoSensorMap.keySet();
     }
 
-    /**
-     * Either returns the {@link Unit} specified in the
-     *      {@link org.radarcns.config.catalog.DeviceCatalog} for the given source type and
-     *      sensor type or overrides the default {@link Unit} for the given
-     *      {@link DescriptiveStatistic}.
-     *
-     * @param sourceType source type where the sensor is hosted
-     * @param sensorType sensor type of interest
-     * @param statistic {@link DescriptiveStatistic} for which the {@link Unit} is required
-     *
-     * @return a {@link Unit}
-     */
-    public static Unit getUnit(String sourceType, String sensorType,
-            DescriptiveStatistic statistic) {
-
-        switch (statistic) {
-            case RECEIVED_MESSAGES: return Unit.PERCENTAGE;
-            default: return null;
-//            default: return SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
-        }
-    }
+//    /**
+//     * Either returns the {@link Unit} specified in the
+//     *      {@link SourceData} for the given  sourcedata and
+//     *      sensor type or overrides the default {@link Unit} for the given
+//     *      {@link DescriptiveStatistic}.
+//     *
+//     * @param sourceType sourceType type where the sensor is hosted
+//     * @param sensorType sensor type of interest
+//     * @param statistic {@link DescriptiveStatistic} for which the {@link Unit} is required
+//     *
+//     * @return a {@link Unit}
+//     */
+//    public static Unit getUnit(String sourceType, String sensorType,
+//            DescriptiveStatistic statistic) {
+//
+//        switch (statistic) {
+//            case RECEIVED_MESSAGES: return Unit.PERCENTAGE;
+//            default: return null;
+////            default: return SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
+//        }
+//    }
 
     /**
      * Returns a {@link Header} that can be used to constract a {@link Dataset}.

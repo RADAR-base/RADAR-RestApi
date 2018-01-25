@@ -29,13 +29,13 @@ public interface BasePath {
     String GET_SUBJECT = "getSubject";
     String REALTIME = "realTime";
     String SPECIFICATION = "specification";
-    String SOURCE = "source";
+    String SOURCE = "sourceType";
     String SUBJECT = "subject";
     String STATUS = "status";
     String STATE = "state";
     String PROJECT = "projects";
     String SUBJECTS = "subjects";
-    String SOURCE_TYPES = "source-types";
+    String SOURCE_TYPES = "sourceType-types";
     String AVRO_BINARY = "avro/binary";
 
 

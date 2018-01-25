@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.domain.managementportal.SourceType;
-import org.radarcns.domain.restapi.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.monitor.SourceMonitor;
 import org.radarcns.util.RadarConverter;

@@ -54,10 +54,10 @@ public class SourceTypeEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Returns a list of source-types")
+    @Operation(summary = "Returns a list of sourceType-types")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description = "Return a list of source-type objects")
+    @ApiResponse(responseCode = "200", description = "Return a list of sourceType-type objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getAllSourceTypesJson() {
@@ -89,7 +89,7 @@ public class SourceTypeEndPoint {
     @Path("/{" + PRODUCER + "}/{" + MODEL + "}/{" + CATALOGUE_VERSION + "}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Returns a list of projects",
-            description = "Each project can have multiple source-types associated with it")
+            description = "Each project can have multiple sourceType-types associated with it")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a list of project objects")

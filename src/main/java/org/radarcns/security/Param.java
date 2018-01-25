@@ -22,7 +22,7 @@ package org.radarcns.security;
 public class Param {
 
     public static final String SUBJECT = "subject";
-    public static final String SOURCE = "source";
+    public static final String SOURCE = "sourceType";
 
     public static boolean isNullOrEmpty(String input) {
         return input == null || input.trim().isEmpty();

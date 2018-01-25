@@ -48,10 +48,10 @@
 //import org.radarcns.integration.util.RestApiDetails;
 //import org.radarcns.integration.util.Utility;
 //import org.radarcns.monitor.Monitors;
-//import org.radarcns.restapi.source.Sensor;
-//import org.radarcns.restapi.source.Source;
-//import org.radarcns.restapi.source.SourceSummary;
-//import org.radarcns.restapi.source.States;
+//import org.radarcns.restapi.sourceType.Sensor;
+//import org.radarcns.restapi.sourceType.Source;
+//import org.radarcns.restapi.sourceType.SourceSummary;
+//import org.radarcns.restapi.sourceType.States;
 //import org.radarcns.restapi.spec.SensorSpecification;
 //import org.radarcns.restapi.spec.SourceSpecification;
 //import org.radarcns.restapi.subject.Subject;

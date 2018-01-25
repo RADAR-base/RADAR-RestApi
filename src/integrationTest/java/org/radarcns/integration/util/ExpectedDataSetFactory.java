@@ -25,16 +25,16 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.data.DataItem;
+import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.restapi.data.Acceleration;
 import org.radarcns.restapi.data.DoubleSample;
 import org.radarcns.restapi.data.Quartiles;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.dataset.Item;
-import org.radarcns.restapi.header.DescriptiveStatistic;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
-import org.radarcns.restapi.header.Header;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;
@@ -49,8 +49,8 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param expectedValue mock data used to test
      * @param subjectId subject identifier
-     * @param sourceId source identifier
-     * @param sourceType source that has to be simulated
+     * @param sourceId sourceType identifier
+     * @param sourceType sourceType that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
      * @param timeWindow time interval between two consecutive samples
@@ -72,8 +72,8 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param expectedValue mock data used to test
      * @param subjectId subject identifier
-     * @param sourceId source identifier
-     * @param sourceType source that has to be simulated
+     * @param sourceId sourceType identifier
+     * @param sourceType sourceType that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
      * @param timeWindow time interval between two consecutive samples
@@ -123,9 +123,9 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
      * @return {@code List<Item>} for a {@link Dataset}
      *
-     * @see Item
+     * @see DataItem
      **/
-    public List<Item> getItem(ExpectedValue<?> expectedValue, Header header)
+    public List<DataItem> getItem(ExpectedValue<?> expectedValue, Header header)
             throws IllegalAccessException, InstantiationException {
 
         if (expectedValue.getSeries().isEmpty()) {
@@ -137,12 +137,12 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
         if (singleExpectedValue instanceof DoubleArrayCollector) {
             return getArrayItems(expectedValue, keys, header.getDescriptiveStatistic(),
-                    header.getType());
+                    header.getAssessmentType());
         } else if (singleExpectedValue instanceof DoubleValueCollector) {
             return getSingletonItems(expectedValue, keys, header.getDescriptiveStatistic(),
-                header.getType());
+                header.getAssessmentType());
         } else {
-            throw new IllegalArgumentException(header.getType() + " not supported yet");
+            throw new IllegalArgumentException(header.getAssessmentType() + " not supported yet");
         }
     }
 
@@ -153,10 +153,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param statistic function that has to be simulated
      * @param sensor @return {@code List<Item>} for a dataset
      */
-    private List<Item> getArrayItems(ExpectedValue expectedValue,
+    private List<DataItem> getArrayItems(ExpectedValue expectedValue,
             Collection<Long> keys, DescriptiveStatistic statistic,
             String sensor) {
-        List<Item> items = new LinkedList<>();
+        List<DataItem> items = new LinkedList<>();
 
         for (Long key : keys) {
             DoubleArrayCollector dac = (DoubleArrayCollector) expectedValue.getSeries().get(key);
@@ -175,7 +175,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                         content = new Acceleration(statValues.get(0), statValues.get(1),
                                 statValues.get(2));
                     }
-                    items.add(new Item(content, getEffectiveTimeFrame(key).getStartDateTime()));
+                    items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
                     break;
                 default:
                     throw new IllegalArgumentException(sensor + " is not a supported test case");
@@ -203,10 +203,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param sensor @return {@code List<Item>} for a data set
      *      represented as {@code Double}.
      **/
-    private List<Item> getSingletonItems(ExpectedValue expectedValue,
+    private List<DataItem> getSingletonItems(ExpectedValue expectedValue,
             Collection<Long> keys, DescriptiveStatistic statistic,
             String sensor) throws InstantiationException, IllegalAccessException {
-        List<Item> items = new LinkedList<>();
+        List<DataItem> items = new LinkedList<>();
 
         for (Long key : keys) {
             DoubleValueCollector dac = (DoubleValueCollector) expectedValue.getSeries().get(key);
@@ -214,7 +214,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             Object content = getContent(getStatValue(statistic, dac), statistic,
                     getSensorClass(sensor));
 
-            items.add(new Item(content, getEffectiveTimeFrame(key).getStartDateTime()));
+            items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
         }
 
         return items;

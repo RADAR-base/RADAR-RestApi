@@ -21,11 +21,11 @@ import static org.radarcns.mongo.util.MongoHelper.COUNT;
 
 import java.util.List;
 import org.bson.Document;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
+import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.util.MongoSensor;
 import org.radarcns.restapi.data.DoubleSample;
 import org.radarcns.restapi.data.Quartiles;
-import org.radarcns.restapi.header.DescriptiveStatistic;
-import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 
 /**

@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.util.HashMap;
 import javax.servlet.ServletContext;
+import org.radarcns.domain.restapi.Source;
 import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.catalog.SourceCatalog;
 
@@ -31,7 +31,7 @@ import org.radarcns.catalog.SourceCatalog;
  */
 public class Monitors {
 
-    /** Map containing actual implementations of each source monitor. **/
+    /** Map containing actual implementations of each sourceType monitor. **/
     private final HashMap<String, SourceMonitor> hooks;
 
     /** Singleton instance. **/
@@ -66,14 +66,14 @@ public class Monitors {
     }
 
     /**
-     * Checks the status for the given source counting the number of received messages and
+     * Checks the status for the given sourceType counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
      *
      * @param subject identifier
      * @param source identifier
      * @param context {@link ServletContext} used to retrieve the client for accessing the
      *      results cache
-     * @return {@code SourceDefinition} representing a source source
+     * @return {@code SourceDefinition} representing a sourceType sourceType
      * @throws ConnectException if the connection with MongoDb is faulty
      *
      * @see Source
@@ -84,13 +84,13 @@ public class Monitors {
     }
 
     /**
-     * Checks the status for the given source counting the number of received messages and
+     * Checks the status for the given sourceType counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
      *
      * @param subject identifier
      * @param source identifier
      * @param client is the MongoDB client
-     * @return {@code SourceDefinition} representing a source source
+     * @return {@code SourceDefinition} representing a sourceType sourceType
      * @throws ConnectException if the connection with MongoDb is faulty
      *
      * @see Source
@@ -103,7 +103,7 @@ public class Monitors {
             throw new UnsupportedOperationException(sourceType + "is not currently supported");
         }
         // TODO find the number of records available and get the state
-//        return monitor.getState(subject, source, client , 0);
+//        return monitor.getState(subject, sourceType, client , 0);
         return null;
     }
 
@@ -120,7 +120,7 @@ public class Monitors {
             throw new UnsupportedOperationException(sourceType + " is not currently supported");
         }
 
-//        return monitor.getSource().getSpecification();
+//        return monitor.getSourceType().getSpecification();
         return null;
     }
 

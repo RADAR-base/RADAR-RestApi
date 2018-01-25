@@ -17,13 +17,13 @@
 package org.radarcns.integration.unit;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
 
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.junit.Test;
-import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.integration.util.RandomInput;

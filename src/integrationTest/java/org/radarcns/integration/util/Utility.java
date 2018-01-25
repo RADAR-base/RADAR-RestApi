@@ -34,18 +34,18 @@ import java.util.List;
 import java.util.Map;
 import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
-import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.config.Properties;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.data.DataItem;
+import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.listener.MongoDbContextListener;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.restapi.data.Acceleration;
 import org.radarcns.restapi.data.DoubleSample;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.dataset.Item;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
-import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 
 public class Utility {
@@ -101,7 +101,7 @@ public class Utility {
      * Generates a Dataset using the input documents.
      * @param docs list of Documents that has to be converted
      * @param subjectId subject identifier
-     * @param sourceId source identifier
+     * @param sourceId sourceType identifier
      * @param stat filed extracted from the document
      * @param unit measurement unit useful to generate the dataset's header
      * @param timeWindow time interval between two consecutive samples
@@ -118,7 +118,7 @@ public class Utility {
                 RadarConverter.getISO8601(docs.get(0).getDate(START)),
                 RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate(END)));
 
-        List<Item> itemList = new LinkedList<>();
+        List<DataItem> itemList = new LinkedList<>();
         for (Document doc : docs) {
             SpecificRecord record = recordClass.newInstance();
             switch (stat) {
@@ -129,7 +129,7 @@ public class Utility {
                             doc.getDouble(stat.getParam()));
                     break;
             }
-            itemList.add(new Item(record, RadarConverter.getISO8601(doc.getDate(START))));
+            itemList.add(new DataItem(record, RadarConverter.getISO8601(doc.getDate(START))));
         }
 
         Header header = new Header(subjectId, sourceId, sourceType, sensorType,
@@ -212,14 +212,14 @@ public class Utility {
                 inputHeader.getEffectiveTimeFrame().getStartDateTime(),
                 inputHeader.getEffectiveTimeFrame().getEndDateTime());
         Header cloneHeader = new Header(inputHeader.getSubjectId(), inputHeader.getSourceId(),
-                    inputHeader.getSource(), inputHeader.getType(),
+                    inputHeader.getSourceType(), inputHeader.getAssessmentType(),
                     inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
                     inputHeader.getTimeWindow(), cloneEffectiveTimeFrame);
 
 
-        List<Item> cloneItem = new ArrayList<>();
+        List<DataItem> cloneItem = new ArrayList<>();
         SpecificRecord value;
-        for (Item item : input.getDataset()) {
+        for (DataItem item : input.getDataset()) {
 
             if (item.getSample() instanceof DoubleSample) {
                 value = new DoubleSample(((DoubleSample)item.getSample()).getValue());
@@ -231,7 +231,7 @@ public class Utility {
                         + " is not supported yet");
             }
 
-            cloneItem.add(new Item(value, item.getStartDateTime()));
+            cloneItem.add(new DataItem(value, item.getStartDateTime()));
         }
 
         return new Dataset(cloneHeader, cloneItem);

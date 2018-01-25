@@ -25,13 +25,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
+import org.radarcns.domain.restapi.Source;
 import org.radarcns.mongo.data.android.AndroidAppStatus;
 import org.radarcns.mongo.data.android.AndroidRecordCounter;
 import org.radarcns.mongo.data.android.AndroidServerStatus;
 import org.radarcns.mongo.util.MongoAndroidApp;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.restapi.app.Application;
-import org.radarcns.restapi.source.Source;
 
 /**
  * Data Access Object for Android App Status values.
@@ -126,7 +126,7 @@ public class AndroidAppDataAccessObject {
     }
 
     /**
-     * Finds the source type for the given sourceID.
+     * Finds the sourceType type for the given sourceID.
      *
      * @param source SourceID
      * @param client MongoDB client

@@ -72,14 +72,14 @@ public class ManagementPortalConfig {
     private String subjectEndpoint;
 
     /**
-     * Web root of Management Portal source-type end point. It is required to create and get
+     * Web root of Management Portal sourceType-type end point. It is required to create and get
      * ManagementPortal SourceTypes.
      */
     @JsonProperty("source_data_endpoint")
     private String sourceDataEndpoint;
 
     /**
-     * Web root of Management Portal source-type end point. It is required to create and get
+     * Web root of Management Portal sourceType-type end point. It is required to create and get
      * Managemen
      *      Portal Subjects.
      */

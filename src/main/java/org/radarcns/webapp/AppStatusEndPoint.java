@@ -95,8 +95,8 @@ public class AppStatusEndPoint {
             Subject sub = client.getSubject(subjectId);
             checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
                     sub.getProject().getProjectName());
-            return ResponseHandler.getJsonResponse(request,
-                    getLastReceivedAppStatusWorker(subjectId, sourceId));
+            return Response.ok().entity(
+                    getLastReceivedAppStatusWorker(subjectId, sourceId)).build();
         } catch (AccessDeniedException exc) {
             LOGGER.error(exc.getMessage(), exc);
             return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
@@ -111,43 +111,43 @@ public class AppStatusEndPoint {
         }
     }
 
-    /**
-     * AVRO function that returns the status app of the given subject.
-     */
-    @GET
-    @Produces(AVRO_BINARY)
-    @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @Operation(summary = "Return an Applications status",
-            description = "The Android application periodically updates its current status")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
-    @ApiResponse(responseCode = "200", description =
-            "Return a application.avsc object containing last"
-                    + "received status")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getLastReceivedAppStatusAvro(
-            @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
-                    sub.getProject().getProjectName());
-            return ResponseHandler.getAvroResponse(request,
-                    getLastReceivedAppStatusWorker(subjectId, sourceId));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
-        }
-    }
+//    /**
+//     * AVRO function that returns the status app of the given subject.
+//     */
+//    @GET
+//    @Produces(AVRO_BINARY)
+//    @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+//    @Operation(summary = "Return an Applications status",
+//            description = "The Android application periodically updates its current status")
+//    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+//    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
+//    @ApiResponse(responseCode = "200", description =
+//            "Return a application.avsc object containing last"
+//                    + "received status")
+//    @ApiResponse(responseCode = "401", description = "Access denied error occured")
+//    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+//    public Response getLastReceivedAppStatusAvro(
+//            @PathParam(SUBJECT_ID) String subjectId,
+//            @PathParam(SOURCE_ID) String sourceId) {
+//        try {
+//            ManagementPortalClient client = ManagementPortalClientManager
+//                    .getManagementPortalClient(context);
+//            Subject sub = client.getSubject(subjectId);
+//            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
+//                    sub.getProject().getProjectName());
+//            return ResponseHandler.getAvroResponse(request,
+//                    getLastReceivedAppStatusWorker(subjectId, sourceId));
+//        } catch (AccessDeniedException exc) {
+//            LOGGER.error(exc.getMessage(), exc);
+//            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
+//        } catch (NotAuthorizedException exc) {
+//            LOGGER.error(exc.getMessage(), exc);
+//            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
+//        } catch (Exception exec) {
+//            LOGGER.error(exec.getMessage(), exec);
+//            return ResponseHandler.getAvroErrorResponse(request);
+//        }
+//    }
 
     /**
      * Actual implementation of AVRO and JSON getRealTimeUser.

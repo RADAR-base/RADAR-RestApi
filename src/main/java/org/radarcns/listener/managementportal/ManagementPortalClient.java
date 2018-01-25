@@ -233,7 +233,7 @@ public class ManagementPortalClient {
     /**
      * Retrieves all {@link SourceType} from Management Portal using {@link ServletContext} entity.
      *
-     * @return source-types retrieved from the management portal.
+     * @return sourceType-types retrieved from the management portal.
      */
     public List<SourceType> retrieveSourceTypes() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
@@ -243,7 +243,7 @@ public class ManagementPortalClient {
         try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
-                throw new IOException("Failed to retrieve all source-types: " + responseBody);
+                throw new IOException("Failed to retrieve all sourceType-types: " + responseBody);
             }
             List<SourceType> allSourceTypes = SOURCE_TYPE_LIST_READER.readValue(responseBody);
             logger.info("Retrieved SourceTypes from MP");
@@ -255,7 +255,7 @@ public class ManagementPortalClient {
      * Retrieves all {@link org.radarcns.domain.managementportal.SourceData} from Management Portal
      * using {@link ServletContext} entity.
      *
-     * @return source-types retrieved from the management portal.
+     * @return sourceType-types retrieved from the management portal.
      */
     public List<SourceData> retrieveSourceData() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
@@ -265,7 +265,7 @@ public class ManagementPortalClient {
         try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
-                throw new IOException("Failed to retrieve all source-data: " + responseBody);
+                throw new IOException("Failed to retrieve all sourceType-data: " + responseBody);
             }
             List<SourceData> allSourceData = SOURCE_DATA_LIST_READER.readValue(responseBody);
             logger.info("Retrieved SourceTypes from MP");

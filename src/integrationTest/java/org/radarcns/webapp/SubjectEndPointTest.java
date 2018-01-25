@@ -47,10 +47,10 @@
 //import org.radarcns.integration.util.RandomInput;
 //import org.radarcns.integration.util.RestApiDetails;
 //import org.radarcns.integration.util.Utility;
-//import org.radarcns.restapi.source.Sensor;
-//import org.radarcns.restapi.source.Source;
-//import org.radarcns.restapi.source.SourceSummary;
-//import org.radarcns.restapi.source.States;
+//import org.radarcns.restapi.sourceType.Sensor;
+//import org.radarcns.restapi.sourceType.Source;
+//import org.radarcns.restapi.sourceType.SourceSummary;
+//import org.radarcns.restapi.sourceType.States;
 //import org.radarcns.restapi.subject.Cohort;
 //import org.radarcns.restapi.subject.Subject;
 //import org.radarcns.util.RadarConverter;
@@ -98,13 +98,13 @@
 //
 //        for (Subject patient : cohort.getSubjects()) {
 //            if (patient.getSubjectId().equalsIgnoreCase(SUBJECT)) {
-//                Source source = patient.getSources().get(0);
-//                assertEquals(SOURCE_TYPE, source.getType());
-//                assertEquals(SOURCE, source.getId());
+//                Source sourceType = patient.getSources().get(0);
+//                assertEquals(SOURCE_TYPE, sourceType.getType());
+//                assertEquals(SOURCE, sourceType.getId());
 //            } else if (patient.getSubjectId().equalsIgnoreCase(SUBJECT.concat("1"))) {
-//                Source source = patient.getSources().get(0);
-//                assertEquals("ANDROID", source.getType());
-//                assertEquals(SOURCE.concat("1"), source.getId());
+//                Source sourceType = patient.getSources().get(0);
+//                assertEquals("ANDROID", sourceType.getType());
+//                assertEquals(SOURCE.concat("1"), sourceType.getId());
 //            }
 //        }
 //

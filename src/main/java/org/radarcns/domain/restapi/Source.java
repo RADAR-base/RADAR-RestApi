@@ -1,6 +1,7 @@
 package org.radarcns.domain.restapi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 
 public class Source {
 
@@ -28,6 +29,24 @@ public class Source {
     @JsonProperty
     private EffectiveTimeFrame effectiveTimeFrame;
 
+    /**
+     * Default constructor.  Note that this does not initialize fields
+     * to their default values from the schema.  If that is desired then
+     * one should use <code>newBuilder()</code>.
+     */
+    public Source() {}
+
+    /**
+     * All-args constructor.
+     * @param id Source identifier.
+     * @param type Source name.
+     * @param summary Source details.
+     */
+    public Source(java.lang.String id, java.lang.String type, org.radarcns.restapi.source.SourceSummary summary) {
+        this.sourceId = id;
+        this.sourceTypeModel = type;
+//        this.summary = summary;
+    }
     public Source sourceId(String sourceId) {
         this.sourceId = sourceId;
         return this;

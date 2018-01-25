@@ -4,7 +4,7 @@ device_catalog:
   #====================== Empatica E4 Wristband =======================#
   #A device item states the specification and the configurations required to integrate a wearable
   # device into the data access interface. The used value must be contained in
-  # RADAR-Schemas/restapi/source/sources_type.avsc
+  # RADAR-Schemas/restapi/sourceType/sources_type.avsc
   EMPATICA:
     #List of on-board sensors
     sensors:

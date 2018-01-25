@@ -25,14 +25,14 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import org.bson.Document;
-import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.data.DataItem;
+import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.data.sensor.DataFormat;
 import org.radarcns.mongo.util.MongoHelper.Stat;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.dataset.Item;
-import org.radarcns.restapi.header.DescriptiveStatistic;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
-import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +51,9 @@ public abstract class MongoSensor extends MongoDataAccess {
     private final DataFormat dataFormat;
 
     /**
-     * Constructs a MongoSensor able to query the collections of the sensor for the given source.
+     * Constructs a MongoSensor able to query the collections of the sensor for the given sourceType.
      *
-     * @param sensorType sensor of the given source that will be consume from this instance
+     * @param sensorType sensor of the given sourceType that will be consume from this instance
      */
     public MongoSensor(DataFormat format, String sensorType) {
 
@@ -95,14 +95,14 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Returns a {@code Dataset} containing the last seen value for the couple subject source.
+     * Returns a {@code Dataset} containing the last seen value for the couple subject sourceType.
      *
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param stat is the required statistical value
      * @param header information used to provide the data context
      * @param collection is the mongoDb collection that has to be queried
-     * @return the last seen data value stat for the given subject and source, otherwise
+     * @return the last seen data value stat for the given subject and sourceType, otherwise
      *      empty dataset
      *
      * @see Dataset
@@ -119,14 +119,14 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Returns a {@code Dataset} containing alla available values for the couple subject source.
+     * Returns a {@code Dataset} containing alla available values for the couple subject sourceType.
      *
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param header information used to provide the data context
      * @param stat is the required statistical value
      * @param collection is the mongoDb collection that has to be queried
-     * @return data dataset for the given subject and source, otherwise empty dataset
+     * @return data dataset for the given subject and sourceType, otherwise empty dataset
      *
      * @see Dataset
      */
@@ -141,7 +141,7 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Returns a {@code Dataset} containing alla available values for the couple subject source.
+     * Returns a {@code Dataset} containing alla available values for the couple subject sourceType.
      *
      * @param subject is the subjectID
      * @param source is the sourceID
@@ -150,7 +150,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
      * @param collection is the mongoDb collection that has to be queried
-     * @return data dataset for the given subject and source within the start and end time window,
+     * @return data dataset for the given subject and sourceType within the start and end time window,
      *      otherwise empty dataset
      *
      * @see Dataset
@@ -167,7 +167,7 @@ public abstract class MongoSensor extends MongoDataAccess {
 
     /**
      * Counts the received messages within the time-window [start-end] for the couple subject
-     *      source.
+     *      sourceType.
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param start is time window start point in millisecond
@@ -212,7 +212,7 @@ public abstract class MongoSensor extends MongoDataAccess {
         Date start = null;
         Date end = null;
 
-        LinkedList<Item> list = new LinkedList<>();
+        LinkedList<DataItem> list = new LinkedList<>();
 
         if (!cursor.hasNext()) {
             LOGGER.debug("Empty cursor");
@@ -238,7 +238,7 @@ public abstract class MongoSensor extends MongoDataAccess {
                 }
             }
 
-            Item item = new Item(docToAvro(doc, field, stat, header),
+            DataItem item = new DataItem(docToAvro(doc, field, stat, header),
                     RadarConverter.getISO8601(doc.getDate(MongoHelper.START)));
 
             list.addLast(item);
@@ -260,7 +260,7 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Finds source type for the given subject using the source catalog.
+     * Finds sourceType type for the given subject using the sourceType catalog.
      *
      * @param collection name
      */
@@ -274,9 +274,9 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Returns the required mongoDB collection name for the given source type.
+     * Returns the required mongoDB collection name for the given sourceType type.
      *
-     * @param source source type
+     * @param source sourceType type
      * @param interval useful to identify which collection has to be queried. A sensor has a
      *      collection for each time frame or time window
      * @return the MongoDB Collection name
@@ -287,7 +287,7 @@ public abstract class MongoSensor extends MongoDataAccess {
             return deviceCollections.get(source).get(interval);
         }
 
-        throw new IllegalArgumentException("Unknown source type. " + source
+        throw new IllegalArgumentException("Unknown sourceType type. " + source
             + "is not yest supported.");
     }
 
@@ -305,9 +305,9 @@ public abstract class MongoSensor extends MongoDataAccess {
      * Convert a {@link Document} to the corresponding
      *      {@link org.apache.avro.specific.SpecificRecord}.
      *
-     * @param doc {@link Document} storing data used to create the related {@link Item}
+     * @param doc {@link Document} storing data used to create the related {@link DataItem}
      * @param field key of the value that has to be extracted from the {@link Document}
-     * @param stat {@link DescriptiveStatistic} represented by the resulting {@link Item}
+     * @param stat {@link DescriptiveStatistic} represented by the resulting {@link DataItem}
      * @param header {@link Header} used to provide the data context
      *
      * @implSpec this function must be override by the subclass

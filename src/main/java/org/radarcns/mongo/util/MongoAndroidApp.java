@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.bson.Document;
-import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.restapi.app.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public abstract class MongoAndroidApp extends MongoDataAccess {
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param client is the mongoDb client instance
-     * @return the last seen status update for the given subject and source, otherwise null
+     * @return the last seen status update for the given subject and sourceType, otherwise null
      */
     public Application valueBySubjectSource(String subject, String source, Application app,
             MongoClient client) throws ConnectException {

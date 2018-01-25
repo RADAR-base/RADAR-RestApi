@@ -52,10 +52,13 @@ import org.apache.avro.specific.SpecificRecord;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.catalogue.Unit;
 import org.radarcns.config.PipelineConfig;
 import org.radarcns.config.YamlConfigLoader;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.data.DataItem;
+import org.radarcns.domain.restapi.data.Dataset;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
+import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
 import org.radarcns.integration.util.RestApiDetails;
@@ -70,10 +73,6 @@ import org.radarcns.producer.rest.RestClient;
 import org.radarcns.restapi.data.Acceleration;
 import org.radarcns.restapi.data.DoubleSample;
 import org.radarcns.restapi.data.Quartiles;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.dataset.Item;
-import org.radarcns.restapi.header.DescriptiveStatistic;
-import org.radarcns.restapi.header.Header;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.wiremock.ManagementPortalWireMock;
 import org.slf4j.Logger;
@@ -269,10 +268,10 @@ public class EndToEndTest {
 
             Header updatedHeader = dataset.getHeader();
             updatedHeader.setDescriptiveStatistic(DescriptiveStatistic.RECEIVED_MESSAGES);
-            updatedHeader.setUnit(Unit.PERCENTAGE.toString());
+            updatedHeader.setUnit("PERCENTAGE");
             dataset.setHeader(updatedHeader);
 
-            for (Item item : dataset.getDataset()) {
+            for (DataItem item : dataset.getDataset()) {
                 if (item.getSample() instanceof DoubleSample) {
                     DoubleSample sample = (DoubleSample)item.getSample();
                     item.setSample(new DoubleSample(RadarConverter.roundDouble(
@@ -358,7 +357,7 @@ public class EndToEndTest {
                 String pathSensor = pathStat.replace("{" + SOURCEDATATYPE + "}",
                         getSensorType(config));
 
-                Dataset actual = apiClient.requestAvro(pathSensor, Dataset.class, Status.OK);
+                Dataset actual = apiClient.requestJson(pathSensor, Dataset.class, Status.OK);
 
                 assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
                         config.getMaximumDifference());
@@ -376,12 +375,12 @@ public class EndToEndTest {
             double delta) {
         assertEquals(expected.getHeader(), actual.getHeader());
 
-        Iterator<Item> expectedItems = expected.getDataset().iterator();
-        Iterator<Item> actualItems = actual.getDataset().iterator();
+        Iterator<DataItem> expectedItems = expected.getDataset().iterator();
+        Iterator<DataItem> actualItems = actual.getDataset().iterator();
 
         while (expectedItems.hasNext()) {
-            Item expectedItem = expectedItems.next();
-            Item actualItem = actualItems.next();
+            DataItem expectedItem = expectedItems.next();
+            DataItem actualItem = actualItems.next();
 
             assertEquals(expectedItem.getStartDateTime(), actualItem.getStartDateTime());
 
@@ -407,7 +406,7 @@ public class EndToEndTest {
      * Checks if the two given list of Item are equals. Double values are compared using a constant
      * representing the maximum delta for which both numbers are still considered equal.
      *
-     * @see Item
+     * @see DataItem
      */
     private void compareSingletonItem(DescriptiveStatistic stat, SpecificRecord expectedRecord,
             SpecificRecord actualRecord, double delta) {
@@ -430,7 +429,7 @@ public class EndToEndTest {
      * are compared using a constant representing the maximum delta for which both numbers are
      * still considered equal.
      *
-     * @see Item
+     * @see DataItem
      * @see Acceleration
      */
     private void compareAccelerationItem(DescriptiveStatistic stat, Acceleration expectedRecord,
@@ -460,7 +459,7 @@ public class EndToEndTest {
      * compared using a constant representing the maximum delta for which both numbers are
      * still considered equal.
      *
-     * @see Item
+     * @see DataItem
      * @see Quartiles
      */
     private void compareQuartiles(Quartiles expectedQuartiles, Quartiles actualQuartiles,

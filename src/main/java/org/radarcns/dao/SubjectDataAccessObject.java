@@ -24,11 +24,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
+import org.radarcns.domain.managementportal.SourceTypeIdentifier;
+import org.radarcns.domain.restapi.Source;
+import org.radarcns.domain.restapi.Subject;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.monitor.Monitors;
-import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.subject.Cohort;
-import org.radarcns.restapi.subject.Subject;
 
 /**
  * Data Access Object for user management.
@@ -53,7 +54,7 @@ public class SubjectDataAccessObject {
      * @return a study {@link Cohort}
      * @throws ConnectException if MongoDB is not available
      */
-    public  Cohort getAllSubjects(ServletContext context) throws ConnectException {
+    public   List<Subject> getAllSubjects(ServletContext context) throws ConnectException {
         return getAllSubjects(MongoHelper.getClient(context));
     }
 
@@ -66,7 +67,7 @@ public class SubjectDataAccessObject {
      *
      * @see Subject
      */
-    public  Cohort getAllSubjects(MongoClient client) throws ConnectException {
+    public  List<Subject> getAllSubjects(MongoClient client) throws ConnectException {
 
         List<Subject> patients = new LinkedList<>();
 
@@ -78,7 +79,7 @@ public class SubjectDataAccessObject {
             patients.add(findAllSourcesByUser(user, client));
         }
 
-        return new Cohort(0, patients);
+        return patients;
     }
 
     /**
@@ -192,7 +193,9 @@ public class SubjectDataAccessObject {
 
         for (Source source : sources) {
             try {
-                updatedSources.add(monitor.getState(subject, source.getId(), source.getType(),
+                updatedSources.add(monitor.getState(subject, source.getSourceId(), new
+                                SourceTypeIdentifier(source.getSourceTypeProducer(), source
+                                .getSourceTypeModel() , source.getSourceTypeCatalogVersion()).toString(),
                         client));
             } catch (UnsupportedOperationException ex) {
                 updatedSources.add(source);
@@ -200,7 +203,6 @@ public class SubjectDataAccessObject {
         }
 
         return new Subject(subject, isSubjectActive(subject),
-                this.sensorDataAccessObject.getEffectiveTimeFrame(subject, client),
                 updatedSources);
     }
 

@@ -24,6 +24,24 @@ public class Subject {
     @JsonProperty
     private String lastSeen;
 
+    /**
+     * Default constructor.  Note that this does not initialize fields
+     * to their default values from the schema.  If that is desired then
+     * one should use <code>newBuilder()</code>.
+     */
+    public Subject() {}
+
+    /**
+     * All-args constructor.
+     * @param subjectId Subject identifier.
+     * @param active True if the subject is engaged, false otherwise. False means the subject is no longer monitored.
+     * @param sources List of sources used by the subject.
+     */
+    public Subject(java.lang.String subjectId, java.lang.Boolean active, List<Source> sources) {
+        this.subjectId = subjectId;
+        this.status = active?"ACTIVATED" : "DISCONNECTED";
+        this.sources = sources;
+    }
     public Subject subjectId(String subjectId) {
         this.subjectId = subjectId;
         return this;

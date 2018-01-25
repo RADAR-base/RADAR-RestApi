@@ -49,8 +49,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Management Portal web-app. Function set to access subject and source information from MP. A
- * subject is a person enrolled for in a study. A source is a device linked to the subject.
+ * Management Portal web-app. Function set to access subject and sourceType information from MP. A
+ * subject is a person enrolled for in a study. A sourceType is a device linked to the subject.
  */
 @Path("/mp")
 public class ManagementPortalEndPoint {
