@@ -50,7 +50,7 @@ public class SourceTypeEndPoint {
     //--------------------------------------------------------------------------------------------//
 
     /**
-     * JSON function that returns all available projects.
+     * JSON function that returns all available source types.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -81,9 +81,8 @@ public class SourceTypeEndPoint {
         }
     }
 
-
     /**
-     * JSON function that returns all available projects.
+     * JSON function that returns a single source type.
      */
     @GET
     @Path("/{" + PRODUCER + "}/{" + MODEL + "}/{" + CATALOGUE_VERSION + "}")
@@ -95,7 +94,8 @@ public class SourceTypeEndPoint {
     @ApiResponse(responseCode = "200", description = "Return a list of project objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    public Response getAllSourceTypesJson(@PathParam(PRODUCER) String producer,
+    @ApiResponse(responseCode = "404", description = "Source type not found")
+    public Response getSourceTypeJson(@PathParam(PRODUCER) String producer,
             @PathParam(MODEL) String model, @PathParam(CATALOGUE_VERSION) String
             catalogVersion) {
         try {
