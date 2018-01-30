@@ -1,7 +1,8 @@
 package org.radarcns.managementportal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.util.List;
 
 
 /**
@@ -27,6 +28,9 @@ public class SourceType {
     @JsonProperty
     private Boolean canRegisterDynamically;
 
+    @JsonProperty
+    private List<SourceData> sourceData;
+
     public Integer getId() {
         return id;
     }
@@ -49,5 +53,14 @@ public class SourceType {
 
     public Boolean getCanRegisterDynamically() {
         return canRegisterDynamically;
+    }
+
+    public List<SourceData> getSourceData() {
+        return sourceData;
+    }
+
+    @JsonIgnore
+    public SourceTypeIdentifier getSourceTypeIdentifier() {
+        return new SourceTypeIdentifier(producer, model, catalogVersion);
     }
 }

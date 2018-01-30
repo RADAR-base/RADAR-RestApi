@@ -16,7 +16,6 @@
 
 package org.radarcns.config;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URL;
 import java.util.Objects;
@@ -39,70 +38,54 @@ import javax.annotation.Nonnull;
  */
 public class ManagementPortalConfig {
     /** OAuth2 client identifier. */
-    private final String oauthClientId;
+    @JsonProperty("oauth_client_id")
+    private String oauthClientId;
 
     /** OAuth2 client secret. */
-    private final String oauthClientSecret;
+    @JsonProperty("oauth_client_secret")
+    private String oauthClientSecret;
 
     /** OAuth2 client scopes. */
-    private final String oauthClientScopes;
+    @JsonProperty("oauth_client_scopes")
+    private String oauthClientScopes;
 
     /** URL pointing a Management Portal instance. */
-    private final URL managementPortalUrl;
+    @JsonProperty("management_portal_url")
+    private URL managementPortalUrl;
 
     /** Web root of Management Portal token end point. It is required to refresh Access Token. */
-    private final String tokenEndpoint;
+    @JsonProperty("token_endpoint")
+    private String tokenEndpoint;
 
     /**
      * Web root of Management Portal project end point. It is required to get a Management Portal
      *      Project.
      */
-    private final String projectEndpoint;
+    @JsonProperty("project_endpoint")
+    private String projectEndpoint;
 
     /**
      * Web root of Management Portal subject end point. It is required to create and get Managemen
      *      Portal Subjects.
      */
-    private final String subjectEndpoint;
-
-    /** Time until subject and project caches are invalidated. */
-    private String cacheInvalidateDuration;
-    /** Time until subject and project caches can be retried on failed requests. */
-    private String cacheRetryDuration;
+    @JsonProperty("subject_endpoint")
+    private String subjectEndpoint;
 
     /**
-     * Constructor.
-     * @param oauthClientId {@link String} representing OAuth2 client identifier
-     * @param oauthClientSecret {@link String} representing OAuth2 client identifier
-     * @param oauthClientScopes {@link String} representing OAuth2 client scopes
-     * @param managementPortalUrl {@link URL} pointing a Management Portal instane
-     * @param tokenEndpoint {@link String} representing Management Portal web root to renew tokens
-     * @param projectEndpoint {@link String} representing Management Portal web root to access
-     *      project data
-     * @param subjectEndpoint {@link String} representing Management Portal web root to manage
-     *      subject
+     * Web root of Management Portal source-type end point. It is required to create and get
+     * Managemen
+     *      Portal Subjects.
      */
-    @JsonCreator
-    protected ManagementPortalConfig(
-            @JsonProperty("oauth_client_id") String oauthClientId,
-            @JsonProperty("oauth_client_secret") String oauthClientSecret,
-            @JsonProperty("oauth_client_scopes") String oauthClientScopes,
-            @JsonProperty("management_portal_url") URL managementPortalUrl,
-            @JsonProperty("token_endpoint") String tokenEndpoint,
-            @JsonProperty("project_endpoint") String projectEndpoint,
-            @JsonProperty("subject_endpoint") String subjectEndpoint,
-            @JsonProperty("cache_invalidate_duration") String invalidate,
-            @JsonProperty("cache_retry_duration") String retry) {
-        this.oauthClientId = oauthClientId;
-        this.oauthClientSecret = oauthClientSecret;
-        this.oauthClientScopes = oauthClientScopes;
-        this.managementPortalUrl = managementPortalUrl;
-        this.tokenEndpoint = tokenEndpoint;
-        this.projectEndpoint = projectEndpoint;
-        this.subjectEndpoint = subjectEndpoint;
-        this.cacheInvalidateDuration = invalidate;
-        this.cacheRetryDuration = retry;
-    }
+    @JsonProperty("source_type_endpoint")
+    private String sourceTypeEndpoint;
+
+    /** Time until subject and project caches are invalidated. */
+    @JsonProperty("cache_invalidate_duration")
+    private String cacheInvalidateDuration;
+
+    /** Time until subject and project caches can be retried on failed requests. */
+    @JsonProperty("cache_retry_duration")
+    private String cacheRetryDuration;
 
     public String getOauthClientId() {
         return oauthClientId;
@@ -130,6 +113,10 @@ public class ManagementPortalConfig {
 
     public String getSubjectEndpoint() {
         return subjectEndpoint;
+    }
+
+    public String getSourceTypeEndpoint() {
+        return sourceTypeEndpoint;
     }
 
     /**
@@ -160,13 +147,16 @@ public class ManagementPortalConfig {
     @Override
     public String toString() {
         return "Configuration {" + "\n"
-            + "oauthClientId = '" + oauthClientId + "'\n"
-            + "oauthClientSecret = '" + oauthClientSecret + "'\n"
-            + "oauthClientScopes = '" + oauthClientScopes + "'\n"
-            + "managementPortalUrl = " + managementPortalUrl + "\n"
-            + "tokenEndpoint = '" + tokenEndpoint + "'\n"
-            + "projectEndpoint = '" + projectEndpoint + "'\n"
-            + "subjectEndpoint = '" + subjectEndpoint + "'\n"
-            + '}';
+                + "oauthClientId = '" + oauthClientId + "'\n"
+                + "oauthClientSecret = '" + oauthClientSecret + "'\n"
+                + "oauthClientScopes = '" + oauthClientScopes + "'\n"
+                + "managementPortalUrl = " + managementPortalUrl + "\n"
+                + "tokenEndpoint = '" + tokenEndpoint + "'\n"
+                + "projectEndpoint = '" + projectEndpoint + "'\n"
+                + "subjectEndpoint = '" + subjectEndpoint + "'\n"
+                + "sourceTypeEndpoint = '" + sourceTypeEndpoint + "'\n"
+                + "cacheRetryDuration = '" + cacheRetryDuration + "'\n"
+                + "cacheInvalidateDuration = '" + cacheInvalidateDuration + "'\n"
+                + '}';
     }
 }
