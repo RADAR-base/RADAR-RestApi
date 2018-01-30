@@ -29,7 +29,9 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.io.IOException;
 import java.net.ConnectException;
+import java.security.GeneralSecurityException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -39,18 +41,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
 import org.radarcns.security.Param;
-import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Subject web-app. Function set to access subject information. A subject is a person enrolled for
@@ -58,8 +56,6 @@ import org.slf4j.LoggerFactory;
  */
 @Path("/" + SUBJECT)
 public class SubjectEndPoint {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectEndPoint.class);
 
     @Context
     private ServletContext context;
@@ -84,24 +80,12 @@ public class SubjectEndPoint {
             "No value for the given parameters, in the body"
                     + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getAllSubjectsJson(
-            @PathParam(STUDY_ID) String study
-    ) {
-        try {
-            checkPermissionOnProject(getRadarToken(request), SUBJECT_READ, study);
-            return ResponseHandler.getJsonResponse(request, getAllSubjectsWorker());
-        } catch (AccessDeniedException exc) {
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                    + "completed. If this error persists, please contact the service "
-                    + "administrator.");
-        }
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    public Response getAllSubjectsJson(@PathParam(STUDY_ID) String study)
+            throws IOException, GeneralSecurityException {
+        checkPermissionOnProject(getRadarToken(request), SUBJECT_READ, study);
+        return ResponseHandler.getJsonResponse(request, getAllSubjectsWorker());
     }
 
     /**
@@ -116,22 +100,12 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "204", description = "No value for the given parameters")
     @ApiResponse(responseCode = "200", description = "Return a byte array serialising a list of"
             + "subject.avsc objects")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getAllSubjectsAvro(
-            @PathParam(STUDY_ID) String study
-    ) {
-        try {
-            checkPermissionOnProject(getRadarToken(request), SUBJECT_READ, study);
-            return ResponseHandler.getAvroResponse(request, getAllSubjectsWorker());
-        } catch (AccessDeniedException exc) {
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
-        }
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    public Response getAllSubjectsAvro(@PathParam(STUDY_ID) String study)
+            throws IOException, GeneralSecurityException {
+        checkPermissionOnProject(getRadarToken(request), SUBJECT_READ, study);
+        return ResponseHandler.getAvroResponse(request, getAllSubjectsWorker());
     }
 
     /**
@@ -162,30 +136,17 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "200", description =
             "Return the subject.avsc object associated with the "
                     + "given subject identifier")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getSubjectJson(
-            @PathParam(SUBJECT_ID) String subjectId
-    ) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnSubject(getRadarToken(request), SUBJECT_READ,
-                    sub.getProject().getProjectName(), subjectId);
-            return ResponseHandler.getJsonResponse(request, getSubjectWorker(subjectId));
-        } catch (AccessDeniedException exc) {
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (NotFoundException ex) {
-            return ResponseHandler.getJsonNotFoundResponse(request, ex.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                    + "completed. If this error persists, please contact the service "
-                    + "administrator.");
-        }
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
+    public Response getSubjectJson(@PathParam(SUBJECT_ID) String subjectId)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient client = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+        checkPermissionOnSubject(getRadarToken(request), SUBJECT_READ,
+                sub.getProject().getProjectName(), subjectId);
+        return ResponseHandler.getJsonResponse(request, getSubjectWorker(subjectId));
     }
 
     /**
@@ -206,28 +167,17 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "200", description =
             "Return the subject.avsc object associated with the "
                     + "given subject identifier")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getSubjectAvro(
-            @PathParam(SUBJECT_ID) String subjectId
-    ) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-            checkPermissionOnSubject(getRadarToken(request), SUBJECT_READ,
-                    sub.getProject().getProjectName(), subjectId);
-            return ResponseHandler.getAvroResponse(request, getSubjectWorker(subjectId));
-        } catch (AccessDeniedException exc) {
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (NotFoundException ex) {
-            return ResponseHandler.getJsonNotFoundResponse(request, ex.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
-        }
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
+    public Response getSubjectAvro(@PathParam(SUBJECT_ID) String subjectId)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient client = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
+        checkPermissionOnSubject(getRadarToken(request), SUBJECT_READ,
+                sub.getProject().getProjectName(), subjectId);
+        return ResponseHandler.getAvroResponse(request, getSubjectWorker(subjectId));
     }
 
     /**

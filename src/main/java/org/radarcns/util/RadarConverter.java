@@ -263,6 +263,7 @@ public final class RadarConverter {
         }
     }
 
+    /** Whether a given temporal threshold is passed, compared to given time. */
     public static boolean isThresholdPassed(Temporal time, Duration duration) {
         return Duration.between(time, Instant.now()).compareTo(duration) > 0;
     }

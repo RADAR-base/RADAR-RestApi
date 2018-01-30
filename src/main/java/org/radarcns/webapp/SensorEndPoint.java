@@ -32,7 +32,9 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.io.IOException;
 import java.net.ConnectException;
+import java.security.GeneralSecurityException;
 import java.util.LinkedList;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -43,7 +45,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
@@ -53,7 +54,7 @@ import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.security.Param;
-import org.radarcns.security.exception.AccessDeniedException;
+import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,6 @@ import org.slf4j.LoggerFactory;
  */
 @Path("/" + DATA)
 public class SensorEndPoint {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorEndPoint.class);
 
     @Context
@@ -97,34 +97,22 @@ public class SensorEndPoint {
             "Returns a dataset.avsc object containing last "
                     + "computed sample for the given inputs formatted either Acceleration.avsc or "
                     + "DoubleValue.avsc")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getLastReceivedSampleJson(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
-                    sub.getProject().getProjectName());
-            return ResponseHandler.getJsonResponse(request,
-                    getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
-                    + "completed. If this error persists, please contact the service "
-                    + "administrator.");
-        }
+            @PathParam(SOURCE_ID) String sourceId)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient client = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        Subject sub = client.getSubject(subjectId);
+        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+                sub.getProject().getProjectName());
+        return ResponseHandler.getJsonResponse(request,
+                getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
     }
 
     /**
@@ -147,32 +135,22 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a "
             + "dataset.avsc object containing last computed sample for the given inputs formatted "
             + "either Acceleration.avsc or DoubleValue.avsc")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getLastReceivedSampleAvro(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
-                    sub.getProject().getProjectName());
-            return ResponseHandler.getAvroResponse(request,
-                    getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
-        }
+            @PathParam(SOURCE_ID) String sourceId)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient client = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        Subject sub = client.getSubject(subjectId);
+        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+                sub.getProject().getProjectName());
+        return ResponseHandler.getAvroResponse(request,
+                getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
     }
 
     /**
@@ -222,34 +200,22 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing all "
             + "available samples for the given inputs formatted either Acceleration.avsc or "
             + "DoubleValue.avsc")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getSamplesJson(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
-                    sub.getProject().getProjectName());
-            return ResponseHandler.getJsonResponse(request,
-                    getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
-                    + "completed. If this error persists, please contact the service "
-                    + "administrator.");
-        }
+            @PathParam(SOURCE_ID) String sourceId)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient client = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        Subject sub = client.getSubject(subjectId);
+        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+                sub.getProject().getProjectName());
+        return ResponseHandler.getJsonResponse(request,
+                getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
     }
 
     /**
@@ -270,32 +236,22 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "200", description = "Returns a byte array serialising a "
             + "dataset.avsc object containing all available samples for the given inputs formatted "
             + "either Acceleration.avsc or DoubleValue.avsc")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getSamplesAvro(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
-                    sub.getProject().getProjectName());
-            return ResponseHandler.getAvroResponse(request,
-                    getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
-        }
+            @PathParam(SOURCE_ID) String sourceId)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient client = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        Subject sub = client.getSubject(subjectId);
+        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+                sub.getProject().getProjectName());
+        return ResponseHandler.getAvroResponse(request,
+                getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
     }
 
     /**
@@ -346,8 +302,8 @@ public class SensorEndPoint {
             + "samples "
             + "belonging to the time window [start - end] for the given inputs formatted "
             + "either Acceleration.avsc or DoubleValue.avsc.")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getSamplesWithinWindowJson(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
@@ -355,28 +311,16 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String sourceId,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(START) long start,
-            @PathParam(END) long end) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
-                    sub.getProject().getProjectName());
-            return ResponseHandler.getJsonResponse(request,
-                    getSamplesWithinWindowWorker(subjectId, sourceId, stat,
-                            interval, sensor, start, end));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be "
-                    + "completed. If this error persists, please contact the service "
-                    + "administrator.");
-        }
+            @PathParam(END) long end)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient client = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        Subject sub = client.getSubject(subjectId);
+        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+                sub.getProject().getProjectName());
+        return ResponseHandler.getJsonResponse(request,
+                getSamplesWithinWindowWorker(subjectId, sourceId, stat,
+                        interval, sensor, start, end));
     }
 
     /**
@@ -400,8 +344,8 @@ public class SensorEndPoint {
                     + "object containing samples belonging to the time window [start - end] for "
                     + "the "
                     + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getSamplesWithinWindowAvro(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
@@ -409,26 +353,16 @@ public class SensorEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId,
             @PathParam(START) long start,
-            @PathParam(END) long end) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
-                    sub.getProject().getProjectName());
-            return ResponseHandler.getAvroResponse(request,
-                    getSamplesWithinWindowWorker(subjectId, sourceId, stat,
-                            interval, sensor, start, end));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
-        }
+            @PathParam(END) long end)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient client = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        Subject sub = client.getSubject(subjectId);
+        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+                sub.getProject().getProjectName());
+        return ResponseHandler.getAvroResponse(request,
+                getSamplesWithinWindowWorker(subjectId, sourceId, stat,
+                        interval, sensor, start, end));
     }
 
     /**

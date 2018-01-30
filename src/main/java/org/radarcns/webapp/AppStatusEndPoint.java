@@ -27,7 +27,9 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.io.IOException;
 import java.net.ConnectException;
+import java.security.GeneralSecurityException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -37,7 +39,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.radarcns.auth.exception.NotAuthorizedException;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
@@ -45,21 +46,17 @@ import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.security.Param;
-import org.radarcns.security.exception.AccessDeniedException;
+import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Android application status web-app. Function set to access Android app status information.
  */
 @Path("/" + ANDROID)
 public class AppStatusEndPoint {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppStatusEndPoint.class);
-
     @Context
     private ServletContext context;
+
     @Context
     private HttpServletRequest request;
 
@@ -83,31 +80,19 @@ public class AppStatusEndPoint {
     @ApiResponse(responseCode = "200", description =
             "Return a application.avsc object containing last"
                     + "received status")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getLastReceivedAppStatusJson(
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
-                    sub.getProject().getProjectName());
-            return ResponseHandler.getJsonResponse(request,
-                    getLastReceivedAppStatusWorker(subjectId, sourceId));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getJsonErrorResponse(request, "Your request cannot be"
-                    + "completed. If this error persists, please contact the service "
-                    + "administrator.");
-        }
+            @PathParam(SOURCE_ID) String sourceId)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient client = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        Subject sub = client.getSubject(subjectId);
+        checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
+                sub.getProject().getProjectName());
+        return ResponseHandler.getJsonResponse(request,
+                getLastReceivedAppStatusWorker(subjectId, sourceId));
     }
 
     /**
@@ -123,29 +108,19 @@ public class AppStatusEndPoint {
     @ApiResponse(responseCode = "200", description =
             "Return a application.avsc object containing last"
                     + "received status")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getLastReceivedAppStatusAvro(
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) {
-        try {
-            ManagementPortalClient client = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject sub = client.getSubject(subjectId);
-            checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
-                    sub.getProject().getProjectName());
-            return ResponseHandler.getAvroResponse(request,
-                    getLastReceivedAppStatusWorker(subjectId, sourceId));
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (Exception exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            return ResponseHandler.getAvroErrorResponse(request);
-        }
+            @PathParam(SOURCE_ID) String sourceId)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient client = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        Subject sub = client.getSubject(subjectId);
+        checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
+                sub.getProject().getProjectName());
+        return ResponseHandler.getAvroResponse(request,
+                getLastReceivedAppStatusWorker(subjectId, sourceId));
     }
 
     /**

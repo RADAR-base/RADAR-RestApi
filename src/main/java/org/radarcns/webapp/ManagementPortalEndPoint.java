@@ -26,6 +26,7 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Objects;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -37,12 +38,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.radarcns.auth.exception.NotAuthorizedException;
-import org.radarcns.exception.TokenException;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Subject;
-import org.radarcns.security.exception.AccessDeniedException;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
@@ -80,31 +78,19 @@ public class ManagementPortalEndPoint {
             "No value for the given parameters, in the body"
                     + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getAllSubjectsJson() {
-        try {
-            checkPermission(getRadarToken(request), SUBJECT_READ);
-            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Response response = Response.status(Status.OK)
-                    .entity(managementPortalClient.getSubjects().values())
-                    .build();
-            LOGGER.info("Response : " + response.toString());
-            return response;
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (IOException | TokenException exe) {
-            LOGGER.error(exe.getMessage(), exe);
-            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
-        }
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    public Response getAllSubjectsJson()
+            throws IOException, GeneralSecurityException {
+        checkPermission(getRadarToken(request), SUBJECT_READ);
+        ManagementPortalClient managementPortalClient = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        Response response = Response.status(Status.OK)
+                .entity(managementPortalClient.getSubjects().values())
+                .build();
+        LOGGER.info("Response : " + response.toString());
+        return response;
     }
-
-
 
     /**
      * JSON function that returns all information related to the given subject identifier.
@@ -122,37 +108,22 @@ public class ManagementPortalEndPoint {
     @ApiResponse(responseCode = "200", description =
             "Return the subject.avsc object associated with the "
                     + "given subject identifier")
-    @ApiResponse(responseCode = "401", description = "Access denied error occured")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occured")
-    public Response getSubjectJson(@PathParam(SUBJECT_ID) String subjectId) {
-        try {
-            ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                    .getManagementPortalClient(context);
-            Subject subject = managementPortalClient.getSubject(subjectId);
-            if (Objects.isNull(subject)) {
-                return ResponseHandler.getJsonNotFoundResponse(request, "Subject not found "
-                        + "with subject-id :" + subjectId);
-            }
-            checkPermissionOnProject(getRadarToken(request), SUBJECT_READ,
-                    subject.getProject().getProjectName());
-            Response response = Response.status(Status.OK).entity(subject).build();
-            LOGGER.info("Response : " + response.toString());
-            return response;
-        } catch (AccessDeniedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonAccessDeniedResponse(request, exc.getMessage());
-        } catch (NotAuthorizedException exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getJsonNotAuthorizedResponse(request, exc.getMessage());
-        } catch (TokenException | IOException exe) {
-            LOGGER.error(exe.getMessage(), exe);
-            return ResponseHandler.getJsonErrorResponse(request, exe.getMessage());
-        } catch (NotFoundException e) {
-            LOGGER.error(e.getMessage(), e);
-            return ResponseHandler.getJsonNotFoundResponse(request, e.getMessage());
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Subject not found")
+    public Response getSubjectJson(@PathParam(SUBJECT_ID) String subjectId)
+            throws IOException, GeneralSecurityException, NotFoundException {
+        ManagementPortalClient managementPortalClient = ManagementPortalClientManager
+                .getManagementPortalClient(context);
+        Subject subject = managementPortalClient.getSubject(subjectId);
+        if (Objects.isNull(subject)) {
+            return ResponseHandler.getJsonNotFoundResponse(request, "Subject not found "
+                    + "with subject-id :" + subjectId);
         }
+        checkPermissionOnProject(getRadarToken(request), SUBJECT_READ,
+                subject.getProject().getProjectName());
+        Response response = Response.status(Status.OK).entity(subject).build();
+        LOGGER.info("Response : " + response.toString());
+        return response;
     }
-
-
-
 }
