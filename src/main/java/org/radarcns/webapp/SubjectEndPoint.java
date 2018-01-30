@@ -19,7 +19,6 @@ package org.radarcns.webapp;
 import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnSubject;
-import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
 import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
@@ -32,6 +31,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.security.GeneralSecurityException;
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -41,9 +41,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.radarcns.auth.token.RadarToken;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
 import org.radarcns.security.Param;
@@ -61,6 +61,12 @@ public class SubjectEndPoint {
     private ServletContext context;
     @Context
     private HttpServletRequest request;
+
+    @Inject
+    private RadarToken token;
+
+    @Inject
+    private ManagementPortalClient mpClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                        ALL SUBJECTS                                        //
@@ -84,7 +90,7 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getAllSubjectsJson(@PathParam(STUDY_ID) String study)
             throws IOException, GeneralSecurityException {
-        checkPermissionOnProject(getRadarToken(request), SUBJECT_READ, study);
+        checkPermissionOnProject(token, SUBJECT_READ, study);
         return ResponseHandler.getJsonResponse(request, getAllSubjectsWorker());
     }
 
@@ -104,7 +110,7 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getAllSubjectsAvro(@PathParam(STUDY_ID) String study)
             throws IOException, GeneralSecurityException {
-        checkPermissionOnProject(getRadarToken(request), SUBJECT_READ, study);
+        checkPermissionOnProject(token, SUBJECT_READ, study);
         return ResponseHandler.getAvroResponse(request, getAllSubjectsWorker());
     }
 
@@ -141,10 +147,8 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     public Response getSubjectJson(@PathParam(SUBJECT_ID) String subjectId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-        checkPermissionOnSubject(getRadarToken(request), SUBJECT_READ,
+        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnSubject(token, SUBJECT_READ,
                 sub.getProject().getProjectName(), subjectId);
         return ResponseHandler.getJsonResponse(request, getSubjectWorker(subjectId));
     }
@@ -172,10 +176,8 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     public Response getSubjectAvro(@PathParam(SUBJECT_ID) String subjectId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-        checkPermissionOnSubject(getRadarToken(request), SUBJECT_READ,
+        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnSubject(token, SUBJECT_READ,
                 sub.getProject().getProjectName(), subjectId);
         return ResponseHandler.getAvroResponse(request, getSubjectWorker(subjectId));
     }

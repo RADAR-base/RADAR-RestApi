@@ -34,22 +34,11 @@ public class Monitors {
     private final HashMap<String, SourceMonitor> hooks;
 
     /** Singleton instance. **/
-    private static final Monitors INSTANCE;
+    private static final Monitors INSTANCE = new Monitors();
 
     /** Constructor. **/
-    private Monitors(SourceCatalog catalog) {
+    private Monitors() {
         hooks = new HashMap<>();
-
-        for (String sourceType : catalog.getSupportedSource()) {
-            hooks.put(sourceType, new SourceMonitor(catalog.getDefinition(sourceType)));
-        }
-    }
-
-    /*
-     * Static initializer.
-     */
-    static {
-        INSTANCE = new Monitors(SourceCatalog.getInstance());
     }
 
     /**
@@ -78,6 +67,11 @@ public class Monitors {
         return getState(subject, source, sourceType, MongoHelper.getClient(context));
     }
 
+    private SourceMonitor getMonitor(String sourceType) {
+        return hooks.computeIfAbsent(sourceType,
+                (k) -> new SourceMonitor(SourceCatalog.getInstance().getDefinition(k)));
+    }
+
     /**
      * Checks the status for the given source counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
@@ -92,13 +86,7 @@ public class Monitors {
      */
     public Source getState(String subject, String source, String sourceType, MongoClient client)
             throws ConnectException {
-        SourceMonitor monitor = hooks.get(sourceType);
-
-        if (monitor == null) {
-            throw new UnsupportedOperationException(sourceType + "is not currently supported");
-        }
-
-        return monitor.getState(subject, source, client);
+        return getMonitor(sourceType).getState(subject, source, client);
     }
 
     /**
@@ -106,15 +94,8 @@ public class Monitors {
      *
      * @return {@code SourceSpecification} containing all data names and related frequencies
      */
-    public SourceSpecification getSpecification(String sourceType)
-            throws ConnectException {
-        SourceMonitor monitor = hooks.get(sourceType);
-
-        if (monitor == null) {
-            throw new UnsupportedOperationException(sourceType + " is not currently supported");
-        }
-
-        return monitor.getSource().getSpecification();
+    public SourceSpecification getSpecification(String sourceType) {
+        return getMonitor(sourceType).getSource().getSpecification();
     }
 
 

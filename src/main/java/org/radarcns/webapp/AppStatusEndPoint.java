@@ -18,7 +18,6 @@ package org.radarcns.webapp;
 
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.webapp.util.BasePath.ANDROID;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.STATUS;
@@ -30,6 +29,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.security.GeneralSecurityException;
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -39,10 +39,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.radarcns.auth.token.RadarToken;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.security.Param;
@@ -59,6 +59,12 @@ public class AppStatusEndPoint {
 
     @Context
     private HttpServletRequest request;
+
+    @Inject
+    private RadarToken token;
+
+    @Inject
+    private ManagementPortalClient client;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
@@ -86,11 +92,8 @@ public class AppStatusEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
         Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
-                sub.getProject().getProjectName());
+        checkPermissionOnProject(token, SOURCE_READ, sub.getProject().getProjectName());
         return ResponseHandler.getJsonResponse(request,
                 getLastReceivedAppStatusWorker(subjectId, sourceId));
     }
@@ -114,11 +117,8 @@ public class AppStatusEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
         Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
-                sub.getProject().getProjectName());
+        checkPermissionOnProject(token, SOURCE_READ, sub.getProject().getProjectName());
         return ResponseHandler.getAvroResponse(request,
                 getLastReceivedAppStatusWorker(subjectId, sourceId));
     }

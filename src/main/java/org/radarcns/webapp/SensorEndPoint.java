@@ -18,7 +18,6 @@ package org.radarcns.webapp;
 
 import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
@@ -36,6 +35,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.security.GeneralSecurityException;
 import java.util.LinkedList;
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -45,11 +45,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.radarcns.auth.token.RadarToken;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
@@ -70,6 +70,12 @@ public class SensorEndPoint {
     private ServletContext context;
     @Context
     private HttpServletRequest request;
+
+    @Inject
+    private RadarToken token;
+
+    @Inject
+    private ManagementPortalClient mpClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
@@ -106,10 +112,8 @@ public class SensorEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+        Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnProject(token, MEASUREMENT_READ,
                 sub.getProject().getProjectName());
         return ResponseHandler.getJsonResponse(request,
                 getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
@@ -144,10 +148,8 @@ public class SensorEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+        Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnProject(token, MEASUREMENT_READ,
                 sub.getProject().getProjectName());
         return ResponseHandler.getAvroResponse(request,
                 getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
@@ -209,10 +211,8 @@ public class SensorEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+        Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnProject(token, MEASUREMENT_READ,
                 sub.getProject().getProjectName());
         return ResponseHandler.getJsonResponse(request,
                 getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
@@ -245,10 +245,8 @@ public class SensorEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+        Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnProject(token, MEASUREMENT_READ,
                 sub.getProject().getProjectName());
         return ResponseHandler.getAvroResponse(request,
                 getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
@@ -313,10 +311,8 @@ public class SensorEndPoint {
             @PathParam(START) long start,
             @PathParam(END) long end)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+        Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnProject(token, MEASUREMENT_READ,
                 sub.getProject().getProjectName());
         return ResponseHandler.getJsonResponse(request,
                 getSamplesWithinWindowWorker(subjectId, sourceId, stat,
@@ -355,10 +351,8 @@ public class SensorEndPoint {
             @PathParam(START) long start,
             @PathParam(END) long end)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), MEASUREMENT_READ,
+        Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnProject(token, MEASUREMENT_READ,
                 sub.getProject().getProjectName());
         return ResponseHandler.getAvroResponse(request,
                 getSamplesWithinWindowWorker(subjectId, sourceId, stat,

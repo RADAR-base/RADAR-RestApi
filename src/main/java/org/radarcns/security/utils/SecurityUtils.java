@@ -31,8 +31,8 @@ public final class SecurityUtils {
             throw new NotAuthorizedException("No token was found in the request context.");
         }
         if (!(jwt instanceof RadarToken)) {
-            // should not happen, the AuthenticationFilter will only set a DecodedJWT object
-            throw new NotAuthorizedException("Expected token to be of type DecodedJWT but was "
+            // should not happen, the AuthenticationFilter will only set a RadarToken object
+            throw new NotAuthorizedException("Expected token to be of type RadarToken but was "
                     + jwt.getClass().getName());
         }
         return (RadarToken) jwt;

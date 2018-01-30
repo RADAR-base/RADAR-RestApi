@@ -32,7 +32,7 @@
                 io.swagger.v3.jaxrs2.integration.resources,
                 org.radarcns.webapp,
                 org.radarcns.webapp.exception
-                org.radarcns.webapp.media
+                org.radarcns.webapp.inject
             </param-value>
         </init-param>
         <init-param>
@@ -57,7 +57,7 @@
         <listener-class>org.radarcns.listener.managementportal.HttpClientListener</listener-class>
     </listener>
     <listener>
-        <listener-class>org.radarcns.listener.managementportal.ManagementPortalClientManager</listener-class>
+        <listener-class>org.radarcns.listener.managementportal.ManagementPortalClientFactory</listener-class>
     </listener>
 
 </web-app>

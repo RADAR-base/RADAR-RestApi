@@ -218,7 +218,7 @@ public final class RadarConverter {
      * @return the number of expected messages
      */
     public static Double getExpectedMessages(Header header) {
-        return SourceCatalog.getInstance(header.getSource()).getFrequency(
+        return SourceCatalog.getInstance().getDefinition(header.getSource()).getFrequency(
                 header.getType()) * getSecond(header.getTimeWindow()).doubleValue();
     }
 

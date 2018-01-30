@@ -112,7 +112,7 @@ public class SourceMonitorDbTest {
      **/
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-        SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
+        SourceDefinition definition = SourceCatalog.getInstance().getDefinition(SOURCE_TYPE);
         for (String sensorType : definition.getSensorTypes()) {
             Utility.dropCollection(client,
                     SensorDataAccessObject.getInstance().getCollectionName(
@@ -133,7 +133,7 @@ public class SourceMonitorDbTest {
 
         String collectionName;
 
-        SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
+        SourceDefinition definition = SourceCatalog.getInstance().getDefinition(SOURCE_TYPE);
         for (int i = 0; i < window; i++) {
             for (String sensorType : definition.getSensorTypes()) {
                 messages = reducedMessage(

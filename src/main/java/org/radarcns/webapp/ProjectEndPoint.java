@@ -4,7 +4,6 @@ import static org.radarcns.auth.authorization.Permission.PROJECT_READ;
 import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.webapp.util.BasePath.PROJECT;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 
@@ -12,18 +11,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.radarcns.auth.token.RadarToken;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.webapp.exception.NotFoundException;
 import org.radarcns.webapp.util.Parameter;
 
@@ -31,10 +28,11 @@ import org.radarcns.webapp.util.Parameter;
 public class ProjectEndPoint {
     private static final String PROJECT_NAME = "projectName";
 
-    @Context
-    private ServletContext context;
-    @Context
-    private HttpServletRequest request;
+    @Inject
+    private RadarToken token;
+
+    @Inject
+    private ManagementPortalClient mpClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                       PROJECTS                                             //
@@ -54,11 +52,9 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getAllProjectsJson()
             throws IOException, GeneralSecurityException {
-        checkPermission(getRadarToken(request), PROJECT_READ);
-        ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                .getManagementPortalClient(context);
+        checkPermission(token, PROJECT_READ);
         return Response.status(Status.OK)
-                .entity(managementPortalClient.getProjects().values())
+                .entity(mpClient.getProjects().values())
                 .build();
     }
 
@@ -82,11 +78,9 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getProjectJson(@PathParam(PROJECT_NAME) String projectName)
             throws IOException, GeneralSecurityException, NotFoundException {
-        checkPermissionOnProject(getRadarToken(request), PROJECT_READ, projectName);
-        ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                .getManagementPortalClient(context);
+        checkPermissionOnProject(token, PROJECT_READ, projectName);
         return Response.status(Status.OK)
-                .entity(managementPortalClient.getProject(projectName))
+                .entity(mpClient.getProject(projectName))
                 .build();
     }
 
@@ -110,11 +104,9 @@ public class ProjectEndPoint {
     public Response getAllSubjectsJsonFromStudy(
             @PathParam(Parameter.PROJECT_NAME) String projectName)
             throws IOException, GeneralSecurityException, NotFoundException {
-        checkPermissionOnProject(getRadarToken(request), SUBJECT_READ, projectName);
-        ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                .getManagementPortalClient(context);
+        checkPermissionOnProject(token, SUBJECT_READ, projectName);
         return Response.status(Status.OK)
-                .entity(managementPortalClient.getAllSubjectsFromProject(projectName))
+                .entity(mpClient.getAllSubjectsFromProject(projectName))
                 .build();
     }
 }

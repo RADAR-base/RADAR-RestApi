@@ -19,7 +19,6 @@ package org.radarcns.webapp;
 import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
 import static org.radarcns.webapp.util.BasePath.SOURCE;
@@ -34,6 +33,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.security.GeneralSecurityException;
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -43,10 +43,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.radarcns.auth.token.RadarToken;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
@@ -64,6 +64,12 @@ public class SourceEndPoint {
     private ServletContext context;
     @Context
     private HttpServletRequest request;
+
+    @Inject
+    private RadarToken token;
+
+    @Inject
+    private ManagementPortalClient mpClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                       STATE FUNCTIONS                                      //
@@ -93,10 +99,8 @@ public class SourceEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
             throws GeneralSecurityException, IOException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
+        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnProject(token, SOURCE_READ,
                 sub.getProject().getProjectName());
         return ResponseHandler.getJsonResponse(request,
                 getLastComputedSourceStatus(subjectId, sourceId));
@@ -124,10 +128,8 @@ public class SourceEndPoint {
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
+        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnProject(token, SOURCE_READ,
                 sub.getProject().getProjectName());
         return ResponseHandler.getAvroResponse(request,
                 getLastComputedSourceStatus(subjectId, sourceId));
@@ -175,7 +177,7 @@ public class SourceEndPoint {
     public Response getSourceSpecificationJson(
             @PathParam(SOURCE_TYPE) String source)
             throws IOException, GeneralSecurityException {
-        checkPermission(getRadarToken(request), SOURCE_READ);
+        checkPermission(token, SOURCE_READ);
         return ResponseHandler.getJsonResponse(request, getSourceSpecificationWorker(source));
     }
 
@@ -198,7 +200,7 @@ public class SourceEndPoint {
     public Response getSourceSpecificationAvro(
             @PathParam(SOURCE_TYPE) String source)
             throws IOException, GeneralSecurityException {
-        checkPermission(getRadarToken(request), SOURCE_READ);
+        checkPermission(token, SOURCE_READ);
         return ResponseHandler.getAvroResponse(request, getSourceSpecificationWorker(source));
     }
 
@@ -234,10 +236,8 @@ public class SourceEndPoint {
     public Response getAllSourcesJson(
             @PathParam(SUBJECT_ID) String subjectId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
+        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnProject(token, SOURCE_READ,
                 sub.getProject().getProjectName());
         return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subjectId));
     }
@@ -259,10 +259,8 @@ public class SourceEndPoint {
     public Response getAllSourcesAvro(
             @PathParam(SUBJECT_ID) String subjectId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient client = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        org.radarcns.managementportal.Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(getRadarToken(request), SOURCE_READ,
+        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
+        checkPermissionOnProject(token, SOURCE_READ,
                 sub.getProject().getProjectName());
         return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subjectId));
     }

@@ -338,7 +338,9 @@ public class SensorDataAccessObject {
 
         switch (statistic) {
             case RECEIVED_MESSAGES: return Unit.PERCENTAGE;
-            default: return SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType);
+            default: return SourceCatalog.getInstance()
+                    .getDefinition(sourceType)
+                    .getMeasurementUnit(sensorType);
         }
     }
 

@@ -46,6 +46,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Client to interact with the RADAR Management Portal.
+ *
+ * @implSpec This class is thread-safe.
  */
 public class ManagementPortalClient {
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalClient.class);
@@ -62,15 +64,14 @@ public class ManagementPortalClient {
     private final CachedMap<String, Subject> subjects;
     private final CachedMap<String, Project> projects;
 
-    private OAuth2AccessTokenDetails token;
+    private String token;
 
     /**
      * Client to interact with the RADAR Management Portal.
      *
      * @param okHttpClient {@link OkHttpClient} to communicate to external web services
      * @throws IllegalStateException in case the object cannot be created
-     * @see HttpClientListener
-     * @see ManagementPortalClientManager
+     * @see ManagementPortalClientFactory
      */
     public ManagementPortalClient(@Nonnull OkHttpClient okHttpClient) {
         this.client = okHttpClient;
@@ -101,8 +102,12 @@ public class ManagementPortalClient {
         return defaultValue;
     }
 
-    protected void updateToken(OAuth2AccessTokenDetails tokenDetails) {
-        this.token = tokenDetails;
+    protected synchronized void updateToken(OAuth2AccessTokenDetails tokenDetails) {
+        this.token = tokenDetails.getAccessToken();
+    }
+
+    private synchronized String getToken() {
+        return this.token;
     }
 
     /**
@@ -223,7 +228,7 @@ public class ManagementPortalClient {
     private Request buildGetRequest(URL url) {
         return new Request.Builder()
                 .addHeader("Accept", "application/json")
-                .addHeader("Authorization", "Bearer " + this.token.getAccessToken())
+                .addHeader("Authorization", "Bearer " + getToken())
                 .url(url)
                 .get()
                 .build();

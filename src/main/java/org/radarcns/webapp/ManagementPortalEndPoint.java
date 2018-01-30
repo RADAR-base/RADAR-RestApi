@@ -19,7 +19,6 @@ package org.radarcns.webapp;
 import static org.radarcns.auth.authorization.Permission.SUBJECT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
-import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 import static org.radarcns.webapp.util.BasePath.SUBJECTS;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
@@ -27,24 +26,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Objects;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.radarcns.auth.token.RadarToken;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.listener.managementportal.ManagementPortalClientManager;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.webapp.exception.NotFoundException;
-import org.radarcns.webapp.util.ResponseHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Management Portal web-app. Function set to access subject and source information from MP. A
@@ -52,13 +45,11 @@ import org.slf4j.LoggerFactory;
  */
 @Path("/mp")
 public class ManagementPortalEndPoint {
+    @Inject
+    private RadarToken token;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPortalEndPoint.class);
-
-    @Context
-    private ServletContext context;
-    @Context
-    private HttpServletRequest request;
+    @Inject
+    private ManagementPortalClient client;
 
     //--------------------------------------------------------------------------------------------//
     //                                        SUBJECTS                                            //
@@ -82,14 +73,10 @@ public class ManagementPortalEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     public Response getAllSubjectsJson()
             throws IOException, GeneralSecurityException {
-        checkPermission(getRadarToken(request), SUBJECT_READ);
-        ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        Response response = Response.status(Status.OK)
-                .entity(managementPortalClient.getSubjects().values())
+        checkPermission(token, SUBJECT_READ);
+        return Response.status(Status.OK)
+                .entity(client.getSubjects().values())
                 .build();
-        LOGGER.info("Response : " + response.toString());
-        return response;
     }
 
     /**
@@ -113,17 +100,10 @@ public class ManagementPortalEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject not found")
     public Response getSubjectJson(@PathParam(SUBJECT_ID) String subjectId)
             throws IOException, GeneralSecurityException, NotFoundException {
-        ManagementPortalClient managementPortalClient = ManagementPortalClientManager
-                .getManagementPortalClient(context);
-        Subject subject = managementPortalClient.getSubject(subjectId);
-        if (Objects.isNull(subject)) {
-            return ResponseHandler.getJsonNotFoundResponse(request, "Subject not found "
-                    + "with subject-id :" + subjectId);
-        }
-        checkPermissionOnProject(getRadarToken(request), SUBJECT_READ,
-                subject.getProject().getProjectName());
-        Response response = Response.status(Status.OK).entity(subject).build();
-        LOGGER.info("Response : " + response.toString());
-        return response;
+        Subject subject = client.getSubject(subjectId);
+        checkPermissionOnProject(token, SUBJECT_READ, subject.getProject().getProjectName());
+        return Response.status(Status.OK)
+                .entity(subject)
+                .build();
     }
 }

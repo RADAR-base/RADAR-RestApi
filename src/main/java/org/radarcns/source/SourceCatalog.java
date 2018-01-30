@@ -19,64 +19,34 @@ package org.radarcns.source;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import javax.inject.Inject;
 import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.config.Properties;
 import org.radarcns.config.catalog.DeviceCatalog;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * All supported sourceCatalog specifications.
  */
 public class SourceCatalog {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SourceCatalog.class);
-
     /** Variables. **/
     private final Map<String, SourceDefinition> sourceCatalog;
     private final Set<String> supportedSensor;
     private final Map<String, DataFormat> formatMap;
 
-    /** Singleton instance. **/
-    private static final SourceCatalog INSTANCE;
+    private static final SourceCatalog INSTANCE = new SourceCatalog();
 
-    /**
-     * Static initializer.
-     */
-    static {
-        try {
-            INSTANCE = new SourceCatalog(Properties.getDeviceCatalog());
-        } catch (ClassNotFoundException exec) {
-            LOGGER.error(exec.getMessage(), exec);
-            throw new ExceptionInInitializerError(exec);
-        }
-    }
-
-    /**
-     * Returns the singleton.
-     * @return the singleton {@code SourceCatalog} instance
-     */
     public static SourceCatalog getInstance() {
         return INSTANCE;
     }
 
-    /**
-     * Returns the {@code SourceDefinition} associated with the given {@code SourceType}.
-     * @return the singleton {@code SourceDefinition} instance
-     */
-    public static SourceDefinition getInstance(String sourceType) {
-        SourceDefinition definition = INSTANCE.sourceCatalog.get(sourceType);
-
-        if (definition == null) {
-            throw new UnsupportedOperationException(sourceType + " is not supported yet.");
-        }
-
-        return definition;
+    public SourceCatalog() {
+        this(Properties.getDeviceCatalog());
     }
 
-    private SourceCatalog(DeviceCatalog catalog) throws ClassNotFoundException {
+    public SourceCatalog(DeviceCatalog catalog) {
         sourceCatalog = new HashMap<>();
         supportedSensor = new HashSet<>();
         formatMap = new HashMap<>();
@@ -111,12 +81,11 @@ public class SourceCatalog {
      */
     public SourceDefinition getDefinition(String source) {
         SourceDefinition definition = sourceCatalog.get(source);
-
-        if (definition != null) {
-            return definition;
+        if (definition == null) {
+            throw new NoSuchElementException("Source " + source + " is not found.");
         }
 
-        throw new UnsupportedOperationException(source + " is not currently supported.");
+        return definition;
     }
 
     /**
@@ -147,5 +116,4 @@ public class SourceCatalog {
 
         throw new UnsupportedOperationException(sensor + " is not currently supported.");
     }
-
 }

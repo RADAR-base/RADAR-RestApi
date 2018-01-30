@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import org.bson.Document;
+import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
@@ -66,15 +67,15 @@ public abstract class MongoSensor extends MongoDataAccess {
         this.dataFormat = format;
 
         for (String sourceType : SourceCatalog.getInstance().getSupportedSource()) {
-            if (!SourceCatalog.getInstance(sourceType).isSupported(sensorType)) {
+            SourceDefinition definition = SourceCatalog.getInstance().getDefinition(sourceType);
+            if (!definition.isSupported(sensorType)) {
                 continue;
             }
 
-            deviceCollections.put(sourceType,
-                    SourceCatalog.getInstance(sourceType).getCollections().get(sensorType));
+            Map<String, Map<TimeWindow, String>> collections = definition.getCollections();
+            deviceCollections.put(sourceType, collections.get(sensorType));
 
-            Set<String> names = new HashSet<>(SourceCatalog.getInstance(
-                    sourceType).getCollections().get(sensorType).values());
+            Set<String> names = new HashSet<>(collections.get(sensorType).values());
 
             for (String name : names) {
                 collectionToSource.put(name, sourceType);

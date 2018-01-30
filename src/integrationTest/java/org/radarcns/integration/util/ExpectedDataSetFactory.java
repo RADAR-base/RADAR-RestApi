@@ -84,7 +84,8 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeWindow) {
         return new Header(subjectId, sourceId, sourceType, sensorType, statistic,
-                SourceCatalog.getInstance(sourceType).getMeasurementUnit(sensorType), timeWindow,
+                SourceCatalog.getInstance().getDefinition(sourceType)
+                        .getMeasurementUnit(sensorType), timeWindow,
                 getEffectiveTimeFrame(expectedValue));
     }
 

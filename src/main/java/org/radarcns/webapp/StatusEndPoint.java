@@ -2,7 +2,6 @@ package org.radarcns.webapp;
 
 import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
 import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
-import static org.radarcns.security.utils.SecurityUtils.getRadarToken;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -17,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.radarcns.auth.token.RadarToken;
 import org.radarcns.config.Properties;
 import org.radarcns.status.hdfs.HdfsBinsData;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -25,6 +26,9 @@ import org.radarcns.webapp.util.ResponseHandler;
 public class StatusEndPoint {
     @Context
     private HttpServletRequest request;
+
+    @Inject
+    private RadarToken token;
 
     /** HDFS status. */
     @GET
@@ -43,7 +47,7 @@ public class StatusEndPoint {
             @ApiResponse(responseCode = "401", description = "Access denied error occurred"),
             @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")})
     public Response getJsonData() throws GeneralSecurityException, IOException {
-        checkPermission(getRadarToken(request), MEASUREMENT_READ);
+        checkPermission(token, MEASUREMENT_READ);
         String hdfsPath = Properties.getApiConfig().getHdfsOutputDir();
         if (hdfsPath == null) {
             return ResponseHandler.getJsonErrorResponse(
