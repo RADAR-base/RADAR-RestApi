@@ -3,9 +3,9 @@ package org.radarcns.webapp.exception;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 
 import java.security.GeneralSecurityException;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
@@ -18,11 +18,11 @@ public class GeneralSecurityExceptionMapper extends GeneralSecurityException imp
             .getLogger(GeneralSecurityExceptionMapper.class);
 
     @Context
-    private HttpServletRequest request;
+    private UriInfo uri;
 
     @Override
     public Response toResponse(GeneralSecurityException exception) {
-        logger.warn("[401] {}", request.getRequestURI());
+        logger.warn("[401] {}", uri.getPath());
         return Response.status(HTTP_UNAUTHORIZED)
                 .header("WWW-Authenticate", "Bearer")
                 .build();
