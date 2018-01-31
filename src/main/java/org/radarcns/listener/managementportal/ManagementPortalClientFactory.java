@@ -16,7 +16,7 @@
 
 package org.radarcns.listener.managementportal;
 
-import javax.inject.Inject;
+import javax.ws.rs.core.Context;
 import okhttp3.OkHttpClient;
 import org.glassfish.hk2.api.Factory;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
@@ -27,10 +27,10 @@ import org.radarcns.oauth.OAuth2AccessTokenDetails;
  */
 public class ManagementPortalClientFactory implements Factory<ManagementPortalClient> {
 
-    @Inject
+    @Context
     private OAuth2AccessTokenDetails token;
 
-    @Inject
+    @Context
     private OkHttpClient client;
 
     @Override

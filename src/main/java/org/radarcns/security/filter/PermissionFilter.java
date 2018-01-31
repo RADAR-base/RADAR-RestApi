@@ -5,7 +5,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.radarcns.webapp.filter.AuthenticationFilter.TOKEN_ATTRIBUTE;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -29,17 +28,17 @@ public class PermissionFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        Method method = resourceInfo.getResourceMethod();
-        NeedsPermission annotation = method.getAnnotation(NeedsPermission.class);
-        RadarToken token = (RadarToken) request.getAttribute(TOKEN_ATTRIBUTE);
+        NeedsPermission annotation = resourceInfo.getResourceMethod()
+                .getAnnotation(NeedsPermission.class);
         Permission permission = new Permission(annotation.entity(), annotation.operation());
 
+        RadarToken token = (RadarToken) request.getAttribute(TOKEN_ATTRIBUTE);
         if (!token.hasPermission(permission)) {
             abortWithForbidden(requestContext, "No permission " + permission);
         }
     }
 
-    static void abortWithForbidden(ContainerRequestContext requestContext, String message) {
+    public static void abortWithForbidden(ContainerRequestContext requestContext, String message) {
         logger.warn("[403] {}: {}",
                 requestContext.getUriInfo().getPath(), message);
         Response.ResponseBuilder builder = Response.status(HTTP_FORBIDDEN);

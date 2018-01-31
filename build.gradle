@@ -21,7 +21,7 @@ ext.tomcat = '8.0.47'
 ext.radarAuthVersion = '0.3.3-SNAPSHOT'
 ext.wireMockVersion = '2.5.1'
 ext.jacksonVersion = '2.9.3'
-
+ext.slf4jVersion = '1.7.25'
 
 configurations {
     provided

@@ -1,23 +1,19 @@
 package org.radarcns.security.filter;
 
 import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
-import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.radarcns.security.filter.PermissionFilter.abortWithForbidden;
 import static org.radarcns.webapp.filter.AuthenticationFilter.TOKEN_ATTRIBUTE;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import org.radarcns.auth.authorization.Permission;
 import org.radarcns.auth.token.RadarToken;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
@@ -41,24 +37,24 @@ public class PermissionOnSubjectFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        Method method = resourceInfo.getResourceMethod();
-        NeedsPermissionOnSubject annotation = method.getAnnotation(NeedsPermissionOnSubject.class);
-        RadarToken token = (RadarToken) request.getAttribute(TOKEN_ATTRIBUTE);
+        NeedsPermissionOnSubject annotation = resourceInfo.getResourceMethod()
+                .getAnnotation(NeedsPermissionOnSubject.class);
         Permission permission = new Permission(annotation.entity(), annotation.operation());
 
-        UriInfo uriInfo = requestContext.getUriInfo();
-        MultivaluedMap<String, String> pathParams = uriInfo.getPathParameters();
+        MultivaluedMap<String, String> pathParams = requestContext.getUriInfo().getPathParameters();
+
         String subjectId = pathParams.getFirst(annotation.subjectParam());
+
         String projectName;
         String projectParam = annotation.projectParam();
-        if (projectParam.equals(NeedsPermissionOnSubject.NO_PROJECT)) {
+        if (projectParam.equals(NeedsPermissionOnSubject.PROJECT_OF_SUBJECT)) {
             ManagementPortalClient mpClient = resourceContext
                     .getResource(ManagementPortalClient.class);
             try {
                 Subject subject = mpClient.getSubject(subjectId);
                 projectName = subject.getProject().getProjectName();
             } catch (NotFoundException e) {
-                logger.warn("[404] {}: {}", e.getMessage());
+                logger.warn("[404] {}: {}", requestContext.getUriInfo().getPath(), e.getMessage());
                 Response.ResponseBuilder builder = Response.status(HTTP_FORBIDDEN);
                 if (requestContext.getMediaType().isCompatible(APPLICATION_JSON_TYPE)) {
                     builder.entity(new StatusMessage("not_found", e.getMessage()));
@@ -70,6 +66,7 @@ public class PermissionOnSubjectFilter implements ContainerRequestFilter {
             projectName = pathParams.getFirst(projectParam);
         }
 
+        RadarToken token = (RadarToken) request.getAttribute(TOKEN_ATTRIBUTE);
         if (!token.hasPermissionOnSubject(permission, projectName, subjectId)) {
             abortWithForbidden(requestContext, "No permission " + permission
                     + " on subject " + subjectId + " in project " + projectName);

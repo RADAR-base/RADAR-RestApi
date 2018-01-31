@@ -2,7 +2,8 @@ package org.radarcns.listener.managementportal;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import javax.inject.Inject;
+import java.time.Duration;
+import javax.ws.rs.core.Context;
 import okhttp3.OkHttpClient;
 import org.glassfish.hk2.api.Factory;
 import org.radarcns.config.ManagementPortalConfig;
@@ -21,13 +22,19 @@ public class ManagementPortalTokenFactory implements Factory<OAuth2AccessTokenDe
     private final String clientSecret;
     private final String clientId;
 
-    @Inject
+    @Context
     private OkHttpClient httpClient;
+
     private OAuth2Client oauthClient;
 
-    public ManagementPortalTokenFactory() throws MalformedURLException {
+    /** Factory to create access tokens for the management portal. */
+    public ManagementPortalTokenFactory() {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        url = new URL(config.getManagementPortalUrl(), config.getTokenEndpoint());
+        try {
+            url = new URL(config.getManagementPortalUrl(), config.getTokenEndpoint());
+        } catch (MalformedURLException ex) {
+            throw new IllegalStateException(ex);
+        }
         clientId = config.getOauthClientId();
         clientSecret = config.getOauthClientSecret();
     }
@@ -36,15 +43,15 @@ public class ManagementPortalTokenFactory implements Factory<OAuth2AccessTokenDe
     public OAuth2AccessTokenDetails provide() {
         synchronized (this) {
             if (oauthClient == null) {
-                oauthClient = new OAuth2Client()
-                        .tokenEndpoint(url)
-                        .clientId(clientId)
-                        .clientSecret(clientSecret)
-                        .httpClient(httpClient);
+                oauthClient = new OAuth2Client.Builder()
+                        .endpoint(url)
+                        .credentials(clientId, clientSecret)
+                        .httpClient(httpClient)
+                        .build();
             }
         }
         try {
-            return oauthClient.getAccessToken();
+            return oauthClient.getValidToken(Duration.ofSeconds(30));
         } catch (TokenException e) {
             logger.error("Failed to retrieve token", e);
             throw new IllegalStateException(

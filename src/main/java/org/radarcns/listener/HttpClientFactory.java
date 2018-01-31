@@ -2,10 +2,10 @@ package org.radarcns.listener;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.inject.Inject;
+import javax.ws.rs.core.Context;
 import okhttp3.OkHttpClient;
-import org.glassfish.jersey.server.CloseableService;
 import org.glassfish.hk2.api.Factory;
+import org.glassfish.jersey.server.CloseableService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,10 +15,11 @@ public class HttpClientFactory implements Factory<OkHttpClient> {
     private final OkHttpClient client;
 
     /** Disposes the client after use. */
-    @Inject
+    @Context
     @SuppressWarnings("PMD.UnusedPrivateField")
     private CloseableService closeableService;
 
+    /** Default constructor. Creates the client that will be used. */
     public HttpClientFactory() {
         this.client = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)

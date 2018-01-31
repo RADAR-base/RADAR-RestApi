@@ -13,6 +13,7 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 @Provider
 public class IOExceptionMapper extends IOException implements ExceptionMapper<IOException> {
     private static final Logger logger = LoggerFactory.getLogger(UncaughtExceptionMapper.class);

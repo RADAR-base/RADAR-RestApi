@@ -19,7 +19,7 @@ public class HttpClientFeature implements Feature {
     public static class HttpClientBinder extends AbstractBinder {
         @Override
         protected void configure() {
-            bindFactory(new HttpClientFactory())
+            bindFactory(HttpClientFactory.class)
                     .to(OkHttpClient.class)
                     .in(Singleton.class);
         }

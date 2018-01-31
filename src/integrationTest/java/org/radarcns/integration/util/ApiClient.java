@@ -24,6 +24,7 @@ import org.radarcns.config.ServerConfig;
 import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.oauth.OAuth2Client;
+import org.radarcns.oauth.OAuth2Client.Builder;
 import org.radarcns.producer.rest.ManagedConnectionPool;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.AvroConverter;
@@ -46,25 +47,21 @@ public class ApiClient extends ExternalResource {
 
     static {
         try {
-            RestApiDetails restApiDetails = RestApiDetails
-                    .getRestApiClientDetails();
-            oAuth2Client = new OAuth2Client()
-                    .clientId(restApiDetails.getClientId())
-                    .clientSecret(restApiDetails.getClientSecret())
-                    .tokenEndpoint(
-                            new URL(new URL(restApiDetails.getManagementPortalUrl()),
-                                    restApiDetails.getTokenEndpoint()));
+            RestApiDetails restApiDetails = RestApiDetails.getRestApiClientDetails();
+            oAuth2Client = new Builder()
+                    .credentials(restApiDetails.getClientId(), restApiDetails.getClientSecret())
+                    .endpoint(restApiDetails.getManagementPortalUrl(),
+                            restApiDetails.getTokenEndpoint())
+                    .scopes(restApiDetails.getClientScopes().split(" "))
+                    .build();
 
-            for (String scope : restApiDetails.getClientScopes().split(" ")) {
-                oAuth2Client.addScope(scope);
-            }
-
-            token = oAuth2Client.getAccessToken();
-
+            token = oAuth2Client.getValidToken();
         } catch (MalformedURLException e) {
-            throw new AssertionError("Cannot create a valid url to access management portal", e);
+            logger.error("Cannot create a valid url to access management portal", e);
+            throw new AssertionError();
         } catch (TokenException e) {
-            throw new AssertionError("Cannot get a valid access token", e);
+            logger.error("Cannot get a valid access token", e);
+            throw new AssertionError();
         }
     }
 
@@ -98,7 +95,6 @@ public class ApiClient extends ExternalResource {
 
     @Override
     protected void before() throws TokenException {
-
         this.client = new RestClient(config, 120, new ManagedConnectionPool());
     }
 
@@ -194,6 +190,5 @@ public class ApiClient extends ExternalResource {
     @Override
     protected void after() {
         this.client.close();
-        oAuth2Client.getHttpClient().connectionPool().evictAll();
     }
 }
