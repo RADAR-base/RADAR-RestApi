@@ -16,7 +16,6 @@
 
 package org.radarcns.webapp.util;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,7 +32,6 @@ import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
 import org.radarcns.util.AvroConverter;
-import org.radarcns.webapp.exception.StatusMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,62 +91,6 @@ public class ResponseHandler {
                 .build();
     }
 
-    //TODO return Status.BAD_REQUEST in case of parameter that does not respect regex.
-    /**
-     * It sets the suitable status code and return a JSON message containing the input String.
-     * @param request HTTP request that has to be served
-     * @param message to provide more information about the error
-     * @return the response content formatted in JSON
-     **/
-    public static Response getJsonErrorResponse(HttpServletRequest request, String message) {
-        Status status = Status.INTERNAL_SERVER_ERROR;
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
-
-        LOGGER.debug("[{}] {}", status.getStatusCode(), message);
-        return Response.status(status.getStatusCode())
-                .entity(new StatusMessage("server_error", message, null))
-                .build();
-    }
-
-    /**
-     * It sets the suitable status code and return a JSON message containing the input String.
-     * @param request HTTP request that has to be served
-     * @param message to provide more information about the error
-     * @return the response content formatted in JSON
-     **/
-    public static Response getJsonAccessDeniedResponse(HttpServletRequest request,
-                                                       String message) {
-        Status status = Status.UNAUTHORIZED;
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
-
-        LOGGER.debug("[{}] {}", status.getStatusCode(), message);
-        return Response.status(status.getStatusCode())
-                .entity(new StatusMessage("access_denied", message))
-                .build();
-    }
-
-    /**
-     * It sets the suitable status code and return a JSON message containing the input String.
-     * @param request HTTP request that has to be served
-     * @param message to provide more information about the error
-     * @return the response content formatted in JSON
-     **/
-    public static Response getJsonNotAuthorizedResponse(HttpServletRequest request,
-                                                        String message) {
-        Status status = Status.FORBIDDEN;
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
-
-        SpecificRecord obj = new Message(message);
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-
-        LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-
-        return Response.status(status.getStatusCode())
-                .entity(new StatusMessage("forbidden", "Forbidden!", json))
-                .build();
-    }
-
     /**
      * It sets the status code and serialises the given {@code SpecificRecord} in bytes array.
      * @param request HTTP request that has to be served
@@ -169,19 +111,6 @@ public class ResponseHandler {
             default:
                 return Response.serverError().build();
         }
-    }
-
-
-    //TODO return 400 in case of parameter does not respect regex
-    /**
-     * It sets the status code.
-     * @param request HTTP request that has to be served
-     * @return the response error code
-     **/
-    public static Response getAvroErrorResponse(HttpServletRequest request) {
-        LOGGER.info("[{}] {}", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                request.getRequestURI());
-        return Response.serverError().build();
     }
 
     private static Status getStatus(SpecificRecord obj) throws UnsupportedEncodingException {
@@ -216,27 +145,5 @@ public class ResponseHandler {
                 + obj.getSchema().getName() + " is not supported yet");
         }
         return Status.OK;
-    }
-
-    /**
-     * It sets the suitable status code and return a JSON message containing the input String.
-     * @param request HTTP request that has to be served
-     * @param message to provide more information about the error
-     * @return the response content formatted in JSON
-     **/
-    public static Response getJsonNotFoundResponse(HttpServletRequest request,
-            String message) {
-        Status status = NOT_FOUND;
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
-
-        SpecificRecord obj = new Message(message);
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-
-        LOGGER.debug("[{}] {}", status.getStatusCode(), json);
-
-        return Response.status(status.getStatusCode())
-                .entity(new StatusMessage("not_found", "Not Found!", json))
-                .build();
     }
 }

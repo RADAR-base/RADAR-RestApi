@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import javax.inject.Inject;
 import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.config.Properties;
 import org.radarcns.config.catalog.DeviceCatalog;

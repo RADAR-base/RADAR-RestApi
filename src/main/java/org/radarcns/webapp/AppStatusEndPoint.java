@@ -16,8 +16,8 @@
 
 package org.radarcns.webapp;
 
-import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
-import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
+import static org.radarcns.auth.authorization.Permission.Entity.SOURCE;
+import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.util.BasePath.ANDROID;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.STATUS;
@@ -28,8 +28,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.security.GeneralSecurityException;
-import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -39,14 +37,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.radarcns.auth.token.RadarToken;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
-import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.security.Param;
-import org.radarcns.webapp.exception.NotFoundException;
+import org.radarcns.security.filter.NeedsPermissionOnSubject;
 import org.radarcns.webapp.util.ResponseHandler;
 
 /**
@@ -59,12 +54,6 @@ public class AppStatusEndPoint {
 
     @Context
     private HttpServletRequest request;
-
-    @Inject
-    private RadarToken token;
-
-    @Inject
-    private ManagementPortalClient client;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
@@ -88,12 +77,11 @@ public class AppStatusEndPoint {
                     + "received status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @NeedsPermissionOnSubject(entity = SOURCE, operation = READ)
     public Response getLastReceivedAppStatusJson(
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(token, SOURCE_READ, sub.getProject().getProjectName());
+            throws IOException {
         return ResponseHandler.getJsonResponse(request,
                 getLastReceivedAppStatusWorker(subjectId, sourceId));
     }
@@ -113,12 +101,11 @@ public class AppStatusEndPoint {
                     + "received status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @NeedsPermissionOnSubject(entity = SOURCE, operation = READ)
     public Response getLastReceivedAppStatusAvro(
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        Subject sub = client.getSubject(subjectId);
-        checkPermissionOnProject(token, SOURCE_READ, sub.getProject().getProjectName());
+            throws IOException {
         return ResponseHandler.getAvroResponse(request,
                 getLastReceivedAppStatusWorker(subjectId, sourceId));
     }

@@ -52,10 +52,11 @@ dependencies {
     compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthVersion
     compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
 
+    compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
+
     runtimeOnly group: 'ch.qos.logback', name:'logback-core', version: logback
     runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logback
 
-    runtimeOnly group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
     runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
 }
 

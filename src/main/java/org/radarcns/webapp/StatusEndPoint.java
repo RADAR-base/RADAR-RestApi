@@ -1,35 +1,24 @@
 package org.radarcns.webapp;
 
-import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
-import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
+import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
+import static org.radarcns.auth.authorization.Permission.Operation.READ;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.radarcns.auth.token.RadarToken;
 import org.radarcns.config.Properties;
+import org.radarcns.security.filter.NeedsPermission;
 import org.radarcns.status.hdfs.HdfsBinsData;
-import org.radarcns.webapp.util.ResponseHandler;
 
 @Path("/status")
 public class StatusEndPoint {
-    @Context
-    private HttpServletRequest request;
-
-    @Inject
-    private RadarToken token;
-
     /** HDFS status. */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -46,12 +35,11 @@ public class StatusEndPoint {
             @ApiResponse(responseCode = "200", description = "Return a list of summary of records"),
             @ApiResponse(responseCode = "401", description = "Access denied error occurred"),
             @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")})
-    public Response getJsonData() throws GeneralSecurityException, IOException {
-        checkPermission(token, MEASUREMENT_READ);
+    @NeedsPermission(entity = MEASUREMENT, operation = READ)
+    public Response getJsonData() throws IOException {
         String hdfsPath = Properties.getApiConfig().getHdfsOutputDir();
         if (hdfsPath == null) {
-            return ResponseHandler.getJsonErrorResponse(
-                    request, "The HDFS output directory was not configured.");
+            throw new IllegalStateException("The HDFS output directory was not configured.");
         }
         HdfsBinsData data = HdfsBinsData.parse(Paths.get(hdfsPath).resolve("bins.csv"));
         return Response.status(Response.Status.OK).entity(data).build();

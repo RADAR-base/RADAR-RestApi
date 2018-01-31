@@ -16,9 +16,7 @@
 
 package org.radarcns.webapp;
 
-import static org.radarcns.auth.authorization.Permission.SOURCE_READ;
-import static org.radarcns.auth.authorization.RadarAuthorization.checkPermission;
-import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
+import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
 import static org.radarcns.webapp.util.BasePath.SOURCE;
@@ -32,8 +30,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.security.GeneralSecurityException;
-import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -43,16 +39,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.radarcns.auth.token.RadarToken;
+import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
-import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.restapi.subject.Subject;
 import org.radarcns.security.Param;
-import org.radarcns.webapp.exception.NotFoundException;
+import org.radarcns.security.filter.NeedsPermission;
+import org.radarcns.security.filter.NeedsPermissionOnSubject;
 import org.radarcns.webapp.util.ResponseHandler;
 
 /**
@@ -64,12 +60,6 @@ public class SourceEndPoint {
     private ServletContext context;
     @Context
     private HttpServletRequest request;
-
-    @Inject
-    private RadarToken token;
-
-    @Inject
-    private ManagementPortalClient mpClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                       STATE FUNCTIONS                                      //
@@ -95,13 +85,10 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
+    @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public Response getLastComputedSourceStatusJson(
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId)
-            throws GeneralSecurityException, IOException, NotFoundException {
-        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
-        checkPermissionOnProject(token, SOURCE_READ,
-                sub.getProject().getProjectName());
+            @PathParam(SOURCE_ID) String sourceId) throws IOException {
         return ResponseHandler.getJsonResponse(request,
                 getLastComputedSourceStatus(subjectId, sourceId));
     }
@@ -124,13 +111,10 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
+    @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public Response getLastComputedSourceStatusAvro(
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
-        checkPermissionOnProject(token, SOURCE_READ,
-                sub.getProject().getProjectName());
+            @PathParam(SOURCE_ID) String sourceId) throws IOException {
         return ResponseHandler.getAvroResponse(request,
                 getLastComputedSourceStatus(subjectId, sourceId));
     }
@@ -173,11 +157,10 @@ public class SourceEndPoint {
             + "containing last computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @NeedsPermission(entity = Entity.SOURCE, operation = READ)
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationJson(
-            @PathParam(SOURCE_TYPE) String source)
-            throws IOException, GeneralSecurityException {
-        checkPermission(token, SOURCE_READ);
+            @PathParam(SOURCE_TYPE) String source) throws IOException {
         return ResponseHandler.getJsonResponse(request, getSourceSpecificationWorker(source));
     }
 
@@ -196,19 +179,17 @@ public class SourceEndPoint {
             + "containing last computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @NeedsPermission(entity = Entity.SOURCE, operation = READ)
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationAvro(
-            @PathParam(SOURCE_TYPE) String source)
-            throws IOException, GeneralSecurityException {
-        checkPermission(token, SOURCE_READ);
+            @PathParam(SOURCE_TYPE) String source) throws IOException {
         return ResponseHandler.getAvroResponse(request, getSourceSpecificationWorker(source));
     }
 
     /**
      * Actual implementation of AVRO and JSON getSpecification.
      **/
-    private SourceSpecification getSourceSpecificationWorker(String source)
-            throws ConnectException {
+    private SourceSpecification getSourceSpecificationWorker(String source) {
         return Monitors.getInstance().getSpecification(source);
     }
 
@@ -233,12 +214,9 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
+    @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public Response getAllSourcesJson(
-            @PathParam(SUBJECT_ID) String subjectId)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
-        checkPermissionOnProject(token, SOURCE_READ,
-                sub.getProject().getProjectName());
+            @PathParam(SUBJECT_ID) String subjectId) throws IOException {
         return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subjectId));
     }
 
@@ -256,12 +234,9 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
+    @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public Response getAllSourcesAvro(
-            @PathParam(SUBJECT_ID) String subjectId)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
-        checkPermissionOnProject(token, SOURCE_READ,
-                sub.getProject().getProjectName());
+            @PathParam(SUBJECT_ID) String subjectId) throws IOException {
         return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subjectId));
     }
 

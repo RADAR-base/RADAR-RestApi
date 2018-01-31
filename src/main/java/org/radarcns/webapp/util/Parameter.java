@@ -27,7 +27,9 @@ public interface Parameter {
     String SOURCE_TYPE = "sourceType";
     String START = "start";
     String STAT = "stat";
-    String STUDY_ID = "studyId";
     String PROJECT_NAME = "projectName";
     String SUBJECT_ID = "subjectId";
+    String PRODUCER = "producer";
+    String MODEL = "model";
+    String CATALOGUE_VERSION = "catalogueVersion";
 }

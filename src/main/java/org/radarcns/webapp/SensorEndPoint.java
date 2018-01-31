@@ -16,8 +16,8 @@
 
 package org.radarcns.webapp;
 
-import static org.radarcns.auth.authorization.Permission.MEASUREMENT_READ;
-import static org.radarcns.auth.authorization.RadarAuthorization.checkPermissionOnProject;
+import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
+import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
@@ -33,9 +33,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.security.GeneralSecurityException;
 import java.util.LinkedList;
-import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -45,16 +43,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.radarcns.auth.token.RadarToken;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
-import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.managementportal.Subject;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.security.Param;
-import org.radarcns.webapp.exception.NotFoundException;
+import org.radarcns.security.filter.NeedsPermissionOnSubject;
 import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,12 +65,6 @@ public class SensorEndPoint {
     private ServletContext context;
     @Context
     private HttpServletRequest request;
-
-    @Inject
-    private RadarToken token;
-
-    @Inject
-    private ManagementPortalClient mpClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
@@ -105,16 +94,13 @@ public class SensorEndPoint {
                     + "DoubleValue.avsc")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Response getLastReceivedSampleJson(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        Subject sub = mpClient.getSubject(subjectId);
-        checkPermissionOnProject(token, MEASUREMENT_READ,
-                sub.getProject().getProjectName());
+            @PathParam(SOURCE_ID) String sourceId) throws IOException {
         return ResponseHandler.getJsonResponse(request,
                 getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
     }
@@ -141,16 +127,13 @@ public class SensorEndPoint {
             + "either Acceleration.avsc or DoubleValue.avsc")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Response getLastReceivedSampleAvro(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        Subject sub = mpClient.getSubject(subjectId);
-        checkPermissionOnProject(token, MEASUREMENT_READ,
-                sub.getProject().getProjectName());
+            @PathParam(SOURCE_ID) String sourceId) throws IOException {
         return ResponseHandler.getAvroResponse(request,
                 getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
     }
@@ -204,16 +187,13 @@ public class SensorEndPoint {
             + "DoubleValue.avsc")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Response getSamplesJson(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        Subject sub = mpClient.getSubject(subjectId);
-        checkPermissionOnProject(token, MEASUREMENT_READ,
-                sub.getProject().getProjectName());
+            @PathParam(SOURCE_ID) String sourceId) throws IOException {
         return ResponseHandler.getJsonResponse(request,
                 getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
     }
@@ -238,16 +218,14 @@ public class SensorEndPoint {
             + "either Acceleration.avsc or DoubleValue.avsc")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Response getSamplesAvro(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        Subject sub = mpClient.getSubject(subjectId);
-        checkPermissionOnProject(token, MEASUREMENT_READ,
-                sub.getProject().getProjectName());
+            throws IOException {
         return ResponseHandler.getAvroResponse(request,
                 getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
     }
@@ -302,6 +280,7 @@ public class SensorEndPoint {
             + "either Acceleration.avsc or DoubleValue.avsc.")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Response getSamplesWithinWindowJson(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
@@ -309,11 +288,7 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String sourceId,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(START) long start,
-            @PathParam(END) long end)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        Subject sub = mpClient.getSubject(subjectId);
-        checkPermissionOnProject(token, MEASUREMENT_READ,
-                sub.getProject().getProjectName());
+            @PathParam(END) long end) throws IOException {
         return ResponseHandler.getJsonResponse(request,
                 getSamplesWithinWindowWorker(subjectId, sourceId, stat,
                         interval, sensor, start, end));
@@ -342,6 +317,7 @@ public class SensorEndPoint {
                     + "given inputs formatted either Acceleration.avsc or DoubleValue.avsc.")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Response getSamplesWithinWindowAvro(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
@@ -350,10 +326,7 @@ public class SensorEndPoint {
             @PathParam(SOURCE_ID) String sourceId,
             @PathParam(START) long start,
             @PathParam(END) long end)
-            throws IOException, GeneralSecurityException, NotFoundException {
-        Subject sub = mpClient.getSubject(subjectId);
-        checkPermissionOnProject(token, MEASUREMENT_READ,
-                sub.getProject().getProjectName());
+            throws IOException {
         return ResponseHandler.getAvroResponse(request,
                 getSamplesWithinWindowWorker(subjectId, sourceId, stat,
                         interval, sensor, start, end));
