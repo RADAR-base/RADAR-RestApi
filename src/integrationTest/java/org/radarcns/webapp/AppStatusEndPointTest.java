@@ -17,11 +17,9 @@
 package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.STATUS;
 
 import com.mongodb.MongoClient;
@@ -31,7 +29,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;

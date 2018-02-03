@@ -3,7 +3,6 @@ package org.radarcns.security.filter;
 import static org.radarcns.security.filter.PermissionFilter.abortWithForbidden;
 
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
@@ -16,9 +15,6 @@ import org.radarcns.webapp.filter.AuthenticationFilter.RadarSecurityContext;
 public class PermissionOnProjectFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
-
-    @Context
-    private HttpServletRequest request;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {

@@ -1,5 +1,3 @@
-package org.radarcns.security;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.security;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.security;
 
 /**
  * Checks if parameters are valid or not matching again REGEXs.
