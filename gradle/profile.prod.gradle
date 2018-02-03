@@ -1,5 +1,5 @@
-task downloadWarDependencies {
-    description "Pre-downloads war dependencies"
+task downloadApplicationDependencies {
+    description "Pre-downloads application dependencies"
     configurations.compileClasspath.files
     configurations.runtimeClasspath.files
 }

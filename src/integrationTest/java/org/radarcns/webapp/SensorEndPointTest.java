@@ -50,6 +50,7 @@ import org.radarcns.util.RadarConverter;
 
 public class SensorEndPointTest {
 
+    private static final String PROJECT = "radar";
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = org.radarcns.config.TestCatalog.EMPATICA;
@@ -58,7 +59,7 @@ public class SensorEndPointTest {
     private static final Class<DoubleSample> ITEM = DoubleSample.class;
     private static final int SAMPLES = 10;
     private static final String SOURCE_PATH = SENSOR_TYPE + '/' + COUNT + '/' + TIME_WINDOW + '/'
-            + SUBJECT + '/' + SOURCE;
+            + PROJECT + '/' + SUBJECT + '/' + SOURCE;
 
     @Rule
     public final ApiClient apiClient = new ApiClient(

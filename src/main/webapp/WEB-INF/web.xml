@@ -39,6 +39,6 @@
     </servlet-mapping>
 
     <listener>
-        <listener-class>org.radarcns.listener.MongoDbContextListener</listener-class>
+        <listener-class>org.radarcns.listener.MongoFactory</listener-class>
     </listener>
 </web-app>

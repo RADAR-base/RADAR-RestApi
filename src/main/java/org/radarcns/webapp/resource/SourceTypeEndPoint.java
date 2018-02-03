@@ -1,4 +1,4 @@
-package org.radarcns.webapp;
+package org.radarcns.webapp.resource;
 
 import static org.radarcns.auth.authorization.Permission.Entity.SOURCETYPE;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
@@ -10,21 +10,22 @@ import static org.radarcns.webapp.util.Parameter.PRODUCER;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.security.filter.NeedsPermission;
-import org.radarcns.webapp.exception.NotFoundException;
 
+@Provider
 @Path("/" + SOURCE_TYPES)
 public class SourceTypeEndPoint {
-    @Context
+    @Inject
     private ManagementPortalClient mpClient;
 
     //--------------------------------------------------------------------------------------------//
@@ -65,9 +66,10 @@ public class SourceTypeEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Source type not found")
     @NeedsPermission(entity = SOURCETYPE, operation = READ)
-    public Response getSourceTypeJson(@PathParam(PRODUCER) String producer,
-            @PathParam(MODEL) String model, @PathParam(CATALOGUE_VERSION) String catalogVersion)
-            throws IOException, NotFoundException {
+    public Response getSourceTypeJson(
+            @PathParam(PRODUCER) String producer,
+            @PathParam(MODEL) String model,
+            @PathParam(CATALOGUE_VERSION) String catalogVersion) throws IOException {
         return Response.status(Status.OK)
                 .entity(mpClient.getSourceType(producer, model, catalogVersion))
                 .build();

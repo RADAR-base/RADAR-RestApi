@@ -98,7 +98,7 @@ public class SensorDataAccessObject {
      * @param stat is the required statistical value
      * @param timeWindow time frame resolution
      * @param sensorType is the required sensor type
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
+     * @param client client used to retrieve the client for accessing the
      *      results cache
      * @return the last seen data value stat for the given subject and source, otherwise
      *      empty dataset
@@ -106,10 +106,8 @@ public class SensorDataAccessObject {
      * @see Dataset
      */
     public Dataset getLastReceivedSample(String subject, String source, DescriptiveStatistic stat,
-            TimeWindow timeWindow, String sensorType, ServletContext context)
+            TimeWindow timeWindow, String sensorType, MongoClient client)
             throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
-
         Header header = getHeader(subject, source, sensorType, stat,
                 timeWindow, client);
 
@@ -120,7 +118,7 @@ public class SensorDataAccessObject {
         MongoSensor sensorDao = hooks.get(sensorType);
 
         return sensorDao.valueRTByUserSource(subject, source, header,
-                    RadarConverter.getMongoStat(stat), MongoHelper.getCollection(context,
+                    RadarConverter.getMongoStat(stat), MongoHelper.getCollection(client,
                         sensorDao.getCollectionName(header.getSource(), timeWindow)));
     }
 
@@ -132,17 +130,15 @@ public class SensorDataAccessObject {
      * @param stat is the required statistical value
      * @param timeWindow time frame resolution
      * @param sensorType is the required sensor type
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
+     * @param client mongo client for accessing the
      *      results cache
      * @return data dataset for the given subject and source, otherwise empty dataset
      *
      * @see Dataset
      */
     public Dataset getSamples(String subject, String source, DescriptiveStatistic stat,
-            TimeWindow timeWindow, String sensorType, ServletContext context)
+            TimeWindow timeWindow, String sensorType, MongoClient client)
             throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
-
         Header header = getHeader(subject, source, sensorType, stat,
                 timeWindow, client);
 
@@ -153,7 +149,7 @@ public class SensorDataAccessObject {
         MongoSensor sensorDao = hooks.get(sensorType);
 
         return sensorDao.valueByUserSource(subject, source, header,
-                RadarConverter.getMongoStat(stat), MongoHelper.getCollection(context,
+                RadarConverter.getMongoStat(stat), MongoHelper.getCollection(client,
                     sensorDao.getCollectionName(header.getSource(), timeWindow)));
     }
 
@@ -176,9 +172,7 @@ public class SensorDataAccessObject {
      */
     public Dataset getSamples(String subject, String source,
             DescriptiveStatistic stat, TimeWindow timeWindow, Long start, Long end,
-            String sensorType, ServletContext context) throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
-
+            String sensorType, MongoClient client) throws ConnectException {
         Header header = getHeader(subject, source, sensorType, stat,
                 timeWindow, client);
 
@@ -189,7 +183,7 @@ public class SensorDataAccessObject {
         MongoSensor sensorDao = hooks.get(sensorType);
 
         return sensorDao.valueByUserSourceWindow(subject, source, header,
-                RadarConverter.getMongoStat(stat), start, end, MongoHelper.getCollection(context,
+                RadarConverter.getMongoStat(stat), start, end, MongoHelper.getCollection(client,
                     sensorDao.getCollectionName(header.getSource(), timeWindow)));
     }
 
@@ -222,7 +216,7 @@ public class SensorDataAccessObject {
      * @throws ConnectException if MongoDB is not available
      *
      */
-    public Set<String> getAllSubject(MongoClient client) throws ConnectException {
+    public Set<String> getAllSubject(MongoClient client) {
         Set<String> subjects = new HashSet<>();
 
         for (MongoSensor mongoSensor : hooks.values()) {
@@ -240,8 +234,7 @@ public class SensorDataAccessObject {
      * @return a {@code Set<Source>} containing all {@link Source} used by the given {@code subject}
      * @throws ConnectException if MongoDB is not available
      */
-    public Set<Source> getAllSources(String subject, MongoClient client)
-            throws ConnectException {
+    public Set<Source> getAllSources(String subject, MongoClient client) {
         Set<Source> sources = new HashSet<>();
 
         for (MongoSensor mongoSensor : hooks.values()) {

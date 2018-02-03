@@ -24,12 +24,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import javax.servlet.ServletContext;
 import org.radarcns.dao.mongo.data.android.AndroidAppStatus;
 import org.radarcns.dao.mongo.data.android.AndroidRecordCounter;
 import org.radarcns.dao.mongo.data.android.AndroidServerStatus;
 import org.radarcns.dao.mongo.util.MongoAndroidApp;
-import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.restapi.source.Source;
 
@@ -52,21 +50,6 @@ public class AndroidAppDataAccessObject {
         dataAccessObjects.add(new AndroidAppStatus());
         dataAccessObjects.add(new AndroidRecordCounter());
         dataAccessObjects.add(new AndroidServerStatus());
-    }
-
-    /**
-     * Computes the Android App Status realign on different collection.
-     *
-     * @param subject identifier
-     * @param source identifier
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return {@code Application} representing the status of the related Android App
-     * @throws ConnectException if MongoDb is not available
-     */
-    public Application getStatus(String subject, String source, ServletContext context)
-            throws ConnectException {
-        return getStatus(subject, source, MongoHelper.getClient(context));
     }
 
     /**

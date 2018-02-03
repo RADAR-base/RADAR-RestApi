@@ -13,8 +13,7 @@ import org.radarcns.security.filter.PermissionOnProjectFilter;
 import org.radarcns.security.filter.PermissionOnSubjectFilter;
 
 @Provider
-public class AuthorizationDynamicFeature implements DynamicFeature {
-
+public class AuthorizationFeature implements DynamicFeature {
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
         Method method = resourceInfo.getResourceMethod();

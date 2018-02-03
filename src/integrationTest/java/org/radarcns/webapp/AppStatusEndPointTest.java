@@ -18,6 +18,7 @@ package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
@@ -43,17 +44,19 @@ import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
+import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.webapp.util.BasePath;
 
 public class AppStatusEndPointTest {
+    private static final String PROJECT = "radar";
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
-    private static final String SOURCE_PATH = SUBJECT + '/' + SOURCE;
+    private static final String SOURCE_PATH = PROJECT + '/' + SUBJECT + '/' + SOURCE;
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
@@ -61,15 +64,14 @@ public class AppStatusEndPointTest {
                     + BasePath.ANDROID + '/' + STATUS + '/');
 
     @Test
-    public void getStatusTest204() throws IOException {
-        try (Response response = apiClient.request(SOURCE_PATH, AVRO_BINARY, Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
+    public void getStatusTest200Unknown() throws IOException, ReflectiveOperationException {
+        Application actual = apiClient.requestAvro(SOURCE_PATH, Application.class, Status.OK);
+        assertSame(ServerStatus.UNKNOWN, actual.getServerStatus());
     }
 
     @Test
     public void getStatusTest200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+            throws IOException, ReflectiveOperationException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,

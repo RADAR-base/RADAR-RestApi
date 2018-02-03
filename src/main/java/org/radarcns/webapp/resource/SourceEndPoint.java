@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.webapp;
+package org.radarcns.webapp.resource;
 
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
@@ -22,15 +22,17 @@ import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
 import static org.radarcns.webapp.util.BasePath.SOURCE;
 import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
 import static org.radarcns.webapp.util.BasePath.STATE;
+import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SOURCE_TYPE;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
+import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.net.ConnectException;
-import javax.servlet.ServletContext;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -39,6 +41,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
@@ -54,12 +57,11 @@ import org.radarcns.webapp.util.ResponseHandler;
 /**
  * SourceDefinition web-app. Function set to access source information.
  */
+@Provider
 @Path("/" + SOURCE)
 public class SourceEndPoint {
-    @Context
-    private ServletContext context;
-    @Context
-    private HttpServletRequest request;
+    @Inject
+    private MongoClient mongoClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                       STATE FUNCTIONS                                      //
@@ -70,7 +72,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + STATE + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("/" + STATE + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Return a SourceDefinition values",
             description = "Using the source sensors values arrived within last 60sec, it computes "
                     + "the"
@@ -87,9 +89,10 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public Response getLastComputedSourceStatusJson(
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) throws IOException {
-        return ResponseHandler.getJsonResponse(request,
+        return ResponseHandler.getJsonResponse(
                 getLastComputedSourceStatus(subjectId, sourceId));
     }
 
@@ -98,7 +101,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(AVRO_BINARY)
-    @Path("/" + STATE + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("/" + STATE + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Return a SourceDefinition values",
             description = "Using the source sensors values arrived within last 60sec, it computes "
                     + "the"
@@ -113,9 +116,10 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public Response getLastComputedSourceStatusAvro(
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) throws IOException {
-        return ResponseHandler.getAvroResponse(request,
+        return ResponseHandler.getAvroResponse(
                 getLastComputedSourceStatus(subjectId, sourceId));
     }
 
@@ -126,13 +130,13 @@ public class SourceEndPoint {
             throws ConnectException {
         Param.isValidInput(subject, source);
 
-        String sourceType = SourceDataAccessObject.getSourceType(source, context);
+        String sourceType = SourceDataAccessObject.getSourceType(source, mongoClient);
 
         if (sourceType == null) {
             return null;
         }
 
-        return Monitors.getInstance().getState(subject, source, sourceType, context);
+        return Monitors.getInstance().getState(mongoClient, subject, source, sourceType);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -161,7 +165,7 @@ public class SourceEndPoint {
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationJson(
             @PathParam(SOURCE_TYPE) String source) throws IOException {
-        return ResponseHandler.getJsonResponse(request, getSourceSpecificationWorker(source));
+        return ResponseHandler.getJsonResponse(getSourceSpecificationWorker(source));
     }
 
     /**
@@ -183,7 +187,7 @@ public class SourceEndPoint {
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Response getSourceSpecificationAvro(
             @PathParam(SOURCE_TYPE) String source) throws IOException {
-        return ResponseHandler.getAvroResponse(request, getSourceSpecificationWorker(source));
+        return ResponseHandler.getAvroResponse(getSourceSpecificationWorker(source));
     }
 
     /**
@@ -202,7 +206,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + GET_ALL_SOURCES + "/{" + SUBJECT_ID + "}")
+    @Path("/" + GET_ALL_SOURCES + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}")
     @Operation(summary = "Return a User value",
             description = "Return all known sources associated with the give subjectID")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
@@ -216,8 +220,9 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public Response getAllSourcesJson(
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        return ResponseHandler.getJsonResponse(request, getAllSourcesWorker(subjectId));
+        return ResponseHandler.getJsonResponse(getAllSourcesWorker(subjectId));
     }
 
     /**
@@ -225,7 +230,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces(AVRO_BINARY)
-    @Path("/" + GET_ALL_SOURCES + "/{" + SUBJECT_ID + "}")
+    @Path("/" + GET_ALL_SOURCES + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}")
     @Operation(summary = "Return a User value",
             description = "Return all known sources associated with the give subjectID")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
@@ -236,8 +241,9 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public Response getAllSourcesAvro(
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        return ResponseHandler.getAvroResponse(request, getAllSourcesWorker(subjectId));
+        return ResponseHandler.getAvroResponse(getAllSourcesWorker(subjectId));
     }
 
     /**
@@ -248,8 +254,8 @@ public class SourceEndPoint {
 
         Subject subject = new Subject();
 
-        if (SubjectDataAccessObject.exist(subjectId, context)) {
-            subject = SourceDataAccessObject.findAllSourcesByUser(subjectId, context);
+        if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
+            subject = SourceDataAccessObject.findAllSourcesByUser(subjectId, mongoClient);
         }
 
         return subject;

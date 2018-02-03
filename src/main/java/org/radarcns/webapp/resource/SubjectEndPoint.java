@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.webapp;
+package org.radarcns.webapp.resource;
 
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
@@ -24,11 +24,12 @@ import static org.radarcns.webapp.util.BasePath.SUBJECT;
 import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
+import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.net.ConnectException;
-import javax.servlet.ServletContext;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -37,6 +38,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.restapi.subject.Cohort;
@@ -50,13 +52,11 @@ import org.radarcns.webapp.util.ResponseHandler;
  * Subject web-app. Function set to access subject information. A subject is a person enrolled for
  * in a study.
  */
+@Provider
 @Path("/" + SUBJECT)
 public class SubjectEndPoint {
-
-    @Context
-    private ServletContext context;
-    @Context
-    private HttpServletRequest request;
+    @Inject
+    private MongoClient mongoClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                        ALL SUBJECTS                                        //
@@ -80,7 +80,7 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermissionOnProject(entity = Entity.SUBJECT, operation = READ)
     public Response getAllSubjectsJson(@PathParam(PROJECT_NAME) String study) throws IOException {
-        return ResponseHandler.getJsonResponse(request, getAllSubjectsWorker());
+        return ResponseHandler.getJsonResponse(getAllSubjectsWorker());
     }
 
     /**
@@ -99,14 +99,14 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermissionOnProject(entity = Entity.SUBJECT, operation = READ)
     public Response getAllSubjectsAvro(@PathParam(PROJECT_NAME) String study) throws IOException {
-        return ResponseHandler.getAvroResponse(request, getAllSubjectsWorker());
+        return ResponseHandler.getAvroResponse(getAllSubjectsWorker());
     }
 
     /**
      * Actual implementation of AVRO and JSON getAllSubjects.
      **/
     private Cohort getAllSubjectsWorker() throws ConnectException {
-        return SubjectDataAccessObject.getAllSubjects(context);
+        return SubjectDataAccessObject.getAllSubjects(mongoClient);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -118,7 +118,7 @@ public class SubjectEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
+    @Path("{" + PROJECT_NAME + "}/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
     @Operation(summary = "Return the information related to given subject identifier",
             description = "Some information are not implemented yet. The returned values are "
                     + "hardcoded.")
@@ -134,8 +134,10 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SUBJECT, operation = READ)
-    public Response getSubjectJson(@PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        return ResponseHandler.getJsonResponse(request, getSubjectWorker(subjectId));
+    public Response getSubjectJson(
+            @PathParam(PROJECT_NAME) String projectName,
+            @PathParam(SUBJECT_ID) String subjectId) throws IOException {
+        return ResponseHandler.getJsonResponse(getSubjectWorker(subjectId));
     }
 
     /**
@@ -143,7 +145,7 @@ public class SubjectEndPoint {
      */
     @GET
     @Produces(AVRO_BINARY)
-    @Path("/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
+    @Path("{" + PROJECT_NAME + "}/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
     @Operation(
             summary = "Return the information related to given subject identifier",
             description = "Some information are not implemented yet. The returned values are "
@@ -160,8 +162,10 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnProject(entity = Entity.SUBJECT, operation = READ)
-    public Response getSubjectAvro(@PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        return ResponseHandler.getAvroResponse(request, getSubjectWorker(subjectId));
+    public Response getSubjectAvro(
+            @PathParam(PROJECT_NAME) String projectName,
+            @PathParam(SUBJECT_ID) String subjectId) throws IOException {
+        return ResponseHandler.getAvroResponse(getSubjectWorker(subjectId));
     }
 
     /**
@@ -172,8 +176,8 @@ public class SubjectEndPoint {
 
         Subject subject = new Subject();
 
-        if (SubjectDataAccessObject.exist(subjectId, context)) {
-            subject = SubjectDataAccessObject.getSubject(subjectId, context);
+        if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
+            subject = SubjectDataAccessObject.getSubject(subjectId, mongoClient);
         }
 
         return subject;

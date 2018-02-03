@@ -1,4 +1,4 @@
-package org.radarcns.webapp;
+package org.radarcns.webapp.resource;
 
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
@@ -13,10 +13,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 import org.radarcns.config.Properties;
 import org.radarcns.security.filter.NeedsPermission;
 import org.radarcns.status.hdfs.HdfsBinsData;
 
+@Provider
 @Path("/status")
 public class StatusEndPoint {
     /** HDFS status. */

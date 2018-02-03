@@ -29,6 +29,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
+import javax.ws.rs.NotFoundException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -42,7 +43,6 @@ import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.CachedMap;
 import org.radarcns.util.RadarConverter;
-import org.radarcns.webapp.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,12 +156,31 @@ public class ManagementPortalClient {
      *
      * @param subjectLogin {@link String} that has to be searched.
      * @return {@link Subject} if a subject is found
+     * @throws IOException if the subjects cannot be refreshed
+     * @throws NotFoundException if the subject is not found
      */
-    public Subject getSubject(@Nonnull String subjectLogin) throws IOException, NotFoundException {
+    public Subject getSubject(@Nonnull String subjectLogin) throws IOException {
         try {
             return subjects.get(subjectLogin);
         } catch (NoSuchElementException ex) {
             throw new NotFoundException("Subject " + subjectLogin + " not found.");
+        }
+    }
+
+    /**
+     * Checks whether given subject is part of given project.
+     *
+     * @param projectName project that should contain the subject.
+     * @param subjectLogin login name that has to be searched.
+     * @throws IOException if the list of subjects cannot be refreshed.
+     * @throws NotFoundException if the subject is not found in given project.
+     */
+    public void checkSubjectInProject(@Nonnull String projectName, @Nonnull String subjectLogin)
+            throws IOException {
+        Subject subject = getSubject(subjectLogin);
+        if (!projectName.equals(subject.getProject().getProjectName())) {
+            throw new NotFoundException(
+                    "Subject " + subjectLogin + " is not part of project " + projectName + ".");
         }
     }
 
@@ -173,8 +192,7 @@ public class ManagementPortalClient {
      * @return {@link List} of {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException in case the subjects cannot be retrieved.
      */
-    public List<Subject> getAllSubjectsFromProject(@Nonnull String projectName) throws
-            IOException, NotFoundException {
+    public List<Subject> getAllSubjectsFromProject(@Nonnull String projectName) throws IOException {
         // will throw not found if relevant.
         getProject(projectName);
 
@@ -227,7 +245,7 @@ public class ManagementPortalClient {
      * @param projectName {@link String} of the Project that has to be retrieved
      * @return {@link Project} retrieved from the Management Portal
      */
-    public Project getProject(String projectName) throws IOException, NotFoundException {
+    public Project getProject(String projectName) throws IOException {
         try {
             return projects.get(projectName);
         } catch (NoSuchElementException ex) {
@@ -253,9 +271,8 @@ public class ManagementPortalClient {
      * @param catalogVersion {@link String} of the Source-type that has to be retrieved
      * @return {@link SourceType} retrieved from the Management Portal
      */
-    public SourceType getSourceType(String producer, String model, String catalogVersion) throws
-            IOException,
-            NotFoundException {
+    public SourceType getSourceType(String producer, String model, String catalogVersion)
+            throws IOException {
         try {
             return sourceTypes.get(new SourceTypeIdentifier(producer, model, catalogVersion));
         } catch (NoSuchElementException ex) {

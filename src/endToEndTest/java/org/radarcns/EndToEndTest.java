@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -84,6 +83,7 @@ public class EndToEndTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EndToEndTest.class);
 
+    private static final String PROJECT_NAME_MOCK = "radar";
     private static final String USER_ID_MOCK = "sub-1";
     private static final String SOURCE_ID_MOCK = "SourceID_0";
 
@@ -317,8 +317,7 @@ public class EndToEndTest {
      **/
     public static Map<MockDataConfig, Dataset> getExpectedDataset(
             Map<MockDataConfig, ExpectedValue> expectedValue, DescriptiveStatistic stat)
-            throws ClassNotFoundException, NoSuchMethodException, IOException,
-            IllegalAccessException, InvocationTargetException, InstantiationException {
+            throws IllegalAccessException, InstantiationException {
         Map<MockDataConfig, Dataset> map = new HashMap<>();
 
         for (MockDataConfig config : expectedValue.keySet()) {
@@ -344,11 +343,11 @@ public class EndToEndTest {
      * Queries the REST-API for each statistical function and for each data.
      */
     private void assertRestApiMatches()
-            throws IOException, GeneralSecurityException, ReflectiveOperationException {
+            throws IOException, ReflectiveOperationException {
         LOGGER.info("Fetching APIs ...");
 
         final String path = DATA + "/{" + SENSOR + "}/{" + STAT + "}/" + TimeWindow.TEN_SECOND
-                + '/' + USER_ID_MOCK + "/" + SOURCE_ID_MOCK;
+                + '/' + PROJECT_NAME_MOCK + '/' + USER_ID_MOCK + "/" + SOURCE_ID_MOCK;
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
             String pathStat = path.replace("{" + STAT + "}", stat.name());

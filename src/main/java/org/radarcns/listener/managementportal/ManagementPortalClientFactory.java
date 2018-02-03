@@ -16,28 +16,64 @@
 
 package org.radarcns.listener.managementportal;
 
-import javax.ws.rs.core.Context;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
+import javax.inject.Inject;
 import okhttp3.OkHttpClient;
 import org.glassfish.hk2.api.Factory;
-import org.radarcns.oauth.OAuth2AccessTokenDetails;
+import org.radarcns.config.ManagementPortalConfig;
+import org.radarcns.config.Properties;
+import org.radarcns.exception.TokenException;
+import org.radarcns.oauth.OAuth2Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Refreshes the OAuth2 token needed to authenticate against the Management Portal and adds it to
  * the {@link javax.servlet.ServletContext} in this way multiple function can make reuse of it.
  */
 public class ManagementPortalClientFactory implements Factory<ManagementPortalClient> {
+    private static final Logger logger = LoggerFactory
+            .getLogger(ManagementPortalClientFactory.class);
 
-    @Context
-    private OAuth2AccessTokenDetails token;
+    private final URL url;
+    private final String clientId;
+    private final String clientSecret;
 
-    @Context
-    private OkHttpClient client;
+    @Inject
+    private OkHttpClient httpClient;
+    private ManagementPortalClient mpClient;
+    private OAuth2Client oauthClient;
+
+    public ManagementPortalClientFactory() {
+        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
+        try {
+            url = new URL(config.getManagementPortalUrl(), config.getTokenEndpoint());
+        } catch (MalformedURLException ex) {
+            throw new IllegalStateException(ex);
+        }
+        clientId = config.getOauthClientId();
+        clientSecret = config.getOauthClientSecret();
+    }
 
     @Override
-    public ManagementPortalClient provide() {
-        ManagementPortalClient mpClient = new ManagementPortalClient(client);
-        mpClient.updateToken(token);
-        return mpClient;
+    public synchronized ManagementPortalClient provide() {
+        if (mpClient == null) {
+            mpClient = new ManagementPortalClient(httpClient);
+            oauthClient = new OAuth2Client.Builder()
+                    .endpoint(url)
+                    .credentials(clientId, clientSecret)
+                    .httpClient(httpClient)
+                    .build();
+        }
+        try {
+            mpClient.updateToken(oauthClient.getValidToken(Duration.ofSeconds(30)));
+            return mpClient;
+        } catch (TokenException e) {
+            logger.error("Failed to retrieve token", e);
+            return null;
+        }
     }
 
     @Override

@@ -1,7 +1,6 @@
 package org.radarcns.security.filter;
 
 import static org.radarcns.security.filter.PermissionFilter.abortWithForbidden;
-import static org.radarcns.webapp.filter.AuthenticationFilter.TOKEN_ATTRIBUTE;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +11,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import org.radarcns.auth.authorization.Permission;
 import org.radarcns.auth.token.RadarToken;
+import org.radarcns.webapp.filter.AuthenticationFilter.RadarSecurityContext;
 
 public class PermissionOnProjectFilter implements ContainerRequestFilter {
     @Context
@@ -28,7 +28,7 @@ public class PermissionOnProjectFilter implements ContainerRequestFilter {
         UriInfo uriInfo = requestContext.getUriInfo();
         String projectName = uriInfo.getPathParameters().getFirst(annotation.projectParam());
 
-        RadarToken token = (RadarToken) request.getAttribute(TOKEN_ATTRIBUTE);
+        RadarToken token = ((RadarSecurityContext) requestContext.getSecurityContext()).getToken();
         if (!token.hasPermissionOnProject(permission, projectName)) {
             abortWithForbidden(requestContext,
                     "No permission " + permission + " on project " + projectName + '.');

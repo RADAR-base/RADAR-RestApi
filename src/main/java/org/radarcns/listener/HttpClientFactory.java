@@ -12,25 +12,18 @@ import org.slf4j.LoggerFactory;
 public class HttpClientFactory implements Factory<OkHttpClient> {
     private static final Logger logger = LoggerFactory.getLogger(HttpClientFactory.class);
 
-    private final OkHttpClient client;
-
     /** Disposes the client after use. */
     @Context
     @SuppressWarnings("PMD.UnusedPrivateField")
     private CloseableService closeableService;
 
-    /** Default constructor. Creates the client that will be used. */
-    public HttpClientFactory() {
-        this.client = new OkHttpClient.Builder()
+    @Override
+    public OkHttpClient provide() {
+        return new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .build();
-    }
-
-    @Override
-    public OkHttpClient provide() {
-        return client;
     }
 
     @Override

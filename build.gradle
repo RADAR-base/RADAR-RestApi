@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'war'
+    id 'application'
 }
 
 group 'org.radarcns'
@@ -39,9 +39,12 @@ repositories {
 }
 
 dependencies {
-    providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
+    compile 'org.glassfish.grizzly:grizzly-http-server:2.+'
+    compile 'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.+'
+    compile 'org.glassfish.jersey.containers:jersey-container-grizzly2-servlet:2.+'
 
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
+    compile 'org.glassfish.hk2:hk2-metadata-generator:2.+'
+
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
 
     compile group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: swagger
@@ -60,9 +63,7 @@ dependencies {
     runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
 }
 
-war {
-    archiveName 'radar.war'
-}
+mainClassName = 'org.radarcns.webapp.GrizzlyServer'
 
 if (!hasProperty('profile')) {
     ext.profile = 'dev'

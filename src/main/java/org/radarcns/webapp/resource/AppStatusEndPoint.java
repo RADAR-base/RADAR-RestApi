@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package org.radarcns.webapp;
+package org.radarcns.webapp.resource;
 
 import static org.radarcns.auth.authorization.Permission.Entity.SOURCE;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.util.BasePath.ANDROID;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.STATUS;
+import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
+import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.net.ConnectException;
-import javax.servlet.ServletContext;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -37,8 +39,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.restapi.app.Application;
 import org.radarcns.security.Param;
 import org.radarcns.security.filter.NeedsPermissionOnSubject;
@@ -47,13 +51,11 @@ import org.radarcns.webapp.util.ResponseHandler;
 /**
  * Android application status web-app. Function set to access Android app status information.
  */
+@Provider
 @Path("/" + ANDROID)
 public class AppStatusEndPoint {
-    @Context
-    private ServletContext context;
-
-    @Context
-    private HttpServletRequest request;
+    @Inject
+    private MongoClient mongoClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
@@ -64,7 +66,7 @@ public class AppStatusEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("/" + STATUS + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Return an Applications status",
             description = "The Android application periodically updates its current status")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
@@ -79,10 +81,10 @@ public class AppStatusEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermissionOnSubject(entity = SOURCE, operation = READ)
     public Response getLastReceivedAppStatusJson(
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId)
-            throws IOException {
-        return ResponseHandler.getJsonResponse(request,
+            @PathParam(SOURCE_ID) String sourceId) throws IOException {
+        return ResponseHandler.getJsonResponse(
                 getLastReceivedAppStatusWorker(subjectId, sourceId));
     }
 
@@ -91,7 +93,7 @@ public class AppStatusEndPoint {
      */
     @GET
     @Produces(AVRO_BINARY)
-    @Path("/" + STATUS + "/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("/" + STATUS + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Return an Applications status",
             description = "The Android application periodically updates its current status")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
@@ -103,10 +105,10 @@ public class AppStatusEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermissionOnSubject(entity = SOURCE, operation = READ)
     public Response getLastReceivedAppStatusAvro(
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId)
-            throws IOException {
-        return ResponseHandler.getAvroResponse(request,
+            @PathParam(SOURCE_ID) String sourceId) throws IOException {
+        return ResponseHandler.getAvroResponse(
                 getLastReceivedAppStatusWorker(subjectId, sourceId));
     }
 
@@ -117,11 +119,12 @@ public class AppStatusEndPoint {
             throws ConnectException {
         Param.isValidInput(subject, source);
 
-        Application application = new Application();
+        Application application = new Application(
+                null, 0d, ServerStatus.UNKNOWN, -1, -1, -1);
 
-        if (SubjectDataAccessObject.exist(subject, context)) {
+        if (SubjectDataAccessObject.exist(subject, mongoClient)) {
             application = AndroidAppDataAccessObject.getInstance().getStatus(
-                    subject, source, context);
+                    subject, source, mongoClient);
         }
 
         return application;

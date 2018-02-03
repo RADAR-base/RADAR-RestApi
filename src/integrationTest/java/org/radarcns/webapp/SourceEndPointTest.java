@@ -65,6 +65,7 @@ public class SourceEndPointTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceEndPointTest.class);
 
+    private static final String PROJECT = "radar";
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = EMPATICA;
@@ -79,7 +80,8 @@ public class SourceEndPointTest {
 
     @Test
     public void getStatusTest204() throws IOException {
-        try (Response response = apiClient.request(STATE + '/' + SUBJECT + '/' + SOURCE,
+        try (Response response = apiClient.request(
+                STATE + '/' + PROJECT + '/' + SUBJECT + '/' + SOURCE,
                 AVRO_BINARY, Status.NO_CONTENT)) {
             assertNotNull(response);
         }
@@ -93,7 +95,8 @@ public class SourceEndPointTest {
 
         MongoDataAccess.writeSourceType(SOURCE, SOURCE_TYPE, client);
 
-        Source actual = apiClient.requestAvro(STATE + '/' + SUBJECT + '/' + SOURCE,
+        Source actual = apiClient.requestAvro(
+                STATE + '/' + PROJECT + '/' + SUBJECT + '/' + SOURCE,
                 Source.class, Status.OK);
 
         assertEquals(SOURCE, actual.getId());
@@ -159,7 +162,7 @@ public class SourceEndPointTest {
     @Test
     public void getAllSourcesTest200()
             throws IOException, ReflectiveOperationException, URISyntaxException {
-        String path = BasePath.SOURCE + "/" + GET_ALL_SOURCES + "/" + SUBJECT;
+        String path = BasePath.SOURCE + '/' + PROJECT + '/' + GET_ALL_SOURCES + "/" + SUBJECT;
 
         LOGGER.info(path);
 
@@ -174,7 +177,8 @@ public class SourceEndPointTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE.concat("1")));
 
-        Subject actual = apiClient.requestAvro(GET_ALL_SOURCES + '/' + SUBJECT,
+        Subject actual = apiClient.requestAvro(
+                GET_ALL_SOURCES + '/' + PROJECT + '/' + SUBJECT,
                 Subject.class, Status.OK);
 
         List<Source> listSource = new ArrayList<>(actual.getSources());
@@ -199,13 +203,14 @@ public class SourceEndPointTest {
     @Test
     public void getAllSourcesTest204() throws IOException {
         try (Response response = apiClient.request(
-                GET_ALL_SOURCES + "/" + SUBJECT, AVRO_BINARY, Status.NO_CONTENT)) {
+                GET_ALL_SOURCES + '/' + PROJECT + '/' + SUBJECT,
+                AVRO_BINARY, Status.NO_CONTENT)) {
             assertNotNull(response);
         }
     }
 
     @After
-    public void dropAndClose() throws URISyntaxException {
+    public void dropAndClose() {
         dropAndClose(Utility.getMongoClient());
     }
 

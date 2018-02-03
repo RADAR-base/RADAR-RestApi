@@ -1,4 +1,4 @@
-package org.radarcns.webapp;
+package org.radarcns.webapp.resource;
 
 import static org.radarcns.auth.authorization.Permission.Entity.PROJECT;
 import static org.radarcns.auth.authorization.Permission.Entity.SUBJECT;
@@ -10,22 +10,23 @@ import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.security.filter.NeedsPermission;
 import org.radarcns.security.filter.NeedsPermissionOnProject;
-import org.radarcns.webapp.exception.NotFoundException;
 
+@Provider
 @Path("/" + PROJECTS)
 public class ProjectEndPoint {
-    @Context
+    @Inject
     private ManagementPortalClient mpClient;
 
     //--------------------------------------------------------------------------------------------//
@@ -70,8 +71,8 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermission(entity = PROJECT, operation = READ)
-    public Response getProjectJson(@PathParam(PROJECT_NAME) String projectName)
-            throws IOException, NotFoundException {
+    public Response getProjectJson(
+            @PathParam(PROJECT_NAME) String projectName) throws IOException {
         return Response.status(Status.OK)
                 .entity(mpClient.getProject(projectName))
                 .build();
@@ -96,8 +97,7 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermissionOnProject(entity = SUBJECT, operation = READ)
     public Response getAllSubjectsJsonFromStudy(
-            @PathParam(PROJECT_NAME) String projectName)
-            throws IOException, NotFoundException {
+            @PathParam(PROJECT_NAME) String projectName) throws IOException {
         return Response.status(Status.OK)
                 .entity(mpClient.getAllSubjectsFromProject(projectName))
                 .build();

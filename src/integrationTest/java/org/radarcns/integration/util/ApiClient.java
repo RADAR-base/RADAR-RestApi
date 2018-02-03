@@ -8,7 +8,6 @@ import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;

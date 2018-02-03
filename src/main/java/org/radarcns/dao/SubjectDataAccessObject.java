@@ -22,8 +22,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import javax.servlet.ServletContext;
-import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
 
@@ -31,20 +29,6 @@ import org.radarcns.restapi.subject.Subject;
  * Data Access Object for user management.
  */
 public class SubjectDataAccessObject {
-
-    //private static final Logger LOGGER = LoggerFactory.getLogger(SubjectDataAccessObject.class);
-
-    /**
-     * Finds all subjects checking all available collections.
-     *
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return a study {@link Cohort}
-     * @throws ConnectException if MongoDB is not available
-     */
-    public static Cohort getAllSubjects(ServletContext context) throws ConnectException {
-        return getAllSubjects(MongoHelper.getClient(context));
-    }
 
     /**
      * Finds all subjects checking all available collections.
@@ -69,20 +53,6 @@ public class SubjectDataAccessObject {
         }
 
         return new Cohort(0, patients);
-    }
-
-    /**
-     * Returns all information related to the given Subject identifier.
-     *
-     * @param subject Subject Identifier
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return a study {@link Cohort}
-     * @throws ConnectException if MongoDB is not available
-     */
-    public static Subject getSubject(String subject, ServletContext context)
-            throws ConnectException {
-        return getSubject(subject, MongoHelper.getClient(context));
     }
 
     /**
@@ -111,23 +81,6 @@ public class SubjectDataAccessObject {
     public static boolean isSubjectActive(String subject) {
         //TODO must be integrated with the suggested user management tool.
         return true;
-    }
-
-    /**
-     * Checks if the subject exists.
-     *
-     * @param subject Subject identifier
-     * @param context {@link ServletContext} used to retrieve the client for the subject management
-     *      tool
-     *
-     * @return {@code true} if exist, {@code false} otherwise
-     *
-     * @throws ConnectException if the connection with MongoDb cannot be established
-     */
-    public static boolean exist(String subject, ServletContext context) throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
-
-        return exist(subject, client);
     }
 
     /**

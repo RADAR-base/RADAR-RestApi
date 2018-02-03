@@ -16,134 +16,73 @@
 
 package org.radarcns.webapp.util;
 
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.restapi.app.Application;
-import org.radarcns.restapi.avro.Message;
 import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.subject.Cohort;
-import org.radarcns.restapi.subject.Subject;
 import org.radarcns.util.AvroConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.radarcns.webapp.exception.StatusMessage;
 
 /**
  * Generic response handler.
  */
 public class ResponseHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseHandler.class);
+    public static final String APPLICATION_JSON_UTF8 = "application/json; charset=utf-8";
 
     /**
      * It serialises the {@link Dataset} in input in JSON and sets the suitable status code.
-     * @param request HTTP request that has to be served
      * @param dataset request result
      * @return the response content formatted in JSON
      **/
-    public static Response getJsonResponse(HttpServletRequest request, Dataset dataset) {
-        Status status = Status.OK;
-        int size = 0;
-        SpecificRecord obj = dataset;
-
-        if (dataset.getDataset().isEmpty()) {
-            status = NO_CONTENT;
-            obj = new Message("No data for this input");
-        } else {
-            size = dataset.getDataset().size();
-        }
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-
-        LOGGER.debug("{}", json);
-        LOGGER.debug("[{}] {} records", status.getStatusCode(), size);
-
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
-
-        return Response.status(status.getStatusCode()).entity(json).build();
-    }
-
-    /**
-     * It serialises the {@code SpecificRecord} in input in JSON and sets the suitable status code.
-     * @param request HTTP request that has to be served
-     * @param obj request result
-     * @return the response content formatted in JSON
-     **/
-    public static Response getJsonResponse(HttpServletRequest request, SpecificRecord obj)
-            throws IOException {
-        Status status = getStatus(obj);
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
-
-        if (status == NO_CONTENT) {
-            return Response.noContent().build();
-        }
-
-        JsonNode json = AvroConverter.avroToJsonNode(obj);
-        return Response.status(status.getStatusCode())
+    public static Response getJsonResponse(Dataset dataset) {
+        JsonNode json = AvroConverter.avroToJsonNode(dataset);
+        return Response.ok()
                 .entity(json)
                 .build();
     }
 
     /**
-     * It sets the status code and serialises the given {@code SpecificRecord} in bytes array.
-     * @param request HTTP request that has to be served
+     * It serialises the {@code SpecificRecord} in input in JSON and sets the suitable status code.
      * @param obj request result
-     * @return the response content formatted in AVRO
+     * @return the response content formatted in JSON
      **/
-    public static Response getAvroResponse(HttpServletRequest request, SpecificRecord obj)
-            throws IOException {
-        Status status = getStatus(obj);
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
-
-        switch (status) {
-            case OK:
-                byte[] array = AvroConverter.avroToAvroByte(obj);
-                return Response.ok(array, MediaType.APPLICATION_OCTET_STREAM_TYPE).build();
-            case NO_CONTENT:
-                return Response.noContent().build();
-            default:
-                return Response.serverError().build();
+    public static Response getJsonResponse(SpecificRecord obj) {
+        if (obj == null) {
+            return Response.noContent().build();
+        } else {
+            JsonNode json = AvroConverter.avroToJsonNode(obj);
+            return Response.ok()
+                    .entity(json)
+                    .build();
         }
     }
 
-    private static Status getStatus(SpecificRecord obj) throws UnsupportedEncodingException {
+    /**
+     * It sets the status code and serialises the given {@code SpecificRecord} in bytes array.
+     * @param obj request result
+     * @return the response content formatted in AVRO
+     **/
+    public static Response getAvroResponse(SpecificRecord obj)
+            throws IOException {
         if (obj == null) {
-            return NO_CONTENT;
+            return Response.noContent().build();
+        } else {
+            byte[] array = AvroConverter.avroToAvroByte(obj);
+            return Response.ok(array, "avro/binary").build();
         }
+    }
 
-        switch (obj.getSchema().getName()) {
-            case "Cohort" :
-                if (((Cohort) obj).getSubjects().isEmpty()) {
-                    return NO_CONTENT;
-                }
-                break;
-            case "Dataset" :
-                if (((Dataset) obj).getDataset().isEmpty()) {
-                    return NO_CONTENT;
-                }
-                break;
-            case "Application" :
-                if (((Application) obj).getServerStatus() == null) {
-                    return NO_CONTENT;
-                }
-                break;
-            case "Subject" :
-                if (((Subject) obj).getSubjectId() == null) {
-                    return NO_CONTENT;
-                }
-                break;
-            case "Source" : break;
-            case "SourceSpecification" : break;
-            default: throw new UnsupportedEncodingException("SpecificRecord "
-                + obj.getSchema().getName() + " is not supported yet");
+    public static ResponseBuilder jsonStatus(
+            MediaType type, Status status, String error, String message) {
+        ResponseBuilder builder = Response.status(status);
+        if (type == null || type.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
+            builder.header("Content-Type", APPLICATION_JSON_UTF8)
+                    .entity(new StatusMessage(error, message));
         }
-        return Status.OK;
+        return builder;
     }
 }

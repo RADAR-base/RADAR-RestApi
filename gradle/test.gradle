@@ -111,7 +111,7 @@ task integrationTest(type: Test, dependsOn: ['copyFrontendConfigIntegrationTest'
         events "skipped", "failed", "passed"
     }
 }
-integrationTest.finalizedBy 'stopSimpleStack'
+//integrationTest.finalizedBy 'stopSimpleStack'
 
 task endToEndTest(type: Test, dependsOn: ['copyFrontendConfigEndToEndTest', 'installRadarStack', 'listDockerProcesses']) {
     description = "Run end to end tests (located in src/endToEndTest/...)."

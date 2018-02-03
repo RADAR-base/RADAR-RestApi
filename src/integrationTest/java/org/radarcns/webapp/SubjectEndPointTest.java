@@ -59,7 +59,7 @@ import org.radarcns.webapp.util.BasePath;
 public class SubjectEndPointTest {
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
-    private static final String STUDY = "0";
+    private static final String PROJECT = "radar";
     private static final String SOURCE_TYPE = org.radarcns.config.TestCatalog.EMPATICA;
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
@@ -72,7 +72,7 @@ public class SubjectEndPointTest {
 
     @Test
     public void getAllSubjectsTest204() throws IOException {
-        try (Response response = apiClient.request(GET_ALL_SUBJECTS + "/" + STUDY, APPLICATION_JSON,
+        try (Response response = apiClient.request(GET_ALL_SUBJECTS + "/" + PROJECT, APPLICATION_JSON,
                 Status.NO_CONTENT)) {
             assertNotNull(response);
         }
@@ -94,7 +94,7 @@ public class SubjectEndPointTest {
                 RandomInput.getRandomApplicationStatus(SUBJECT.concat("1"), SOURCE.concat("1")));
 
         Cohort cohort = RadarConverter.readerFor(Cohort.class).readValue(apiClient.requestString(
-                GET_ALL_SUBJECTS + "/" + STUDY, APPLICATION_JSON, Status.OK));
+                GET_ALL_SUBJECTS + "/" + PROJECT, APPLICATION_JSON, Status.OK));
 
         for (Subject patient : cohort.getSubjects()) {
             if (patient.getSubjectId().equalsIgnoreCase(SUBJECT)) {

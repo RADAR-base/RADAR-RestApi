@@ -1,5 +1,6 @@
 package org.radarcns.security.filter;
 
+import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
 import java.lang.annotation.ElementType;
@@ -11,13 +12,6 @@ import org.radarcns.auth.authorization.Permission;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NeedsPermissionOnSubject {
-
-    /**
-     * Token value for {@link #projectParam()} to indicate that the project name will be deduced
-     * from the subject in {@link #subjectParam()}.
-     */
-    String PROJECT_OF_SUBJECT = "__projectOfSubject";
-
     /**
      * Entity that the permission is needed on.
      */
@@ -30,11 +24,10 @@ public @interface NeedsPermissionOnSubject {
 
     /**
      * Path parameter for the name of the project that the entity belongs to.
-     * If set to {@link #PROJECT_OF_SUBJECT}, it will be deduced by taking the project where given
-     * subject is a participant. If {@link org.radarcns.webapp.util.Parameter#PROJECT_NAME} is a
-     * path parameter, then that is preferred.
+     * In this API, {@link org.radarcns.webapp.util.Parameter#PROJECT_NAME} is usually used for path
+     * parameters, so that is the default.
      */
-    String projectParam() default PROJECT_OF_SUBJECT;
+    String projectParam() default PROJECT_NAME;
 
     /**
      * Path parameter for the ID of the subject that the entity belongs to.

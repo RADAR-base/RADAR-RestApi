@@ -1,19 +1,17 @@
 package org.radarcns.security.filter;
 
-import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static org.radarcns.webapp.filter.AuthenticationFilter.TOKEN_ATTRIBUTE;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.radarcns.auth.authorization.Permission;
 import org.radarcns.auth.token.RadarToken;
 import org.radarcns.webapp.exception.StatusMessage;
+import org.radarcns.webapp.filter.AuthenticationFilter.RadarSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,26 +21,30 @@ public class PermissionFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
-    @Context
-    private HttpServletRequest request;
-
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         NeedsPermission annotation = resourceInfo.getResourceMethod()
                 .getAnnotation(NeedsPermission.class);
         Permission permission = new Permission(annotation.entity(), annotation.operation());
 
-        RadarToken token = (RadarToken) request.getAttribute(TOKEN_ATTRIBUTE);
+        RadarToken token = ((RadarSecurityContext) requestContext.getSecurityContext()).getToken();
         if (!token.hasPermission(permission)) {
             abortWithForbidden(requestContext, "No permission " + permission);
         }
     }
 
+    /**
+     * Abort the request with a forbidden status. The caller must ensure that no other changes are
+     * made to the context (i.e., make a quick return).
+     * @param requestContext context to abort
+     * @param message message to log and pass as a status message to clients.
+     */
     public static void abortWithForbidden(ContainerRequestContext requestContext, String message) {
         logger.warn("[403] {}: {}",
                 requestContext.getUriInfo().getPath(), message);
-        Response.ResponseBuilder builder = Response.status(HTTP_FORBIDDEN);
-        if (requestContext.getMediaType().isCompatible(APPLICATION_JSON_TYPE)) {
+        Response.ResponseBuilder builder = Response.status(Status.FORBIDDEN);
+        if (requestContext.getMediaType() == null
+                || requestContext.getMediaType().isCompatible(APPLICATION_JSON_TYPE)) {
             builder.entity(new StatusMessage("forbidden", message));
         }
         requestContext.abortWith(builder.build());

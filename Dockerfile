@@ -24,23 +24,25 @@ RUN ./gradlew --version
 COPY ./gradle/profile.prod.gradle /code/gradle/
 COPY ./build.gradle ./gradle.properties ./settings.gradle /code/
 
-RUN ./gradlew downloadWarDependencies
+RUN ./gradlew downloadApplicationDependencies
 
 COPY ./src/ /code/src
 
-RUN ./gradlew war
+RUN ./gradlew distTar \
+    && cd build/distributions \
+    && tar xf *.tar \
+    && rm *.tar radar-restapi-*/lib/radar-restapi-*.jar
 
-FROM tomcat:8.0.47-jre8-alpine
+FROM openjdk:8-jre-alpine
 
 MAINTAINER @yatharthranjan, @blootsvoets
 
 LABEL description="RADAR-CNS Rest Api docker container"
 
-COPY --from=builder /code/build/libs/radar.war /usr/local/tomcat/webapps/radar.war
-COPY src/main/docker/classpath.xml /usr/local/tomcat/conf/Catalina/localhost/radar.xml
-
-VOLUME /usr/local/tomcat/conf/radar
+COPY --from=builder /code/build/distributions/radar-restapi-*/bin/* /usr/bin/
+COPY --from=builder /code/build/distributions/radar-restapi-*/lib/* /usr/lib/
+COPY --from=builder /code/build/libs/radar-restapi-*.jar /usr/lib/
 
 EXPOSE 8080
 
-CMD ["catalina.sh", "run"]
+CMD ["radar-restapi"]

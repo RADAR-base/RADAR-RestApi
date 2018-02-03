@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.webapp;
+package org.radarcns.webapp.resource;
 
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
@@ -23,31 +23,37 @@ import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
 import static org.radarcns.webapp.util.Parameter.END;
 import static org.radarcns.webapp.util.Parameter.INTERVAL;
+import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.util.Parameter.SENSOR;
 import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.util.Parameter.START;
 import static org.radarcns.webapp.util.Parameter.STAT;
 import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 
+import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedList;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.catalogue.Unit;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
+import org.radarcns.restapi.header.Header;
 import org.radarcns.security.Param;
 import org.radarcns.security.filter.NeedsPermissionOnSubject;
 import org.radarcns.webapp.util.ResponseHandler;
@@ -57,14 +63,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Sensor web-app. Function set to access all data data.
  */
+@Provider
 @Path("/" + DATA)
 public class SensorEndPoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorEndPoint.class);
 
-    @Context
-    private ServletContext context;
-    @Context
-    private HttpServletRequest request;
+    @Inject
+    private MongoClient mongoClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
@@ -75,7 +80,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID
+    @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME
+            + "}/{" + SUBJECT_ID
             + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
@@ -99,9 +105,10 @@ public class SensorEndPoint {
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) throws IOException {
-        return ResponseHandler.getJsonResponse(request,
+        return ResponseHandler.getJsonResponse(
                 getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
     }
 
@@ -111,7 +118,7 @@ public class SensorEndPoint {
     @GET
     @Produces(AVRO_BINARY)
     @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL
-            + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+            + "}/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
             description =
                     "Each collected sample is aggregated to provide near real-time statistical "
@@ -132,9 +139,10 @@ public class SensorEndPoint {
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) throws IOException {
-        return ResponseHandler.getAvroResponse(request,
+        return ResponseHandler.getAvroResponse(
                 getLastReceivedSampleWorker(subjectId, sourceId, sensor, stat, interval));
     }
 
@@ -147,10 +155,10 @@ public class SensorEndPoint {
 
         Dataset dataset = new Dataset(null, new LinkedList<>());
 
-        if (SubjectDataAccessObject.exist(subject, context)) {
+        if (SubjectDataAccessObject.exist(subject, mongoClient)) {
             dataset = SensorDataAccessObject.getInstance()
                     .getLastReceivedSample(subject, source,
-                            stat, interval, sensor, context);
+                            stat, interval, sensor, mongoClient);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subject, source);
@@ -169,7 +177,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME + "}/{"
+            + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
@@ -192,9 +201,10 @@ public class SensorEndPoint {
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId) throws IOException {
-        return ResponseHandler.getJsonResponse(request,
+        return ResponseHandler.getJsonResponse(
                 getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
     }
 
@@ -203,7 +213,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(AVRO_BINARY)
-    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME + "}/{"
+            + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
             description = "Each collected sample is aggregated to provide near real-time "
@@ -223,10 +234,10 @@ public class SensorEndPoint {
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId)
-            throws IOException {
-        return ResponseHandler.getAvroResponse(request,
+            @PathParam(SOURCE_ID) String sourceId) throws IOException {
+        return ResponseHandler.getAvroResponse(
                 getSamplesWorker(subjectId, sourceId, stat, interval, sensor));
     }
 
@@ -237,11 +248,13 @@ public class SensorEndPoint {
             TimeWindow interval, String sensor) throws ConnectException {
         Param.isValidInput(subject, source);
 
-        Dataset dataset = new Dataset(null, new LinkedList<>());
+        String now = Instant.now().toString();
+        Dataset dataset = new Dataset(new Header(subject, source, "UNKNOWN", sensor, stat,
+                Unit.UNKNOWN, interval, new EffectiveTimeFrame(now, now)), new ArrayList<>(0));
 
-        if (SubjectDataAccessObject.exist(subject, context)) {
+        if (SubjectDataAccessObject.exist(subject, mongoClient)) {
             dataset = SensorDataAccessObject.getInstance().getSamples(subject,
-                    source, stat, interval, sensor, context);
+                    source, stat, interval, sensor, mongoClient);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subject, source);
@@ -260,7 +273,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME + "}/{"
+            + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
@@ -284,12 +298,13 @@ public class SensorEndPoint {
     public Response getSamplesWithinWindowJson(
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId,
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(START) long start,
             @PathParam(END) long end) throws IOException {
-        return ResponseHandler.getJsonResponse(request,
+        return ResponseHandler.getJsonResponse(
                 getSamplesWithinWindowWorker(subjectId, sourceId, stat,
                         interval, sensor, start, end));
     }
@@ -299,7 +314,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces(AVRO_BINARY)
-    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + SUBJECT_ID + "}/{"
+    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME + "}/{"
+            + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @Operation(summary = "Returns a dataset object formatted in Apache AVRO.",
             description = "Each collected sample is aggregated to provide near real-time "
@@ -322,12 +338,12 @@ public class SensorEndPoint {
             @PathParam(SENSOR) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
+            @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId,
             @PathParam(SOURCE_ID) String sourceId,
             @PathParam(START) long start,
-            @PathParam(END) long end)
-            throws IOException {
-        return ResponseHandler.getAvroResponse(request,
+            @PathParam(END) long end) throws IOException {
+        return ResponseHandler.getAvroResponse(
                 getSamplesWithinWindowWorker(subjectId, sourceId, stat,
                         interval, sensor, start, end));
     }
@@ -340,11 +356,14 @@ public class SensorEndPoint {
             long end) throws ConnectException {
         Param.isValidInput(subject, source);
 
-        Dataset dataset = new Dataset(null, new LinkedList<>());
+        String startDate = Instant.ofEpochMilli(start).toString();
+        Dataset dataset = new Dataset(new Header(subject, source, "UNKNOWN", sensor, stat,
+                Unit.UNKNOWN, interval, new EffectiveTimeFrame(startDate, startDate)),
+                new ArrayList<>(0));
 
-        if (SubjectDataAccessObject.exist(subject, context)) {
+        if (SubjectDataAccessObject.exist(subject, mongoClient)) {
             dataset = SensorDataAccessObject.getInstance().getSamples(
-                    subject, source, stat, interval, start, end, sensor, context);
+                    subject, source, stat, interval, start, end, sensor, mongoClient);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subject, source);

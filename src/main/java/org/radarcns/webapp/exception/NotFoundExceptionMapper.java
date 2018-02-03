@@ -1,14 +1,14 @@
 package org.radarcns.webapp.exception;
 
-import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,13 +25,10 @@ public class NotFoundExceptionMapper extends NotFoundException
 
     @Override
     public Response toResponse(NotFoundException exception) {
-        logger.warn("[404] {}", uri.getPath());
+        logger.warn("[404] {}", uri.getAbsolutePath());
 
-        Response.ResponseBuilder builder = Response.status(HTTP_NOT_FOUND);
-        if (headers.getMediaType().isCompatible(APPLICATION_JSON_TYPE)) {
-            builder.entity(new StatusMessage("not_found",
-                    exception.getMessage()));
-        }
-        return builder.build();
+        return ResponseHandler.jsonStatus(headers.getMediaType(), Status.NOT_FOUND,
+                "not_found", exception.getMessage() + ".")
+                .build();
     }
 }
