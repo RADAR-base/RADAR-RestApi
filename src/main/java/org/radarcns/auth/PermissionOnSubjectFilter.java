@@ -8,7 +8,7 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import org.radarcns.auth.authorization.Permission;
-import org.radarcns.auth.token.RadarToken;
+import org.radarcns.webapp.filter.AuthenticationFilter;
 
 /**
  * Check that the token has access to given subject in given project.
@@ -28,8 +28,8 @@ public class PermissionOnSubjectFilter implements ContainerRequestFilter {
         String subjectId = pathParams.getFirst(annotation.subjectParam());
         String projectName = pathParams.getFirst(annotation.projectParam());
 
-        RadarToken token = ((RadarSecurityContext) requestContext.getSecurityContext()).getToken();
-        if (!token.hasPermissionOnSubject(permission, projectName, subjectId)) {
+        if (!AuthenticationFilter.getToken(requestContext)
+                .hasPermissionOnSubject(permission, projectName, subjectId)) {
             abortWithForbidden(requestContext, "No permission " + permission
                     + " on subject " + subjectId + " in project " + projectName);
         }

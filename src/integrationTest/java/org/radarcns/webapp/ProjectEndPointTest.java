@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.webapp.util.BasePath.SUBJECTS;
+import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.util.RadarConverter;
-import org.radarcns.webapp.util.BasePath;
+import org.radarcns.webapp.resource.BasePath;
 
 public class ProjectEndPointTest {
 

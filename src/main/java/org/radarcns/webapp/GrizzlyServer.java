@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 /** Server for the REST-API. */
 public class GrizzlyServer {
     private static final Logger logger = LoggerFactory.getLogger(GrizzlyServer.class);
-    private static final String BASE_URI = "http://0.0.0.0:8080/radar/api/";
+    private static final String BASE_URI = "http://0.0.0.0:8080/api/";
 
     /** Main command line server. */
     public static void main(String[] args) {

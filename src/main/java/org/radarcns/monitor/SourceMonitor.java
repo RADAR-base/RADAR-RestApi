@@ -17,7 +17,6 @@
 package org.radarcns.monitor;
 
 import com.mongodb.MongoClient;
-import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -51,12 +50,10 @@ public class SourceMonitor {
      * @param source identifier
      * @param client is the MongoDB client
      * @return {@code SourceDefinition} representing a source source
-     * @throws ConnectException if the connection with MongoDb is faulty
      *
      * @see Source
      */
-    public Source getState(String subject, String source, MongoClient client)
-            throws ConnectException {
+    public Source getState(String subject, String source, MongoClient client) {
 
         long tenSec = TimeUnit.SECONDS.toMillis(10);
         long end = (System.currentTimeMillis() / tenSec) * tenSec;
@@ -71,16 +68,15 @@ public class SourceMonitor {
      *
      * @param subject identifier
      * @param source identifier
-     * @oaram start initial time that has to be monitored
+     * @param start initial time that has to be monitored
      * @param end final time that has to be monitored
      * @param client is the MongoDB client
      * @return {@code SourceDefinition} representing a source source
-     * @throws ConnectException if the connection with MongoDb is faulty
      *
      * @see Source
      */
-    public Source getState(String subject, String source, long start, long end, MongoClient client)
-            throws ConnectException {
+    public Source getState(String subject, String source, long start, long end,
+            MongoClient client) {
         Map<String, Sensor> sensorMap = new HashMap<>();
 
         double countTemp;

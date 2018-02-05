@@ -17,7 +17,6 @@
 package org.radarcns.dao;
 
 import com.mongodb.MongoClient;
-import java.net.ConnectException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -105,8 +104,7 @@ public class SensorDataAccessObject {
      * @see Dataset
      */
     public Dataset getLastReceivedSample(String subject, String source, DescriptiveStatistic stat,
-            TimeWindow timeWindow, String sensorType, MongoClient client)
-            throws ConnectException {
+            TimeWindow timeWindow, String sensorType, MongoClient client) {
         Header header = getHeader(subject, source, sensorType, stat,
                 timeWindow, client);
 
@@ -136,8 +134,7 @@ public class SensorDataAccessObject {
      * @see Dataset
      */
     public Dataset getSamples(String subject, String source, DescriptiveStatistic stat,
-            TimeWindow timeWindow, String sensorType, MongoClient client)
-            throws ConnectException {
+            TimeWindow timeWindow, String sensorType, MongoClient client) {
         Header header = getHeader(subject, source, sensorType, stat,
                 timeWindow, client);
 
@@ -170,7 +167,7 @@ public class SensorDataAccessObject {
      */
     public Dataset getSamples(String subject, String source,
             DescriptiveStatistic stat, TimeWindow timeWindow, Long start, Long end,
-            String sensorType, MongoClient client) throws ConnectException {
+            String sensorType, MongoClient client) {
         Header header = getHeader(subject, source, sensorType, stat,
                 timeWindow, client);
 
@@ -197,8 +194,7 @@ public class SensorDataAccessObject {
      * @return the number of received messages within the time-window [start-end].
      */
     public double count(String subject, String source, Long start,
-            Long end, String sensorType, String sourceType, MongoClient client)
-            throws ConnectException {
+            Long end, String sensorType, String sourceType, MongoClient client) {
         MongoSensor sensorDao = hooks.get(sensorType);
 
         return sensorDao.countSamplesByUserSourceWindow(subject, source, start, end,
@@ -211,8 +207,6 @@ public class SensorDataAccessObject {
      *
      * @param client MongoDB client
      * @return a {@code Set<String>} containing all Subject Identifier
-     * @throws ConnectException if MongoDB is not available
-     *
      */
     public Set<String> getAllSubject(MongoClient client) {
         Set<String> subjects = new HashSet<>();
@@ -230,7 +224,6 @@ public class SensorDataAccessObject {
      * @param subject subject identifier.
      * @param client MongoDb client
      * @return a {@code Set<Source>} containing all {@link Source} used by the given {@code subject}
-     * @throws ConnectException if MongoDB is not available
      */
     public Set<Source> getAllSources(String subject, MongoClient client) {
         Set<Source> sources = new HashSet<>();
@@ -248,10 +241,8 @@ public class SensorDataAccessObject {
      * @param source source identifier
      * @param client {@link MongoClient} used to connect to the database
      * @return a study {@code SourceType}
-     *
-     * @throws ConnectException if MongoDB is not available
      */
-    public String getSourceType(String source, MongoClient client) throws ConnectException {
+    public String getSourceType(String source, MongoClient client) {
         for (MongoSensor mongoSensor : hooks.values()) {
             String type = mongoSensor.findSourceType(source, client);
 
@@ -271,11 +262,8 @@ public class SensorDataAccessObject {
      *
      * @return {@link EffectiveTimeFrame} reporting the interval during which the subject has sent
      *      data into the platform
-     *
-     * @throws ConnectException if the connection with MongoDb cannot be established
      */
-    public EffectiveTimeFrame getEffectiveTimeFrame(String subject, MongoClient client)
-            throws ConnectException {
+    public EffectiveTimeFrame getEffectiveTimeFrame(String subject, MongoClient client) {
         long start = Long.MAX_VALUE;
         long end = Long.MIN_VALUE;
 
@@ -347,13 +335,10 @@ public class SensorDataAccessObject {
      *
      * @return {@link Header} related to the given inputs
      *
-     * @throws ConnectException if the connection with MongoDb cannot be established
-     *
      * @see Dataset
      */
     private static Header getHeader(String subject, String source, String sensorType,
-            DescriptiveStatistic stat, TimeWindow timeWindow, MongoClient client)
-            throws ConnectException {
+            DescriptiveStatistic stat, TimeWindow timeWindow, MongoClient client) {
         String sourceType = SourceDataAccessObject.getSourceType(source, client);
 
         if (sourceType == null) {

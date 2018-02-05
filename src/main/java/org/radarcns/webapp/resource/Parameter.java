@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.webapp.util;
+package org.radarcns.webapp.resource;
 
 /**
  * Static class listing End Point parameter.

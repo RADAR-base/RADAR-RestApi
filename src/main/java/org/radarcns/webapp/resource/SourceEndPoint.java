@@ -18,15 +18,15 @@ package org.radarcns.webapp.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
-import static org.radarcns.webapp.util.BasePath.SOURCE;
-import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
-import static org.radarcns.webapp.util.BasePath.STATE;
-import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
-import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.util.Parameter.SOURCE_TYPE;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.resource.BasePath.GET_ALL_SOURCES;
+import static org.radarcns.webapp.resource.BasePath.SOURCE;
+import static org.radarcns.webapp.resource.BasePath.SPECIFICATION;
+import static org.radarcns.webapp.resource.BasePath.STATE;
+import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
+import static org.radarcns.webapp.resource.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.resource.Parameter.SOURCE_TYPE;
+import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 
 import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,7 +41,6 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.NeedsPermission;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.auth.authorization.Permission.Entity;
@@ -53,12 +52,13 @@ import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.restapi.subject.Subject;
+import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
  * SourceDefinition web-app. Function set to access source information.
  */
-@Provider
+@Authenticated
 @Path("/" + SOURCE)
 public class SourceEndPoint {
     @Inject

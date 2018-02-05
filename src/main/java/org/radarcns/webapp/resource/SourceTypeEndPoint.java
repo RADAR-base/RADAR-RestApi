@@ -3,10 +3,10 @@ package org.radarcns.webapp.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.SOURCETYPE;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.webapp.util.BasePath.SOURCE_TYPES;
-import static org.radarcns.webapp.util.Parameter.CATALOGUE_VERSION;
-import static org.radarcns.webapp.util.Parameter.MODEL;
-import static org.radarcns.webapp.util.Parameter.PRODUCER;
+import static org.radarcns.webapp.resource.BasePath.SOURCE_TYPES;
+import static org.radarcns.webapp.resource.Parameter.CATALOGUE_VERSION;
+import static org.radarcns.webapp.resource.Parameter.MODEL;
+import static org.radarcns.webapp.resource.Parameter.PRODUCER;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,13 +17,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.NeedsPermission;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.managementportal.SourceType;
+import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
-@Provider
+@Authenticated
 @Path("/" + SOURCE_TYPES)
 public class SourceTypeEndPoint {
     @Inject

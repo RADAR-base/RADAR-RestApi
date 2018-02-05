@@ -18,12 +18,12 @@ package org.radarcns.webapp.resource;
 
 import static org.radarcns.auth.authorization.Permission.Entity.SOURCE;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.webapp.util.BasePath.ANDROID;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.STATUS;
-import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
-import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.resource.BasePath.ANDROID;
+import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.resource.BasePath.STATUS;
+import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
+import static org.radarcns.webapp.resource.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 
 import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,19 +35,19 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.restapi.app.Application;
+import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
  * Android application status web-app. Function set to access Android app status information.
  */
-@Provider
+@Authenticated
 @Path("/" + ANDROID)
 public class AppStatusEndPoint {
     @Inject

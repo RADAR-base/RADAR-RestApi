@@ -12,12 +12,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.NeedsPermission;
 import org.radarcns.config.Properties;
 import org.radarcns.status.hdfs.HdfsBinsData;
+import org.radarcns.webapp.filter.Authenticated;
 
-@Provider
+@Authenticated
 @Path("/status")
 public class StatusEndPoint {
     /** HDFS status. */

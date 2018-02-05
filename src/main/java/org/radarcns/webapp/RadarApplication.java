@@ -15,13 +15,14 @@ import org.radarcns.webapp.filter.AuthorizationFeature;
 /**
  * Radar application configuration.
  *
- * @implNote replaces previous {@code web.xml}.
+ * Replaces previous {@code web.xml}.
  */
 public class RadarApplication extends ResourceConfig {
 
     /** Radar application configuration. */
     public RadarApplication() {
         packages(
+                "io.swagger.v3.jaxrs2.integration.resources",
                 "org.radarcns.webapp.resource",
                 "org.radarcns.webapp.exception",
                 "org.radarcns.webapp.media");

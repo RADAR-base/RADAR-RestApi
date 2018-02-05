@@ -1,6 +1,6 @@
 package org.radarcns.webapp.media;
 
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
 
 import java.io.IOException;
 import java.io.OutputStream;

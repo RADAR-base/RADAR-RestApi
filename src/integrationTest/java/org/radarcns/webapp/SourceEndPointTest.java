@@ -25,10 +25,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.radarcns.config.TestCatalog.BIOVOTION;
 import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
-import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
-import static org.radarcns.webapp.util.BasePath.STATE;
+import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.resource.BasePath.GET_ALL_SOURCES;
+import static org.radarcns.webapp.resource.BasePath.SPECIFICATION;
+import static org.radarcns.webapp.resource.BasePath.STATE;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -61,7 +61,7 @@ import org.radarcns.restapi.source.States;
 import org.radarcns.restapi.spec.SensorSpecification;
 import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.restapi.subject.Subject;
-import org.radarcns.webapp.util.BasePath;
+import org.radarcns.webapp.resource.BasePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

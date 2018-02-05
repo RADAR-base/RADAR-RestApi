@@ -9,7 +9,7 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import org.radarcns.auth.authorization.Permission;
-import org.radarcns.auth.token.RadarToken;
+import org.radarcns.webapp.filter.AuthenticationFilter;
 
 /**
  * Check that the token has access to given project.
@@ -26,8 +26,8 @@ public class PermissionOnProjectFilter implements ContainerRequestFilter {
         UriInfo uriInfo = requestContext.getUriInfo();
         String projectName = uriInfo.getPathParameters().getFirst(annotation.projectParam());
 
-        RadarToken token = ((RadarSecurityContext) requestContext.getSecurityContext()).getToken();
-        if (!token.hasPermissionOnProject(permission, projectName)) {
+        if (!AuthenticationFilter.getToken(requestContext)
+                .hasPermissionOnProject(permission, projectName)) {
             abortWithForbidden(requestContext,
                     "No permission " + permission + " on project " + projectName + '.');
         }

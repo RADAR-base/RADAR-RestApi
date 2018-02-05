@@ -1,5 +1,3 @@
-package org.radarcns.dao;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -16,8 +14,9 @@ package org.radarcns.dao;
  * limitations under the License.
  */
 
+package org.radarcns.dao;
+
 import com.mongodb.MongoClient;
-import java.net.ConnectException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,11 +34,8 @@ public class SubjectDataAccessObject {
      *
      * @param client {@link MongoClient} used to connect to the database
      * @return a study {@link Cohort}
-     * @throws ConnectException if MongoDB is not available
-     *
-     * @see Subject
      */
-    public static Cohort getAllSubjects(MongoClient client) throws ConnectException {
+    public static Cohort getAllSubjects(MongoClient client) {
 
         List<Subject> patients = new LinkedList<>();
 
@@ -61,11 +57,8 @@ public class SubjectDataAccessObject {
      * @param subjectId Subject Identifier
      * @param client {@link MongoClient} used to connect to the database
      * @return a study {@link Cohort}
-     * @throws ConnectException if MongoDB is not available
-     *
-     * @see Subject
      */
-    public static Subject getSubject(String subjectId, MongoClient client) throws ConnectException {
+    public static Subject getSubject(String subjectId, MongoClient client) {
         return SourceDataAccessObject.findAllSourcesByUser(subjectId, client);
     }
 
@@ -90,10 +83,8 @@ public class SubjectDataAccessObject {
      * @param client {@link MongoClient} used to connect to the database
      *
      * @return {@code true} if exist, {@code false} otherwise
-     *
-     * @throws ConnectException if the connection with MongoDb cannot be established
      */
-    public static boolean exist(String subject, MongoClient client) throws ConnectException {
+    public static boolean exist(String subject, MongoClient client) {
         //TODO Temporary implementation. It must integrated with the suggested user management tool.
         return !SourceDataAccessObject.findAllSourcesByUser(subject, client).getSources().isEmpty();
     }

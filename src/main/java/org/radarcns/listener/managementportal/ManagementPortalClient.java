@@ -47,9 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Client to interact with the RADAR Management Portal.
- *
- * @implSpec This class is thread-safe.
+ * Client to interact with the RADAR Management Portal. This class is thread-safe.
  */
 public class ManagementPortalClient {
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalClient.class);

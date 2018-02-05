@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.STATUS;
+import static org.radarcns.webapp.resource.BasePath.STATUS;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -43,7 +43,7 @@ import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.restapi.app.Application;
-import org.radarcns.webapp.util.BasePath;
+import org.radarcns.webapp.resource.BasePath;
 
 public class AppStatusEndPointTest {
     private static final String PROJECT = "radar";

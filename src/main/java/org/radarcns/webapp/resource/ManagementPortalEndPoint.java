@@ -18,9 +18,9 @@ package org.radarcns.webapp.resource;
 
 import static org.radarcns.auth.authorization.Permission.Entity.SUBJECT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.webapp.util.BasePath.SUBJECTS;
-import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
+import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
+import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,17 +32,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.NeedsPermission;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.managementportal.Subject;
+import org.radarcns.webapp.filter.Authenticated;
 
 /**
  * Management Portal web-app. Function set to access subject and source information from MP. A
  * subject is a person enrolled for in a study. A source is a device linked to the subject.
  */
-@Provider
+@Authenticated
 @Path("/mp")
 public class ManagementPortalEndPoint {
     @Inject

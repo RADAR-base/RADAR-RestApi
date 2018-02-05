@@ -20,23 +20,18 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.config.ExposedConfigTest.CONFIG_JSON;
 import static org.radarcns.config.ExposedConfigTest.OPENAPI_JSON;
 import static org.radarcns.config.TestCatalog.EMPATICA;
-import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.Parameter.SENSOR;
-import static org.radarcns.webapp.util.Parameter.STAT;
+import static org.radarcns.webapp.resource.BasePath.DATA;
+import static org.radarcns.webapp.resource.Parameter.SENSOR;
+import static org.radarcns.webapp.resource.Parameter.STAT;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,7 +53,6 @@ import org.radarcns.config.PipelineConfig;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
-import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.MockDataConfig;
@@ -200,9 +194,7 @@ public class EndToEndTest {
     /**
      * Generates new random CSV files.
      */
-    private void produceInputFile()
-            throws IOException, ClassNotFoundException, NoSuchMethodException,
-            InvocationTargetException, ParseException, IllegalAccessException {
+    private void produceInputFile() throws IOException {
         LOGGER.info("Generating CSV files ...");
         for (MockDataConfig config : pipelineConfig.getData()) {
             new CsvGenerator().generate(config, pipelineConfig.getDuration(), dataRoot);
@@ -494,30 +486,7 @@ public class EndToEndTest {
     public void checkSwaggerConfig() throws IOException {
         String response = apiClient.requestString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
         JsonNode node = new ObjectMapper().readTree(response);
-        assertTrue(node.has("servers"));
-        String serverUrl = node.get("servers").elements().next().get("url").asText();
-        assertEquals(RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString(),
-                serverUrl);
-        // TODO change the above line to use local resources
-    }
-
-    /**
-     * Checks the correctness of the deployed frontend configuration file making the request via
-     *      NGINX.
-     *
-     * @throws IOException either if the used URL is malformed or the response containing the
-     *      downloaded file cannot be parsed.
-     */
-    @Test
-    public void checkFrontendConfig()
-            throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        LOGGER.info("Checking Frontend pipelineConfig ...");
-
-        String actual = frontendClient.requestString(
-                "/config/" + CONFIG_JSON, APPLICATION_JSON, Status.OK);
-        String expected = Utility.readAll(
-                EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
-
-        assertEquals(actual, expected);
+        assertTrue(node.has("openapi"));
+        assertTrue(node.get("openapi").asText().startsWith("3."));
     }
 }

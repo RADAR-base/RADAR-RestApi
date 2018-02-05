@@ -22,8 +22,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.BasePath.REALTIME;
+import static org.radarcns.webapp.resource.BasePath.DATA;
+import static org.radarcns.webapp.resource.BasePath.REALTIME;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;

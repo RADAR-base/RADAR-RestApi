@@ -19,17 +19,17 @@ package org.radarcns.webapp.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.BasePath.REALTIME;
-import static org.radarcns.webapp.util.Parameter.END;
-import static org.radarcns.webapp.util.Parameter.INTERVAL;
-import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
-import static org.radarcns.webapp.util.Parameter.SENSOR;
-import static org.radarcns.webapp.util.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.util.Parameter.START;
-import static org.radarcns.webapp.util.Parameter.STAT;
-import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.resource.BasePath.DATA;
+import static org.radarcns.webapp.resource.BasePath.REALTIME;
+import static org.radarcns.webapp.resource.Parameter.END;
+import static org.radarcns.webapp.resource.Parameter.INTERVAL;
+import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
+import static org.radarcns.webapp.resource.Parameter.SENSOR;
+import static org.radarcns.webapp.resource.Parameter.SOURCE_ID;
+import static org.radarcns.webapp.resource.Parameter.START;
+import static org.radarcns.webapp.resource.Parameter.STAT;
+import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 
 import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,7 +42,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
@@ -53,6 +52,7 @@ import org.radarcns.restapi.dataset.Dataset;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.header.Header;
+import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Sensor web-app. Function set to access all data data.
  */
-@Provider
+@Authenticated
 @Path("/" + DATA)
 public class SensorEndPoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorEndPoint.class);

@@ -17,7 +17,6 @@
 package org.radarcns.dao;
 
 import com.mongodb.MongoClient;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,11 +37,8 @@ public class SourceDataAccessObject {
      * @param source is the SourceID
      * @param client MongoDB client
      * @return source type associated with the given source
-     *
-     * @throws ConnectException if MongoDb instance is not available
      */
-    public static String getSourceType(String source, MongoClient client)
-            throws ConnectException {
+    public static String getSourceType(String source, MongoClient client) {
         String type = MongoDataAccess.getSourceType(source, client);
 
         if (type == null) {
@@ -66,10 +62,8 @@ public class SourceDataAccessObject {
      * @param subject subject identifier.
      * @param client MongoDb client
      * @return a {@code Subject} object
-     * @throws ConnectException if MongoDB is not available
      */
-    public static Subject findAllSourcesByUser(String subject, MongoClient client)
-            throws ConnectException {
+    public static Subject findAllSourcesByUser(String subject, MongoClient client) {
         Set<Source> sources = new HashSet<>();
 
         sources.addAll(SensorDataAccessObject.getInstance().getAllSources(

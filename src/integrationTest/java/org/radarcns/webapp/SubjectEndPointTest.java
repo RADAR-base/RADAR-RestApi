@@ -24,8 +24,8 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
-import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
+import static org.radarcns.webapp.resource.BasePath.GET_ALL_SUBJECTS;
+import static org.radarcns.webapp.resource.BasePath.GET_SUBJECT;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -51,7 +51,7 @@ import org.radarcns.restapi.source.States;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
 import org.radarcns.util.RadarConverter;
-import org.radarcns.webapp.util.BasePath;
+import org.radarcns.webapp.resource.BasePath;
 
 public class SubjectEndPointTest {
     private static final String SUBJECT = "sub-1";

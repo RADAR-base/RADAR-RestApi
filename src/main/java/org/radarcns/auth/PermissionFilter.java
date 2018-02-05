@@ -9,8 +9,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.radarcns.auth.authorization.Permission;
-import org.radarcns.auth.token.RadarToken;
 import org.radarcns.webapp.exception.StatusMessage;
+import org.radarcns.webapp.filter.AuthenticationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +29,7 @@ public class PermissionFilter implements ContainerRequestFilter {
                 .getAnnotation(NeedsPermission.class);
         Permission permission = new Permission(annotation.entity(), annotation.operation());
 
-        RadarToken token = ((RadarSecurityContext) requestContext.getSecurityContext()).getToken();
-        if (!token.hasPermission(permission)) {
+        if (!AuthenticationFilter.getToken(requestContext).hasPermission(permission)) {
             abortWithForbidden(requestContext, "No permission " + permission);
         }
     }

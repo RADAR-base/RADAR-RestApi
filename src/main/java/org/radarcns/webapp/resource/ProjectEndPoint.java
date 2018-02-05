@@ -3,9 +3,9 @@ package org.radarcns.webapp.resource;
 import static org.radarcns.auth.authorization.Permission.Entity.PROJECT;
 import static org.radarcns.auth.authorization.Permission.Entity.SUBJECT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.webapp.util.BasePath.PROJECTS;
-import static org.radarcns.webapp.util.BasePath.SUBJECTS;
-import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
+import static org.radarcns.webapp.resource.BasePath.PROJECTS;
+import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
+import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,14 +18,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.NeedsPermission;
 import org.radarcns.auth.NeedsPermissionOnProject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
+import org.radarcns.webapp.filter.Authenticated;
 
-@Provider
+@Authenticated
 @Path("/" + PROJECTS)
 public class ProjectEndPoint {
     @Inject

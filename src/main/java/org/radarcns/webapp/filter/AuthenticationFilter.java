@@ -9,7 +9,7 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
+import javax.ws.rs.core.SecurityContext;
 import org.radarcns.auth.RadarSecurityContext;
 import org.radarcns.auth.authentication.TokenValidator;
 import org.radarcns.auth.config.ServerConfig;
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * Checks the presence and validity of a Management Portal JWT. Will return a 401 HTTP status code
  * otherwise.
  */
-@Provider
+@Authenticated
 @Priority(1000)
 public class AuthenticationFilter implements ContainerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
@@ -32,7 +32,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        String token = getToken(requestContext);
+        String token = extractBearerToken(requestContext);
         if (token == null) {
             logger.warn("[401] {}: No token bearer header provided in the request",
                     requestContext.getUriInfo().getPath());
@@ -76,7 +76,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         return validator;
     }
 
-    private String getToken(ContainerRequestContext requestContext) {
+    private String extractBearerToken(ContainerRequestContext requestContext) {
         String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         // Check if the HTTP Authorization header is present and formatted correctly
@@ -88,5 +88,21 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
         // Extract the token from the HTTP Authorization header
         return authorizationHeader.substring("Bearer".length()).trim();
+    }
+
+    /**
+     * Get the token from a request context.
+     *
+     * @throws IllegalStateException if the method or path was not annotated with
+     * {@link Authenticated}.
+     */
+    public static RadarToken getToken(ContainerRequestContext context) {
+        SecurityContext secContext = context.getSecurityContext();
+        if (secContext instanceof RadarSecurityContext) {
+            return ((RadarSecurityContext) context.getSecurityContext()).getToken();
+        } else {
+            throw new IllegalStateException(
+                    "Permission requested but no authentication performed yet.");
+        }
     }
 }

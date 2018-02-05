@@ -17,7 +17,6 @@
 package org.radarcns.monitor;
 
 import com.mongodb.MongoClient;
-import java.net.ConnectException;
 import java.util.HashMap;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
@@ -60,12 +59,9 @@ public class Monitors {
      * @param subject identifier
      * @param source identifier
      * @return {@code SourceDefinition} representing a source source
-     * @throws ConnectException if the connection with MongoDb is faulty
-     *
      * @see Source
      */
-    public Source getState(MongoClient client, String subject, String source, String sourceType)
-            throws ConnectException {
+    public Source getState(MongoClient client, String subject, String source, String sourceType) {
         return getMonitor(sourceType).getState(subject, source, client);
     }
 
