@@ -9,7 +9,7 @@ import javax.ws.rs.ext.Provider;
 
 /** Standard CORS filter, applied to all responses. */
 @Provider
-@Priority(1000)
+@Priority(500)
 public class CorsFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext,
