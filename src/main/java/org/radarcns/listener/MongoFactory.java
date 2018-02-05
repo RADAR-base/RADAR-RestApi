@@ -21,18 +21,24 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import java.util.List;
+import javax.ws.rs.core.Context;
 import org.bson.Document;
 import org.glassfish.hk2.api.Factory;
+import org.glassfish.jersey.server.CloseableService;
 import org.radarcns.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * pon the web application initialisation, this Context Listener creates a MongoDb client that can
- * be reused by each call. A Mongo Client should be seen like a Thread Pool.
+ * Factory to creates a singleton MongoClient with the correct credentials.
  */
 public class MongoFactory implements Factory<MongoClient> {
     private static final Logger logger = LoggerFactory.getLogger(MongoFactory.class);
+
+    /** Disposes the client after use. */
+    @Context
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private CloseableService closeableService;
 
     /**
      * Checks if with the given client and credential is it possible to establish a connection

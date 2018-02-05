@@ -100,6 +100,7 @@ public class SensorEndPoint {
                     + "DoubleValue.avsc")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getLastReceivedSampleJson(
             @Alphanumeric @PathParam(SENSOR) String sensor,
@@ -108,6 +109,9 @@ public class SensorEndPoint {
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
             @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
+        // todo: 404 if given source does not exist.
+        // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
+        // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
         if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
             Dataset dataset = SensorDataAccessObject.getInstance()
@@ -154,6 +158,7 @@ public class SensorEndPoint {
             + "DoubleValue.avsc")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getSamplesJson(
             @Alphanumeric @PathParam(SENSOR) String sensor,
@@ -162,6 +167,9 @@ public class SensorEndPoint {
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
             @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
+        // todo: 404 if given source does not exist.
+        // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
+        // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
         if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
@@ -209,6 +217,7 @@ public class SensorEndPoint {
             + "either Acceleration.avsc or DoubleValue.avsc.")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getSamplesWithinWindowJson(
             @Alphanumeric @PathParam(SENSOR) String sensor,
@@ -219,6 +228,9 @@ public class SensorEndPoint {
             @PathParam(INTERVAL) TimeWindow interval,
             @PathParam(START) long start,
             @PathParam(END) long end) throws IOException {
+        // todo: 404 if given source does not exist.
+        // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
+        // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
         if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {

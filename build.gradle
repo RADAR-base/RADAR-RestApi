@@ -17,12 +17,13 @@ ext.logback = '1.2.2'
 ext.mongodb = '3.6.0'
 ext.radarCommons = '0.7'
 ext.radarSchema = '0.2.3'
-ext.swagger = '2.0.0-rc3'
+ext.swagger = '2.0.0-rc4'
 ext.tomcat = '8.0.47'
 ext.radarAuthVersion = '0.3.3-SNAPSHOT'
 ext.wireMockVersion = '2.5.1'
 ext.jacksonVersion = '2.9.3'
 ext.slf4jVersion = '1.7.25'
+ext.findbugsVersion = '3.0.2'
 
 configurations {
     provided
@@ -46,7 +47,6 @@ dependencies {
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: jersey
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-servlet', version: jersey
     compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
-
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
 
     // TODO: Add back swagger support
@@ -57,6 +57,8 @@ dependencies {
 
     compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthVersion
     compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
+
+    compile group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
 
     runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
 
