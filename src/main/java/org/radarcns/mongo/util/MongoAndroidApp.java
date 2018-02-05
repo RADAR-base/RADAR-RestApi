@@ -18,7 +18,6 @@ package org.radarcns.mongo.util;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
-import java.net.ConnectException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,7 +43,7 @@ public abstract class MongoAndroidApp extends MongoDataAccess {
      * @return the last seen status update for the given subject and sourceType, otherwise null
      */
     public Application valueBySubjectSource(String subject, String source, Application app,
-            MongoClient client) throws ConnectException {
+            MongoClient client) {
 
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentBySubjectAndSource(subject, source, null, -1, 1,

@@ -15,10 +15,10 @@ public class SourceTypeIdentifier {
     private String catalogVersion;
 
     /**
-     * Creates a sourceType-type identifier from parameters
-     * @param producer of sourceType-type
-     * @param model of sourceType-type
-     * @param catalogVersion of sourceType-type
+     * Creates a source-type identifier from parameters.
+     * @param producer of source-type
+     * @param model of source-type
+     * @param catalogVersion of source-type
      */
     public SourceTypeIdentifier(String producer, String model, String catalogVersion) {
         this.producer = producer;

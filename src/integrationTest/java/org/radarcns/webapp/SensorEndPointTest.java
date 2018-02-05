@@ -17,12 +17,13 @@
 //package org.radarcns.webapp;
 //
 //import static java.util.Collections.singletonList;
+//import static org.hamcrest.Matchers.empty;
+//import static org.hamcrest.Matchers.is;
 //import static org.junit.Assert.assertEquals;
-//import static org.junit.Assert.assertNotNull;
+//import static org.junit.Assert.assertThat;
 //import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-//import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-//import static org.radarcns.webapp.util.BasePath.DATA;
-//import static org.radarcns.webapp.util.BasePath.REALTIME;
+//import static org.radarcns.webapp.resource.BasePath.DATA;
+//import static org.radarcns.webapp.resource.BasePath.REALTIME;
 //
 //import com.mongodb.MongoClient;
 //import com.mongodb.client.MongoCollection;
@@ -30,7 +31,6 @@
 //import java.net.URISyntaxException;
 //import java.util.List;
 //import javax.ws.rs.core.Response.Status;
-//import okhttp3.Response;
 //import org.bson.Document;
 //import org.junit.After;
 //import org.junit.Rule;
@@ -39,7 +39,7 @@
 //import org.radarcns.catalogue.Unit;
 //import org.radarcns.dao.AndroidAppDataAccessObject;
 //import org.radarcns.dao.SensorDataAccessObject;
-//import org.radarcns.mongo.util.MongoHelper;
+//import org.radarcns.dao.mongo.util.MongoHelper;
 //import org.radarcns.integration.util.ApiClient;
 //import org.radarcns.integration.util.RandomInput;
 //import org.radarcns.integration.util.RestApiDetails;
@@ -50,16 +50,16 @@
 //
 //public class SensorEndPointTest {
 //
+//    private static final String PROJECT = "radar";
 //    private static final String SUBJECT = "sub-1";
-//    private static final String SOURCE = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
-//    private static final String SOURCE_TYPE = "EMPATICA";
-//    private static final String SENSOR_TYPE = "BATTERY";
-//    private static final String COLLECTION_NAME = "android_empatica_e4_battery_level_10sec";
+//    private static final String SOURCE = "SourceID_0";
+//    private static final String SOURCE_TYPE = org.radarcns.config.TestCatalog.EMPATICA;
+//    private static final String SENSOR_TYPE = "HEART_RATE";
 //    private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
 //    private static final Class<DoubleSample> ITEM = DoubleSample.class;
 //    private static final int SAMPLES = 10;
 //    private static final String SOURCE_PATH = SENSOR_TYPE + '/' + COUNT + '/' + TIME_WINDOW + '/'
-//            + SUBJECT + '/' + SOURCE;
+//            + PROJECT + '/' + SUBJECT + '/' + SOURCE;
 //
 //    @Rule
 //    public final ApiClient apiClient = new ApiClient(
@@ -72,7 +72,9 @@
 //            throws IOException, ReflectiveOperationException, URISyntaxException {
 //        MongoClient client = Utility.getMongoClient();
 //
-//        MongoCollection<Document> collection = MongoHelper.getCollection(client,COLLECTION_NAME);
+//        MongoCollection<Document> collection = MongoHelper.getCollection(client,
+//                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//                        SOURCE_TYPE, TIME_WINDOW));
 //
 //        List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
 //                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
@@ -81,7 +83,7 @@
 //
 //        Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
 //                SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
-//                Unit.BEATS_PER_MIN.toString(), TIME_WINDOW, ITEM);
+//                Unit.BEATS_PER_MIN, TIME_WINDOW, ITEM);
 //
 //        Dataset actual = apiClient.requestAvro(REALTIME + "/" + SOURCE_PATH,
 //                Dataset.class, Status.OK);
@@ -96,7 +98,9 @@
 //            throws IOException, ReflectiveOperationException, URISyntaxException {
 //        MongoClient client = Utility.getMongoClient();
 //
-//        MongoCollection<Document> collection = MongoHelper.getCollection(client,COLLECTION_NAME);
+//        MongoCollection<Document> collection = MongoHelper.getCollection(client,
+//                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//                        SOURCE_TYPE, TIME_WINDOW));
 //
 //        List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
 //                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
@@ -104,7 +108,7 @@
 //        collection.insertMany(docs);
 //
 //        Dataset expected = Utility.convertDocToDataset(docs, SUBJECT, SOURCE, SOURCE_TYPE,
-//                SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN.toString(), TIME_WINDOW,
+//                SENSOR_TYPE, RadarConverter.getMongoStat(COUNT), Unit.BEATS_PER_MIN, TIME_WINDOW,
 //                ITEM);
 //
 //        Dataset actual = apiClient.requestAvro(SOURCE_PATH, Dataset.class, Status.OK);
@@ -118,7 +122,9 @@
 //    public void getTimeWindowTest200() throws IOException, ReflectiveOperationException {
 //        MongoClient client = Utility.getMongoClient();
 //
-//        MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
+//        MongoCollection<Document> collection = MongoHelper.getCollection(client,
+//                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//                        SOURCE_TYPE, TIME_WINDOW));
 //
 //        List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
 //                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
@@ -138,7 +144,7 @@
 //
 //        Dataset expected = Utility.convertDocToDataset(docs.subList(index - 1, index + 2),
 //                SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, RadarConverter.getMongoStat(COUNT),
-//                Unit.BEATS_PER_MIN.toString(), TIME_WINDOW, ITEM);
+//                Unit.BEATS_PER_MIN, TIME_WINDOW, ITEM);
 //
 //        assertEquals(expected, actual);
 //
@@ -146,10 +152,9 @@
 //    }
 //
 //    @Test
-//    public void getAllDataTest204() throws IOException {
-//        try (Response response = apiClient.request(SOURCE_PATH, AVRO_BINARY, Status.NO_CONTENT)) {
-//            assertNotNull(response);
-//        }
+//    public void getAllDataTestEmpty() throws IOException, ReflectiveOperationException {
+//        Dataset dataset = apiClient.requestAvro(SOURCE_PATH, Dataset.class, Status.OK);
+//        assertThat(dataset.getDataset(), is(empty()));
 //    }
 //
 //    @After
@@ -163,7 +168,9 @@
 //     **/
 //    public void dropAndClose(MongoClient client) {
 //        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-//        Utility.dropCollection(client, COLLECTION_NAME);
+//        Utility.dropCollection(client,
+//                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//                        SOURCE_TYPE, TIME_WINDOW));
 //        Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
 //        client.close();
 //    }

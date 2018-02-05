@@ -20,7 +20,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.config.ExposedConfigTest.CONFIG_JSON;
 import static org.radarcns.config.ExposedConfigTest.OPENAPI_JSON;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.Parameter.SOURCEDATATYPE;
@@ -30,13 +29,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,7 +55,6 @@ import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
-import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.MockDataConfig;
@@ -81,6 +74,7 @@ public class EndToEndTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EndToEndTest.class);
 
+    private static final String PROJECT_NAME_MOCK = "radar";
     private static final String USER_ID_MOCK = "sub-1";
     private static final String SOURCE_ID_MOCK = "SourceID_0";
 
@@ -197,9 +191,7 @@ public class EndToEndTest {
     /**
      * Generates new random CSV files.
      */
-    private void produceInputFile()
-            throws IOException, ClassNotFoundException, NoSuchMethodException,
-            InvocationTargetException, ParseException, IllegalAccessException {
+    private void produceInputFile() throws IOException {
         LOGGER.info("Generating CSV files ...");
         for (MockDataConfig config : pipelineConfig.getData()) {
             new CsvGenerator().generate(config, pipelineConfig.getDuration(), dataRoot);
@@ -314,8 +306,7 @@ public class EndToEndTest {
      **/
     public static Map<MockDataConfig, Dataset> getExpectedDataset(
             Map<MockDataConfig, ExpectedValue> expectedValue, DescriptiveStatistic stat)
-            throws ClassNotFoundException, NoSuchMethodException, IOException,
-            IllegalAccessException, InvocationTargetException, InstantiationException {
+            throws IllegalAccessException, InstantiationException {
         Map<MockDataConfig, Dataset> map = new HashMap<>();
 
         for (MockDataConfig config : expectedValue.keySet()) {
@@ -341,11 +332,11 @@ public class EndToEndTest {
      * Queries the REST-API for each statistical function and for each data.
      */
     private void assertRestApiMatches()
-            throws IOException, GeneralSecurityException, ReflectiveOperationException {
+            throws IOException, ReflectiveOperationException {
         LOGGER.info("Fetching APIs ...");
 
         final String path = DATA + "/{" + SOURCEDATATYPE + "}/{" + STAT + "}/" + TimeWindow.TEN_SECOND
-                + '/' + USER_ID_MOCK + "/" + SOURCE_ID_MOCK;
+                + '/' + PROJECT_NAME_MOCK + '/' + USER_ID_MOCK + "/" + SOURCE_ID_MOCK;
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
             String pathStat = path.replace("{" + STAT + "}", stat.name());
@@ -492,30 +483,7 @@ public class EndToEndTest {
     public void checkSwaggerConfig() throws IOException {
         String response = apiClient.requestString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
         JsonNode node = new ObjectMapper().readTree(response);
-        assertTrue(node.has("servers"));
-        String serverUrl = node.get("servers").elements().next().get("url").asText();
-        assertEquals(RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString(),
-                serverUrl);
-        // TODO change the above line to use local resources
-    }
-
-    /**
-     * Checks the correctness of the deployed frontend configuration file making the request via
-     *      NGINX.
-     *
-     * @throws IOException either if the used URL is malformed or the response containing the
-     *      downloaded file cannot be parsed.
-     */
-    @Test
-    public void checkFrontendConfig()
-            throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        LOGGER.info("Checking Frontend pipelineConfig ...");
-
-        String actual = frontendClient.requestString(
-                "/config/" + CONFIG_JSON, APPLICATION_JSON, Status.OK);
-        String expected = Utility.readAll(
-                EndToEndTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
-
-        assertEquals(actual, expected);
+        assertTrue(node.has("openapi"));
+        assertTrue(node.get("openapi").asText().startsWith("3."));
     }
 }

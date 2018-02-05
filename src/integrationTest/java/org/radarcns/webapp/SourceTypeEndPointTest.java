@@ -18,7 +18,7 @@ import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.util.RadarConverter;
-import org.radarcns.webapp.util.BasePath;
+import org.radarcns.webapp.resource.BasePath;
 
 public class SourceTypeEndPointTest {
 

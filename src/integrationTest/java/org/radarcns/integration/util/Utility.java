@@ -43,7 +43,7 @@ import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
-import org.radarcns.listener.MongoDbContextListener;
+import org.radarcns.listener.MongoFactory;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.util.RadarConverter;
 
@@ -56,7 +56,7 @@ public class Utility {
         MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();
         MongoClient client = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),
                 credentials, MongoClientOptions.builder().build());
-        if (!MongoDbContextListener.checkMongoConnection(client)) {
+        if (!MongoFactory.checkMongoConnection(client)) {
             throw new IllegalStateException("MongoDB connection invalid for hosts "
                     + Properties.getApiConfig().getMongoDbHosts() + " and credentials "
                     + Properties.getApiConfig().getMongoDbCredentials());

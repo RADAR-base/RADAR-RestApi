@@ -19,7 +19,6 @@ package org.radarcns.mongo.util;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lte;
-import static org.radarcns.listener.MongoDbContextListener.MONGO_CLIENT;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -28,12 +27,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import java.net.ConnectException;
 import java.util.Date;
-import javax.servlet.ServletContext;
 import org.bson.Document;
 import org.radarcns.config.Properties;
-import org.radarcns.listener.MongoDbContextListener;
 
 /**
  * Generic MongoDB helper.
@@ -241,30 +237,6 @@ public class MongoHelper {
     /**
      * Returns the needed MongoDB collection.
      *
-     * @param context the application context maintaining the MongoDB client
-     * @param collection is the name of the returned connection
-     * @return the MongoDB collection named collection. If the MongoDB client is null, it first
-     *      tries to establish a new connection and then return.
-     * @throws ConnectException if MongoDB cannot be reached
-     */
-    public static MongoCollection<Document> getCollection(ServletContext context, String collection)
-            throws ConnectException {
-        MongoDbContextListener.testConnection(context);
-
-        if (context.getAttribute(MONGO_CLIENT) == null) {
-            MongoDbContextListener.recoverOrThrow(context);
-        }
-
-        MongoClient mongoClient = (MongoClient) context.getAttribute(MONGO_CLIENT);
-        MongoDatabase database = mongoClient.getDatabase(
-                Properties.getApiConfig().getMongoDbName());
-
-        return database.getCollection(collection);
-    }
-
-    /**
-     * Returns the needed MongoDB collection.
-     *
      * @param client the MongoDB client
      * @param collection is the name of the returned connection
      * @return the MongoDB collection named collection.
@@ -273,23 +245,5 @@ public class MongoHelper {
         MongoDatabase database = client.getDatabase(Properties.getApiConfig().getMongoDbName());
 
         return database.getCollection(collection);
-    }
-
-    /**
-     * Returns the MongoDB client initialised upon start-up.
-     *
-     * @param context the application context maintaining the MongoDB client
-     * @return If the MongoDB client is null, it first tries to establish a new connection and then
-     *          return.
-     * @throws ConnectException if MongoDB cannot be reached
-     */
-    public static MongoClient getClient(ServletContext context) throws ConnectException {
-        MongoDbContextListener.testConnection(context);
-
-        if (context.getAttribute(MONGO_CLIENT) == null) {
-            MongoDbContextListener.recoverOrThrow(context);
-        }
-
-        return (MongoClient) context.getAttribute(MONGO_CLIENT);
     }
 }

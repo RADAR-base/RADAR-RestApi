@@ -3,6 +3,8 @@ package org.radarcns.integration.util;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Objects;
 import net.minidev.json.annotate.JsonIgnore;
 import org.radarcns.config.Properties;
@@ -35,7 +37,7 @@ public class RestApiDetails {
     private String clientScopes;
 
     @JsonProperty("management_portal_url")
-    private String managementPortalUrl;
+    private URL managementPortalUrl;
 
     @JsonProperty("token_endpoint")
     private String tokenEndpoint;
@@ -55,7 +57,7 @@ public class RestApiDetails {
         return clientScopes;
     }
 
-    public String getManagementPortalUrl() {
+    public URL getManagementPortalUrl() {
         return managementPortalUrl;
     }
 
@@ -71,8 +73,10 @@ public class RestApiDetails {
      * Get rest-api configs.
      */
     public static RestApiDetails getRestApiClientDetails() {
-        if (Objects.isNull(instance)) {
-            String path = Properties.class.getClassLoader().getResource(CONFIG_FILE_NAME).getFile();
+        if (instance == null) {
+            String path = Objects
+                    .requireNonNull(Properties.class.getClassLoader().getResource(CONFIG_FILE_NAME))
+                    .getFile();
             LOGGER.info("Loading RestAPI client Config file located at : {}", path);
             try {
                 instance = new YamlConfigLoader().load(new File(path), RestApiDetails.class);
@@ -83,7 +87,11 @@ public class RestApiDetails {
                 restApiDetails.clientSecret = "secret";
                 restApiDetails.clientScopes = "SUBJECT.READ PROJECT.READ SOURCE.READ "
                         + "SOURCETYPE.READ MEASUREMENT.READ";
-                restApiDetails.managementPortalUrl = "http://localhost:8090/";
+                try {
+                    restApiDetails.managementPortalUrl = new URL("http://localhost:8090/");
+                } catch (MalformedURLException e1) {
+                    throw new AssertionError("Failed to construct ManagementPortal url");
+                }
                 restApiDetails.tokenEndpoint = "oauth/token";
                 return restApiDetails;
 

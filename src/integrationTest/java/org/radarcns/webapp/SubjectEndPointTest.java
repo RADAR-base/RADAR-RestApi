@@ -16,25 +16,24 @@
 //
 //package org.radarcns.webapp;
 //
-//import static java.util.function.Function.identity;
 //import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+//import static org.hamcrest.MatcherAssert.assertThat;
+//import static org.hamcrest.Matchers.either;
+//import static org.hamcrest.Matchers.empty;
+//import static org.hamcrest.Matchers.hasItems;
+//import static org.hamcrest.Matchers.is;
 //import static org.junit.Assert.assertEquals;
-//import static org.junit.Assert.assertNotNull;
 //import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-//import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
-//import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
+//import static org.radarcns.webapp.resource.BasePath.GET_ALL_SUBJECTS;
+//import static org.radarcns.webapp.resource.BasePath.GET_SUBJECT;
 //
 //import com.mongodb.MongoClient;
 //import com.mongodb.client.MongoCollection;
 //import java.io.IOException;
 //import java.net.URISyntaxException;
-//import java.util.Arrays;
-//import java.util.Collections;
 //import java.util.List;
-//import java.util.Map;
 //import java.util.stream.Collectors;
 //import javax.ws.rs.core.Response.Status;
-//import okhttp3.Response;
 //import org.bson.Document;
 //import org.junit.After;
 //import org.junit.Rule;
@@ -42,25 +41,23 @@
 //import org.radarcns.catalogue.TimeWindow;
 //import org.radarcns.dao.AndroidAppDataAccessObject;
 //import org.radarcns.dao.SensorDataAccessObject;
-//import org.radarcns.mongo.util.MongoHelper;
+//import org.radarcns.dao.mongo.util.MongoHelper;
 //import org.radarcns.integration.util.ApiClient;
 //import org.radarcns.integration.util.RandomInput;
 //import org.radarcns.integration.util.RestApiDetails;
 //import org.radarcns.integration.util.Utility;
-//import org.radarcns.restapi.sourceType.Sensor;
-//import org.radarcns.restapi.sourceType.Source;
-//import org.radarcns.restapi.sourceType.SourceSummary;
-//import org.radarcns.restapi.sourceType.States;
+//import org.radarcns.restapi.source.Source;
+//import org.radarcns.restapi.source.States;
 //import org.radarcns.restapi.subject.Cohort;
 //import org.radarcns.restapi.subject.Subject;
 //import org.radarcns.util.RadarConverter;
-//import org.radarcns.webapp.util.BasePath;
+//import org.radarcns.webapp.resource.BasePath;
 //
 //public class SubjectEndPointTest {
 //    private static final String SUBJECT = "sub-1";
 //    private static final String SOURCE = "SourceID_0";
-//    private static final String STUDY = "0";
-//    private static final String SOURCE_TYPE = "EMPATICA";
+//    private static final String PROJECT = "radar";
+//    private static final String SOURCE_TYPE = org.radarcns.config.TestCatalog.EMPATICA;
 //    private static final String SENSOR_TYPE = "HEART_RATE";
 //    private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
 //    private static final int SAMPLES = 10;
@@ -71,11 +68,10 @@
 //                    + BasePath.SUBJECT + '/');
 //
 //    @Test
-//    public void getAllSubjectsTest204() throws IOException {
-//        try (Response response = apiClient.request(GET_ALL_SUBJECTS + "/" + STUDY, APPLICATION_JSON,
-//                Status.NO_CONTENT)) {
-//            assertNotNull(response);
-//        }
+//    public void getAllSubjectsTest204() throws IOException, ReflectiveOperationException {
+//        Cohort cohort = apiClient.requestAvro(GET_ALL_SUBJECTS + "/" + PROJECT, Cohort.class,
+//                Status.OK);
+//        assertThat(cohort.getSubjects(), is(empty()));
 //    }
 //
 //    @Test
@@ -94,17 +90,17 @@
 //                RandomInput.getRandomApplicationStatus(SUBJECT.concat("1"), SOURCE.concat("1")));
 //
 //        Cohort cohort = RadarConverter.readerFor(Cohort.class).readValue(apiClient.requestString(
-//                GET_ALL_SUBJECTS + "/" + STUDY, APPLICATION_JSON, Status.OK));
+//                GET_ALL_SUBJECTS + "/" + PROJECT, APPLICATION_JSON, Status.OK));
 //
 //        for (Subject patient : cohort.getSubjects()) {
 //            if (patient.getSubjectId().equalsIgnoreCase(SUBJECT)) {
-//                Source sourceType = patient.getSources().get(0);
-//                assertEquals(SOURCE_TYPE, sourceType.getType());
-//                assertEquals(SOURCE, sourceType.getId());
+//                Source source = patient.getSources().get(0);
+//                assertEquals(SOURCE_TYPE, source.getType());
+//                assertEquals(SOURCE, source.getId());
 //            } else if (patient.getSubjectId().equalsIgnoreCase(SUBJECT.concat("1"))) {
-//                Source sourceType = patient.getSources().get(0);
-//                assertEquals("ANDROID", sourceType.getType());
-//                assertEquals(SOURCE.concat("1"), sourceType.getId());
+//                Source source = patient.getSources().get(0);
+//                assertEquals(org.radarcns.config.TestCatalog.ANDROID, source.getType());
+//                assertEquals(SOURCE.concat("1"), source.getId());
 //            }
 //        }
 //
@@ -112,11 +108,12 @@
 //    }
 //
 //    @Test
-//    public void getSubjectTest204() throws IOException {
-//        try (Response response = apiClient.request(
-//                GET_SUBJECT + '/' + SUBJECT, APPLICATION_JSON, Status.NO_CONTENT)) {
-//            assertNotNull(response);
-//        }
+//    public void getSubjectTest204() throws IOException, ReflectiveOperationException {
+//        Subject subject = apiClient.requestAvro(
+//                PROJECT + '/' + GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
+//        assertThat(subject.getActive(), is(false));
+//        assertThat(subject.getSubjectId(), is(SUBJECT));
+//        assertThat(subject.getSources(), is(empty()));
 //    }
 //
 //    @Test
@@ -135,22 +132,28 @@
 //        collection.insertMany(randomInput);
 //
 //        Subject actual = apiClient.requestAvro(
-//                GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
+//                PROJECT + '/' + GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
 //
-//        Map<String, Sensor> sensorMap = Arrays.stream(
-//                new String[] {
-//                        "INTER_BEAT_INTERVAL", "BATTERY", "HEART_RATE", "THERMOMETER",
-//                        "ACCELEROMETER", "ELECTRODERMAL_ACTIVITY", "BLOOD_VOLUME_PULSE"
-//                })
-//                .collect(Collectors.toMap(identity(), s -> new Sensor(
-//                        s, States.DISCONNECTED, 0, 1.0)));
+//        assertThat(actual.getSubjectId(), is(SUBJECT));
+//        assertThat(actual.getActive(), is(true));
+//        assertThat(actual.getEffectiveTimeFrame(),
+//                is(Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput)));
 //
-//        Subject expected = new Subject(SUBJECT, true,
-//                Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput),
-//                Collections.singletonList(new Source(SOURCE, SOURCE_TYPE, new SourceSummary(
-//                        States.DISCONNECTED, 0, 1.0, sensorMap))));
+//        List<String> sensorTypes = actual.getSources().stream()
+//                .flatMap(s -> s.getSummary().getSensors().keySet().stream())
+//                .collect(Collectors.toList());
 //
-//        assertEquals(expected, actual);
+//        assertThat(sensorTypes, hasItems("INTER_BEAT_INTERVAL", "BATTERY",
+//                "HEART_RATE", "THERMOMETER", "ACCELEROMETER", "ELECTRODERMAL_ACTIVITY",
+//                "BLOOD_VOLUME_PULSE"));
+//
+//        actual.getSources().forEach(s -> assertThat(s.getSummary().getState(),
+//                either(is(States.DISCONNECTED)).or(is(States.WARNING))));
+//
+//        actual.getSources().stream()
+//                .flatMap(s -> s.getSummary().getSensors().values().stream())
+//                .forEach(s -> assertThat(s.getState(),
+//                        either(is(States.DISCONNECTED)).or(is(States.WARNING))));
 //
 //        dropAndClose(client);
 //    }

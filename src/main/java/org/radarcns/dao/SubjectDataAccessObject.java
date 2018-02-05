@@ -1,5 +1,3 @@
-package org.radarcns.dao;
-
 /*
  * Copyright 2016 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.dao;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.dao;
 
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
@@ -147,8 +147,6 @@ public class SubjectDataAccessObject {
      * @param client {@link MongoClient} used to connect to the database
      *
      * @return {@code true} if exist, {@code false} otherwise
-     *
-     * @throws ConnectException if the connection with MongoDb cannot be established
      */
     public  boolean exist(String subject, MongoClient client) throws ConnectException {
         //TODO Temporary implementation. It must integrated with the suggested user management tool.
