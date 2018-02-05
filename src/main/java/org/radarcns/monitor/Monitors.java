@@ -17,10 +17,7 @@
 package org.radarcns.monitor;
 
 import com.mongodb.MongoClient;
-import java.net.ConnectException;
 import java.util.HashMap;
-import javax.servlet.ServletContext;
-import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.source.SourceCatalog;
@@ -34,22 +31,11 @@ public class Monitors {
     private final HashMap<String, SourceMonitor> hooks;
 
     /** Singleton instance. **/
-    private static final Monitors INSTANCE;
+    private static final Monitors INSTANCE = new Monitors();
 
     /** Constructor. **/
-    private Monitors(SourceCatalog catalog) {
+    public Monitors() {
         hooks = new HashMap<>();
-
-        for (String sourceType : catalog.getSupportedSource()) {
-            hooks.put(sourceType, new SourceMonitor(catalog.getDefinition(sourceType)));
-        }
-    }
-
-    /*
-     * Static initializer.
-     */
-    static {
-        INSTANCE = new Monitors(SourceCatalog.getInstance());
     }
 
     /**
@@ -60,45 +46,23 @@ public class Monitors {
         return INSTANCE;
     }
 
-    /**
-     * Checks the status for the given source counting the number of received messages and
-     *      checking whether it respects the data frequencies. There is a check for each data.
-     *
-     * @param subject identifier
-     * @param source identifier
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return {@code SourceDefinition} representing a source source
-     * @throws ConnectException if the connection with MongoDb is faulty
-     *
-     * @see Source
-     */
-    public Source getState(String subject, String source, String sourceType,
-            ServletContext context) throws ConnectException {
-        return getState(subject, source, sourceType, MongoHelper.getClient(context));
+    private SourceMonitor getMonitor(String sourceType) {
+        return hooks.computeIfAbsent(sourceType,
+                (k) -> new SourceMonitor(SourceCatalog.getInstance().getDefinition(k)));
     }
 
     /**
      * Checks the status for the given source counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
      *
+     * @param client is the MongoDB client
      * @param subject identifier
      * @param source identifier
-     * @param client is the MongoDB client
      * @return {@code SourceDefinition} representing a source source
-     * @throws ConnectException if the connection with MongoDb is faulty
-     *
      * @see Source
      */
-    public Source getState(String subject, String source, String sourceType, MongoClient client)
-            throws ConnectException {
-        SourceMonitor monitor = hooks.get(sourceType);
-
-        if (monitor == null) {
-            throw new UnsupportedOperationException(sourceType + "is not currently supported");
-        }
-
-        return monitor.getState(subject, source, client);
+    public Source getState(MongoClient client, String subject, String source, String sourceType) {
+        return getMonitor(sourceType).getState(subject, source, client);
     }
 
     /**
@@ -106,15 +70,8 @@ public class Monitors {
      *
      * @return {@code SourceSpecification} containing all data names and related frequencies
      */
-    public SourceSpecification getSpecification(String sourceType)
-            throws ConnectException {
-        SourceMonitor monitor = hooks.get(sourceType);
-
-        if (monitor == null) {
-            throw new UnsupportedOperationException(sourceType + " is not currently supported");
-        }
-
-        return monitor.getSource().getSpecification();
+    public SourceSpecification getSpecification(String sourceType) {
+        return getMonitor(sourceType).getSource().getSpecification();
     }
 
 

@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'war'
+    id 'application'
 }
 
 group 'org.radarcns'
@@ -9,6 +9,7 @@ version '0.1.2-SNAPSHOT'
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
+ext.grizzly = '2.4.3'
 ext.jersey = '2.26'
 ext.junitVersion = '4.12'
 ext.hamcrestVersion = '1.3'
@@ -16,12 +17,13 @@ ext.logback = '1.2.2'
 ext.mongodb = '3.6.0'
 ext.radarCommons = '0.7'
 ext.radarSchema = '0.2.3'
-ext.swagger = '2.0.0-rc3'
+ext.swagger = '2.0.0-rc4'
 ext.tomcat = '8.0.47'
 ext.radarAuthVersion = '0.3.3-SNAPSHOT'
 ext.wireMockVersion = '2.5.1'
 ext.jacksonVersion = '2.9.3'
-
+ext.slf4jVersion = '1.7.25'
+ext.findbugsVersion = '3.0.2'
 
 configurations {
     provided
@@ -39,11 +41,15 @@ repositories {
 }
 
 dependencies {
-    providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcat
+    // TODO: Reduce dependencies to the minimum
+    compile group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: grizzly
 
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jersey
+    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: jersey
+    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-servlet', version: jersey
+    compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
 
+    // TODO: Add back swagger support
     compile group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: swagger
 
     compile group: 'org.radarcns', name: 'radar-commons', version: radarCommons
@@ -52,16 +58,15 @@ dependencies {
     compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthVersion
     compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
 
+    compile group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
+
+    runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
+
     runtimeOnly group: 'ch.qos.logback', name:'logback-core', version: logback
     runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logback
-
-    runtimeOnly group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
-    runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
 }
 
-war {
-    archiveName 'radar.war'
-}
+mainClassName = 'org.radarcns.webapp.GrizzlyServer'
 
 if (!hasProperty('profile')) {
     ext.profile = 'dev'

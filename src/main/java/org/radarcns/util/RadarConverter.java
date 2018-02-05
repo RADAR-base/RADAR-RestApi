@@ -41,7 +41,6 @@ import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.Header;
-import org.radarcns.security.Param;
 import org.radarcns.source.SourceCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,8 +87,7 @@ public final class RadarConverter {
      * Converts {@code long} to ISO8601 {@code String}.
      * @param value input {@code long} that has to be converted
      * @return a {@code String} representing a date in ISO8601 format
-     * @see <a href="http://www.iso.org/iso/home/standards/iso8601.htm>ISO8601 specification</a>
-     **/
+     */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public static String getISO8601(long value) throws DateTimeException {
         return Instant.ofEpochMilli(value).toString();
@@ -99,8 +97,7 @@ public final class RadarConverter {
      * Converts {@link Date} to ISO8601 {@code String}.
      * @param value input {@link Date} that has to be converted
      * @return a {@code String} representing a date in ISO8601 format
-     * @see <a href="http://www.iso.org/iso/home/standards/iso8601.htm>ISO8601 specification</a>
-     **/
+     */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public static String getISO8601(Date value) {
         return value.toInstant().toString();
@@ -110,8 +107,7 @@ public final class RadarConverter {
      * Converts ISO8601 {@code String} to java {@link Date}.
      * @param value input {@code String} formatted in ISO8601
      * @return {@link Date} object according to the given input
-     * @see <a href="http://www.iso.org/iso/home/standards/iso8601.htm>ISO8601 specification</a>
-     **/
+     */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public static Date getISO8601(String value) throws DateTimeParseException {
         return Date.from(Instant.parse(value));
@@ -174,18 +170,12 @@ public final class RadarConverter {
      * Converts the input String in Server Status.
      **/
     public static ServerStatus getServerStatus(String value) {
-        if (Param.isNullOrEmpty(value)) {
+        if (value == null) {
             return ServerStatus.UNKNOWN;
         }
-
-        String temp = value.toUpperCase();
-        if (temp.equals(ServerStatus.CONNECTED.toString())) {
-            return ServerStatus.CONNECTED;
-        } else if (temp.equals(ServerStatus.DISCONNECTED.toString())) {
-            return ServerStatus.DISCONNECTED;
-        } else if (temp.equals(ServerStatus.UNKNOWN.toString())) {
-            return ServerStatus.UNKNOWN;
-        } else {
+        try {
+            return ServerStatus.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException ex) {
             logger.warn("Unsupported ServerStatus. Value is {}", value);
             return ServerStatus.UNKNOWN;
         }
@@ -218,7 +208,7 @@ public final class RadarConverter {
      * @return the number of expected messages
      */
     public static Double getExpectedMessages(Header header) {
-        return SourceCatalog.getInstance(header.getSource()).getFrequency(
+        return SourceCatalog.getInstance().getDefinition(header.getSource()).getFrequency(
                 header.getType()) * getSecond(header.getTimeWindow()).doubleValue();
     }
 
@@ -263,6 +253,7 @@ public final class RadarConverter {
         }
     }
 
+    /** Whether a given temporal threshold is passed, compared to given time. */
     public static boolean isThresholdPassed(Temporal time, Duration duration) {
         return Duration.between(time, Instant.now()).compareTo(duration) > 0;
     }

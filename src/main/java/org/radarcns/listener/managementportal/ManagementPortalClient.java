@@ -29,6 +29,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
+import javax.ws.rs.NotFoundException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -42,12 +43,11 @@ import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.CachedMap;
 import org.radarcns.util.RadarConverter;
-import org.radarcns.webapp.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Client to interact with the RADAR Management Portal.
+ * Client to interact with the RADAR Management Portal. This class is thread-safe.
  */
 public class ManagementPortalClient {
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalClient.class);
@@ -69,15 +69,14 @@ public class ManagementPortalClient {
     private final CachedMap<String, Project> projects;
     private final CachedMap<SourceTypeIdentifier, SourceType> sourceTypes;
 
-    private OAuth2AccessTokenDetails token;
+    private String token;
 
     /**
      * Client to interact with the RADAR Management Portal.
      *
      * @param okHttpClient {@link OkHttpClient} to communicate to external web services
      * @throws IllegalStateException in case the object cannot be created
-     * @see HttpClientListener
-     * @see ManagementPortalClientManager
+     * @see ManagementPortalClientFactory
      */
     public ManagementPortalClient(@Nonnull OkHttpClient okHttpClient) {
         this.client = okHttpClient;
@@ -111,8 +110,12 @@ public class ManagementPortalClient {
         return defaultValue;
     }
 
-    protected void updateToken(OAuth2AccessTokenDetails tokenDetails) {
-        this.token = tokenDetails;
+    protected synchronized void updateToken(OAuth2AccessTokenDetails tokenDetails) {
+        this.token = tokenDetails.getAccessToken();
+    }
+
+    private synchronized String getToken() {
+        return this.token;
     }
 
     /**
@@ -151,12 +154,31 @@ public class ManagementPortalClient {
      *
      * @param subjectLogin {@link String} that has to be searched.
      * @return {@link Subject} if a subject is found
+     * @throws IOException if the subjects cannot be refreshed
+     * @throws NotFoundException if the subject is not found
      */
     public Subject getSubject(@Nonnull String subjectLogin) throws IOException, NotFoundException {
         try {
             return subjects.get(subjectLogin);
         } catch (NoSuchElementException ex) {
             throw new NotFoundException("Subject " + subjectLogin + " not found.");
+        }
+    }
+
+    /**
+     * Checks whether given subject is part of given project.
+     *
+     * @param projectName project that should contain the subject.
+     * @param subjectLogin login name that has to be searched.
+     * @throws IOException if the list of subjects cannot be refreshed.
+     * @throws NotFoundException if the subject is not found in given project.
+     */
+    public void checkSubjectInProject(@Nonnull String projectName, @Nonnull String subjectLogin)
+            throws IOException, NotFoundException {
+        Subject subject = getSubject(subjectLogin);
+        if (!projectName.equals(subject.getProject().getProjectName())) {
+            throw new NotFoundException(
+                    "Subject " + subjectLogin + " is not part of project " + projectName + ".");
         }
     }
 
@@ -168,8 +190,7 @@ public class ManagementPortalClient {
      * @return {@link List} of {@link Subject} retrieved from the Management Portal
      * @throws MalformedURLException in case the subjects cannot be retrieved.
      */
-    public List<Subject> getAllSubjectsFromProject(@Nonnull String projectName) throws
-            IOException, NotFoundException {
+    public List<Subject> getAllSubjectsFromProject(@Nonnull String projectName) throws IOException {
         // will throw not found if relevant.
         getProject(projectName);
 
@@ -190,6 +211,7 @@ public class ManagementPortalClient {
      * Retrieves all {@link Project} from Management Portal using {@link ServletContext} entity.
      *
      * @return {@link ArrayList} of {@link Project} retrieved from the Management Portal
+     * @throws IOException if the list of projects cannot be retrieved.
      */
     public Map<String, Project> getProjects() throws IOException {
         return projects.get();
@@ -221,6 +243,8 @@ public class ManagementPortalClient {
      *
      * @param projectName {@link String} of the Project that has to be retrieved
      * @return {@link Project} retrieved from the Management Portal
+     * @throws IOException if the list of projects cannot be retrieved
+     * @throws NotFoundException if given project is not found
      */
     public Project getProject(String projectName) throws IOException, NotFoundException {
         try {
@@ -234,6 +258,7 @@ public class ManagementPortalClient {
      * Retrieves all {@link SourceType} from Management Portal using {@link ServletContext} entity.
      *
      * @return {@link ArrayList} of {@link SourceType} retrieved from the Management Portal
+     * @throws IOException if the list of source types cannot be retrieved
      */
     public Map<SourceTypeIdentifier, SourceType> getSourceTypes() throws IOException {
         return sourceTypes.get();
@@ -247,10 +272,11 @@ public class ManagementPortalClient {
      * @param model {@link String} of the Source-type that has to be retrieved
      * @param catalogVersion {@link String} of the Source-type that has to be retrieved
      * @return {@link SourceType} retrieved from the Management Portal
+     * @throws IOException if the list of source types cannot be retrieved
+     * @throws NotFoundException if given source type is not found
      */
-    public SourceType getSourceType(String producer, String model, String catalogVersion) throws
-            IOException,
-            NotFoundException {
+    public SourceType getSourceType(String producer, String model, String catalogVersion)
+            throws IOException, NotFoundException {
         try {
             return sourceTypes.get(new SourceTypeIdentifier(producer, model, catalogVersion));
         } catch (NoSuchElementException ex) {
@@ -264,6 +290,7 @@ public class ManagementPortalClient {
      * Retrieves all {@link SourceType} from Management Portal using {@link ServletContext} entity.
      *
      * @return source-types retrieved from the management portal.
+     * @throws IOException if the list of source types cannot be retrieved
      */
     private List<SourceType> retrieveSourceTypes() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
@@ -284,7 +311,7 @@ public class ManagementPortalClient {
     private Request buildGetRequest(URL url) {
         return new Request.Builder()
                 .addHeader("Accept", "application/json")
-                .addHeader("Authorization", "Bearer " + this.token.getAccessToken())
+                .addHeader("Authorization", "Bearer " + getToken())
                 .url(url)
                 .get()
                 .build();

@@ -27,9 +27,6 @@ import static org.radarcns.dao.mongo.util.MongoHelper.THIRD_QUARTILE;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -59,7 +56,7 @@ public class SourceMonitorDbTest {
     private static int WINDOWS = 2;
 
     @Test
-    public void testGetStateFine() throws IOException, URISyntaxException {
+    public void testGetStateFine() {
         MongoClient client = getClient();
 
         Source source = getSource(WINDOWS,0, client);
@@ -70,7 +67,7 @@ public class SourceMonitorDbTest {
     }
 
     @Test
-    public void testGetStateOk() throws ConnectException, URISyntaxException {
+    public void testGetStateOk() {
         MongoClient client = getClient();
 
         Source source = getSource(WINDOWS, 0.05, client);
@@ -81,7 +78,7 @@ public class SourceMonitorDbTest {
     }
 
     @Test
-    public void testGetStateWarining() throws ConnectException, URISyntaxException {
+    public void testGetStateWarining() {
         MongoClient client = getClient();
 
         Source source = getSource(WINDOWS, 0.50, client);
@@ -92,7 +89,7 @@ public class SourceMonitorDbTest {
     }
 
     @Test
-    public void testGetStateDisconnected() throws ConnectException, URISyntaxException {
+    public void testGetStateDisconnected() {
         MongoClient client = getClient();
 
         Source source = getSource(WINDOWS, 1, client);
@@ -112,7 +109,7 @@ public class SourceMonitorDbTest {
      **/
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-        SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
+        SourceDefinition definition = SourceCatalog.getInstance().getDefinition(SOURCE_TYPE);
         for (String sensorType : definition.getSensorTypes()) {
             Utility.dropCollection(client,
                     SensorDataAccessObject.getInstance().getCollectionName(
@@ -122,8 +119,7 @@ public class SourceMonitorDbTest {
         client.close();
     }
 
-    private Source getSource(int window, double percentage, MongoClient client)
-            throws ConnectException {
+    private Source getSource(int window, double percentage, MongoClient client) {
         long timestamp = System.currentTimeMillis();
 
         Map<String, Integer> count = new HashMap<>();
@@ -133,7 +129,7 @@ public class SourceMonitorDbTest {
 
         String collectionName;
 
-        SourceDefinition definition = SourceCatalog.getInstance(SOURCE_TYPE);
+        SourceDefinition definition = SourceCatalog.getInstance().getDefinition(SOURCE_TYPE);
         for (int i = 0; i < window; i++) {
             for (String sensorType : definition.getSensorTypes()) {
                 messages = reducedMessage(
@@ -244,7 +240,7 @@ public class SourceMonitorDbTest {
         return Double.valueOf(frequency * (1 - reduction)).intValue();
     }
 
-    private MongoClient getClient() throws URISyntaxException {
+    private MongoClient getClient() {
         return Utility.getMongoClient();
     }
 }

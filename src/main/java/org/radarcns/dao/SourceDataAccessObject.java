@@ -17,14 +17,12 @@
 package org.radarcns.dao;
 
 import com.mongodb.MongoClient;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
-import javax.servlet.ServletContext;
 import org.radarcns.dao.mongo.util.MongoDataAccess;
-import org.radarcns.dao.mongo.util.MongoHelper;
 import org.radarcns.monitor.Monitors;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.subject.Subject;
@@ -33,33 +31,14 @@ import org.radarcns.restapi.subject.Subject;
  * Data Access Object for subject management.
  */
 public class SourceDataAccessObject {
-
-    /**
-     * Given a sourceID, it finds what is the associated source type.
-     *
-     * @param source is the SourceID
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return source type associated with the given source
-     *
-     * @throws ConnectException if MongoDb instance is not available
-     */
-    public static String getSourceType(String source, ServletContext context)
-            throws ConnectException {
-        return getSourceType(source, MongoHelper.getClient(context));
-    }
-
     /**
      * Given a sourceID, it finds what is the associated source type.
      *
      * @param source is the SourceID
      * @param client MongoDB client
      * @return source type associated with the given source
-     *
-     * @throws ConnectException if MongoDb instance is not available
      */
-    public static String getSourceType(String source, MongoClient client)
-            throws ConnectException {
+    public static String getSourceType(String source, MongoClient client) {
         String type = MongoDataAccess.getSourceType(source, client);
 
         if (type == null) {
@@ -81,26 +60,10 @@ public class SourceDataAccessObject {
      * Returns all available sources for the given patient.
      *
      * @param subject subject identifier.
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return a {@code Subject} object
-     * @throws ConnectException if MongoDB is not available
-     */
-    public static Subject findAllSourcesByUser(String subject, ServletContext context)
-            throws ConnectException {
-        return findAllSourcesByUser(subject, MongoHelper.getClient(context));
-    }
-
-    /**
-     * Returns all available sources for the given patient.
-     *
-     * @param subject subject identifier.
      * @param client MongoDb client
      * @return a {@code Subject} object
-     * @throws ConnectException if MongoDB is not available
      */
-    public static Subject findAllSourcesByUser(String subject, MongoClient client)
-            throws ConnectException {
+    public static Subject findAllSourcesByUser(String subject, MongoClient client) {
         Set<Source> sources = new HashSet<>();
 
         sources.addAll(SensorDataAccessObject.getInstance().getAllSources(
@@ -114,9 +77,9 @@ public class SourceDataAccessObject {
 
         for (Source source : sources) {
             try {
-                updatedSources.add(monitor.getState(subject, source.getId(), source.getType(),
-                        client));
-            } catch (UnsupportedOperationException ex) {
+                updatedSources.add(monitor.getState(client, subject, source.getId(),
+                        source.getType()));
+            } catch (NoSuchElementException ex) {
                 updatedSources.add(source);
             }
         }

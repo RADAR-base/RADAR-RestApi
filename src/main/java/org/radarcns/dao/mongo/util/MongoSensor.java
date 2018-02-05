@@ -18,7 +18,6 @@ package org.radarcns.dao.mongo.util;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import java.net.ConnectException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +25,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import org.bson.Document;
+import org.radarcns.catalog.SourceDefinition;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
 import org.radarcns.dao.mongo.util.MongoHelper.Stat;
@@ -66,15 +66,15 @@ public abstract class MongoSensor extends MongoDataAccess {
         this.dataFormat = format;
 
         for (String sourceType : SourceCatalog.getInstance().getSupportedSource()) {
-            if (!SourceCatalog.getInstance(sourceType).isSupported(sensorType)) {
+            SourceDefinition definition = SourceCatalog.getInstance().getDefinition(sourceType);
+            if (!definition.isSupported(sensorType)) {
                 continue;
             }
 
-            deviceCollections.put(sourceType,
-                    SourceCatalog.getInstance(sourceType).getCollections().get(sensorType));
+            Map<String, Map<TimeWindow, String>> collections = definition.getCollections();
+            deviceCollections.put(sourceType, collections.get(sensorType));
 
-            Set<String> names = new HashSet<>(SourceCatalog.getInstance(
-                    sourceType).getCollections().get(sensorType).values());
+            Set<String> names = new HashSet<>(collections.get(sensorType).values());
 
             for (String name : names) {
                 collectionToSource.put(name, sourceType);
@@ -111,7 +111,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Dataset valueRTByUserSource(String subject, String source, Header header, Stat stat,
-            MongoCollection<Document> collection) throws ConnectException {
+            MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSource(subject, source, MongoHelper.END, -1, 1,
                 collection);
@@ -133,7 +133,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @see Dataset
      */
     public Dataset valueByUserSource(String subject, String source, Header header,
-            MongoHelper.Stat stat, MongoCollection<Document> collection) throws ConnectException {
+            MongoHelper.Stat stat, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSource(subject, source,MongoHelper.START, 1, null,
                 collection);
@@ -158,8 +158,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @see Dataset
      */
     public Dataset valueByUserSourceWindow(String subject, String source, Header header,
-            MongoHelper.Stat stat, Long start, Long end, MongoCollection<Document> collection)
-            throws ConnectException {
+            MongoHelper.Stat stat, Long start, Long end, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSourceWindow(subject, source, start, end, collection);
 
@@ -178,7 +177,7 @@ public abstract class MongoSensor extends MongoDataAccess {
      * @return the number of received messages within the time-window [start-end].
      */
     public double countSamplesByUserSourceWindow(String subject, String source, Long start,
-            Long end, MongoCollection<Document> collection) throws ConnectException {
+            Long end, MongoCollection<Document> collection) {
         double count = 0;
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByUserSourceWindow(subject, source, start, end, collection);
@@ -305,14 +304,13 @@ public abstract class MongoSensor extends MongoDataAccess {
 
     /**
      * Convert a {@link Document} to the corresponding
-     *      {@link org.apache.avro.specific.SpecificRecord}.
+     *      {@link org.apache.avro.specific.SpecificRecord}. This function must be override by the
+     *      subclass
      *
      * @param doc {@link Document} storing data used to create the related {@link Item}
      * @param field key of the value that has to be extracted from the {@link Document}
      * @param stat {@link DescriptiveStatistic} represented by the resulting {@link Item}
      * @param header {@link Header} used to provide the data context
-     *
-     * @implSpec this function must be override by the subclass
      *
      * @return the {@link DataFormat} related to the sensor
      */
@@ -322,10 +320,11 @@ public abstract class MongoSensor extends MongoDataAccess {
     }
 
     /**
-     * Extract the count information for the given MongoDB document.
+     * Extract the count information for the given MongoDB document. This function should be
+     * overridden by the subclass.
      * @param doc is the Bson Document from which we extract the required value to compute the
      *      count value
-     * @implSpec this function should be override by the subclass
+     *
      * @return the count value
      */
     protected int extractCount(Document doc) {

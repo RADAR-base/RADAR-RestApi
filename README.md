@@ -19,7 +19,7 @@ To deploy the war do:
 
 By default, log messages are redirected to the `STDOUT`.
 
-The api documentation is located at `<your-server-address>:<port>/radar/api/openapi.json`
+The api documentation is located at `<your-server-address>:<port>/api/openapi.json`
 
 For accessing the end-points of this API, you will need JWT tokens from the [Management Portal]
 (https://github.com/RADAR-CNS/ManagementPortal) and send it with each request in the header. In order for your token to allow access to the Rest-Api you will need to add the resource name of rest-api (ie - `res_RestApi`) in the oauth client details of the Management Portal(MP). For example, if you want a client named `dashboard` to have access to the REST API just add this line to the OAuth client credentials csv file of MP - 
@@ -29,7 +29,7 @@ dashboard;res_RestApi;my-secret-token-to-change-in-production;SUBJECT.READ,PROJE
 ```
 You can change the secret, scope, name, etc according to your needs. For more info, read the configuration in the Readme of Management Portal
 
-The Rest-api is capable of reading `bins.csv` file generated while restructuring the HDFS file system. See [hdfs_restructure.sh](https://github.com/RADAR-CNS/RADAR-Docker/tree/dev/dcompose-stack/radar-cp-hadoop-stack). This file gives a summary of records being received by the Radar Platform. An example of this file is included here in the root directory. Please place it in the `/usr/local/tomcat/bin/radar/bins.csv` for it to be readable by the RestApi. This is available at the end-point `<your-server-address>:<port>/radar/api/status/hdfs` and can be obtained as a `CSV` or `JSON` as specified by the Accept header in your request.
+The Rest-api is capable of reading `bins.csv` file generated while restructuring the HDFS file system. See [hdfs_restructure.sh](https://github.com/RADAR-CNS/RADAR-Docker/tree/dev/dcompose-stack/radar-cp-hadoop-stack). This file gives a summary of records being received by the Radar Platform. An example of this file is included here in the root directory. Please place it in the `/usr/local/tomcat/bin/radar/bins.csv` for it to be readable by the RestApi. This is available at the end-point `<your-server-address>:<port>/api/status/hdfs` and can be obtained as a `CSV` or `JSON` as specified by the Accept header in your request.
 
 ## Dev Environment
 Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json) to see documentation of dev deploy instance.

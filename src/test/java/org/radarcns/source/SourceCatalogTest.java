@@ -19,15 +19,16 @@ package org.radarcns.source;
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.config.TestCatalog.EMPATICA;
 
+import java.util.NoSuchElementException;
 import org.junit.Test;
 
 public class SourceCatalogTest {
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = NoSuchElementException.class)
     public void sourceCatalogTest() {
-        assertEquals(EMPATICA, SourceCatalog.getInstance(EMPATICA).getType());
+        assertEquals(EMPATICA, SourceCatalog.getInstance().getDefinition(EMPATICA).getType());
 
-        SourceCatalog.getInstance("PEBBLE");
+        SourceCatalog.getInstance().getDefinition("PEBBLE");
     }
 
 }

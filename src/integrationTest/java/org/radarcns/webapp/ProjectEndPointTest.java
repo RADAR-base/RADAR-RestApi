@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.webapp.util.BasePath.SUBJECTS;
+import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.managementportal.Project;
 import org.radarcns.managementportal.Subject;
 import org.radarcns.util.RadarConverter;
-import org.radarcns.webapp.util.BasePath;
+import org.radarcns.webapp.resource.BasePath;
 
 public class ProjectEndPointTest {
 
@@ -34,7 +34,7 @@ public class ProjectEndPointTest {
     public void getAllProjectsStatusTest200()
             throws IOException, URISyntaxException {
 
-        Response actual = apiClient.request(BasePath.PROJECT, APPLICATION_JSON, Status.OK);
+        Response actual = apiClient.request(BasePath.PROJECTS, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
         ObjectReader reader = RadarConverter.readerForCollection(List.class, Project.class);
         List<Project> projects = reader.readValue(actual.body().byteStream());
@@ -48,7 +48,7 @@ public class ProjectEndPointTest {
             throws IOException, ReflectiveOperationException, URISyntaxException {
 
         Response actual = apiClient
-                .request(BasePath.PROJECT + "/" + PROJECT_NAME, APPLICATION_JSON,
+                .request(BasePath.PROJECTS + "/" + PROJECT_NAME, APPLICATION_JSON,
                         Status.OK);
         assertTrue(actual.isSuccessful());
         ObjectReader reader = RadarConverter.readerFor(Project.class);
@@ -62,7 +62,7 @@ public class ProjectEndPointTest {
             throws IOException, ReflectiveOperationException, URISyntaxException {
 
         Response actual = apiClient
-                .request(BasePath.PROJECT + "/" + "SOMETHING", APPLICATION_JSON,
+                .request(BasePath.PROJECTS + "/" + "SOMETHING", APPLICATION_JSON,
                         Status.NOT_FOUND);
         assertFalse(actual.isSuccessful());
         assertEquals(actual.code(), Status.NOT_FOUND.getStatusCode());
@@ -75,7 +75,7 @@ public class ProjectEndPointTest {
             throws IOException, ReflectiveOperationException, URISyntaxException {
 
         Response actual = apiClient
-                .request(BasePath.PROJECT + "/" + PROJECT_NAME + "/" + SUBJECTS, APPLICATION_JSON,
+                .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS, APPLICATION_JSON,
                         Status.OK);
         assertTrue(actual.isSuccessful());
 

@@ -16,15 +16,19 @@
 
 package org.radarcns.webapp;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.radarcns.config.TestCatalog.BIOVOTION;
 import static org.radarcns.config.TestCatalog.EMPATICA;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
-import static org.radarcns.webapp.util.BasePath.SPECIFICATION;
-import static org.radarcns.webapp.util.BasePath.STATE;
+import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.resource.BasePath.GET_ALL_SOURCES;
+import static org.radarcns.webapp.resource.BasePath.SPECIFICATION;
+import static org.radarcns.webapp.resource.BasePath.STATE;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -57,7 +61,7 @@ import org.radarcns.restapi.source.States;
 import org.radarcns.restapi.spec.SensorSpecification;
 import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.restapi.subject.Subject;
-import org.radarcns.webapp.util.BasePath;
+import org.radarcns.webapp.resource.BasePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +69,7 @@ public class SourceEndPointTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceEndPointTest.class);
 
+    private static final String PROJECT = "radar";
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
     private static final String SOURCE_TYPE = EMPATICA;
@@ -78,11 +83,13 @@ public class SourceEndPointTest {
                     + BasePath.SOURCE + '/');
 
     @Test
-    public void getStatusTest204() throws IOException {
-        try (Response response = apiClient.request(STATE + '/' + SUBJECT + '/' + SOURCE,
-                AVRO_BINARY, Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
+    public void getStatusTest204() throws IOException, ReflectiveOperationException {
+        Source source = apiClient.requestAvro(
+                STATE + '/' + PROJECT + '/' + SUBJECT + '/' + SOURCE,
+                Source.class, Status.OK);
+        assertThat(source.getId(), is(SOURCE));
+        assertThat(source.getType(), is("UNKNOWN"));
+        assertThat(source.getSummary(), is(nullValue()));
     }
 
     @Test
@@ -93,7 +100,8 @@ public class SourceEndPointTest {
 
         MongoDataAccess.writeSourceType(SOURCE, SOURCE_TYPE, client);
 
-        Source actual = apiClient.requestAvro(STATE + '/' + SUBJECT + '/' + SOURCE,
+        Source actual = apiClient.requestAvro(
+                STATE + '/' + PROJECT + '/' + SUBJECT + '/' + SOURCE,
                 Source.class, Status.OK);
 
         assertEquals(SOURCE, actual.getId());
@@ -159,7 +167,7 @@ public class SourceEndPointTest {
     @Test
     public void getAllSourcesTest200()
             throws IOException, ReflectiveOperationException, URISyntaxException {
-        String path = BasePath.SOURCE + "/" + GET_ALL_SOURCES + "/" + SUBJECT;
+        String path = BasePath.SOURCE + '/' + PROJECT + '/' + GET_ALL_SOURCES + "/" + SUBJECT;
 
         LOGGER.info(path);
 
@@ -174,7 +182,8 @@ public class SourceEndPointTest {
         Utility.insertMixedDocs(client,
                 RandomInput.getRandomApplicationStatus(SUBJECT, SOURCE.concat("1")));
 
-        Subject actual = apiClient.requestAvro(GET_ALL_SOURCES + '/' + SUBJECT,
+        Subject actual = apiClient.requestAvro(
+                GET_ALL_SOURCES + '/' + PROJECT + '/' + SUBJECT,
                 Subject.class, Status.OK);
 
         List<Source> listSource = new ArrayList<>(actual.getSources());
@@ -197,15 +206,18 @@ public class SourceEndPointTest {
     }
 
     @Test
-    public void getAllSourcesTest204() throws IOException {
-        try (Response response = apiClient.request(
-                GET_ALL_SOURCES + "/" + SUBJECT, AVRO_BINARY, Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
+    public void getAllSourcesTestEmpty() throws IOException, ReflectiveOperationException {
+        Subject subject = apiClient.requestAvro(GET_ALL_SOURCES + '/' + PROJECT + '/' + SUBJECT,
+                Subject.class, Status.OK);
+        assertThat(subject.getSubjectId(), is(SUBJECT));
+        assertThat(subject.getSources(), is(empty()));
+        assertThat(subject.getActive(), is(false));
+        assertThat(subject.getEffectiveTimeFrame().getStartDateTime(),
+                is(subject.getEffectiveTimeFrame().getEndDateTime()));
     }
 
     @After
-    public void dropAndClose() throws URISyntaxException {
+    public void dropAndClose() {
         dropAndClose(Utility.getMongoClient());
     }
 
