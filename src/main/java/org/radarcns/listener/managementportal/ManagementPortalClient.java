@@ -276,7 +276,7 @@ public class ManagementPortalClient {
      * @throws NotFoundException if given source type is not found
      */
     public SourceType getSourceType(String producer, String model, String catalogVersion)
-            throws IOException {
+            throws IOException, NotFoundException {
         try {
             return sourceTypes.get(new SourceTypeIdentifier(producer, model, catalogVersion));
         } catch (NoSuchElementException ex) {
