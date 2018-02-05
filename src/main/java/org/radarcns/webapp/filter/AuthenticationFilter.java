@@ -1,5 +1,7 @@
 package org.radarcns.webapp.filter;
 
+import static org.radarcns.webapp.exception.UncaughtExceptionMapper.APPLICATION_JSON_UTF8;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
@@ -17,6 +19,7 @@ import org.radarcns.auth.config.YamlServerConfig;
 import org.radarcns.auth.exception.TokenValidationException;
 import org.radarcns.auth.token.RadarToken;
 import org.radarcns.config.Properties;
+import org.radarcns.webapp.exception.StatusMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +42,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             requestContext.abortWith(
                     Response.status(Status.UNAUTHORIZED)
                             .header("WWW-Authenticate", "Bearer")
+                            .header("Content-Type", APPLICATION_JSON_UTF8)
+                            .entity(new StatusMessage("token_missing",
+                                    "No bearer token provided in request."))
                             .build());
             return;
         }
@@ -51,6 +57,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             requestContext.abortWith(
                     Response.status(Status.UNAUTHORIZED)
                             .header("WWW-Authenticate", "Bearer")
+                            .header("Content-Type", APPLICATION_JSON_UTF8)
+                            .entity(new StatusMessage("token_invalid",
+                                    "Token is invalid: " + ex.getMessage()))
                             .build());
         }
     }
