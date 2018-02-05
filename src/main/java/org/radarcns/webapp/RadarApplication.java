@@ -17,7 +17,8 @@ public class RadarApplication extends ResourceConfig {
     public RadarApplication() {
         packages(
                 "org.radarcns.webapp.resource",
-                "org.radarcns.webapp.exception");
+                "org.radarcns.webapp.exception",
+                "org.radarcns.webapp.media");
 
         register(AuthenticationFilter.class);
         register(AuthorizationFeature.class);

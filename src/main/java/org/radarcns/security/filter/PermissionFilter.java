@@ -15,6 +15,9 @@ import org.radarcns.webapp.filter.AuthenticationFilter.RadarSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Check that the token has given permissions.
+ */
 public class PermissionFilter implements ContainerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(PermissionFilter.class);
 

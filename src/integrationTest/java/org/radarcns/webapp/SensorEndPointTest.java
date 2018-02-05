@@ -17,10 +17,11 @@
 package org.radarcns.webapp;
 
 import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.DATA;
 import static org.radarcns.webapp.util.BasePath.REALTIME;
 
@@ -30,7 +31,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
@@ -152,10 +152,9 @@ public class SensorEndPointTest {
     }
 
     @Test
-    public void getAllDataTest204() throws IOException {
-        try (Response response = apiClient.request(SOURCE_PATH, AVRO_BINARY, Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
+    public void getAllDataTestEmpty() throws IOException, ReflectiveOperationException {
+        Dataset dataset = apiClient.requestAvro(SOURCE_PATH, Dataset.class, Status.OK);
+        assertThat(dataset.getDataset(), is(empty()));
     }
 
     @After

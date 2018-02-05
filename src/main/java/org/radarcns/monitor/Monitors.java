@@ -35,7 +35,7 @@ public class Monitors {
     private static final Monitors INSTANCE = new Monitors();
 
     /** Constructor. **/
-    private Monitors() {
+    public Monitors() {
         hooks = new HashMap<>();
     }
 

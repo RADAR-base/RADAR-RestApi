@@ -18,8 +18,12 @@ package org.radarcns.webapp;
 
 import static java.util.function.Function.identity;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
 import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
@@ -34,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
@@ -71,11 +74,10 @@ public class SubjectEndPointTest {
                     + BasePath.SUBJECT + '/');
 
     @Test
-    public void getAllSubjectsTest204() throws IOException {
-        try (Response response = apiClient.request(GET_ALL_SUBJECTS + "/" + PROJECT, APPLICATION_JSON,
-                Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
+    public void getAllSubjectsTest204() throws IOException, ReflectiveOperationException {
+        Cohort cohort = apiClient.requestAvro(GET_ALL_SUBJECTS + "/" + PROJECT, Cohort.class,
+                Status.OK);
+        assertThat(cohort.getSubjects(), is(empty()));
     }
 
     @Test
@@ -112,11 +114,12 @@ public class SubjectEndPointTest {
     }
 
     @Test
-    public void getSubjectTest204() throws IOException {
-        try (Response response = apiClient.request(
-                GET_SUBJECT + '/' + SUBJECT, APPLICATION_JSON, Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
+    public void getSubjectTest204() throws IOException, ReflectiveOperationException {
+        Subject subject = apiClient.requestAvro(
+                PROJECT + '/' + GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
+        assertThat(subject.getActive(), is(false));
+        assertThat(subject.getSubjectId(), is(SUBJECT));
+        assertThat(subject.getSources(), is(empty()));
     }
 
     @Test
@@ -135,7 +138,7 @@ public class SubjectEndPointTest {
         collection.insertMany(randomInput);
 
         Subject actual = apiClient.requestAvro(
-                GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
+                PROJECT + '/' + GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
 
         Map<String, Sensor> sensorMap = Arrays.stream(
                 new String[] {
@@ -144,6 +147,27 @@ public class SubjectEndPointTest {
                 })
                 .collect(Collectors.toMap(identity(), s -> new Sensor(
                         s, States.DISCONNECTED, 0, 1.0)));
+
+        assertThat(actual.getSubjectId(), is(SUBJECT));
+        assertThat(actual.getActive(), is(true));
+        assertThat(actual.getEffectiveTimeFrame(),
+                is(Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput)));
+
+        List<String> sensorTypes = actual.getSources().stream()
+                .flatMap(s -> s.getSummary().getSensors().keySet().stream())
+                .collect(Collectors.toList());
+
+        assertThat(sensorTypes, hasItems("INTER_BEAT_INTERVAL", "BATTERY",
+                "HEART_RATE", "THERMOMETER", "ACCELEROMETER", "ELECTRODERMAL_ACTIVITY",
+                "BLOOD_VOLUME_PULSE"));
+
+        actual.getSources().forEach(s -> assertThat(s.getSummary().getState(),
+                either(is(States.DISCONNECTED)).or(is(States.WARNING))));
+
+        actual.getSources().stream()
+                .flatMap(s -> s.getSummary().getSensors().values().stream())
+                .forEach(s -> assertThat(s.getState(),
+                        either(is(States.DISCONNECTED)).or(is(States.WARNING))));
 
         Subject expected = new Subject(SUBJECT, true,
                 Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput),

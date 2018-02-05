@@ -12,6 +12,9 @@ import org.radarcns.auth.authorization.Permission;
 import org.radarcns.auth.token.RadarToken;
 import org.radarcns.webapp.filter.AuthenticationFilter.RadarSecurityContext;
 
+/**
+ * Check that the token has access to given project.
+ */
 public class PermissionOnProjectFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;

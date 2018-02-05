@@ -29,22 +29,20 @@ import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
-import java.net.ConnectException;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.restapi.app.Application;
-import org.radarcns.security.Param;
 import org.radarcns.security.filter.NeedsPermissionOnSubject;
-import org.radarcns.webapp.util.ResponseHandler;
+import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
  * Android application status web-app. Function set to access Android app status information.
@@ -55,6 +53,9 @@ public class AppStatusEndPoint {
     @Inject
     private MongoClient mongoClient;
 
+    @Inject
+    private ManagementPortalClient mpClient;
+
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
     //--------------------------------------------------------------------------------------------//
@@ -63,7 +64,7 @@ public class AppStatusEndPoint {
      * JSON function that returns the status app of the given subject.
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, AVRO_BINARY})
     @Path("/" + STATUS + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Return an Applications status",
             description = "The Android application periodically updates its current status")
@@ -78,51 +79,17 @@ public class AppStatusEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermissionOnSubject(entity = SOURCE, operation = READ)
-    public Response getLastReceivedAppStatusJson(
-            @PathParam(PROJECT_NAME) String projectName,
-            @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) throws IOException {
-        return ResponseHandler.getJsonResponse(
-                getLastReceivedAppStatusWorker(subjectId, sourceId));
-    }
-
-    /**
-     * AVRO function that returns the status app of the given subject.
-     */
-    @GET
-    @Produces(AVRO_BINARY)
-    @Path("/" + STATUS + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @Operation(summary = "Return an Applications status",
-            description = "The Android application periodically updates its current status")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
-    @ApiResponse(responseCode = "200", description =
-            "Return a application.avsc object containing last"
-                    + "received status")
-    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @NeedsPermissionOnSubject(entity = SOURCE, operation = READ)
-    public Response getLastReceivedAppStatusAvro(
-            @PathParam(PROJECT_NAME) String projectName,
-            @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) throws IOException {
-        return ResponseHandler.getAvroResponse(
-                getLastReceivedAppStatusWorker(subjectId, sourceId));
-    }
-
-    /**
-     * Actual implementation of AVRO and JSON getRealTimeUser.
-     **/
-    private Application getLastReceivedAppStatusWorker(String subject, String source)
-            throws ConnectException {
-        Param.isValidInput(subject, source);
-
+    public Application getLastReceivedAppStatusJson(
+            @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
+            @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
+            @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
+        mpClient.checkSubjectInProject(projectName, subjectId);
         Application application = new Application(
                 null, 0d, ServerStatus.UNKNOWN, -1, -1, -1);
 
-        if (SubjectDataAccessObject.exist(subject, mongoClient)) {
+        if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
             application = AndroidAppDataAccessObject.getInstance().getStatus(
-                    subject, source, mongoClient);
+                    subjectId, sourceId, mongoClient);
         }
 
         return application;

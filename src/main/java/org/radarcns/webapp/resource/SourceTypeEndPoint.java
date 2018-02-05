@@ -1,5 +1,6 @@
 package org.radarcns.webapp.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.SOURCETYPE;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.util.BasePath.SOURCE_TYPES;
@@ -10,17 +11,17 @@ import static org.radarcns.webapp.util.Parameter.PRODUCER;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
+import java.util.Collection;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.managementportal.SourceType;
 import org.radarcns.security.filter.NeedsPermission;
+import org.radarcns.webapp.validation.Alphanumeric;
 
 @Provider
 @Path("/" + SOURCE_TYPES)
@@ -37,7 +38,7 @@ public class SourceTypeEndPoint {
      * JSON function that returns all available source types.
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
     @Operation(summary = "Returns a list of source-types")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
@@ -45,10 +46,8 @@ public class SourceTypeEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermission(entity = SOURCETYPE, operation = READ)
-    public Response getAllSourceTypesJson() throws IOException {
-        return Response.status(Status.OK)
-                .entity(mpClient.getSourceTypes().values())
-                .build();
+    public Collection<SourceType> getAllSourceTypesJson() throws IOException {
+        return mpClient.getSourceTypes().values();
     }
 
     /**
@@ -56,7 +55,7 @@ public class SourceTypeEndPoint {
      */
     @GET
     @Path("/{" + PRODUCER + "}/{" + MODEL + "}/{" + CATALOGUE_VERSION + "}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
     @Operation(summary = "Returns a list of projects",
             description = "Each project can have multiple source-types associated with it")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
@@ -66,12 +65,10 @@ public class SourceTypeEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Source type not found")
     @NeedsPermission(entity = SOURCETYPE, operation = READ)
-    public Response getSourceTypeJson(
-            @PathParam(PRODUCER) String producer,
-            @PathParam(MODEL) String model,
-            @PathParam(CATALOGUE_VERSION) String catalogVersion) throws IOException {
-        return Response.status(Status.OK)
-                .entity(mpClient.getSourceType(producer, model, catalogVersion))
-                .build();
+    public SourceType getSourceTypeJson(
+            @Alphanumeric @PathParam(PRODUCER) String producer,
+            @Alphanumeric @PathParam(MODEL) String model,
+            @Alphanumeric @PathParam(CATALOGUE_VERSION) String catalogVersion) throws IOException {
+        return mpClient.getSourceType(producer, model, catalogVersion);
     }
 }

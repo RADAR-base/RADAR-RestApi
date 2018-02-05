@@ -16,6 +16,7 @@
 
 package org.radarcns.webapp.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SOURCES;
@@ -31,26 +32,28 @@ import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
-import java.net.ConnectException;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.monitor.Monitors;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.restapi.subject.Subject;
-import org.radarcns.security.Param;
 import org.radarcns.security.filter.NeedsPermission;
 import org.radarcns.security.filter.NeedsPermissionOnSubject;
-import org.radarcns.webapp.util.ResponseHandler;
+import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
  * SourceDefinition web-app. Function set to access source information.
@@ -61,6 +64,9 @@ public class SourceEndPoint {
     @Inject
     private MongoClient mongoClient;
 
+    @Inject
+    private ManagementPortalClient mpClient;
+
     //--------------------------------------------------------------------------------------------//
     //                                       STATE FUNCTIONS                                      //
     //--------------------------------------------------------------------------------------------//
@@ -69,7 +75,7 @@ public class SourceEndPoint {
      * JSON function that returns the status of the given source.
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("/" + STATE + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Return a SourceDefinition values",
             description = "Using the source sensors values arrived within last 60sec, it computes "
@@ -86,55 +92,26 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
-    public Response getLastComputedSourceStatusJson(
-            @PathParam(PROJECT_NAME) String projectName,
-            @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) throws IOException {
-        return ResponseHandler.getJsonResponse(
-                getLastComputedSourceStatus(subjectId, sourceId));
-    }
+    public Source getLastComputedSourceStatusJson(
+            @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
+            @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
+            @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
+        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
 
-    /**
-     * AVRO function that returns the status of the given source.
-     */
-    @GET
-    @Produces(AVRO_BINARY)
-    @Path("/" + STATE + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-    @Operation(summary = "Return a SourceDefinition values",
-            description = "Using the source sensors values arrived within last 60sec, it computes "
-                    + "the"
-                    + "sender status for the given subjectID and sourceID")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
-    @ApiResponse(responseCode = "200", description = "Return a byte array serialising source.avsc "
-            + "object"
-            + "containing last computed status")
-    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
-    @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
-    public Response getLastComputedSourceStatusAvro(
-            @PathParam(PROJECT_NAME) String projectName,
-            @PathParam(SUBJECT_ID) String subjectId,
-            @PathParam(SOURCE_ID) String sourceId) throws IOException {
-        return ResponseHandler.getAvroResponse(
-                getLastComputedSourceStatus(subjectId, sourceId));
-    }
+        String sourceType = SourceDataAccessObject.getSourceType(sourceId, mongoClient);
 
-    /**
-     * Actual implementation of AVRO and JSON getRTStateByUserDevice.
-     **/
-    private Source getLastComputedSourceStatus(String subject, String source)
-            throws ConnectException {
-        Param.isValidInput(subject, source);
+        if (sourceType != null) {
+            return Monitors.getInstance().getState(mongoClient, subjectId, sourceId, sourceType);
+        } else {
+            Optional<org.radarcns.managementportal.Source> source = sub.getSources().stream()
+                    .filter(s -> s.getSourceId().equals(sourceId))
+                    .findAny();
 
-        String sourceType = SourceDataAccessObject.getSourceType(source, mongoClient);
-
-        if (sourceType == null) {
-            return null;
+            return new Source(sourceId,
+                    source.map(s -> (s.getSourceTypeProducer() + "_" + s.getSourceTypeModel())
+                            .toUpperCase()).orElse("UNKNOWN"),
+                    null);
         }
-
-        return Monitors.getInstance().getState(mongoClient, subject, source, sourceType);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -145,7 +122,7 @@ public class SourceEndPoint {
      * JSON function that returns the specification of the given source.
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
     @Operation(summary = "Return a SourceDefinition specification",
             description = "Return the data specification of all on-board sensors for the given"
@@ -159,40 +136,15 @@ public class SourceEndPoint {
             + "containing last computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Source type not found")
     @NeedsPermission(entity = Entity.SOURCE, operation = READ)
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Response getSourceSpecificationJson(
-            @PathParam(SOURCE_TYPE) String source) throws IOException {
-        return ResponseHandler.getJsonResponse(getSourceSpecificationWorker(source));
-    }
-
-    /**
-     * AVRO function that returns the status of the given data.
-     */
-    @GET
-    @Produces(AVRO_BINARY)
-    @Path("/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
-    @Operation(summary = "Return a SourceDefinition specification",
-            description = "Return the data specification of all on-board sensors for the given"
-                    + "source type")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
-    @ApiResponse(responseCode = "200", description = "Return a source_specification.avsc object"
-            + "containing last computed status")
-    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @NeedsPermission(entity = Entity.SOURCE, operation = READ)
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Response getSourceSpecificationAvro(
-            @PathParam(SOURCE_TYPE) String source) throws IOException {
-        return ResponseHandler.getAvroResponse(getSourceSpecificationWorker(source));
-    }
-
-    /**
-     * Actual implementation of AVRO and JSON getSpecification.
-     **/
-    private SourceSpecification getSourceSpecificationWorker(String source) {
-        return Monitors.getInstance().getSpecification(source);
+    public SourceSpecification getSourceSpecificationJson(
+            @Alphanumeric @PathParam(SOURCE_TYPE) String sourceType) {
+        SourceSpecification sourceSpec = Monitors.getInstance().getSpecification(sourceType);
+        if (sourceSpec == null) {
+            throw new NotFoundException("Source type " + sourceType + " not found");
+        }
+        return sourceSpec;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -203,7 +155,7 @@ public class SourceEndPoint {
      * JSON function that returns all known sources for the given subject.
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("/" + GET_ALL_SOURCES + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}")
     @Operation(summary = "Return a User value",
             description = "Return all known sources associated with the give subjectID")
@@ -217,45 +169,17 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
-    public Response getAllSourcesJson(
-            @PathParam(PROJECT_NAME) String projectName,
-            @PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        return ResponseHandler.getJsonResponse(getAllSourcesWorker(subjectId));
-    }
-
-    /**
-     * AVRO function that returns all known sources for the given subject.
-     */
-    @GET
-    @Produces(AVRO_BINARY)
-    @Path("/" + GET_ALL_SOURCES + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}")
-    @Operation(summary = "Return a User value",
-            description = "Return all known sources associated with the give subjectID")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
-    @ApiResponse(responseCode = "200", description = "Return a subject.avsc object")
-    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
-    @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
-    public Response getAllSourcesAvro(
-            @PathParam(PROJECT_NAME) String projectName,
-            @PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        return ResponseHandler.getAvroResponse(getAllSourcesWorker(subjectId));
-    }
-
-    /**
-     * Actual implementation of AVRO and JSON getAllSources.
-     **/
-    private Subject getAllSourcesWorker(String subjectId) throws ConnectException {
-        Param.isValidSubject(subjectId);
-
-        Subject subject = new Subject();
-
+    public Subject getAllSourcesJson(
+            @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
+            @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {
+        // TODO: get sources data from MP
+        mpClient.getSubject(subjectId);
         if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
-            subject = SourceDataAccessObject.findAllSourcesByUser(subjectId, mongoClient);
+            return SourceDataAccessObject.findAllSourcesByUser(subjectId, mongoClient);
+        } else {
+            String now = Instant.now().toString();
+            return new Subject(subjectId, false, new EffectiveTimeFrame(now, now),
+                    Collections.emptyList());
         }
-
-        return subject;
     }
 }

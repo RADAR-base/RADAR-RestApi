@@ -16,6 +16,7 @@
 
 package org.radarcns.webapp.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
@@ -28,23 +29,23 @@ import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
-import java.net.ConnectException;
+import java.time.Instant;
+import java.util.Collections;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
-import org.radarcns.security.Param;
 import org.radarcns.security.filter.NeedsPermissionOnProject;
 import org.radarcns.security.filter.NeedsPermissionOnSubject;
-import org.radarcns.webapp.util.ResponseHandler;
+import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
  * Subject web-app. Function set to access subject information. A subject is a person enrolled for
@@ -56,6 +57,9 @@ public class SubjectEndPoint {
     @Inject
     private MongoClient mongoClient;
 
+    @Inject
+    private ManagementPortalClient mpClient;
+
     //--------------------------------------------------------------------------------------------//
     //                                        ALL SUBJECTS                                        //
     //--------------------------------------------------------------------------------------------//
@@ -64,7 +68,7 @@ public class SubjectEndPoint {
      * JSON function that returns all available subject.
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("/" + GET_ALL_SUBJECTS + "/{" + PROJECT_NAME + "}")
     @Operation(summary = "Return a list of subjects",
             description = "Each subject can have multiple sourceID associated with him")
@@ -77,33 +81,9 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermissionOnProject(entity = Entity.SUBJECT, operation = READ)
-    public Response getAllSubjectsJson(@PathParam(PROJECT_NAME) String study) throws IOException {
-        return ResponseHandler.getJsonResponse(getAllSubjectsWorker());
-    }
-
-    /**
-     * AVRO function that returns all available subject.
-     */
-    @GET
-    @Produces(AVRO_BINARY)
-    @Path("/" + GET_ALL_SUBJECTS + "/{" + PROJECT_NAME + "}")
-    @Operation(summary = "Return a list of subjects",
-            description = "Each subject can have multiple sourceID associated with him")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters")
-    @ApiResponse(responseCode = "200", description = "Return a byte array serialising a list of"
-            + "subject.avsc objects")
-    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @NeedsPermissionOnProject(entity = Entity.SUBJECT, operation = READ)
-    public Response getAllSubjectsAvro(@PathParam(PROJECT_NAME) String study) throws IOException {
-        return ResponseHandler.getAvroResponse(getAllSubjectsWorker());
-    }
-
-    /**
-     * Actual implementation of AVRO and JSON getAllSubjects.
-     **/
-    private Cohort getAllSubjectsWorker() throws ConnectException {
+    public Cohort getAllSubjectsJson(
+            @Alphanumeric @PathParam(PROJECT_NAME) String study) throws IOException {
+        // TODO: actually use the current study
         return SubjectDataAccessObject.getAllSubjects(mongoClient);
     }
 
@@ -115,7 +95,7 @@ public class SubjectEndPoint {
      * JSON function that returns all information related to the given subject identifier.
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("{" + PROJECT_NAME + "}/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
     @Operation(summary = "Return the information related to given subject identifier",
             description = "Some information are not implemented yet. The returned values are "
@@ -132,53 +112,16 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SUBJECT, operation = READ)
-    public Response getSubjectJson(
-            @PathParam(PROJECT_NAME) String projectName,
-            @PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        return ResponseHandler.getJsonResponse(getSubjectWorker(subjectId));
-    }
-
-    /**
-     * AVRO function that returns all information related to the given subject identifier.
-     */
-    @GET
-    @Produces(AVRO_BINARY)
-    @Path("{" + PROJECT_NAME + "}/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
-    @Operation(
-            summary = "Return the information related to given subject identifier",
-            description = "Some information are not implemented yet. The returned values are "
-                    + "hardcoded.")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description =
-            "No value for the given parameters, in the body"
-                    + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description =
-            "Return the subject.avsc object associated with the "
-                    + "given subject identifier")
-    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
-    @NeedsPermissionOnProject(entity = Entity.SUBJECT, operation = READ)
-    public Response getSubjectAvro(
-            @PathParam(PROJECT_NAME) String projectName,
-            @PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        return ResponseHandler.getAvroResponse(getSubjectWorker(subjectId));
-    }
-
-    /**
-     * Actual implementation of AVRO and JSON getSubject.
-     **/
-    private Subject getSubjectWorker(String subjectId) throws ConnectException {
-        Param.isValidSubject(subjectId);
-
-        Subject subject = new Subject();
-
+    public Subject getSubjectJson(
+            @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
+            @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {
+        mpClient.getSubject(subjectId);
         if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
-            subject = SubjectDataAccessObject.getSubject(subjectId, mongoClient);
+            return SubjectDataAccessObject.getSubject(subjectId, mongoClient);
+        } else {
+            String now = Instant.now().toString();
+            return new Subject(subjectId, false, new EffectiveTimeFrame(now, now),
+                    Collections.emptyList());
         }
-
-        return subject;
     }
-
 }

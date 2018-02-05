@@ -16,6 +16,10 @@
 
 package org.radarcns.webapp;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.radarcns.config.TestCatalog.BIOVOTION;
@@ -79,12 +83,13 @@ public class SourceEndPointTest {
                     + BasePath.SOURCE + '/');
 
     @Test
-    public void getStatusTest204() throws IOException {
-        try (Response response = apiClient.request(
+    public void getStatusTest204() throws IOException, ReflectiveOperationException {
+        Source source = apiClient.requestAvro(
                 STATE + '/' + PROJECT + '/' + SUBJECT + '/' + SOURCE,
-                AVRO_BINARY, Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
+                Source.class, Status.OK);
+        assertThat(source.getId(), is(SOURCE));
+        assertThat(source.getType(), is("UNKNOWN"));
+        assertThat(source.getSummary(), is(nullValue()));
     }
 
     @Test
@@ -201,12 +206,14 @@ public class SourceEndPointTest {
     }
 
     @Test
-    public void getAllSourcesTest204() throws IOException {
-        try (Response response = apiClient.request(
-                GET_ALL_SOURCES + '/' + PROJECT + '/' + SUBJECT,
-                AVRO_BINARY, Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
+    public void getAllSourcesTestEmpty() throws IOException, ReflectiveOperationException {
+        Subject subject = apiClient.requestAvro(GET_ALL_SOURCES + '/' + PROJECT + '/' + SUBJECT,
+                Subject.class, Status.OK);
+        assertThat(subject.getSubjectId(), is(SUBJECT));
+        assertThat(subject.getSources(), is(empty()));
+        assertThat(subject.getActive(), is(false));
+        assertThat(subject.getEffectiveTimeFrame().getStartDateTime(),
+                is(subject.getEffectiveTimeFrame().getEndDateTime()));
     }
 
     @After

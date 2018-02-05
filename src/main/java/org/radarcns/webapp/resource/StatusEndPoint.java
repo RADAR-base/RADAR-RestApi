@@ -12,7 +12,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import org.radarcns.config.Properties;
 import org.radarcns.security.filter.NeedsPermission;
@@ -38,12 +37,11 @@ public class StatusEndPoint {
             @ApiResponse(responseCode = "401", description = "Access denied error occurred"),
             @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")})
     @NeedsPermission(entity = MEASUREMENT, operation = READ)
-    public Response getJsonData() throws IOException {
+    public HdfsBinsData getJsonData() throws IOException {
         String hdfsPath = Properties.getApiConfig().getHdfsOutputDir();
         if (hdfsPath == null) {
             throw new IllegalStateException("The HDFS output directory was not configured.");
         }
-        HdfsBinsData data = HdfsBinsData.parse(Paths.get(hdfsPath).resolve("bins.csv"));
-        return Response.status(Response.Status.OK).entity(data).build();
+        return HdfsBinsData.parse(Paths.get(hdfsPath).resolve("bins.csv"));
     }
 }

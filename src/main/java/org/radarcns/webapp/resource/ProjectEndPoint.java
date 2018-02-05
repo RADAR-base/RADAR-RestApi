@@ -10,16 +10,18 @@ import static org.radarcns.webapp.util.Parameter.PROJECT_NAME;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.managementportal.Project;
+import org.radarcns.managementportal.Subject;
 import org.radarcns.security.filter.NeedsPermission;
 import org.radarcns.security.filter.NeedsPermissionOnProject;
 
@@ -46,10 +48,8 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermission(entity = PROJECT, operation = READ)
-    public Response getAllProjectsJson() throws IOException {
-        return Response.status(Status.OK)
-                .entity(mpClient.getProjects().values())
-                .build();
+    public Collection<Project> getAllProjectsJson() throws IOException {
+        return mpClient.getProjects().values();
     }
 
     /**
@@ -71,11 +71,9 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermission(entity = PROJECT, operation = READ)
-    public Response getProjectJson(
+    public Project getProjectJson(
             @PathParam(PROJECT_NAME) String projectName) throws IOException {
-        return Response.status(Status.OK)
-                .entity(mpClient.getProject(projectName))
-                .build();
+        return mpClient.getProject(projectName);
     }
 
 
@@ -96,10 +94,8 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermissionOnProject(entity = SUBJECT, operation = READ)
-    public Response getAllSubjectsJsonFromStudy(
+    public List<Subject> getAllSubjectsJsonFromStudy(
             @PathParam(PROJECT_NAME) String projectName) throws IOException {
-        return Response.status(Status.OK)
-                .entity(mpClient.getAllSubjectsFromProject(projectName))
-                .build();
+        return mpClient.getAllSubjectsFromProject(projectName);
     }
 }

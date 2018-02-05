@@ -25,16 +25,16 @@ import static org.radarcns.webapp.util.Parameter.SUBJECT_ID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
+import java.util.Collection;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.managementportal.Subject;
 import org.radarcns.security.filter.NeedsPermission;
 import org.radarcns.security.filter.NeedsPermissionOnSubject;
 
@@ -69,10 +69,8 @@ public class ManagementPortalEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermission(entity = SUBJECT, operation = READ)
-    public Response getAllSubjectsJson() throws IOException {
-        return Response.status(Status.OK)
-                .entity(mpClient.getSubjects().values())
-                .build();
+    public Collection<Subject> getAllSubjectsJson() throws IOException {
+        return mpClient.getSubjects().values();
     }
 
     /**
@@ -95,11 +93,9 @@ public class ManagementPortalEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found")
     @NeedsPermissionOnSubject(entity = SUBJECT, operation = READ)
-    public Response getSubjectJson(
+    public Subject getSubjectJson(
             @PathParam(PROJECT_NAME) String projectName,
             @PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        return Response.status(Status.OK)
-                .entity(mpClient.getSubject(subjectId))
-                .build();
+        return mpClient.getSubject(subjectId);
     }
 }
