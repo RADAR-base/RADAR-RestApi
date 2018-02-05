@@ -30,8 +30,8 @@ public class IOExceptionMapper extends IOException implements ExceptionMapper<IO
         logger.error("[500] {} - {}: {}", uri.getAbsolutePath(),
                 exception.getClass(), exception.getMessage());
 
-        return UncaughtExceptionMapper.jsonStatus(headers.getMediaType(), Status.INTERNAL_SERVER_ERROR,
-                "temporary_server_error",
+        return UncaughtExceptionMapper.jsonStatus(headers.getMediaType(),
+                Status.INTERNAL_SERVER_ERROR, "temporary_server_error",
                 exception.getClass() + ": " + exception.getMessage() + ".")
                 .build();
     }

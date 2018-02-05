@@ -41,10 +41,15 @@ public class SourceCatalog {
         return INSTANCE;
     }
 
+    /** Default constructor. */
     public SourceCatalog() {
         this(Properties.getDeviceCatalog());
     }
 
+    /**
+     * Constructor with device catalog.
+     * @param catalog device catalog.
+     */
     public SourceCatalog(DeviceCatalog catalog) {
         sourceCatalog = new HashMap<>();
         supportedSensor = new HashSet<>();

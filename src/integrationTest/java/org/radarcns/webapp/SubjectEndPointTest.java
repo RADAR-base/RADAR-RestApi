@@ -16,7 +16,6 @@
 
 package org.radarcns.webapp;
 
-import static java.util.function.Function.identity;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
@@ -32,10 +31,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
@@ -50,9 +46,7 @@ import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.restapi.source.Sensor;
 import org.radarcns.restapi.source.Source;
-import org.radarcns.restapi.source.SourceSummary;
 import org.radarcns.restapi.source.States;
 import org.radarcns.restapi.subject.Cohort;
 import org.radarcns.restapi.subject.Subject;
@@ -140,14 +134,6 @@ public class SubjectEndPointTest {
         Subject actual = apiClient.requestAvro(
                 PROJECT + '/' + GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
 
-        Map<String, Sensor> sensorMap = Arrays.stream(
-                new String[] {
-                        "INTER_BEAT_INTERVAL", "BATTERY", "HEART_RATE", "THERMOMETER",
-                        "ACCELEROMETER", "ELECTRODERMAL_ACTIVITY", "BLOOD_VOLUME_PULSE"
-                })
-                .collect(Collectors.toMap(identity(), s -> new Sensor(
-                        s, States.DISCONNECTED, 0, 1.0)));
-
         assertThat(actual.getSubjectId(), is(SUBJECT));
         assertThat(actual.getActive(), is(true));
         assertThat(actual.getEffectiveTimeFrame(),
@@ -168,13 +154,6 @@ public class SubjectEndPointTest {
                 .flatMap(s -> s.getSummary().getSensors().values().stream())
                 .forEach(s -> assertThat(s.getState(),
                         either(is(States.DISCONNECTED)).or(is(States.WARNING))));
-
-        Subject expected = new Subject(SUBJECT, true,
-                Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput),
-                Collections.singletonList(new Source(SOURCE, SOURCE_TYPE, new SourceSummary(
-                        States.DISCONNECTED, 0, 1.0, sensorMap))));
-
-        assertEquals(expected, actual);
 
         dropAndClose(client);
     }

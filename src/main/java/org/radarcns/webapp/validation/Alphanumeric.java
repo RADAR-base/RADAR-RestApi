@@ -9,6 +9,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.validation.Constraint;
 
+/**
+ * Indicates that a given String should be alphanumeric plus allowed symbols {@code -_./:#@}.
+ */
 @Target({ METHOD, FIELD, PARAMETER })
 @Retention(RUNTIME)
 @Constraint(validatedBy = AlphanumericValidator.class)

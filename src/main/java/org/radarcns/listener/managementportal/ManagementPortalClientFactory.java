@@ -17,7 +17,6 @@
 package org.radarcns.listener.managementportal;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Duration;
 import javax.inject.Inject;
 import okhttp3.OkHttpClient;
@@ -37,36 +36,30 @@ public class ManagementPortalClientFactory implements Factory<ManagementPortalCl
     private static final Logger logger = LoggerFactory
             .getLogger(ManagementPortalClientFactory.class);
 
-    private final URL url;
-    private final String clientId;
-    private final String clientSecret;
-
-    @Inject
-    private OkHttpClient httpClient;
     private ManagementPortalClient mpClient;
     private OAuth2Client oauthClient;
 
-    public ManagementPortalClientFactory() {
+    /**
+     * Default constructor.
+     */
+    @Inject
+    public ManagementPortalClientFactory(OkHttpClient httpClient) {
+        mpClient = new ManagementPortalClient(httpClient);
+
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         try {
-            url = new URL(config.getManagementPortalUrl(), config.getTokenEndpoint());
+            oauthClient = new OAuth2Client.Builder()
+                    .endpoint(config.getManagementPortalUrl(), config.getTokenEndpoint())
+                    .credentials(config.getOauthClientId(), config.getOauthClientSecret())
+                    .httpClient(httpClient)
+                    .build();
         } catch (MalformedURLException ex) {
             throw new IllegalStateException(ex);
         }
-        clientId = config.getOauthClientId();
-        clientSecret = config.getOauthClientSecret();
     }
 
     @Override
     public synchronized ManagementPortalClient provide() {
-        if (mpClient == null) {
-            mpClient = new ManagementPortalClient(httpClient);
-            oauthClient = new OAuth2Client.Builder()
-                    .endpoint(url)
-                    .credentials(clientId, clientSecret)
-                    .httpClient(httpClient)
-                    .build();
-        }
         try {
             mpClient.updateToken(oauthClient.getValidToken(Duration.ofSeconds(30)));
             return mpClient;

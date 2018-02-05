@@ -1,5 +1,3 @@
-package org.radarcns.webapp.util;
-
 /*
  *  Copyright 2017 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.webapp.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.webapp.util;
 
 /**
  * Static class listing End Point parameter.

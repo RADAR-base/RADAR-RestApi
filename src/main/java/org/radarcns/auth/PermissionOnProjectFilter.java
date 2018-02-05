@@ -10,7 +10,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import org.radarcns.auth.authorization.Permission;
 import org.radarcns.auth.token.RadarToken;
-import org.radarcns.webapp.filter.AuthenticationFilter.RadarSecurityContext;
 
 /**
  * Check that the token has access to given project.

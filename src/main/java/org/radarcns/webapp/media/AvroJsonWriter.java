@@ -16,6 +16,7 @@ import javax.ws.rs.ext.Provider;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.util.RadarConverter;
 
+/** Converts Avro SpecificRecord objects to plain JSON format. */
 @Provider
 @Produces(APPLICATION_JSON)
 @Singleton

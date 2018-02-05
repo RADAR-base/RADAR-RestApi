@@ -19,6 +19,7 @@ import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecord;
 import org.glassfish.jersey.internal.inject.PerThread;
 
+/** Converts Avro SpecificRecord objects to binary avro format. */
 @Provider
 @Produces(AVRO_BINARY)
 @PerThread
@@ -31,6 +32,7 @@ public class AvroBinaryWriter implements MessageBodyWriter<SpecificRecord> {
         return SpecificRecord.class.isAssignableFrom(type);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void writeTo(SpecificRecord record, Class<?> type, Type genericType,
             Annotation[] annotations, MediaType mediaType,
@@ -39,7 +41,6 @@ public class AvroBinaryWriter implements MessageBodyWriter<SpecificRecord> {
         DatumWriter writer = new SpecificDatumWriter(record.getSchema());
         encoder = EncoderFactory.get().binaryEncoder(entityStream, encoder);
 
-        //noinspection unchecked
         writer.write(record, encoder);
 
         encoder.flush();

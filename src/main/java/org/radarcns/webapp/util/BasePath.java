@@ -22,7 +22,6 @@ package org.radarcns.webapp.util;
 public interface BasePath {
 
     String ANDROID = "android";
-    String AVRO = "avro";
     String DATA = "data";
     String GET_ALL_SOURCES = "getAllSources";
     String GET_ALL_SUBJECTS = "getAllSubjects";

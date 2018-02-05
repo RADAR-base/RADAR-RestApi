@@ -83,8 +83,8 @@ public class SourceDataAccessObject {
 
         for (Source source : sources) {
             try {
-                updatedSources.add(monitor.getState(client, subject, source.getId(), source.getType()
-                ));
+                updatedSources.add(monitor.getState(client, subject, source.getId(),
+                        source.getType()));
             } catch (NoSuchElementException ex) {
                 updatedSources.add(source);
             }

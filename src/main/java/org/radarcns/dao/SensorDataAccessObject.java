@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.ServletContext;
 import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.catalogue.Unit;
 import org.radarcns.dao.mongo.data.sensor.DataFormat;
@@ -163,8 +162,7 @@ public class SensorDataAccessObject {
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
      * @param sensorType is the required sensor type
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
+     * @param client mongo client
      * @return data dataset for the given subject and source within the start and end time window,
      *      otherwise empty dataset
      *

@@ -12,8 +12,14 @@ import org.radarcns.listener.managementportal.ManagementPortalClientFactory;
 import org.radarcns.webapp.filter.AuthenticationFilter;
 import org.radarcns.webapp.filter.AuthorizationFeature;
 
+/**
+ * Radar application configuration.
+ *
+ * @implNote replaces previous {@code web.xml}.
+ */
 public class RadarApplication extends ResourceConfig {
 
+    /** Radar application configuration. */
     public RadarApplication() {
         packages(
                 "org.radarcns.webapp.resource",

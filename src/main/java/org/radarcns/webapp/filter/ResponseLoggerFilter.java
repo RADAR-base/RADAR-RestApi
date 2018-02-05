@@ -7,6 +7,7 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Logs all successful responses using debug log level. */
 @Provider
 public class ResponseLoggerFilter implements ContainerResponseFilter {
     private static final Logger logger = LoggerFactory.getLogger(ResponseLoggerFilter.class);

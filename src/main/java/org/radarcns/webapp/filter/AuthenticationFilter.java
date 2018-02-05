@@ -2,8 +2,6 @@ package org.radarcns.webapp.filter;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.Principal;
-import java.util.Collections;
 import java.util.Locale;
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -11,8 +9,8 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
+import org.radarcns.auth.RadarSecurityContext;
 import org.radarcns.auth.authentication.TokenValidator;
 import org.radarcns.auth.config.ServerConfig;
 import org.radarcns.auth.config.YamlServerConfig;
@@ -22,6 +20,10 @@ import org.radarcns.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Checks the presence and validity of a Management Portal JWT. Will return a 401 HTTP status code
+ * otherwise.
+ */
 @Provider
 @Priority(1000)
 public class AuthenticationFilter implements ContainerRequestFilter {
@@ -86,40 +88,5 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
         // Extract the token from the HTTP Authorization header
         return authorizationHeader.substring("Bearer".length()).trim();
-    }
-
-    public static class RadarSecurityContext implements SecurityContext {
-        private final RadarToken token;
-
-        public RadarSecurityContext(RadarToken token) {
-            this.token = token;
-        }
-
-        @Override
-        public Principal getUserPrincipal() {
-            return token::getSubject;
-        }
-
-        @Override
-        public boolean isUserInRole(String role) {
-            String[] projectRole = role.split(":");
-            return projectRole.length == 2 && token.getRoles()
-                    .getOrDefault(projectRole[0], Collections.emptyList())
-                    .contains(projectRole[1]);
-        }
-
-        @Override
-        public boolean isSecure() {
-            return true;
-        }
-
-        @Override
-        public String getAuthenticationScheme() {
-            return "JWT";
-        }
-
-        public RadarToken getToken() {
-            return token;
-        }
     }
 }

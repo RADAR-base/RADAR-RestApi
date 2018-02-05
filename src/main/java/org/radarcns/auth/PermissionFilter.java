@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response.Status;
 import org.radarcns.auth.authorization.Permission;
 import org.radarcns.auth.token.RadarToken;
 import org.radarcns.webapp.exception.StatusMessage;
-import org.radarcns.webapp.filter.AuthenticationFilter.RadarSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
