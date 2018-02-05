@@ -15,7 +15,7 @@ import org.radarcns.webapp.filter.AuthorizationFeature;
 /**
  * Radar application configuration.
  *
- * Replaces previous {@code web.xml}.
+ * <p>Replaces previous {@code web.xml}.
  */
 public class RadarApplication extends ResourceConfig {
 

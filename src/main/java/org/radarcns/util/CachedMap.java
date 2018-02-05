@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Map that caches the result of a list for a limited time.
  *
- * This class is thread-safe if given retriever and key extractors are thread-safe.
+ * <p>This class is thread-safe if given retriever and key extractors are thread-safe.
  */
 public class CachedMap<S, T> {
     private final ThrowingSupplier<? extends Collection<T>> retriever;
