@@ -83,9 +83,6 @@ public class SourceEndPoint {
                     + "sender status for the given subjectID and sourceID")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
-            + "body"
-            + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a source.avsc object containing last"
             + "computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
@@ -129,9 +126,6 @@ public class SourceEndPoint {
                     + "source type")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
-            + "body"
-            + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a source_specification.avsc object"
             + "containing last computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
@@ -160,9 +154,6 @@ public class SourceEndPoint {
     @Operation(summary = "Return a User value",
             description = "Return all known sources associated with the give subjectID")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
-            + "body"
             + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a subject.avsc object")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")

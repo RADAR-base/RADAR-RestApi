@@ -92,8 +92,6 @@ public class SensorEndPoint {
                     + "time-frame resolutions. The response is formatted in JSON.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body "
             + "there is a message.avsc object with more details.")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
-            + "body there is a message.avsc object with more details.")
     @ApiResponse(responseCode = "200", description =
             "Returns a dataset.avsc object containing last "
                     + "computed sample for the given inputs formatted either Acceleration.avsc or "
@@ -150,9 +148,6 @@ public class SensorEndPoint {
                     + "time-frame resolutions. The response is formatted in JSON.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body "
             + "there is a message.avsc object with more details.")
-    @ApiResponse(responseCode = "204", description =
-            "No value for the given parameters, in the body "
-                    + "there is a message.avsc object with more details.")
     @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing all "
             + "available samples for the given inputs formatted either Acceleration.avsc or "
             + "DoubleValue.avsc")
@@ -207,9 +202,6 @@ public class SensorEndPoint {
                     + "[start - end]. Data can be queried using different time-frame resolutions. "
                     + "The response is formatted in JSON.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body "
-            + "there is a message.avsc object with more details.")
-    @ApiResponse(responseCode = "204", description = "No value for the given parameters, in the "
-            + "body "
             + "there is a message.avsc object with more details.")
     @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing "
             + "samples "

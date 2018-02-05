@@ -62,9 +62,6 @@ public class ManagementPortalEndPoint {
             description = "Each subject can have multiple sourceID associated with him")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description =
-            "No value for the given parameters, in the body"
-                    + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
@@ -83,9 +80,6 @@ public class ManagementPortalEndPoint {
             description = "Source infomation not present right now")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description =
-            "No value for the given parameters, in the body"
-                    + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description =
             "Return the subject.avsc object associated with the "
                     + "given subject identifier")

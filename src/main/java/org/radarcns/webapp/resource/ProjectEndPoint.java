@@ -70,6 +70,7 @@ public class ProjectEndPoint {
                     + "given project identifier")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Project not found")
     @NeedsPermission(entity = PROJECT, operation = READ)
     public Project getProjectJson(
             @PathParam(PROJECT_NAME) String projectName) throws IOException {
@@ -93,6 +94,7 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "200", description = "Return a list of subjects objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Project not found")
     @NeedsPermissionOnProject(entity = SUBJECT, operation = READ)
     public List<Subject> getAllSubjectsJsonFromStudy(
             @PathParam(PROJECT_NAME) String projectName) throws IOException {

@@ -31,8 +31,6 @@ public class StatusEndPoint {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "500", description = "An error occurs while executing, "
                     + "in the body there is a message.avsc object with more details"),
-            @ApiResponse(responseCode = "204", description = "No value for the given parameters, "
-                    + "in the body there is a message.avsc object with more details"),
             @ApiResponse(responseCode = "200", description = "Return a list of summary of records"),
             @ApiResponse(responseCode = "401", description = "Access denied error occurred"),
             @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")})

@@ -74,16 +74,16 @@ public class SubjectEndPoint {
             description = "Each subject can have multiple sourceID associated with him")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description =
-            "No value for the given parameters, in the body"
-                    + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Project not found.")
     @NeedsPermissionOnProject(entity = Entity.SUBJECT, operation = READ)
     public Cohort getAllSubjectsJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String study) throws IOException {
         // TODO: actually use the current study
+        // throws on not found
+        mpClient.getProject(study);
         return SubjectDataAccessObject.getAllSubjects(mongoClient);
     }
 
@@ -102,9 +102,6 @@ public class SubjectEndPoint {
                     + "hardcoded.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "204", description =
-            "No value for the given parameters, in the body"
-                    + "there is a message.avsc object with more details")
     @ApiResponse(responseCode = "200", description =
             "Return the subject.avsc object associated with the "
                     + "given subject identifier")
@@ -115,6 +112,8 @@ public class SubjectEndPoint {
     public Subject getSubjectJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {
+        // check that the project and subject exist
+        mpClient.getProject(projectName);
         mpClient.getSubject(subjectId);
         if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
             return SubjectDataAccessObject.getSubject(subjectId, mongoClient);
