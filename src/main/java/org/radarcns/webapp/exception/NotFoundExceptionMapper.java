@@ -8,10 +8,12 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import org.radarcns.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Handles NotFoundException with HTTP status code 404, a JSON error body and a log statement.
+ */
 @Provider
 public class NotFoundExceptionMapper extends NotFoundException
         implements ExceptionMapper<NotFoundException> {
@@ -27,7 +29,7 @@ public class NotFoundExceptionMapper extends NotFoundException
     public Response toResponse(NotFoundException exception) {
         logger.warn("[404] {}", uri.getAbsolutePath());
 
-        return ResponseHandler.jsonStatus(headers.getMediaType(), Status.NOT_FOUND,
+        return UncaughtExceptionMapper.jsonStatus(headers.getMediaType(), Status.NOT_FOUND,
                 "not_found", exception.getMessage() + ".")
                 .build();
     }
