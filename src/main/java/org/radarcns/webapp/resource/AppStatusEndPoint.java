@@ -36,12 +36,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.Provider;
+import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.restapi.app.Application;
-import org.radarcns.security.filter.NeedsPermissionOnSubject;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**

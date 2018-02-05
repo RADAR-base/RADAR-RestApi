@@ -33,10 +33,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.Provider;
+import org.radarcns.auth.NeedsPermission;
+import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.managementportal.Subject;
-import org.radarcns.security.filter.NeedsPermission;
-import org.radarcns.security.filter.NeedsPermissionOnSubject;
 
 /**
  * Management Portal web-app. Function set to access subject and source information from MP. A

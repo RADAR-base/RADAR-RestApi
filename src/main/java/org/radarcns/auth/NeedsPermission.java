@@ -1,4 +1,4 @@
-package org.radarcns.security.filter;
+package org.radarcns.auth;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

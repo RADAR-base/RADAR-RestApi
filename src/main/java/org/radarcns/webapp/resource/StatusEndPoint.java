@@ -13,8 +13,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.Provider;
+import org.radarcns.auth.NeedsPermission;
 import org.radarcns.config.Properties;
-import org.radarcns.security.filter.NeedsPermission;
 import org.radarcns.status.hdfs.HdfsBinsData;
 
 @Provider

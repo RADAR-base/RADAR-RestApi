@@ -5,12 +5,12 @@ import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
-import org.radarcns.security.filter.NeedsPermission;
-import org.radarcns.security.filter.NeedsPermissionOnProject;
-import org.radarcns.security.filter.NeedsPermissionOnSubject;
-import org.radarcns.security.filter.PermissionFilter;
-import org.radarcns.security.filter.PermissionOnProjectFilter;
-import org.radarcns.security.filter.PermissionOnSubjectFilter;
+import org.radarcns.auth.NeedsPermission;
+import org.radarcns.auth.NeedsPermissionOnProject;
+import org.radarcns.auth.NeedsPermissionOnSubject;
+import org.radarcns.auth.PermissionFilter;
+import org.radarcns.auth.PermissionOnProjectFilter;
+import org.radarcns.auth.PermissionOnSubjectFilter;
 
 @Provider
 public class AuthorizationFeature implements DynamicFeature {

@@ -1,6 +1,6 @@
-package org.radarcns.security.filter;
+package org.radarcns.auth;
 
-import static org.radarcns.security.filter.PermissionFilter.abortWithForbidden;
+import static org.radarcns.auth.PermissionFilter.abortWithForbidden;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;

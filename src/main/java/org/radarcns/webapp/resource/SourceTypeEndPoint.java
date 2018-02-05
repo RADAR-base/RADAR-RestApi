@@ -18,9 +18,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ext.Provider;
+import org.radarcns.auth.NeedsPermission;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.managementportal.SourceType;
-import org.radarcns.security.filter.NeedsPermission;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 @Provider

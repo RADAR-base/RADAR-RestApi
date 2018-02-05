@@ -41,7 +41,6 @@ import org.radarcns.dao.mongo.util.MongoHelper.Stat;
 import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.restapi.header.DescriptiveStatistic;
 import org.radarcns.restapi.header.Header;
-import org.radarcns.security.Param;
 import org.radarcns.source.SourceCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,18 +173,12 @@ public final class RadarConverter {
      * Converts the input String in Server Status.
      **/
     public static ServerStatus getServerStatus(String value) {
-        if (Param.isNullOrEmpty(value)) {
+        if (value == null) {
             return ServerStatus.UNKNOWN;
         }
-
-        String temp = value.toUpperCase();
-        if (temp.equals(ServerStatus.CONNECTED.toString())) {
-            return ServerStatus.CONNECTED;
-        } else if (temp.equals(ServerStatus.DISCONNECTED.toString())) {
-            return ServerStatus.DISCONNECTED;
-        } else if (temp.equals(ServerStatus.UNKNOWN.toString())) {
-            return ServerStatus.UNKNOWN;
-        } else {
+        try {
+            return ServerStatus.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException ex) {
             logger.warn("Unsupported ServerStatus. Value is {}", value);
             return ServerStatus.UNKNOWN;
         }

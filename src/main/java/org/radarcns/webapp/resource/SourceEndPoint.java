@@ -42,6 +42,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ext.Provider;
+import org.radarcns.auth.NeedsPermission;
+import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
@@ -51,8 +53,6 @@ import org.radarcns.restapi.header.EffectiveTimeFrame;
 import org.radarcns.restapi.source.Source;
 import org.radarcns.restapi.spec.SourceSpecification;
 import org.radarcns.restapi.subject.Subject;
-import org.radarcns.security.filter.NeedsPermission;
-import org.radarcns.security.filter.NeedsPermissionOnSubject;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**

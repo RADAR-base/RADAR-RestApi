@@ -1,4 +1,4 @@
-package org.radarcns.security.filter;
+package org.radarcns.auth;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
