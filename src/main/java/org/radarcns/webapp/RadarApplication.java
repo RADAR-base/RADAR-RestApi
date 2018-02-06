@@ -72,11 +72,11 @@ public class RadarApplication extends ResourceConfig {
                         .in(Singleton.class);
 
                 bind(SubjectService.class)
-                        .to(SourceMonitorService.class)
+                        .to(SubjectService.class)
                         .in(Singleton.class);
 
                 bind(SourceService.class)
-                        .to(SourceMonitorService.class)
+                        .to(SourceService.class)
                         .in(Singleton.class);
             }
         });
