@@ -26,7 +26,9 @@ public class SubjectService {
         this.sourceService = sourceService;
     }
 
-    public static boolean checkSourceAssignedToSubject(Subject subject, String sourceId) {
+    public boolean checkSourceAssignedToSubject(String subjectId, String sourceId) throws
+            IOException {
+        Subject subject = managementPortalClient.getSubject(subjectId);
         if (subject.getSources().stream().filter(p -> p.getSourceId().equals(sourceId))
                 .collect(Collectors.toList()).isEmpty()) {
             LOGGER.error("Cannot find source-id " + sourceId + "for subject" + subject.getId());

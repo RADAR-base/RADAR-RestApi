@@ -179,6 +179,8 @@ public class ManagementPortalClient {
         }
     }
 
+
+
     /**
      * Retrieves all {@link Subject} from a study (or project) in the Management Portal using {@link
      * ServletContext} entity.
