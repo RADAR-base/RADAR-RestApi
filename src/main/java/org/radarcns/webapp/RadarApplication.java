@@ -13,6 +13,9 @@ import org.radarcns.listener.HttpClientFactory;
 import org.radarcns.listener.MongoFactory;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientFactory;
+import org.radarcns.service.SourceMonitorService;
+import org.radarcns.service.SourceService;
+import org.radarcns.service.SubjectService;
 import org.radarcns.webapp.filter.AuthenticationFilter;
 import org.radarcns.webapp.filter.AuthorizationFeature;
 
@@ -62,6 +65,18 @@ public class RadarApplication extends ResourceConfig {
 
                 bind(SubjectDataAccessObject.class)
                         .to(SubjectDataAccessObject.class)
+                        .in(Singleton.class);
+
+                bind(SourceMonitorService.class)
+                        .to(SourceMonitorService.class)
+                        .in(Singleton.class);
+
+                bind(SubjectService.class)
+                        .to(SourceMonitorService.class)
+                        .in(Singleton.class);
+
+                bind(SourceService.class)
+                        .to(SourceMonitorService.class)
                         .in(Singleton.class);
             }
         });

@@ -20,8 +20,8 @@ import static org.radarcns.mongo.util.MongoHelper.QUARTILE;
 
 import java.util.List;
 import org.bson.Document;
-import org.radarcns.mongo.util.MongoSensor;
 import org.radarcns.domain.managementportal.SourceData;
+import org.radarcns.mongo.util.MongoSensor;
 
 public enum DataFormat {
     ACCELERATION_FORMAT("AccelerationFormat"),

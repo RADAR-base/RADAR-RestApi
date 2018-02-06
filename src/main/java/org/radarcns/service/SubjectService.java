@@ -3,9 +3,9 @@ package org.radarcns.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
-import org.radarcns.domain.managementportal.Source;
 import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.slf4j.Logger;
@@ -19,6 +19,7 @@ public class SubjectService {
 
     private SourceService sourceService;
 
+    @Inject
     public SubjectService(ManagementPortalClient managementPortalClient, SourceService
             sourceService) {
         this.managementPortalClient = managementPortalClient;
@@ -36,12 +37,6 @@ public class SubjectService {
         return true;
     }
 
-    public static Source getSourceFromSubject(Subject subject, String sourceId) {
-        // there should be one source that would match the given sourceId
-        return subject.getSources().stream().filter(p -> p.getSourceId().equals(sourceId))
-                .collect(Collectors.toList()).get(0);
-    }
-
     private org.radarcns.domain.restapi.Subject buildSubject(
             org.radarcns.domain.managementportal.Subject subject) {
         return new org.radarcns.domain.restapi.Subject()
@@ -54,8 +49,15 @@ public class SubjectService {
 
     public List<org.radarcns.domain.restapi.Subject> getAllSubjectsFromProject(String projectName)
             throws IOException, NotFoundException {
+        // returns NotFound if a project is not available
+        this.managementPortalClient.getProject(projectName);
         return this.managementPortalClient.getAllSubjectsFromProject(projectName).stream()
                 .map(this::buildSubject).collect(Collectors.toList());
     }
 
+    public org.radarcns.domain.restapi.Subject getSubjectBySubjectId(String projectName,
+            String subjectId) throws IOException, NotFoundException {
+        this.managementPortalClient.getProject(projectName);
+        return this.buildSubject(this.managementPortalClient.getSubject(subjectId));
+    }
 }

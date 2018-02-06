@@ -23,10 +23,10 @@ import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
 import javax.inject.Inject;
 import org.bson.Document;
-import org.radarcns.domain.restapi.States;
-import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.domain.managementportal.SourceType;
+import org.radarcns.domain.restapi.States;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,11 +37,12 @@ import org.slf4j.LoggerFactory;
 public class SourceMonitorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceMonitorService.class);
+    private static final String TIME_START ="timeStart";
+    private static final String TIME_END ="timeEnd";
 
     private final MongoClient mongoClient;
 
-    private static final String TIME_START ="timeStart";
-    private static final String TIME_END ="timeEnd";
+
     /** Constructor. **/
     @Inject
     public SourceMonitorService(MongoClient mongoClient) {

@@ -20,11 +20,9 @@ import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.HashMap;
-import javax.servlet.ServletContext;
+import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.restapi.Source;
-import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.service.SourceMonitorService;
 
 /**

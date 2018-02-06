@@ -19,30 +19,26 @@ package org.radarcns.webapp.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.resource.BasePath.GET_ALL_SUBJECTS;
-import static org.radarcns.webapp.resource.BasePath.GET_SUBJECT;
-import static org.radarcns.webapp.resource.BasePath.SUBJECT;
+import static org.radarcns.webapp.resource.BasePath.PROJECTS;
+import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 
-import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
-import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.NeedsPermissionOnProject;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.auth.authorization.Permission.Entity;
-import org.radarcns.dao.SubjectDataAccessObject;
-import org.radarcns.domain.managementportal.Subject;
-import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.domain.restapi.Subject;
+import org.radarcns.service.SubjectService;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
@@ -51,43 +47,35 @@ import org.radarcns.webapp.validation.Alphanumeric;
  * in a study.
  */
 @Authenticated
-@Path("/" + SUBJECT)
+@Path("/" + PROJECTS)
 public class SubjectEndPoint {
-    @Inject
-    private MongoClient mongoClient;
 
     @Inject
-    private ManagementPortalClient mpClient;
-
-    @Inject
-    private SubjectDataAccessObject subjectDataAccessObject;
-
-    //--------------------------------------------------------------------------------------------//
-    //                                        ALL SUBJECTS                                        //
-    //--------------------------------------------------------------------------------------------//
+    private SubjectService subjectService;
 
     /**
-     * JSON function that returns all available subject.
+     * JSON function that returns all available subject based on the Study ID (Project ID).
      */
     @GET
-    @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/" + GET_ALL_SUBJECTS + "/{" + PROJECT_NAME + "}")
-    @Operation(summary = "Return a list of subjects",
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS)
+    @Operation(summary = "Return a list of subjects contained within a study",
             description = "Each subject can have multiple sourceID associated with him")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
             + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description = "Return a list of subject.avsc objects")
+    @ApiResponse(responseCode = "404", description =
+            "No value for the given parameters, in the body"
+                    + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "200", description = "Return a list of subjects objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Project not found.")
+    @ApiResponse(responseCode = "404", description = "Project not found")
     @NeedsPermissionOnProject(entity = Entity.SUBJECT, operation = READ)
-    public List<Subject> getAllSubjectsJson(
-            @Alphanumeric @PathParam(PROJECT_NAME) String study) throws IOException {
-        // TODO: actually use the current study
-        // throws on not found
-        mpClient.getProject(study);
-        return mpClient.getAllSubjectsFromProject(study);
+    public List<Subject> getAllSubjectsJsonFromStudy(
+            @PathParam(PROJECT_NAME) String projectName) throws IOException {
+        return subjectService.getAllSubjectsFromProject(projectName);
     }
+
 
     //--------------------------------------------------------------------------------------------//
     //                                        SUBJECT INFO                                        //
@@ -98,7 +86,7 @@ public class SubjectEndPoint {
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("{" + PROJECT_NAME + "}/" + GET_SUBJECT + "/{" + SUBJECT_ID + "}")
+    @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS + "/{" + SUBJECT_ID + "}")
     @Operation(summary = "Return the information related to given subject identifier",
             description = "Some information are not implemented yet. The returned values are "
                     + "hardcoded.")
@@ -114,15 +102,6 @@ public class SubjectEndPoint {
     public org.radarcns.domain.restapi.Subject getSubjectJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        // check that the project and subject exist
-        mpClient.getProject(projectName);
-        mpClient.getSubject(subjectId);
-        if (subjectDataAccessObject.exist(subjectId, mongoClient)) {
-            return subjectDataAccessObject.getSubject(subjectId, mongoClient);
-        } else {
-            String now = Instant.now().toString();
-            return new org.radarcns.domain.restapi.Subject(subjectId, false,
-                    Collections.emptyList());
-        }
+        return subjectService.getSubjectBySubjectId(projectName, subjectId);
     }
 }

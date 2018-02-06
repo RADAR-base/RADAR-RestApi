@@ -23,14 +23,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import javax.servlet.ServletContext;
 import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.mongo.data.android.AndroidAppStatus;
 import org.radarcns.mongo.data.android.AndroidRecordCounter;
 import org.radarcns.mongo.data.android.AndroidServerStatus;
 import org.radarcns.mongo.util.MongoAndroidApp;
-import org.radarcns.mongo.util.MongoHelper;
 
 /**
  * Data Access Object for Android App Status values.

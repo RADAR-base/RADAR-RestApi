@@ -3,6 +3,7 @@ package org.radarcns.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.Source;
@@ -14,10 +15,12 @@ import org.slf4j.LoggerFactory;
 public class SourceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubjectService.class);
+
     private SourceMonitorService sourceMonitorService;
 
     private SourceCatalog sourceCatalog;
 
+    @Inject
     public SourceService(SourceMonitorService sourceMonitorService, SourceCatalog sourceCatalog) {
         this.sourceMonitorService = sourceMonitorService;
         this.sourceCatalog = sourceCatalog;
@@ -37,9 +40,11 @@ public class SourceService {
                     .getSourceTypeCatalogVersion());
         } catch (NotFoundException | IOException e) {
 
-            LOGGER.error("Cannot retrieve sourceType-type for given sourceType " + source.getSourceId());
-            throw new IllegalStateException("Cannot retrive sourceType-type for given sourceType " + source
-                    .getSourceId());
+            LOGGER.error(
+                    "Cannot retrieve sourceType-type for given sourceType " + source.getSourceId());
+            throw new IllegalStateException(
+                    "Cannot retrive sourceType-type for given sourceType " + source
+                            .getSourceId());
         }
 
         return new org.radarcns.domain.restapi.Source()
@@ -54,8 +59,8 @@ public class SourceService {
     }
 
     public static SourceTypeIdentifier getSourceTypeIdFromSource(Source source) {
-        return new SourceTypeIdentifier(source.getSourceTypeProducer() , source
-                .getSourceTypeModel() ,source.getSourceTypeCatalogVersion());
+        return new SourceTypeIdentifier(source.getSourceTypeProducer(), source.getSourceTypeModel(),
+                source.getSourceTypeCatalogVersion());
     }
 
 }
