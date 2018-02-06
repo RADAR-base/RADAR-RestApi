@@ -21,9 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.config.ExposedConfigTest.OPENAPI_JSON;
-import static org.radarcns.webapp.util.BasePath.DATA;
-import static org.radarcns.webapp.util.Parameter.SOURCEDATATYPE;
-import static org.radarcns.webapp.util.Parameter.STAT;
+import static org.radarcns.webapp.resource.BasePath.DATA;
+import static org.radarcns.webapp.resource.Parameter.SOURCEDATATYPE;
+import static org.radarcns.webapp.resource.Parameter.STAT;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -18,8 +18,7 @@ package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.radarcns.config.TestCatalog.EMPATICA;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.webapp.resource.BasePath.STATUS;
 
 import com.mongodb.MongoClient;
@@ -33,27 +32,27 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.catalogue.TimeWindow;
 import org.radarcns.dao.AndroidAppDataAccessObject;
-import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.domain.restapi.Application;
+import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
+import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.monitor.application.ServerStatus;
-import org.radarcns.restapi.app.Application;
 import org.radarcns.webapp.resource.BasePath;
 
 public class AppStatusEndPointTest {
     private static final String PROJECT = "radar";
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = EMPATICA;
+    private static final String SOURCE_TYPE = "EMPATICA";
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
     private static final String SOURCE_PATH = PROJECT + '/' + SUBJECT + '/' + SOURCE;
+    private static final String COLLECTION_NAME = "android_empatica_e4_heartrate_10sec";
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
@@ -62,7 +61,7 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest200Unknown() throws IOException, ReflectiveOperationException {
-        Application actual = apiClient.requestAvro(SOURCE_PATH, Application.class, Status.OK);
+        Application actual = apiClient.requestJson(SOURCE_PATH, Application.class, Status.OK);
         assertSame(ServerStatus.UNKNOWN, actual.getServerStatus());
     }
 
@@ -71,9 +70,7 @@ public class AppStatusEndPointTest {
             throws IOException, ReflectiveOperationException {
         MongoClient client = Utility.getMongoClient();
 
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_WINDOW));
+        MongoCollection<Document> collection = MongoHelper.getCollection(client,COLLECTION_NAME);
 
         List<Document> list = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
                 SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
@@ -86,7 +83,7 @@ public class AppStatusEndPointTest {
         Utility.insertMixedDocs(client, map);
 
         Application expected = Utility.convertDocToApplication(map);
-        Application actual = apiClient.requestAvro(SOURCE_PATH, Application.class, Status.OK);
+        Application actual = apiClient.requestJson(SOURCE_PATH, Application.class, Status.OK);
 
         assertEquals(expected, actual);
 
@@ -103,9 +100,7 @@ public class AppStatusEndPointTest {
      **/
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-        Utility.dropCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_WINDOW));
+        Utility.dropCollection(client,COLLECTION_NAME);
         Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
         client.close();
     }
