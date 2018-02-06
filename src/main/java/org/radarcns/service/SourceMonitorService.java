@@ -50,27 +50,30 @@ public class SourceMonitorService {
     }
 
 
-    public EffectiveTimeFrame getEffectiveTimeFrame(String subjectId, String sourceId ,
-            SourceType sourceType) {
+    public EffectiveTimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
+            String sourceId, SourceType sourceType) {
 
         // get the last document sorted by timeEnd
-        MongoCursor<Document> cursor = MongoHelper.findDocumentBySubjectAndSource(subjectId, sourceId,
-                TIME_END, DESCENDING, 1,
-                MongoHelper.getCollection(this.mongoClient, sourceType.getSourceStatisticsMonitorTopic()));
+        MongoCursor<Document> cursor = MongoHelper.findDocumentByProjectAndSubjectAndSource
+                (projectId, subjectId, sourceId,
+                        TIME_END, DESCENDING, 1,
+                        MongoHelper.getCollection(this.mongoClient,
+                                sourceType.getSourceStatisticsMonitorTopic()));
 
         if (!cursor.hasNext()) {
-            LOGGER.debug("Empty cursor for collection {}", sourceType.getSourceStatisticsMonitorTopic());
+            LOGGER.debug("Empty cursor for collection {}",
+                    sourceType.getSourceStatisticsMonitorTopic());
         }
         long timeStart = Long.MIN_VALUE;
         long timeEnd = Long.MAX_VALUE;
         if (cursor.hasNext()) {
             Document document = cursor.next();
-            timeStart = Math.max(timeStart , document.getDate(TIME_START).getTime());
+            timeStart = Math.max(timeStart, document.getDate(TIME_START).getTime());
             timeEnd = Math.min(timeEnd, document.getDate(TIME_END).getTime());
         }
 
         cursor.close();
-        return new EffectiveTimeFrame(RadarConverter.getISO8601(timeStart) , RadarConverter
+        return new EffectiveTimeFrame(RadarConverter.getISO8601(timeStart), RadarConverter
                 .getISO8601(timeEnd));
 
     }

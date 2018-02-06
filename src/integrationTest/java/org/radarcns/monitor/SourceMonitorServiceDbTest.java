@@ -36,6 +36,7 @@ import org.radarcns.util.RadarConverter;
 
 public class SourceMonitorServiceDbTest {
 
+    private static final String PROJECT_NAME = "radar";
     private static final String SUBJECT_ID = "sub-1";
     private static final String SOURCE_ID = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
     private static final String SOURCETYPE_PRODUCER = "EMPATICA";
@@ -73,7 +74,8 @@ public class SourceMonitorServiceDbTest {
                 .getSourceStatisticsMonitorTopic());
         collection.insertOne(doc);
 
-        EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(SUBJECT_ID, SOURCE_ID, sourceType);
+        EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(PROJECT_NAME, SUBJECT_ID,
+                SOURCE_ID, sourceType);
 
         assertEquals(result.getStartDateTime(), RadarConverter.getISO8601(start));
         assertEquals(result.getEndDateTime(), RadarConverter.getISO8601(end));
@@ -91,7 +93,8 @@ public class SourceMonitorServiceDbTest {
                 .getSourceStatisticsMonitorTopic());
         collection.insertMany(Arrays.asList(doc, second));
 
-        EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(SUBJECT_ID, SOURCE_ID, sourceType);
+        EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(PROJECT_NAME, SUBJECT_ID,
+                SOURCE_ID, sourceType);
 
         assertEquals(result.getStartDateTime(), RadarConverter.getISO8601(start));
         assertEquals(result.getEndDateTime(), RadarConverter.getISO8601(later));
@@ -107,7 +110,7 @@ public class SourceMonitorServiceDbTest {
         return new Document(MongoHelper.ID, SUBJECT_ID + "-" + SOURCE_ID + "-" + start + "-" + end)
                 .append(MongoHelper.USER_ID, SUBJECT_ID)
                 .append(MongoHelper.SOURCE_ID, SOURCE_ID)
-                .append(MongoHelper.PROJECT_ID, "radar")
+                .append(MongoHelper.PROJECT_ID, PROJECT_NAME)
                 .append(MongoHelper.START, new Date(start))
                 .append(MongoHelper.END, new Date(end));
     }

@@ -44,7 +44,8 @@ public class SubjectService {
                 .projectName(subject.getProject().getProjectName())
                 .status(subject.getStatus())
                 .humanReadableId(subject.getHumanReadableIdentifier())
-                .sources(this.sourceService.buildSources(subject.getId(), subject.getSources()));
+                .sources(this.sourceService.buildSources(subject.getProject().getProjectName(),
+                        subject.getId(), subject.getSources()));
     }
 
     public List<org.radarcns.domain.restapi.Subject> getAllSubjectsFromProject(String projectName)

@@ -112,6 +112,7 @@ public class MongoHelper {
     /**
      * Finds all Documents belonging to the given subject for the give sourceType.
      *
+     * @param project is the projectName
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
@@ -121,21 +122,60 @@ public class MongoHelper {
      * @return a MongoDB cursor containing all documents for the given User, SourceDefinition
      *      and MongoDB collection
      */
-    public static MongoCursor<Document> findDocumentBySubjectAndSource(String subject, String
-            source,
-            String sortBy, int order, Integer limit, MongoCollection<Document> collection) {
+    public static MongoCursor<Document> findDocumentByProjectAndSubjectAndSource(String
+            project, String subject, String source, String sortBy, int order, Integer limit,
+            MongoCollection<Document> collection) {
         FindIterable<Document> result;
 
         if (sortBy == null) {
             result = collection.find(
-                Filters.and(
-                    eq(USER_ID, subject),
-                    eq(SOURCE_ID, source)));
+                    Filters.and(
+                            eq(USER_ID, subject),
+                            eq(SOURCE_ID, source),
+                            eq(PROJECT_ID, project)));
         } else {
             result = collection.find(
-                Filters.and(
-                    eq(USER_ID, subject),
-                    eq(SOURCE_ID, source))
+                    Filters.and(
+                            eq(USER_ID, subject),
+                            eq(SOURCE_ID, source),
+                            eq(PROJECT_ID, project))
+            ).sort(new BasicDBObject(sortBy, order));
+        }
+
+        if (limit != null) {
+            result = result.limit(limit);
+        }
+
+        return result.iterator();
+    }
+
+    /**
+     * Finds all Documents belonging to the given subject for the give sourceType.
+     *
+     * @param subject is the subjectID
+     * @param source is the sourceID
+     * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
+     * means ascending while {@code -1} means descending
+     * @param limit is the number of document that will be retrieved
+     * @param collection is the MongoDB that will be queried
+     * @return a MongoDB cursor containing all documents for the given User, SourceDefinition and
+     * MongoDB collection
+     */
+    public static MongoCursor<Document> findDocumentBySubjectAndSource(String subject,
+            String source, String sortBy, int order, Integer limit,
+            MongoCollection<Document> collection) {
+        FindIterable<Document> result;
+
+        if (sortBy == null) {
+            result = collection.find(
+                    Filters.and(
+                            eq(USER_ID, subject),
+                            eq(SOURCE_ID, source)));
+        } else {
+            result = collection.find(
+                    Filters.and(
+                            eq(USER_ID, subject),
+                            eq(SOURCE_ID, source))
             ).sort(new BasicDBObject(sortBy, order));
         }
 

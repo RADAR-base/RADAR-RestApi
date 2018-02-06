@@ -27,12 +27,15 @@ public class SourceService {
     }
 
 
-    public List<org.radarcns.domain.restapi.Source> buildSources(String subjectId,
+    public List<org.radarcns.domain.restapi.Source> buildSources(String projectId , String
+            subjectId,
             List<Source> sources) {
-        return sources.stream().map(p -> buildSource(subjectId, p)).collect(Collectors.toList());
+        return sources.stream().map(p -> buildSource(projectId, subjectId, p)).collect(Collectors
+                .toList());
     }
 
-    public org.radarcns.domain.restapi.Source buildSource(String subjectId, Source source) {
+    public org.radarcns.domain.restapi.Source buildSource(String projectId, String subjectId,
+            Source source) {
         SourceType sourceType = null;
         try {
             sourceType = this.sourceCatalog.getSourceType(source
@@ -55,7 +58,8 @@ public class SourceService {
                 .sourceTypeProducer(source.getSourceTypeProducer())
                 .sourceTypeModel(source.getSourceTypeModel())
                 .effectiveTimeFrame(this.sourceMonitorService
-                        .getEffectiveTimeFrame(subjectId, source.getSourceId(), sourceType));
+                        .getEffectiveTimeFrame(projectId, subjectId, source.getSourceId(),
+                                sourceType));
     }
 
     public static SourceTypeIdentifier getSourceTypeIdFromSource(Source source) {
