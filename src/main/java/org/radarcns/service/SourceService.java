@@ -3,11 +3,11 @@ package org.radarcns.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.ws.rs.NotFoundException;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.Source;
 import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
-import org.radarcns.webapp.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

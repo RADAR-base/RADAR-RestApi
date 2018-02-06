@@ -25,7 +25,7 @@ import static org.radarcns.webapp.resource.BasePath.REALTIME;
 import static org.radarcns.webapp.resource.Parameter.END;
 import static org.radarcns.webapp.resource.Parameter.INTERVAL;
 import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
-import static org.radarcns.webapp.resource.Parameter.SENSOR;
+import static org.radarcns.webapp.resource.Parameter.SOURCEDATATYPE;
 import static org.radarcns.webapp.resource.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.resource.Parameter.START;
 import static org.radarcns.webapp.resource.Parameter.STAT;
@@ -43,15 +43,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.radarcns.auth.NeedsPermissionOnSubject;
-import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.catalogue.Unit;
+import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.dao.SensorDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.header.DescriptiveStatistic;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
-import org.radarcns.restapi.header.Header;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 import org.slf4j.Logger;
@@ -71,6 +71,15 @@ public class SensorEndPoint {
     @Inject
     private ManagementPortalClient mpClient;
 
+    @Inject
+    private SourceCatalog sourceCatalog;
+
+    @Inject
+    private SubjectDataAccessObject subjectDataAccessObject;
+
+    @Inject
+    private SensorDataAccessObject sensorDataAccessObject;
+
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
     //--------------------------------------------------------------------------------------------//
@@ -80,7 +89,7 @@ public class SensorEndPoint {
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/" + REALTIME + "/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME
+    @Path("/" + REALTIME + "/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME
             + "}/{" + SUBJECT_ID
             + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
@@ -101,7 +110,7 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getLastReceivedSampleJson(
-            @Alphanumeric @PathParam(SENSOR) String sensor,
+            @Alphanumeric @PathParam(SOURCEDATATYPE) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
@@ -111,10 +120,11 @@ public class SensorEndPoint {
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
-        if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
-            Dataset dataset = SensorDataAccessObject.getInstance()
+        if (this.subjectDataAccessObject.exist(subjectId, mongoClient)) {
+            Dataset dataset = this.sensorDataAccessObject
                     .getLastReceivedSample(subjectId, sourceId,
-                            stat, interval, sensor, mongoClient);
+                            stat, interval, this.sourceCatalog.getSourceData(sensor), mongoClient
+                            , null); //TODO fetch source-type
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
@@ -137,7 +147,7 @@ public class SensorEndPoint {
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME + "}/{"
+    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME + "}/{"
             + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
@@ -156,7 +166,7 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getSamplesJson(
-            @Alphanumeric @PathParam(SENSOR) String sensor,
+            @Alphanumeric @PathParam(SOURCEDATATYPE) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(INTERVAL) TimeWindow interval,
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
@@ -167,9 +177,10 @@ public class SensorEndPoint {
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
-        if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
-            Dataset dataset = SensorDataAccessObject.getInstance().getSamples(subjectId,
-                    sourceId, stat, interval, sensor, mongoClient);
+        if (subjectDataAccessObject.exist(subjectId, mongoClient)) {
+            Dataset dataset = sensorDataAccessObject.getSamples(subjectId,
+                    sourceId, stat, interval, this.sourceCatalog.getSourceData(sensor), mongoClient ,
+                    null);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
@@ -191,7 +202,7 @@ public class SensorEndPoint {
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/{" + SENSOR + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME + "}/{"
+    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME + "}/{"
             + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
@@ -212,7 +223,7 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getSamplesWithinWindowJson(
-            @Alphanumeric @PathParam(SENSOR) String sensor,
+            @Alphanumeric @PathParam(SOURCEDATATYPE) String sensor,
             @PathParam(STAT) DescriptiveStatistic stat,
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
@@ -225,9 +236,11 @@ public class SensorEndPoint {
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
-        if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
-            Dataset dataset = SensorDataAccessObject.getInstance().getSamples(
-                    subjectId, sourceId, stat, interval, start, end, sensor, mongoClient);
+        if (subjectDataAccessObject.exist(subjectId, mongoClient)) {
+            Dataset dataset = sensorDataAccessObject.getSamples(
+                    subjectId, sourceId, stat, interval, start, end, this.sourceCatalog
+                            .getSourceData(sensor),
+                    mongoClient , null);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
@@ -244,7 +257,7 @@ public class SensorEndPoint {
             DescriptiveStatistic stat, TimeWindow interval, Instant timeFrameStart) {
         String time = timeFrameStart.toString();
         return new Dataset(new Header(subjectId, sourceId, "UNKNOWN", sensor, stat,
-                Unit.UNKNOWN, interval, new EffectiveTimeFrame(time, time)),
+                null, interval, new EffectiveTimeFrame(time, time)),
                 Collections.emptyList());
     }
 }

@@ -18,7 +18,6 @@ package org.radarcns.listener.managementportal;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;

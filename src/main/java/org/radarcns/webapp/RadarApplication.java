@@ -5,6 +5,10 @@ import javax.inject.Singleton;
 import okhttp3.OkHttpClient;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.dao.SensorDataAccessObject;
+import org.radarcns.dao.SourceDataAccessObject;
+import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.listener.HttpClientFactory;
 import org.radarcns.listener.MongoFactory;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
@@ -42,6 +46,22 @@ public class RadarApplication extends ResourceConfig {
 
                 bindFactory(MongoFactory.class)
                         .to(MongoClient.class)
+                        .in(Singleton.class);
+
+                bind(SourceCatalog.class)
+                        .to(SourceCatalog.class)
+                        .in(Singleton.class);
+
+                bind(SensorDataAccessObject.class)
+                        .to(SensorDataAccessObject.class)
+                        .in(Singleton.class);
+
+                bind(SourceDataAccessObject.class)
+                        .to(SourceDataAccessObject.class)
+                        .in(Singleton.class);
+
+                bind(SubjectDataAccessObject.class)
+                        .to(SubjectDataAccessObject.class)
                         .in(Singleton.class);
             }
         });

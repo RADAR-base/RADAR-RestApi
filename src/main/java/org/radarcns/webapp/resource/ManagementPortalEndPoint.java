@@ -35,7 +35,7 @@ import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.NeedsPermission;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.managementportal.Subject;
+import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.webapp.filter.Authenticated;
 
 /**

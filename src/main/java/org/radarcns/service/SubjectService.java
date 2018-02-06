@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
 import org.radarcns.domain.managementportal.Source;
 import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.webapp.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

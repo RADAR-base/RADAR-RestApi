@@ -18,8 +18,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.radarcns.auth.NeedsPermission;
-import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.managementportal.SourceType;
+import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
@@ -27,7 +27,7 @@ import org.radarcns.webapp.validation.Alphanumeric;
 @Path("/" + SOURCE_TYPES)
 public class SourceTypeEndPoint {
     @Inject
-    private ManagementPortalClient mpClient;
+    private SourceCatalog sourceCatalog;
 
     //--------------------------------------------------------------------------------------------//
     //                                       SOURCE-TYPES
@@ -47,7 +47,7 @@ public class SourceTypeEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermission(entity = SOURCETYPE, operation = READ)
     public Collection<SourceType> getAllSourceTypesJson() throws IOException {
-        return mpClient.getSourceTypes().values();
+        return sourceCatalog.getSourceTypes();
     }
 
     /**
@@ -69,6 +69,6 @@ public class SourceTypeEndPoint {
             @Alphanumeric @PathParam(PRODUCER) String producer,
             @Alphanumeric @PathParam(MODEL) String model,
             @Alphanumeric @PathParam(CATALOGUE_VERSION) String catalogVersion) throws IOException {
-        return mpClient.getSourceType(producer, model, catalogVersion);
+        return sourceCatalog.getSourceType(producer, model, catalogVersion);
     }
 }

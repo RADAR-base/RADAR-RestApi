@@ -21,8 +21,8 @@ import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.NeedsPermission;
 import org.radarcns.auth.NeedsPermissionOnProject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.managementportal.Project;
-import org.radarcns.managementportal.Subject;
+import org.radarcns.domain.managementportal.Project;
+import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.webapp.filter.Authenticated;
 
 @Authenticated

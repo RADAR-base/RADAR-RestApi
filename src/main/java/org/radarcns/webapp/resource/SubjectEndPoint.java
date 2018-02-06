@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -40,10 +41,8 @@ import org.radarcns.auth.NeedsPermissionOnProject;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
-import org.radarcns.restapi.subject.Cohort;
-import org.radarcns.restapi.subject.Subject;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
@@ -59,6 +58,9 @@ public class SubjectEndPoint {
 
     @Inject
     private ManagementPortalClient mpClient;
+
+    @Inject
+    private SubjectDataAccessObject subjectDataAccessObject;
 
     //--------------------------------------------------------------------------------------------//
     //                                        ALL SUBJECTS                                        //
@@ -79,12 +81,12 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Project not found.")
     @NeedsPermissionOnProject(entity = Entity.SUBJECT, operation = READ)
-    public Cohort getAllSubjectsJson(
+    public List<Subject> getAllSubjectsJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String study) throws IOException {
         // TODO: actually use the current study
         // throws on not found
         mpClient.getProject(study);
-        return SubjectDataAccessObject.getAllSubjects(mongoClient);
+        return mpClient.getAllSubjectsFromProject(study);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -109,17 +111,17 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SUBJECT, operation = READ)
-    public Subject getSubjectJson(
+    public org.radarcns.domain.restapi.Subject getSubjectJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {
         // check that the project and subject exist
         mpClient.getProject(projectName);
         mpClient.getSubject(subjectId);
-        if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
-            return SubjectDataAccessObject.getSubject(subjectId, mongoClient);
+        if (subjectDataAccessObject.exist(subjectId, mongoClient)) {
+            return subjectDataAccessObject.getSubject(subjectId, mongoClient);
         } else {
             String now = Instant.now().toString();
-            return new Subject(subjectId, false, new EffectiveTimeFrame(now, now),
+            return new org.radarcns.domain.restapi.Subject(subjectId, false,
                     Collections.emptyList());
         }
     }

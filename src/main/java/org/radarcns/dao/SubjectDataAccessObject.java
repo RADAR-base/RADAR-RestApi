@@ -23,11 +23,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import javax.servlet.ServletContext;
+import javax.inject.Inject;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.Subject;
-import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.monitor.Monitors;
 
 /**
@@ -40,21 +39,11 @@ public class SubjectDataAccessObject {
 
     private SourceDataAccessObject sourceDataAccessObject;
 
+    @Inject
     public SubjectDataAccessObject(SensorDataAccessObject sensorDataAccessObject,
             SourceDataAccessObject sourceDataAccessObject) {
         this.sourceDataAccessObject = sourceDataAccessObject;
         this.sensorDataAccessObject = sensorDataAccessObject;
-    }
-    /**
-     * Finds all subjects checking all available collections.
-     *
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return a list of  {@link Subject}
-     * @throws ConnectException if MongoDB is not available
-     */
-    public   List<Subject> getAllSubjects(ServletContext context) throws ConnectException {
-        return getAllSubjects(MongoHelper.getClient(context));
     }
 
     /**
@@ -81,19 +70,6 @@ public class SubjectDataAccessObject {
         return patients;
     }
 
-    /**
-     * Returns all information related to the given Subject identifier.
-     *
-     * @param subject Subject Identifier
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return a {@link Subject}
-     * @throws ConnectException if MongoDB is not available
-     */
-    public  Subject getSubject(String subject, ServletContext context)
-            throws ConnectException {
-        return getSubject(subject, MongoHelper.getClient(context));
-    }
 
     /**
      * Finds all subjects checking all available collections.
@@ -127,23 +103,6 @@ public class SubjectDataAccessObject {
      * Checks if the subject exists.
      *
      * @param subject Subject identifier
-     * @param context {@link ServletContext} used to retrieve the client for the subject management
-     *      tool
-     *
-     * @return {@code true} if exist, {@code false} otherwise
-     *
-     * @throws ConnectException if the connection with MongoDb cannot be established
-     */
-    public  boolean exist(String subject, ServletContext context) throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
-
-        return exist(subject, client);
-    }
-
-    /**
-     * Checks if the subject exists.
-     *
-     * @param subject Subject identifier
      * @param client {@link MongoClient} used to connect to the database
      *
      * @return {@code true} if exist, {@code false} otherwise
@@ -151,20 +110,6 @@ public class SubjectDataAccessObject {
     public  boolean exist(String subject, MongoClient client) throws ConnectException {
         //TODO Temporary implementation. It must integrated with the suggested user management tool.
         return !this.findAllSourcesByUser(subject, client).getSources().isEmpty();
-    }
-
-    /**
-     * Returns all available sources for the given patient.
-     *
-     * @param subject subject identifier.
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return a {@code Subject} object
-     * @throws ConnectException if MongoDB is not available
-     */
-    public  Subject findAllSourcesByUser(String subject, ServletContext context)
-            throws ConnectException {
-        return findAllSourcesByUser(subject, MongoHelper.getClient(context));
     }
 
     /**

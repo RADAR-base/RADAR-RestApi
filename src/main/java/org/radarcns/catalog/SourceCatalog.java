@@ -24,14 +24,15 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
+import javax.ws.rs.NotFoundException;
 import org.radarcns.mongo.data.sensor.DataFormat;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.util.CachedMap;
-import org.radarcns.webapp.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,6 @@ import org.slf4j.LoggerFactory;
 public class SourceCatalog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceCatalog.class);
-
 
     private CachedMap<SourceTypeIdentifier, SourceType> sourceTypes;
 
@@ -57,6 +57,7 @@ public class SourceCatalog {
      * Constructor to create SourceCatalog.
      * @param managementPortalClient of the context
      */
+    @Inject
     public SourceCatalog(ManagementPortalClient managementPortalClient) {
         this.managementPortalClient = managementPortalClient;
             this.sourceTypes = new CachedMap<>(this.managementPortalClient::retrieveSourceTypes,

@@ -21,11 +21,9 @@ import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.resource.BasePath.GET_ALL_SOURCES;
 import static org.radarcns.webapp.resource.BasePath.SOURCE;
-import static org.radarcns.webapp.resource.BasePath.SPECIFICATION;
 import static org.radarcns.webapp.resource.BasePath.STATE;
 import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.resource.Parameter.SOURCE_ID;
-import static org.radarcns.webapp.resource.Parameter.SOURCE_TYPE;
 import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 
 import com.mongodb.MongoClient;
@@ -37,21 +35,17 @@ import java.util.Collections;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import org.radarcns.auth.NeedsPermission;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.domain.restapi.Source;
+import org.radarcns.domain.restapi.Subject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.monitor.Monitors;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
-import org.radarcns.restapi.source.Source;
-import org.radarcns.restapi.spec.SourceSpecification;
-import org.radarcns.restapi.subject.Subject;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
@@ -66,6 +60,12 @@ public class SourceEndPoint {
 
     @Inject
     private ManagementPortalClient mpClient;
+
+    @Inject
+    private SourceDataAccessObject sourceDataAccessObject;
+
+    @Inject
+    private SubjectDataAccessObject subjectDataAccessObject;
 
     //--------------------------------------------------------------------------------------------//
     //                                       STATE FUNCTIONS                                      //
@@ -93,21 +93,20 @@ public class SourceEndPoint {
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
             @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
-        org.radarcns.managementportal.Subject sub = mpClient.getSubject(subjectId);
+        org.radarcns.domain.managementportal.Subject sub = mpClient.getSubject(subjectId);
 
-        String sourceType = SourceDataAccessObject.getSourceType(sourceId, mongoClient);
+        String sourceType = sourceDataAccessObject.getSourceType(sourceId, mongoClient);
 
         if (sourceType != null) {
             return Monitors.getInstance().getState(mongoClient, subjectId, sourceId, sourceType);
         } else {
-            Optional<org.radarcns.managementportal.Source> source = sub.getSources().stream()
+            Optional<org.radarcns.domain.managementportal.Source> source = sub.getSources().stream()
                     .filter(s -> s.getSourceId().equals(sourceId))
                     .findAny();
 
             return new Source(sourceId,
                     source.map(s -> (s.getSourceTypeProducer() + "_" + s.getSourceTypeModel())
-                            .toUpperCase()).orElse("UNKNOWN"),
-                    null);
+                            .toUpperCase()).orElse("UNKNOWN"));
         }
     }
 
@@ -115,31 +114,31 @@ public class SourceEndPoint {
     //                               SOURCE SPECIFICATION FUNCTIONS                               //
     //--------------------------------------------------------------------------------------------//
 
-    /**
-     * JSON function that returns the specification of the given source.
-     */
-    @GET
-    @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
-    @Operation(summary = "Return a SourceDefinition specification",
-            description = "Return the data specification of all on-board sensors for the given"
-                    + "source type")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description = "Return a source_specification.avsc object"
-            + "containing last computed status")
-    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
-    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Source type not found")
-    @NeedsPermission(entity = Entity.SOURCE, operation = READ)
-    public SourceSpecification getSourceSpecificationJson(
-            @Alphanumeric @PathParam(SOURCE_TYPE) String sourceType) {
-        SourceSpecification sourceSpec = Monitors.getInstance().getSpecification(sourceType);
-        if (sourceSpec == null) {
-            throw new NotFoundException("Source type " + sourceType + " not found");
-        }
-        return sourceSpec;
-    }
+//    /**
+//     * JSON function that returns the specification of the given source.
+//     */
+//    @GET
+//    @Produces({APPLICATION_JSON, AVRO_BINARY})
+//    @Path("/" + SPECIFICATION + "/{" + SOURCE_TYPE + "}")
+//    @Operation(summary = "Return a SourceDefinition specification",
+//            description = "Return the data specification of all on-board sensors for the given"
+//                    + "source type")
+//    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
+//            + "there is a message.avsc object with more details")
+//    @ApiResponse(responseCode = "200", description = "Return a source_specification.avsc object"
+//            + "containing last computed status")
+//    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+//    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+//    @ApiResponse(responseCode = "404", description = "Source type not found")
+//    @NeedsPermission(entity = Entity.SOURCE, operation = READ)
+//    public SourceSpecification getSourceSpecificationJson(
+//            @Alphanumeric @PathParam(SOURCE_TYPE) String sourceType) {
+//        SourceSpecification sourceSpec = Monitors.getInstance().getSpecification(sourceType);
+//        if (sourceSpec == null) {
+//            throw new NotFoundException("Source type " + sourceType + " not found");
+//        }
+//        return sourceSpec;
+//    }
 
     //--------------------------------------------------------------------------------------------//
     //                                         ALL SOURCES                                        //
@@ -165,11 +164,11 @@ public class SourceEndPoint {
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {
         // TODO: get sources data from MP
         mpClient.getSubject(subjectId);
-        if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
-            return SourceDataAccessObject.findAllSourcesByUser(subjectId, mongoClient);
+        if (subjectDataAccessObject.exist(subjectId, mongoClient)) {
+            return subjectDataAccessObject.findAllSourcesByUser(subjectId, mongoClient);
         } else {
             String now = Instant.now().toString();
-            return new Subject(subjectId, false, new EffectiveTimeFrame(now, now),
+            return new Subject(subjectId, false,
                     Collections.emptyList());
         }
     }

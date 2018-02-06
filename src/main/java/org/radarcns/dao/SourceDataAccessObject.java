@@ -18,9 +18,8 @@ package org.radarcns.dao;
 
 import com.mongodb.MongoClient;
 import java.net.ConnectException;
-import javax.servlet.ServletContext;
+import javax.inject.Inject;
 import org.radarcns.mongo.util.MongoDataAccess;
-import org.radarcns.mongo.util.MongoHelper;
 
 /**
  * Data Access Object for subject management.
@@ -30,22 +29,9 @@ public class SourceDataAccessObject {
 
     private SensorDataAccessObject sensorDataAccessObject ;
 
+    @Inject
     public SourceDataAccessObject(SensorDataAccessObject sensorDataAccessObject) {
         this.sensorDataAccessObject = sensorDataAccessObject;
-    }
-    /**
-     * Given a sourceID, it finds what is the associated sourceType type.
-     *
-     * @param source is the SourceID
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
-     * @return sourceType type associated with the given sourceType
-     *
-     * @throws ConnectException if MongoDb instance is not available
-     */
-    public String getSourceType(String source, ServletContext context)
-            throws ConnectException {
-        return getSourceType(source, MongoHelper.getClient(context));
     }
 
     /**

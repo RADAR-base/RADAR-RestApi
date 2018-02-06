@@ -70,18 +70,17 @@ public class Monitors {
      * Checks the status for the given sourceType counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
      *
+     * @param client is the MongoDB client
      * @param subject identifier
      * @param source identifier
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
      * @return {@code SourceDefinition} representing a sourceType sourceType
      * @throws ConnectException if the connection with MongoDb is faulty
      *
      * @see Source
      */
-    public Source getState(String subject, String source, String sourceType,
-            ServletContext context) throws ConnectException {
-        return getState(subject, source, sourceType, MongoHelper.getClient(context));
+    public Source getState(MongoClient client, String subject, String source, String sourceType)
+            throws ConnectException {
+        return getState(subject, source, sourceType, client);
     }
 
     /**

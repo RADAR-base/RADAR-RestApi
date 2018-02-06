@@ -21,6 +21,7 @@ import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
+import javax.inject.Inject;
 import org.bson.Document;
 import org.radarcns.domain.restapi.States;
 import org.radarcns.mongo.util.MongoHelper;
@@ -42,6 +43,7 @@ public class SourceMonitorService {
     private static final String TIME_START ="timeStart";
     private static final String TIME_END ="timeEnd";
     /** Constructor. **/
+    @Inject
     public SourceMonitorService(MongoClient mongoClient) {
         this.mongoClient = mongoClient;
     }

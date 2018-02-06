@@ -38,9 +38,9 @@ import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
+import org.radarcns.domain.restapi.Application;
+import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.monitor.application.ServerStatus;
-import org.radarcns.restapi.app.Application;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
@@ -56,6 +56,8 @@ public class AppStatusEndPoint {
     @Inject
     private ManagementPortalClient mpClient;
 
+    @Inject
+    private SubjectDataAccessObject subjectDataAccessObject;
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
     //--------------------------------------------------------------------------------------------//
@@ -85,7 +87,7 @@ public class AppStatusEndPoint {
         Application application = new Application(
                 null, 0d, ServerStatus.UNKNOWN, -1, -1, -1);
 
-        if (SubjectDataAccessObject.exist(subjectId, mongoClient)) {
+        if (this.subjectDataAccessObject.exist(subjectId, mongoClient)) {
             application = AndroidAppDataAccessObject.getInstance().getStatus(
                     subjectId, sourceId, mongoClient);
         }

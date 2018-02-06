@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.ServletContext;
+import javax.inject.Inject;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.restapi.Source;
@@ -53,6 +53,7 @@ public class SensorDataAccessObject {
     private final Map<String, MongoSensor> mongoSensorMap = new HashMap<>();
 
     /** Constructor. **/
+    @Inject
     public SensorDataAccessObject(SourceCatalog sourceCatalog) throws IOException {
 
         sourceCatalog.getSourceTypes().forEach(sourceType -> {
@@ -84,19 +85,15 @@ public class SensorDataAccessObject {
      * @param stat is the required statistical value
      * @param timeWindow time frame resolution
      * @param sourceData is the required sensor type
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
      * @return the last seen data value stat for the given subject and sourceType, otherwise
      *      empty dataset
      *
      * @see Dataset
      */
     public Dataset getLastReceivedSample(String subject, String source, DescriptiveStatistic stat,
-            TimeWindow timeWindow, SourceData sourceData, ServletContext context , String
+            TimeWindow timeWindow, SourceData sourceData, MongoClient client , String
             sourceType)
             throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
-
         Header header = getHeader(subject, source, sourceData, stat,
                 timeWindow, client, sourceType);
 
@@ -107,7 +104,7 @@ public class SensorDataAccessObject {
         MongoSensor sensorDao = mongoSensorMap.get(sourceData.getSourceDataName());
 
         return sensorDao.valueRTByUserSource(subject, source, header,
-                    RadarConverter.getMongoStat(stat), MongoHelper.getCollection(context,
+                    RadarConverter.getMongoStat(stat), MongoHelper.getCollection(client,
                         sensorDao.getCollectionName(header.getSourceType(), timeWindow)));
     }
 
@@ -119,17 +116,14 @@ public class SensorDataAccessObject {
      * @param stat is the required statistical value
      * @param timeWindow time frame resolution
      * @param sourceData is the required sensor type
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
      * @return data dataset for the given subject and sourceType, otherwise empty dataset
      *
      * @see Dataset
      */
     public Dataset getSamples(String subject, String source, DescriptiveStatistic stat,
-            TimeWindow timeWindow, SourceData sourceData, ServletContext context , String
+            TimeWindow timeWindow, SourceData sourceData, MongoClient client , String
             sourceType)
             throws ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
 
         Header header = getHeader(subject, source, sourceData, stat,
                 timeWindow, client, sourceType);
@@ -141,7 +135,7 @@ public class SensorDataAccessObject {
         MongoSensor sensorDao = mongoSensorMap.get(sourceData.getSourceDataName());
 
         return sensorDao.valueByUserSource(subject, source, header,
-                RadarConverter.getMongoStat(stat), MongoHelper.getCollection(context,
+                RadarConverter.getMongoStat(stat), MongoHelper.getCollection(client,
                     sensorDao.getCollectionName(header.getSourceType(), timeWindow)));
     }
 
@@ -155,8 +149,6 @@ public class SensorDataAccessObject {
      * @param start is time window start point in millisecond
      * @param end  is time window end point in millisecond
      * @param sourceData is the required sensor type
-     * @param context {@link ServletContext} used to retrieve the client for accessing the
-     *      results cache
      * @return data dataset for the given subject and sourceType within the start and end time window,
      *      otherwise empty dataset
      *
@@ -164,10 +156,8 @@ public class SensorDataAccessObject {
      */
     public Dataset getSamples(String subject, String source,
             DescriptiveStatistic stat, TimeWindow timeWindow, Long start, Long end,
-            SourceData sourceData, ServletContext context , String sourceType) throws
+            SourceData sourceData, MongoClient client , String sourceType) throws
             ConnectException {
-        MongoClient client = MongoHelper.getClient(context);
-
         Header header = getHeader(subject, source, sourceData, stat,
                 timeWindow, client , sourceType);
 
@@ -178,7 +168,7 @@ public class SensorDataAccessObject {
         MongoSensor sensorDao = mongoSensorMap.get(sourceData.getSourceDataName());
 
         return sensorDao.valueByUserSourceWindow(subject, source, header,
-                RadarConverter.getMongoStat(stat), start, end, MongoHelper.getCollection(context,
+                RadarConverter.getMongoStat(stat), start, end, MongoHelper.getCollection(client,
                     sensorDao.getCollectionName(header.getSourceType(), timeWindow)));
     }
 
