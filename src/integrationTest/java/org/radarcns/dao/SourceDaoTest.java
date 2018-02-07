@@ -53,7 +53,7 @@
 //        MongoClient client = Utility.getMongoClient();
 //
 //        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-//                SourceDataValueAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//                DataSetService.getInstance(SENSOR_TYPE).getCollectionName(
 //                    SOURCE_TYPE, TIME_WINDOW));
 //
 //        collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
@@ -107,7 +107,7 @@
 //     **/
 //    public void dropAndClose(MongoClient client) {
 //        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-//        Utility.dropCollection(client, SourceDataValueAccessObject.getInstance(
+//        Utility.dropCollection(client, DataSetService.getInstance(
 //                SENSOR_TYPE).getCollectionName(SOURCE_TYPE, TIME_WINDOW));
 //        Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
 //        client.close();

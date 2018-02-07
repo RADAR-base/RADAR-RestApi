@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.dao;
+package org.radarcns.service;
 
 import com.mongodb.MongoClient;
 import java.io.IOException;
@@ -45,16 +45,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Generic Data Access Object database independent.
  */
-public class SourceDataValueAccessObject {
+public class DataSetService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SourceDataValueAccessObject.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSetService.class);
 
     /** Map containing actual implementations of each data DAO. **/
     private final Map<String, MongoSensor> mongoSensorMap = new HashMap<>();
 
     /** Constructor. **/
     @Inject
-    public SourceDataValueAccessObject(SourceCatalog sourceCatalog) throws IOException {
+    public DataSetService(SourceCatalog sourceCatalog) throws IOException {
 
         sourceCatalog.getSourceTypes().forEach(sourceType -> {
             List<SourceData> sourceTypeConsumer = sourceType.getSourceData();
@@ -64,7 +64,7 @@ public class SourceDataValueAccessObject {
             });
         });
 
-        LOGGER.info("SourceDataValueAccessObject successfully loaded.");
+        LOGGER.info("DataSetService successfully loaded.");
     }
 
     /**
@@ -284,7 +284,7 @@ public class SourceDataValueAccessObject {
 
     /**
      * Returns the singleton.
-     * @return the singleton {@code SourceDataValueAccessObject} INSTANCE
+     * @return the singleton {@code DataSetService} INSTANCE
      */
     public String getCollectionName(String sourceType, String sensorType,
             TimeWindow timeWindow) {

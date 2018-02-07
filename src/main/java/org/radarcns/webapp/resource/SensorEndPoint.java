@@ -44,7 +44,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.catalog.SourceCatalog;
-import org.radarcns.dao.SourceDataValueAccessObject;
+import org.radarcns.service.DataSetService;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
@@ -74,7 +74,7 @@ public class SensorEndPoint {
     private SourceCatalog sourceCatalog;
 
     @Inject
-    private SourceDataValueAccessObject sourceDataValueAccessObject;
+    private DataSetService dataSetService;
 
     //--------------------------------------------------------------------------------------------//
     //                                    REAL-TIME FUNCTIONS                                     //
@@ -117,7 +117,7 @@ public class SensorEndPoint {
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
-            Dataset dataset = this.sourceDataValueAccessObject
+            Dataset dataset = this.dataSetService
                     .getLastReceivedSample(subjectId, sourceId,
                             stat, interval, this.sourceCatalog.getSourceData(sensor), mongoClient
                             , null); //TODO fetch source-type
@@ -170,7 +170,7 @@ public class SensorEndPoint {
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
-            Dataset dataset = sourceDataValueAccessObject.getSamples(subjectId,
+            Dataset dataset = dataSetService.getSamples(subjectId,
                     sourceId, stat, interval, this.sourceCatalog.getSourceData(sensor), mongoClient ,
                     null);
 
@@ -227,7 +227,7 @@ public class SensorEndPoint {
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
-            Dataset dataset = sourceDataValueAccessObject.getSamples(
+            Dataset dataset = dataSetService.getSamples(
                     subjectId, sourceId, stat, interval, start, end, this.sourceCatalog
                             .getSourceData(sensor),
                     mongoClient , null);
