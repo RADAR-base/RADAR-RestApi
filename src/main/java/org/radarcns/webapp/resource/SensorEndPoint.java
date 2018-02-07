@@ -45,7 +45,6 @@ import javax.ws.rs.Produces;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
@@ -73,9 +72,6 @@ public class SensorEndPoint {
 
     @Inject
     private SourceCatalog sourceCatalog;
-
-    @Inject
-    private SubjectDataAccessObject subjectDataAccessObject;
 
     @Inject
     private SensorDataAccessObject sensorDataAccessObject;
@@ -120,7 +116,7 @@ public class SensorEndPoint {
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
-        if (this.subjectDataAccessObject.exist(subjectId, mongoClient)) {
+
             Dataset dataset = this.sensorDataAccessObject
                     .getLastReceivedSample(subjectId, sourceId,
                             stat, interval, this.sourceCatalog.getSourceData(sensor), mongoClient
@@ -128,14 +124,11 @@ public class SensorEndPoint {
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
+                return emptyDataset(subjectId, sourceId, sensor, stat, interval,
+                        Instant.now());
             }
 
             return dataset;
-        } else {
-            return emptyDataset(subjectId, sourceId, sensor, stat, interval,
-                    Instant.now());
-
-        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -177,20 +170,18 @@ public class SensorEndPoint {
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
-        if (subjectDataAccessObject.exist(subjectId, mongoClient)) {
             Dataset dataset = sensorDataAccessObject.getSamples(subjectId,
                     sourceId, stat, interval, this.sourceCatalog.getSourceData(sensor), mongoClient ,
                     null);
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
+                return emptyDataset(subjectId, sourceId, sensor, stat, interval,
+                        Instant.now());
             }
 
             return dataset;
-        } else {
-            return emptyDataset(subjectId, sourceId, sensor, stat, interval,
-                    Instant.now());
-        }
+
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -236,7 +227,6 @@ public class SensorEndPoint {
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
-        if (subjectDataAccessObject.exist(subjectId, mongoClient)) {
             Dataset dataset = sensorDataAccessObject.getSamples(
                     subjectId, sourceId, stat, interval, start, end, this.sourceCatalog
                             .getSourceData(sensor),
@@ -244,13 +234,12 @@ public class SensorEndPoint {
 
             if (dataset.getDataset().isEmpty()) {
                 LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
+                return emptyDataset(subjectId, sourceId, sensor, stat, interval,
+                        Instant.ofEpochMilli(start));
             }
 
             return dataset;
-        } else {
-            return emptyDataset(subjectId, sourceId, sensor, stat, interval,
-                    Instant.ofEpochMilli(start));
-        }
+
     }
 
     private static Dataset emptyDataset(String subjectId, String sourceId, String sensor,

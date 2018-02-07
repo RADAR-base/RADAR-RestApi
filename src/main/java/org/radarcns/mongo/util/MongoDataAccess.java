@@ -39,8 +39,6 @@ import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import org.radarcns.restapi.source.Source;
-
 /**
  * Generic function for subject management.
  */
@@ -245,7 +243,7 @@ public abstract class MongoDataAccess {
      * Get the name of the collection belonging to a sourceType with given time window.
      * @return the MongoDB Collection name associated to the sourceType type for the given time frame
      */
-    public abstract String getCollectionName(String source, TimeWindow interval);
+    public abstract String getCollectionName(String sourceType, TimeWindow interval);
 
     /**
      * Names of collections in the database.

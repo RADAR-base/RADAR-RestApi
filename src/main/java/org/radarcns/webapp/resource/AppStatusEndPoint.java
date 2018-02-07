@@ -37,7 +37,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.dao.AndroidAppDataAccessObject;
-import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
