@@ -27,7 +27,7 @@ import javax.inject.Inject;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.Subject;
-import org.radarcns.monitor.Monitors;
+import org.radarcns.service.SourceMonitorService;
 
 /**
  * Data Access Object for user management.
@@ -39,11 +39,14 @@ public class SubjectDataAccessObject {
 
     private SourceDataAccessObject sourceDataAccessObject;
 
+    private SourceMonitorService sourceMonitorService;
+
     @Inject
     public SubjectDataAccessObject(SensorDataAccessObject sensorDataAccessObject,
-            SourceDataAccessObject sourceDataAccessObject) {
+            SourceDataAccessObject sourceDataAccessObject, SourceMonitorService sourceMonitorService) {
         this.sourceDataAccessObject = sourceDataAccessObject;
         this.sensorDataAccessObject = sensorDataAccessObject;
+        this.sourceMonitorService = sourceMonitorService;
     }
 
     /**
@@ -129,16 +132,16 @@ public class SubjectDataAccessObject {
         sources.addAll(AndroidAppDataAccessObject.getInstance().findAllSourcesBySubject(
                 subject, client));
 
-        Monitors monitor = Monitors.getInstance();
+
 
         List<Source> updatedSources = new ArrayList<>(sources.size());
 
         for (Source source : sources) {
             try {
-                updatedSources.add(monitor.getState(subject, source.getSourceId(), new
-                                SourceTypeIdentifier(source.getSourceTypeProducer(), source
-                                .getSourceTypeModel() , source.getSourceTypeCatalogVersion()).toString(),
-                        client));
+//                updatedSources.add(monitor.getState(subject, source.getSourceId(), new
+//                                SourceTypeIdentifier(source.getSourceTypeProducer(), source
+//                                .getSourceTypeModel() , source.getSourceTypeCatalogVersion()).toString(),
+//                        client));
             } catch (UnsupportedOperationException ex) {
                 updatedSources.add(source);
             }

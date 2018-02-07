@@ -86,6 +86,15 @@ public class ManagementPortalConfig {
     @JsonProperty("source_type_endpoint")
     private String sourceTypeEndpoint;
 
+    /**
+     * Web root of Management Portal sourceType-type end point. It is required to create and get
+     * Managemen
+     *      Portal Subjects.
+     */
+    @JsonProperty("source_endpoint")
+    private String sourceEndpoint;
+
+
     /** Time until subject and project caches are invalidated. */
     @JsonProperty("cache_invalidate_duration")
     private String cacheInvalidateDuration;
@@ -130,6 +139,10 @@ public class ManagementPortalConfig {
         return sourceDataEndpoint;
     }
 
+    public String getSourceEndpoint() {
+        return sourceEndpoint;
+    }
+
     /**
      * Ensures that the resultant string represents a relative directory.
      * It modifies the string if needed to start with a non-slash and ends with a slash.
@@ -167,6 +180,7 @@ public class ManagementPortalConfig {
                 + "subjectEndpoint = '" + subjectEndpoint + "'\n"
                 + "sourceTypeEndpoint = '" + sourceTypeEndpoint + "'\n"
                 + "sourceDataEndpoint = '" + sourceDataEndpoint + "'\n"
+                + "sourceEndpoint = '" + sourceEndpoint + "'\n"
                 + "cacheRetryDuration = '" + cacheRetryDuration + "'\n"
                 + "cacheInvalidateDuration = '" + cacheInvalidateDuration + "'\n"
                 + '}';

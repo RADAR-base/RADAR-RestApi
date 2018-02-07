@@ -275,6 +275,22 @@ public class MongoHelper {
     }
 
     /**
+     * Finds all sources for the given subject and projectId.
+     *
+     * @param subject is the subjectID
+     * @param collection is the MongoDB that will be queried
+     * @return a MongoDB cursor containing all distinct sources for the given User and MongoDB
+     *      collection
+     */
+    public static MongoCursor<String> findAllSourcesBySubjectAndProject(String subject, String
+            projectName,
+            MongoCollection<Document> collection) {
+        return collection.distinct(SOURCE_ID, String.class)
+                .filter(Filters.and(eq(USER_ID, subject), eq(PROJECT_ID, projectName))).iterator();
+    }
+
+
+    /**
      * Returns the needed MongoDB collection.
      *
      * @param client the MongoDB client

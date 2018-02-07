@@ -19,3 +19,4 @@ management_portal_config:
     subject_endpoint: api/subjects/
     source_type_endpoint: api/source-types/
     source_data_endpoint: api/source-data/
+    source_endpoint: api/sources/

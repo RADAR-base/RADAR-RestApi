@@ -21,6 +21,8 @@ import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
+import java.util.Collections;
+import java.util.List;
 import javax.inject.Inject;
 import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceType;
@@ -50,6 +52,15 @@ public class SourceMonitorService {
     }
 
 
+    /**
+     * Finds effectiveTimeFrame of a source of a subject under a project by querying
+     * source-monitor-statistics of source-type.
+     * @param projectId of the subject
+     * @param subjectId of the subject
+     * @param sourceId of the source
+     * @param sourceType of the source
+     * @return calculated {@link EffectiveTimeFrame} with earliest and latest timestamps
+     */
     public EffectiveTimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
             String sourceId, SourceType sourceType) {
 
@@ -76,6 +87,35 @@ public class SourceMonitorService {
         return new EffectiveTimeFrame(RadarConverter.getISO8601(timeStart), RadarConverter
                 .getISO8601(timeEnd));
 
+    }
+
+    /**
+     * This will fetch all the sourceIds received under given subjectId and projectId in the
+     * provided SourceType
+     * @param projectName of the subject
+     * @param subjectId of the subject
+     * @param sourceType of the source
+     */
+    public List<String> getAllSourcesOfSubjectInProject(String projectName, String subjectId,
+            SourceType sourceType) {
+
+        // get the last document sorted by timeEnd
+        MongoCursor<String> cursor = MongoHelper.findAllSourcesBySubjectAndProject
+                (projectName, subjectId,
+                        MongoHelper.getCollection(this.mongoClient,
+                                sourceType.getSourceStatisticsMonitorTopic()));
+        if (!cursor.hasNext()) {
+            LOGGER.debug("No records found in collection {} for subject {} and project {}",
+                    sourceType.getSourceStatisticsMonitorTopic(), subjectId, projectName);
+        }
+        List<String> sourceIds = Collections.emptyList();
+        if (cursor.hasNext()) {
+            String entry = cursor.next();
+            sourceIds.add(entry);
+        }
+
+        cursor.close();
+        return sourceIds;
     }
     /**
      * Checks the status for the given sourceType counting the number of received messages and

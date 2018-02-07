@@ -35,6 +35,7 @@ import okhttp3.Response;
 import org.radarcns.config.ManagementPortalConfig;
 import org.radarcns.config.Properties;
 import org.radarcns.domain.managementportal.Project;
+import org.radarcns.domain.managementportal.Source;
 import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.managementportal.Subject;
@@ -60,6 +61,9 @@ public class ManagementPortalClient {
     private static final ObjectReader SOURCE_DATA_LIST_READER = RadarConverter.readerForCollection(
             List.class, SourceData.class);
 
+    private static final ObjectReader SOURCE_LIST_READER = RadarConverter.readerForCollection(
+            List.class, SourceData.class);
+
     private static final Duration CACHE_INVALIDATE_DEFAULT = Duration.ofMinutes(1);
     private static final Duration CACHE_RETRY_DEFAULT = Duration.ofHours(1);
 
@@ -67,6 +71,7 @@ public class ManagementPortalClient {
 
     private final CachedMap<String, Subject> subjects;
     private final CachedMap<String, Project> projects;
+    private final CachedMap<String, Source> sources;
 
 
     private String token;
@@ -92,6 +97,7 @@ public class ManagementPortalClient {
         subjects = new CachedMap<>(this::retrieveSubjects, Subject::getId, invalidate, retry);
         projects = new CachedMap<>(this::retrieveProjects, Project::getProjectName,
                 invalidate, retry);
+        sources = new CachedMap<>(this::retrieveSources, Source::getSourceId, invalidate, retry);
     }
 
     private static Duration parseDuration(String duration, Duration defaultValue) {
@@ -292,6 +298,53 @@ public class ManagementPortalClient {
             List<SourceData> allSourceData = SOURCE_DATA_LIST_READER.readValue(responseBody);
             logger.info("Retrieved SourceTypes from MP");
             return allSourceData;
+        }
+    }
+
+    /**
+     * Retrieves all {@link Source} from the already computed list of sources using {@link
+     * ArrayList} of {@link Source} else it calls a method for retrieving the Source from MP.
+     *
+     * @return {@link ArrayList} of {@link Source} if a subject is found
+     */
+    public Map<String, Source> getSources() throws IOException {
+        return sources.get();
+    }
+
+    /**
+     * Retrieves all {@link Source} from Management Portal using {@link ServletContext} entity.
+     *
+     * @return Source retrieved from the Management Portal
+     */
+    private List<Source> retrieveSources() throws IOException {
+        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
+        URL url = new URL(config.getManagementPortalUrl(), config.getSourceEndpoint());
+        Request getAllSourcesRequest = this.buildGetRequest(url);
+        try (Response response = this.client.newCall(getAllSourcesRequest).execute()) {
+            String responseBody = RestClient.responseBody(response);
+            if (!response.isSuccessful()) {
+                throw new IOException("Failed to retrieve all sources: " + responseBody);
+            }
+            List<Source> sources = SOURCE_LIST_READER.readValue(responseBody);
+            logger.info("Retrieved Sources from MP.");
+            return sources;
+        }
+    }
+
+    /**
+     * Retrieves a {@link Source} from the already computed list of subjects using {@link
+     * ArrayList} of {@link Source} entity.
+     *
+     * @param sourceId {@link String} that has to be searched.
+     * @return {@link Source} if a subject is found
+     * @throws IOException if the subjects cannot be refreshed
+     * @throws NotFoundException if the subject is not found
+     */
+    public Source getSource(@Nonnull String sourceId) throws IOException, NotFoundException {
+        try {
+            return sources.get(sourceId);
+        } catch (NoSuchElementException ex) {
+            throw new NotFoundException("Source " + sourceId + " not found.");
         }
     }
 
