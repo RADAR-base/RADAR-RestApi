@@ -69,20 +69,20 @@ public class AndroidAppDataAccessObject {
         return app;
     }
 
-    /**
-     * Finds all subjects.
-     *
-     * @return all distinct subjectIDs for the given collection, otherwise an empty Collection
-     */
-    public Collection<String> findAllUser(MongoClient client) {
-        Set<String> subjects = new HashSet<>();
-
-        for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
-            subjects.addAll(dataAccessObject.findAllUser(client));
-        }
-
-        return subjects;
-    }
+//    /**
+//     * Finds all subjects.
+//     *
+//     * @return all distinct subjectIDs for the given collection, otherwise an empty Collection
+//     */
+//    public Collection<String> findAllUser(MongoClient client) {
+//        Set<String> subjects = new HashSet<>();
+//
+//        for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
+//            subjects.addAll(dataAccessObject.findAllUser(client));
+//        }
+//
+//        return subjects;
+//    }
 
     /**
      * Finds all sources for the given subject.

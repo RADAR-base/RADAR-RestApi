@@ -43,18 +43,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generic Data Accesss Object database independent.
+ * Generic Data Access Object database independent.
  */
-public class SensorDataAccessObject {
+public class SourceDataValueAccessObject {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SensorDataAccessObject.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SourceDataValueAccessObject.class);
 
     /** Map containing actual implementations of each data DAO. **/
     private final Map<String, MongoSensor> mongoSensorMap = new HashMap<>();
 
     /** Constructor. **/
     @Inject
-    public SensorDataAccessObject(SourceCatalog sourceCatalog) throws IOException {
+    public SourceDataValueAccessObject(SourceCatalog sourceCatalog) throws IOException {
 
         sourceCatalog.getSourceTypes().forEach(sourceType -> {
             List<SourceData> sourceTypeConsumer = sourceType.getSourceData();
@@ -64,7 +64,7 @@ public class SensorDataAccessObject {
             });
         });
 
-        LOGGER.info("SensorDataAccessObject successfully loaded.");
+        LOGGER.info("SourceDataValueAccessObject successfully loaded.");
     }
 
     /**
@@ -193,23 +193,23 @@ public class SensorDataAccessObject {
                 sensorDao.getCollectionName(sourceType, TimeWindow.TEN_SECOND)));
     }
 
-    /**
-     * Finds all subjects checking all available collections.
-     *
-     * @param client MongoDB client
-     * @return a {@code Set<String>} containing all Subject Identifier
-     * @throws ConnectException if MongoDB is not available
-     *
-     */
-    public Set<String> getAllSubject(MongoClient client) throws ConnectException {
-        Set<String> subjects = new HashSet<>();
-
-        for (MongoSensor mongoSensor : mongoSensorMap.values()) {
-            subjects.addAll(mongoSensor.findAllUser(client));
-        }
-
-        return subjects;
-    }
+//    /**
+//     * Finds all subjects checking all available collections.
+//     *
+//     * @param client MongoDB client
+//     * @return a {@code Set<String>} containing all Subject Identifier
+//     * @throws ConnectException if MongoDB is not available
+//     *
+//     */
+//    public Set<String> getAllSubject(MongoClient client) throws ConnectException {
+//        Set<String> subjects = new HashSet<>();
+//
+//        for (MongoSensor mongoSensor : mongoSensorMap.values()) {
+//            subjects.addAll(mongoSensor.findAllUser(client));
+//        }
+//
+//        return subjects;
+//    }
 
     /**
      * Returns all available sources for the given subject.
@@ -284,7 +284,7 @@ public class SensorDataAccessObject {
 
     /**
      * Returns the singleton.
-     * @return the singleton {@code SensorDataAccessObject} INSTANCE
+     * @return the singleton {@code SourceDataValueAccessObject} INSTANCE
      */
     public String getCollectionName(String sourceType, String sensorType,
             TimeWindow timeWindow) {

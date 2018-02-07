@@ -46,32 +46,32 @@ public abstract class MongoDataAccess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDataAccess.class);
 
-    /**
-     * Finds all subjects.
-     *
-     * @param client is the MongoDb client instance
-     *
-     * @return all distinct subjectIDs for the current DAO instance, otherwise an empty Collection
-     */
-    public Collection<String> findAllUser(MongoClient client) {
-        Set<String> set = new HashSet<>();
-
-        for (String collection : getCollectionNames()) {
-            try (MongoCursor<String> cursor = MongoHelper.findAllUser(
-                    MongoHelper.getCollection(client, collection))) {
-
-                if (!cursor.hasNext()) {
-                    LOGGER.debug("Empty cursor for collection {}", collection);
-                }
-
-                while (cursor.hasNext()) {
-                    set.add(cursor.next());
-                }
-            }
-        }
-
-        return set;
-    }
+//    /**
+//     * Finds all subjects.
+//     *
+//     * @param client is the MongoDb client instance
+//     *
+//     * @return all distinct subjectIDs for the current DAO instance, otherwise an empty Collection
+//     */
+//    public Collection<String> findAllUser(MongoClient client) {
+//        Set<String> set = new HashSet<>();
+//
+//        for (String collection : getCollectionNames()) {
+//            try (MongoCursor<String> cursor = MongoHelper.findAllUser(
+//                    MongoHelper.getCollection(client, collection))) {
+//
+//                if (!cursor.hasNext()) {
+//                    LOGGER.debug("Empty cursor for collection {}", collection);
+//                }
+//
+//                while (cursor.hasNext()) {
+//                    set.add(cursor.next());
+//                }
+//            }
+//        }
+//
+//        return set;
+//    }
 
     /**
      * Finds all sources for the given subject.

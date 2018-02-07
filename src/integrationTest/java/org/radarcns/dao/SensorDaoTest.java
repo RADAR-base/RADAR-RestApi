@@ -65,10 +65,10 @@
 //        MongoClient client = Utility.getMongoClient();
 //
 //        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-//                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//                SourceDataValueAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
 //                    SOURCE_TYPE, TIME_WINDOW));
 //
-//        dirtyCollections.add(SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//        dirtyCollections.add(SourceDataValueAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
 //                SOURCE_TYPE, TIME_WINDOW));
 //
 //        List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
@@ -79,7 +79,7 @@
 //        Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
 //                    "BEATS_PER_MIN", TIME_WINDOW, null);
 //
-//        Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueRTByUserSource(
+//        Dataset actual = SourceDataValueAccessObject.getInstance(SENSOR_TYPE).valueRTByUserSource(
 //                SUBJECT, SOURCE, header, RadarConverter.getMongoStat(COUNT), collection);
 //
 //        Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
@@ -97,10 +97,10 @@
 //        MongoClient client = Utility.getMongoClient();
 //
 //        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-//                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//                SourceDataValueAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
 //                    SOURCE_TYPE, TIME_WINDOW));
 //
-//        dirtyCollections.add(SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//        dirtyCollections.add(SourceDataValueAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
 //                SOURCE_TYPE, TIME_WINDOW));
 //
 //        List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
@@ -111,7 +111,7 @@
 //        Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
 //                Unit.BEATS_PER_MIN.toString(), TIME_WINDOW, null);
 //
-//        Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueByUserSource(SUBJECT,
+//        Dataset actual = SourceDataValueAccessObject.getInstance(SENSOR_TYPE).valueByUserSource(SUBJECT,
 //                SOURCE, header, RadarConverter.getMongoStat(COUNT), collection);
 //
 //        Dataset expected = Utility.convertDocToDataset(docs,
@@ -129,10 +129,10 @@
 //        MongoClient client = Utility.getMongoClient();
 //
 //        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-//                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//                SourceDataValueAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
 //                    SOURCE_TYPE, TIME_WINDOW));
 //
-//        dirtyCollections.add(SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//        dirtyCollections.add(SourceDataValueAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
 //                SOURCE_TYPE, TIME_WINDOW));
 //
 //        List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
@@ -151,7 +151,7 @@
 //        Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
 //                Unit.BEATS_PER_MIN.toString(), TIME_WINDOW, null);
 //
-//        Dataset actual = SensorDataAccessObject.getInstance(SENSOR_TYPE).valueByUserSourceWindow(
+//        Dataset actual = SourceDataValueAccessObject.getInstance(SENSOR_TYPE).valueByUserSourceWindow(
 //                SUBJECT, SOURCE, header, RadarConverter.getMongoStat(COUNT), start, end,
 //                collection);
 //
@@ -170,10 +170,10 @@
 //        MongoClient client = Utility.getMongoClient();
 //
 //        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-//                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//                SourceDataValueAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
 //                    SOURCE_TYPE, TIME_WINDOW));
 //
-//        dirtyCollections.add(SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
+//        dirtyCollections.add(SourceDataValueAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
 //                SOURCE_TYPE, TIME_WINDOW));
 //
 //        List<Document> docs = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
@@ -189,7 +189,7 @@
 //        long start = docs.get(index - 1).getDate(START).getTime();
 //        long end = docs.get(index + 1).getDate(END).getTime();
 //
-//        double actual = SensorDataAccessObject.getInstance(
+//        double actual = SourceDataValueAccessObject.getInstance(
 //                SENSOR_TYPE).countSamplesByUserSourceWindow(SUBJECT, SOURCE, start, end,
 //                collection);
 //
@@ -208,10 +208,10 @@
 //        MongoClient client = Utility.getMongoClient();
 //
 //        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-//                SensorDataAccessObject.getInstance("HEART_RATE").getCollectionName(
+//                SourceDataValueAccessObject.getInstance("HEART_RATE").getCollectionName(
 //                SOURCE_TYPE, TIME_WINDOW));
 //
-//        dirtyCollections.add(SensorDataAccessObject.getInstance("HEART_RATE").getCollectionName(
+//        dirtyCollections.add(SourceDataValueAccessObject.getInstance("HEART_RATE").getCollectionName(
 //                SOURCE_TYPE, TIME_WINDOW));
 //
 //        List<Document> randomInput = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
@@ -224,10 +224,10 @@
 //            randomInput);
 //
 //        collection = MongoHelper.getCollection(client,
-//            SensorDataAccessObject.getInstance("ACCELEROMETER").getCollectionName(SOURCE_TYPE,
+//            SourceDataValueAccessObject.getInstance("ACCELEROMETER").getCollectionName(SOURCE_TYPE,
 //                TIME_WINDOW));
 //
-//        dirtyCollections.add(SensorDataAccessObject.getInstance("ACCELEROMETER").getCollectionName(
+//        dirtyCollections.add(SourceDataValueAccessObject.getInstance("ACCELEROMETER").getCollectionName(
 //                SOURCE_TYPE, TIME_WINDOW));
 //
 //        randomInput = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE, "ACCELEROMETER",
@@ -240,7 +240,7 @@
 //                RadarConverter.getISO8601(expected.getEndDateTime()).getTime(),
 //                randomInput);
 //
-//        EffectiveTimeFrame actual = SensorDataAccessObject.getInstance()
+//        EffectiveTimeFrame actual = SourceDataValueAccessObject.getInstance()
 //                .getEffectiveTimeFrame(SUBJECT, client);
 //
 //        assertEquals(expected, actual);
