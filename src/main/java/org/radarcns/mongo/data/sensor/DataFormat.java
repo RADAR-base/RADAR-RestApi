@@ -21,7 +21,7 @@ import static org.radarcns.mongo.util.MongoHelper.QUARTILE;
 import java.util.List;
 import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceData;
-import org.radarcns.mongo.util.MongoSensor;
+import org.radarcns.mongo.util.MongoSourceDataWrapper;
 
 public enum DataFormat {
     ACCELERATION_FORMAT("AccelerationFormat"),
@@ -38,13 +38,13 @@ public enum DataFormat {
     }
 
     /**
-     * Returns the {@code MongoSensor} associated with the given sensor.
-     * @param sourceData sensor for which the MongoSensor has to be instantiated
-     * @return {@code MongoSensor}
+     * Returns the {@code MongoSourceDataWrapper} associated with the given sensor.
+     * @param sourceData sensor for which the MongoSourceDataWrapper has to be instantiated
+     * @return {@code MongoSourceDataWrapper}
      *
-     * @see MongoSensor
+     * @see MongoSourceDataWrapper
      */
-    public static MongoSensor getMongoSensor(SourceData sourceData) {
+    public static MongoSourceDataWrapper getMongoSensor(SourceData sourceData) {
         String sourceDataType = sourceData.getSourceDataType();
         switch (sourceDataType) {
             case "ACCELEROMETER": return new AccelerationFormat(sourceDataType);

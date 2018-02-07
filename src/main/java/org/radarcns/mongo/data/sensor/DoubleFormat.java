@@ -24,13 +24,13 @@ import org.bson.Document;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
-import org.radarcns.mongo.util.MongoSensor;
+import org.radarcns.mongo.util.MongoSourceDataWrapper;
 import org.radarcns.util.RadarConverter;
 
 /**
  * Data Access Object for sensors which are represented by a single double value.
  */
-public class DoubleFormat extends MongoSensor {
+public class DoubleFormat extends MongoSourceDataWrapper {
 
     //private static final Logger LOGGER = LoggerFactory.getLogger(DoubleFormat.class);
 

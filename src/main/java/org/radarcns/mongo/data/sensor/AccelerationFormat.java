@@ -26,13 +26,13 @@ import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
-import org.radarcns.mongo.util.MongoSensor;
+import org.radarcns.mongo.util.MongoSourceDataWrapper;
 import org.radarcns.util.RadarConverter;
 
 /**
  * Data Access Object for Acceleration values.
  */
-public class AccelerationFormat extends MongoSensor {
+public class AccelerationFormat extends MongoSourceDataWrapper {
 
     public static final String X_LABEL = "x";
     public static final String Y_LABEL = "y";

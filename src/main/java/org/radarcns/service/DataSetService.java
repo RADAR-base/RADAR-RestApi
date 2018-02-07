@@ -37,7 +37,7 @@ import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.data.sensor.DataFormat;
 import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.mongo.util.MongoSensor;
+import org.radarcns.mongo.util.MongoSourceDataWrapper;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class DataSetService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetService.class);
 
     /** Map containing actual implementations of each data DAO. **/
-    private final Map<String, MongoSensor> mongoSensorMap = new HashMap<>();
+    private final Map<String, MongoSourceDataWrapper> mongoSensorMap = new HashMap<>();
 
     /** Constructor. **/
     @Inject
@@ -71,9 +71,9 @@ public class DataSetService {
      * Returns the singleton Data Access Object associated with the sensor for the given sourceType.
      *
      * @param sensorType sensor of interest
-     * @return {@code MongoSensor} associated with the requested sensor for the given sourceType
+     * @return {@code MongoSourceDataWrapper} associated with the requested sensor for the given sourceType
      */
-    public MongoSensor getInstance(String sensorType) {
+    public MongoSourceDataWrapper getInstance(String sensorType) {
         return this.mongoSensorMap.get(sensorType);
     }
 
@@ -101,7 +101,7 @@ public class DataSetService {
             return new Dataset(null, new LinkedList<>());
         }
 
-        MongoSensor sensorDao = mongoSensorMap.get(sourceData.getSourceDataName());
+        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceData.getSourceDataName());
 
         return sensorDao.valueRTByUserSource(subject, source, header,
                     RadarConverter.getMongoStat(stat), MongoHelper.getCollection(client,
@@ -132,7 +132,7 @@ public class DataSetService {
             return new Dataset(null, new LinkedList<>());
         }
 
-        MongoSensor sensorDao = mongoSensorMap.get(sourceData.getSourceDataName());
+        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceData.getSourceDataName());
 
         return sensorDao.valueByUserSource(subject, source, header,
                 RadarConverter.getMongoStat(stat), MongoHelper.getCollection(client,
@@ -165,7 +165,7 @@ public class DataSetService {
             return new Dataset(null, new LinkedList<>());
         }
 
-        MongoSensor sensorDao = mongoSensorMap.get(sourceData.getSourceDataName());
+        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceData.getSourceDataName());
 
         return sensorDao.valueByUserSourceWindow(subject, source, header,
                 RadarConverter.getMongoStat(stat), start, end, MongoHelper.getCollection(client,
@@ -186,7 +186,7 @@ public class DataSetService {
     public double count(String subject, String source, Long start,
             Long end, String sensorType, String sourceType, MongoClient client)
             throws ConnectException {
-        MongoSensor sensorDao = mongoSensorMap.get(sensorType);
+        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sensorType);
 
         return sensorDao.countSamplesByUserSourceWindow(subject, source, start, end,
                 MongoHelper.getCollection(client,
@@ -204,7 +204,7 @@ public class DataSetService {
 //    public Set<String> getAllSubject(MongoClient client) throws ConnectException {
 //        Set<String> subjects = new HashSet<>();
 //
-//        for (MongoSensor mongoSensor : mongoSensorMap.values()) {
+//        for (MongoSourceDataWrapper mongoSensor : mongoSensorMap.values()) {
 //            subjects.addAll(mongoSensor.findAllUser(client));
 //        }
 //
@@ -223,8 +223,8 @@ public class DataSetService {
             throws ConnectException {
         Set<Source> sources = new HashSet<>();
 
-        for (MongoSensor mongoSensor : mongoSensorMap.values()) {
-            sources.addAll(mongoSensor.findAllSourcesByUser(subject, client));
+        for (MongoSourceDataWrapper mongoSourceDataWrapper : mongoSensorMap.values()) {
+            sources.addAll(mongoSourceDataWrapper.findAllSourcesByUser(subject, client));
         }
 
         return sources;
@@ -240,8 +240,8 @@ public class DataSetService {
      * @throws ConnectException if MongoDB is not available
      */
     public String getSourceType(String source, MongoClient client) throws ConnectException {
-        for (MongoSensor mongoSensor : mongoSensorMap.values()) {
-            String type = mongoSensor.findSourceType(source, client);
+        for (MongoSourceDataWrapper mongoSourceDataWrapper : mongoSensorMap.values()) {
+            String type = mongoSourceDataWrapper.findSourceType(source, client);
 
             if (type != null) {
                 return type;
@@ -269,12 +269,13 @@ public class DataSetService {
 
         Set<Source> sources = getAllSources(subject, client);
 
-        for (MongoSensor mongoSensor : mongoSensorMap.values()) {
+        for (MongoSourceDataWrapper mongoSourceDataWrapper : mongoSensorMap.values()) {
             for (Source source : sources) {
                 start = Math.min(start,
-                        mongoSensor.getTimestamp(subject, source.getSourceId(), true, client).getTime());
+                        mongoSourceDataWrapper
+                                .getTimestamp(subject, source.getSourceId(), true, client).getTime());
                 end = Math.max(end,
-                    mongoSensor.getTimestamp(subject, source.getSourceId(), false, client).getTime());
+                    mongoSourceDataWrapper.getTimestamp(subject, source.getSourceId(), false, client).getTime());
             }
         }
 
