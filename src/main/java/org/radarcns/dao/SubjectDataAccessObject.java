@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
-import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.Subject;
 import org.radarcns.service.SourceMonitorService;
@@ -37,14 +36,11 @@ public class SubjectDataAccessObject {
     //private static final Logger LOGGER = LoggerFactory.getLogger(SubjectDataAccessObject.class);
     private SensorDataAccessObject sensorDataAccessObject;
 
-    private SourceDataAccessObject sourceDataAccessObject;
-
     private SourceMonitorService sourceMonitorService;
 
     @Inject
     public SubjectDataAccessObject(SensorDataAccessObject sensorDataAccessObject,
-            SourceDataAccessObject sourceDataAccessObject, SourceMonitorService sourceMonitorService) {
-        this.sourceDataAccessObject = sourceDataAccessObject;
+             SourceMonitorService sourceMonitorService) {
         this.sensorDataAccessObject = sensorDataAccessObject;
         this.sourceMonitorService = sourceMonitorService;
     }

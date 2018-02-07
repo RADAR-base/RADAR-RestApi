@@ -37,7 +37,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.auth.authorization.Permission.Entity;
-import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
@@ -57,9 +56,6 @@ public class SourceEndPoint {
 
     @Inject
     private ManagementPortalClient mpClient;
-
-    @Inject
-    private SourceDataAccessObject sourceDataAccessObject;
 
     @Inject
     private SubjectDataAccessObject subjectDataAccessObject;

@@ -7,7 +7,6 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.dao.SourceDataAccessObject;
 import org.radarcns.dao.SubjectDataAccessObject;
 import org.radarcns.listener.HttpClientFactory;
 import org.radarcns.listener.MongoFactory;
@@ -57,10 +56,6 @@ public class RadarApplication extends ResourceConfig {
 
                 bind(SensorDataAccessObject.class)
                         .to(SensorDataAccessObject.class)
-                        .in(Singleton.class);
-
-                bind(SourceDataAccessObject.class)
-                        .to(SourceDataAccessObject.class)
                         .in(Singleton.class);
 
                 bind(SubjectDataAccessObject.class)

@@ -42,12 +42,12 @@ public class SourceService {
     public org.radarcns.domain.restapi.Source buildSource(String projectId, String subjectId,
             Source source) {
         SourceType sourceType = null;
+        // a source fetched from MP should ideally have a source-type
         try {
             sourceType = this.sourceCatalog.getSourceType(source
                     .getSourceTypeProducer(), source.getSourceTypeModel(), source
                     .getSourceTypeCatalogVersion());
         } catch (NotFoundException | IOException e) {
-
             LOGGER.error(
                     "Cannot retrieve sourceType-type for given sourceType " + source.getSourceId());
             throw new IllegalStateException(
