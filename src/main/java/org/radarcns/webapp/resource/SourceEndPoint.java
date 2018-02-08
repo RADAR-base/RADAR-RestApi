@@ -25,7 +25,6 @@ import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 
-import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
@@ -38,7 +37,6 @@ import javax.ws.rs.Produces;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.domain.restapi.Source;
-import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.SourceService;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
@@ -49,12 +47,6 @@ import org.radarcns.webapp.validation.Alphanumeric;
 @Authenticated
 @Path("/" + PROJECTS)
 public class SourceEndPoint {
-
-    @Inject
-    private MongoClient mongoClient;
-
-    @Inject
-    private ManagementPortalClient mpClient;
 
     @Inject
     private SourceService sourceService;
@@ -85,9 +77,9 @@ public class SourceEndPoint {
         return sourceService.getAllSourcesOfSubject(projectName, subjectId);
     }
 
-//    //--------------------------------------------------------------------------------------------//
-//    //                                       STATE FUNCTIONS                                      //
-//    //--------------------------------------------------------------------------------------------//
+//    //------------------------------------------------------------------------------------------//
+//    //                                       STATE FUNCTIONS                                    //
+//    //------------------------------------------------------------------------------------------//
 //
 //    /**
 //     * JSON function that returns the status of the given source.

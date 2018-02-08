@@ -154,7 +154,6 @@ public class ApiClient extends ExternalResource {
     }
 
 
-
     /**
      * Request an Avro SpecificRecord from the API, with given relative path. This sets the Accept
      * header to {@code avro/binary}.

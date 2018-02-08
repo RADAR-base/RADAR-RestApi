@@ -40,8 +40,7 @@ public class SubjectService {
         return true;
     }
 
-    private org.radarcns.domain.restapi.Subject buildSubject(
-            org.radarcns.domain.managementportal.Subject subject) throws IOException {
+    private org.radarcns.domain.restapi.Subject buildSubject(Subject subject) throws IOException {
         return new org.radarcns.domain.restapi.Subject()
                 .subjectId(subject.getId())
                 .projectName(subject.getProject().getProjectName())

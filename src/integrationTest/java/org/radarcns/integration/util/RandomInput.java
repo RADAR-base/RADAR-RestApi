@@ -16,9 +16,9 @@
 
 package org.radarcns.integration.util;
 
-import static org.radarcns.mongo.data.android.ApplicationStatusUpTime.UPTIME_COLLECTION;
 import static org.radarcns.mongo.data.android.ApplicationStatusRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.mongo.data.android.ApplicationStatusServerStatus.STATUS_COLLECTION;
+import static org.radarcns.mongo.data.android.ApplicationStatusUpTime.UPTIME_COLLECTION;
 import static org.radarcns.mongo.util.MongoHelper.PROJECT_ID;
 import static org.radarcns.mongo.util.MongoHelper.SOURCE_ID;
 import static org.radarcns.mongo.util.MongoHelper.USER_ID;
@@ -253,7 +253,7 @@ public class RandomInput {
      **/
     public static Map<String, Document> getRandomApplicationStatus(String project, String user,
             String
-            source,
+                    source,
             String ipAddress, ServerStatus serverStatus, Double uptime, int recordsCached,
             int recordsSent, int recordsUnsent) {
         String id = user + "-" + source;

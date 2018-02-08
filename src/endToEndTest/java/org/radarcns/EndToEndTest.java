@@ -51,6 +51,8 @@ import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.format.Acceleration;
+import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.integration.util.ApiClient;
@@ -63,8 +65,6 @@ import org.radarcns.mock.data.MockRecordValidator;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mock.model.MockAggregator;
 import org.radarcns.producer.rest.RestClient;
-import org.radarcns.domain.restapi.format.Acceleration;
-import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.wiremock.ManagementPortalWireMock;
 import org.slf4j.Logger;
@@ -87,21 +87,21 @@ public class EndToEndTest {
     public static final String PIPELINE_CONFIG = "pipeline.yml";
     private static final String[] REQUIRED_TOPICS = {
             "android_empatica_e4_acceleration",
-        "android_empatica_e4_acceleration_10sec",
-        "android_empatica_e4_battery_level",
-        "android_empatica_e4_battery_level_10sec",
-        "android_empatica_e4_blood_volume_pulse",
-        "android_empatica_e4_blood_volume_pulse_10sec",
-        "android_empatica_e4_electrodermal_activity",
-        "android_empatica_e4_electrodermal_activity_10sec",
-        "android_empatica_e4_heart_rate_10sec",
-        "android_empatica_e4_inter_beat_interval",
-        "android_empatica_e4_inter_beat_interval_10sec",
-        "android_empatica_e4_temperature",
-        "android_empatica_e4_temperature_10sec",
-        "application_server_status",
-        "application_record_counts",
-        "application_uptime"
+            "android_empatica_e4_acceleration_10sec",
+            "android_empatica_e4_battery_level",
+            "android_empatica_e4_battery_level_10sec",
+            "android_empatica_e4_blood_volume_pulse",
+            "android_empatica_e4_blood_volume_pulse_10sec",
+            "android_empatica_e4_electrodermal_activity",
+            "android_empatica_e4_electrodermal_activity_10sec",
+            "android_empatica_e4_heart_rate_10sec",
+            "android_empatica_e4_inter_beat_interval",
+            "android_empatica_e4_inter_beat_interval_10sec",
+            "android_empatica_e4_temperature",
+            "android_empatica_e4_temperature_10sec",
+            "application_server_status",
+            "application_record_counts",
+            "application_uptime"
     };
 
     // Latency expressed in second
@@ -122,8 +122,8 @@ public class EndToEndTest {
     public ApiClient frontendClient = new ApiClient(pipelineConfig.getFrontend());
 
     /**
-     * Test initialisation. It loads the config file and waits that the infrastructure is ready
-     *      to accept requests.
+     * Test initialisation. It loads the config file and waits that the infrastructure is ready to
+     * accept requests.
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -200,8 +200,8 @@ public class EndToEndTest {
     }
 
     /**
-     * Starting from the expected values computed using the available CSV files, it computes all
-     * the expected Datasets used to test REST-API.
+     * Starting from the expected values computed using the available CSV files, it computes all the
+     * expected Datasets used to test REST-API.
      *
      * @see ExpectedValue
      */
@@ -264,26 +264,26 @@ public class EndToEndTest {
 
             for (DataItem item : dataset.getDataset()) {
                 if (item.getSample() instanceof Double) {
-                    Double sample = (Double)item.getSample();
+                    Double sample = (Double) item.getSample();
                     item.setSample(new Double(RadarConverter.roundDouble(
                             (Double) sample / RadarConverter.getExpectedMessages(
-                            updatedHeader), 2)));
+                                    updatedHeader), 2)));
                 } else if (item.getSample() instanceof Acceleration) {
-                    Acceleration sample = (Acceleration)item.getSample();
+                    Acceleration sample = (Acceleration) item.getSample();
                     item.setSample(new Acceleration(
-                                RadarConverter.roundDouble(
-                                (Double) sample.getX() / RadarConverter.getExpectedMessages(
-                                updatedHeader), 2),
-                                RadarConverter.roundDouble(
-                                (Double) sample.getY() / RadarConverter.getExpectedMessages(
-                                updatedHeader), 2),
-                                RadarConverter.roundDouble(
-                                (Double) sample.getZ() / RadarConverter.getExpectedMessages(
-                                updatedHeader), 2)));
+                            RadarConverter.roundDouble(
+                                    (Double) sample.getX() / RadarConverter.getExpectedMessages(
+                                            updatedHeader), 2),
+                            RadarConverter.roundDouble(
+                                    (Double) sample.getY() / RadarConverter.getExpectedMessages(
+                                            updatedHeader), 2),
+                            RadarConverter.roundDouble(
+                                    (Double) sample.getZ() / RadarConverter.getExpectedMessages(
+                                            updatedHeader), 2)));
                 } else {
                     throw new IllegalArgumentException(
                             item.getSample().getClass().getCanonicalName()
-                                + " is not supported yet");
+                                    + " is not supported yet");
                 }
             }
 
@@ -295,8 +295,8 @@ public class EndToEndTest {
 
     /**
      * Simulates all possible test case scenarios configured in mock-configuration. For each data,
-     * it generates one dataset per statistical function. The measurement units are taken from
-     * an Empatica device.
+     * it generates one dataset per statistical function. The measurement units are taken from an
+     * Empatica device.
      *
      * @param expectedValue {@code Map} of key {@code MockDataConfig} and value {@code
      * ExpectedValue} containing all expected values
@@ -336,8 +336,9 @@ public class EndToEndTest {
             throws IOException, ReflectiveOperationException {
         LOGGER.info("Fetching APIs ...");
 
-        final String path = DATA + "/{" + SOURCE_DATA_NAME + "}/{" + STAT + "}/" + TimeWindow.TEN_SECOND
-                + '/' + PROJECT_NAME_MOCK + '/' + USER_ID_MOCK + "/" + SOURCE_ID_MOCK;
+        final String path =
+                DATA + "/{" + SOURCE_DATA_NAME + "}/{" + STAT + "}/" + TimeWindow.TEN_SECOND
+                        + '/' + PROJECT_NAME_MOCK + '/' + USER_ID_MOCK + "/" + SOURCE_ID_MOCK;
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
             String pathStat = path.replace("{" + STAT + "}", stat.name());
@@ -417,8 +418,8 @@ public class EndToEndTest {
 
     /**
      * Checks if the two given list of Item of type Acceleration values are equals. Double values
-     * are compared using a constant representing the maximum delta for which both numbers are
-     * still considered equal.
+     * are compared using a constant representing the maximum delta for which both numbers are still
+     * considered equal.
      *
      * @see DataItem
      * @see Acceleration
@@ -447,8 +448,8 @@ public class EndToEndTest {
 
     /**
      * Checks if the two given list of Item of Quartiles values are equals. Double values are
-     * compared using a constant representing the maximum delta for which both numbers are
-     * still considered equal.
+     * compared using a constant representing the maximum delta for which both numbers are still
+     * considered equal.
      *
      * @see DataItem
      * @see Quartiles
@@ -466,7 +467,7 @@ public class EndToEndTest {
      * Converts data value string to SensorType.
      *
      * @throws IllegalArgumentException if the specified data does not match any of the already
-     *          known ones
+     * known ones
      */
     private static String getSensorType(MockDataConfig config) {
         if (config.getSensor().equals("BATTERY_LEVEL")) {

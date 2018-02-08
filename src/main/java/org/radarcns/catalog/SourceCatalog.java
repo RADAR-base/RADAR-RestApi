@@ -31,7 +31,6 @@ import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.mongo.data.sensor.DataFormat;
 import org.radarcns.util.CachedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +46,6 @@ public class SourceCatalog {
 
     private CachedMap<String, SourceData> sourceData;
 
-    private final ManagementPortalClient managementPortalClient;
-
     private static final Duration CACHE_INVALIDATE_DEFAULT = Duration.ofMinutes(1);
 
     private static final Duration CACHE_RETRY_DEFAULT = Duration.ofHours(1);
@@ -60,11 +57,11 @@ public class SourceCatalog {
      */
     @Inject
     public SourceCatalog(ManagementPortalClient managementPortalClient) {
-        this.managementPortalClient = managementPortalClient;
-        this.sourceTypes = new CachedMap<>(this.managementPortalClient::retrieveSourceTypes,
+        LOGGER.debug("Initializing source catalogue");
+        this.sourceTypes = new CachedMap<>(managementPortalClient::retrieveSourceTypes,
                 SourceType::getSourceTypeIdentifier,
                 CACHE_INVALIDATE_DEFAULT, CACHE_RETRY_DEFAULT);
-        this.sourceData = new CachedMap<>(this.managementPortalClient::retrieveSourceData,
+        this.sourceData = new CachedMap<>(managementPortalClient::retrieveSourceData,
                 SourceData::getSourceDataName,
                 CACHE_INVALIDATE_DEFAULT, CACHE_RETRY_DEFAULT);
     }
@@ -130,36 +127,6 @@ public class SourceCatalog {
         return result;
     }
 
-//    /**
-//     * Returns the {@code SourceDefinition} associated with the given {@code SourceType}.
-//     * @return the singleton {@code SourceDefinition} instance
-//     */
-//    public SourceType getSourceTypeDefinition(SourceTypeIdentifier sourceType) {
-//        SourceType definition = sourceTypes.get(true).get(sourceType);
-//
-//        if (definition == null) {
-//            throw new UnsupportedOperationException(sourceType + " is not supported yet.");
-//        }
-//
-//        return definition;
-//    }
-
-//    /**
-//     * Returns sourceType's SourceDefinition.
-//     * @param sourceType sourceType involved in the interaction
-//     * @return the SourceDefinition related to the input
-//     * @see SourceDefinition
-//     */
-//    public SourceDefinition getDefinition(String sourceType) {
-//        SourceDefinition definition = sourceCatalog.get(sourceType);
-//
-//        if (definition != null) {
-//            return definition;
-//        }
-//
-//        throw new UnsupportedOperationException(sourceType + " is not currently supported.");
-//    }
-
     /**
      * Returns the supported sourceType type.
      *
@@ -179,20 +146,5 @@ public class SourceCatalog {
         return sourceData.get().values().stream().collect(Collectors.toSet());
     }
 
-
-    /**
-     * Returns the DataFormat associated with the sensor.
-     */
-    public DataFormat getFormat(String sensor) {
-//        DataFormat format = formatMap.get(sensor);
-//
-//        if (format != null) {
-//            return format;
-//        }
-
-        return null;
-
-//        throw new UnsupportedOperationException(sensor + " is not currently supported.");
-    }
 
 }

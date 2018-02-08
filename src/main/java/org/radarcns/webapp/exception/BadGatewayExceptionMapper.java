@@ -1,6 +1,5 @@
 package org.radarcns.webapp.exception;
 
-import java.io.IOException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -10,7 +9,8 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BadGatewayExceptionMapper extends BadGatewayException implements ExceptionMapper<BadGatewayException> {
+public class BadGatewayExceptionMapper extends BadGatewayException implements
+        ExceptionMapper<BadGatewayException> {
 
     private static final Logger logger = LoggerFactory.getLogger(BadGatewayExceptionMapper.class);
 

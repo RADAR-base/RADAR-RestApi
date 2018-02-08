@@ -141,8 +141,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             return getArrayItems(expectedValue, keys, header.getDescriptiveStatistic(),
                     header.getSourceDataType());
         } else if (singleExpectedValue instanceof DoubleValueCollector) {
-            return getSingletonItems(expectedValue, keys, header.getDescriptiveStatistic(),
-                    header.getSourceDataType());
+            return getSingletonItems(expectedValue, keys, header.getDescriptiveStatistic());
         } else {
             throw new IllegalArgumentException(header.getSourceDataType() + " not supported yet");
         }
@@ -203,11 +202,11 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param keys {@code Collection} of timewindow initial time
      * @param statistic function that has to be simulated
-     * @param sensor @return {@code List<Item>} for a data set represented as {@code Double}.
+     * @return {@code List<Item>} for a data set represented as {@code Double}.
      **/
     private List<DataItem> getSingletonItems(ExpectedValue expectedValue,
-            Collection<Long> keys, DescriptiveStatistic statistic,
-            String sensor) throws InstantiationException, IllegalAccessException {
+            Collection<Long> keys, DescriptiveStatistic statistic)
+            throws InstantiationException, IllegalAccessException {
         List<DataItem> items = new LinkedList<>();
 
         for (Long key : keys) {
@@ -222,7 +221,8 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
 
-    private <T> T getContent(Object object, DescriptiveStatistic stat) throws IllegalAccessException, InstantiationException {
+    private <T> T getContent(Object object, DescriptiveStatistic stat)
+            throws IllegalAccessException, InstantiationException {
         T content;
 
         switch (stat) {

@@ -33,7 +33,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.NeedsPermissionOnProject;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.auth.authorization.Permission.Entity;
@@ -57,7 +56,7 @@ public class SubjectEndPoint {
      * JSON function that returns all available subject based on the Study ID (Project ID).
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
     @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS)
     @Operation(summary = "Return a list of subjects contained within a study",
             description = "Each subject can have multiple sourceID associated with him")
@@ -98,7 +97,7 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SUBJECT, operation = READ)
-    public org.radarcns.domain.restapi.Subject getSubjectJson(
+    public Subject getSubjectJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {
         return subjectService.getSubjectBySubjectId(projectName, subjectId);

@@ -78,8 +78,8 @@ public class DataSetService {
         sourceCatalog.getSourceTypes().forEach(sourceType -> {
             List<SourceData> sourceTypeConsumer = sourceType.getSourceData();
             sourceTypeConsumer.forEach(sourceData ->
-                mongoSensorMap.put(sourceData.getSourceDataName(), DataFormat.getMongoSensor
-                        (sourceData))
+                    mongoSensorMap.put(sourceData.getSourceDataName(), DataFormat.getMongoSensor
+                            (sourceData))
             );
         });
 

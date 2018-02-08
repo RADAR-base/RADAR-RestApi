@@ -21,16 +21,15 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.inject.Inject;
 import org.radarcns.domain.restapi.Application;
-import org.radarcns.mongo.data.android.ApplicationStatusUpTime;
 import org.radarcns.mongo.data.android.ApplicationStatusRecordCounter;
 import org.radarcns.mongo.data.android.ApplicationStatusServerStatus;
+import org.radarcns.mongo.data.android.ApplicationStatusUpTime;
 import org.radarcns.mongo.data.android.MongoApplicationStatusWrapper;
 
 /**
  * Data Access Object for Android App Status values.
  */
 public class ApplicationStatusMonitorService {
-
 
 
     private final List<MongoApplicationStatusWrapper> dataAccessObjects;
@@ -57,11 +56,13 @@ public class ApplicationStatusMonitorService {
         Application app = null;
 
         for (MongoApplicationStatusWrapper dataAccessObject : dataAccessObjects) {
-            app = dataAccessObject.valueByProjectSubjectSource(project, subject, source, app, client);
+            app = dataAccessObject
+                    .valueByProjectSubjectSource(project, subject, source, app, client);
         }
 
         return app;
     }
+
     /**
      * Returns all mongoDb collections used by this DAO.
      *

@@ -27,10 +27,10 @@ public class RadarSecurityContext implements SecurityContext {
     /**
      * Maps roles in the shape {@code "project:role"} to a Management Portal role. Global roles take
      * the shape of {@code ":global_role"}. This allows for example a {@code
-     * @RolesAllowed(":SYS_ADMIN")} annotation to resolve correctly.
      *
      * @param role role to be mapped
      * @return {@code true} if the RadarToken contains given project/role, {@code false} otherwise
+     * @RolesAllowed(":SYS_ADMIN")} annotation to resolve correctly.
      */
     @Override
     public boolean isUserInRole(String role) {

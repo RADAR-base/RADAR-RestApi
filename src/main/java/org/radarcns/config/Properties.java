@@ -52,11 +52,6 @@ public final class Properties {
     public static final String NAME_CONFIG_FILE = "radar.yml";
 
     /**
-     * Path where the config file is located.
-     **/
-    private static String validPath;
-
-    /**
      * Singleton. The default folder for config files is {@code PATH_FILE}. It can be override
      * setting the environment variable {@code CONFIG_FOLDER}. In case, no one of those contain the
      * expected file, the {@code ClassLoader} is used to load file from the resources folder.
@@ -103,7 +98,6 @@ public final class Properties {
         }
 
         String path = Properties.class.getClassLoader().getResource(NAME_CONFIG_FILE).getFile();
-        validPath = new File(path).getParent() + "/";
 
         LOGGER.info("Loading Config file located at : {}", path);
 
@@ -111,14 +105,12 @@ public final class Properties {
     }
 
     private static ApplicationConfig loadApiConfig(String path) throws IOException {
-        validPath = path;
         String filePath = path + NAME_CONFIG_FILE;
 
         if (fileExists(filePath)) {
             LOGGER.info("Loading Config file located at : {}", path);
             return new YamlConfigLoader().load(new File(filePath), ApplicationConfig.class);
         } else {
-            validPath = null;
             return null;
         }
     }

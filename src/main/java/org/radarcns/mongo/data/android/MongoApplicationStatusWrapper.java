@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class MongoApplicationStatusWrapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoApplicationStatusWrapper.class);
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(MongoApplicationStatusWrapper.class);
 
     /**
      * Returns an {@code Application} initialised with the extracted value.

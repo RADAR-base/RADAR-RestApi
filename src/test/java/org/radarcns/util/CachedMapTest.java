@@ -20,7 +20,9 @@ public class CachedMapTest {
     private AtomicInteger calls;
     private CachedMap<String, String> map;
 
-    /** Set up a basic map and empty calls. */
+    /**
+     * Set up a basic map and empty calls.
+     */
     @Before
     public void setUp() {
         calls = new AtomicInteger(0);

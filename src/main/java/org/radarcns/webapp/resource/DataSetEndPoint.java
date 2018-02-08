@@ -163,11 +163,10 @@ public class DataSetEndPoint {
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
         Dataset dataset;
-        if(start != null && end != null) {
+        if (start != null && end != null) {
             dataset = dataSetService.getAllRecordsInWindow(projectName,
                     subjectId, sourceId, sourceDataName, stat, interval, start, end);
-        }
-        else {
+        } else {
             dataset = dataSetService.getAllDataItems(projectName, subjectId,
                     sourceId, sourceDataName, stat, interval);
         }

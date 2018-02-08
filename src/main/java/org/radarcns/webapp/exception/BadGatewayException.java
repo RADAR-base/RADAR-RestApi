@@ -8,6 +8,7 @@ public class BadGatewayException extends WebApplicationException {
     public BadGatewayException() {
         super(Status.BAD_GATEWAY);
     }
+
     public BadGatewayException(Throwable cause) {
         super(cause, Status.BAD_GATEWAY);
     }

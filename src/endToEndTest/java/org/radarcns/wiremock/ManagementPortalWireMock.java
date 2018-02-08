@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
  * Created by yatharthranjan on 14/11/2017.
  */
 public class ManagementPortalWireMock extends ExternalResource {
+
     private static Logger logger = LoggerFactory.getLogger(ManagementPortalWireMock.class);
 
     private static final String APPLICATION_JSON = "application/json; charset=utf-8";
