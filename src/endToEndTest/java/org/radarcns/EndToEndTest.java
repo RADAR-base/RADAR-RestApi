@@ -265,21 +265,24 @@ public class EndToEndTest {
             for (DataItem item : dataset.getDataset()) {
                 if (item.getSample() instanceof Double) {
                     Double sample = (Double) item.getSample();
-                    item.setSample(new Double(RadarConverter.roundDouble(
-                            (Double) sample / RadarConverter.getExpectedMessages(
-                                    updatedHeader), 2)));
+                    item.setSample(RadarConverter.roundDouble(
+                             sample / RadarConverter.getExpectedMessages(
+                                    updatedHeader.getTimeWindow(), null), 2));
                 } else if (item.getSample() instanceof Acceleration) {
                     Acceleration sample = (Acceleration) item.getSample();
                     item.setSample(new Acceleration(
                             RadarConverter.roundDouble(
-                                    (Double) sample.getX() / RadarConverter.getExpectedMessages(
-                                            updatedHeader), 2),
+                                    (Double) sample.getX() / RadarConverter
+                                            .getExpectedMessages(updatedHeader.getTimeWindow(),
+                                                    null), 2),
                             RadarConverter.roundDouble(
-                                    (Double) sample.getY() / RadarConverter.getExpectedMessages(
-                                            updatedHeader), 2),
+                                    (Double) sample.getY() / RadarConverter
+                                            .getExpectedMessages(updatedHeader.getTimeWindow(),
+                                                    null), 2),
                             RadarConverter.roundDouble(
-                                    (Double) sample.getZ() / RadarConverter.getExpectedMessages(
-                                            updatedHeader), 2)));
+                                    (Double) sample.getZ() / RadarConverter
+                                            .getExpectedMessages(updatedHeader.getTimeWindow(),
+                                                    null), 2)));
                 } else {
                     throw new IllegalArgumentException(
                             item.getSample().getClass().getCanonicalName()

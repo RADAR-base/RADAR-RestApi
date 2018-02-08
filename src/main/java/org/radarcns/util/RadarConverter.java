@@ -38,7 +38,6 @@ import java.util.concurrent.TimeUnit;
 import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.slf4j.Logger;
@@ -233,18 +232,14 @@ public final class RadarConverter {
     }
 
     /**
-     * Returns the amount of expected data related to the sourceType type, sensor type and {@link
-     * TimeWindow} specified in the {@link Header}.
+     * Returns the expected number of records
      *
-     * @param header {@link Header} to provide data context
+     * @param timeWindow {@link TimeWindow} to provide data context
+     * @param frequency {@link Double} to provide data context
      * @return the number of expected messages
      */
-    public static Double getExpectedMessages(Header header) {
-//        return SourceCatalog.getInstance().getDefinition(header.getSource()).getFrequency(
-//                header.getType()) * getSecond(header.getTimeWindow()).doubleValue();
-//        return SourceCatalog.getInstance(header.getSourceType()).getFrequency(
-//                header.getType()) * getSecond(header.getTimeWindow()).doubleValue();
-        return null;
+    public static Double getExpectedMessages(TimeWindow timeWindow , Double frequency) {
+        return getSecond(timeWindow)* frequency;
     }
 
     /**

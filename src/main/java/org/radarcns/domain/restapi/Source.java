@@ -45,7 +45,6 @@ public class Source {
     public Source(java.lang.String id, java.lang.String type) {
         this.sourceId = id;
         this.sourceTypeModel = type;
-//        this.summary = summary;
     }
 
     public Source sourceId(String sourceId) {
@@ -57,9 +56,6 @@ public class Source {
         return sourceId;
     }
 
-    public void setSourceId(String sourceId) {
-        this.sourceId = sourceId;
-    }
 
     public Source sourceName(String sourceName) {
         this.sourceName = sourceName;
@@ -70,9 +66,6 @@ public class Source {
         return sourceName;
     }
 
-    public void setSourceName(String sourceName) {
-        this.sourceName = sourceName;
-    }
 
     public Source sourceTypeProducer(String sourceTypeProducer) {
         this.sourceTypeProducer = sourceTypeProducer;
@@ -83,9 +76,6 @@ public class Source {
         return sourceTypeProducer;
     }
 
-    public void setSourceTypeProducer(String sourceTypeProducer) {
-        this.sourceTypeProducer = sourceTypeProducer;
-    }
 
     public Source sourceTypeModel(String sourceTypeModel) {
         this.sourceTypeModel = sourceTypeModel;
@@ -96,9 +86,6 @@ public class Source {
         return sourceTypeModel;
     }
 
-    public void setSourceTypeModel(String sourceTypeModel) {
-        this.sourceTypeModel = sourceTypeModel;
-    }
 
     public Source sourceTypeCatalogVersion(String sourceTypeCatalogVersion) {
         this.sourceTypeCatalogVersion = sourceTypeCatalogVersion;
@@ -109,9 +96,6 @@ public class Source {
         return sourceTypeCatalogVersion;
     }
 
-    public void setSourceTypeCatalogVersion(String sourceTypeCatalogVersion) {
-        this.sourceTypeCatalogVersion = sourceTypeCatalogVersion;
-    }
 
     public Source assigned(Boolean assigned) {
         this.assigned = assigned;
@@ -122,9 +106,6 @@ public class Source {
         return assigned;
     }
 
-    public void setAssigned(Boolean assigned) {
-        this.assigned = assigned;
-    }
 
     public Source status(String status) {
         this.status = status;
@@ -135,9 +116,6 @@ public class Source {
         return status;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     public Source effectiveTimeFrame(EffectiveTimeFrame effectiveTimeFrame) {
         this.effectiveTimeFrame = effectiveTimeFrame;
@@ -148,7 +126,4 @@ public class Source {
         return effectiveTimeFrame;
     }
 
-    public void setEffectiveTimeFrame(EffectiveTimeFrame effectiveTimeFrame) {
-        this.effectiveTimeFrame = effectiveTimeFrame;
-    }
 }

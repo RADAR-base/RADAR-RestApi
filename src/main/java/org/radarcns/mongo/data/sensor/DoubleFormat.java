@@ -56,7 +56,7 @@ public class DoubleFormat extends MongoSourceDataWrapper {
                         quartiles.get(2));
             case RECEIVED_MESSAGES:
                 return RadarConverter.roundDouble(
-                        doc.getDouble(field) / RadarConverter.getExpectedMessages(header),
+                        doc.getDouble(field) / getExpectedRecordCount(header.getTimeWindow()),
                         2);
             default:
                 return doc.getDouble(field);

@@ -32,9 +32,6 @@ public class Subject {
         return subjectId;
     }
 
-    public void setSubjectId(String subjectId) {
-        this.subjectId = subjectId;
-    }
 
     public Subject status(String status) {
         this.status = status;
@@ -45,9 +42,6 @@ public class Subject {
         return status;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     public Subject humanReadableId(String humanReadableId) {
         this.humanReadableId = humanReadableId;
@@ -58,9 +52,6 @@ public class Subject {
         return humanReadableId;
     }
 
-    public void setHumanReadableId(String humanReadableId) {
-        this.humanReadableId = humanReadableId;
-    }
 
     public Subject projectName(String projectName) {
         this.projectName = projectName;
@@ -71,9 +62,6 @@ public class Subject {
         return projectName;
     }
 
-    public void setProject(String projectName) {
-        this.projectName = projectName;
-    }
 
 
     public Subject sources(List<Source> sources) {
@@ -91,9 +79,6 @@ public class Subject {
         return sources;
     }
 
-    public void setSources(List<Source> sources) {
-        this.sources = sources;
-    }
 
     public Subject lastSeen(String lastSeen) {
         this.lastSeen = lastSeen;
@@ -104,7 +89,4 @@ public class Subject {
         return lastSeen;
     }
 
-    public void setLastSeen(String lastSeen) {
-        this.lastSeen = lastSeen;
-    }
 }

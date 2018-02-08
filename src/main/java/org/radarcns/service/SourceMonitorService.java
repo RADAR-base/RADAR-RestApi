@@ -23,9 +23,11 @@ import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceType;
+import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.States;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
@@ -133,15 +135,15 @@ public class SourceMonitorService {
      *
      * @see Source
      */
-//    public Source getState(String subjectId, String sourceId, MongoClient client ,  double countTemp)
-//            throws ConnectException {
-//
-//        long tenSec = TimeUnit.SECONDS.toMillis(10);
-//        long end = (System.currentTimeMillis() / tenSec) * tenSec;
-//        long start = end - TimeUnit.MINUTES.toMillis(1);
-//
-//        return getState(subjectId, sourceId, start, end, client , countTemp);
-//    }
+    public Source getState(String subjectId, String sourceId, MongoClient client ,  double countTemp)
+            throws ConnectException {
+
+        long tenSec = TimeUnit.SECONDS.toMillis(10);
+        long end = (System.currentTimeMillis() / tenSec) * tenSec;
+        long start = end - TimeUnit.MINUTES.toMillis(1);
+
+        return getState(subjectId, sourceId, start, end, client , countTemp);
+    }
 
     /**
      * Checks the status for the given sourceType counting the number of received messages and
@@ -157,34 +159,12 @@ public class SourceMonitorService {
      *
      * @see Source
      */
-//    public Source getState(String subject, String sourceType, long start, long end, MongoClient
-//            client ,  double countTemp)
-//            throws ConnectException {
-//        Map<String, Sensor> sensorMap = new HashMap<>();
-//
-//        double percentTemp;
-//        for (String type : specification.getSensorTypes()) {
-//
-//            percentTemp = getPercentage(countTemp, specification.getFrequency(type) * 60);
-//
-//            sensorMap.put(type, new Sensor(type, getStatus(percentTemp), (int)countTemp,
-//                    RadarConverter.roundDouble(1.0 - percentTemp, 2)));
-//        }
-//
-//        double countMex = 0;
-//        double avgPerc = 0;
-//        for (Sensor sensor : sensorMap.values()) {
-//            countMex += sensor.getReceivedMessage();
-//            avgPerc += sensor.getMessageLoss();
-//        }
-//
-//        avgPerc = avgPerc / 7.0;
-//
-//        SourceSummary sourceState = new SourceSummary(getStatus(1 - avgPerc),
-//                (int)countMex, RadarConverter.roundDouble(avgPerc, 2), sensorMap);
-//
-//        return new Source(sourceType, specification.getType(), sourceState);
-//    }
+    public Source getState(String subject, String sourceType, long start, long end, MongoClient
+            client ,  double countTemp)
+            throws ConnectException {
+        //TODO calculate source state
+        return null;
+    }
 
     /**
      * Returns the percentage of received message with respect to the expected value.
@@ -217,7 +197,4 @@ public class SourceMonitorService {
         }
     }
 
-//    public SourceDefinition getSourceType() {
-//        return specification;
-//    }
 }

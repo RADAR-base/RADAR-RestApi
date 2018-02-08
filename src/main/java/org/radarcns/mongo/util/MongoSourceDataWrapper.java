@@ -67,6 +67,10 @@ public abstract class MongoSourceDataWrapper {
         return sourceData.getSourceDataType();
     }
 
+    public Double getFrequency() {
+        return sourceData.getFrequency();
+    }
+
     /**
      * Returns the {@code DataFormat} related to this instance.
      */
@@ -293,5 +297,9 @@ public abstract class MongoSourceDataWrapper {
         map.put(TimeWindow.ONE_DAY, topicName.concat("_1d"));
         map.put(TimeWindow.ONE_WEEK, topicName.concat("_1w"));
         return map;
+    }
+
+    public Double getExpectedRecordCount(TimeWindow timeWindow) {
+        return RadarConverter.getSecond(timeWindow) * getFrequency();
     }
 }

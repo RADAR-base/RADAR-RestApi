@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -117,10 +116,10 @@ public class SourceCatalog {
     public SourceData getSourceData(String sourceDataName)
             throws NotFoundException, IOException {
         SourceData result = sourceData.get(sourceDataName);
-        if (Objects.isNull(result)) {
+        if (result == null) {
             result = sourceData.get(true).get(sourceDataName);
         }
-        if (Objects.isNull(result)) {
+        if (result == null) {
             throw new NotFoundException(
                     "Cannot find sourceType-data of identifier " + sourceDataName);
         }
