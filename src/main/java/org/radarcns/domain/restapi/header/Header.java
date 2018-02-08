@@ -66,8 +66,7 @@ public class Header {
      * @param descriptiveStatistic Statical value expressed by samples.
      * @param unit Unit used by the sourceType.
      * @param timeWindow Time interval between two consecutive samples.
-     * @param effectiveTimeFrame Timestamps of the first and the last samples contained in the
-     * dataset.
+     * @param effectiveTimeFrame Timestamps of the first and the last samples in the data-set.
      */
     public Header(String projectId, String subjectId, String sourceId, String sourceType, String
             sourceDataType,

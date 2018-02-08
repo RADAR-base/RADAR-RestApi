@@ -23,6 +23,7 @@ import static org.radarcns.webapp.resource.BasePath.PROJECTS;
 import static org.radarcns.webapp.resource.BasePath.SOURCES;
 import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
+import static org.radarcns.webapp.resource.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,47 +78,35 @@ public class SourceEndPoint {
         return sourceService.getAllSourcesOfSubject(projectName, subjectId);
     }
 
-//    //------------------------------------------------------------------------------------------//
-//    //                                       STATE FUNCTIONS                                    //
-//    //------------------------------------------------------------------------------------------//
-//
-//    /**
-//     * JSON function that returns the status of the given source.
-//     */
-//    @GET
-//    @Produces({APPLICATION_JSON, AVRO_BINARY})
-//    @Path("/" + STATE + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
-//    @Operation(summary = "Return a SourceDefinition values",
-//            description = "Using the source sensors values arrived within last 60sec, it computes "
-//                    + "the"
-//                    + "sender status for the given subjectID and sourceID")
-//    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-//            + "there is a message.avsc object with more details")
-//    @ApiResponse(responseCode = "200", description = "Return a source.avsc object containing last"
-//            + "computed status")
-//    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
-//    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-//    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
-//    @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
-//    public Source getLastComputedSourceStatusJson(
-//            @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
-//            @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
-//            @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
-//        org.radarcns.domain.managementportal.Subject sub = mpClient.getSubject(subjectId);
-//
-//        String sourceType = sourceDataAccessObject.getSourceType(sourceId, mongoClient);
-//
-//        if (sourceType != null) {
-//            return Monitors.getInstance().getState(mongoClient, subjectId, sourceId, sourceType);
-//        } else {
-//            Optional<org.radarcns.domain.managementportal.Source> source = sub.getSources().stream()
-//                    .filter(s -> s.getSourceId().equals(sourceId))
-//                    .findAny();
-//
-//            return new Source(sourceId,
-//                    source.map(s -> (s.getSourceTypeProducer() + "_" + s.getSourceTypeModel())
-//                            .toUpperCase()).orElse("UNKNOWN"));
-//        }
-//    }
+    //------------------------------------------------------------------------------------------//
+    //                                       STATE FUNCTIONS                                    //
+    //------------------------------------------------------------------------------------------//
+
+    /**
+     * JSON function that returns the status of the given source.
+     */
+    @GET
+    @Produces({APPLICATION_JSON, AVRO_BINARY})
+    @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS + "/{" + SUBJECT_ID + "}" + "/" + SOURCES
+            + "}/{" + SOURCE_ID + "}")
+    @Operation(summary = "Return a SourceDefinition values",
+            description = "Using the source sensors values arrived within last 60sec, it computes"
+                    + " the sender status for the given subjectID and sourceID")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
+            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "200", description = "Return a source.avsc object containing last"
+            + "computed status")
+    @ApiResponse(responseCode = "401", description = "Access denied error occurred")
+    @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
+    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
+    @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
+    public Source getLastComputedSourceStatusJson(
+            @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
+            @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
+            @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
+
+        // TODO implement source-summary calculation which includes the compliance
+        return new Source();
+    }
 
 }

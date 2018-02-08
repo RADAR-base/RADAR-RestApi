@@ -22,10 +22,8 @@ public class DataItem {
     /**
      * All-args constructor.
      *
-     * @param sample Sample value. For more details, check org.radarcns.domain.restapi
-     * .Acceleration, java.lang.Double and org.radarcns.questionnaire.Questionnaire.
-     * @param startDateTime Point in time (ISO8601) with UTC timezone. It represents the timestamp
-     * of the first sample contained inside the aggregated data.
+     * @param sample Sample value.
+     * @param startDateTime Point in time (ISO8601) with UTC timezone of first sample in data-set.
      */
     public DataItem(java.lang.Object sample, java.lang.String startDateTime) {
         this.sample = sample;

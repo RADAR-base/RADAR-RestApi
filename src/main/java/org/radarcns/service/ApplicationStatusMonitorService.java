@@ -34,6 +34,10 @@ public class ApplicationStatusMonitorService {
 
     private final List<MongoApplicationStatusWrapper> dataAccessObjects;
 
+    /**
+     * Default constructor.
+     * Initiates all the delegate classes to compute Application Status.
+     */
     @Inject
     public ApplicationStatusMonitorService() {
         dataAccessObjects = new LinkedList<>();

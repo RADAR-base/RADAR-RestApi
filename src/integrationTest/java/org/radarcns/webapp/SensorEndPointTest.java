@@ -19,7 +19,6 @@
 //import static java.util.Collections.singletonList;
 //import static org.hamcrest.Matchers.empty;
 //import static org.hamcrest.Matchers.is;
-//import static org.junit.Assert.assertEquals;
 //import static org.junit.Assert.assertThat;
 //import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
 //import static org.radarcns.webapp.resource.BasePath.DATA;
@@ -37,8 +36,6 @@
 //import org.junit.Test;
 //import org.radarcns.catalogue.TimeWindow;
 //import org.radarcns.catalogue.Unit;
-//import org.radarcns.service.ApplicationStatusMonitorService;
-//import org.radarcns.service.DataSetService;
 //import org.radarcns.dao.mongo.util.MongoHelper;
 //import org.radarcns.integration.util.ApiClient;
 //import org.radarcns.integration.util.RandomInput;
@@ -46,6 +43,8 @@
 //import org.radarcns.integration.util.Utility;
 //import org.radarcns.restapi.data.DoubleSample;
 //import org.radarcns.restapi.dataset.Dataset;
+//import org.radarcns.service.ApplicationStatusMonitorService;
+//import org.radarcns.service.DataSetService;
 //import org.radarcns.util.RadarConverter;
 //
 //public class SensorEndPointTest {
@@ -171,7 +170,8 @@
 //        Utility.dropCollection(client,
 //                DataSetService.getInstance(SENSOR_TYPE).getCollectionName(
 //                        SOURCE_TYPE, TIME_WINDOW));
-//        Utility.dropCollection(client, ApplicationStatusMonitorService.getInstance().getCollections());
+//        Utility.dropCollection(client,
+//                ApplicationStatusMonitorService.getInstance().getCollections());
 //        client.close();
 //    }
 //

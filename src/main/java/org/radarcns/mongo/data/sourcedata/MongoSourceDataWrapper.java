@@ -83,9 +83,7 @@ public abstract class MongoSourceDataWrapper {
      * @param source is the sourceID
      * @param stat is the required statistical value
      * @param header information used to provide the data context
-     * @param collection is the mongoDb collection that has to be queried
-     * @return the last seen data value stat for the given subject and sourceType, otherwise empty
-     * dataset
+     * @param collection is the mongoDb collection that has to data-set.
      * @see Dataset
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
@@ -132,8 +130,7 @@ public abstract class MongoSourceDataWrapper {
      * @param start is time window start point in millisecond
      * @param end is time window end point in millisecond
      * @param collection is the mongoDb collection that has to be queried
-     * @return data dataset for the given subject and sourceType within the start and end time
-     * window, otherwise empty dataset
+     * @return data-set for the given subject and source within the window, otherwise empty data-set
      * @see Dataset
      */
     public Dataset getAllRecordsInWindow(String projectName, String subject, String source, Header
@@ -242,11 +239,10 @@ public abstract class MongoSourceDataWrapper {
     }
 
     /**
-     * Returns the required mongoDB collection name for the given sourceType type.
+     * Returns the required mongoDB collection name for the given timeWindow of this source-data.
      *
-     * @param interval useful to identify which collection has to be queried. A sensor has a
-     * collection for each time frame or time window
-     * @return the MongoDB Collection name
+     * @param interval of data-set query.
+     * @return the MongoDB Collection name for given {@link TimeWindow}
      */
     public String getCollectionName(TimeWindow interval) {
         if (timeWindowToCollectionsMap.containsKey(interval)) {
@@ -258,7 +254,7 @@ public abstract class MongoSourceDataWrapper {
     }
 
     /**
-     * Convert a {@link Document} to the corresponding {@link org.apache.avro.specific.SpecificRecord}.
+     * Convert a {@link Document} to the corresponding SpecificRecord.
      * This function must be override by the subclass
      *
      * @param doc {@link Document} storing data used to create the related {@link DataItem}
@@ -276,8 +272,7 @@ public abstract class MongoSourceDataWrapper {
      * Extract the count information for the given MongoDB document. This function should be
      * overridden by the subclass.
      *
-     * @param doc is the Bson Document from which we extract the required value to compute the count
-     * value
+     * @param doc the document from the count should be extracted.
      * @return the count value
      */
     protected abstract int extractCount(Document doc);

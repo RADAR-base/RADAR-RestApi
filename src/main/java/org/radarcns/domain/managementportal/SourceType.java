@@ -66,6 +66,12 @@ public class SourceType {
         return sourceData;
     }
 
+    /**
+     * Returns the source-monitor-statistics collection name for this source-type based on
+     * convention.
+     * @return the source-monitor-statistics collection name
+     */
+    @JsonIgnore
     public String getSourceStatisticsMonitorTopic() {
         // based on the convention
         if (Objects.isNull(sourceStatisticsMonitorTopic) || sourceStatisticsMonitorTopic

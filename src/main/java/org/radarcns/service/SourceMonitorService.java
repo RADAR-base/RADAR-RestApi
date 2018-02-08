@@ -70,10 +70,9 @@ public class SourceMonitorService {
             String sourceId, SourceType sourceType) {
 
         // get the last document sorted by timeEnd
-        MongoCursor<Document> cursor = MongoHelper.findDocumentByProjectAndSubjectAndSource
-                (projectId, subjectId, sourceId,
-                        TIME_END, DESCENDING, 1,
-                        MongoHelper.getCollection(this.mongoClient,
+        MongoCursor<Document> cursor = MongoHelper
+                .findDocumentByProjectAndSubjectAndSource(projectId, subjectId, sourceId,
+                        TIME_END, DESCENDING, 1, MongoHelper.getCollection(this.mongoClient,
                                 sourceType.getSourceStatisticsMonitorTopic()));
 
         if (!cursor.hasNext()) {
@@ -96,7 +95,7 @@ public class SourceMonitorService {
 
     /**
      * This will fetch all the sourceIds received under given subjectId and projectId in the
-     * provided SourceType
+     * provided SourceType.
      *
      * @param projectName of the subject
      * @param subjectId of the subject
@@ -106,8 +105,8 @@ public class SourceMonitorService {
             SourceType sourceType) {
 
         // get the last document sorted by timeEnd
-        MongoCursor<String> cursor = MongoHelper.findAllSourcesBySubjectAndProject
-                (projectName, subjectId,
+        MongoCursor<String> cursor = MongoHelper
+                .findAllSourcesBySubjectAndProject(projectName, subjectId,
                         MongoHelper.getCollection(this.mongoClient,
                                 sourceType.getSourceStatisticsMonitorTopic()));
         if (!cursor.hasNext()) {
@@ -123,6 +122,7 @@ public class SourceMonitorService {
         cursor.close();
         return sourceIds;
     }
+
     /**
      * Checks the status for the given sourceType counting the number of received messages and
      *      checking whether it respects the data frequencies. There is a check for each data.
@@ -135,7 +135,7 @@ public class SourceMonitorService {
      *
      * @see Source
      */
-    public Source getState(String subjectId, String sourceId, MongoClient client ,  double countTemp)
+    public Source getState(String subjectId, String sourceId, MongoClient client, double countTemp)
             throws ConnectException {
 
         long tenSec = TimeUnit.SECONDS.toMillis(10);
@@ -151,7 +151,7 @@ public class SourceMonitorService {
      *
      * @param subject identifier
      * @param sourceType identifier
-     * @oaram start initial time that has to be monitored
+     * @param start initial time that has to be monitored
      * @param end final time that has to be monitored
      * @param client is the MongoDB client
      * @return {@code SourceDefinition} representing a sourceType sourceType
@@ -159,9 +159,9 @@ public class SourceMonitorService {
      *
      * @see Source
      */
-    public Source getState(String subject, String sourceType, long start, long end, MongoClient
-            client ,  double countTemp)
-            throws ConnectException {
+    public Source getState(String subject, String sourceType, long start, long end,
+            MongoClient client, double countTemp) throws ConnectException {
+
         //TODO calculate source state
         return null;
     }

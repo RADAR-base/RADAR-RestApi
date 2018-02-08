@@ -52,6 +52,9 @@ public class SourceMonitorServiceDbTest {
 
     private static SourceMonitorService monitor;
 
+    /**
+     * Initializes common objects required for the test.
+     */
     @Before
     public void setUp() {
         sourceType = new SourceType();

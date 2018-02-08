@@ -34,8 +34,8 @@ import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.mongo.data.sourcedata.DataFormat;
-import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.data.sourcedata.MongoSourceDataWrapper;
+import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,8 +78,8 @@ public class DataSetService {
         sourceCatalog.getSourceTypes().forEach(sourceType -> {
             List<SourceData> sourceTypeConsumer = sourceType.getSourceData();
             sourceTypeConsumer.forEach(sourceData ->
-                    mongoSensorMap.put(sourceData.getSourceDataName(), DataFormat.getMongoSensor
-                            (sourceData))
+                    mongoSensorMap.put(sourceData.getSourceDataName(),
+                            DataFormat.getMongoSensor(sourceData))
             );
         });
 
@@ -95,8 +95,7 @@ public class DataSetService {
      * @param sourceDataName of the data
      * @param stat is the required statistical value
      * @param timeWindow time frame resolution
-     * @return the last seen data value stat for the given subject and sourceType, otherwise empty
-     * dataset
+     * @return the last seen data value stat for the given subject and source, otherwise empty.
      * @see Dataset
      */
     public Dataset getLastReceivedSample(String projectName, String subjectId, String sourceId,
@@ -130,14 +129,14 @@ public class DataSetService {
      * @param sourceDataName of data
      * @param stat is the required statistical value
      * @param timeWindow time frame resolution
-     * @return data dataset for the given subject and sourceType, otherwise empty dataset
+     * @return dataset for the given subject and sourceType, otherwise empty dataset
      * @see Dataset
      */
     public Dataset getAllDataItems(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
             throws IOException {
-        org.radarcns.domain.managementportal.Source source = managementPortalClient.getSource
-                (sourceId);
+        org.radarcns.domain.managementportal.Source source = managementPortalClient
+                .getSource(sourceId);
 
         EffectiveTimeFrame effectiveTimeFrame = sourceMonitorService
                 .getEffectiveTimeFrame(projectName, subjectId, sourceId, sourceCatalog
@@ -145,9 +144,9 @@ public class DataSetService {
                                 source.getSourceTypeModel(),
                                 source.getSourceTypeCatalogVersion()));
 
-        Header header = getHeader(projectName, subjectId, sourceId, sourceCatalog.getSourceData
-                        (sourceDataName), stat,
-                timeWindow, source.getSourceTypeIdentifier().toString(), effectiveTimeFrame);
+        Header header = getHeader(projectName, subjectId, sourceId,
+                sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
+                source.getSourceTypeIdentifier().toString(), effectiveTimeFrame);
 
         MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
 
@@ -167,8 +166,7 @@ public class DataSetService {
      * @param timeWindow time frame resolution
      * @param start is time window start point in millisecond
      * @param end is time window end point in millisecond
-     * @return data dataset for the given subject and sourceType within the start and end time
-     * window, otherwise empty dataset
+     * @return dataset for the given subject and source for given query.
      * @see Dataset
      */
     public Dataset getAllRecordsInWindow(String projectName, String subjectId,
@@ -216,11 +214,11 @@ public class DataSetService {
     }
 
     /**
-     * Returns {@link EffectiveTimeFrame} during which the {@code subject} have sent data.
+     * Returns {@link EffectiveTimeFrame} during which the
+     * {@link org.radarcns.domain.managementportal.Subject} have sent data.
      *
      * @param subject subject identifier
-     * @return {@link EffectiveTimeFrame} reporting the interval during which the subject has sent
-     * data into the platform
+     * @return {@link EffectiveTimeFrame} of the subject in relevant project.
      * @throws ConnectException if the connection with MongoDb cannot be established
      */
     public EffectiveTimeFrame getEffectiveTimeFrame(String projectName, String subject)

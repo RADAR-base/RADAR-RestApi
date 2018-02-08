@@ -20,6 +20,12 @@ public class SubjectService {
 
     private SourceService sourceService;
 
+    /**
+     * Default constructor.
+     * Injects all dependencies.
+     * @param managementPortalClient
+     * @param sourceService
+     */
     @Inject
     public SubjectService(ManagementPortalClient managementPortalClient, SourceService
             sourceService) {
@@ -27,15 +33,21 @@ public class SubjectService {
         this.sourceService = sourceService;
     }
 
+    /**
+     * Checks whether given source-id is available in the sources available for the subject.
+     * @param subjectId
+     * @param sourceId
+     * @return {@code true} if available.
+     * @throws IOException
+     */
     public boolean checkSourceAssignedToSubject(String subjectId, String sourceId) throws
             IOException {
         Subject subject = managementPortalClient.getSubject(subjectId);
         if (subject.getSources().stream().filter(p -> p.getSourceId().equals(sourceId))
                 .collect(Collectors.toList()).isEmpty()) {
             LOGGER.error("Cannot find source-id " + sourceId + "for subject" + subject.getId());
-            throw new BadRequestException(
-                    "Source-id " + sourceId + " is not available for subject " +
-                            subject.getId());
+            throw new BadRequestException("Source-id " + sourceId + " is not available for subject "
+                    + subject.getId());
         }
         return true;
     }
@@ -50,6 +62,13 @@ public class SubjectService {
                         .getProjectName(), subject.getId()));
     }
 
+    /**
+     * Returns list of {@link org.radarcns.domain.restapi.Subject} available under given project.
+     * @param projectName
+     * @return list of subjects.
+     * @throws IOException
+     * @throws NotFoundException
+     */
     public List<org.radarcns.domain.restapi.Subject> getAllSubjectsFromProject(String projectName)
             throws IOException, NotFoundException {
         // returns NotFound if a project is not available

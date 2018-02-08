@@ -16,7 +16,6 @@
 //
 //package org.radarcns.webapp;
 //
-//import static org.hamcrest.MatcherAssert.assertThat;
 //import static org.hamcrest.Matchers.empty;
 //import static org.hamcrest.Matchers.is;
 //import static org.hamcrest.Matchers.nullValue;
@@ -45,8 +44,6 @@
 //import org.junit.Rule;
 //import org.junit.Test;
 //import org.radarcns.catalogue.TimeWindow;
-//import org.radarcns.service.ApplicationStatusMonitorService;
-//import org.radarcns.service.DataSetService;
 //import org.radarcns.dao.mongo.util.MongoDataAccess;
 //import org.radarcns.dao.mongo.util.MongoHelper;
 //import org.radarcns.integration.util.ApiClient;
@@ -61,6 +58,8 @@
 //import org.radarcns.restapi.spec.SensorSpecification;
 //import org.radarcns.restapi.spec.SourceSpecification;
 //import org.radarcns.restapi.subject.Subject;
+//import org.radarcns.service.ApplicationStatusMonitorService;
+//import org.radarcns.service.DataSetService;
 //import org.radarcns.webapp.resource.BasePath;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -114,7 +113,7 @@
 //
 //        List<SensorSpecification> spec = new LinkedList<>(
 //                Monitors.getInstance().getSpecification(
-//                    EMPATICA).getSensors().values());
+//                        EMPATICA).getSensors().values());
 //
 //        for (Sensor sensor : summary.getSensors().values()) {
 //            assertEquals(States.DISCONNECTED, sensor.getState());
@@ -175,7 +174,7 @@
 //
 //        MongoCollection<Document> collection = MongoHelper.getCollection(client,
 //                DataSetService.getInstance(SENSOR_TYPE).getCollectionName(
-//                    SOURCE_TYPE, TIME_WINDOW));
+//                        SOURCE_TYPE, TIME_WINDOW));
 //
 //        collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
 //                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false));
@@ -193,7 +192,8 @@
 //
 //        while (iterator.hasNext()) {
 //            switch (iterator.next().getType()) {
-//                case org.radarcns.config.TestCatalog.ANDROID: case EMPATICA:
+//                case org.radarcns.config.TestCatalog.ANDROID:
+//                case EMPATICA:
 //                    iterator.remove();
 //                    break;
 //                default:
@@ -221,15 +221,17 @@
 //        dropAndClose(Utility.getMongoClient());
 //    }
 //
-//    /** Drops all used collections to bring the database back to the initial state, and close the
-//     *      database connection.
+//    /**
+//     * Drops all used collections to bring the database back to the initial state, and close the
+//     * database connection.
 //     **/
 //    public void dropAndClose(MongoClient client) {
 //        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
 //        Utility.dropCollection(client,
 //                DataSetService.getInstance(SENSOR_TYPE).getCollectionName(
-//                    SOURCE_TYPE, TIME_WINDOW));
-//        Utility.dropCollection(client, ApplicationStatusMonitorService.getInstance().getCollections());
+//                        SOURCE_TYPE, TIME_WINDOW));
+//        Utility.dropCollection(client,
+//                ApplicationStatusMonitorService.getInstance().getCollections());
 //        client.close();
 //    }
 //

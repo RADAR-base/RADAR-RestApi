@@ -24,6 +24,13 @@ public class SourceService {
 
     private ManagementPortalClient managementPortalClient;
 
+    /**
+     * Default constructor.
+     * Injects all dependencies for the class.
+     * @param sourceMonitorService instance
+     * @param sourceCatalog instance
+     * @param managementPortalClient instance
+     */
     @Inject
     public SourceService(SourceMonitorService sourceMonitorService, SourceCatalog sourceCatalog,
             ManagementPortalClient managementPortalClient) {
@@ -33,13 +40,30 @@ public class SourceService {
     }
 
 
+    /**
+     * Builds list of {@link org.radarcns.domain.restapi.Source} of given subject under project
+     * using provided source. It calculates the
+     * {@link org.radarcns.domain.restapi.header.EffectiveTimeFrame} of each sources as well.
+     *
+     * @param projectId of subject
+     * @param subjectId of subject
+     * @param sources from MP
+     * @return list of sources assigned to subject under given project.
+     */
     public List<org.radarcns.domain.restapi.Source> buildSources(String projectId, String
-            subjectId,
-            List<Source> sources) {
+            subjectId, List<Source> sources) {
         return sources.stream().map(p -> buildSource(projectId, subjectId, p)).collect(Collectors
                 .toList());
     }
 
+    /**
+     * Build a {@link org.radarcns.domain.restapi.Source} using provided parameters and by
+     * calculating EffectiveTimeFrame of the source.
+     * @param projectId of subject
+     * @param subjectId of subject
+     * @param source instance from MP
+     * @return computed Source.
+     */
     public org.radarcns.domain.restapi.Source buildSource(String projectId, String subjectId,
             Source source) {
         SourceType sourceType = null;
@@ -75,7 +99,7 @@ public class SourceService {
 
 
     /**
-     * Returns all the sources recorded for a subject under given project
+     * Returns all the sources recorded for a subject under given project.
      *
      * @param projectName of subject
      * @param subjectId of subject

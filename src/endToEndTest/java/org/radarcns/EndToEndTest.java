@@ -468,9 +468,6 @@ public class EndToEndTest {
 
     /**
      * Converts data value string to SensorType.
-     *
-     * @throws IllegalArgumentException if the specified data does not match any of the already
-     * known ones
      */
     private static String getSensorType(MockDataConfig config) {
         if (config.getSensor().equals("BATTERY_LEVEL")) {

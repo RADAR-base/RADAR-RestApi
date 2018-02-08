@@ -102,12 +102,9 @@ public class ApiClient extends ExternalResource {
      *
      * @param relativePath path relative to the base URL, without starting slash.
      * @param accept Accept Header for content negotiation
-     * @param expectedResponseCode response codes that are considered valid. If none are given, any
-     * success response code is considered valid.
+     * @param expectedResponseCode response codes that are considered valid.
      * @return HTTP Response
      * @throws IOException if the request could not be executed
-     * @throws AssertionError if the response code does not match one of expectedResponse or if no
-     * expectedResponse is provided if the response code does not indicate success.
      */
     public Response request(String relativePath, String accept, Status... expectedResponseCode)
             throws IOException {

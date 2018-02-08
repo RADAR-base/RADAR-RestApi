@@ -238,8 +238,8 @@ public final class RadarConverter {
      * @param frequency {@link Double} to provide data context
      * @return the number of expected messages
      */
-    public static Double getExpectedMessages(TimeWindow timeWindow , Double frequency) {
-        return getSecond(timeWindow)* frequency;
+    public static Double getExpectedMessages(TimeWindow timeWindow, Double frequency) {
+        return getSecond(timeWindow) * frequency;
     }
 
     /**

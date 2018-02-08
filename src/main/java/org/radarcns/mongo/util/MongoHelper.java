@@ -94,8 +94,7 @@ public class MongoHelper {
      * @param start is the start time of the queried timewindow
      * @param end is the end time of the queried timewindow
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents between start and end for the given User,
-     * SourceDefinition and MongoDB collection
+     * @return a MongoDB cursor containing all documents from the query.
      */
     public static MongoCursor<Document> findDocumentByUserSourceWindow(String subject,
             String source, Long start, Long end, MongoCollection<Document> collection) {
@@ -118,8 +117,7 @@ public class MongoHelper {
      * @param start is the start time of the queried timewindow
      * @param end is the end time of the queried timewindow
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents between start and end for the given User,
-     * SourceDefinition and MongoDB collection
+     * @return a MongoDB cursor containing all documents from the query.
      */
     public static MongoCursor<Document> findDocumentsByProjectAndSubjectAndSourceInWindow(
             String projectName, String subject, String source, Long start, Long end,
@@ -145,8 +143,7 @@ public class MongoHelper {
      * means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents for the given User, SourceDefinition and
-     * MongoDB collection
+     * @return a MongoDB cursor containing all documents from query.
      */
     public static MongoCursor<Document> findDocumentByProjectAndSubjectAndSource(String
             project, String subject, String source, String sortBy, int order, Integer limit,
@@ -220,8 +217,7 @@ public class MongoHelper {
      * means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents for the given SourceDefinition and MongoDB
-     * collection
+     * @return a MongoDB cursor containing all documents from the query.
      */
     protected static MongoCursor<Document> findDocumentBySource(String source,
             String sortBy, int order, Integer limit, MongoCollection<Document> collection) {
@@ -252,8 +248,7 @@ public class MongoHelper {
      * means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents for the given SourceDefinition and MongoDB
-     * collection
+     * @return a MongoDB cursor containing all documents from query.
      */
     protected static MongoCursor<Document> findDocumentById(String id, String sortBy, int order,
             Integer limit, MongoCollection<Document> collection) {

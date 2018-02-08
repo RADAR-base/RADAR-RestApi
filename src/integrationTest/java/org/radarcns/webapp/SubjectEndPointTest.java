@@ -52,10 +52,7 @@ public class SubjectEndPointTest {
     private static final String SUBJECT_ID = "sub-1";
     private static final String SOURCE_ID = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
     private static final String MONITOR_STATISTICS_TOPIC = "source_statistics_empatica_e4";
-//    private static final String SOURCE_TYPE = "EMPATICA";
-//    private static final String SENSOR_TYPE = "HEART_RATE";
-//    private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
-//    private static final int SAMPLES = 10;
+
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
@@ -91,8 +88,8 @@ public class SubjectEndPointTest {
 
 
     private static Document getDocumentsForStatistics(long start, long end) {
-        return new Document(MongoHelper.ID, PROJECT_NAME + "_" + SUBJECT_ID + "-" + SOURCE_ID +
-                "-" + start + "-" + end)
+        return new Document(MongoHelper.ID, PROJECT_NAME + "_" + SUBJECT_ID + "-" + SOURCE_ID
+                + "-" + start + "-" + end)
                 .append(MongoHelper.USER_ID, SUBJECT_ID)
                 .append(MongoHelper.SOURCE_ID, SOURCE_ID)
                 .append(MongoHelper.PROJECT_ID, PROJECT_NAME)

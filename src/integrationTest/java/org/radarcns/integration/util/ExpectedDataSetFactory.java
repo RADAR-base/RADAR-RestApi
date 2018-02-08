@@ -236,13 +236,4 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
         return content;
     }
-
-//    private Class getSensorClass(String sensor) {
-//        switch (sensor) {
-//            case "ACCELEROMETER":
-//                return Acceleration.class;
-//            default:
-//                return Double.class;
-//        }
-//    }
 }
