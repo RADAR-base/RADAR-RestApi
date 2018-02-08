@@ -39,8 +39,6 @@ public class AccelerationFormat extends MongoSourceDataWrapper {
     public static final String Y_LABEL = "y";
     public static final String Z_LABEL = "z";
 
-    //private static final Logger LOGGER = LoggerFactory.getLogger(AccelerationFormat.class);
-
     public AccelerationFormat(SourceData sourceData) {
         super(sourceData);
     }

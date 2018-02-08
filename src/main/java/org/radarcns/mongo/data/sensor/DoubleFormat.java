@@ -33,8 +33,6 @@ import org.radarcns.util.RadarConverter;
  */
 public class DoubleFormat extends MongoSourceDataWrapper {
 
-    //private static final Logger LOGGER = LoggerFactory.getLogger(DoubleFormat.class);
-
     public DoubleFormat(SourceData sourceData) {
         super(sourceData);
     }

@@ -109,7 +109,7 @@
 //        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
 //        Utility.dropCollection(client, DataSetService.getInstance(
 //                SENSOR_TYPE).getCollectionName(SOURCE_TYPE, TIME_WINDOW));
-//        Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
+//        Utility.dropCollection(client, ApplicationStatusMonitorService.getInstance().getCollections());
 //        client.close();
 //    }
 //}

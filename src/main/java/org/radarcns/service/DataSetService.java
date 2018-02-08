@@ -277,7 +277,6 @@ public class DataSetService {
             EffectiveTimeFrame effectiveTimeFrame) throws IOException {
 
         return new Header(project, subject, source, sourceType, sourceData.getSourceDataType(),
-                stat,
-                sourceData.getUnit(), timeWindow, effectiveTimeFrame);
+                stat, sourceData.getUnit(), timeWindow, effectiveTimeFrame);
     }
 }

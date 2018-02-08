@@ -18,25 +18,21 @@ package org.radarcns.mongo.data.android;
 
 import org.bson.Document;
 import org.radarcns.domain.restapi.Application;
-import org.radarcns.mongo.util.MongoAndroidApp;
-import org.radarcns.util.RadarConverter;
 
-public class AndroidServerStatus extends MongoAndroidApp {
+public class ApplicationStatusUpTime extends MongoApplicationStatusWrapper {
 
-    public static final String STATUS_COLLECTION = "application_server_status";
+    public static final String UPTIME_COLLECTION = "application_uptime";
 
     //TODO take field names from RADAR MongoDb Connector
     @Override
     protected Application getApplication(Document doc, Application app) {
-        app.setIpAddress(doc.getString("clientIP"));
-        app.setServerStatus(RadarConverter.getServerStatus(doc.getString("serverStatus")));
+        app.setUptime(doc.getDouble("applicationUptime"));
 
         return app;
     }
 
     @Override
     public String getCollectionName() {
-        return STATUS_COLLECTION;
+        return UPTIME_COLLECTION;
     }
-
 }

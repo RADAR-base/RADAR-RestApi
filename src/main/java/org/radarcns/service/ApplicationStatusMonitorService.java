@@ -14,41 +14,33 @@
  * limitations under the License.
  */
 
-package org.radarcns.dao;
+package org.radarcns.service;
 
 import com.mongodb.MongoClient;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import javax.inject.Inject;
 import org.radarcns.domain.restapi.Application;
-import org.radarcns.domain.restapi.Source;
-import org.radarcns.mongo.data.android.AndroidAppStatus;
-import org.radarcns.mongo.data.android.AndroidRecordCounter;
-import org.radarcns.mongo.data.android.AndroidServerStatus;
-import org.radarcns.mongo.util.MongoAndroidApp;
+import org.radarcns.mongo.data.android.ApplicationStatusUpTime;
+import org.radarcns.mongo.data.android.ApplicationStatusRecordCounter;
+import org.radarcns.mongo.data.android.ApplicationStatusServerStatus;
+import org.radarcns.mongo.data.android.MongoApplicationStatusWrapper;
 
 /**
  * Data Access Object for Android App Status values.
  */
-public class AndroidAppDataAccessObject {
+public class ApplicationStatusMonitorService {
 
-    private static final AndroidAppDataAccessObject instance = new AndroidAppDataAccessObject();
 
-    public static AndroidAppDataAccessObject getInstance() {
-        return instance;
-    }
 
-    private final List<MongoAndroidApp> dataAccessObjects;
+    private final List<MongoApplicationStatusWrapper> dataAccessObjects;
 
-    private AndroidAppDataAccessObject() {
+    @Inject
+    public ApplicationStatusMonitorService() {
         dataAccessObjects = new LinkedList<>();
-
-        dataAccessObjects.add(new AndroidAppStatus());
-        dataAccessObjects.add(new AndroidRecordCounter());
-        dataAccessObjects.add(new AndroidServerStatus());
+        dataAccessObjects.add(new ApplicationStatusUpTime());
+        dataAccessObjects.add(new ApplicationStatusRecordCounter());
+        dataAccessObjects.add(new ApplicationStatusServerStatus());
     }
 
     /**
@@ -64,8 +56,8 @@ public class AndroidAppDataAccessObject {
             client) {
         Application app = null;
 
-        for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
-            app = dataAccessObject.valueBySubjectSource(project, subject, source, app, client);
+        for (MongoApplicationStatusWrapper dataAccessObject : dataAccessObjects) {
+            app = dataAccessObject.valueByProjectSubjectSource(project, subject, source, app, client);
         }
 
         return app;
@@ -78,7 +70,7 @@ public class AndroidAppDataAccessObject {
     public List<String> getCollections() {
         List<String> list = new LinkedList<>();
 
-        for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
+        for (MongoApplicationStatusWrapper dataAccessObject : dataAccessObjects) {
             list.add(dataAccessObject.getCollectionName());
         }
 

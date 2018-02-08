@@ -35,7 +35,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.NeedsPermissionOnSubject;
-import org.radarcns.dao.AndroidAppDataAccessObject;
+import org.radarcns.service.ApplicationStatusMonitorService;
 import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
@@ -58,6 +58,9 @@ public class AppStatusEndPoint {
 
     @Inject
     private SubjectService subjectService;
+
+    @Inject
+    private ApplicationStatusMonitorService applicationStatusMonitorService;
     //--------------------------------------------------------------------------------------------//
     //                                    APPLICATION_STATUS FUNCTIONS                            //
     //--------------------------------------------------------------------------------------------//
@@ -86,7 +89,7 @@ public class AppStatusEndPoint {
         mpClient.checkSubjectInProject(projectName, subjectId);
         Application application = null;
         if (subjectService.checkSourceAssignedToSubject(subjectId, sourceId)) {
-            application = AndroidAppDataAccessObject.getInstance().getStatus(projectName,
+            application = applicationStatusMonitorService.getStatus(projectName,
                     subjectId, sourceId, mongoClient);
         }
         if (application == null) {

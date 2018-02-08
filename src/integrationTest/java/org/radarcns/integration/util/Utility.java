@@ -16,9 +16,9 @@
 
 package org.radarcns.integration.util;
 
-import static org.radarcns.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
-import static org.radarcns.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
-import static org.radarcns.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
+import static org.radarcns.mongo.data.android.ApplicationStatusUpTime.UPTIME_COLLECTION;
+import static org.radarcns.mongo.data.android.ApplicationStatusRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.mongo.data.android.ApplicationStatusServerStatus.STATUS_COLLECTION;
 import static org.radarcns.mongo.util.MongoHelper.END;
 import static org.radarcns.mongo.util.MongoHelper.START;
 

@@ -71,7 +71,7 @@
 //                recordsSent, recordsUnsent);
 //
 //        assertEquals(application,
-//                AndroidAppDataAccessObject.getInstance().getStatus(SUBJECT, SOURCE, client));
+//                ApplicationStatusMonitorService.getInstance().getStatus(SUBJECT, SOURCE, client));
 //
 //        dropAndClose(client);
 //    }
@@ -87,7 +87,7 @@
 //                SUBJECT.concat("1"), SOURCE.concat("1")));
 //
 //        assertEquals(2,
-//                AndroidAppDataAccessObject.getInstance().findAllUser(client).size());
+//                ApplicationStatusMonitorService.getInstance().findAllUser(client).size());
 //
 //        dropAndClose(client);
 //    }
@@ -103,7 +103,7 @@
 //                SUBJECT, SOURCE.concat("1")));
 //
 //        assertEquals(2,
-//                AndroidAppDataAccessObject.getInstance().findAllSourcesBySubject(SUBJECT,
+//                ApplicationStatusMonitorService.getInstance().findAllSourcesBySubject(SUBJECT,
 //                        client).size());
 //
 //        dropAndClose(client);
@@ -121,10 +121,10 @@
 //                SOURCE_TYPE, SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false));
 //
 //        assertEquals(ANDROID,
-//                AndroidAppDataAccessObject.getInstance().findSourceType(SOURCE, client));
+//                ApplicationStatusMonitorService.getInstance().findSourceType(SOURCE, client));
 //
 //        assertEquals(null,
-//                AndroidAppDataAccessObject.getInstance().findSourceType(SOURCE.concat("1"),
+//                ApplicationStatusMonitorService.getInstance().findSourceType(SOURCE.concat("1"),
 //                    client));
 //
 //        dropAndClose(client);
@@ -140,7 +140,7 @@
 //     **/
 //    public void dropAndClose(MongoClient client) {
 //        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-//        Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
+//        Utility.dropCollection(client, ApplicationStatusMonitorService.getInstance().getCollections());
 //
 //        client.close();
 //    }

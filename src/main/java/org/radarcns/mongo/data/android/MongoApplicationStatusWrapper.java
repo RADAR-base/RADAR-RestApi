@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.util;
+package org.radarcns.mongo.data.android;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.radarcns.domain.restapi.Application;
+import org.radarcns.mongo.util.MongoHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Generic DAO to return Android App status information.
  */
-public abstract class MongoAndroidApp {
+public abstract class MongoApplicationStatusWrapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoAndroidApp.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoApplicationStatusWrapper.class);
 
     /**
      * Returns an {@code Application} initialised with the extracted value.
@@ -38,7 +39,7 @@ public abstract class MongoAndroidApp {
      * @param client is the mongoDb client instance
      * @return the last seen status update for the given subject and sourceType, otherwise null
      */
-    public Application valueBySubjectSource(String project, String subject, String source,
+    public Application valueByProjectSubjectSource(String project, String subject, String source,
             Application app,
             MongoClient client) {
 

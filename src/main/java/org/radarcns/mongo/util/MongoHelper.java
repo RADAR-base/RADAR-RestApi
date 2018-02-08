@@ -55,7 +55,6 @@ public class MongoHelper {
     public static final String SECOND_QUARTILE = "50";
     public static final String THIRD_QUARTILE = "75";
 
-    public static final String DEVICE_CATALOG = "radar_device_catalog";
 
     public static final int ASCENDING = 1;
     public static final int DESCENDING = -1;

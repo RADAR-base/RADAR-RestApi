@@ -10,6 +10,7 @@ import org.radarcns.listener.HttpClientFactory;
 import org.radarcns.listener.MongoFactory;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientFactory;
+import org.radarcns.service.ApplicationStatusMonitorService;
 import org.radarcns.service.DataSetService;
 import org.radarcns.service.SourceMonitorService;
 import org.radarcns.service.SourceService;
@@ -69,6 +70,10 @@ public class RadarApplication extends ResourceConfig {
 
                 bind(DataSetService.class)
                         .to(DataSetService.class)
+                        .in(Singleton.class);
+
+                bind(ApplicationStatusMonitorService.class)
+                        .to(ApplicationStatusMonitorService.class)
                         .in(Singleton.class);
             }
         });

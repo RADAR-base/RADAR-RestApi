@@ -20,6 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.webapp.resource.BasePath.APPLICATION_STATUS;
+import static org.radarcns.mongo.data.android.ApplicationStatusUpTime.UPTIME_COLLECTION;
+import static org.radarcns.mongo.data.android.ApplicationStatusRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.mongo.data.android.ApplicationStatusServerStatus.STATUS_COLLECTION;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -32,7 +35,7 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.dao.AndroidAppDataAccessObject;
+import org.radarcns.service.ApplicationStatusMonitorService;
 import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.domain.restapi.TimeWindow;
@@ -101,9 +104,11 @@ public class AppStatusEndPointTest {
      * database connection.
      **/
     public void dropAndClose(MongoClient client) {
-        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
         Utility.dropCollection(client, COLLECTION_NAME);
-        Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
+        Utility.dropCollection(client, STATUS_COLLECTION);
+        Utility.dropCollection(client, UPTIME_COLLECTION);
+        Utility.dropCollection(client, RECORD_COLLECTION);
+
         client.close();
     }
 
