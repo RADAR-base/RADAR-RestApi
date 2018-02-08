@@ -16,6 +16,7 @@
 
 package org.radarcns.domain.managementportal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -109,5 +110,11 @@ public class Source {
 
     public void setAssigned(Boolean assigned) {
         this.assigned = assigned;
+    }
+
+    @JsonIgnore
+    public SourceTypeIdentifier getSourceTypeIdentifier() {
+        return new SourceTypeIdentifier(this.sourceTypeProducer , this.sourceTypeModel , this
+                .sourceTypeCatalogVersion);
     }
 }

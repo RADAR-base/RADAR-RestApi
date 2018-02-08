@@ -21,6 +21,7 @@ import static org.radarcns.mongo.util.MongoHelper.COUNT;
 
 import java.util.List;
 import org.bson.Document;
+import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
@@ -34,8 +35,13 @@ public class DoubleFormat extends MongoSourceDataWrapper {
 
     //private static final Logger LOGGER = LoggerFactory.getLogger(DoubleFormat.class);
 
-    public DoubleFormat(String sensorType) {
-        super(DataFormat.DOUBLE_FORMAT, sensorType);
+    public DoubleFormat(SourceData sourceData) {
+        super( sourceData);
+    }
+
+    @Override
+    public DataFormat getDataFormat() {
+        return DataFormat.DOUBLE_FORMAT;
     }
 
     @Override
@@ -43,7 +49,7 @@ public class DoubleFormat extends MongoSourceDataWrapper {
             Header header) {
         switch (stat) {
             case MEDIAN:
-                return new Double(getQuartiles(doc).get(1));
+                return getQuartiles(doc).get(1);
             case QUARTILES:
                 List<Double> quartiles = getQuartiles(doc);
                 return new Quartiles(
@@ -51,11 +57,11 @@ public class DoubleFormat extends MongoSourceDataWrapper {
                     quartiles.get(1),
                     quartiles.get(2));
             case RECEIVED_MESSAGES:
-                return new Double(RadarConverter.roundDouble(
+                return RadarConverter.roundDouble(
                         doc.getDouble(field) / RadarConverter.getExpectedMessages(header),
-                    2));
+                    2);
             default:
-                return new Double(doc.getDouble(field));
+                return doc.getDouble(field);
         }
     }
 

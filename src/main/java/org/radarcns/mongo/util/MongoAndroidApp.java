@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Generic DAO to return Android App status information.
  */
-public abstract class MongoAndroidApp extends MongoDataAccess {
+public abstract class MongoAndroidApp  {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoAndroidApp.class);
 
@@ -70,19 +70,6 @@ public abstract class MongoAndroidApp extends MongoDataAccess {
 
     protected abstract String getCollectionName();
 
-    @Override
-    public String getCollectionName(String source, TimeWindow interval) {
-        return null;
-    }
 
-    @Override
-    public Set<String> getCollectionNames() {
-        return new HashSet<>(Collections.singleton(getCollectionName()));
-    }
-
-    @Override
-    public String getSourceType(String collection) {
-        return "ANDROID";
-    }
 
 }

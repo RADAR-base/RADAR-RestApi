@@ -25,11 +25,13 @@ public class Header {
      */
     @JsonProperty
     public String sourceType;
+
     /**
      * Report the sensor name or specific type of assessment.
      */
     @JsonProperty
-    public String assessmentType;
+    public String sourceDataType;
+
     /**
      * Statical value expressed by samples.
      */
@@ -59,21 +61,23 @@ public class Header {
      *
      * @param subjectId Subject identifier.
      * @param sourceId Source identifier.
-     * @param source Source information, it can be a device or assessment name.
-     * @param assessmentType Report the sensor name or specific type of assessment.
+     * @param sourceType Source information, it can be a device or assessment name.
+     * @param sourceDataType Source information, it can be a device or assessment name.
      * @param descriptiveStatistic Statical value expressed by samples.
      * @param unit Unit used by the sourceType.
      * @param timeWindow Time interval between two consecutive samples.
      * @param effectiveTimeFrame Timestamps of the first and the last samples contained in the
      * dataset.
      */
-    public Header(String subjectId, String sourceId, String source, String assessmentType,
+    public Header(String projectId, String subjectId, String sourceId, String sourceType, String
+            sourceDataType,
             DescriptiveStatistic descriptiveStatistic, String unit, TimeWindow timeWindow,
             EffectiveTimeFrame effectiveTimeFrame) {
+        this.projectId = projectId;
         this.subjectId = subjectId;
         this.sourceId = sourceId;
-        this.sourceType = source;
-        this.assessmentType = assessmentType;
+        this.sourceType = sourceType;
+        this.sourceDataType = sourceDataType;
         this.descriptiveStatistic = descriptiveStatistic;
         this.unit = unit;
         this.timeWindow = timeWindow;
@@ -112,12 +116,12 @@ public class Header {
         this.sourceType = sourceType;
     }
 
-    public String getAssessmentType() {
-        return assessmentType;
+    public String getSourceDataType() {
+        return sourceDataType;
     }
 
-    public void setAssessmentType(String assessmentType) {
-        this.assessmentType = assessmentType;
+    public void setSourceDataType(String sourceDataType) {
+        this.sourceDataType = sourceDataType;
     }
 
     public DescriptiveStatistic getDescriptiveStatistic() {

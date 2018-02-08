@@ -53,10 +53,6 @@ public class RadarApplication extends ResourceConfig {
                         .to(SourceCatalog.class)
                         .in(Singleton.class);
 
-                bind(DataSetService.class)
-                        .to(DataSetService.class)
-                        .in(Singleton.class);
-
                 bind(SourceMonitorService.class)
                         .to(SourceMonitorService.class)
                         .in(Singleton.class);
@@ -67,6 +63,10 @@ public class RadarApplication extends ResourceConfig {
 
                 bind(SourceService.class)
                         .to(SourceService.class)
+                        .in(Singleton.class);
+
+                bind(DataSetService.class)
+                        .to(DataSetService.class)
                         .in(Singleton.class);
             }
         });

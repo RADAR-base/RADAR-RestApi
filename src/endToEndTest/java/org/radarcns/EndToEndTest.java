@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.config.ExposedConfigTest.OPENAPI_JSON;
 import static org.radarcns.webapp.resource.BasePath.DATA;
-import static org.radarcns.webapp.resource.Parameter.SOURCEDATATYPE;
+import static org.radarcns.webapp.resource.Parameter.SOURCE_DATA_NAME;
 import static org.radarcns.webapp.resource.Parameter.STAT;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -335,7 +335,7 @@ public class EndToEndTest {
             throws IOException, ReflectiveOperationException {
         LOGGER.info("Fetching APIs ...");
 
-        final String path = DATA + "/{" + SOURCEDATATYPE + "}/{" + STAT + "}/" + TimeWindow.TEN_SECOND
+        final String path = DATA + "/{" + SOURCE_DATA_NAME + "}/{" + STAT + "}/" + TimeWindow.TEN_SECOND
                 + '/' + PROJECT_NAME_MOCK + '/' + USER_ID_MOCK + "/" + SOURCE_ID_MOCK;
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
@@ -344,7 +344,7 @@ public class EndToEndTest {
             Map<MockDataConfig, Dataset> datasets = expectedDataset.get(stat);
 
             for (MockDataConfig config : datasets.keySet()) {
-                String pathSensor = pathStat.replace("{" + SOURCEDATATYPE + "}",
+                String pathSensor = pathStat.replace("{" + SOURCE_DATA_NAME + "}",
                         getSensorType(config));
 
                 Dataset actual = apiClient.requestJson(pathSensor, Dataset.class, Status.OK);

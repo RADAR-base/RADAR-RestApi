@@ -21,15 +21,15 @@ import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.resource.BasePath.DATA;
-import static org.radarcns.webapp.resource.BasePath.REALTIME;
+import static org.radarcns.webapp.resource.BasePath.LATEST;
 import static org.radarcns.webapp.resource.Parameter.END;
-import static org.radarcns.webapp.resource.Parameter.INTERVAL;
 import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
-import static org.radarcns.webapp.resource.Parameter.SOURCEDATATYPE;
+import static org.radarcns.webapp.resource.Parameter.SOURCE_DATA_NAME;
 import static org.radarcns.webapp.resource.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.resource.Parameter.START;
 import static org.radarcns.webapp.resource.Parameter.STAT;
 import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
+import static org.radarcns.webapp.resource.Parameter.TIME_WINDOW;
 
 import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,13 +44,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.catalog.SourceCatalog;
-import org.radarcns.service.DataSetService;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.service.DataSetService;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 import org.slf4j.Logger;
@@ -62,6 +62,7 @@ import org.slf4j.LoggerFactory;
 @Authenticated
 @Path("/" + DATA)
 public class SensorEndPoint {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorEndPoint.class);
 
     @Inject
@@ -77,7 +78,7 @@ public class SensorEndPoint {
     private DataSetService dataSetService;
 
     //--------------------------------------------------------------------------------------------//
-    //                                    REAL-TIME FUNCTIONS                                     //
+    //                                    LATEST RECORD FUNCTION                                  //
     //--------------------------------------------------------------------------------------------//
 
     /**
@@ -85,9 +86,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/" + REALTIME + "/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME
-            + "}/{" + SUBJECT_ID
-            + "}/{" + SOURCE_ID + "}")
+    @Path("/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + SOURCE_DATA_NAME
+            + "}/{" + STAT + "}/{" + TIME_WINDOW + "}/" + LATEST)
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical "
@@ -106,43 +106,41 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getLastReceivedSampleJson(
-            @Alphanumeric @PathParam(SOURCEDATATYPE) String sensor,
-            @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(INTERVAL) TimeWindow interval,
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
-            @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
+            @Alphanumeric @PathParam(SOURCE_ID) String sourceId,
+            @Alphanumeric @PathParam(SOURCE_DATA_NAME) String sourceDataName,
+            @PathParam(STAT) DescriptiveStatistic stat,
+            @PathParam(TIME_WINDOW) TimeWindow interval) throws IOException {
         // todo: 404 if given source does not exist.
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
-            Dataset dataset = this.dataSetService
-                    .getLastReceivedSample(subjectId, sourceId,
-                            stat, interval, this.sourceCatalog.getSourceData(sensor), mongoClient
-                            , null); //TODO fetch source-type
+        Dataset dataset = this.dataSetService
+                .getLastReceivedSample(projectName, subjectId, sourceId, sourceDataName, stat,
+                        interval);
 
-            if (dataset.getDataset().isEmpty()) {
-                LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
-                return emptyDataset(subjectId, sourceId, sensor, stat, interval,
-                        Instant.now());
-            }
+        if (dataset.getDataset().isEmpty()) {
+            LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
+            return emptyDataset(projectName, subjectId, sourceId, sourceDataName, stat, interval,
+                    Instant.now());
+        }
 
-            return dataset;
+        return dataset;
     }
 
     //--------------------------------------------------------------------------------------------//
-    //                                   WHOLE-DATA FUNCTIONS                                     //
+    //                                   ALL RECORDS FUNCTIONS                                    //
     //--------------------------------------------------------------------------------------------//
 
     /**
-     * JSON function that returns all available samples for the given data.
+     * JSON function that returns all available records for the given data.
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME + "}/{"
-            + SUBJECT_ID + "}/{"
-            + SOURCE_ID + "}")
+    @Path("/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + SOURCE_DATA_NAME
+            + "}/{" + STAT + "}/{" + TIME_WINDOW + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical "
@@ -159,28 +157,27 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getSamplesJson(
-            @Alphanumeric @PathParam(SOURCEDATATYPE) String sensor,
-            @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(INTERVAL) TimeWindow interval,
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
-            @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
+            @Alphanumeric @PathParam(SOURCE_ID) String sourceId,
+            @Alphanumeric @PathParam(SOURCE_DATA_NAME) String sourceDataName,
+            @PathParam(STAT) DescriptiveStatistic stat,
+            @PathParam(TIME_WINDOW) TimeWindow interval) throws IOException {
         // todo: 404 if given source does not exist.
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
-            Dataset dataset = dataSetService.getSamples(subjectId,
-                    sourceId, stat, interval, this.sourceCatalog.getSourceData(sensor), mongoClient ,
-                    null);
+        Dataset dataset = dataSetService.getAllDataItems(projectName, subjectId,
+                sourceId, sourceDataName, stat, interval);
 
-            if (dataset.getDataset().isEmpty()) {
-                LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
-                return emptyDataset(subjectId, sourceId, sensor, stat, interval,
-                        Instant.now());
-            }
+        if (dataset.getDataset().isEmpty()) {
+            LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
+            return emptyDataset(projectName, subjectId, sourceId, sourceDataName, stat, interval,
+                    Instant.now());
+        }
 
-            return dataset;
+        return dataset;
 
     }
 
@@ -193,7 +190,8 @@ public class SensorEndPoint {
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/{" + SOURCEDATATYPE + "}/{" + STAT + "}/{" + INTERVAL + "}/{" + PROJECT_NAME + "}/{"
+    @Path("/{" + SOURCE_DATA_NAME + "}/{" + STAT + "}/{" + TIME_WINDOW + "}/{" + PROJECT_NAME
+            + "}/{"
             + SUBJECT_ID + "}/{"
             + SOURCE_ID + "}/{" + START + "}/{" + END + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
@@ -214,12 +212,12 @@ public class SensorEndPoint {
     @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getSamplesWithinWindowJson(
-            @Alphanumeric @PathParam(SOURCEDATATYPE) String sensor,
+            @Alphanumeric @PathParam(SOURCE_DATA_NAME) String sourceDataName,
             @PathParam(STAT) DescriptiveStatistic stat,
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
             @Alphanumeric @PathParam(SOURCE_ID) String sourceId,
-            @PathParam(INTERVAL) TimeWindow interval,
+            @PathParam(TIME_WINDOW) TimeWindow interval,
             @PathParam(START) long start,
             @PathParam(END) long end) throws IOException {
         // todo: 404 if given source does not exist.
@@ -227,25 +225,24 @@ public class SensorEndPoint {
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
 
-            Dataset dataset = dataSetService.getSamples(
-                    subjectId, sourceId, stat, interval, start, end, this.sourceCatalog
-                            .getSourceData(sensor),
-                    mongoClient , null);
+        Dataset dataset = dataSetService.getAllRecordsInWindow(projectName,
+                subjectId, sourceId, sourceDataName, stat, interval, start, end);
 
-            if (dataset.getDataset().isEmpty()) {
-                LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
-                return emptyDataset(subjectId, sourceId, sensor, stat, interval,
-                        Instant.ofEpochMilli(start));
-            }
+        if (dataset.getDataset().isEmpty()) {
+            LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
+            return emptyDataset(projectName, subjectId, sourceId, sourceDataName, stat, interval,
+                    Instant.ofEpochMilli(start));
+        }
 
-            return dataset;
+        return dataset;
 
     }
 
-    private static Dataset emptyDataset(String subjectId, String sourceId, String sensor,
+    private static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
+            String sensor,
             DescriptiveStatistic stat, TimeWindow interval, Instant timeFrameStart) {
         String time = timeFrameStart.toString();
-        return new Dataset(new Header(subjectId, sourceId, "UNKNOWN", sensor, stat,
+        return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
                 null, interval, new EffectiveTimeFrame(time, time)),
                 Collections.emptyList());
     }

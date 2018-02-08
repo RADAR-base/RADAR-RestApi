@@ -21,8 +21,8 @@ package org.radarcns.webapp.resource;
  */
 public interface Parameter {
     String END = "end";
-    String INTERVAL = "interval";
-    String SOURCEDATATYPE = "sensor";
+    String TIME_WINDOW = "timeWindow";
+    String SOURCE_DATA_NAME = "sourceDataName";
     String SOURCE_ID = "sourceId";
     String SOURCE_TYPE = "sourceType";
     String START = "start";

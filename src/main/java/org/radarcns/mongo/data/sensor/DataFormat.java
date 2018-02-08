@@ -47,8 +47,8 @@ public enum DataFormat {
     public static MongoSourceDataWrapper getMongoSensor(SourceData sourceData) {
         String sourceDataType = sourceData.getSourceDataType();
         switch (sourceDataType) {
-            case "ACCELEROMETER": return new AccelerationFormat(sourceDataType);
-            default: return new DoubleFormat(sourceDataType);
+            case "ACCELEROMETER": return new AccelerationFormat(sourceData);
+            default: return new DoubleFormat(sourceData);
         }
     }
 

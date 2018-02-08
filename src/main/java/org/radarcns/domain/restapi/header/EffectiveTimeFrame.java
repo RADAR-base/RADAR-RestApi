@@ -1,6 +1,8 @@
 package org.radarcns.domain.restapi.header;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Date;
+import org.radarcns.util.RadarConverter;
 
 public class EffectiveTimeFrame {
 
@@ -17,6 +19,16 @@ public class EffectiveTimeFrame {
     public EffectiveTimeFrame(String startDateTime , String endDateTime) {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
+    }
+
+    public EffectiveTimeFrame(Date startDateTime , Date endDateTime) {
+        this.startDateTime = RadarConverter.getISO8601(startDateTime);
+        this.endDateTime = RadarConverter.getISO8601(endDateTime);
+    }
+
+    public EffectiveTimeFrame(Long startDateTime , Long endDateTime) {
+        this.startDateTime = RadarConverter.getISO8601(startDateTime);
+        this.endDateTime = RadarConverter.getISO8601(endDateTime);
     }
 
     public String getStartDateTime() {

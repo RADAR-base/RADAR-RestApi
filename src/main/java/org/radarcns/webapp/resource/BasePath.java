@@ -23,11 +23,7 @@ public interface BasePath {
 
     String ANDROID = "android";
     String DATA = "data";
-    String GET_ALL_SOURCES = "getAllSources";
-    String GET_ALL_SUBJECTS = "getAllSubjects";
-    String GET_SUBJECT = "getSubject";
-    String REALTIME = "realTime";
-    String SPECIFICATION = "specification";
+    String LATEST = "latest";
     String SOURCE = "sourceType";
     String SUBJECT = "subject";
     String STATUS = "status";

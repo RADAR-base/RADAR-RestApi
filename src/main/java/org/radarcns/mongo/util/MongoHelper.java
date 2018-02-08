@@ -110,6 +110,29 @@ public class MongoHelper {
     }
 
     /**
+     * Finds all Documents within [start-end] belonging to the given subject for the give sourceType.
+     *
+     * @param subject is the subjectID
+     * @param source is the sourceID
+     * @param start is the start time of the queried timewindow
+     * @param end is the end time of the queried timewindow
+     * @param collection is the MongoDB that will be queried
+     * @return a MongoDB cursor containing all documents between start and end for the given User,
+     *      SourceDefinition and MongoDB collection
+     */
+    protected static MongoCursor<Document> findDocumentsByProjectAndSubjectAndSourceInWindow(String projectName, String subject, String source, Long start, Long end, MongoCollection<Document> collection) {
+        FindIterable<Document> result = collection.find(
+                Filters.and(
+                        eq(PROJECT_ID, projectName),
+                        eq(USER_ID, subject),
+                        eq(SOURCE_ID, source),
+                        gte(START, new Date(start)),
+                        lte(END, new Date(end)))).sort(new BasicDBObject(START, 1));
+
+        return result.iterator();
+    }
+
+    /**
      * Finds all Documents belonging to the given subject for the give sourceType.
      *
      * @param project is the projectName

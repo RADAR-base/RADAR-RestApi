@@ -79,7 +79,7 @@
 //        Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
 //                    "BEATS_PER_MIN", TIME_WINDOW, null);
 //
-//        Dataset actual = DataSetService.getInstance(SENSOR_TYPE).valueRTByUserSource(
+//        Dataset actual = DataSetService.getInstance(SENSOR_TYPE).getLatestRecord(
 //                SUBJECT, SOURCE, header, RadarConverter.getMongoStat(COUNT), collection);
 //
 //        Dataset expected = Utility.convertDocToDataset(singletonList(docs.get(docs.size() - 1)),
@@ -111,7 +111,7 @@
 //        Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
 //                Unit.BEATS_PER_MIN.toString(), TIME_WINDOW, null);
 //
-//        Dataset actual = DataSetService.getInstance(SENSOR_TYPE).valueByUserSource(SUBJECT,
+//        Dataset actual = DataSetService.getInstance(SENSOR_TYPE).valueByProjectAndSubjectAndSource(SUBJECT,
 //                SOURCE, header, RadarConverter.getMongoStat(COUNT), collection);
 //
 //        Dataset expected = Utility.convertDocToDataset(docs,
@@ -151,7 +151,7 @@
 //        Header header = new Header(SUBJECT, SOURCE, SOURCE_TYPE, SENSOR_TYPE, COUNT,
 //                Unit.BEATS_PER_MIN.toString(), TIME_WINDOW, null);
 //
-//        Dataset actual = DataSetService.getInstance(SENSOR_TYPE).valueByUserSourceWindow(
+//        Dataset actual = DataSetService.getInstance(SENSOR_TYPE).getAllRecordsInWindow(
 //                SUBJECT, SOURCE, header, RadarConverter.getMongoStat(COUNT), start, end,
 //                collection);
 //

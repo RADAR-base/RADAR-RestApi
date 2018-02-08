@@ -22,6 +22,7 @@ import static org.radarcns.mongo.util.MongoHelper.FIELDS;
 
 import java.util.List;
 import org.bson.Document;
+import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
@@ -40,8 +41,13 @@ public class AccelerationFormat extends MongoSourceDataWrapper {
 
     //private static final Logger LOGGER = LoggerFactory.getLogger(AccelerationFormat.class);
 
-    public AccelerationFormat(String sensorType) {
-        super(DataFormat.ACCELERATION_FORMAT, sensorType);
+    public AccelerationFormat(SourceData sourceData) {
+        super(sourceData);
+    }
+
+    @Override
+    public DataFormat getDataFormat() {
+        return DataFormat.ACCELERATION_FORMAT;
     }
 
     @Override
