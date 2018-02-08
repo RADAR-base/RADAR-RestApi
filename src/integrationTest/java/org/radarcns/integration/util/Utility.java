@@ -114,6 +114,7 @@ public class Utility {
      * accessible
      * @throws InstantiationException if item class cannot be instantiated
      */
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public static Dataset convertDocToDataset(List<Document> docs, String projectName, String
             subjectId,
             String sourceId, String sourceType, String sensorType, Stat stat, String unit,

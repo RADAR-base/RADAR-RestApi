@@ -213,8 +213,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         for (Long key : keys) {
             DoubleValueCollector dac = (DoubleValueCollector) expectedValue.getSeries().get(key);
 
-            Object content = getContent(getStatValue(statistic, dac), statistic,
-                    getSensorClass(sensor));
+            Object content = getContent(getStatValue(statistic, dac), statistic);
 
             items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
         }
@@ -223,8 +222,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
 
-    private <T> T getContent(Object object, DescriptiveStatistic stat,
-            Class<T> sampleClass) throws IllegalAccessException, InstantiationException {
+    private <T> T getContent(Object object, DescriptiveStatistic stat) throws IllegalAccessException, InstantiationException {
         T content;
 
         switch (stat) {
@@ -239,12 +237,12 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         return content;
     }
 
-    private Class getSensorClass(String sensor) {
-        switch (sensor) {
-            case "ACCELEROMETER":
-                return Acceleration.class;
-            default:
-                return Double.class;
-        }
-    }
+//    private Class getSensorClass(String sensor) {
+//        switch (sensor) {
+//            case "ACCELEROMETER":
+//                return Acceleration.class;
+//            default:
+//                return Double.class;
+//        }
+//    }
 }
