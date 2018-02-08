@@ -21,51 +21,16 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import java.util.List;
-import javax.ws.rs.core.Context;
-import org.bson.Document;
-import org.glassfish.hk2.api.Factory;
-import org.glassfish.jersey.server.CloseableService;
+import org.glassfish.jersey.internal.inject.DisposableSupplier;
 import org.radarcns.config.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Factory to creates a singleton MongoClient with the correct credentials.
  */
-public class MongoFactory implements Factory<MongoClient> {
-    private static final Logger logger = LoggerFactory.getLogger(MongoFactory.class);
-
-    /** Disposes the client after use. */
-    @Context
-    @SuppressWarnings("PMD.UnusedPrivateField")
-    private CloseableService closeableService;
-
-    /**
-     * Checks if with the given client and credential is it possible to establish a connection
-     * towards the MongoDB host.
-     *
-     * @param mongoClient client for MongoDB
-     * @return {@code true} if the connection can be established false otherwise
-     */
-    public static boolean checkMongoConnection(MongoClient mongoClient) {
-        Boolean flag = true;
-        try {
-            for (MongoCredential user : mongoClient.getCredentialsList()) {
-                mongoClient.getDatabase(user.getSource()).runCommand(new Document("ping", 1));
-            }
-
-        } catch (Exception exec) {
-            flag = false;
-            logger.error("Error during connection test", exec);
-        }
-
-        logger.info("MongoDB connection is {}", flag.toString());
-
-        return flag;
-    }
+public class MongoFactory implements DisposableSupplier<MongoClient> {
 
     @Override
-    public MongoClient provide() {
+    public MongoClient get() {
         MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();
         List<ServerAddress> hosts = Properties.getApiConfig().getMongoDbHosts();
 
