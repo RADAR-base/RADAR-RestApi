@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
  * Check that the token has given permissions.
  */
 public class PermissionFilter implements ContainerRequestFilter {
+
     private static final Logger logger = LoggerFactory.getLogger(PermissionFilter.class);
 
     @Context
@@ -37,6 +38,7 @@ public class PermissionFilter implements ContainerRequestFilter {
     /**
      * Abort the request with a forbidden status. The caller must ensure that no other changes are
      * made to the context (i.e., make a quick return).
+     *
      * @param requestContext context to abort
      * @param message message to log and pass as a status message to clients.
      */

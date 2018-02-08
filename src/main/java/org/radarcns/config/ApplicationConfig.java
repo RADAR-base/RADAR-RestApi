@@ -28,49 +28,64 @@ import java.util.Map;
  */
 public class ApplicationConfig {
 
-    /** MongoDb hosts. **/
+    /**
+     * MongoDb hosts.
+     **/
     @JsonProperty("mongodb_hosts")
-    private Map<String,String> mongoHosts;
-    /** MongoDb users. **/
+    private Map<String, String> mongoHosts;
+    /**
+     * MongoDb users.
+     **/
     @JsonProperty("mongodb_credentials")
-    private Map<String,String> mongoUser;
+    private Map<String, String> mongoUser;
 
-    /** Bins location. */
+    /**
+     * Bins location.
+     */
     @JsonProperty("hdfs_output_dir")
     private String hdfsOutputDir;
 
     @JsonProperty("management_portal_config")
     private ManagementPortalConfig managementPortalConfig;
 
-    /** Returns MongoDb hosts. **/
+    /**
+     * Returns MongoDb hosts.
+     **/
     public Map<String, String> getMongoHosts() {
         return mongoHosts;
     }
 
-    /** Sets MongoDb instance. **/
+    /**
+     * Sets MongoDb instance.
+     **/
     public void setMongoHosts(Map<String, String> mongoHosts) {
         this.mongoHosts = mongoHosts;
     }
 
-    /** Returns MongoDb users. **/
+    /**
+     * Returns MongoDb users.
+     **/
     public Map<String, String> getMongoUser() {
         return mongoUser;
     }
 
-    /** Sets MongoDb users. **/
+    /**
+     * Sets MongoDb users.
+     **/
     public void setMongoUser(Map<String, String> mongoUser) {
         this.mongoUser = mongoUser;
     }
 
     /**
      * Returns the list of all known MongoDB instances.
+     *
      * @return MongoDB instances as List
      */
     public List<ServerAddress> getMongoDbHosts() {
 
         final List<ServerAddress> mongoHostsTemp = new LinkedList<>();
         for (final String key : mongoHosts.keySet()) {
-            mongoHostsTemp.add(new ServerAddress(key,Integer.valueOf(mongoHosts.get(key))));
+            mongoHostsTemp.add(new ServerAddress(key, Integer.valueOf(mongoHosts.get(key))));
         }
 
         return mongoHostsTemp;
@@ -78,6 +93,7 @@ public class ApplicationConfig {
 
     /**
      * Returns the list of all known MongoDB credentials.
+     *
      * @return a {@code List} of {@link MongoCredential}
      */
     public MongoCredential getMongoDbCredentials() {
@@ -87,6 +103,7 @@ public class ApplicationConfig {
 
     /**
      * Returns a {@code String} representing the MongoDB database name.
+     *
      * @return MongoDB database name as {@code String}
      */
     public String getMongoDbName() {

@@ -12,7 +12,7 @@ import javax.validation.Constraint;
 /**
  * Indicates that a given String should be alphanumeric plus allowed symbols {@code -_./:#@}.
  */
-@Target({ METHOD, FIELD, PARAMETER })
+@Target({METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
 @Constraint(validatedBy = AlphanumericValidator.class)
 public @interface Alphanumeric {

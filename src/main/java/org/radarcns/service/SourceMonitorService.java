@@ -39,13 +39,15 @@ import org.slf4j.LoggerFactory;
 public class SourceMonitorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceMonitorService.class);
-    private static final String TIME_START ="timeStart";
-    private static final String TIME_END ="timeEnd";
+    private static final String TIME_START = "timeStart";
+    private static final String TIME_END = "timeEnd";
 
     private final MongoClient mongoClient;
 
 
-    /** Constructor. **/
+    /**
+     * Constructor.
+     **/
     @Inject
     public SourceMonitorService(MongoClient mongoClient) {
         this.mongoClient = mongoClient;
@@ -55,6 +57,7 @@ public class SourceMonitorService {
     /**
      * Finds effectiveTimeFrame of a source of a subject under a project by querying
      * source-monitor-statistics of source-type.
+     *
      * @param projectId of the subject
      * @param subjectId of the subject
      * @param sourceId of the source
@@ -92,6 +95,7 @@ public class SourceMonitorService {
     /**
      * This will fetch all the sourceIds received under given subjectId and projectId in the
      * provided SourceType
+     *
      * @param projectName of the subject
      * @param subjectId of the subject
      * @param sourceType of the source

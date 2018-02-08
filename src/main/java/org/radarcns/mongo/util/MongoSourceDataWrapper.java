@@ -48,7 +48,8 @@ public abstract class MongoSourceDataWrapper {
     private final SourceData sourceData;
 
     /**
-     * Constructs a MongoSourceDataWrapper able to query the collections of the sensor for the given sourceType.
+     * Constructs a MongoSourceDataWrapper able to query the collections of the sensor for the given
+     * sourceType.
      *
      * @param sourceData of the given sourceType that will be consume from this instance
      */
@@ -79,9 +80,8 @@ public abstract class MongoSourceDataWrapper {
      * @param stat is the required statistical value
      * @param header information used to provide the data context
      * @param collection is the mongoDb collection that has to be queried
-     * @return the last seen data value stat for the given subject and sourceType, otherwise
-     *      empty dataset
-     *
+     * @return the last seen data value stat for the given subject and sourceType, otherwise empty
+     * dataset
      * @see Dataset
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
@@ -89,14 +89,15 @@ public abstract class MongoSourceDataWrapper {
             header, Stat stat, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, MongoHelper
-                                .END, -1, 1, collection);
+                        .END, -1, 1, collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                 cursor);
     }
 
     /**
-     * Returns a {@code Dataset} containing alla available values for the couple subject sourceType.
+     * Returns a {@code Dataset} containing alla available values for the couple subject
+     * sourceType.
      *
      * @param subject is the subjectID
      * @param source is the sourceID
@@ -104,14 +105,13 @@ public abstract class MongoSourceDataWrapper {
      * @param stat is the required statistical value
      * @param collection is the mongoDb collection that has to be queried
      * @return data dataset for the given subject and sourceType, otherwise empty dataset
-     *
      * @see Dataset
      */
     public Dataset getAllRecords(String projectName, String subject, String source, Header
             header, MongoHelper.Stat stat, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source,MongoHelper
-                                .START, 1, null, collection);
+                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, MongoHelper
+                        .START, 1, null, collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                 cursor);
@@ -145,11 +145,12 @@ public abstract class MongoSourceDataWrapper {
 
     /**
      * Counts the received messages within the time-window [start-end] for the couple subject
-     *      sourceType.
+     * sourceType.
+     *
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param start is time window start point in millisecond
-     * @param end  is time window end point in millisecond
+     * @param end is time window end point in millisecond
      * @param collection is the mongoDb collection that has to be queried
      * @return the number of received messages within the time-window [start-end].
      */
@@ -175,14 +176,13 @@ public abstract class MongoSourceDataWrapper {
 
     /**
      * Builds the required {@link Dataset}. It adds the {@link EffectiveTimeFrame} to the given
-     *      {@link Header}.
+     * {@link Header}.
      *
      * @param field is the mongodb field that has to be extracted
      * @param stat is the statistical functional represented by the extracted field
      * @param header information to provide the context of the data set
      * @param cursor the mongoD cursor
      * @return data dataset for the given input, otherwise empty dataset
-     *
      * @see Dataset
      */
     private Dataset getDataSet(String field, DescriptiveStatistic stat, Header header,
@@ -241,7 +241,7 @@ public abstract class MongoSourceDataWrapper {
      * Returns the required mongoDB collection name for the given sourceType type.
      *
      * @param interval useful to identify which collection has to be queried. A sensor has a
-     *      collection for each time frame or time window
+     * collection for each time frame or time window
      * @return the MongoDB Collection name
      */
     public String getCollectionName(TimeWindow interval) {
@@ -250,19 +250,17 @@ public abstract class MongoSourceDataWrapper {
         }
 
         throw new IllegalArgumentException("Unknown sourceType type. " + sourceData
-            + "is not yest supported.");
+                + "is not yest supported.");
     }
 
     /**
-     * Convert a {@link Document} to the corresponding
-     *      {@link org.apache.avro.specific.SpecificRecord}. This function must be override by the
-     *      subclass
+     * Convert a {@link Document} to the corresponding {@link org.apache.avro.specific.SpecificRecord}.
+     * This function must be override by the subclass
      *
      * @param doc {@link Document} storing data used to create the related {@link DataItem}
      * @param field key of the value that has to be extracted from the {@link Document}
      * @param stat {@link DescriptiveStatistic} represented by the resulting {@link DataItem}
      * @param header {@link Header} used to provide the data context
-     *
      * @return the {@link DataFormat} related to the sensor
      */
     protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat,
@@ -273,9 +271,9 @@ public abstract class MongoSourceDataWrapper {
     /**
      * Extract the count information for the given MongoDB document. This function should be
      * overridden by the subclass.
-     * @param doc is the Bson Document from which we extract the required value to compute the
-     *      count value
      *
+     * @param doc is the Bson Document from which we extract the required value to compute the count
+     * value
      * @return the count value
      */
     protected abstract int extractCount(Document doc);
@@ -288,12 +286,12 @@ public abstract class MongoSourceDataWrapper {
     private Map<TimeWindow, String> createCollectionsForTimeWindow(String topicName) {
         Map<TimeWindow, String> map = new HashMap<>();
 
-        map.put(TimeWindow.TEN_SECOND , topicName);
-        map.put(TimeWindow.ONE_MIN , topicName.concat("_1min"));
-        map.put(TimeWindow.TEN_MIN , topicName.concat("_10min"));
-        map.put(TimeWindow.ONE_HOUR , topicName.concat("_1h"));
-        map.put(TimeWindow.ONE_DAY , topicName.concat("_1d"));
-        map.put(TimeWindow.ONE_WEEK , topicName.concat("_1w"));
+        map.put(TimeWindow.TEN_SECOND, topicName);
+        map.put(TimeWindow.ONE_MIN, topicName.concat("_1min"));
+        map.put(TimeWindow.TEN_MIN, topicName.concat("_10min"));
+        map.put(TimeWindow.ONE_HOUR, topicName.concat("_1h"));
+        map.put(TimeWindow.ONE_DAY, topicName.concat("_1d"));
+        map.put(TimeWindow.ONE_WEEK, topicName.concat("_1w"));
         return map;
     }
 }

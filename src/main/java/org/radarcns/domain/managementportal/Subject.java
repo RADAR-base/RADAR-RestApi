@@ -27,6 +27,7 @@ import java.util.Map;
  * Java Class representing a RADAR Management Portal Subject.
  */
 public class Subject {
+
     public static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
 
     @JsonProperty
@@ -42,7 +43,7 @@ public class Subject {
     @JsonProperty
     private List<Source> sources;
     @JsonProperty
-    private Map<String,String> attributes;
+    private Map<String, String> attributes;
     @JsonProperty
     private Project project;
 
@@ -86,6 +87,7 @@ public class Subject {
 
     /**
      * Returns the Human Readable Identifier associated with this subject.
+     *
      * @return {@link String} stating the Human Readable Identifier associated with this subject or
      * {@code null} if not set.
      */
@@ -100,6 +102,7 @@ public class Subject {
 
     /**
      * Gets the project attribute (e.g. tag) associated with the given {@link String} key.
+     *
      * @param key {@link String} tag key
      * @return {@link String} value associated with the given key
      */

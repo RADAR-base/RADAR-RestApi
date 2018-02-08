@@ -47,7 +47,7 @@ public class SourceCatalog {
 
     private CachedMap<String, SourceData> sourceData;
 
-    private final ManagementPortalClient managementPortalClient ;
+    private final ManagementPortalClient managementPortalClient;
 
     private static final Duration CACHE_INVALIDATE_DEFAULT = Duration.ofMinutes(1);
 
@@ -55,17 +55,18 @@ public class SourceCatalog {
 
     /**
      * Constructor to create SourceCatalog.
+     *
      * @param managementPortalClient of the context
      */
     @Inject
     public SourceCatalog(ManagementPortalClient managementPortalClient) {
         this.managementPortalClient = managementPortalClient;
-            this.sourceTypes = new CachedMap<>(this.managementPortalClient::retrieveSourceTypes,
-                    SourceType::getSourceTypeIdentifier,
-                    CACHE_INVALIDATE_DEFAULT, CACHE_RETRY_DEFAULT);
-            this.sourceData = new CachedMap<>(this.managementPortalClient::retrieveSourceData,
-                    SourceData::getSourceDataName,
-                    CACHE_INVALIDATE_DEFAULT, CACHE_RETRY_DEFAULT);
+        this.sourceTypes = new CachedMap<>(this.managementPortalClient::retrieveSourceTypes,
+                SourceType::getSourceTypeIdentifier,
+                CACHE_INVALIDATE_DEFAULT, CACHE_RETRY_DEFAULT);
+        this.sourceData = new CachedMap<>(this.managementPortalClient::retrieveSourceData,
+                SourceData::getSourceDataName,
+                CACHE_INVALIDATE_DEFAULT, CACHE_RETRY_DEFAULT);
     }
 
     /**
@@ -94,7 +95,7 @@ public class SourceCatalog {
                     catalogVersion));
         } catch (NoSuchElementException exe) {
             throw new NotFoundException("Cannot find sourceType-type of identifier "
-                    + producer + ":" + model + ":" + catalogVersion , exe);
+                    + producer + ":" + model + ":" + catalogVersion, exe);
         }
         return result;
     }
@@ -123,7 +124,8 @@ public class SourceCatalog {
             result = sourceData.get(true).get(sourceDataName);
         }
         if (Objects.isNull(result)) {
-            throw new NotFoundException("Cannot find sourceType-data of identifier " + sourceDataName);
+            throw new NotFoundException(
+                    "Cannot find sourceType-data of identifier " + sourceDataName);
         }
         return result;
     }
@@ -141,8 +143,6 @@ public class SourceCatalog {
 //
 //        return definition;
 //    }
-
-
 
 //    /**
 //     * Returns sourceType's SourceDefinition.
@@ -162,6 +162,7 @@ public class SourceCatalog {
 
     /**
      * Returns the supported sourceType type.
+     *
      * @return a set containing all supported sourceType
      */
     public Set<String> getSupportedSource() throws IOException {
@@ -171,12 +172,12 @@ public class SourceCatalog {
 
     /**
      * Returns the supported sensor set.
+     *
      * @return a set containing all supported sourceType
      */
     public Set<SourceData> getSupportedSensor() throws IOException {
         return sourceData.get().values().stream().collect(Collectors.toSet());
     }
-
 
 
     /**

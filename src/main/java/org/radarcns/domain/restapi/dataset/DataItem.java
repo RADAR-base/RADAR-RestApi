@@ -13,17 +13,19 @@ public class DataItem {
 
 
     /**
-     * Default constructor.  Note that this does not initialize fields
-     * to their default values from the schema.  If that is desired then
-     * one should use <code>newBuilder()</code>.
+     * Default constructor.  Note that this does not initialize fields to their default values from
+     * the schema.  If that is desired then one should use <code>newBuilder()</code>.
      */
-    public DataItem() {}
+    public DataItem() {
+    }
 
     /**
      * All-args constructor.
+     *
      * @param sample Sample value. For more details, check org.radarcns.domain.restapi
      * .Acceleration, java.lang.Double and org.radarcns.questionnaire.Questionnaire.
-     * @param startDateTime Point in time (ISO8601) with UTC timezone. It represents the timestamp of the first sample contained inside the aggregated data.
+     * @param startDateTime Point in time (ISO8601) with UTC timezone. It represents the timestamp
+     * of the first sample contained inside the aggregated data.
      */
     public DataItem(java.lang.Object sample, java.lang.String startDateTime) {
         this.sample = sample;

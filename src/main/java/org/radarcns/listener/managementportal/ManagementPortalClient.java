@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * Client to interact with the RADAR Management Portal. This class is thread-safe.
  */
 public class ManagementPortalClient {
+
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalClient.class);
 
     private static final ObjectReader SUBJECT_LIST_READER = RadarConverter.readerForCollection(
@@ -184,7 +185,6 @@ public class ManagementPortalClient {
                     "Subject " + subjectLogin + " is not part of project " + projectName + ".");
         }
     }
-
 
 
     /**
@@ -332,8 +332,8 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves a {@link Source} from the already computed list of subjects using {@link
-     * ArrayList} of {@link Source} entity.
+     * Retrieves a {@link Source} from the already computed list of subjects using {@link ArrayList}
+     * of {@link Source} entity.
      *
      * @param sourceId {@link String} that has to be searched.
      * @return {@link Source} if a subject is found

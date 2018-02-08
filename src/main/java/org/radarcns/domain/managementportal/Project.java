@@ -25,6 +25,7 @@ import java.util.Optional;
  * Java class defining a RADAR Management Portal Project.
  */
 public class Project {
+
     @JsonProperty
     private Integer id;
 

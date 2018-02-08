@@ -16,6 +16,7 @@ public class SourceTypeIdentifier {
 
     /**
      * Creates a source-type identifier from parameters.
+     *
      * @param producer of source-type
      * @param model of source-type
      * @param catalogVersion of source-type

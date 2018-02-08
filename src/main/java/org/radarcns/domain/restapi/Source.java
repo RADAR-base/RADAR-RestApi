@@ -30,14 +30,15 @@ public class Source {
     private EffectiveTimeFrame effectiveTimeFrame;
 
     /**
-     * Default constructor.  Note that this does not initialize fields
-     * to their default values from the schema.  If that is desired then
-     * one should use <code>newBuilder()</code>.
+     * Default constructor.  Note that this does not initialize fields to their default values from
+     * the schema.  If that is desired then one should use <code>newBuilder()</code>.
      */
-    public Source() {}
+    public Source() {
+    }
 
     /**
      * All-args constructor.
+     *
      * @param id Source identifier.
      * @param type Source name.
      */
@@ -46,6 +47,7 @@ public class Source {
         this.sourceTypeModel = type;
 //        this.summary = summary;
     }
+
     public Source sourceId(String sourceId) {
         this.sourceId = sourceId;
         return this;

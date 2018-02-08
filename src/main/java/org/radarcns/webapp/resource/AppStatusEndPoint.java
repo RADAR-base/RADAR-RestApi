@@ -50,6 +50,7 @@ import org.radarcns.webapp.validation.Alphanumeric;
 @Authenticated
 @Path("/" + ANDROID)
 public class AppStatusEndPoint {
+
     @Inject
     private MongoClient mongoClient;
 
@@ -87,7 +88,7 @@ public class AppStatusEndPoint {
         Application application = new Application(
                 null, 0d, ServerStatus.UNKNOWN, -1, -1, -1);
 
-        if (subjectService.checkSourceAssignedToSubject(subjectId , sourceId)) {
+        if (subjectService.checkSourceAssignedToSubject(subjectId, sourceId)) {
             application = AndroidAppDataAccessObject.getInstance().getStatus(
                     subjectId, sourceId, mongoClient);
         }

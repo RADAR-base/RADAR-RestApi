@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 public class HdfsSourceStatus {
+
     public enum Status {
         HEALTHY, UNHEALTHY
     }
@@ -26,6 +27,7 @@ public class HdfsSourceStatus {
 
     /**
      * Constructor from JSON response.
+     *
      * @param sourceId sourceId
      * @param status sourceId status
      * @param lastUpdate late updated timestamp
@@ -49,6 +51,7 @@ public class HdfsSourceStatus {
 
     /**
      * Constructor.
+     *
      * @param sourceId sourceId
      * @param status sourceId status
      * @param lastUpdate late updated timestamp

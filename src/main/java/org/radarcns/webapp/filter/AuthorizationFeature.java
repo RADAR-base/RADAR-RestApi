@@ -12,9 +12,12 @@ import org.radarcns.auth.PermissionFilter;
 import org.radarcns.auth.PermissionOnProjectFilter;
 import org.radarcns.auth.PermissionOnSubjectFilter;
 
-/** Authorization for different auth tags. */
+/**
+ * Authorization for different auth tags.
+ */
 @Provider
 public class AuthorizationFeature implements DynamicFeature {
+
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
         Method method = resourceInfo.getResourceMethod();

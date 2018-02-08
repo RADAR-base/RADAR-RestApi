@@ -13,14 +13,15 @@ public class Dataset {
     public List<DataItem> dataset;
 
     /**
-     * Default constructor.  Note that this does not initialize fields
-     * to their default values from the schema.  If that is desired then
-     * one should use <code>newBuilder()</code>.
+     * Default constructor.  Note that this does not initialize fields to their default values from
+     * the schema.  If that is desired then one should use <code>newBuilder()</code>.
      */
-    public Dataset() {}
+    public Dataset() {
+    }
 
     /**
      * All-args constructor.
+     *
      * @param header Information useful to contextualise the data set.
      * @param dataset Collection of samples.
      */

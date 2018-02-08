@@ -14,6 +14,7 @@ import org.radarcns.webapp.filter.AuthenticationFilter;
  * Check that the token has access to given subject in given project.
  */
 public class PermissionOnSubjectFilter implements ContainerRequestFilter {
+
     @Context
     private ResourceInfo resourceInfo;
 

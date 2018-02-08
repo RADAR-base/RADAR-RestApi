@@ -39,21 +39,23 @@ public enum DataFormat {
 
     /**
      * Returns the {@code MongoSourceDataWrapper} associated with the given sensor.
+     *
      * @param sourceData sensor for which the MongoSourceDataWrapper has to be instantiated
      * @return {@code MongoSourceDataWrapper}
-     *
      * @see MongoSourceDataWrapper
      */
     public static MongoSourceDataWrapper getMongoSensor(SourceData sourceData) {
         String sourceDataType = sourceData.getSourceDataType();
         switch (sourceDataType) {
-            case "ACCELEROMETER": return new AccelerationFormat(sourceData);
-            default: return new DoubleFormat(sourceData);
+            case "ACCELEROMETER":
+                return new AccelerationFormat(sourceData);
+            default:
+                return new DoubleFormat(sourceData);
         }
     }
 
     @SuppressWarnings("unchecked")
     public static List<Double> getQuartiles(Document doc) {
-        return (List<Double>)doc.get(QUARTILE);
+        return (List<Double>) doc.get(QUARTILE);
     }
 }

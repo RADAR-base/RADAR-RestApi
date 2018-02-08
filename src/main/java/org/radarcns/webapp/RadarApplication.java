@@ -6,11 +6,11 @@ import okhttp3.OkHttpClient;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.radarcns.catalog.SourceCatalog;
-import org.radarcns.service.DataSetService;
 import org.radarcns.listener.HttpClientFactory;
 import org.radarcns.listener.MongoFactory;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.listener.managementportal.ManagementPortalClientFactory;
+import org.radarcns.service.DataSetService;
 import org.radarcns.service.SourceMonitorService;
 import org.radarcns.service.SourceService;
 import org.radarcns.service.SubjectService;
@@ -24,7 +24,9 @@ import org.radarcns.webapp.filter.AuthorizationFeature;
  */
 public class RadarApplication extends ResourceConfig {
 
-    /** Radar application configuration. */
+    /**
+     * Radar application configuration.
+     */
     public RadarApplication() {
         packages(
                 "io.swagger.v3.jaxrs2.integration.resources",

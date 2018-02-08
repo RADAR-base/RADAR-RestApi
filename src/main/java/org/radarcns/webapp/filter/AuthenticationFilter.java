@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 @Authenticated
 @Priority(1000)
 public class AuthenticationFilter implements ContainerRequestFilter {
+
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
     private static TokenValidator validator;
 
@@ -102,8 +103,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     /**
      * Get the token from a request context.
      *
-     * @throws IllegalStateException if the method or path was not annotated with
-     * {@link Authenticated}.
+     * @throws IllegalStateException if the method or path was not annotated with {@link
+     * Authenticated}.
      */
     public static RadarToken getToken(ContainerRequestContext context) {
         SecurityContext secContext = context.getSecurityContext();

@@ -61,10 +61,11 @@ public class AccelerationFormat extends MongoSourceDataWrapper {
         Document z = fields.get(2);
 
         switch (stat) {
-            case MEDIAN: return new Acceleration(
-                    getQuartiles(x).get(1),
-                    getQuartiles(y).get(1),
-                    getQuartiles(z).get(1));
+            case MEDIAN:
+                return new Acceleration(
+                        getQuartiles(x).get(1),
+                        getQuartiles(y).get(1),
+                        getQuartiles(z).get(1));
             case QUARTILES:
                 List<Double> xq = getQuartiles(x);
                 List<Double> yq = getQuartiles(y);
@@ -76,17 +77,18 @@ public class AccelerationFormat extends MongoSourceDataWrapper {
                         new Quartiles(zq.get(0), zq.get(1), zq.get(2)));
             case RECEIVED_MESSAGES:
                 return new Acceleration(
-                    RadarConverter.roundDouble(
-                            x.getDouble(field) / RadarConverter.getExpectedMessages(header), 2),
-                    RadarConverter.roundDouble(
-                            y.getDouble(field) / RadarConverter.getExpectedMessages(header), 2),
-                    RadarConverter.roundDouble(
-                            z.getDouble(field) / RadarConverter.getExpectedMessages(header), 2));
+                        RadarConverter.roundDouble(
+                                x.getDouble(field) / RadarConverter.getExpectedMessages(header), 2),
+                        RadarConverter.roundDouble(
+                                y.getDouble(field) / RadarConverter.getExpectedMessages(header), 2),
+                        RadarConverter.roundDouble(
+                                z.getDouble(field) / RadarConverter.getExpectedMessages(header),
+                                2));
             default:
                 return new Acceleration(
-                    x.get(field),
-                    y.get(field),
-                    z.get(field));
+                        x.get(field),
+                        y.get(field),
+                        z.get(field));
         }
     }
 
@@ -100,6 +102,6 @@ public class AccelerationFormat extends MongoSourceDataWrapper {
     }
 
     private static int intProperty(Document doc, String key) {
-        return ((Number)doc.get(key)).intValue();
+        return ((Number) doc.get(key)).intValue();
     }
 }

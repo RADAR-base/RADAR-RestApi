@@ -33,9 +33,12 @@ import org.slf4j.LoggerFactory;
  * Factory to creates a singleton MongoClient with the correct credentials.
  */
 public class MongoFactory implements Factory<MongoClient> {
+
     private static final Logger logger = LoggerFactory.getLogger(MongoFactory.class);
 
-    /** Disposes the client after use. */
+    /**
+     * Disposes the client after use.
+     */
     @Context
     @SuppressWarnings("PMD.UnusedPrivateField")
     private CloseableService closeableService;

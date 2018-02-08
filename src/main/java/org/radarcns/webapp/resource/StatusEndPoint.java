@@ -20,7 +20,10 @@ import org.radarcns.webapp.filter.Authenticated;
 @Authenticated
 @Path("/status")
 public class StatusEndPoint {
-    /** HDFS status. */
+
+    /**
+     * HDFS status.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/hdfs")

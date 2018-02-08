@@ -18,19 +18,15 @@ package org.radarcns.mongo.util;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import org.bson.Document;
 import org.radarcns.domain.restapi.Application;
-import org.radarcns.domain.restapi.TimeWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Generic DAO to return Android App status information.
  */
-public abstract class MongoAndroidApp  {
+public abstract class MongoAndroidApp {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoAndroidApp.class);
 
@@ -47,7 +43,7 @@ public abstract class MongoAndroidApp  {
 
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentBySubjectAndSource(subject, source, null, -1, 1,
-                    MongoHelper.getCollection(client, getCollectionName()));
+                        MongoHelper.getCollection(client, getCollectionName()));
 
         if (!cursor.hasNext()) {
             LOGGER.debug("Empty cursor");
@@ -69,7 +65,6 @@ public abstract class MongoAndroidApp  {
     protected abstract Application getApplication(Document doc, Application app);
 
     protected abstract String getCollectionName();
-
 
 
 }

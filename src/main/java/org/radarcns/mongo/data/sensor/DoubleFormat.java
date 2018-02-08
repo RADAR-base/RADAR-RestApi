@@ -36,7 +36,7 @@ public class DoubleFormat extends MongoSourceDataWrapper {
     //private static final Logger LOGGER = LoggerFactory.getLogger(DoubleFormat.class);
 
     public DoubleFormat(SourceData sourceData) {
-        super( sourceData);
+        super(sourceData);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class DoubleFormat extends MongoSourceDataWrapper {
             case QUARTILES:
                 List<Double> quartiles = getQuartiles(doc);
                 return new Quartiles(
-                    quartiles.get(0),
-                    quartiles.get(1),
-                    quartiles.get(2));
+                        quartiles.get(0),
+                        quartiles.get(1),
+                        quartiles.get(2));
             case RECEIVED_MESSAGES:
                 return RadarConverter.roundDouble(
                         doc.getDouble(field) / RadarConverter.getExpectedMessages(header),
-                    2);
+                        2);
             default:
                 return doc.getDouble(field);
         }
@@ -69,6 +69,6 @@ public class DoubleFormat extends MongoSourceDataWrapper {
     @Override
     @SuppressWarnings("unchecked")
     protected int extractCount(Document doc) {
-        return ((Number)doc.get(COUNT)).intValue();
+        return ((Number) doc.get(COUNT)).intValue();
     }
 }

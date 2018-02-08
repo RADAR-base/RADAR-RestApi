@@ -16,17 +16,17 @@ public class EffectiveTimeFrame {
         // default constructor for json
     }
 
-    public EffectiveTimeFrame(String startDateTime , String endDateTime) {
+    public EffectiveTimeFrame(String startDateTime, String endDateTime) {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
     }
 
-    public EffectiveTimeFrame(Date startDateTime , Date endDateTime) {
+    public EffectiveTimeFrame(Date startDateTime, Date endDateTime) {
         this.startDateTime = RadarConverter.getISO8601(startDateTime);
         this.endDateTime = RadarConverter.getISO8601(endDateTime);
     }
 
-    public EffectiveTimeFrame(Long startDateTime , Long endDateTime) {
+    public EffectiveTimeFrame(Long startDateTime, Long endDateTime) {
         this.startDateTime = RadarConverter.getISO8601(startDateTime);
         this.endDateTime = RadarConverter.getISO8601(endDateTime);
     }

@@ -120,6 +120,7 @@ public class AndroidAppDataAccessObject {
 
     /**
      * Returns all mongoDb collections used by this DAO.
+     *
      * @return list of String
      */
     public List<String> getCollections() {

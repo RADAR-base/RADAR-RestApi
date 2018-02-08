@@ -15,6 +15,7 @@ import org.radarcns.webapp.resource.Parameter;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NeedsPermissionOnProject {
+
     /**
      * Entity that the permission is needed on.
      */
@@ -26,9 +27,8 @@ public @interface NeedsPermissionOnProject {
     Permission.Operation operation();
 
     /**
-     * Path parameter for the name of the project that the entity belongs to.
-     * In this API, this is usually {@link Parameter#PROJECT_NAME}, so
-     * this is the default.
+     * Path parameter for the name of the project that the entity belongs to. In this API, this is
+     * usually {@link Parameter#PROJECT_NAME}, so this is the default.
      */
     String projectParam() default PROJECT_NAME;
 }

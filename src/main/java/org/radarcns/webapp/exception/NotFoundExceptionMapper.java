@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 @Provider
 public class NotFoundExceptionMapper extends NotFoundException
         implements ExceptionMapper<NotFoundException> {
+
     private static final Logger logger = LoggerFactory.getLogger(NotFoundExceptionMapper.class);
 
     @Context

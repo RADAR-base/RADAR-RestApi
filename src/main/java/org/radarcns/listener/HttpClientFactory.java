@@ -10,9 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpClientFactory implements Factory<OkHttpClient> {
+
     private static final Logger logger = LoggerFactory.getLogger(HttpClientFactory.class);
 
-    /** Disposes the client after use. */
+    /**
+     * Disposes the client after use.
+     */
     @Context
     @SuppressWarnings("PMD.UnusedPrivateField")
     private CloseableService closeableService;

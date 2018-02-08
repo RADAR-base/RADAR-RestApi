@@ -5,6 +5,6 @@
     <PreResources className="org.apache.catalina.webresources.DirResourceSet"
       base="/usr/local/tomcat/conf/radar"
       internalPath="/"
-      webAppMount="/WEB-INF/classes" />
+      webAppMount="/WEB-INF/classes"/>
   </Resources>
 </Context>

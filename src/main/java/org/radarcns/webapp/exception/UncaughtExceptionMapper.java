@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 public class UncaughtExceptionMapper extends Throwable implements ExceptionMapper<Throwable> {
+
     public static final String APPLICATION_JSON_UTF8 = "application/json; charset=utf-8";
     private static final Logger logger = LoggerFactory.getLogger(UncaughtExceptionMapper.class);
 
@@ -39,6 +40,7 @@ public class UncaughtExceptionMapper extends Throwable implements ExceptionMappe
     /**
      * Constructs a response builder with given properties. If the response type can be compatible
      * with application/json, a JSON body response will be added.
+     *
      * @param type expected media type
      * @param status HTTP status code
      * @param error identifiable error string

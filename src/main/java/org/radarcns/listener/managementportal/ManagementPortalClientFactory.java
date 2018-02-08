@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * the {@link javax.servlet.ServletContext} in this way multiple function can make reuse of it.
  */
 public class ManagementPortalClientFactory implements Factory<ManagementPortalClient> {
+
     private static final Logger logger = LoggerFactory
             .getLogger(ManagementPortalClientFactory.class);
 

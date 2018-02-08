@@ -61,12 +61,13 @@ public class DataSetService {
     private MongoClient mongoClient;
 
     private SourceService sourceService;
+
     /**
      * Constructor.
      **/
     @Inject
     public DataSetService(SourceCatalog sourceCatalog, SourceMonitorService sourceMonitorService,
-            ManagementPortalClient managementPortalClient, MongoClient mongoClient ,
+            ManagementPortalClient managementPortalClient, MongoClient mongoClient,
             SourceService sourceService)
             throws IOException {
         this.sourceMonitorService = sourceMonitorService;
@@ -134,7 +135,7 @@ public class DataSetService {
      */
     public Dataset getAllDataItems(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
-            throws IOException{
+            throws IOException {
         org.radarcns.domain.managementportal.Source source = managementPortalClient.getSource
                 (sourceId);
 
@@ -146,8 +147,7 @@ public class DataSetService {
 
         Header header = getHeader(projectName, subjectId, sourceId, sourceCatalog.getSourceData
                         (sourceDataName), stat,
-                timeWindow, source.getSourceTypeIdentifier().toString() , effectiveTimeFrame);
-
+                timeWindow, source.getSourceTypeIdentifier().toString(), effectiveTimeFrame);
 
         MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
 
@@ -167,13 +167,13 @@ public class DataSetService {
      * @param timeWindow time frame resolution
      * @param start is time window start point in millisecond
      * @param end is time window end point in millisecond
-
      * @return data dataset for the given subject and sourceType within the start and end time
      * window, otherwise empty dataset
      * @see Dataset
      */
     public Dataset getAllRecordsInWindow(String projectName, String subjectId,
-            String sourceId, String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow,
+            String sourceId, String sourceDataName, DescriptiveStatistic stat,
+            TimeWindow timeWindow,
             Long start, Long end) throws IOException {
 
         org.radarcns.domain.managementportal.Source source = managementPortalClient.getSource
@@ -188,7 +188,8 @@ public class DataSetService {
         MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
 
         return sensorDao.getAllRecordsInWindow(projectName, subjectId, sourceId, header,
-                RadarConverter.getMongoStat(stat), start, end, MongoHelper.getCollection(mongoClient,
+                RadarConverter.getMongoStat(stat), start, end,
+                MongoHelper.getCollection(mongoClient,
                         sensorDao.getCollectionName(timeWindow)));
     }
 

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Management Portal {@link Subject} support tags: a key-value attribute.
  */
 public class Tag {
+
     @JsonProperty
     private String key;
 
@@ -39,7 +40,7 @@ public class Tag {
     @Override
     public String toString() {
         return "Tag{" + "\n"
-            + "key='" + key + "'\n"
-            + ", value='" + value + "'}";
+                + "key='" + key + "'\n"
+                + ", value='" + value + "'}";
     }
 }

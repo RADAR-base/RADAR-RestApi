@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Java class defining a RADAR Management Portal Source.
  */
 public class Source {
+
     @JsonProperty
     private Integer id;
 
@@ -114,7 +115,7 @@ public class Source {
 
     @JsonIgnore
     public SourceTypeIdentifier getSourceTypeIdentifier() {
-        return new SourceTypeIdentifier(this.sourceTypeProducer , this.sourceTypeModel , this
+        return new SourceTypeIdentifier(this.sourceTypeProducer, this.sourceTypeModel, this
                 .sourceTypeCatalogVersion);
     }
 }

@@ -18,7 +18,6 @@ package org.radarcns.mongo.data.android;
 
 import org.bson.Document;
 import org.radarcns.domain.restapi.Application;
-import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.mongo.util.MongoAndroidApp;
 import org.radarcns.util.RadarConverter;
 

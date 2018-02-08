@@ -26,28 +26,40 @@ import org.slf4j.LoggerFactory;
  */
 public final class Properties {
 
-    /** Logger. **/
+    /**
+     * Logger.
+     **/
     private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
 
-    /** Path to the configuration file for AWS deploy. **/
+    /**
+     * Path to the configuration file for AWS deploy.
+     **/
     private static final String PATH_FILE_AWS = "/usr/share/tomcat8/conf/";
 
-    /** Path to the configuration file for Docker image. **/
+    /**
+     * Path to the configuration file for Docker image.
+     **/
     private static final String PATH_FILE_DOCKER = "/usr/local/tomcat/conf/radar/";
 
-    /** Placeholder alternative path for the config folder. **/
+    /**
+     * Placeholder alternative path for the config folder.
+     **/
     private static final String CONFIG_FOLDER = "CONFIG_FOLDER";
 
-    /** API Config file name. **/
+    /**
+     * API Config file name.
+     **/
     public static final String NAME_CONFIG_FILE = "radar.yml";
 
-    /** Path where the config file is located. **/
+    /**
+     * Path where the config file is located.
+     **/
     private static String validPath;
 
-    /** Singleton. The default folder for config files is {@code PATH_FILE}. It can be
-     *      override setting the environment variable {@code CONFIG_FOLDER}. In case, no one of
-     *      those contain the expected file, the {@code ClassLoader} is used to load file from the
-     *      resources folder.
+    /**
+     * Singleton. The default folder for config files is {@code PATH_FILE}. It can be override
+     * setting the environment variable {@code CONFIG_FOLDER}. In case, no one of those contain the
+     * expected file, the {@code ClassLoader} is used to load file from the resources folder.
      **/
     private static final ApplicationConfig API_CONFIG_INSTANCE;
 
@@ -62,6 +74,7 @@ public final class Properties {
 
     /**
      * Gives access to the singleton API properties.
+     *
      * @return Properties
      */
     public static ApplicationConfig getApiConfig() {
@@ -70,9 +83,9 @@ public final class Properties {
 
     /**
      * Loads the API configuration file. First of all, the {@code CONFIG_FOLDER} env variable is
-     *      checked to verify if points a valid config file. If not, the default location for AWS
-     *      and Docker image deployment are checked. In the last instance, the config file is
-     *      searched inside the default projects resources folder.
+     * checked to verify if points a valid config file. If not, the default location for AWS and
+     * Docker image deployment are checked. In the last instance, the config file is searched inside
+     * the default projects resources folder.
      */
     private static ApplicationConfig loadApiConfig() throws IOException {
         String[] paths = new String[]{
