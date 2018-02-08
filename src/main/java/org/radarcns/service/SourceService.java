@@ -10,6 +10,7 @@ import org.radarcns.domain.managementportal.Source;
 import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.webapp.exception.BadGatewayException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,8 @@ public class SourceService {
     public List<org.radarcns.domain.restapi.Source> getAllSourcesOfSubject(String projectName,
             String subjectId) throws IOException {
         this.managementPortalClient.getSubject(subjectId);
-        //fetch all sourceIds of subject available in from mongoDB
+        //fetch all sourceIds of subject available in from mongoDB.
+        //This should currently available sources and previously used sources
         // can be replaced if the history tracking feature is available in MP
         List<String> allSources = this.sourceCatalog.getSourceTypes().stream().map(sourceType ->
                 sourceMonitorService.getAllSourcesOfSubjectInProject(projectName, subjectId,
@@ -93,7 +95,7 @@ public class SourceService {
                     try {
                         return managementPortalClient.getSource(s);
                     } catch (IOException exe) {
-                        return null;
+                        throw new BadGatewayException(exe);
                     }
                 }
         ).collect(Collectors.toList());

@@ -33,7 +33,7 @@ public class AndroidAppStatus extends MongoAndroidApp {
     }
 
     @Override
-    protected String getCollectionName() {
+    public String getCollectionName() {
         return UPTIME_COLLECTION;
     }
 }

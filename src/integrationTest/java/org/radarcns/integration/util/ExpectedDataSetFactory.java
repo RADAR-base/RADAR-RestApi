@@ -55,11 +55,13 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @return {@code Dataset} resulted by the simulation
      * @see Dataset
      */
-    public Dataset getDataset(ExpectedValue expectedValue, String subjectId, String sourceId,
+    public Dataset getDataset(ExpectedValue expectedValue, String projectName, String subjectId,
+            String sourceId,
             String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeWindow) throws InstantiationException, IllegalAccessException {
 
-        Header header = getHeader(expectedValue, subjectId, sourceId, sourceType, sensorType,
+        Header header = getHeader(expectedValue, projectName, subjectId, sourceId, sourceType,
+                sensorType,
                 statistic, timeWindow);
 
         return new Dataset(header, getItem(expectedValue, header));
@@ -77,10 +79,12 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param timeWindow time interval between two consecutive samples
      * @return {@link Header} for a {@link Dataset}
      */
-    public Header getHeader(ExpectedValue expectedValue, String subjectId, String sourceId,
+    public Header getHeader(ExpectedValue expectedValue,String projectName, String subjectId,
+            String
+            sourceId,
             String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeWindow) {
-        return new Header(subjectId, sourceId, sourceType, sensorType, statistic,
+        return new Header(projectName, subjectId, sourceId, sourceType, sensorType, statistic,
                 null, timeWindow,
                 getEffectiveTimeFrame(expectedValue));
     }
@@ -135,12 +139,12 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
         if (singleExpectedValue instanceof DoubleArrayCollector) {
             return getArrayItems(expectedValue, keys, header.getDescriptiveStatistic(),
-                    header.getAssessmentType());
+                    header.getSourceDataType());
         } else if (singleExpectedValue instanceof DoubleValueCollector) {
             return getSingletonItems(expectedValue, keys, header.getDescriptiveStatistic(),
-                header.getAssessmentType());
+                header.getSourceDataType());
         } else {
-            throw new IllegalArgumentException(header.getAssessmentType() + " not supported yet");
+            throw new IllegalArgumentException(header.getSourceDataType() + " not supported yet");
         }
     }
 

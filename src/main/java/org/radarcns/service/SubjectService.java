@@ -8,6 +8,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.webapp.exception.BadGatewayException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,14 +41,14 @@ public class SubjectService {
     }
 
     private org.radarcns.domain.restapi.Subject buildSubject(
-            org.radarcns.domain.managementportal.Subject subject) {
+            org.radarcns.domain.managementportal.Subject subject) throws IOException {
         return new org.radarcns.domain.restapi.Subject()
                 .subjectId(subject.getId())
                 .projectName(subject.getProject().getProjectName())
                 .status(subject.getStatus())
                 .humanReadableId(subject.getHumanReadableIdentifier())
-                .sources(this.sourceService.buildSources(subject.getProject().getProjectName(),
-                        subject.getId(), subject.getSources()));
+                .sources(this.sourceService.getAllSourcesOfSubject(subject.getProject()
+                        .getProjectName(), subject.getId()));
     }
 
     public List<org.radarcns.domain.restapi.Subject> getAllSubjectsFromProject(String projectName)
@@ -55,7 +56,13 @@ public class SubjectService {
         // returns NotFound if a project is not available
         this.managementPortalClient.getProject(projectName);
         return this.managementPortalClient.getAllSubjectsFromProject(projectName).stream()
-                .map(this::buildSubject).collect(Collectors.toList());
+                .map(s -> {
+                    try {
+                        return buildSubject(s);
+                    } catch (IOException exe) {
+                        throw new BadGatewayException(exe);
+                    }
+                }).collect(Collectors.toList());
     }
 
     public org.radarcns.domain.restapi.Subject getSubjectBySubjectId(String projectName,

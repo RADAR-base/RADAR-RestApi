@@ -39,12 +39,13 @@ public class ExpectedValueTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
+    private static final String PROJECT = "radar";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test
     public void matchDatasetOnDocuments() throws Exception {
-        Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(SUBJECT, SOURCE,
+        Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
                 "EMPATICA", "HEART_RATE", COUNT, TIME_WINDOW, SAMPLES, false);
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);

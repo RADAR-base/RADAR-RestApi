@@ -35,7 +35,7 @@ public class AndroidRecordCounter extends MongoAndroidApp {
     }
 
     @Override
-    protected String getCollectionName() {
+    public String getCollectionName() {
         return RECORD_COLLECTION;
     }
 }

@@ -72,7 +72,7 @@ public class AppStatusEndPointTest {
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client,COLLECTION_NAME);
 
-        List<Document> list = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
+        List<Document> list = RandomInput.getDocumentsRandom(PROJECT, SUBJECT, SOURCE, SOURCE_TYPE,
                 SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
 
         collection.insertMany(list);

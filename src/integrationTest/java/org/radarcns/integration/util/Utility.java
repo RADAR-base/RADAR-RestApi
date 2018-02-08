@@ -39,12 +39,12 @@ import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.listener.MongoFactory;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
-import org.radarcns.listener.MongoFactory;
-import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.util.RadarConverter;
 
 public class Utility {
@@ -109,7 +109,8 @@ public class Utility {
      * @throws IllegalAccessException if the item class or its nullary constructor is not accessible
      * @throws InstantiationException if item class cannot be instantiated
      */
-    public static Dataset convertDocToDataset(List<Document> docs, String subjectId,
+    public static Dataset convertDocToDataset(List<Document> docs, String projectName, String
+            subjectId,
             String sourceId, String sourceType, String sensorType, Stat stat, String unit,
             TimeWindow timeWindow, Class<? extends SpecificRecord> recordClass)
             throws IllegalAccessException, InstantiationException {
@@ -131,7 +132,7 @@ public class Utility {
             itemList.add(new DataItem(record, RadarConverter.getISO8601(doc.getDate(START))));
         }
 
-        Header header = new Header(subjectId, sourceId, sourceType, sensorType,
+        Header header = new Header(projectName, subjectId, sourceId, sourceType, sensorType,
                     RadarConverter.getDescriptiveStatistic(stat), unit, timeWindow, eftHeader);
 
         return new Dataset(header, itemList);
@@ -207,13 +208,14 @@ public class Utility {
      */
     public static Dataset cloneDataset(Dataset input) {
         Header inputHeader = input.getHeader();
-        EffectiveTimeFrame cloneEffectiveTimeFrame =  new EffectiveTimeFrame(
+        EffectiveTimeFrame cloneEffectiveTimeFrame = new EffectiveTimeFrame(
                 inputHeader.getEffectiveTimeFrame().getStartDateTime(),
                 inputHeader.getEffectiveTimeFrame().getEndDateTime());
-        Header cloneHeader = new Header(inputHeader.getSubjectId(), inputHeader.getSourceId(),
-                    inputHeader.getSourceType(), inputHeader.getAssessmentType(),
-                    inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
-                    inputHeader.getTimeWindow(), cloneEffectiveTimeFrame);
+        Header cloneHeader = new Header(inputHeader.getProjectId(), inputHeader.getSubjectId(),
+                inputHeader.getSourceId(), inputHeader.getSourceType(),
+                inputHeader.getSourceDataType(),
+                inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
+                inputHeader.getTimeWindow(), cloneEffectiveTimeFrame);
 
 
         List<DataItem> cloneItem = new ArrayList<>();

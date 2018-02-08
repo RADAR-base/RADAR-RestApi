@@ -195,7 +195,7 @@ public abstract class MongoSourceDataWrapper {
         if (!cursor.hasNext()) {
             LOGGER.debug("Empty cursor");
             cursor.close();
-            return new Dataset(null, list);
+            return new Dataset(header, list);
         }
 
         while (cursor.hasNext()) {

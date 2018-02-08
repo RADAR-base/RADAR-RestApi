@@ -35,7 +35,7 @@ public class AndroidServerStatus extends MongoAndroidApp {
     }
 
     @Override
-    protected String getCollectionName() {
+    public String getCollectionName() {
         return STATUS_COLLECTION;
     }
 

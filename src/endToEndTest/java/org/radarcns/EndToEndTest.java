@@ -311,7 +311,8 @@ public class EndToEndTest {
 
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory.getDataset(
-                    expectedValue.get(config), USER_ID_MOCK, SOURCE_ID_MOCK, "EMPATICA",
+                    expectedValue.get(config), PROJECT_NAME_MOCK, USER_ID_MOCK, SOURCE_ID_MOCK,
+                    "EMPATICA",
                     getSensorType(config), stat, TIME_WINDOW));
         }
 
