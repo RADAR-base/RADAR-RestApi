@@ -11,6 +11,15 @@ public class HttpClientFactory implements DisposableSupplier<OkHttpClient> {
     private static final Logger logger = LoggerFactory.getLogger(HttpClientFactory.class);
 
     @Override
+    public OkHttpClient get() {
+        return new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+    }
+
+    @Override
     public void dispose(OkHttpClient client) {
         client.connectionPool().evictAll();
         ExecutorService executorService = client.dispatcher().executorService();
@@ -21,14 +30,5 @@ public class HttpClientFactory implements DisposableSupplier<OkHttpClient> {
         } catch (InterruptedException e) {
             logger.warn("InterruptedException on destroy()", e);
         }
-    }
-
-    @Override
-    public OkHttpClient get() {
-        return new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build();
     }
 }
