@@ -75,14 +75,14 @@ public class AccelerationFormat extends MongoSourceDataWrapper {
             case RECEIVED_MESSAGES:
                 return new Acceleration(
                         RadarConverter.roundDouble(
-                                x.getDouble(field) /
-                                        getExpectedRecordCount(header.getTimeWindow()), 2),
+                                x.getDouble(field)
+                                        / getExpectedRecordCount(header.getTimeWindow()), 2),
                         RadarConverter.roundDouble(
-                                y.getDouble(field) /
-                                        getExpectedRecordCount(header.getTimeWindow()), 2),
+                                y.getDouble(field)
+                                        / getExpectedRecordCount(header.getTimeWindow()), 2),
                         RadarConverter.roundDouble(
-                                z.getDouble(field) /
-                                        getExpectedRecordCount(header.getTimeWindow()), 2));
+                                z.getDouble(field)
+                                        / getExpectedRecordCount(header.getTimeWindow()), 2));
             default:
                 return new Acceleration(
                         x.get(field),

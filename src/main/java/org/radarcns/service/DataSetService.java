@@ -174,8 +174,8 @@ public class DataSetService {
             TimeWindow timeWindow,
             Long start, Long end) throws IOException {
 
-        org.radarcns.domain.managementportal.Source source = managementPortalClient.getSource
-                (sourceId);
+        org.radarcns.domain.managementportal.Source source = managementPortalClient
+                .getSource(sourceId);
 
         EffectiveTimeFrame effectiveTimeFrame = new EffectiveTimeFrame(start, end);
 

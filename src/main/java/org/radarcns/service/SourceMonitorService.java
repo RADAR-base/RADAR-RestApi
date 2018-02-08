@@ -142,7 +142,7 @@ public class SourceMonitorService {
         long end = (System.currentTimeMillis() / tenSec) * tenSec;
         long start = end - TimeUnit.MINUTES.toMillis(1);
 
-        return getState(subjectId, sourceId, start, end, client , countTemp);
+        return getState(subjectId, sourceId, start, end, client, countTemp);
     }
 
     /**

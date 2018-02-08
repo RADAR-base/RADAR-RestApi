@@ -23,8 +23,8 @@ public class SubjectService {
     /**
      * Default constructor.
      * Injects all dependencies.
-     * @param managementPortalClient
-     * @param sourceService
+     * @param managementPortalClient instance
+     * @param sourceService instance
      */
     @Inject
     public SubjectService(ManagementPortalClient managementPortalClient, SourceService
@@ -35,10 +35,10 @@ public class SubjectService {
 
     /**
      * Checks whether given source-id is available in the sources available for the subject.
-     * @param subjectId
-     * @param sourceId
+     * @param subjectId of subject
+     * @param sourceId of source
      * @return {@code true} if available.
-     * @throws IOException
+     * @throws IOException when unable to process the request.
      */
     public boolean checkSourceAssignedToSubject(String subjectId, String sourceId) throws
             IOException {
@@ -64,10 +64,10 @@ public class SubjectService {
 
     /**
      * Returns list of {@link org.radarcns.domain.restapi.Subject} available under given project.
-     * @param projectName
+     * @param projectName of project
      * @return list of subjects.
-     * @throws IOException
-     * @throws NotFoundException
+     * @throws IOException when unable to process
+     * @throws NotFoundException when given parameters are not available in the database.
      */
     public List<org.radarcns.domain.restapi.Subject> getAllSubjectsFromProject(String projectName)
             throws IOException, NotFoundException {
