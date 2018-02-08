@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.android;
+package org.radarcns.mongo.data.applicationstatus;
 
 import org.bson.Document;
 import org.radarcns.domain.restapi.Application;

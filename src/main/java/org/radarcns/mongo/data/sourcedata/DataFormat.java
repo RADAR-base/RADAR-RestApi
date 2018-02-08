@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.sensor;
+package org.radarcns.mongo.data.sourcedata;
 
 import static org.radarcns.mongo.util.MongoHelper.QUARTILE;
 
 import java.util.List;
 import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceData;
-import org.radarcns.mongo.util.MongoSourceDataWrapper;
 
 public enum DataFormat {
     ACCELERATION_FORMAT("AccelerationFormat"),

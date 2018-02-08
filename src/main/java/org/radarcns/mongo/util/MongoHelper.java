@@ -97,7 +97,7 @@ public class MongoHelper {
      * @return a MongoDB cursor containing all documents between start and end for the given User,
      * SourceDefinition and MongoDB collection
      */
-    protected static MongoCursor<Document> findDocumentByUserSourceWindow(String subject,
+    public static MongoCursor<Document> findDocumentByUserSourceWindow(String subject,
             String source, Long start, Long end, MongoCollection<Document> collection) {
         FindIterable<Document> result = collection.find(
                 Filters.and(
@@ -121,7 +121,7 @@ public class MongoHelper {
      * @return a MongoDB cursor containing all documents between start and end for the given User,
      * SourceDefinition and MongoDB collection
      */
-    protected static MongoCursor<Document> findDocumentsByProjectAndSubjectAndSourceInWindow(
+    public static MongoCursor<Document> findDocumentsByProjectAndSubjectAndSourceInWindow(
             String projectName, String subject, String source, Long start, Long end,
             MongoCollection<Document> collection) {
         FindIterable<Document> result = collection.find(

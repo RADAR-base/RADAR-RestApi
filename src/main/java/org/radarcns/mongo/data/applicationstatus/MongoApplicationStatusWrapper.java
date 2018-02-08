@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.android;
+package org.radarcns.mongo.data.applicationstatus;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;

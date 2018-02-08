@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.util;
+package org.radarcns.mongo.data.sourcedata;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -30,7 +30,7 @@ import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
-import org.radarcns.mongo.data.sensor.DataFormat;
+import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;

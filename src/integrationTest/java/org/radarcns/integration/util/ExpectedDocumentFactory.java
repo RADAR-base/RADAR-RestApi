@@ -34,7 +34,7 @@ import java.util.Map;
 import org.bson.Document;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.mock.model.ExpectedValue;
-import org.radarcns.mongo.data.sensor.AccelerationFormat;
+import org.radarcns.mongo.data.sourcedata.AccelerationFormat;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.stream.collector.DoubleArrayCollector;

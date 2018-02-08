@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.android;
+package org.radarcns.mongo.data.applicationstatus;
 
 import org.bson.Document;
 import org.radarcns.domain.restapi.Application;
+import org.radarcns.util.RadarConverter;
 
-public class ApplicationStatusUpTime extends MongoApplicationStatusWrapper {
+public class ApplicationStatusServerStatus extends MongoApplicationStatusWrapper {
 
-    public static final String UPTIME_COLLECTION = "application_uptime";
+    public static final String STATUS_COLLECTION = "application_server_status";
 
     //TODO take field names from RADAR MongoDb Connector
     @Override
     protected Application getApplication(Document doc, Application app) {
-        app.setUptime(doc.getDouble("applicationUptime"));
+        app.setIpAddress(doc.getString("clientIP"));
+        app.setServerStatus(RadarConverter.getServerStatus(doc.getString("serverStatus")));
 
         return app;
     }
 
     @Override
     public String getCollectionName() {
-        return UPTIME_COLLECTION;
+        return STATUS_COLLECTION;
     }
+
 }

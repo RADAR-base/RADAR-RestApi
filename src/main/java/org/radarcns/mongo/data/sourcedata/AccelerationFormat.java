@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.sensor;
+package org.radarcns.mongo.data.sourcedata;
 
-import static org.radarcns.mongo.data.sensor.DataFormat.getQuartiles;
+import static org.radarcns.mongo.data.sourcedata.DataFormat.getQuartiles;
 import static org.radarcns.mongo.util.MongoHelper.COUNT;
 import static org.radarcns.mongo.util.MongoHelper.FIELDS;
 
@@ -27,7 +27,6 @@ import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
-import org.radarcns.mongo.util.MongoSourceDataWrapper;
 import org.radarcns.util.RadarConverter;
 
 /**
