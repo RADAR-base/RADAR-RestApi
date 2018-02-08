@@ -38,11 +38,12 @@ public abstract class MongoAndroidApp {
      * @param client is the mongoDb client instance
      * @return the last seen status update for the given subject and sourceType, otherwise null
      */
-    public Application valueBySubjectSource(String subject, String source, Application app,
+    public Application valueBySubjectSource(String project, String subject, String source,
+            Application app,
             MongoClient client) {
 
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentBySubjectAndSource(subject, source, null, -1, 1,
+                .findDocumentByProjectAndSubjectAndSource(project, subject, source, null, -1, 1,
                         MongoHelper.getCollection(client, getCollectionName()));
 
         if (!cursor.hasNext()) {

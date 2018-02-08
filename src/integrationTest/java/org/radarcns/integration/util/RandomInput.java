@@ -19,6 +19,7 @@ package org.radarcns.integration.util;
 import static org.radarcns.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
 import static org.radarcns.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
+import static org.radarcns.mongo.util.MongoHelper.PROJECT_ID;
 import static org.radarcns.mongo.util.MongoHelper.SOURCE_ID;
 import static org.radarcns.mongo.util.MongoHelper.USER_ID;
 
@@ -233,7 +234,8 @@ public class RandomInput {
      * Generates and returns a randomly generated {@code ApplicationStatus} mocking data sent by
      * RADAR-CNS pRMT.
      **/
-    public static Map<String, Document> getRandomApplicationStatus(String user, String source) {
+    public static Map<String, Document> getRandomApplicationStatus(String project, String user,
+            String source) {
         String ipAdress = getRandomIpAddress();
         ServerStatus serverStatus = ServerStatus.values()[
                 ThreadLocalRandom.current().nextInt(0, ServerStatus.values().length)];
@@ -242,14 +244,16 @@ public class RandomInput {
         int recordsSent = ThreadLocalRandom.current().nextInt();
         int recordsUnsent = ThreadLocalRandom.current().nextInt();
 
-        return getRandomApplicationStatus(user, source, ipAdress, serverStatus, uptime,
+        return getRandomApplicationStatus(project, user, source, ipAdress, serverStatus, uptime,
                 recordsCached, recordsSent, recordsUnsent);
     }
 
     /**
      * Generates and returns a ApplicationStatus using the given inputs.
      **/
-    public static Map<String, Document> getRandomApplicationStatus(String user, String source,
+    public static Map<String, Document> getRandomApplicationStatus(String project, String user,
+            String
+            source,
             String ipAddress, ServerStatus serverStatus, Double uptime, int recordsCached,
             int recordsSent, int recordsUnsent) {
         String id = user + "-" + source;
@@ -257,12 +261,14 @@ public class RandomInput {
         Document uptimeDoc = new Document("_id", id)
                 .append(USER_ID, user)
                 .append(SOURCE_ID, source)
+                .append(PROJECT_ID, project)
                 .append("sourceType", source)
                 .append("applicationUptime", uptime);
 
         Document statusDoc = new Document("_id", id)
                 .append(USER_ID, user)
                 .append(SOURCE_ID, source)
+                .append(PROJECT_ID, project)
                 .append("sourceType", source)
                 .append("clientIP", ipAddress)
                 .append("serverStatus", serverStatus.toString());
@@ -270,6 +276,7 @@ public class RandomInput {
         Document recordsDoc = new Document("_id", id)
                 .append(USER_ID, user)
                 .append(SOURCE_ID, source)
+                .append(PROJECT_ID, project)
                 .append("sourceType", source)
                 .append("recordsCached", recordsCached)
                 .append("recordsSent", recordsSent)

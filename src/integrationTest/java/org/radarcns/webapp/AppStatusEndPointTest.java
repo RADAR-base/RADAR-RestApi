@@ -77,7 +77,7 @@ public class AppStatusEndPointTest {
 
         collection.insertMany(list);
 
-        Map<String, Document> map = RandomInput.getRandomApplicationStatus(
+        Map<String, Document> map = RandomInput.getRandomApplicationStatus(PROJECT,
                 SUBJECT, SOURCE);
 
         Utility.insertMixedDocs(client, map);

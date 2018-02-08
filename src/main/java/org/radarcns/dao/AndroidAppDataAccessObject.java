@@ -65,7 +65,7 @@ public class AndroidAppDataAccessObject {
         Application app = null;
 
         for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
-            app = dataAccessObject.valueBySubjectSource(subject, source, app, client);
+            app = dataAccessObject.valueBySubjectSource(project, subject, source, app, client);
         }
 
         return app;
