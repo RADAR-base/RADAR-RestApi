@@ -64,7 +64,7 @@ public abstract class MongoAndroidApp {
 
     protected abstract Application getApplication(Document doc, Application app);
 
-    protected abstract String getCollectionName();
+    public abstract String getCollectionName();
 
 
 }

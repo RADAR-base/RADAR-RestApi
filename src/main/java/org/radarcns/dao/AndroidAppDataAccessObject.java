@@ -68,56 +68,6 @@ public class AndroidAppDataAccessObject {
 
         return app;
     }
-
-//    /**
-//     * Finds all subjects.
-//     *
-//     * @return all distinct subjectIDs for the given collection, otherwise an empty Collection
-//     */
-//    public Collection<String> findAllUser(MongoClient client) {
-//        Set<String> subjects = new HashSet<>();
-//
-//        for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
-//            subjects.addAll(dataAccessObject.findAllUser(client));
-//        }
-//
-//        return subjects;
-//    }
-
-    /**
-     * Finds all sources for the given subject.
-     *
-     * @param subject is the subjectID
-     * @return all distinct sourceIDs for the given collection, otherwise empty Collection
-     */
-    public Collection<Source> findAllSourcesBySubject(String subject, MongoClient client) {
-        Set<Source> subjects = new HashSet<>();
-
-        for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
-            subjects.addAll(dataAccessObject.findAllSourcesByUser(subject, client));
-        }
-
-        return subjects;
-    }
-
-    /**
-     * Finds the source type for the given sourceID.
-     *
-     * @param source SourceID
-     * @param client MongoDB client
-     * @return a study {@code SourceType}
-     */
-    public String findSourceType(String source, MongoClient client) {
-        String type = null;
-        Iterator<MongoAndroidApp> iterator = dataAccessObjects.iterator();
-
-        while (iterator.hasNext() && type == null) {
-            type = iterator.next().findSourceType(source, client);
-        }
-
-        return type;
-    }
-
     /**
      * Returns all mongoDb collections used by this DAO.
      *
@@ -127,7 +77,7 @@ public class AndroidAppDataAccessObject {
         List<String> list = new LinkedList<>();
 
         for (MongoAndroidApp dataAccessObject : dataAccessObjects) {
-            list.addAll(dataAccessObject.getCollectionNames());
+            list.add(dataAccessObject.getCollectionName());
         }
 
         return list;
