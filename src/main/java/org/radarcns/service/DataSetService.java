@@ -215,46 +215,6 @@ public class DataSetService {
                         sensorDao.getCollectionName(TimeWindow.TEN_SECOND)));
     }
 
-//    /**
-//     * Returns all available sources for the given subject.
-//     *
-//     * @param subject subject identifier.
-//     * @param client MongoDb client
-//     * @return a {@code Set<Source>} containing all {@link Source} used by the given {@code subject}
-//     * @throws ConnectException if MongoDB is not available
-//     */
-//    public Set<Source> getAllSources(String subject, MongoClient client)
-//            throws ConnectException {
-//        Set<Source> sources = new HashSet<>();
-//
-//        for (MongoSourceDataWrapper mongoSourceDataWrapper : mongoSensorMap.values()) {
-//            sources.addAll(mongoSourceDataWrapper.findAllSourcesByUser(subject, client));
-//        }
-//
-//        return sources;
-//    }
-
-//    /**
-//     * Finds the sourceType type for the given sourceID.
-//     *
-//     * @param source sourceType identifier
-//     * @param client {@link MongoClient} used to connect to the database
-//     * @return a study {@code SourceType}
-//     *
-//     * @throws ConnectException if MongoDB is not available
-//     */
-//    public String getSourceType(String source, MongoClient client) throws ConnectException {
-//        for (MongoSourceDataWrapper mongoSourceDataWrapper : mongoSensorMap.values()) {
-//            String type = mongoSourceDataWrapper.findSourceType(source, client);
-//
-//            if (type != null) {
-//                return type;
-//            }
-//        }
-//
-//        return null;
-//    }
-
     /**
      * Returns {@link EffectiveTimeFrame} during which the {@code subject} have sent data.
      *

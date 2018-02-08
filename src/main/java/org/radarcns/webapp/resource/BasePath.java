@@ -26,7 +26,7 @@ public interface BasePath {
     String LATEST = "latest";
     String SOURCE = "sourceType";
     String SUBJECT = "subject";
-    String STATUS = "status";
+    String APPLICATION_STATUS = "application-status";
     String STATE = "state";
     String PROJECTS = "projects";
     String SUBJECTS = "subjects";

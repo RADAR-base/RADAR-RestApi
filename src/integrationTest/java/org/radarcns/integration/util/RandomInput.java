@@ -19,6 +19,8 @@ package org.radarcns.integration.util;
 import static org.radarcns.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
 import static org.radarcns.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
+import static org.radarcns.mongo.util.MongoHelper.SOURCE_ID;
+import static org.radarcns.mongo.util.MongoHelper.USER_ID;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -253,18 +255,21 @@ public class RandomInput {
         String id = user + "-" + source;
 
         Document uptimeDoc = new Document("_id", id)
-                .append("user", user)
+                .append(USER_ID, user)
+                .append(SOURCE_ID, source)
                 .append("sourceType", source)
                 .append("applicationUptime", uptime);
 
         Document statusDoc = new Document("_id", id)
-                .append("user", user)
+                .append(USER_ID, user)
+                .append(SOURCE_ID, source)
                 .append("sourceType", source)
                 .append("clientIP", ipAddress)
                 .append("serverStatus", serverStatus.toString());
 
         Document recordsDoc = new Document("_id", id)
-                .append("user", user)
+                .append(USER_ID, user)
+                .append(SOURCE_ID, source)
                 .append("sourceType", source)
                 .append("recordsCached", recordsCached)
                 .append("recordsSent", recordsSent)

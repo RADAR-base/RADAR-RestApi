@@ -54,12 +54,14 @@ public class AndroidAppDataAccessObject {
     /**
      * Computes the Android App Status realign on different collection.
      *
+     * @param project of the subject
      * @param subject identifier
      * @param source identifier
      * @param client is the MongoDb client
      * @return {@code Application} representing the status of the related Android App
      */
-    public Application getStatus(String subject, String source, MongoClient client) {
+    public Application getStatus(String project, String subject, String source, MongoClient
+            client) {
         Application app = null;
 
         for (MongoAndroidApp dataAccessObject : dataAccessObjects) {

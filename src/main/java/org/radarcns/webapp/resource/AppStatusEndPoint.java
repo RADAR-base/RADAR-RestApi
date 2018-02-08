@@ -18,9 +18,8 @@ package org.radarcns.webapp.resource;
 
 import static org.radarcns.auth.authorization.Permission.Entity.SOURCE;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.webapp.resource.BasePath.ANDROID;
+import static org.radarcns.webapp.resource.BasePath.APPLICATION_STATUS;
 import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.resource.BasePath.STATUS;
 import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.resource.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
@@ -48,7 +47,7 @@ import org.radarcns.webapp.validation.Alphanumeric;
  * Android application status web-app. Function set to access Android app status information.
  */
 @Authenticated
-@Path("/" + ANDROID)
+@Path("/" + APPLICATION_STATUS)
 public class AppStatusEndPoint {
 
     @Inject
@@ -60,7 +59,7 @@ public class AppStatusEndPoint {
     @Inject
     private SubjectService subjectService;
     //--------------------------------------------------------------------------------------------//
-    //                                    REAL-TIME FUNCTIONS                                     //
+    //                                    APPLICATION_STATUS FUNCTIONS                            //
     //--------------------------------------------------------------------------------------------//
 
     /**
@@ -68,7 +67,7 @@ public class AppStatusEndPoint {
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, AVRO_BINARY})
-    @Path("/" + STATUS + "/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
+    @Path("/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Return an Applications status",
             description = "The Android application periodically updates its current status")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
@@ -85,14 +84,15 @@ public class AppStatusEndPoint {
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
             @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
         mpClient.checkSubjectInProject(projectName, subjectId);
-        Application application = new Application(
-                null, 0d, ServerStatus.UNKNOWN, -1, -1, -1);
-
+        Application application = null;
         if (subjectService.checkSourceAssignedToSubject(subjectId, sourceId)) {
-            application = AndroidAppDataAccessObject.getInstance().getStatus(
+            application = AndroidAppDataAccessObject.getInstance().getStatus(projectName,
                     subjectId, sourceId, mongoClient);
         }
+        if (application == null) {
+            return new Application(null, 0d, ServerStatus.UNKNOWN, -1, -1, -1);
 
+        }
         return application;
     }
 }

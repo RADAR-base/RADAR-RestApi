@@ -153,34 +153,6 @@ public class ApiClient extends ExternalResource {
         }
     }
 
-    /**
-     * Request an Avro SpecificRecord from the API, with given relative path. This sets the
-     * Accept header to {@code avro/binary}.
-     *
-     * @param relativePath path relative to the base URL, without starting slash.
-     * @param avroClass Avro SpecificRecord class to deserialize.
-     * @param expectedResponse response codes that are considered valid. If none are given, any
-     *                         success response code is considered valid.
-     *
-     * @return HTTP Response body as a string
-     * @throws IOException if the request could not be executed
-     * @throws ReflectiveOperationException if the provided class does not have a static
-     *                                      {@code getClassSchema()} method.
-     * @throws AssertionError if the response code does not match one of expectedResponse or
-     *                        if no expectedResponse is provided if the response code does not
-     *                        indicate success.
-     */
-//    @Nonnull
-//    public <K extends SpecificRecord> K requestAvro(String relativePath, Class<K> avroClass,
-//            Status... expectedResponse) throws IOException, ReflectiveOperationException {
-//        try (Response response = request(relativePath, AVRO_BINARY, expectedResponse)) {
-//            ResponseBody body = response.body();
-//            assertNotNull(body);
-//            @SuppressWarnings("JavaReflectionMemberAccess")
-//            Schema schema = (Schema) avroClass.getMethod("getClassSchema").invoke(null);
-//            return AvroConverter.avroByteToAvro(body.bytes(), schema);
-//        }
-//    }
 
 
     /**

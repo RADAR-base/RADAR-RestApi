@@ -1,6 +1,7 @@
 package org.radarcns.domain.restapi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 
 public class Application {
 
@@ -8,36 +9,35 @@ public class Application {
      * Hardware identifier of client application.
      */
     @JsonProperty
-    private java.lang.String ipAddress;
+    private java.lang.String ipAddress = null;
     /**
      * Time since last app start (s).
      */
     @JsonProperty
-    private double uptime;
+    private double uptime = 0d;
     /**
      * Server connection status.
      */
     @JsonProperty
-    private ServerStatus serverStatus;
+    private ServerStatus serverStatus = ServerStatus.UNKNOWN;
     /**
      * Number of records currently being cached.
      */
     @JsonProperty
-    private int recordsCached;
+    private int recordsCached = -1;
     /**
      * Number of records sent since application start.
      */
     @JsonProperty
-    private int recordsSent;
+    private int recordsSent = -1;
     /**
      * Number of unsent records.
      */
     @JsonProperty
-    private int recordsUnsent;
+    private int recordsUnsent = -1;
 
     /**
-     * Default constructor.  Note that this does not initialize fields to their default values from
-     * the schema.  If that is desired then one should use <code>newBuilder()</code>.
+     * Default constructor.
      */
     public Application() {
     }
@@ -110,5 +110,29 @@ public class Application {
 
     public void setRecordsUnsent(int recordsUnsent) {
         this.recordsUnsent = recordsUnsent;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Application sourceType = (Application) o;
+
+        return Objects.equals(ipAddress, sourceType.ipAddress)
+                && Objects.equals(uptime, sourceType.uptime)
+                && Objects.equals(serverStatus, sourceType.serverStatus)
+                && Objects.equals(recordsCached, sourceType.recordsCached)
+                && Objects.equals(recordsSent, sourceType.recordsSent)
+                && Objects.equals(recordsUnsent, sourceType.recordsUnsent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects
+                .hash(ipAddress, uptime, serverStatus, recordsCached, recordsSent, recordsUnsent);
     }
 }

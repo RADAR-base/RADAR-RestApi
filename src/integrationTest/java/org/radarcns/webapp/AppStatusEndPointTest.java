@@ -19,7 +19,7 @@ package org.radarcns.webapp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.resource.BasePath.STATUS;
+import static org.radarcns.webapp.resource.BasePath.APPLICATION_STATUS;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -34,14 +34,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.dao.AndroidAppDataAccessObject;
 import org.radarcns.domain.restapi.Application;
+import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.monitor.application.ServerStatus;
-import org.radarcns.webapp.resource.BasePath;
 
 public class AppStatusEndPointTest {
 
@@ -52,13 +51,13 @@ public class AppStatusEndPointTest {
     private static final String SENSOR_TYPE = "HEART_RATE";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
-    private static final String SOURCE_PATH = PROJECT + '/' + SUBJECT + '/' + SOURCE;
+    private static final String SOURCE_PATH =
+            APPLICATION_STATUS + '/' + PROJECT + '/' + SUBJECT + '/' + SOURCE;
     private static final String COLLECTION_NAME = "android_empatica_e4_heartrate_10sec";
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()
-                    + BasePath.ANDROID + '/' + STATUS + '/');
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
     @Test
     public void getStatusTest200Unknown() throws IOException, ReflectiveOperationException {
@@ -86,7 +85,8 @@ public class AppStatusEndPointTest {
         Application expected = Utility.convertDocToApplication(map);
         Application actual = apiClient.requestJson(SOURCE_PATH, Application.class, Status.OK);
 
-        assertEquals(expected, actual);
+        assertEquals(expected.getServerStatus(), actual.getServerStatus());
+        assertEquals(expected.getIpAddress(), actual.getIpAddress());
 
         dropAndClose(client);
     }
