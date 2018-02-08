@@ -44,6 +44,7 @@ import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.webapp.resource.BasePath;
 
 public class AppStatusEndPointTest {
+
     private static final String PROJECT = "radar";
     private static final String SUBJECT = "sub-1";
     private static final String SOURCE = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
@@ -70,7 +71,7 @@ public class AppStatusEndPointTest {
             throws IOException, ReflectiveOperationException {
         MongoClient client = Utility.getMongoClient();
 
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,COLLECTION_NAME);
+        MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
 
         List<Document> list = RandomInput.getDocumentsRandom(PROJECT, SUBJECT, SOURCE, SOURCE_TYPE,
                 SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
@@ -95,12 +96,13 @@ public class AppStatusEndPointTest {
         dropAndClose(Utility.getMongoClient());
     }
 
-    /** Drops all used collections to bring the database back to the initial state, and close the
-     *      database connection.
+    /**
+     * Drops all used collections to bring the database back to the initial state, and close the
+     * database connection.
      **/
     public void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-        Utility.dropCollection(client,COLLECTION_NAME);
+        Utility.dropCollection(client, COLLECTION_NAME);
         Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
         client.close();
     }

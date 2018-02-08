@@ -1,25 +1,37 @@
 package org.radarcns.domain.managementportal;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SourceData {
 
+    @JsonProperty
     private Long id;
 
+    @JsonProperty
     private String sourceDataType;
 
+    @JsonProperty
     private String sourceDataName;
 
+    @JsonProperty
     private Double frequency;
 
+    @JsonProperty
     private String unit;
 
+    @JsonProperty
     private String processingState;
 
+    @JsonProperty
     private String keySchema;
 
+    @JsonProperty
     private String valueSchema;
 
+    @JsonProperty
     private String topic;
 
+    @JsonProperty
     private Boolean enabled;
 
     public Long getId() {

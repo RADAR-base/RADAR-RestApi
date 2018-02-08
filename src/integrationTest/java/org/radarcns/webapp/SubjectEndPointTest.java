@@ -115,7 +115,7 @@ public class SubjectEndPointTest {
         collection.insertMany(Arrays.asList(doc, second));
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS + "/"
-                                + SUBJECT_ID, APPLICATION_JSON, Status.OK);
+                        + SUBJECT_ID, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
 
         ObjectReader reader = RadarConverter.readerFor(Subject.class);
@@ -133,7 +133,7 @@ public class SubjectEndPointTest {
     public void getSubjectTest404() throws IOException, ReflectiveOperationException {
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS + "/"
-                                + "OTHER", APPLICATION_JSON, Status.NOT_FOUND);
+                        + "OTHER", APPLICATION_JSON, Status.NOT_FOUND);
         assertFalse(actual.isSuccessful());
         assertEquals(actual.code(), Status.NOT_FOUND.getStatusCode());
     }

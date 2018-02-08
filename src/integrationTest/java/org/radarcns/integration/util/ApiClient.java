@@ -5,7 +5,6 @@ import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
@@ -17,8 +16,6 @@ import javax.ws.rs.core.Response.Status;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import org.apache.avro.Schema;
-import org.apache.avro.specific.SpecificRecord;
 import org.hamcrest.CoreMatchers;
 import org.junit.rules.ExternalResource;
 import org.radarcns.config.ServerConfig;
@@ -36,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * Client to a REST API. Sets up the authorization against Management Portal
  */
 public class ApiClient extends ExternalResource {
+
     private static final Logger logger = LoggerFactory.getLogger(ApiClient.class);
 
     private final ServerConfig config;
@@ -105,13 +103,11 @@ public class ApiClient extends ExternalResource {
      * @param relativePath path relative to the base URL, without starting slash.
      * @param accept Accept Header for content negotiation
      * @param expectedResponseCode response codes that are considered valid. If none are given, any
-     *                         success response code is considered valid.
-     *
+     * success response code is considered valid.
      * @return HTTP Response
      * @throws IOException if the request could not be executed
-     * @throws AssertionError if the response code does not match one of expectedResponse or
-     *                        if no expectedResponse is provided if the response code does not
-     *                        indicate success.
+     * @throws AssertionError if the response code does not match one of expectedResponse or if no
+     * expectedResponse is provided if the response code does not indicate success.
      */
     public Response request(String relativePath, String accept, Status... expectedResponseCode)
             throws IOException {
@@ -141,13 +137,11 @@ public class ApiClient extends ExternalResource {
      * @param relativePath path relative to the base URL, without starting slash.
      * @param accept Accept Header for content negotiation
      * @param expectedResponse response codes that are considered valid. If none are given, any
-     *                         success response code is considered valid.
-     *
+     * success response code is considered valid.
      * @return HTTP Response body as a string
      * @throws IOException if the request could not be executed
-     * @throws AssertionError if the response code does not match one of expectedResponse or
-     *                        if no expectedResponse is provided if the response code does not
-     *                        indicate success.
+     * @throws AssertionError if the response code does not match one of expectedResponse or if no
+     * expectedResponse is provided if the response code does not indicate success.
      */
     @Nonnull
     public String requestString(String relativePath, String accept, Status... expectedResponse)
@@ -190,21 +184,19 @@ public class ApiClient extends ExternalResource {
 
 
     /**
-     * Request an Avro SpecificRecord from the API, with given relative path. This sets the
-     * Accept header to {@code avro/binary}.
+     * Request an Avro SpecificRecord from the API, with given relative path. This sets the Accept
+     * header to {@code avro/binary}.
      *
      * @param relativePath path relative to the base URL, without starting slash.
      * @param avroClass Avro SpecificRecord class to deserialize.
      * @param expectedResponse response codes that are considered valid. If none are given, any
-     *                         success response code is considered valid.
-     *
+     * success response code is considered valid.
      * @return HTTP Response body as a string
      * @throws IOException if the request could not be executed
-     * @throws ReflectiveOperationException if the provided class does not have a static
-     *                                      {@code getClassSchema()} method.
-     * @throws AssertionError if the response code does not match one of expectedResponse or
-     *                        if no expectedResponse is provided if the response code does not
-     *                        indicate success.
+     * @throws ReflectiveOperationException if the provided class does not have a static {@code
+     * getClassSchema()} method.
+     * @throws AssertionError if the response code does not match one of expectedResponse or if no
+     * expectedResponse is provided if the response code does not indicate success.
      */
     @Nonnull
     public <K> K requestJson(String relativePath, Class<K> avroClass,

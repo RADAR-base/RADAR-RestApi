@@ -33,10 +33,10 @@ import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
+import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mongo.data.sensor.AccelerationFormat;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
-import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 
@@ -187,6 +187,7 @@ public class ExpectedDocumentFactory {
 
     /**
      * Produces {@link List} of {@link Document}s for given {@link ExpectedValue}.
+     *
      * @param expectedValue for test
      * @return {@link List} of {@link Document}s
      */

@@ -27,9 +27,9 @@ import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.integration.util.RandomInput;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
-import org.radarcns.integration.util.RandomInput;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -59,7 +59,7 @@ public class ExpectedValueTest {
 
         count = 0;
         for (DataItem item : dataset.getDataset()) {
-            count += (Double)  item.getSample();
+            count += (Double) item.getSample();
         }
         assertEquals(SAMPLES, count);
 
@@ -80,7 +80,7 @@ public class ExpectedValueTest {
      * @see EffectiveTimeFrame
      **/
     public static boolean compareEffectiveTimeFrame(EffectiveTimeFrame window1,
-                EffectiveTimeFrame window2) {
+            EffectiveTimeFrame window2) {
         return window1.getStartDateTime().equals(window2.getStartDateTime())
                 && window1.getEndDateTime().equals(window2.getEndDateTime());
     }

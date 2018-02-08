@@ -27,12 +27,12 @@ import java.util.List;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.format.Acceleration;
+import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mock.model.ExpectedValue;
-import org.radarcns.domain.restapi.format.Acceleration;
-import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;
@@ -79,9 +79,9 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param timeWindow time interval between two consecutive samples
      * @return {@link Header} for a {@link Dataset}
      */
-    public Header getHeader(ExpectedValue expectedValue,String projectName, String subjectId,
+    public Header getHeader(ExpectedValue expectedValue, String projectName, String subjectId,
             String
-            sourceId,
+                    sourceId,
             String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeWindow) {
         return new Header(projectName, subjectId, sourceId, sourceType, sensorType, statistic,
@@ -91,6 +91,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
     /**
      * Get the effective interval for a value.
+     *
      * @return {@code EffectiveTimeFrame} for the simulated inteval.
      * @see EffectiveTimeFrame
      */
@@ -107,6 +108,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
     /**
      * Get the effective time frame for a single time stamp.
+     *
      * @param value timestamp.
      * @return {@code EffectiveTimeFrame} starting on value and ending {@link
      * ExpectedValue#DURATION} milliseconds after.
@@ -122,9 +124,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * It generates the {@code List<Item>} for the resulting {@link Dataset}.
      *
      * @param header {@link Header} used to provide data context
-
      * @return {@code List<Item>} for a {@link Dataset}
-     *
      * @see DataItem
      **/
     public List<DataItem> getItem(ExpectedValue<?> expectedValue, Header header)
@@ -142,7 +142,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                     header.getSourceDataType());
         } else if (singleExpectedValue instanceof DoubleValueCollector) {
             return getSingletonItems(expectedValue, keys, header.getDescriptiveStatistic(),
-                header.getSourceDataType());
+                    header.getSourceDataType());
         } else {
             throw new IllegalArgumentException(header.getSourceDataType() + " not supported yet");
         }
@@ -189,6 +189,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
     /**
      * Quartile object from a list of three doubles.
+     *
      * @param list of {@code Double} values representing a quartile.
      * @return the value that has to be stored within a {@code Dataset} {@code Item}
      * @see Quartiles
@@ -202,8 +203,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param keys {@code Collection} of timewindow initial time
      * @param statistic function that has to be simulated
-     * @param sensor @return {@code List<Item>} for a data set
-     *      represented as {@code Double}.
+     * @param sensor @return {@code List<Item>} for a data set represented as {@code Double}.
      **/
     private List<DataItem> getSingletonItems(ExpectedValue expectedValue,
             Collection<Long> keys, DescriptiveStatistic statistic,
@@ -229,10 +229,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
         switch (stat) {
             case QUARTILES:
-                content = (T)getQuartile((List<Double>) object);
+                content = (T) getQuartile((List<Double>) object);
                 break;
             default:
-                content = (T)object;
+                content = (T) object;
                 break;
         }
 

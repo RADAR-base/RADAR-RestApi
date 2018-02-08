@@ -67,10 +67,11 @@ public class SourceType {
     }
 
     public String getSourceStatisticsMonitorTopic() {
-        // TODO remove setting default logic
+        // based on the convention
         if (Objects.isNull(sourceStatisticsMonitorTopic) || sourceStatisticsMonitorTopic
                 .isEmpty()) {
-            return SOURCE_STATISTICS_MONITOR + "_" + this.producer + "_" + this.model.toLowerCase();
+            return (SOURCE_STATISTICS_MONITOR + "_" + this.producer + "_" + this.model)
+                    .toLowerCase();
         }
         return sourceStatisticsMonitorTopic;
     }

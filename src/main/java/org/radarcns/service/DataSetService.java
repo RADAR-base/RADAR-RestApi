@@ -77,10 +77,10 @@ public class DataSetService {
         this.sourceService = sourceService;
         sourceCatalog.getSourceTypes().forEach(sourceType -> {
             List<SourceData> sourceTypeConsumer = sourceType.getSourceData();
-            sourceTypeConsumer.forEach(sourceData -> {
+            sourceTypeConsumer.forEach(sourceData ->
                 mongoSensorMap.put(sourceData.getSourceDataName(), DataFormat.getMongoSensor
-                        (sourceData));
-            });
+                        (sourceData))
+            );
         });
 
         LOGGER.info("DataSetService successfully loaded.");

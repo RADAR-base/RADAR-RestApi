@@ -27,10 +27,10 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.domain.managementportal.SourceType;
+import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.service.SourceMonitorService;
 import org.radarcns.util.RadarConverter;
 

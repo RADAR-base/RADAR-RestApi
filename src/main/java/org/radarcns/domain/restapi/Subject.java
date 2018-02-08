@@ -30,19 +30,19 @@ public class Subject {
     public Subject() {
     }
 
-    /**
-     * All-args constructor.
-     *
-     * @param subjectId Subject identifier.
-     * @param active True if the subject is engaged, false otherwise. False means the subject is no
-     * longer monitored.
-     * @param sources List of sources used by the subject.
-     */
-    public Subject(String subjectId, Boolean active, List<Source> sources) {
-        this.subjectId = subjectId;
-        this.status = active ? "ACTIVATED" : "DISCONNECTED";
-        this.sources = sources;
-    }
+//    /**
+//     * All-args constructor.
+//     *
+//     * @param subjectId Subject identifier.
+//     * @param active True if the subject is engaged, false otherwise. False means the subject is no
+//     * longer monitored.
+//     * @param sources List of sources used by the subject.
+//     */
+//    public Subject(String subjectId, Boolean active, List<Source> sources) {
+//        this.subjectId = subjectId;
+//        this.status = active ? "ACTIVATED" : "DISCONNECTED";
+//        this.sources = sources;
+//    }
 
     public Subject subjectId(String subjectId) {
         this.subjectId = subjectId;

@@ -68,7 +68,7 @@ public class RandomInput {
                 start += 1;
             } else {
                 start += TimeUnit.SECONDS.toMillis(
-                    ThreadLocalRandom.current().nextLong(1, 15));
+                        ThreadLocalRandom.current().nextLong(1, 15));
             }
         }
 
@@ -102,57 +102,69 @@ public class RandomInput {
 
         dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
                 sensorType,
-                    stat, timeWindow);
+                stat, timeWindow);
         documents = expectedDocumentFactory.produceExpectedData(instance);
     }
 
     /**
      * Returns a Map containing a {@code Dataset} and a {@code Collection<Document>} randomly
-     *      generated mocking the behaviour of the RADAR-CNS Platform.
+     * generated mocking the behaviour of the RADAR-CNS Platform.
      */
-    public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user, String source,
+    public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user,
+            String source,
             String sourceType, String sensorType, DescriptiveStatistic stat,
             TimeWindow timeWindow, int samples, boolean singleWindow) throws InstantiationException,
             IllegalAccessException {
         switch (sourceType) {
-            case "ANDROID": break;
-            case "BIOVOTION": break;
-            case "EMPATICA": return getBoth(project, user, source, sourceType, sensorType, stat,
-                    timeWindow,
-                    samples, singleWindow);
-            case "PEBBLE": break;
-            default: break;
+            case "ANDROID":
+                break;
+            case "BIOVOTION":
+                break;
+            case "EMPATICA":
+                return getBoth(project, user, source, sourceType, sensorType, stat,
+                        timeWindow,
+                        samples, singleWindow);
+            case "PEBBLE":
+                break;
+            default:
+                break;
         }
 
         throw new UnsupportedOperationException(sourceType + " is not"
-            + " currently supported.");
+                + " currently supported.");
     }
 
     /**
-     * Returns a {@code Dataset} randomly generated that mocks the behaviour of
-     *      the RADAR-CNS Platform.
+     * Returns a {@code Dataset} randomly generated that mocks the behaviour of the RADAR-CNS
+     * Platform.
      */
-    public static Dataset getDatasetRandom(String project, String user, String source, String sourceType,
+    public static Dataset getDatasetRandom(String project, String user, String source,
+            String sourceType,
             String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
             int samples, boolean singleWindow) throws InstantiationException,
             IllegalAccessException {
         switch (sourceType) {
-            case "ANDROID": break;
-            case "BIOVOTION": break;
-            case "EMPATICA": return getDataset(project, user, source, sourceType, sensorType, stat,
-                    timeWindow,
-                            samples, singleWindow);
-            case "PEBBLE": break;
-            default: break;
+            case "ANDROID":
+                break;
+            case "BIOVOTION":
+                break;
+            case "EMPATICA":
+                return getDataset(project, user, source, sourceType, sensorType, stat,
+                        timeWindow,
+                        samples, singleWindow);
+            case "PEBBLE":
+                break;
+            default:
+                break;
         }
 
         throw new UnsupportedOperationException(sourceType + " is not"
-            + " currently supported.");
+                + " currently supported.");
     }
 
     /**
-     * Returns a {@code Collection<Document>} randomly generated that mocks the behaviour of
-     *      the RADAR-CNS Platform.
+     * Returns a {@code Collection<Document>} randomly generated that mocks the behaviour of the
+     * RADAR-CNS Platform.
      */
     public static List<Document> getDocumentsRandom(String project, String user, String source,
             String sourceType, String sensorType, DescriptiveStatistic stat,
@@ -161,7 +173,7 @@ public class RandomInput {
         switch (sourceType) {
             case "EMPATICA":
                 return getDocument(project, user, source, sourceType, sensorType, stat,
-                            timeWindow, samples, singleWindow);
+                        timeWindow, samples, singleWindow);
             default:
                 throw new UnsupportedOperationException(sourceType + " is not"
                         + " currently supported.");
@@ -185,7 +197,8 @@ public class RandomInput {
         return documents;
     }
 
-    private static Map<String, Object> getBoth(String project, String user, String source, String sourceType,
+    private static Map<String, Object> getBoth(String project, String user, String source,
+            String sourceType,
             String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
             boolean singleWindow) throws InstantiationException, IllegalAccessException {
         nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
@@ -204,17 +217,19 @@ public class RandomInput {
             case "ACCELEROMETER":
                 randomArrayValue(project, user, source, sourceType, sensorType, stat, timeWindow,
                         samples,
-                                singleWindow);
+                        singleWindow);
                 break;
-            default: randomDoubleValue(project, user, source, sourceType, sensorType, stat,
-                    timeWindow,
-                                samples, singleWindow);
+            default:
+                randomDoubleValue(project, user, source, sourceType, sensorType, stat,
+                        timeWindow,
+                        samples, singleWindow);
                 break;
         }
     }
 
-    /** Generates and returns a randomly generated {@code ApplicationStatus} mocking data sent
-     *      by RADAR-CNS pRMT.
+    /**
+     * Generates and returns a randomly generated {@code ApplicationStatus} mocking data sent by
+     * RADAR-CNS pRMT.
      **/
     public static Map<String, Document> getRandomApplicationStatus(String user, String source) {
         String ipAdress = getRandomIpAddress();
@@ -229,7 +244,9 @@ public class RandomInput {
                 recordsCached, recordsSent, recordsUnsent);
     }
 
-    /** Generates and returns a ApplicationStatus using the given inputs. **/
+    /**
+     * Generates and returns a ApplicationStatus using the given inputs.
+     **/
     public static Map<String, Document> getRandomApplicationStatus(String user, String source,
             String ipAddress, ServerStatus serverStatus, Double uptime, int recordsCached,
             int recordsSent, int recordsUnsent) {
@@ -260,15 +277,17 @@ public class RandomInput {
         return documents;
     }
 
-    /** Returns a String representing a random IP address. **/
+    /**
+     * Returns a String representing a random IP address.
+     **/
     public static String getRandomIpAddress() {
         long ip = ThreadLocalRandom.current().nextLong();
         StringBuilder result = new StringBuilder(15);
 
         for (int i = 0; i < 4; i++) {
-            result.insert(0,Long.toString(ip & 0xff));
+            result.insert(0, Long.toString(ip & 0xff));
             if (i < 3) {
-                result.insert(0,'.');
+                result.insert(0, '.');
             }
             ip = ip >> 8;
         }

@@ -67,6 +67,7 @@ public class Utility {
 
     /**
      * Drop mongo collection called name.
+     *
      * @param client mongoDB client
      * @param name collection name that has to be dropped
      */
@@ -76,6 +77,7 @@ public class Utility {
 
     /**
      * Drop mongo collection in names.
+     *
      * @param client mongoDB client
      * @param names collection names that have to be dropped
      */
@@ -87,6 +89,7 @@ public class Utility {
 
     /**
      * Inserts mixed documents in mixed collections.
+     *
      * @param client mongoDb client to access the instance
      * @param map mapping between document and collections
      */
@@ -98,6 +101,7 @@ public class Utility {
 
     /**
      * Generates a Dataset using the input documents.
+     *
      * @param docs list of Documents that has to be converted
      * @param subjectId subject identifier
      * @param sourceId sourceType identifier
@@ -106,7 +110,8 @@ public class Utility {
      * @param timeWindow time interval between two consecutive samples
      * @param recordClass class used compute the Item
      * @return a Dataset rep all required document
-     * @throws IllegalAccessException if the item class or its nullary constructor is not accessible
+     * @throws IllegalAccessException if the item class or its nullary constructor is not
+     * accessible
      * @throws InstantiationException if item class cannot be instantiated
      */
     public static Dataset convertDocToDataset(List<Document> docs, String projectName, String
@@ -133,33 +138,34 @@ public class Utility {
         }
 
         Header header = new Header(projectName, subjectId, sourceId, sourceType, sensorType,
-                    RadarConverter.getDescriptiveStatistic(stat), unit, timeWindow, eftHeader);
+                RadarConverter.getDescriptiveStatistic(stat), unit, timeWindow, eftHeader);
 
         return new Dataset(header, itemList);
     }
 
     /**
      * Converts Bson Document into an ApplicationConfig.
+     *
      * @param documents map containing variables to create the ApplicationConfig class
      * @return an ApplicationConfig class
-     *
      * @see Application
      */
     //TODO take field names from RADAR Mongo Connector
     public static Application convertDocToApplication(Map<String, Document> documents) {
         return new Application(
-            documents.get(STATUS_COLLECTION).getString("clientIP"),
-            documents.get(UPTIME_COLLECTION).getDouble("applicationUptime"),
-            RadarConverter.getServerStatus(
-                    documents.get(STATUS_COLLECTION).getString("serverStatus")),
-            documents.get(RECORD_COLLECTION).getInteger("recordsCached"),
-            documents.get(RECORD_COLLECTION).getInteger("recordsSent"),
-            documents.get(RECORD_COLLECTION).getInteger("recordsUnsent")
+                documents.get(STATUS_COLLECTION).getString("clientIP"),
+                documents.get(UPTIME_COLLECTION).getDouble("applicationUptime"),
+                RadarConverter.getServerStatus(
+                        documents.get(STATUS_COLLECTION).getString("serverStatus")),
+                documents.get(RECORD_COLLECTION).getInteger("recordsCached"),
+                documents.get(RECORD_COLLECTION).getInteger("recordsSent"),
+                documents.get(RECORD_COLLECTION).getInteger("recordsUnsent")
         );
     }
 
     /**
      * Converts add data in an InputStream to a String.
+     *
      * @param in inputstream
      * @return a String representing the file content
      */
@@ -175,13 +181,13 @@ public class Utility {
 
     /**
      * Computes the {@link EffectiveTimeFrame} related to the {@code List<Document>}. {@code start}
-     *      {@code end} can be used to update an exiting {@link EffectiveTimeFrame} using the given
-     *      {@code List<Document>}.
+     * {@code end} can be used to update an exiting {@link EffectiveTimeFrame} using the given
+     * {@code List<Document>}.
      *
      * @param start time window start time
      * @param end time window end time
-     * @param docs list of mock documents that has to be analysed to compute the
-     *      {@link EffectiveTimeFrame}
+     * @param docs list of mock documents that has to be analysed to compute the {@link
+     * EffectiveTimeFrame}
      * @return {@link EffectiveTimeFrame} related to the {@code List<Document>}
      */
     public static EffectiveTimeFrame getExpectedTimeFrame(long start, long end,
@@ -195,15 +201,14 @@ public class Utility {
         }
 
         return new EffectiveTimeFrame(
-            RadarConverter.getISO8601(expectedStart),
-            RadarConverter.getISO8601(expectedEnd));
+                RadarConverter.getISO8601(expectedStart),
+                RadarConverter.getISO8601(expectedEnd));
     }
 
     /**
      * Clones the input {@link Dataset}.
      *
      * @param input {@link Dataset} that has to be cloned
-     *
      * @return {@link Dataset} cloned from {@code input}
      */
     public static Dataset cloneDataset(Dataset input) {
@@ -217,7 +222,6 @@ public class Utility {
                 inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
                 inputHeader.getTimeWindow(), cloneEffectiveTimeFrame);
 
-
         List<DataItem> cloneItem = new ArrayList<>();
         Object value;
         for (DataItem item : input.getDataset()) {
@@ -225,7 +229,7 @@ public class Utility {
             if (item.getSample() instanceof Double) {
                 value = item.getSample();
             } else if (item.getSample() instanceof Acceleration) {
-                Acceleration temp = (Acceleration)item.getSample();
+                Acceleration temp = (Acceleration) item.getSample();
                 value = new Acceleration(temp.getX(), temp.getY(), temp.getZ());
             } else {
                 throw new IllegalArgumentException(item.getSample().getClass().getCanonicalName()
