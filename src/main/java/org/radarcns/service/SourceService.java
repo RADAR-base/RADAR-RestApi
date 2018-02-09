@@ -161,13 +161,4 @@ public class SourceService {
                 this.managementPortalClient.getSubject(subjectId).getSources());
     }
 
-
-    private List<String> fetchAllRecordedSourcesForSubject(String projectName, String subjectId)
-            throws IOException {
-        // fetches source-ids reported for all available source-types for provided subject and
-        // project in source-monitor-statistics
-        return this.sourceCatalog.getSourceTypes().stream().map(sourceType ->
-                sourceMonitorService.getAllSourcesOfSubjectInProject(projectName, subjectId,
-                        sourceType)).flatMap(List::stream).collect(Collectors.toList());
-    }
 }
