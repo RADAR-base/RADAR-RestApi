@@ -71,6 +71,7 @@ public final class RadarConverter {
 
     static {
         OBJECT_MAPPER = new ObjectMapper(JSON_FACTORY);
+        OBJECT_MAPPER.findAndRegisterModules();
         OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
         OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         OBJECT_MAPPER.setSerializationInclusion(Include.NON_NULL);

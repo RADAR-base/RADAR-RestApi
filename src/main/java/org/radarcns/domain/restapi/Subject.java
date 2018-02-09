@@ -63,7 +63,6 @@ public class Subject {
     }
 
 
-
     public Subject sources(List<Source> sources) {
         this.sources = sources;
         return this;

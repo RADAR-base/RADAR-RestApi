@@ -1,6 +1,7 @@
 package org.radarcns.service;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -8,12 +9,11 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import org.radarcns.catalog.SourceCatalog;
-import org.radarcns.domain.managementportal.Source;
-import org.radarcns.domain.managementportal.SourceType;
-import org.radarcns.domain.managementportal.SourceTypeIdentifier;
-import org.radarcns.domain.managementportal.Subject;
+import org.radarcns.domain.managementportal.SourceDTO;
+import org.radarcns.domain.managementportal.SourceTypeDTO;
+import org.radarcns.domain.managementportal.SubjectDTO;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.webapp.exception.BadGatewayException;
+import org.radarcns.management.service.dto.MinimalSourceDetailsDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +28,8 @@ public class SourceService {
     private ManagementPortalClient managementPortalClient;
 
     /**
-     * Default constructor.
-     * Injects all dependencies for the class.
+     * Default constructor. Injects all dependencies for the class.
+     *
      * @param sourceMonitorService instance
      * @param sourceCatalog instance
      * @param managementPortalClient instance
@@ -45,8 +45,8 @@ public class SourceService {
 
     /**
      * Builds list of {@link org.radarcns.domain.restapi.Source} of given subject under project
-     * using provided source. It calculates the
-     * {@link org.radarcns.domain.restapi.header.EffectiveTimeFrame} of each sources as well.
+     * using provided source. It calculates the {@link org.radarcns.domain.restapi.header.EffectiveTimeFrame}
+     * of each sources as well.
      *
      * @param projectId of subject
      * @param subjectId of subject
@@ -54,7 +54,7 @@ public class SourceService {
      * @return list of sources assigned to subject under given project.
      */
     public List<org.radarcns.domain.restapi.Source> buildSources(String projectId, String
-            subjectId, List<Source> sources) {
+            subjectId, List<SourceDTO> sources) {
         return sources.stream().map(p -> buildSource(projectId, subjectId, p)).collect(Collectors
                 .toList());
     }
@@ -62,14 +62,68 @@ public class SourceService {
     /**
      * Build a {@link org.radarcns.domain.restapi.Source} using provided parameters and by
      * calculating EffectiveTimeFrame of the source.
+     *
      * @param projectId of subject
      * @param subjectId of subject
      * @param source instance from MP
      * @return computed Source.
      */
     public org.radarcns.domain.restapi.Source buildSource(String projectId, String subjectId,
-            Source source) {
-        SourceType sourceType = null;
+            SourceDTO source) {
+        SourceTypeDTO sourceType = null;
+        // a source fetched from MP should ideally have a source-type
+        try {
+            sourceType = this.sourceCatalog.getSourceType(source
+                    .getSourceType().getProducer(), source.getSourceType().getModel(), source
+                    .getSourceType().getCatalogVersion());
+        } catch (NotFoundException | IOException e) {
+            LOGGER.error(
+                    "Cannot retrieve sourceType-type for given sourceType " + source.getSourceId());
+            throw new IllegalStateException(
+                    "Cannot retrive sourceType-type for given sourceType " + source
+                            .getSourceId());
+        }
+
+        return new org.radarcns.domain.restapi.Source()
+                .sourceId(source.getSourceIdentifier())
+                .assigned(source.getAssigned())
+                .sourceName(source.getSourceName())
+                .sourceTypeCatalogVersion(source.getSourceType().getCatalogVersion())
+                .sourceTypeProducer(source.getSourceType().getProducer())
+                .sourceTypeModel(source.getSourceType().getModel())
+                .effectiveTimeFrame(this.sourceMonitorService
+                        .getEffectiveTimeFrame(projectId, subjectId, source.getSourceIdentifier(),
+                                sourceType));
+    }
+
+    /**
+     * Builds list of {@link org.radarcns.domain.restapi.Source} of given subject under project
+     * using provided source. It calculates the {@link org.radarcns.domain.restapi.header.EffectiveTimeFrame}
+     * of each sources as well.
+     *
+     * @param projectId of subject
+     * @param subjectId of subject
+     * @param sources from MP
+     * @return list of sources assigned to subject under given project.
+     */
+    public List<org.radarcns.domain.restapi.Source> buildSourcesFromMinimal(String projectId, String
+            subjectId, Collection<MinimalSourceDetailsDTO> sources) {
+        return sources.stream().map(p -> buildSource(projectId, subjectId, p)).collect(Collectors
+                .toList());
+    }
+
+    /**
+     * Build a {@link org.radarcns.domain.restapi.Source} using provided parameters and by
+     * calculating EffectiveTimeFrame of the source.
+     *
+     * @param projectId of subject
+     * @param subjectId of subject
+     * @param source instance from MP
+     * @return computed Source.
+     */
+    public org.radarcns.domain.restapi.Source buildSource(String projectId, String subjectId,
+            MinimalSourceDetailsDTO source) {
+        SourceTypeDTO sourceType = null;
         // a source fetched from MP should ideally have a source-type
         try {
             sourceType = this.sourceCatalog.getSourceType(source
@@ -84,22 +138,17 @@ public class SourceService {
         }
 
         return new org.radarcns.domain.restapi.Source()
-                .sourceId(source.getSourceId())
-                .assigned(source.getAssigned())
+                .sourceId(source.getSourceId().toString())
+                .assigned(source.isAssigned())
                 .sourceName(source.getSourceName())
                 .sourceTypeCatalogVersion(source.getSourceTypeCatalogVersion())
                 .sourceTypeProducer(source.getSourceTypeProducer())
                 .sourceTypeModel(source.getSourceTypeModel())
                 .effectiveTimeFrame(this.sourceMonitorService
-                        .getEffectiveTimeFrame(projectId, subjectId, source.getSourceId(),
+                        .getEffectiveTimeFrame(projectId, subjectId,
+                                source.getSourceId().toString(),
                                 sourceType));
     }
-
-    public static SourceTypeIdentifier getSourceTypeIdFromSource(Source source) {
-        return new SourceTypeIdentifier(source.getSourceTypeProducer(), source.getSourceTypeModel(),
-                source.getSourceTypeCatalogVersion());
-    }
-
 
     /**
      * Returns all the sources recorded for a subject under given project including history.
@@ -110,10 +159,10 @@ public class SourceService {
      */
     public List<org.radarcns.domain.restapi.Source> getAllSourcesOfSubject(String projectName,
             String subjectId) throws IOException {
-        Subject subject = this.managementPortalClient.getSubject(subjectId);
+        SubjectDTO subject = this.managementPortalClient.getSubject(subjectId);
 
         Set<String> currentlyAvailableSourceIds = subject.getSources().stream().map
-                (Source::getSourceId).collect(Collectors.toSet());
+                (p -> p.getSourceId().toString()).collect(Collectors.toSet());
 
         //fetch all sourceIds of subject available in from mongoDB.
         List<String> recordedSourceIdsForSubject = fetchAllRecordedSourcesForSubject(projectName,
@@ -121,21 +170,22 @@ public class SourceService {
 
         // set should avoid duplicates, thus if currently available sources are fetched they
         // won't be repeated.
-        Set<String> allSourceIds= Stream.concat(currentlyAvailableSourceIds.stream(),
+        Set<String> allSourceIds = Stream.concat(currentlyAvailableSourceIds.stream(),
                 recordedSourceIdsForSubject.stream()).collect(Collectors.toSet());
 
         // fetch source data from management-portal.
-        List<Source> sourceList = allSourceIds.stream()
-                .map(s -> {
-                            try {
-                                return managementPortalClient.getSource(s);
-                            } catch (IOException exe) {
-                                throw new BadGatewayException(exe);
-                            }
-                        }
-                ).collect(Collectors.toList());
+        //TODO optimize to reuse what is already gathered from subject and fetch only history
+//        List<SourceDTO> sourceList = allSourceIds.stream()
+//                .map(s -> {
+//                            try {
+//                                return managementPortalClient.getSource(s);
+//                            } catch (IOException exe) {
+//                                throw new BadGatewayException(exe);
+//                            }
+//                        }
+//                ).collect(Collectors.toList());
         // convert source to rest-api response
-        return buildSources(projectName, subjectId, sourceList);
+        return buildSourcesFromMinimal(projectName, subjectId, subject.getSources());
     }
 
 

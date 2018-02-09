@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import org.bson.Document;
-import org.radarcns.domain.managementportal.SourceType;
+import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.States;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
@@ -67,7 +67,7 @@ public class SourceMonitorService {
      * @return calculated {@link EffectiveTimeFrame} with earliest and latest timestamps
      */
     public EffectiveTimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
-            String sourceId, SourceType sourceType) {
+            String sourceId, SourceTypeDTO sourceType) {
 
         // get the last document sorted by timeEnd
         MongoCursor<Document> cursor = MongoHelper
@@ -102,7 +102,7 @@ public class SourceMonitorService {
      * @param sourceType of the source
      */
     public List<String> getAllSourcesOfSubjectInProject(String projectName, String subjectId,
-            SourceType sourceType) {
+            SourceTypeDTO sourceType) {
 
         // get the last document sorted by timeEnd
         MongoCursor<String> cursor = MongoHelper
@@ -125,14 +125,13 @@ public class SourceMonitorService {
 
     /**
      * Checks the status for the given sourceType counting the number of received messages and
-     *      checking whether it respects the data frequencies. There is a check for each data.
+     * checking whether it respects the data frequencies. There is a check for each data.
      *
      * @param subjectId identifier
      * @param sourceId identifier
      * @param client is the MongoDB client
      * @return {@code SourceDefinition} representing a sourceType sourceType
      * @throws ConnectException if the connection with MongoDb is faulty
-     *
      * @see Source
      */
     public Source getState(String subjectId, String sourceId, MongoClient client, double countTemp)
@@ -147,7 +146,7 @@ public class SourceMonitorService {
 
     /**
      * Checks the status for the given sourceType counting the number of received messages and
-     *      checking whether it respects the data frequencies. There is a check for each data.
+     * checking whether it respects the data frequencies. There is a check for each data.
      *
      * @param subject identifier
      * @param sourceType identifier
@@ -156,7 +155,6 @@ public class SourceMonitorService {
      * @param client is the MongoDB client
      * @return {@code SourceDefinition} representing a sourceType sourceType
      * @throws ConnectException if the connection with MongoDb is faulty
-     *
      * @see Source
      */
     public Source getState(String subject, String sourceType, long start, long end,

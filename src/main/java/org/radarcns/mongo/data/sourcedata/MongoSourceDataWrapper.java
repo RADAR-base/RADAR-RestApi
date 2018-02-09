@@ -23,13 +23,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import org.bson.Document;
-import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
@@ -45,7 +45,7 @@ public abstract class MongoSourceDataWrapper {
 
     private final Map<TimeWindow, String> timeWindowToCollectionsMap;
 
-    private final SourceData sourceData;
+    private final SourceDataDTO sourceData;
 
     /**
      * Constructs a MongoSourceDataWrapper able to query the collections of the sensor for the given
@@ -53,7 +53,7 @@ public abstract class MongoSourceDataWrapper {
      *
      * @param sourceData of the given sourceType that will be consume from this instance
      */
-    public MongoSourceDataWrapper(SourceData sourceData) {
+    public MongoSourceDataWrapper(SourceDataDTO sourceData) {
 
         timeWindowToCollectionsMap = createCollectionsForTimeWindow(sourceData.getTopic());
 
@@ -68,7 +68,7 @@ public abstract class MongoSourceDataWrapper {
     }
 
     public Double getFrequency() {
-        return sourceData.getFrequency();
+        return Double.valueOf(sourceData.getFrequency());
     }
 
     /**
@@ -254,8 +254,8 @@ public abstract class MongoSourceDataWrapper {
     }
 
     /**
-     * Convert a {@link Document} to the corresponding SpecificRecord.
-     * This function must be override by the subclass
+     * Convert a {@link Document} to the corresponding SpecificRecord. This function must be
+     * override by the subclass
      *
      * @param doc {@link Document} storing data used to create the related {@link DataItem}
      * @param field key of the value that has to be extracted from the {@link Document}

@@ -19,8 +19,9 @@ ext.radarCommons = '0.7'
 ext.swagger = '2.0.0-rc4'
 ext.tomcat = '8.0.47'
 ext.radarAuthVersion = '0.3.3-SNAPSHOT'
+ext.managmentPortalClientVersion = '0.3.4'
 ext.wireMockVersion = '2.5.1'
-ext.jacksonVersion = '2.9.3'
+ext.jacksonVersion = '2.9.1'
 ext.mockitoVersion = '2.2.29'
 
 ext.slf4jVersion = '1.7.25'
@@ -57,7 +58,10 @@ dependencies {
 
     compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthVersion
     compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
-
+    compile group: 'org.radarcns', name: 'management-portal', version: managmentPortalClientVersion
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version:
+            jacksonVersion
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
 
     runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey

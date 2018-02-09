@@ -21,10 +21,10 @@ import static org.radarcns.mongo.util.MongoHelper.COUNT;
 
 import java.util.List;
 import org.bson.Document;
-import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -32,7 +32,7 @@ import org.radarcns.util.RadarConverter;
  */
 public class DoubleFormat extends MongoSourceDataWrapper {
 
-    public DoubleFormat(SourceData sourceData) {
+    public DoubleFormat(SourceDataDTO sourceData) {
         super(sourceData);
     }
 

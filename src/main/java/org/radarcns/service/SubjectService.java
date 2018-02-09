@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
-import org.radarcns.domain.managementportal.Subject;
+import org.radarcns.domain.managementportal.SubjectDTO;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.webapp.exception.BadGatewayException;
 import org.slf4j.Logger;
@@ -21,8 +21,8 @@ public class SubjectService {
     private SourceService sourceService;
 
     /**
-     * Default constructor.
-     * Injects all dependencies.
+     * Default constructor. Injects all dependencies.
+     *
      * @param managementPortalClient instance
      * @param sourceService instance
      */
@@ -35,6 +35,7 @@ public class SubjectService {
 
     /**
      * Checks whether given source-id is available in the sources available for the subject.
+     *
      * @param subjectId of subject
      * @param sourceId of source
      * @return {@code true} if available.
@@ -42,8 +43,8 @@ public class SubjectService {
      */
     public boolean checkSourceAssignedToSubject(String subjectId, String sourceId) throws
             IOException {
-        Subject subject = managementPortalClient.getSubject(subjectId);
-        if (subject.getSources().stream().filter(p -> p.getSourceId().equals(sourceId))
+        SubjectDTO subject = managementPortalClient.getSubject(subjectId);
+        if (subject.getSources().stream().filter(p -> p.getSourceId().toString().equals(sourceId))
                 .collect(Collectors.toList()).isEmpty()) {
             LOGGER.error("Cannot find source-id " + sourceId + "for subject" + subject.getId());
             throw new BadRequestException("Source-id " + sourceId + " is not available for subject "
@@ -52,18 +53,20 @@ public class SubjectService {
         return true;
     }
 
-    private org.radarcns.domain.restapi.Subject buildSubject(Subject subject) throws IOException {
+    private org.radarcns.domain.restapi.Subject buildSubject(SubjectDTO subject)
+            throws IOException {
         return new org.radarcns.domain.restapi.Subject()
-                .subjectId(subject.getId())
+                .subjectId(subject.getLogin())
                 .projectName(subject.getProject().getProjectName())
-                .status(subject.getStatus())
+                .status(subject.getStatus().toString())
                 .humanReadableId(subject.getHumanReadableIdentifier())
                 .sources(this.sourceService.getAllSourcesOfSubject(subject.getProject()
-                        .getProjectName(), subject.getId()));
+                        .getProjectName(), subject.getLogin()));
     }
 
     /**
      * Returns list of {@link org.radarcns.domain.restapi.Subject} available under given project.
+     *
      * @param projectName of project
      * @return list of subjects.
      * @throws IOException when unable to process

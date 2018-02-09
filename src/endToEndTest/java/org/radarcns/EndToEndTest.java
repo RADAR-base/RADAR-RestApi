@@ -266,7 +266,7 @@ public class EndToEndTest {
                 if (item.getSample() instanceof Double) {
                     Double sample = (Double) item.getSample();
                     item.setSample(RadarConverter.roundDouble(
-                             sample / RadarConverter.getExpectedMessages(
+                            sample / RadarConverter.getExpectedMessages(
                                     updatedHeader.getTimeWindow(), null), 2));
                 } else if (item.getSample() instanceof Acceleration) {
                     Acceleration sample = (Acceleration) item.getSample();

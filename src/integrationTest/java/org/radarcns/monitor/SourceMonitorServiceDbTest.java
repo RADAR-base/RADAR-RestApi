@@ -27,9 +27,10 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.domain.managementportal.SourceType;
+import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.integration.util.Utility;
+import org.radarcns.management.domain.enumeration.SourceTypeScope;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.service.SourceMonitorService;
 import org.radarcns.util.RadarConverter;
@@ -48,7 +49,7 @@ public class SourceMonitorServiceDbTest {
 
     private static MongoClient mongoClient = Utility.getMongoClient();
 
-    private static SourceType sourceType;
+    private static SourceTypeDTO sourceType;
 
     private static SourceMonitorService monitor;
 
@@ -57,14 +58,14 @@ public class SourceMonitorServiceDbTest {
      */
     @Before
     public void setUp() {
-        sourceType = new SourceType();
-        sourceType.setId(1);
+        sourceType = new SourceTypeDTO();
+        sourceType.setId(1l);
         sourceType.setProducer(SOURCETYPE_PRODUCER);
         sourceType.setCanRegisterDynamically(false);
         sourceType.setModel(SOURCETYPE_MODEL);
         sourceType.setCatalogVersion(SOURCETYPE_CATALOGUE_VERSION);
-        sourceType.setSourceStatisticsMonitorTopic(MONITOR_STATISTICS_TOPIC);
-        sourceType.setSourceTypeScope("PASSIVE");
+        sourceType.sourceStatisticsMonitorTopic(MONITOR_STATISTICS_TOPIC);
+        sourceType.setSourceTypeScope(SourceTypeScope.PASSIVE);
         monitor = new SourceMonitorService(mongoClient);
     }
 

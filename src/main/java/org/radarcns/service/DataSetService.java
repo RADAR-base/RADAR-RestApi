@@ -23,9 +23,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.inject.Inject;
 import org.radarcns.catalog.SourceCatalog;
-import org.radarcns.domain.managementportal.SourceData;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
@@ -33,6 +33,7 @@ import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.mongo.data.sourcedata.DataFormat;
 import org.radarcns.mongo.data.sourcedata.MongoSourceDataWrapper;
 import org.radarcns.mongo.util.MongoHelper;
@@ -76,7 +77,7 @@ public class DataSetService {
         this.mongoClient = mongoClient;
         this.sourceService = sourceService;
         sourceCatalog.getSourceTypes().forEach(sourceType -> {
-            List<SourceData> sourceTypeConsumer = sourceType.getSourceData();
+            Set<SourceDataDTO> sourceTypeConsumer = sourceType.getSourceData();
             sourceTypeConsumer.forEach(sourceData ->
                     mongoSensorMap.put(sourceData.getSourceDataName(),
                             DataFormat.getMongoSensor(sourceData))
@@ -101,13 +102,13 @@ public class DataSetService {
     public Dataset getLastReceivedSample(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
             throws IOException {
-        org.radarcns.domain.managementportal.Source source = managementPortalClient
+        org.radarcns.domain.managementportal.SourceDTO source = managementPortalClient
                 .getSource(sourceId);
         EffectiveTimeFrame effectiveTimeFrame = sourceMonitorService
                 .getEffectiveTimeFrame(projectName, subjectId, sourceId, sourceCatalog
-                        .getSourceType(source.getSourceTypeProducer(),
-                                source.getSourceTypeModel(),
-                                source.getSourceTypeCatalogVersion()));
+                        .getSourceType(source.getSourceType().getProducer(),
+                                source.getSourceType().getModel(),
+                                source.getSourceType().getCatalogVersion()));
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
                 source.getSourceTypeIdentifier().toString(), effectiveTimeFrame);
@@ -135,14 +136,14 @@ public class DataSetService {
     public Dataset getAllDataItems(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
             throws IOException {
-        org.radarcns.domain.managementportal.Source source = managementPortalClient
+        org.radarcns.domain.managementportal.SourceDTO source = managementPortalClient
                 .getSource(sourceId);
 
         EffectiveTimeFrame effectiveTimeFrame = sourceMonitorService
                 .getEffectiveTimeFrame(projectName, subjectId, sourceId, sourceCatalog
-                        .getSourceType(source.getSourceTypeProducer(),
-                                source.getSourceTypeModel(),
-                                source.getSourceTypeCatalogVersion()));
+                        .getSourceType(source.getSourceType().getProducer(),
+                                source.getSourceType().getModel(),
+                                source.getSourceType().getCatalogVersion()));
 
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
@@ -174,7 +175,7 @@ public class DataSetService {
             TimeWindow timeWindow,
             Long start, Long end) throws IOException {
 
-        org.radarcns.domain.managementportal.Source source = managementPortalClient
+        org.radarcns.domain.managementportal.SourceDTO source = managementPortalClient
                 .getSource(sourceId);
 
         EffectiveTimeFrame effectiveTimeFrame = new EffectiveTimeFrame(start, end);
@@ -214,8 +215,8 @@ public class DataSetService {
     }
 
     /**
-     * Returns {@link EffectiveTimeFrame} during which the
-     * {@link org.radarcns.domain.managementportal.Subject} have sent data.
+     * Returns {@link EffectiveTimeFrame} during which the {@link org.radarcns.domain.managementportal.SubjectDTO}
+     * have sent data.
      *
      * @param subject subject identifier
      * @return {@link EffectiveTimeFrame} of the subject in relevant project.
@@ -270,7 +271,8 @@ public class DataSetService {
      * @throws ConnectException if the connection with MongoDb cannot be established
      * @see Dataset
      */
-    private Header getHeader(String project, String subject, String source, SourceData sourceData,
+    private Header getHeader(String project, String subject, String source,
+            SourceDataDTO sourceData,
             DescriptiveStatistic stat, TimeWindow timeWindow, String sourceType,
             EffectiveTimeFrame effectiveTimeFrame) throws IOException {
 

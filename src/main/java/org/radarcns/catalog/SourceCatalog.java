@@ -19,6 +19,7 @@ package org.radarcns.catalog;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -26,10 +27,10 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.ws.rs.NotFoundException;
-import org.radarcns.domain.managementportal.SourceData;
-import org.radarcns.domain.managementportal.SourceType;
+import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.util.CachedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +42,9 @@ public class SourceCatalog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceCatalog.class);
 
-    private CachedMap<SourceTypeIdentifier, SourceType> sourceTypes;
+    private CachedMap<SourceTypeIdentifier, SourceTypeDTO> sourceTypes;
 
-    private CachedMap<String, SourceData> sourceData;
+    private CachedMap<String, SourceDataDTO> sourceData;
 
     private static final Duration CACHE_INVALIDATE_DEFAULT = Duration.ofMinutes(1);
 
@@ -58,34 +59,35 @@ public class SourceCatalog {
     public SourceCatalog(ManagementPortalClient managementPortalClient) {
         LOGGER.debug("Initializing source catalogue");
         this.sourceTypes = new CachedMap<>(managementPortalClient::retrieveSourceTypes,
-                SourceType::getSourceTypeIdentifier,
+                SourceTypeDTO::getSourceTypeIdentifier,
                 CACHE_INVALIDATE_DEFAULT, CACHE_RETRY_DEFAULT);
         this.sourceData = new CachedMap<>(managementPortalClient::retrieveSourceData,
-                SourceData::getSourceDataName,
+                SourceDataDTO::getSourceDataName,
                 CACHE_INVALIDATE_DEFAULT, CACHE_RETRY_DEFAULT);
     }
 
     /**
-     * Retrieves all {@link SourceType} from Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link SourceTypeDTO} from Management Portal using {@link ServletContext}
+     * entity.
      *
-     * @return {@link ArrayList} of {@link SourceType} retrieved from the Management Portal
+     * @return {@link ArrayList} of {@link SourceTypeDTO} retrieved from the Management Portal
      */
-    public List<SourceType> getSourceTypes() throws IOException {
+    public List<SourceTypeDTO> getSourceTypes() throws IOException {
         return new ArrayList<>(sourceTypes.get().values());
     }
 
     /**
-     * Retrieves a {@link SourceType} from the Management Portal using {@link ServletContext}
+     * Retrieves a {@link SourceTypeDTO} from the Management Portal using {@link ServletContext}
      * entity.
      *
      * @param producer {@link String} of the Source-type that has to be retrieved
      * @param model {@link String} of the Source-type that has to be retrieved
      * @param catalogVersion {@link String} of the Source-type that has to be retrieved
-     * @return {@link SourceType} retrieved from the Management Portal
+     * @return {@link SourceTypeDTO} retrieved from the Management Portal
      */
-    public SourceType getSourceType(String producer, String model, String catalogVersion)
+    public SourceTypeDTO getSourceType(String producer, String model, String catalogVersion)
             throws NotFoundException, IOException {
-        SourceType result;
+        SourceTypeDTO result;
         try {
             result = sourceTypes.get(new SourceTypeIdentifier(producer, model,
                     catalogVersion));
@@ -98,24 +100,25 @@ public class SourceCatalog {
 
 
     /**
-     * Retrieves all {@link SourceData} from Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link SourceDataDTO} from Management Portal using {@link ServletContext}
+     * entity.
      *
-     * @return {@link ArrayList} of {@link SourceData} retrieved from the Management Portal
+     * @return {@link ArrayList} of {@link SourceDataDTO} retrieved from the Management Portal
      */
-    public List<SourceData> getSourceData() throws IOException {
+    public List<SourceDataDTO> getSourceData() throws IOException {
         return new ArrayList<>(sourceData.get().values());
     }
 
     /**
-     * Retrieves a {@link SourceData} from the Management Portal using {@link ServletContext}
+     * Retrieves a {@link SourceDataDTO} from the Management Portal using {@link ServletContext}
      * entity.
      *
      * @param sourceDataName {@link String} of the Source-Data that has to be retrieved
-     * @return {@link SourceType} retrieved from the Management Portal
+     * @return {@link SourceDataDTO} retrieved from the Management Portal
      */
-    public SourceData getSourceData(String sourceDataName)
+    public SourceDataDTO getSourceData(String sourceDataName)
             throws NotFoundException, IOException {
-        SourceData result = sourceData.get(sourceDataName);
+        SourceDataDTO result = sourceData.get(sourceDataName);
         if (result == null) {
             result = sourceData.get(true).get(sourceDataName);
         }
@@ -131,7 +134,7 @@ public class SourceCatalog {
      *
      * @return a set containing all supported sourceType
      */
-    public Set<String> getSupportedSource() throws IOException {
+    public Set<String> getSupportedSourceTypes() throws IOException {
         return sourceTypes.get().keySet().stream().map(SourceTypeIdentifier::toString).collect(
                 Collectors.toSet());
     }
@@ -141,8 +144,8 @@ public class SourceCatalog {
      *
      * @return a set containing all supported sourceType
      */
-    public Set<SourceData> getSupportedSensor() throws IOException {
-        return sourceData.get().values().stream().collect(Collectors.toSet());
+    public Set<SourceDataDTO> getSupportedSensor() throws IOException {
+        return new HashSet<>(sourceData.get().values());
     }
 
 

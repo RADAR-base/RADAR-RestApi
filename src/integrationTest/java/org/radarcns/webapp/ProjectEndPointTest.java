@@ -14,9 +14,9 @@ import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.domain.managementportal.Project;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
+import org.radarcns.management.service.dto.ProjectDTO;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.resource.BasePath;
 
@@ -34,8 +34,8 @@ public class ProjectEndPointTest {
 
         Response actual = apiClient.request(BasePath.PROJECTS, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerForCollection(List.class, Project.class);
-        List<Project> projects = reader.readValue(actual.body().byteStream());
+        ObjectReader reader = RadarConverter.readerForCollection(List.class, ProjectDTO.class);
+        List<ProjectDTO> projects = reader.readValue(actual.body().byteStream());
 
         assertNotNull(projects);
         assertTrue(projects.size() > 0);
@@ -49,8 +49,8 @@ public class ProjectEndPointTest {
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME, APPLICATION_JSON,
                         Status.OK);
         assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(Project.class);
-        Project project = reader.readValue(actual.body().byteStream());
+        ObjectReader reader = RadarConverter.readerFor(ProjectDTO.class);
+        ProjectDTO project = reader.readValue(actual.body().byteStream());
         assertEquals(PROJECT_NAME, project.getProjectName());
 
     }

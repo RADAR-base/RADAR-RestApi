@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.domain.managementportal.SourceType;
+import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.util.RadarConverter;
@@ -36,8 +36,8 @@ public class SourceTypeEndPointTest {
 
         Response actual = apiClient.request(BasePath.SOURCE_TYPES, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerForCollection(List.class, SourceType.class);
-        List<SourceType> sourceTypes = reader.readValue(actual.body().byteStream());
+        ObjectReader reader = RadarConverter.readerForCollection(List.class, SourceTypeDTO.class);
+        List<SourceTypeDTO> sourceTypes = reader.readValue(actual.body().byteStream());
 
         assertNotNull(sourceTypes);
         assertTrue(sourceTypes.size() > 0);
@@ -52,8 +52,8 @@ public class SourceTypeEndPointTest {
                                 + CATALOGUE_VERSION, APPLICATION_JSON,
                         Status.OK);
         assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(SourceType.class);
-        SourceType project = reader.readValue(actual.body().byteStream());
+        ObjectReader reader = RadarConverter.readerFor(SourceTypeDTO.class);
+        SourceTypeDTO project = reader.readValue(actual.body().byteStream());
         assertEquals(PRODUCER, project.getProducer());
         assertEquals(MODEL, project.getModel());
         assertEquals(CATALOGUE_VERSION, project.getCatalogVersion());

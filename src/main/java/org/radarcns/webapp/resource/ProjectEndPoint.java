@@ -16,8 +16,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.NeedsPermission;
-import org.radarcns.domain.managementportal.Project;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.management.service.dto.ProjectDTO;
 import org.radarcns.webapp.filter.Authenticated;
 
 @Authenticated
@@ -44,7 +44,7 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @NeedsPermission(entity = PROJECT, operation = READ)
-    public Collection<Project> getAllProjectsJson() throws IOException {
+    public Collection<ProjectDTO> getAllProjectsJson() throws IOException {
         return mpClient.getProjects().values();
     }
 
@@ -68,7 +68,7 @@ public class ProjectEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Project not found")
     @NeedsPermission(entity = PROJECT, operation = READ)
-    public Project getProjectJson(
+    public ProjectDTO getProjectJson(
             @PathParam(PROJECT_NAME) String projectName) throws IOException {
         return mpClient.getProject(projectName);
     }
