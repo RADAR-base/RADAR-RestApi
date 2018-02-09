@@ -2,13 +2,16 @@ package org.radarcns.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.Source;
 import org.radarcns.domain.managementportal.SourceType;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
+import org.radarcns.domain.managementportal.Subject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.webapp.exception.BadGatewayException;
 import org.slf4j.Logger;
@@ -99,7 +102,7 @@ public class SourceService {
 
 
     /**
-     * Returns all the sources recorded for a subject under given project.
+     * Returns all the sources recorded for a subject under given project including history.
      *
      * @param projectName of subject
      * @param subjectId of subject
@@ -107,25 +110,41 @@ public class SourceService {
      */
     public List<org.radarcns.domain.restapi.Source> getAllSourcesOfSubject(String projectName,
             String subjectId) throws IOException {
-        this.managementPortalClient.getSubject(subjectId);
+        Subject subject = this.managementPortalClient.getSubject(subjectId);
+
+        Set<String> currentlyAvailableSourceIds = subject.getSources().stream().map
+                (Source::getSourceId).collect(Collectors.toSet());
+
         //fetch all sourceIds of subject available in from mongoDB.
-        //This should currently available sources and previously used sources
-        // can be replaced if the history tracking feature is available in MP
-        List<String> allSources = this.sourceCatalog.getSourceTypes().stream().map(sourceType ->
-                sourceMonitorService.getAllSourcesOfSubjectInProject(projectName, subjectId,
-                        sourceType)).flatMap(List::stream).collect(Collectors.toList());
-        // fetch source data from MP
-        List<Source> sources = allSources.stream().map(s -> {
-                    try {
-                        return managementPortalClient.getSource(s);
-                    } catch (IOException exe) {
-                        throw new BadGatewayException(exe);
-                    }
-                }
-        ).collect(Collectors.toList());
+        List<String> recordedSourceIdsForSubject = fetchAllRecordedSourcesForSubject(projectName,
+                subjectId);
+
+        // set should avoid duplicates, thus if currently available sources are fetched they
+        // won't be repeated.
+        Set<String> allSourceIds= Stream.concat(currentlyAvailableSourceIds.stream(),
+                recordedSourceIdsForSubject.stream()).collect(Collectors.toSet());
+
+        // fetch source data from management-portal.
+        List<Source> sourceList = allSourceIds.stream()
+                .map(s -> {
+                            try {
+                                return managementPortalClient.getSource(s);
+                            } catch (IOException exe) {
+                                throw new BadGatewayException(exe);
+                            }
+                        }
+                ).collect(Collectors.toList());
         // convert source to rest-api response
-        return buildSources(projectName, subjectId, sources);
+        return buildSources(projectName, subjectId, sourceList);
     }
 
 
+    private List<String> fetchAllRecordedSourcesForSubject(String projectName, String subjectId)
+            throws IOException {
+        // fetches source-ids reported for all available source-types for provided subject and
+        // project in source-monitor-statistics
+        return this.sourceCatalog.getSourceTypes().stream().map(sourceType ->
+                sourceMonitorService.getAllSourcesOfSubjectInProject(projectName, subjectId,
+                        sourceType)).flatMap(List::stream).collect(Collectors.toList());
+    }
 }

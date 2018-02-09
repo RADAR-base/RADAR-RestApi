@@ -40,6 +40,7 @@ public class ApplicationStatusMonitorService {
      */
     @Inject
     public ApplicationStatusMonitorService() {
+        //TODO simplify processing application status
         dataAccessObjects = new LinkedList<>();
         dataAccessObjects.add(new ApplicationStatusUpTime());
         dataAccessObjects.add(new ApplicationStatusRecordCounter());
