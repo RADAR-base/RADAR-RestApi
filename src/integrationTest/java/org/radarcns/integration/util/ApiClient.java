@@ -136,8 +136,6 @@ public class ApiClient extends ExternalResource {
      * @param expectedResponse response codes that are considered valid.
      * @return HTTP Response body as a string
      * @throws IOException if the request could not be executed
-     * @throws AssertionError if the response code does not match one of expectedResponse or if no
-     * expectedResponse is provided if the response code does not indicate success.
      */
     @Nonnull
     public String requestString(String relativePath, String accept, Status... expectedResponse)
@@ -159,10 +157,6 @@ public class ApiClient extends ExternalResource {
      * @param expectedResponse response codes that are considered valid.
      * @return HTTP Response body as a string
      * @throws IOException if the request could not be executed
-     * @throws ReflectiveOperationException if the provided class does not have a static {@code
-     * getClassSchema()} method.
-     * @throws AssertionError if the response code does not match one of expectedResponse or if no
-     * expectedResponse is provided if the response code does not indicate success.
      */
     @Nonnull
     public <K> K requestJson(String relativePath, Class<K> avroClass,

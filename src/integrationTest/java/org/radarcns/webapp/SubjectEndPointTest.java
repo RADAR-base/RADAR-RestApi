@@ -101,10 +101,10 @@ public class SubjectEndPointTest {
     public void getSubjectsBySubjectIdAndProjectName200()
             throws IOException, ReflectiveOperationException, URISyntaxException {
         MongoClient mongoClient = Utility.getMongoClient();
-        int WINDOWS = 2;
+        int windows = 2;
         long start = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
-        long end = start + TimeUnit.SECONDS.toMillis(60 / (WINDOWS + 1));
-        long later = end + TimeUnit.SECONDS.toMillis(60 / (WINDOWS + 1));
+        long end = start + TimeUnit.SECONDS.toMillis(60 / (windows + 1));
+        long later = end + TimeUnit.SECONDS.toMillis(60 / (windows + 1));
         Document doc = getDocumentsForStatistics(start, end);
         Document second = getDocumentsForStatistics(start, later);
         MongoCollection collection = MongoHelper

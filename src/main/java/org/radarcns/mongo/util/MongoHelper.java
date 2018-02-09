@@ -139,8 +139,7 @@ public class MongoHelper {
      * @param project is the projectName
      * @param subject is the subjectID
      * @param source is the sourceID
-     * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
-     * means ascending while {@code -1} means descending
+     * @param sortBy It is optional. {@code 1} means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents from query.
@@ -177,12 +176,10 @@ public class MongoHelper {
      *
      * @param subject is the subjectID
      * @param source is the sourceID
-     * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
-     * means ascending while {@code -1} means descending
+     * @param sortBy It is optional. {@code 1} means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents for the given User, SourceDefinition and
-     * MongoDB collection
+     * @return a MongoDB cursor containing all documents for the given User, SourceDefinition
      */
     public static MongoCursor<Document> findDocumentBySubjectAndSource(String subject,
             String source, String sortBy, int order, Integer limit,
@@ -213,8 +210,7 @@ public class MongoHelper {
      * Finds all Documents belonging to the given sourceType.
      *
      * @param source is the sourceID
-     * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
-     * means ascending while {@code -1} means descending
+     * @param sortBy It is optional. {@code 1} means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents from the query.
@@ -244,8 +240,7 @@ public class MongoHelper {
      * Finds document with the given ID.
      *
      * @param id Document _id
-     * @param sortBy states the way in which documents have to be sorted. It is optional. {@code 1}
-     * means ascending while {@code -1} means descending
+     * @param sortBy It is optional. {@code 1}  means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents from query.
@@ -286,8 +281,7 @@ public class MongoHelper {
      *
      * @param subject is the subjectID
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all distinct sources for the given User and MongoDB
-     * collection
+     * @return a MongoDB cursor containing all distinct sources for the given User
      */
     public static MongoCursor<String> findAllSourceByUser(String subject,
             MongoCollection<Document> collection) {
@@ -300,8 +294,7 @@ public class MongoHelper {
      *
      * @param subject is the subjectID
      * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all distinct sources for the given User and MongoDB
-     * collection
+     * @return a MongoDB cursor containing all distinct sources for the given User
      */
     public static MongoCursor<String> findAllSourcesBySubjectAndProject(String subject, String
             projectName,

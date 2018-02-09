@@ -43,10 +43,9 @@ import org.radarcns.monitor.application.ServerStatus;
  */
 public class RandomInput {
 
-    //private static final Logger LOGGER = LoggerFactory.getLogger(RandomInput.class);
-
     public static final String DATASET = "dataset";
     public static final String DOCUMENTS = "documents";
+    private static final String SUPPORTED_SOURCE_TYPE = "empatica_e4_v1";
 
     private static Dataset dataset = null;
     private static List<Document> documents = null;
@@ -54,12 +53,11 @@ public class RandomInput {
     private static ExpectedDocumentFactory expectedDocumentFactory = new ExpectedDocumentFactory();
     private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
 
-    private static void randomDoubleValue(String project, String user, String source, String
-            sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow) throws InstantiationException,
-            IllegalAccessException {
-        ObservationKey key = new ObservationKey(null, user, source);
+    private static void randomDoubleValue(String project, String user, String source,
+            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            int samples, boolean singleWindow)
+            throws InstantiationException, IllegalAccessException {
+        ObservationKey key = new ObservationKey(project, user, source);
         ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
         Long start = new Date().getTime();
@@ -76,8 +74,7 @@ public class RandomInput {
         }
 
         dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
-                sensorType,
-                stat, timeWindow);
+                sensorType, stat, timeWindow);
         documents = expectedDocumentFactory.produceExpectedData(instance);
     }
 
@@ -114,23 +111,12 @@ public class RandomInput {
      * generated mocking the behaviour of the RADAR-CNS Platform.
      */
     public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user,
-            String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat,
-            TimeWindow timeWindow, int samples, boolean singleWindow) throws InstantiationException,
-            IllegalAccessException {
-        switch (sourceType) {
-            case "ANDROID":
-                break;
-            case "BIOVOTION":
-                break;
-            case "EMPATICA":
-                return getBoth(project, user, source, sourceType, sensorType, stat,
-                        timeWindow,
-                        samples, singleWindow);
-            case "PEBBLE":
-                break;
-            default:
-                break;
+            String source, String sourceType, String sensorType, DescriptiveStatistic stat,
+            TimeWindow timeWindow, int samples, boolean singleWindow)
+            throws InstantiationException, IllegalAccessException {
+        if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
+            return getBoth(project, user, source, sourceType, sensorType, stat,
+                    timeWindow, samples, singleWindow);
         }
 
         throw new UnsupportedOperationException(sourceType + " is not"
@@ -142,25 +128,14 @@ public class RandomInput {
      * Platform.
      */
     public static Dataset getDatasetRandom(String project, String user, String source,
-            String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow) throws InstantiationException,
-            IllegalAccessException {
-        switch (sourceType) {
-            case "ANDROID":
-                break;
-            case "BIOVOTION":
-                break;
-            case "EMPATICA":
-                return getDataset(project, user, source, sourceType, sensorType, stat,
-                        timeWindow,
-                        samples, singleWindow);
-            case "PEBBLE":
-                break;
-            default:
-                break;
+            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            int samples, boolean singleWindow)
+            throws InstantiationException, IllegalAccessException {
+        if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
+            return getDataset(project, user, source, sourceType, sensorType, stat,
+                    timeWindow,
+                    samples, singleWindow);
         }
-
         throw new UnsupportedOperationException(sourceType + " is not"
                 + " currently supported.");
     }
@@ -174,7 +149,7 @@ public class RandomInput {
             TimeWindow timeWindow, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         switch (sourceType) {
-            case "EMPATICA":
+            case "empatica_e4_v1":
                 return getDocument(project, user, source, sourceType, sensorType, stat,
                         timeWindow, samples, singleWindow);
             default:
@@ -191,19 +166,19 @@ public class RandomInput {
         return dataset;
     }
 
-    private static List<Document> getDocument(String project, String user, String source, String
-            sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
-            boolean singleWindow) throws InstantiationException, IllegalAccessException {
+    private static List<Document> getDocument(String project, String user, String source,
+            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            int samples, boolean singleWindow)
+            throws InstantiationException, IllegalAccessException {
         nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
                 singleWindow);
         return documents;
     }
 
     private static Map<String, Object> getBoth(String project, String user, String source,
-            String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
-            boolean singleWindow) throws InstantiationException, IllegalAccessException {
+            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            int samples, boolean singleWindow)
+            throws InstantiationException, IllegalAccessException {
         nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
                 singleWindow);
 
@@ -219,13 +194,11 @@ public class RandomInput {
         switch (sensorType) {
             case "ACCELEROMETER":
                 randomArrayValue(project, user, source, sourceType, sensorType, stat, timeWindow,
-                        samples,
-                        singleWindow);
+                        samples, singleWindow);
                 break;
             default:
                 randomDoubleValue(project, user, source, sourceType, sensorType, stat,
-                        timeWindow,
-                        samples, singleWindow);
+                        timeWindow, samples, singleWindow);
                 break;
         }
     }
