@@ -3,15 +3,12 @@ package org.radarcns.service;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
-import org.radarcns.domain.managementportal.SubjectDTO;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.management.service.dto.MinimalSourceDetailsDTO;
 import org.slf4j.Logger;
@@ -159,33 +156,9 @@ public class SourceService {
      */
     public List<org.radarcns.domain.restapi.Source> getAllSourcesOfSubject(String projectName,
             String subjectId) throws IOException {
-        SubjectDTO subject = this.managementPortalClient.getSubject(subjectId);
-
-        Set<String> currentlyAvailableSourceIds = subject.getSources().stream().map
-                (p -> p.getSourceId().toString()).collect(Collectors.toSet());
-
-        //fetch all sourceIds of subject available in from mongoDB.
-        List<String> recordedSourceIdsForSubject = fetchAllRecordedSourcesForSubject(projectName,
-                subjectId);
-
-        // set should avoid duplicates, thus if currently available sources are fetched they
-        // won't be repeated.
-        Set<String> allSourceIds = Stream.concat(currentlyAvailableSourceIds.stream(),
-                recordedSourceIdsForSubject.stream()).collect(Collectors.toSet());
-
-        // fetch source data from management-portal.
-        //TODO optimize to reuse what is already gathered from subject and fetch only history
-//        List<SourceDTO> sourceList = allSourceIds.stream()
-//                .map(s -> {
-//                            try {
-//                                return managementPortalClient.getSource(s);
-//                            } catch (IOException exe) {
-//                                throw new BadGatewayException(exe);
-//                            }
-//                        }
-//                ).collect(Collectors.toList());
-        // convert source to rest-api response
-        return buildSourcesFromMinimal(projectName, subjectId, subject.getSources());
+        //TODO implement fetching all recorded sources for subject
+        return buildSourcesFromMinimal(projectName, subjectId,
+                this.managementPortalClient.getSubject(subjectId).getSources());
     }
 
 
