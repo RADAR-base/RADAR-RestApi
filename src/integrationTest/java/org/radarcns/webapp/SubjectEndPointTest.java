@@ -121,6 +121,7 @@ public class SubjectEndPointTest {
         assertNotNull(subject);
         assertEquals(SUBJECT_ID, subject.getSubjectId());
         assertEquals(PROJECT_NAME, subject.getProject());
+        assertTrue(subject.getSources().size() > 0);
 
     }
 

@@ -38,6 +38,7 @@ import javax.ws.rs.Produces;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.domain.restapi.Source;
+import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.SourceService;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
@@ -51,6 +52,9 @@ public class SourceEndPoint {
 
     @Inject
     private SourceService sourceService;
+
+    @Inject
+    private ManagementPortalClient managementPortalClient;
 
     //--------------------------------------------------------------------------------------------//
     //                                         ALL SOURCES                                        //
@@ -74,7 +78,8 @@ public class SourceEndPoint {
     public List<Source> getAllSourcesJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {
-
+        managementPortalClient.getProject(projectName);
+        managementPortalClient.checkSubjectInProject(projectName, subjectId);
         return sourceService.getAllSourcesOfSubject(projectName, subjectId);
     }
 
