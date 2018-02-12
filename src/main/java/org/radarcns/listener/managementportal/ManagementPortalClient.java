@@ -149,9 +149,9 @@ public class ManagementPortalClient {
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to retrieve all SubjectDTOs: " + responseBody);
             }
-            List<SubjectDTO> allSubjectDTOs = SUBJECT_LIST_READER.readValue(responseBody);
+            List<SubjectDTO> allSubjects = SUBJECT_LIST_READER.readValue(responseBody);
             logger.info("Retrieved SubjectDTOs from MP.");
-            return allSubjectDTOs;
+            return allSubjects;
         }
     }
 
@@ -234,17 +234,17 @@ public class ManagementPortalClient {
      */
     private List<ProjectDTO> retrieveProjects() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL getAllProjectDTOsUrl = new URL(config.getManagementPortalUrl(),
+        URL getAllProjectsUrl = new URL(config.getManagementPortalUrl(),
                 config.getProjectEndpoint());
-        Request getAllProjectDTOs = this.buildGetRequest(getAllProjectDTOsUrl);
-        try (Response response = this.client.newCall(getAllProjectDTOs).execute()) {
+        Request getAllProjects = this.buildGetRequest(getAllProjectsUrl);
+        try (Response response = this.client.newCall(getAllProjects).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to retrieve all SubjectDTOs: " + responseBody);
             }
-            List<ProjectDTO> allProjectDTOs = PROJECT_LIST_READER.readValue(responseBody);
+            List<ProjectDTO> allProjects = PROJECT_LIST_READER.readValue(responseBody);
             logger.info("Retrieved ProjectDTOs from MP");
-            return allProjectDTOs;
+            return allProjects;
         }
     }
 
@@ -295,17 +295,17 @@ public class ManagementPortalClient {
      */
     public List<SourceDataDTO> retrieveSourceData() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL getAllSourceDTOTypesUrl = new URL(config.getManagementPortalUrl(),
+        URL getAllSourceTypesUrl = new URL(config.getManagementPortalUrl(),
                 config.getSourceDataEndpoint());
-        Request getAllSourceDTOTypes = this.buildGetRequest(getAllSourceDTOTypesUrl);
-        try (Response response = this.client.newCall(getAllSourceDTOTypes).execute()) {
+        Request getAllSourceTypes = this.buildGetRequest(getAllSourceTypesUrl);
+        try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to retrieve all sourceType-data: " + responseBody);
             }
-            List<SourceDataDTO> allSourceDTOData = SOURCE_DATA_LIST_READER.readValue(responseBody);
+            List<SourceDataDTO> allSourceData = SOURCE_DATA_LIST_READER.readValue(responseBody);
             logger.info("Retrieved SourceDTOTypes from MP");
-            return allSourceDTOData;
+            return allSourceData;
         }
     }
 
@@ -327,8 +327,8 @@ public class ManagementPortalClient {
     private List<SourceDTO> retrieveSources() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL url = new URL(config.getManagementPortalUrl(), config.getSourceEndpoint());
-        Request getAllSourceDTOsRequest = this.buildGetRequest(url);
-        try (Response response = this.client.newCall(getAllSourceDTOsRequest).execute()) {
+        Request getAllSourcesRequest = this.buildGetRequest(url);
+        try (Response response = this.client.newCall(getAllSourcesRequest).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to retrieve all sources: " + responseBody);
