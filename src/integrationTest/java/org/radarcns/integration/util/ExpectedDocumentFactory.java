@@ -24,7 +24,14 @@ import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MINIMUM;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.SUM;
 import static org.radarcns.mock.model.ExpectedValue.DURATION;
+import static org.radarcns.mongo.util.MongoHelper.END;
+import static org.radarcns.mongo.util.MongoHelper.NAME;
+import static org.radarcns.mongo.util.MongoHelper.PROJECT_ID;
+import static org.radarcns.mongo.util.MongoHelper.SOURCE_ID;
+import static org.radarcns.mongo.util.MongoHelper.START;
+import static org.radarcns.mongo.util.MongoHelper.USER_ID;
 
+import com.mongodb.BasicDBObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -112,25 +119,32 @@ public class ExpectedDocumentFactory {
 
             long end = timestamp + DURATION;
 
-            list.add(new Document(MongoHelper.ID,
-                    expectedValue.getLastKey().getUserId()
-                            + "-" + expectedValue.getLastKey().getSourceId()
-                            + "-" + expectedValue.getLastKey().getProjectId()
-                            + "-" + timestamp + "-" + end)
-                    .append(MongoHelper.USER_ID, expectedValue.getLastKey().getUserId())
-                    .append(MongoHelper.SOURCE_ID, expectedValue.getLastKey().getSourceId())
-                    .append(MongoHelper.PROJECT_ID, expectedValue.getLastKey().getProjectId())
+            BasicDBObject key = new BasicDBObject();
+            key.append(PROJECT_ID, expectedValue.getLastKey().getProjectId())
+                    .append(USER_ID, expectedValue.getLastKey().getUserId())
+                    .append(SOURCE_ID, expectedValue.getLastKey().getSourceId())
+                    .append(START, timestamp)
+                    .append(END, end);
+
+            BasicDBObject value = new BasicDBObject();
+            value.append(NAME , "batteryLevel")
                     .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
                     .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleValueCollector))
                     .append(Stat.sum.getParam(), getStatValue(SUM, doubleValueCollector))
                     .append(Stat.count.getParam(), getStatValue(COUNT, doubleValueCollector))
                     .append(Stat.avg.getParam(), getStatValue(AVERAGE, doubleValueCollector))
                     .append(Stat.quartile.getParam(), extractQuartile((List<Double>) getStatValue(
-                            QUARTILES, doubleValueCollector)))
-                    .append(Stat.iqr.getParam(), getStatValue(INTERQUARTILE_RANGE,
-                            doubleValueCollector))
-                    .append(MongoHelper.START, new Date(timestamp))
-                    .append(MongoHelper.END, new Date(end)));
+                            QUARTILES, doubleValueCollector)));
+
+
+            list.add(new Document(MongoHelper.ID, "{"
+                    + PROJECT_ID + ":" + expectedValue.getLastKey().getProjectId() +","
+                    + MongoHelper.USER_ID + ":" + expectedValue.getLastKey().getUserId() +","
+                    + MongoHelper.SOURCE_ID + ":" + expectedValue.getLastKey().getSourceId() +","
+                    + MongoHelper.START + ":" + timestamp +","
+                    + MongoHelper.END + ":" + end +"}")
+                    .append(MongoHelper.KEY, key)
+                    .append(MongoHelper.VALUE, value));
         }
 
         return list;

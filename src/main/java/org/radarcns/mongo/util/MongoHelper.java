@@ -50,6 +50,7 @@ public class MongoHelper {
     public static final String FIELDS = "fields";
     public static final String QUARTILE = "quartile";
     public static final String COUNT = "count";
+    public static final String NAME = "name";
 
     public static final String FIRST_QUARTILE = "25";
     public static final String SECOND_QUARTILE = "50";
@@ -150,18 +151,10 @@ public class MongoHelper {
         FindIterable<Document> result;
 
         if (sortBy == null) {
-            result = collection.find(
-                    Filters.and(
-                            eq(USER_ID, subject),
-                            eq(SOURCE_ID, source),
-                            eq(PROJECT_ID, project)));
+            result = collection.find(findQueryWithKeyParameters(project, subject, source));
         } else {
-            result = collection.find(
-                    Filters.and(
-                            eq(USER_ID, subject),
-                            eq(SOURCE_ID, source),
-                            eq(PROJECT_ID, project))
-            ).sort(new BasicDBObject(sortBy, order));
+            result = collection.find(findQueryWithKeyParameters(project, subject, source))
+                    .sort(new BasicDBObject(sortBy, order));
         }
 
         if (limit != null) {
@@ -171,39 +164,10 @@ public class MongoHelper {
         return result.iterator();
     }
 
-    /**
-     * Finds all Documents belonging to the given subject for the give sourceType.
-     *
-     * @param subject is the subjectID
-     * @param source is the sourceID
-     * @param sortBy It is optional. {@code 1} means ascending while {@code -1} means descending
-     * @param limit is the number of document that will be retrieved
-     * @param collection is the MongoDB that will be queried
-     * @return a MongoDB cursor containing all documents for the given User, SourceDefinition
-     */
-    public static MongoCursor<Document> findDocumentBySubjectAndSource(String subject,
-            String source, String sortBy, int order, Integer limit,
-            MongoCollection<Document> collection) {
-        FindIterable<Document> result;
+    private static BasicDBObject findQueryWithKeyParameters(String projectName, String subjectId, String
+            sourceId) {
+        return new BasicDBObject().append(KEY.concat(".").concat(PROJECT_ID) , projectName);
 
-        if (sortBy == null) {
-            result = collection.find(
-                    Filters.and(
-                            eq(USER_ID, subject),
-                            eq(SOURCE_ID, source)));
-        } else {
-            result = collection.find(
-                    Filters.and(
-                            eq(USER_ID, subject),
-                            eq(SOURCE_ID, source))
-            ).sort(new BasicDBObject(sortBy, order));
-        }
-
-        if (limit != null) {
-            result = result.limit(limit);
-        }
-
-        return result.iterator();
     }
 
     /**
