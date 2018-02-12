@@ -46,7 +46,7 @@ public class ExpectedValueTest {
     @Test
     public void matchDatasetOnDocuments() throws Exception {
         Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
-                "EMPATICA", "HEART_RATE", COUNT, TIME_WINDOW, SAMPLES, false);
+                "empatica_e4_v1", "HEART_RATE", COUNT, TIME_WINDOW, SAMPLES, false);
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
         int count = 0;
