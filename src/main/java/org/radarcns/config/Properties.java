@@ -34,12 +34,12 @@ public final class Properties {
     /**
      * Path to the configuration file for AWS deploy.
      **/
-    private static final String PATH_FILE_AWS = "/usr/share/tomcat8/conf/";
+    private static final String PATH_FILE_AWS = "/usr/share/conf/radar/rest-api";
 
     /**
      * Path to the configuration file for Docker image.
      **/
-    private static final String PATH_FILE_DOCKER = "/usr/local/tomcat/conf/radar/";
+    private static final String PATH_FILE_DOCKER = "/usr/local/conf/radar/rest-api";
 
     /**
      * Placeholder alternative path for the config folder.
