@@ -53,7 +53,7 @@ public class ManagementPortalClient {
 
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalClient.class);
 
-    private static final ObjectReader SubjectDTO_LIST_READER = RadarConverter.readerForCollection(
+    private static final ObjectReader SUBJECT_LIST_READER = RadarConverter.readerForCollection(
             List.class, SubjectDTO.class);
     private static final ObjectReader PROJECT_LIST_READER = RadarConverter.readerForCollection(
             List.class, ProjectDTO.class);
@@ -143,13 +143,13 @@ public class ManagementPortalClient {
     private List<SubjectDTO> retrieveSubjects() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL url = new URL(config.getManagementPortalUrl(), config.getSubjectEndpoint());
-        Request getAllSubjectDTOsRequest = this.buildGetRequest(url);
-        try (Response response = this.client.newCall(getAllSubjectDTOsRequest).execute()) {
+        Request getAllSubjectsRequest = this.buildGetRequest(url);
+        try (Response response = this.client.newCall(getAllSubjectsRequest).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to retrieve all SubjectDTOs: " + responseBody);
             }
-            List<SubjectDTO> allSubjectDTOs = SubjectDTO_LIST_READER.readValue(responseBody);
+            List<SubjectDTO> allSubjectDTOs = SUBJECT_LIST_READER.readValue(responseBody);
             logger.info("Retrieved SubjectDTOs from MP.");
             return allSubjectDTOs;
         }
@@ -159,17 +159,17 @@ public class ManagementPortalClient {
      * Retrieves a {@link SubjectDTO} from the already computed list of SubjectDTOs using {@link
      * ArrayList} of {@link SubjectDTO} entity.
      *
-     * @param SubjectDTOLogin {@link String} that has to be searched.
+     * @param subjectLogin {@link String} that has to be searched.
      * @return {@link SubjectDTO} if a SubjectDTO is found
      * @throws IOException if the SubjectDTOs cannot be refreshed
      * @throws NotFoundException if the SubjectDTO is not found
      */
-    public SubjectDTO getSubject(@Nonnull String SubjectDTOLogin)
+    public SubjectDTO getSubject(@Nonnull String subjectLogin)
             throws IOException, NotFoundException {
         try {
-            return subjects.get(SubjectDTOLogin);
+            return subjects.get(subjectLogin);
         } catch (NoSuchElementException ex) {
-            throw new NotFoundException("SubjectDTO " + SubjectDTOLogin + " not found.");
+            throw new NotFoundException("SubjectDTO " + subjectLogin + " not found.");
         }
     }
 
@@ -177,16 +177,16 @@ public class ManagementPortalClient {
      * Checks whether given SubjectDTO is part of given project.
      *
      * @param projectName project that should contain the SubjectDTO.
-     * @param SubjectDTOLogin login name that has to be searched.
+     * @param subjectLogin login name that has to be searched.
      * @throws IOException if the list of SubjectDTOs cannot be refreshed.
      * @throws NotFoundException if the SubjectDTO is not found in given project.
      */
-    public void checkSubjectInProject(@Nonnull String projectName, @Nonnull String SubjectDTOLogin)
+    public void checkSubjectInProject(@Nonnull String projectName, @Nonnull String subjectLogin)
             throws IOException, NotFoundException {
-        SubjectDTO SubjectDTO = getSubject(SubjectDTOLogin);
-        if (!projectName.equals(SubjectDTO.getProject().getProjectName())) {
+        SubjectDTO subject = getSubject(subjectLogin);
+        if (!projectName.equals(subject.getProject().getProjectName())) {
             throw new NotFoundException(
-                    "SubjectDTO " + SubjectDTOLogin + " is not part of project " + projectName
+                    "SubjectDTO " + subjectLogin + " is not part of project " + projectName
                             + ".");
         }
     }

@@ -47,7 +47,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param expectedValue mock data used to test
      * @param subjectId subject identifier
-     * @param sourceId sourceType identifier
+     * @param sourceId source identifier
      * @param sourceType sourceType that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
@@ -70,7 +70,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param expectedValue mock data used to test
      * @param subjectId subject identifier
-     * @param sourceId sourceType identifier
+     * @param sourceId source identifier
      * @param sourceType sourceType that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
