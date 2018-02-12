@@ -1,6 +1,7 @@
 package org.radarcns.domain.restapi.dataset;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 
 public class DataItem {
 
@@ -44,5 +45,24 @@ public class DataItem {
 
     public void setStartDateTime(String startDateTime) {
         this.startDateTime = startDateTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DataItem sourceType = (DataItem) o;
+
+        return Objects.equals(sample, sourceType.sample)
+                && Objects.equals(startDateTime, sourceType.startDateTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sample, startDateTime);
     }
 }

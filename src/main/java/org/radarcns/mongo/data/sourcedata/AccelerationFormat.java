@@ -48,7 +48,7 @@ public class AccelerationFormat extends MongoSourceDataWrapper {
     }
 
     @Override
-    protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat,
+    protected Object documentToDataFormat(Document doc, String field, DescriptiveStatistic stat,
             Header header) {
         @SuppressWarnings("unchecked")
         List<Document> fields = (List<Document>) doc.get(FIELDS);

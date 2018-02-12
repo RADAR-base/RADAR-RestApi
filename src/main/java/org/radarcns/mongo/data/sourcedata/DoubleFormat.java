@@ -42,7 +42,7 @@ public class DoubleFormat extends MongoSourceDataWrapper {
     }
 
     @Override
-    protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat,
+    protected Object documentToDataFormat(Document doc, String field, DescriptiveStatistic stat,
             Header header) {
         switch (stat) {
             case MEDIAN:

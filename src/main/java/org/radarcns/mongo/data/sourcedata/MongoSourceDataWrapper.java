@@ -19,9 +19,7 @@ package org.radarcns.mongo.data.sourcedata;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import org.bson.Document;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
@@ -43,8 +41,6 @@ public abstract class MongoSourceDataWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoSourceDataWrapper.class);
 
-    private final Map<TimeWindow, String> timeWindowToCollectionsMap;
-
     private final SourceDataDTO sourceData;
 
     /**
@@ -54,9 +50,6 @@ public abstract class MongoSourceDataWrapper {
      * @param sourceData of the given sourceType that will be consume from this instance
      */
     public MongoSourceDataWrapper(SourceDataDTO sourceData) {
-
-        timeWindowToCollectionsMap = createCollectionsForTimeWindow(sourceData.getTopic());
-
         this.sourceData = sourceData;
     }
 
@@ -217,7 +210,7 @@ public abstract class MongoSourceDataWrapper {
                 }
             }
 
-            DataItem item = new DataItem(docToAvro(doc, field, stat, header),
+            DataItem item = new DataItem(documentToDataFormat(doc, field, stat, header),
                     RadarConverter.getISO8601(doc.getDate(MongoHelper.START)));
 
             list.addLast(item);
@@ -245,8 +238,25 @@ public abstract class MongoSourceDataWrapper {
      * @return the MongoDB Collection name for given {@link TimeWindow}
      */
     public String getCollectionName(TimeWindow interval) {
-        if (timeWindowToCollectionsMap.containsKey(interval)) {
-            return timeWindowToCollectionsMap.get(interval);
+        if (sourceData.getTopic() != null && !sourceData.getTopic().isEmpty()) {
+            String topicName = sourceData.getTopic();
+            switch (interval) {
+                case TEN_SECOND:
+                    return topicName.concat("_output");
+                case ONE_MIN:
+                    return topicName.concat("_output_1min");
+                case TEN_MIN:
+                    return topicName.concat("_output_10min");
+                case ONE_HOUR:
+                    return topicName.concat("_output_1h");
+                case ONE_DAY:
+                    return topicName.concat("_output_1d");
+                case ONE_WEEK:
+                    return topicName.concat("_output_1w");
+                case UNKNOWN:
+                default:
+                    return topicName.concat("_output");
+            }
         }
 
         throw new IllegalArgumentException("Unknown sourceType type. " + sourceData
@@ -263,7 +273,7 @@ public abstract class MongoSourceDataWrapper {
      * @param header {@link Header} used to provide the data context
      * @return the {@link DataFormat} related to the sensor
      */
-    protected Object docToAvro(Document doc, String field, DescriptiveStatistic stat,
+    protected Object documentToDataFormat(Document doc, String field, DescriptiveStatistic stat,
             Header header) {
         throw new UnsupportedOperationException("This function must be override by the subclass");
     }
@@ -277,22 +287,6 @@ public abstract class MongoSourceDataWrapper {
      */
     protected abstract int extractCount(Document doc);
 
-    /**
-     * Converts the keys of the collection map from String to TimeFrame.
-     *
-     * @see TimeWindow
-     */
-    private Map<TimeWindow, String> createCollectionsForTimeWindow(String topicName) {
-        Map<TimeWindow, String> map = new HashMap<>();
-
-        map.put(TimeWindow.TEN_SECOND, topicName);
-        map.put(TimeWindow.ONE_MIN, topicName.concat("_1min"));
-        map.put(TimeWindow.TEN_MIN, topicName.concat("_10min"));
-        map.put(TimeWindow.ONE_HOUR, topicName.concat("_1h"));
-        map.put(TimeWindow.ONE_DAY, topicName.concat("_1d"));
-        map.put(TimeWindow.ONE_WEEK, topicName.concat("_1w"));
-        return map;
-    }
 
     public Double getExpectedRecordCount(TimeWindow timeWindow) {
         return RadarConverter.getSecond(timeWindow) * getFrequency();

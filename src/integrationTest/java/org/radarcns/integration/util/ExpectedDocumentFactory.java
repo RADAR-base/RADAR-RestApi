@@ -115,9 +115,11 @@ public class ExpectedDocumentFactory {
             list.add(new Document(MongoHelper.ID,
                     expectedValue.getLastKey().getUserId()
                             + "-" + expectedValue.getLastKey().getSourceId()
+                            + "-" + expectedValue.getLastKey().getProjectId()
                             + "-" + timestamp + "-" + end)
                     .append(MongoHelper.USER_ID, expectedValue.getLastKey().getUserId())
                     .append(MongoHelper.SOURCE_ID, expectedValue.getLastKey().getSourceId())
+                    .append(MongoHelper.PROJECT_ID, expectedValue.getLastKey().getProjectId())
                     .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
                     .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleValueCollector))
                     .append(Stat.sum.getParam(), getStatValue(SUM, doubleValueCollector))

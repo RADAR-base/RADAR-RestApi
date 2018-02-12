@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DateTimeException;
@@ -71,7 +73,9 @@ public final class RadarConverter {
 
     static {
         OBJECT_MAPPER = new ObjectMapper(JSON_FACTORY);
-        OBJECT_MAPPER.findAndRegisterModules();
+        OBJECT_MAPPER
+                .registerModule(new Jdk8Module())
+                .registerModule(new JavaTimeModule());
         OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
         OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         OBJECT_MAPPER.setSerializationInclusion(Include.NON_NULL);
