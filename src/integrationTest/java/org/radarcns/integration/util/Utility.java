@@ -136,7 +136,7 @@ public class Utility {
                             doc.getDouble(stat.getParam()));
                     break;
             }
-            itemList.add(new DataItem(record, RadarConverter.getISO8601(doc.getDate(START))));
+            itemList.add(new DataItem(record,doc.getDate(START)));
         }
 
         Header header = new Header(projectName, subjectId, sourceId, sourceType, sensorType,

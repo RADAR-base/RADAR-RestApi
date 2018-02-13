@@ -25,6 +25,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -34,7 +35,6 @@ import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.States;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,19 +82,29 @@ public class SourceMonitorService {
             LOGGER.debug("Empty cursor for collection {}",
                     sourceType.getSourceStatisticsMonitorTopic());
         }
-        long timeStart = Long.MIN_VALUE;
-        long timeEnd = Long.MAX_VALUE;
+
+        Date start = null;
+        Date end = null;
         if (cursor.hasNext()) {
             Document document = cursor.next();
             Document key = (Document) document.get(KEY);
-            timeStart = Math
-                    .max(timeStart, key.getDate(START).getTime());
-            timeEnd = Math.min(timeEnd, key.getDate(END).getTime());
+            Date localStart = key.getDate(START);
+            Date localEnd = key.getDate(END);
+            if (start == null) {
+                start = localStart;
+                end = localEnd;
+            } else {
+                if (start.after(localStart)) {
+                    start = localStart;
+                }
+                if (end.before(localEnd)) {
+                    end = localEnd;
+                }
+            }
         }
 
         cursor.close();
-        return new EffectiveTimeFrame(RadarConverter.getISO8601(timeStart), RadarConverter
-                .getISO8601(timeEnd));
+        return new EffectiveTimeFrame(start, end);
 
     }
 

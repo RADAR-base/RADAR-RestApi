@@ -107,8 +107,8 @@ public abstract class MongoSourceDataWrapper {
      * @return data dataset for the given subject and sourceType, otherwise empty dataset
      * @see Dataset
      */
-    public Dataset getAllRecords(String projectName, String subject, String source, Header
-            header, MongoHelper.Stat stat, MongoCollection<Document> collection) {
+    public Dataset getAllRecords(String projectName, String subject, String source, Header header,
+            MongoHelper.Stat stat, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, START, 1,
                         null, collection);
@@ -131,8 +131,8 @@ public abstract class MongoSourceDataWrapper {
      * @return data-set for the given subject and source within the window, otherwise empty data-set
      * @see Dataset
      */
-    public Dataset getAllRecordsInWindow(String projectName, String subject, String source, Header
-            header, MongoHelper.Stat stat, Long start, Long end,
+    public Dataset getAllRecordsInWindow(String projectName, String subject, String source,
+            Header header, MongoHelper.Stat stat, Long start, Long end,
             MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentsByProjectAndSubjectAndSourceInWindow(projectName, subject, source,
@@ -217,16 +217,14 @@ public abstract class MongoSourceDataWrapper {
             }
 
             DataItem item = new DataItem(documentToDataFormat(value, field, stat, header),
-                    RadarConverter.getISO8601(localStart));
+                    localStart);
 
             list.addLast(item);
         }
 
         cursor.close();
 
-        EffectiveTimeFrame etf = new EffectiveTimeFrame(
-                RadarConverter.getISO8601(start),
-                RadarConverter.getISO8601(end));
+        EffectiveTimeFrame etf = new EffectiveTimeFrame(start, end);
 
         header.setEffectiveTimeFrame(etf);
 
