@@ -149,11 +149,11 @@ public class ExpectedDocumentFactory {
     }
 
     public static Document buildDocument(String projectName, String subjectId, String sourceId,
-            Object start, Object end, Document value) {
+            Object start, Object end , Document value) {
         return new Document().append(ID, "{"
                 + PROJECT_ID + ":" + projectName + ","
-                + USER_ID + ":" + subjectId + ","
-                + SOURCE_ID + ":" + sourceId + ","
+                + USER_ID + ":" + subjectId+ ","
+                + SOURCE_ID + ":" + sourceId+ ","
                 + START + ":" + start + ","
                 + END + ":" + end + "}")
                 .append(KEY, buildKeyDocument(projectName, subjectId, sourceId, start, end))

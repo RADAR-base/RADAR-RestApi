@@ -61,7 +61,7 @@ public class DataSetEndPointTest {
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
     private static final String REQUEST_PATH = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
-            + SOURCE_DATA_NAME + '/' + COUNT + '/' + TIME_WINDOW + '/' + LATEST;
+            + SOURCE_DATA_NAME + '/' + COUNT + '/' + TIME_WINDOW ;
     private static final String COLLECTION_NAME = "android_empatica_e4_battery_level_output";
 
     @Rule
@@ -70,7 +70,7 @@ public class DataSetEndPointTest {
                     + DATA + '/');
 
     @Test
-    public void getRealtimeTest()
+    public void getLatestRecord()
             throws IOException, ReflectiveOperationException, URISyntaxException {
         MongoClient client = Utility.getMongoClient();
 
@@ -78,7 +78,37 @@ public class DataSetEndPointTest {
 
         Map<String, Object> docs = RandomInput
                 .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
-                        SOURCE_TYPE, SOURCE_DATA_NAME, COUNT, TIME_WINDOW, SAMPLES, true);
+                        SOURCE_TYPE, SOURCE_DATA_NAME, COUNT, TIME_WINDOW, SAMPLES, false);
+
+        collection.insertMany((List<Document>) docs.get(DOCUMENTS));
+
+        Dataset expected = (Dataset) docs.get(DATASET);
+
+        Response actual = apiClient
+                .request(REQUEST_PATH + '/' + LATEST, APPLICATION_JSON, Status.OK);
+        assertTrue(actual.isSuccessful());
+        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
+        Dataset dataset = reader.readValue(actual.body().byteStream());
+        assertNotNull(dataset);
+        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
+        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
+        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
+        assertEquals(1, dataset.getDataset().size());
+        assertEquals(expected.getDataset().get(0), dataset.dataset.get(0));
+
+        dropAndClose(client);
+    }
+
+    @Test
+    public void getAllRecords()
+            throws IOException, ReflectiveOperationException, URISyntaxException {
+        MongoClient client = Utility.getMongoClient();
+
+        MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
+
+        Map<String, Object> docs = RandomInput
+                .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
+                        SOURCE_TYPE, SOURCE_DATA_NAME, COUNT, TIME_WINDOW, SAMPLES, false);
 
         collection.insertMany((List<Document>) docs.get(DOCUMENTS));
 
