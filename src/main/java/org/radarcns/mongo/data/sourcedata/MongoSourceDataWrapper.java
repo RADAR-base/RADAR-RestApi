@@ -16,6 +16,9 @@
 
 package org.radarcns.mongo.data.sourcedata;
 
+import static org.radarcns.mongo.util.MongoHelper.KEY;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
+
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import java.util.Date;
@@ -194,9 +197,12 @@ public abstract class MongoSourceDataWrapper {
 
         while (cursor.hasNext()) {
             Document doc = cursor.next();
+            Document key = (Document) doc.get(KEY);
+            Document value = (Document) doc.get(VALUE);
 
-            Date localStart = doc.getDate(MongoHelper.START);
-            Date localEnd = doc.getDate(MongoHelper.END);
+
+            Date localStart = RadarConverter.getISO8601ToDate(key.getLong(MongoHelper.START));
+            Date localEnd = RadarConverter.getISO8601ToDate(key.getLong(MongoHelper.END));
 
             if (start == null) {
                 start = localStart;
@@ -210,8 +216,8 @@ public abstract class MongoSourceDataWrapper {
                 }
             }
 
-            DataItem item = new DataItem(documentToDataFormat(doc, field, stat, header),
-                    RadarConverter.getISO8601(doc.getDate(MongoHelper.START)));
+            DataItem item = new DataItem(documentToDataFormat(value, field, stat, header),
+                    RadarConverter.getISO8601(localStart));
 
             list.addLast(item);
         }

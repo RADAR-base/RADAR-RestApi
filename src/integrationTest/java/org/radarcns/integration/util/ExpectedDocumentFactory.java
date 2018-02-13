@@ -25,11 +25,14 @@ import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.SUM;
 import static org.radarcns.mock.model.ExpectedValue.DURATION;
 import static org.radarcns.mongo.util.MongoHelper.END;
+import static org.radarcns.mongo.util.MongoHelper.ID;
+import static org.radarcns.mongo.util.MongoHelper.KEY;
 import static org.radarcns.mongo.util.MongoHelper.NAME;
 import static org.radarcns.mongo.util.MongoHelper.PROJECT_ID;
 import static org.radarcns.mongo.util.MongoHelper.SOURCE_ID;
 import static org.radarcns.mongo.util.MongoHelper.START;
 import static org.radarcns.mongo.util.MongoHelper.USER_ID;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.BasicDBObject;
 import java.util.ArrayList;
@@ -42,7 +45,6 @@ import org.bson.Document;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mongo.data.sourcedata.AccelerationFormat;
-import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
@@ -127,7 +129,7 @@ public class ExpectedDocumentFactory {
                     .append(END, end);
 
             BasicDBObject value = new BasicDBObject();
-            value.append(NAME , "batteryLevel")
+            value.append(NAME, "batteryLevel")
                     .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
                     .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleValueCollector))
                     .append(Stat.sum.getParam(), getStatValue(SUM, doubleValueCollector))
@@ -136,15 +138,14 @@ public class ExpectedDocumentFactory {
                     .append(Stat.quartile.getParam(), extractQuartile((List<Double>) getStatValue(
                             QUARTILES, doubleValueCollector)));
 
-
-            list.add(new Document(MongoHelper.ID, "{"
-                    + PROJECT_ID + ":" + expectedValue.getLastKey().getProjectId() +","
-                    + MongoHelper.USER_ID + ":" + expectedValue.getLastKey().getUserId() +","
-                    + MongoHelper.SOURCE_ID + ":" + expectedValue.getLastKey().getSourceId() +","
-                    + MongoHelper.START + ":" + timestamp +","
-                    + MongoHelper.END + ":" + end +"}")
-                    .append(MongoHelper.KEY, key)
-                    .append(MongoHelper.VALUE, value));
+            list.add(new Document(ID, "{"
+                    + PROJECT_ID + ":" + expectedValue.getLastKey().getProjectId() + ","
+                    + USER_ID + ":" + expectedValue.getLastKey().getUserId() + ","
+                    + SOURCE_ID + ":" + expectedValue.getLastKey().getSourceId() + ","
+                    + START + ":" + timestamp + ","
+                    + END + ":" + end + "}")
+                    .append(KEY, key)
+                    .append(VALUE, value));
         }
 
         return list;
@@ -163,12 +164,12 @@ public class ExpectedDocumentFactory {
 
             long end = timestamp + DURATION;
 
-            list.add(new Document(MongoHelper.ID,
+            list.add(new Document(ID,
                     expectedValue.getLastKey().getUserId()
                             + "-" + expectedValue.getLastKey().getUserId()
                             + "-" + timestamp + "-" + end)
-                    .append(MongoHelper.USER_ID, expectedValue.getLastKey().getUserId())
-                    .append(MongoHelper.SOURCE_ID, expectedValue.getLastKey().getSourceId())
+                    .append(USER_ID, expectedValue.getLastKey().getUserId())
+                    .append(SOURCE_ID, expectedValue.getLastKey().getSourceId())
                     .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleArrayCollector))
                     .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleArrayCollector))
                     .append(Stat.sum.getParam(), getStatValue(SUM, doubleArrayCollector))
@@ -179,8 +180,8 @@ public class ExpectedDocumentFactory {
                                     QUARTILES, doubleArrayCollector)))
                     .append(Stat.iqr.getParam(), getStatValue(INTERQUARTILE_RANGE,
                             doubleArrayCollector))
-                    .append(MongoHelper.START, new Date(timestamp))
-                    .append(MongoHelper.END, new Date(end)));
+                    .append(START, new Date(timestamp))
+                    .append(END, new Date(end)));
         }
 
         return list;

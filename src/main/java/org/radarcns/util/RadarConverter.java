@@ -105,6 +105,17 @@ public final class RadarConverter {
     }
 
     /**
+     * Converts {@code long} to ISO8601 {@code Date}.
+     *
+     * @param value input {@code long} that has to be converted
+     * @return a {@code Date} representing a date in ISO8601 format
+     */
+    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+    public static Date getISO8601ToDate(long value) throws DateTimeException {
+        return Date.from(Instant.ofEpochMilli(value));
+    }
+
+    /**
      * Converts {@link Date} to ISO8601 {@code String}.
      *
      * @param value input {@link Date} that has to be converted

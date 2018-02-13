@@ -164,9 +164,11 @@ public class MongoHelper {
         return result.iterator();
     }
 
-    private static BasicDBObject findQueryWithKeyParameters(String projectName, String subjectId, String
-            sourceId) {
-        return new BasicDBObject().append(KEY.concat(".").concat(PROJECT_ID) , projectName);
+    private static BasicDBObject findQueryWithKeyParameters(String projectName, String subjectId,
+            String sourceId) {
+        return new BasicDBObject().append(KEY.concat(".").concat(PROJECT_ID), projectName)
+                .append(KEY.concat(".").concat(USER_ID), subjectId)
+                .append(KEY.concat(".").concat(SOURCE_ID), sourceId);
 
     }
 
