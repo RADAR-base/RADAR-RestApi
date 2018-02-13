@@ -110,32 +110,29 @@ public class MongoHelper {
     }
 
     /**
-     * Finds all Documents within [start-end] belonging to the given subject for the give
-     * sourceType.
+     * Finds all documents within a time window belonging to the given subject, source and project.
      *
-     * @param subject is the subjectID
-     * @param source is the sourceID
+     * @param projectName of the project
+     * @param subjectId is the subjectID
+     * @param sourceId is the sourceID
      * @param start is the start time of the queried timewindow
      * @param end is the end time of the queried timewindow
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents from the query.
      */
     public static MongoCursor<Document> findDocumentsByProjectAndSubjectAndSourceInWindow(
-            String projectName, String subject, String source, Long start, Long end,
+            String projectName, String subjectId, String sourceId, Long start, Long end,
             MongoCollection<Document> collection) {
-        FindIterable<Document> result = collection.find(
-                Filters.and(
-                        eq(PROJECT_ID, projectName),
-                        eq(USER_ID, subject),
-                        eq(SOURCE_ID, source),
-                        gte(START, new Date(start)),
-                        lte(END, new Date(end)))).sort(new BasicDBObject(START, 1));
+        BasicDBObject query = getByProjectSubjectSource(projectName, subjectId, sourceId)
+                .append(KEY.concat(".").concat(START), start)
+                .append(KEY.concat(".").concat(END), end);
+        FindIterable<Document> result = collection.find(query).sort(new BasicDBObject(START, 1));
 
         return result.iterator();
     }
 
     /**
-     * Finds all Documents belonging to the given subject for the give sourceType.
+     * Finds all documents belonging to the given subject, source and project.
      *
      * @param project is the projectName
      * @param subject is the subjectID
@@ -151,9 +148,9 @@ public class MongoHelper {
         FindIterable<Document> result;
 
         if (sortBy == null) {
-            result = collection.find(findQueryWithKeyParameters(project, subject, source));
+            result = collection.find(getByProjectSubjectSource(project, subject, source));
         } else {
-            result = collection.find(findQueryWithKeyParameters(project, subject, source))
+            result = collection.find(getByProjectSubjectSource(project, subject, source))
                     .sort(new BasicDBObject(sortBy, order));
         }
 
@@ -164,7 +161,7 @@ public class MongoHelper {
         return result.iterator();
     }
 
-    private static BasicDBObject findQueryWithKeyParameters(String projectName, String subjectId,
+    private static BasicDBObject getByProjectSubjectSource(String projectName, String subjectId,
             String sourceId) {
         return new BasicDBObject().append(KEY.concat(".").concat(PROJECT_ID), projectName)
                 .append(KEY.concat(".").concat(USER_ID), subjectId)
