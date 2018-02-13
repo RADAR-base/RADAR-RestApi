@@ -7,43 +7,43 @@ import org.radarcns.util.RadarConverter;
 public class EffectiveTimeFrame {
 
     @JsonProperty
-    private String startDateTime;
+    private Date startDateTime;
 
     @JsonProperty
-    private String endDateTime;
+    private Date endDateTime;
 
     public EffectiveTimeFrame() {
         // default constructor for json
     }
 
     public EffectiveTimeFrame(String startDateTime, String endDateTime) {
+        this.startDateTime = RadarConverter.getISO8601(startDateTime);
+        this.endDateTime = RadarConverter.getISO8601(endDateTime);
+    }
+
+    public EffectiveTimeFrame(Date startDateTime, Date endDateTime) {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
     }
 
-    public EffectiveTimeFrame(Date startDateTime, Date endDateTime) {
-        this.startDateTime = RadarConverter.getISO8601(startDateTime);
-        this.endDateTime = RadarConverter.getISO8601(endDateTime);
-    }
-
     public EffectiveTimeFrame(Long startDateTime, Long endDateTime) {
-        this.startDateTime = RadarConverter.getISO8601(startDateTime);
-        this.endDateTime = RadarConverter.getISO8601(endDateTime);
+        this.startDateTime = RadarConverter.getISO8601ToDate(startDateTime);
+        this.endDateTime = RadarConverter.getISO8601ToDate(endDateTime);
     }
 
-    public String getStartDateTime() {
+    public Date getStartDateTime() {
         return startDateTime;
     }
 
-    public void setStartDateTime(String startDateTime) {
+    public void setStartDateTime(Date startDateTime) {
         this.startDateTime = startDateTime;
     }
 
-    public String getEndDateTime() {
+    public Date getEndDateTime() {
         return endDateTime;
     }
 
-    public void setEndDateTime(String endDateTime) {
+    public void setEndDateTime(Date endDateTime) {
         this.endDateTime = endDateTime;
     }
 }

@@ -34,7 +34,6 @@ import static org.radarcns.mongo.util.MongoHelper.START;
 import static org.radarcns.mongo.util.MongoHelper.USER_ID;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
-import com.mongodb.BasicDBObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -121,15 +120,8 @@ public class ExpectedDocumentFactory {
 
             long end = timestamp + DURATION;
 
-            BasicDBObject key = new BasicDBObject();
-            key.append(PROJECT_ID, expectedValue.getLastKey().getProjectId())
-                    .append(USER_ID, expectedValue.getLastKey().getUserId())
-                    .append(SOURCE_ID, expectedValue.getLastKey().getSourceId())
-                    .append(START, timestamp)
-                    .append(END, end);
-
-            BasicDBObject value = new BasicDBObject();
-            value.append(NAME, "batteryLevel")
+            Document value = new Document()
+                    .append(NAME, "batteryLevel")
                     .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
                     .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleValueCollector))
                     .append(Stat.sum.getParam(), getStatValue(SUM, doubleValueCollector))
@@ -138,17 +130,34 @@ public class ExpectedDocumentFactory {
                     .append(Stat.quartile.getParam(), extractQuartile((List<Double>) getStatValue(
                             QUARTILES, doubleValueCollector)));
 
-            list.add(new Document(ID, "{"
-                    + PROJECT_ID + ":" + expectedValue.getLastKey().getProjectId() + ","
-                    + USER_ID + ":" + expectedValue.getLastKey().getUserId() + ","
-                    + SOURCE_ID + ":" + expectedValue.getLastKey().getSourceId() + ","
-                    + START + ":" + timestamp + ","
-                    + END + ":" + end + "}")
-                    .append(KEY, key)
-                    .append(VALUE, value));
+            list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
+                    expectedValue.getLastKey().getUserId(),
+                    expectedValue.getLastKey().getSourceId(), new Date(timestamp), new Date(end),
+                    value));
         }
 
         return list;
+    }
+
+    public static Document buildKeyDocument(String projectName, String subjectId, String sourceId,
+            Object start, Object end) {
+        return new Document().append(PROJECT_ID, projectName)
+                .append(USER_ID, subjectId)
+                .append(SOURCE_ID, sourceId)
+                .append(START, start)
+                .append(END, end);
+    }
+
+    public static Document buildDocument(String projectName, String subjectId, String sourceId,
+            Object start, Object end, Document value) {
+        return new Document().append(ID, "{"
+                + PROJECT_ID + ":" + projectName + ","
+                + USER_ID + ":" + subjectId + ","
+                + SOURCE_ID + ":" + sourceId + ","
+                + START + ":" + start + ","
+                + END + ":" + end + "}")
+                .append(KEY, buildKeyDocument(projectName, subjectId, sourceId, start, end))
+                .append(VALUE, value);
     }
 
     private List<Document> getDocumentsByArray(ExpectedValue<?> expectedValue) {

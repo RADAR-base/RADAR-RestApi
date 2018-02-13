@@ -230,10 +230,10 @@ public class DataSetService {
         List<Source> sources = sourceService.getAllSourcesOfSubject(projectName, subject);
 
         for (Source source : sources) {
-            start = Math.min(start, RadarConverter.getISO8601(source.getEffectiveTimeFrame()
-                    .getStartDateTime()).getTime());
-            end = Math.min(start, RadarConverter.getISO8601(source.getEffectiveTimeFrame()
-                    .getEndDateTime()).getTime());
+            start = Math.min(start, source.getEffectiveTimeFrame()
+                    .getStartDateTime().getTime());
+            end = Math.min(start, source.getEffectiveTimeFrame()
+                    .getEndDateTime().getTime());
         }
 
         return new EffectiveTimeFrame(RadarConverter.getISO8601(start),

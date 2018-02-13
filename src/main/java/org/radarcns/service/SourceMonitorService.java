@@ -17,6 +17,9 @@
 package org.radarcns.service;
 
 import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
+import static org.radarcns.mongo.util.MongoHelper.END;
+import static org.radarcns.mongo.util.MongoHelper.KEY;
+import static org.radarcns.mongo.util.MongoHelper.START;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
@@ -41,8 +44,6 @@ import org.slf4j.LoggerFactory;
 public class SourceMonitorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceMonitorService.class);
-    private static final String TIME_START = "timeStart";
-    private static final String TIME_END = "timeEnd";
 
     private final MongoClient mongoClient;
 
@@ -72,7 +73,9 @@ public class SourceMonitorService {
         // get the last document sorted by timeEnd
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByProjectAndSubjectAndSource(projectId, subjectId, sourceId,
-                        TIME_END, DESCENDING, 1, MongoHelper.getCollection(this.mongoClient,
+                        KEY.concat(".").concat(END), DESCENDING, null,
+                        MongoHelper.getCollection(this
+                                        .mongoClient,
                                 sourceType.getSourceStatisticsMonitorTopic()));
 
         if (!cursor.hasNext()) {
@@ -83,8 +86,10 @@ public class SourceMonitorService {
         long timeEnd = Long.MAX_VALUE;
         if (cursor.hasNext()) {
             Document document = cursor.next();
-            timeStart = Math.max(timeStart, document.getDate(TIME_START).getTime());
-            timeEnd = Math.min(timeEnd, document.getDate(TIME_END).getTime());
+            Document key = (Document) document.get(KEY);
+            timeStart = Math
+                    .max(timeStart, key.getDate(START).getTime());
+            timeEnd = Math.min(timeEnd, key.getDate(END).getTime());
         }
 
         cursor.close();

@@ -172,7 +172,8 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                         content = new Acceleration(statValues.get(0), statValues.get(1),
                                 statValues.get(2));
                     }
-                    items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
+                    items.add(new DataItem(content, RadarConverter.getISO8601(getEffectiveTimeFrame(key)
+                            .getStartDateTime())));
                     break;
                 default:
                     throw new IllegalArgumentException(sensor + " is not a supported test case");
@@ -210,7 +211,8 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
             Object content = getContent(getStatValue(statistic, dac), statistic);
 
-            items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
+            items.add(new DataItem(content, RadarConverter.getISO8601(getEffectiveTimeFrame(key)
+                    .getStartDateTime())));
         }
 
         return items;

@@ -16,7 +16,9 @@
 
 package org.radarcns.mongo.data.sourcedata;
 
+import static org.radarcns.mongo.util.MongoHelper.END;
 import static org.radarcns.mongo.util.MongoHelper.KEY;
+import static org.radarcns.mongo.util.MongoHelper.START;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.client.MongoCollection;
@@ -86,8 +88,8 @@ public abstract class MongoSourceDataWrapper {
     public Dataset getLatestRecord(String projectName, String subject, String source, Header
             header, Stat stat, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, MongoHelper
-                        .END, -1, 1, collection);
+                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, END, -1, 1,
+                        collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                 cursor);
@@ -108,8 +110,8 @@ public abstract class MongoSourceDataWrapper {
     public Dataset getAllRecords(String projectName, String subject, String source, Header
             header, MongoHelper.Stat stat, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, MongoHelper
-                        .START, 1, null, collection);
+                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, START, 1,
+                        null, collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                 cursor);
@@ -200,10 +202,8 @@ public abstract class MongoSourceDataWrapper {
             Document key = (Document) doc.get(KEY);
             Document value = (Document) doc.get(VALUE);
 
-
-            Date localStart = RadarConverter.getISO8601ToDate(key.getLong(MongoHelper.START));
-            Date localEnd = RadarConverter.getISO8601ToDate(key.getLong(MongoHelper.END));
-
+            Date localStart = key.getDate(START);
+            Date localEnd = key.getDate(END);
             if (start == null) {
                 start = localStart;
                 end = localEnd;

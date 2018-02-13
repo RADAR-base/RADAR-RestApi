@@ -19,9 +19,12 @@ package org.radarcns.integration.util;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusServerStatus.STATUS_COLLECTION;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusUpTime.UPTIME_COLLECTION;
+import static org.radarcns.mongo.util.MongoHelper.ID;
+import static org.radarcns.mongo.util.MongoHelper.KEY;
 import static org.radarcns.mongo.util.MongoHelper.PROJECT_ID;
 import static org.radarcns.mongo.util.MongoHelper.SOURCE_ID;
 import static org.radarcns.mongo.util.MongoHelper.USER_ID;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -225,43 +228,45 @@ public class RandomInput {
      * Generates and returns a ApplicationStatus using the given inputs.
      **/
     public static Map<String, Document> getRandomApplicationStatus(String project, String user,
-            String
-                    source,
-            String ipAddress, ServerStatus serverStatus, Double uptime, int recordsCached,
-            int recordsSent, int recordsUnsent) {
-        String id = user + "-" + source;
-
-        Document uptimeDoc = new Document("_id", id)
-                .append(USER_ID, user)
-                .append(SOURCE_ID, source)
-                .append(PROJECT_ID, project)
+            String source, String ipAddress, ServerStatus serverStatus, Double uptime,
+            int recordsCached, int recordsSent, int recordsUnsent) {
+        Document uptimeDoc = new Document()
                 .append("sourceType", source)
                 .append("applicationUptime", uptime);
 
-        Document statusDoc = new Document("_id", id)
-                .append(USER_ID, user)
-                .append(SOURCE_ID, source)
-                .append(PROJECT_ID, project)
+        Document statusDoc = new Document()
                 .append("sourceType", source)
                 .append("clientIP", ipAddress)
                 .append("serverStatus", serverStatus.toString());
 
-        Document recordsDoc = new Document("_id", id)
-                .append(USER_ID, user)
-                .append(SOURCE_ID, source)
-                .append(PROJECT_ID, project)
+        Document recordsDoc = new Document()
                 .append("sourceType", source)
                 .append("recordsCached", recordsCached)
                 .append("recordsSent", recordsSent)
                 .append("recordsUnsent", recordsUnsent);
 
         Map<String, Document> documents = new HashMap<>();
-        documents.put(STATUS_COLLECTION, statusDoc);
-        documents.put(RECORD_COLLECTION, recordsDoc);
-        documents.put(UPTIME_COLLECTION, uptimeDoc);
+        documents.put(STATUS_COLLECTION, buildDocument(project, user, source, statusDoc));
+        documents.put(RECORD_COLLECTION, buildDocument(project, user, source, recordsDoc));
+        documents.put(UPTIME_COLLECTION, buildDocument(project, user, source, uptimeDoc));
         return documents;
     }
 
+    public static Document buildKeyDocument(String projectName, String subjectId, String sourceId) {
+        return new Document().append(PROJECT_ID, projectName)
+                .append(USER_ID, subjectId)
+                .append(SOURCE_ID, sourceId);
+    }
+
+    public static Document buildDocument(String projectName, String subjectId, String sourceId,
+            Document value) {
+        return new Document().append(ID, "{"
+                + PROJECT_ID + ":" + projectName + ","
+                + USER_ID + ":" + subjectId+ ","
+                + SOURCE_ID + ":" + sourceId + "}")
+                .append(KEY, buildKeyDocument(projectName, subjectId, sourceId))
+                .append(VALUE, value);
+    }
     /**
      * Returns a String representing a random IP address.
      **/

@@ -21,6 +21,7 @@ import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusServerS
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusUpTime.UPTIME_COLLECTION;
 import static org.radarcns.mongo.util.MongoHelper.END;
 import static org.radarcns.mongo.util.MongoHelper.START;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
@@ -154,13 +155,13 @@ public class Utility {
     //TODO take field names from RADAR Mongo Connector
     public static Application convertDocToApplication(Map<String, Document> documents) {
         return new Application(
-                documents.get(STATUS_COLLECTION).getString("clientIP"),
-                documents.get(UPTIME_COLLECTION).getDouble("applicationUptime"),
+                ((Document)documents.get(STATUS_COLLECTION).get(VALUE)).getString("clientIP"),
+                ((Document)documents.get(UPTIME_COLLECTION).get(VALUE)).getDouble("applicationUptime"),
                 RadarConverter.getServerStatus(
-                        documents.get(STATUS_COLLECTION).getString("serverStatus")),
-                documents.get(RECORD_COLLECTION).getInteger("recordsCached"),
-                documents.get(RECORD_COLLECTION).getInteger("recordsSent"),
-                documents.get(RECORD_COLLECTION).getInteger("recordsUnsent")
+                        ((Document)documents.get(STATUS_COLLECTION).get(VALUE)).getString("serverStatus")),
+                ((Document)documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsCached"),
+                ((Document)documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsSent"),
+                ((Document)documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsUnsent")
         );
     }
 
