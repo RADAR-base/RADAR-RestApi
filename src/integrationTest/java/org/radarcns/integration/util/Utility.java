@@ -156,7 +156,7 @@ public class Utility {
     public static Application convertDocToApplication(Map<String, Document> documents) {
         return new Application(
                 ((Document)documents.get(STATUS_COLLECTION).get(VALUE)).getString("clientIP"),
-                ((Document)documents.get(UPTIME_COLLECTION).get(VALUE)).getDouble("applicationUptime"),
+                ((Document)documents.get(UPTIME_COLLECTION).get(VALUE)).getDouble("uptime"),
                 RadarConverter.getServerStatus(
                         ((Document)documents.get(STATUS_COLLECTION).get(VALUE)).getString("serverStatus")),
                 ((Document)documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsCached"),

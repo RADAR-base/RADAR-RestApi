@@ -84,10 +84,7 @@ public class AccelerationFormat extends MongoSourceDataWrapper {
                                 z.getDouble(field)
                                         / getExpectedRecordCount(header.getTimeWindow()), 2));
             default:
-                return new Acceleration(
-                        x.get(field),
-                        y.get(field),
-                        z.get(field));
+                return new Acceleration(x.get(field), y.get(field), z.get(field));
         }
     }
 

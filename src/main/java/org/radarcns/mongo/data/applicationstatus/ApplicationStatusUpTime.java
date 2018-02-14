@@ -26,7 +26,7 @@ public class ApplicationStatusUpTime extends MongoApplicationStatusWrapper {
     //TODO take field names from RADAR MongoDb Connector
     @Override
     protected Application getApplication(Document doc, Application app) {
-        app.setUptime(doc.getDouble("applicationUptime"));
+        app.setUptime(doc.getDouble("uptime"));
 
         return app;
     }

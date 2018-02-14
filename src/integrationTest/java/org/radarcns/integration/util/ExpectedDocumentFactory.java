@@ -35,7 +35,6 @@ import static org.radarcns.mongo.util.MongoHelper.USER_ID;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -43,7 +42,6 @@ import java.util.Map;
 import org.bson.Document;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.mock.model.ExpectedValue;
-import org.radarcns.mongo.data.sourcedata.AccelerationFormat;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
@@ -123,13 +121,14 @@ public class ExpectedDocumentFactory {
             list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
                     expectedValue.getLastKey().getUserId(),
                     expectedValue.getLastKey().getSourceId(), new Date(timestamp), new Date(end),
-                    getDocument("batteryLevel", doubleValueCollector)));
+                    getDocumentFromDoubleValueCollector("batteryLevel", doubleValueCollector)));
         }
 
         return list;
     }
 
-    private Document getDocument(String name, DoubleValueCollector doubleValueCollector) {
+    private Document getDocumentFromDoubleValueCollector(String name,
+            DoubleValueCollector doubleValueCollector) {
         return new Document()
                 .append(NAME, name)
                 .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
@@ -137,8 +136,7 @@ public class ExpectedDocumentFactory {
                 .append(Stat.sum.getParam(), getStatValue(SUM, doubleValueCollector))
                 .append(Stat.count.getParam(), getStatValue(COUNT, doubleValueCollector))
                 .append(Stat.avg.getParam(), getStatValue(AVERAGE, doubleValueCollector))
-                .append(Stat.quartile.getParam(), extractQuartile((List<Double>) getStatValue(
-                        QUARTILES, doubleValueCollector)));
+                .append(Stat.quartile.getParam(), getStatValue(QUARTILES, doubleValueCollector));
     }
 
     public static Document buildKeyDocument(String projectName, String subjectId, String sourceId,
@@ -177,9 +175,15 @@ public class ExpectedDocumentFactory {
 
             List<Document> documents = new ArrayList<>();
 
-            documents.add(getDocument("x", doubleArrayCollector.getCollectors().get(0)));
-            documents.add(getDocument("y", doubleArrayCollector.getCollectors().get(1)));
-            documents.add(getDocument("z", doubleArrayCollector.getCollectors().get(2)));
+            documents.add(
+                    getDocumentFromDoubleValueCollector("x",
+                            doubleArrayCollector.getCollectors().get(0)));
+            documents.add(
+                    getDocumentFromDoubleValueCollector("y",
+                            doubleArrayCollector.getCollectors().get(1)));
+            documents.add(
+                    getDocumentFromDoubleValueCollector("z",
+                            doubleArrayCollector.getCollectors().get(2)));
 
             list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
                     expectedValue.getLastKey().getUserId(),
@@ -188,13 +192,6 @@ public class ExpectedDocumentFactory {
         }
 
         return list;
-    }
-
-    private static List<Document> extractQuartile(List<Double> component) {
-        return Arrays.asList(
-                new Document("25", component.get(0)),
-                new Document("50", component.get(1)),
-                new Document("75", component.get(2)));
     }
 
     /**

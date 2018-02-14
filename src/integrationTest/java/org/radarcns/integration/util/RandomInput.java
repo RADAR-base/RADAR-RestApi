@@ -231,6 +231,7 @@ public class RandomInput {
     /**
      * Generates and returns a ApplicationStatus using the given inputs.
      **/
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public static Map<String, Document> getRandomApplicationStatus(String project, String user,
             String source, String ipAddress, ServerStatus serverStatus, Double uptime,
             int recordsCached, int recordsSent, int recordsUnsent, double timeStamp) {
