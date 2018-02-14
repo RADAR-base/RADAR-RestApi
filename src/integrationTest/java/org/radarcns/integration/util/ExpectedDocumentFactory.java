@@ -190,14 +190,6 @@ public class ExpectedDocumentFactory {
         return list;
     }
 
-    private Document extractAccelerationQuartile(List<List<Double>> statValue) {
-        Document quartile = new Document();
-        quartile.put(AccelerationFormat.X_LABEL, extractQuartile(statValue.get(0)));
-        quartile.put(AccelerationFormat.Y_LABEL, extractQuartile(statValue.get(1)));
-        quartile.put(AccelerationFormat.Z_LABEL, extractQuartile(statValue.get(2)));
-        return quartile;
-    }
-
     private static List<Document> extractQuartile(List<Double> component) {
         return Arrays.asList(
                 new Document("25", component.get(0)),
