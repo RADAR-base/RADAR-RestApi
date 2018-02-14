@@ -219,12 +219,13 @@ public class RandomInput {
         ServerStatus serverStatus = ServerStatus.values()[
                 ThreadLocalRandom.current().nextInt(0, ServerStatus.values().length)];
         Double uptime = ThreadLocalRandom.current().nextDouble();
+        Double timestamp = ThreadLocalRandom.current().nextDouble();
         int recordsCached = ThreadLocalRandom.current().nextInt();
         int recordsSent = ThreadLocalRandom.current().nextInt();
         int recordsUnsent = ThreadLocalRandom.current().nextInt();
 
         return getRandomApplicationStatus(project, user, source, ipAdress, serverStatus, uptime,
-                recordsCached, recordsSent, recordsUnsent);
+                recordsCached, recordsSent, recordsUnsent, timestamp);
     }
 
     /**
@@ -232,18 +233,18 @@ public class RandomInput {
      **/
     public static Map<String, Document> getRandomApplicationStatus(String project, String user,
             String source, String ipAddress, ServerStatus serverStatus, Double uptime,
-            int recordsCached, int recordsSent, int recordsUnsent) {
+            int recordsCached, int recordsSent, int recordsUnsent, double timeStamp) {
         Document uptimeDoc = new Document()
-                .append("sourceType", source)
-                .append("applicationUptime", uptime);
+                .append("time", timeStamp)
+                .append("uptime", uptime);
 
         Document statusDoc = new Document()
-                .append("sourceType", source)
+                .append("time", timeStamp)
                 .append("clientIP", ipAddress)
                 .append("serverStatus", serverStatus.toString());
 
         Document recordsDoc = new Document()
-                .append("sourceType", source)
+                .append("time", timeStamp)
                 .append("recordsCached", recordsCached)
                 .append("recordsSent", recordsSent)
                 .append("recordsUnsent", recordsUnsent);
