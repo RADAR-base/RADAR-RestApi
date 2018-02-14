@@ -159,7 +159,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             DoubleArrayCollector dac = (DoubleArrayCollector) expectedValue.getSeries().get(key);
 
             switch (sensor) {
-                case "ACCELEROMETER":
+                case "EMPATICA_E4_v1_ACCELEROMETER":
                     Object content;
 
                     if (statistic.name().equals(DescriptiveStatistic.QUARTILES.name())) {

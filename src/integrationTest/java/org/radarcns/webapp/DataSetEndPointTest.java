@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.AVERAGE;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.integration.util.RandomInput.DATASET;
 import static org.radarcns.integration.util.RandomInput.DOCUMENTS;
@@ -61,8 +62,9 @@ public class DataSetEndPointTest {
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
     private static final String REQUEST_PATH = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
-            + SOURCE_DATA_NAME + '/' + COUNT + '/' + TIME_WINDOW ;
+            + SOURCE_DATA_NAME + '/' + COUNT + '/' + TIME_WINDOW;
     private static final String COLLECTION_NAME = "android_empatica_e4_battery_level_output";
+    private static final String ACCELERATION_COLLECTION = "android_empatica_e4_acceleration_output";
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
@@ -129,6 +131,37 @@ public class DataSetEndPointTest {
     }
 
     @Test
+    public void getAllRecordsForAcceleration()
+            throws IOException, ReflectiveOperationException, URISyntaxException {
+        MongoClient client = Utility.getMongoClient();
+
+        MongoCollection<Document> collection = MongoHelper
+                .getCollection(client, ACCELERATION_COLLECTION);
+        String sourceDataName = "EMPATICA_E4_v1_ACCELEROMETER";
+        Map<String, Object> docs = RandomInput
+                .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
+                        SOURCE_TYPE, sourceDataName, AVERAGE, TIME_WINDOW, SAMPLES, false);
+
+        collection.insertMany((List<Document>) docs.get(DOCUMENTS));
+
+        Dataset expected = (Dataset) docs.get(DATASET);
+        String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
+                + sourceDataName + '/' + AVERAGE + '/' + TIME_WINDOW;
+
+        Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
+        assertTrue(actual.isSuccessful());
+        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
+        Dataset dataset = reader.readValue(actual.body().byteStream());
+        assertNotNull(dataset);
+        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
+        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
+        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
+        assertEquals(expected.getDataset().size(), dataset.dataset.size());
+
+        dropAndClose(client);
+    }
+
+    @Test
     public void getAllDataTestEmpty() throws IOException, ReflectiveOperationException {
         Dataset dataset = apiClient.requestJson(REQUEST_PATH, Dataset.class, Status.OK);
         assertThat(dataset.getDataset(), is(empty()));
@@ -143,8 +176,9 @@ public class DataSetEndPointTest {
      * Drops all used collections to bring the database back to the initial state, and close the
      * database connection.
      **/
-    public void dropAndClose(MongoClient client) {
+    private void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, COLLECTION_NAME);
+        Utility.dropCollection(client, ACCELERATION_COLLECTION);
         client.close();
     }
 

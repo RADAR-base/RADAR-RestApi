@@ -81,15 +81,15 @@ public class RandomInput {
         documents = expectedDocumentFactory.produceExpectedData(instance);
     }
 
-    private static void randomArrayValue(String project, String user, String source, String
-            sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
-            boolean singleWindow) throws InstantiationException, IllegalAccessException {
+    private static void randomArrayValue(String project, String user, String source,
+            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            int samples, boolean singleWindow)
+            throws InstantiationException, IllegalAccessException {
 
         ExpectedArrayValue instance = new ExpectedArrayValue();
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        ObservationKey key = new ObservationKey(null, user, source);
+        ObservationKey key = new ObservationKey(project, user, source);
 
         long start = System.currentTimeMillis();
 
@@ -97,9 +97,10 @@ public class RandomInput {
             instance.add(key, start, random.nextDouble(), random.nextDouble(), random.nextDouble());
 
             if (singleWindow) {
-                start += random.nextInt(1000, 12000);
+                start += 1;
             } else {
-                start += 1L;
+                start += TimeUnit.SECONDS.toMillis(
+                        ThreadLocalRandom.current().nextLong(1, 15));
             }
         }
 
@@ -114,11 +115,11 @@ public class RandomInput {
      * generated mocking the behaviour of the RADAR-CNS Platform.
      */
     public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user,
-            String source, String sourceType, String sensorType, DescriptiveStatistic stat,
+            String source, String sourceType, String sourceDataName, DescriptiveStatistic stat,
             TimeWindow timeWindow, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
-            return getBoth(project, user, source, sourceType, sensorType, stat,
+            return getBoth(project, user, source, sourceType, sourceDataName, stat,
                     timeWindow, samples, singleWindow);
         }
 
@@ -152,7 +153,7 @@ public class RandomInput {
             TimeWindow timeWindow, int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
         switch (sourceType) {
-            case "empatica_e4_v1":
+            case SUPPORTED_SOURCE_TYPE:
                 return getDocument(project, user, source, sourceType, sensorType, stat,
                         timeWindow, samples, singleWindow);
             default:
@@ -179,10 +180,11 @@ public class RandomInput {
     }
 
     private static Map<String, Object> getBoth(String project, String user, String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            String sourceType, String sourceDataName, DescriptiveStatistic stat,
+            TimeWindow timeWindow,
             int samples, boolean singleWindow)
             throws InstantiationException, IllegalAccessException {
-        nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
+        nextValue(project, user, source, sourceType, sourceDataName, stat, timeWindow, samples,
                 singleWindow);
 
         Map<String, Object> map = new HashMap<>();
@@ -192,15 +194,16 @@ public class RandomInput {
     }
 
     private static void nextValue(String project, String user, String source, String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
+            String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
             boolean singleWindow) throws IllegalAccessException, InstantiationException {
-        switch (sensorType) {
-            case "ACCELEROMETER":
-                randomArrayValue(project, user, source, sourceType, sensorType, stat, timeWindow,
+        switch (sourceDataName) {
+            case "EMPATICA_E4_v1_ACCELEROMETER":
+                randomArrayValue(project, user, source, sourceType, sourceDataName, stat,
+                        timeWindow,
                         samples, singleWindow);
                 break;
             default:
-                randomDoubleValue(project, user, source, sourceType, sensorType, stat,
+                randomDoubleValue(project, user, source, sourceType, sourceDataName, stat,
                         timeWindow, samples, singleWindow);
                 break;
         }
@@ -262,11 +265,12 @@ public class RandomInput {
             Document value) {
         return new Document().append(ID, "{"
                 + PROJECT_ID + ":" + projectName + ","
-                + USER_ID + ":" + subjectId+ ","
+                + USER_ID + ":" + subjectId + ","
                 + SOURCE_ID + ":" + sourceId + "}")
                 .append(KEY, buildKeyDocument(projectName, subjectId, sourceId))
                 .append(VALUE, value);
     }
+
     /**
      * Returns a String representing a random IP address.
      **/

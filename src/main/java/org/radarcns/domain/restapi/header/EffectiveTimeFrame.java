@@ -6,6 +6,7 @@ import org.radarcns.util.RadarConverter;
 
 public class EffectiveTimeFrame {
 
+    //TODO convert Dates to java.time classes
     @JsonProperty
     private Date startDateTime;
 
