@@ -16,6 +16,8 @@
 
 package org.radarcns.mongo.data.sourcedata;
 
+import static org.radarcns.mongo.util.MongoHelper.ASCENDING;
+import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
 import static org.radarcns.mongo.util.MongoHelper.END;
 import static org.radarcns.mongo.util.MongoHelper.KEY;
 import static org.radarcns.mongo.util.MongoHelper.START;
@@ -88,8 +90,8 @@ public abstract class MongoSourceDataWrapper {
     public Dataset getLatestRecord(String projectName, String subject, String source, Header
             header, Stat stat, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, END, -1, 1,
-                        collection);
+                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, END,
+                        DESCENDING, 1, collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                 cursor);
@@ -110,8 +112,8 @@ public abstract class MongoSourceDataWrapper {
     public Dataset getAllRecords(String projectName, String subject, String source, Header header,
             MongoHelper.Stat stat, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, START, 1,
-                        null, collection);
+                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, START,
+                        ASCENDING, null, collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                 cursor);
@@ -192,11 +194,14 @@ public abstract class MongoSourceDataWrapper {
         }
 
         cursor.close();
+        // reset EffectiveTimeFrame if it is not set
+        if(Long.MAX_VALUE == RadarConverter.getISO8601(header.getEffectiveTimeFrame()
+                .getStartDateTime())
+                .getTime()) {
+            EffectiveTimeFrame etf = new EffectiveTimeFrame(start, end);
 
-        EffectiveTimeFrame etf = new EffectiveTimeFrame(start, end);
-
-        header.setEffectiveTimeFrame(etf);
-
+            header.setEffectiveTimeFrame(etf);
+        }
         Dataset hrd = new Dataset(header, list);
 
         LOGGER.debug("Found {} value", list.size());

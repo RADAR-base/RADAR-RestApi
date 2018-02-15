@@ -22,7 +22,7 @@ public class Subject {
     private List<Source> sources;
 
     @JsonProperty
-    private Date lastSeen;
+    private String lastSeen;
 
     public Subject subjectId(String subjectId) {
         this.subjectId = subjectId;
@@ -80,12 +80,12 @@ public class Subject {
     }
 
 
-    public Subject lastSeen(Date lastSeen) {
+    public Subject lastSeen(String lastSeen) {
         this.lastSeen = lastSeen;
         return this;
     }
 
-    public Date getLastSeen() {
+    public String getLastSeen() {
         return lastSeen;
     }
 

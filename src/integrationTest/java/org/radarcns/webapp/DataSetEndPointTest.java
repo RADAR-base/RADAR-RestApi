@@ -202,6 +202,39 @@ public class DataSetEndPointTest {
     }
 
     @Test
+    public void getAllRecordsWithQuartilesInTimeRange()
+            throws IOException, ReflectiveOperationException, URISyntaxException {
+        MongoClient client = Utility.getMongoClient();
+
+        MongoCollection<Document> collection = MongoHelper
+                .getCollection(client, COLLECTION_NAME);
+        Map<String, Object> docs = RandomInput
+                .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
+                        SOURCE_TYPE, SOURCE_DATA_NAME, QUARTILES, TIME_WINDOW, SAMPLES, false);
+
+        collection.insertMany((List<Document>) docs.get(DOCUMENTS));
+
+        Dataset expected = (Dataset) docs.get(DATASET);
+        String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
+                + SOURCE_DATA_NAME + '/' + QUARTILES + '/' + TIME_WINDOW;
+
+        Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
+        assertTrue(actual.isSuccessful());
+        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
+        Dataset dataset = reader.readValue(actual.body().byteStream());
+        assertNotNull(dataset);
+        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
+        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
+        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
+        assertEquals(expected.getDataset().size(), dataset.dataset.size());
+        Map sample = (HashMap) dataset.getDataset().get(0).getSample();
+        assertEquals(expected.getDataset().get(0).getSample(),
+                new Quartiles((Double) sample.get("first"), (Double) sample.get("second"),
+                        (Double) sample.get("third")));
+        dropAndClose(client);
+    }
+
+    @Test
     public void getAllDataTestEmpty() throws IOException {
         Dataset dataset = apiClient.requestJson(REQUEST_PATH, Dataset.class, Status.OK);
         assertThat(dataset.getDataset(), is(empty()));

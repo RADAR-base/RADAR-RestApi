@@ -76,13 +76,13 @@ public class SourceMonitorService {
                     sourceType.getSourceStatisticsMonitorTopic());
         }
 
-        long timeStart = Long.MIN_VALUE;
-        long timeEnd = Long.MAX_VALUE;
+        long timeStart = Long.MAX_VALUE;
+        long timeEnd = Long.MIN_VALUE;
         if (cursor.hasNext()) {
             Document document = cursor.next();
             Document key = (Document) document.get(KEY);
-            timeStart = Math.max(timeStart , key.getDate(START).getTime());
-            timeEnd = Math.min(timeEnd, key.getDate(END).getTime());
+            timeStart = Math.min(timeStart , key.getDate(START).getTime());
+            timeEnd = Math.max(timeEnd, key.getDate(END).getTime());
         }
 
         cursor.close();

@@ -92,7 +92,7 @@ public class MongoHelper {
         BasicDBObject query = getByProjectSubjectSource(projectName, subjectId, sourceId)
                 .append(KEY.concat(".").concat(START), start)
                 .append(KEY.concat(".").concat(END), end);
-        FindIterable<Document> result = collection.find(query).sort(new BasicDBObject(START, 1));
+        FindIterable<Document> result = collection.find(query).sort(new BasicDBObject(START, ASCENDING));
 
         return result.iterator();
     }
