@@ -32,6 +32,7 @@ import java.util.Map;
 import org.bson.Document;
 import org.radarcns.config.Properties;
 import org.radarcns.domain.restapi.Application;
+import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
@@ -76,50 +77,6 @@ public class Utility {
         }
     }
 
-    /**
-     * Generates a Dataset using the input documents.
-     *
-     * @param docs list of Documents that has to be converted
-     * @param subjectId subject identifier
-     * @param sourceId sourceType identifier
-     * @param stat filed extracted from the document
-     * @param unit measurement unit useful to generate the dataset's header
-     * @param timeWindow time interval between two consecutive samples
-     * @param recordClass class used compute the Item
-     * @return a Dataset rep all required document
-     * @throws IllegalAccessException if the item class or its nullary constructor is not
-     * accessible
-     * @throws InstantiationException if item class cannot be instantiated
-     */
-    @SuppressWarnings("PMD.ExcessiveParameterList")
-    public static Dataset convertDocToDataset(List<Document> docs, String projectName, String
-            subjectId,
-            String sourceId, String sourceType, String sensorType, Stat stat, String unit,
-            TimeWindow timeWindow, Class<? extends SpecificRecord> recordClass)
-            throws IllegalAccessException, InstantiationException {
-        EffectiveTimeFrame eftHeader = new EffectiveTimeFrame(
-                RadarConverter.getISO8601(docs.get(0).getDate(START)),
-                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate(END)));
-
-        List<DataItem> itemList = new LinkedList<>();
-        for (Document doc : docs) {
-            SpecificRecord record = recordClass.newInstance();
-            switch (stat) {
-                case quartile:
-                    throw new UnsupportedOperationException("Not yet implemented");
-                default:
-                    record.put(record.getSchema().getField("value").pos(),
-                            doc.getDouble(stat.getParam()));
-                    break;
-            }
-            itemList.add(new DataItem(record,doc.getDate(START)));
-        }
-
-        Header header = new Header(projectName, subjectId, sourceId, sourceType, sensorType,
-                RadarConverter.getDescriptiveStatistic(stat), unit, timeWindow, eftHeader);
-
-        return new Dataset(header, itemList);
-    }
 
     /**
      * Converts Bson Document into an ApplicationConfig.
