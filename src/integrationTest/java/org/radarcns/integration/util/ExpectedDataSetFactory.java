@@ -47,7 +47,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param expectedValue mock data used to test
      * @param subjectId subject identifier
-     * @param sourceId sourceType identifier
+     * @param sourceId source identifier
      * @param sourceType sourceType that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
@@ -57,7 +57,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      */
     public Dataset getDataset(ExpectedValue expectedValue, String projectName, String subjectId,
             String sourceId, String sourceType, String sensorType, DescriptiveStatistic statistic,
-            TimeWindow timeWindow) throws InstantiationException, IllegalAccessException {
+            TimeWindow timeWindow) {
 
         Header header = getHeader(expectedValue, projectName, subjectId, sourceId, sourceType,
                 sensorType, statistic, timeWindow);
@@ -70,7 +70,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param expectedValue mock data used to test
      * @param subjectId subject identifier
-     * @param sourceId sourceType identifier
+     * @param sourceId source identifier
      * @param sourceType sourceType that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
@@ -123,8 +123,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @return {@code List<Item>} for a {@link Dataset}
      * @see DataItem
      **/
-    public List<DataItem> getItem(ExpectedValue<?> expectedValue, Header header)
-            throws IllegalAccessException, InstantiationException {
+    public List<DataItem> getItem(ExpectedValue<?> expectedValue, Header header) {
 
         if (expectedValue.getSeries().isEmpty()) {
             return Collections.emptyList();
@@ -201,8 +200,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @return {@code List<Item>} for a data set represented as {@code Double}.
      **/
     private List<DataItem> getSingletonItems(ExpectedValue expectedValue,
-            Collection<Long> keys, DescriptiveStatistic statistic)
-            throws InstantiationException, IllegalAccessException {
+            Collection<Long> keys, DescriptiveStatistic statistic) {
         List<DataItem> items = new LinkedList<>();
 
         for (Long key : keys) {
@@ -217,8 +215,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
 
-    private <T> T getContent(Object object, DescriptiveStatistic stat)
-            throws IllegalAccessException, InstantiationException {
+    private <T> T getContent(Object object, DescriptiveStatistic stat) {
         T content;
 
         switch (stat) {

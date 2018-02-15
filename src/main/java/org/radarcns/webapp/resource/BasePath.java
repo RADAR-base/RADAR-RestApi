@@ -21,13 +21,9 @@ package org.radarcns.webapp.resource;
  */
 public interface BasePath {
 
-    String ANDROID = "android";
     String DATA = "data";
     String LATEST = "latest";
-    String SOURCE = "sourceType";
-    String SUBJECT = "subject";
     String APPLICATION_STATUS = "application-status";
-    String STATE = "state";
     String PROJECTS = "projects";
     String SUBJECTS = "subjects";
     String SOURCES = "sources";

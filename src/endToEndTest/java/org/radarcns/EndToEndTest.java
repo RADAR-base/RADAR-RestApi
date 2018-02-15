@@ -80,7 +80,8 @@ public class EndToEndTest {
 
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
-    private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
+    private static final ExpectedDataSetFactory expectedDataSetFactory =
+            new ExpectedDataSetFactory();
 
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
 
@@ -115,11 +116,11 @@ public class EndToEndTest {
 
     @SuppressWarnings("ConstantConditions")
     @Rule
-    public ApiClient apiClient = new ApiClient(pipelineConfig.getRestApi());
+    public final ApiClient apiClient = new ApiClient(pipelineConfig.getRestApi());
 
     @SuppressWarnings("ConstantConditions")
     @Rule
-    public ApiClient frontendClient = new ApiClient(pipelineConfig.getFrontend());
+    public final ApiClient frontendClient = new ApiClient(pipelineConfig.getFrontend());
 
     /**
      * Test initialisation. It loads the config file and waits that the infrastructure is ready to
@@ -267,22 +268,22 @@ public class EndToEndTest {
                     Double sample = (Double) item.getSample();
                     item.setSample(RadarConverter.roundDouble(
                             sample / RadarConverter.getExpectedMessages(
-                                    updatedHeader.getTimeWindow(), null), 2));
+                                    updatedHeader.getTimeWindow(), 1), 2));
                 } else if (item.getSample() instanceof Acceleration) {
                     Acceleration sample = (Acceleration) item.getSample();
                     item.setSample(new Acceleration(
                             RadarConverter.roundDouble(
                                     (Double) sample.getX() / RadarConverter
                                             .getExpectedMessages(updatedHeader.getTimeWindow(),
-                                                    null), 2),
+                                                    1), 2),
                             RadarConverter.roundDouble(
                                     (Double) sample.getY() / RadarConverter
                                             .getExpectedMessages(updatedHeader.getTimeWindow(),
-                                                    null), 2),
+                                                    1), 2),
                             RadarConverter.roundDouble(
                                     (Double) sample.getZ() / RadarConverter
                                             .getExpectedMessages(updatedHeader.getTimeWindow(),
-                                                    null), 2)));
+                                                    1), 2)));
                 } else {
                     throw new IllegalArgumentException(
                             item.getSample().getClass().getCanonicalName()

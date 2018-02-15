@@ -2,7 +2,6 @@ package org.radarcns.auth;
 
 import static org.radarcns.auth.PermissionFilter.abortWithForbidden;
 
-import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
@@ -20,7 +19,7 @@ public class PermissionOnProjectFilter implements ContainerRequestFilter {
     private ResourceInfo resourceInfo;
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         NeedsPermissionOnProject annotation = resourceInfo.getResourceMethod()
                 .getAnnotation(NeedsPermissionOnProject.class);
         Permission permission = new Permission(annotation.entity(), annotation.operation());

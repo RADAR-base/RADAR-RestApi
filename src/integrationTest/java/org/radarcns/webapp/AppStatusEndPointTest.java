@@ -25,6 +25,7 @@ import static org.radarcns.webapp.resource.BasePath.APPLICATION_STATUS;
 
 import com.mongodb.MongoClient;
 import java.io.IOException;
+import java.util.List;
 import java.net.URISyntaxException;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
@@ -79,7 +80,7 @@ public class AppStatusEndPointTest {
     }
 
     @After
-    public void dropAndClose() throws URISyntaxException {
+    public void dropAndClose() {
         dropAndClose(Utility.getMongoClient());
     }
 

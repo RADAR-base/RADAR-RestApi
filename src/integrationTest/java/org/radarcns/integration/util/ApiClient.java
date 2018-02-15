@@ -93,7 +93,7 @@ public class ApiClient extends ExternalResource {
     }
 
     @Override
-    protected void before() throws TokenException {
+    protected void before() {
         this.client = new RestClient(config, 120, new ManagedConnectionPool());
     }
 
@@ -160,7 +160,7 @@ public class ApiClient extends ExternalResource {
      */
     @Nonnull
     public <K> K requestJson(String relativePath, Class<K> avroClass,
-            Status... expectedResponse) throws IOException, ReflectiveOperationException {
+            Status... expectedResponse) throws IOException {
         try (Response response = request(relativePath, APPLICATION_JSON, expectedResponse)) {
             ResponseBody body = response.body();
             assertNotNull(body);

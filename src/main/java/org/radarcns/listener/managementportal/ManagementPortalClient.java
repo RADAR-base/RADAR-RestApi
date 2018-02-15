@@ -18,6 +18,7 @@ package org.radarcns.listener.managementportal;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.ws.rs.NotFoundException;
 import okhttp3.OkHttpClient;
@@ -37,9 +39,10 @@ import org.radarcns.config.Properties;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.managementportal.SubjectDTO;
+import org.radarcns.exception.TokenException;
 import org.radarcns.management.service.dto.ProjectDTO;
 import org.radarcns.management.service.dto.SourceDataDTO;
-import org.radarcns.oauth.OAuth2AccessTokenDetails;
+import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.CachedMap;
 import org.radarcns.util.RadarConverter;
@@ -53,7 +56,7 @@ public class ManagementPortalClient {
 
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalClient.class);
 
-    private static final ObjectReader SubjectDTO_LIST_READER = RadarConverter.readerForCollection(
+    private static final ObjectReader SUBJECT_LIST_READER = RadarConverter.readerForCollection(
             List.class, SubjectDTO.class);
     private static final ObjectReader PROJECT_LIST_READER = RadarConverter.readerForCollection(
             List.class, ProjectDTO.class);
@@ -69,30 +72,42 @@ public class ManagementPortalClient {
     private static final Duration CACHE_RETRY_DEFAULT = Duration.ofHours(1);
 
     private final OkHttpClient client;
+    private final OAuth2Client oauthClient;
 
     private final CachedMap<String, SubjectDTO> subjects;
     private final CachedMap<String, ProjectDTO> projects;
     private final CachedMap<String, SourceDTO> sources;
 
 
-    private String token;
-
     /**
      * Client to interact with the RADAR Management Portal.
      *
      * @param okHttpClient {@link OkHttpClient} to communicate to external web services
      * @throws IllegalStateException in case the object cannot be created
-     * @see ManagementPortalClientFactory
      */
-    public ManagementPortalClient(@Nonnull OkHttpClient okHttpClient) {
+    @Inject
+    public ManagementPortalClient(OkHttpClient okHttpClient) {
         this.client = okHttpClient;
 
         Duration invalidate = CACHE_INVALIDATE_DEFAULT;
         Duration retry = CACHE_RETRY_DEFAULT;
         ManagementPortalConfig mpConfig = Properties.getApiConfig().getManagementPortalConfig();
-        if (mpConfig != null) {
-            invalidate = parseDuration(mpConfig.getCacheInvalidateDuration(), invalidate);
-            retry = parseDuration(mpConfig.getCacheRetryDuration(), retry);
+
+        if (mpConfig == null) {
+            throw new IllegalStateException("ManagementPortal configuration not set");
+        }
+
+        invalidate = parseDuration(mpConfig.getCacheInvalidateDuration(), invalidate);
+        retry = parseDuration(mpConfig.getCacheRetryDuration(), retry);
+
+        try {
+            oauthClient = new OAuth2Client.Builder()
+                    .endpoint(mpConfig.getManagementPortalUrl(), mpConfig.getTokenEndpoint())
+                    .credentials(mpConfig.getOauthClientId(), mpConfig.getOauthClientSecret())
+                    .httpClient(client)
+                    .build();
+        } catch (MalformedURLException ex) {
+            throw new IllegalStateException("Failed to construct MP URL", ex);
         }
 
         subjects = new CachedMap<>(this::retrieveSubjects, SubjectDTO::getLogin, invalidate,
@@ -116,12 +131,12 @@ public class ManagementPortalClient {
         return defaultValue;
     }
 
-    protected synchronized void updateToken(OAuth2AccessTokenDetails tokenDetails) {
-        this.token = tokenDetails.getAccessToken();
-    }
-
-    private synchronized String getToken() {
-        return this.token;
+    private String getToken() throws IOException {
+        try {
+            return oauthClient.getValidToken(Duration.ofSeconds(30)).getAccessToken();
+        } catch (TokenException ex) {
+            throw new IOException(ex);
+        }
     }
 
     /**
@@ -143,15 +158,15 @@ public class ManagementPortalClient {
     private List<SubjectDTO> retrieveSubjects() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL url = new URL(config.getManagementPortalUrl(), config.getSubjectEndpoint());
-        Request getAllSubjectDTOsRequest = this.buildGetRequest(url);
-        try (Response response = this.client.newCall(getAllSubjectDTOsRequest).execute()) {
+        Request getAllSubjectsRequest = this.buildGetRequest(url);
+        try (Response response = this.client.newCall(getAllSubjectsRequest).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to retrieve all SubjectDTOs: " + responseBody);
             }
-            List<SubjectDTO> allSubjectDTOs = SubjectDTO_LIST_READER.readValue(responseBody);
+            List<SubjectDTO> allSubjects = SUBJECT_LIST_READER.readValue(responseBody);
             logger.info("Retrieved SubjectDTOs from MP.");
-            return allSubjectDTOs;
+            return allSubjects;
         }
     }
 
@@ -159,17 +174,17 @@ public class ManagementPortalClient {
      * Retrieves a {@link SubjectDTO} from the already computed list of SubjectDTOs using {@link
      * ArrayList} of {@link SubjectDTO} entity.
      *
-     * @param SubjectDTOLogin {@link String} that has to be searched.
+     * @param subjectLogin {@link String} that has to be searched.
      * @return {@link SubjectDTO} if a SubjectDTO is found
      * @throws IOException if the SubjectDTOs cannot be refreshed
      * @throws NotFoundException if the SubjectDTO is not found
      */
-    public SubjectDTO getSubject(@Nonnull String SubjectDTOLogin)
+    public SubjectDTO getSubject(@Nonnull String subjectLogin)
             throws IOException, NotFoundException {
         try {
-            return subjects.get(SubjectDTOLogin);
+            return subjects.get(subjectLogin);
         } catch (NoSuchElementException ex) {
-            throw new NotFoundException("SubjectDTO " + SubjectDTOLogin + " not found.");
+            throw new NotFoundException("SubjectDTO " + subjectLogin + " not found.");
         }
     }
 
@@ -177,16 +192,16 @@ public class ManagementPortalClient {
      * Checks whether given SubjectDTO is part of given project.
      *
      * @param projectName project that should contain the SubjectDTO.
-     * @param SubjectDTOLogin login name that has to be searched.
+     * @param subjectLogin login name that has to be searched.
      * @throws IOException if the list of SubjectDTOs cannot be refreshed.
      * @throws NotFoundException if the SubjectDTO is not found in given project.
      */
-    public void checkSubjectInProject(@Nonnull String projectName, @Nonnull String SubjectDTOLogin)
+    public void checkSubjectInProject(@Nonnull String projectName, @Nonnull String subjectLogin)
             throws IOException, NotFoundException {
-        SubjectDTO SubjectDTO = getSubject(SubjectDTOLogin);
-        if (!projectName.equals(SubjectDTO.getProject().getProjectName())) {
+        SubjectDTO subject = getSubject(subjectLogin);
+        if (!projectName.equals(subject.getProject().getProjectName())) {
             throw new NotFoundException(
-                    "SubjectDTO " + SubjectDTOLogin + " is not part of project " + projectName
+                    "SubjectDTO " + subjectLogin + " is not part of project " + projectName
                             + ".");
         }
     }
@@ -234,17 +249,17 @@ public class ManagementPortalClient {
      */
     private List<ProjectDTO> retrieveProjects() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL getAllProjectDTOsUrl = new URL(config.getManagementPortalUrl(),
+        URL getAllProjectsUrl = new URL(config.getManagementPortalUrl(),
                 config.getProjectEndpoint());
-        Request getAllProjectDTOs = this.buildGetRequest(getAllProjectDTOsUrl);
-        try (Response response = this.client.newCall(getAllProjectDTOs).execute()) {
+        Request getAllProjects = this.buildGetRequest(getAllProjectsUrl);
+        try (Response response = this.client.newCall(getAllProjects).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to retrieve all SubjectDTOs: " + responseBody);
             }
-            List<ProjectDTO> allProjectDTOs = PROJECT_LIST_READER.readValue(responseBody);
+            List<ProjectDTO> allProjects = PROJECT_LIST_READER.readValue(responseBody);
             logger.info("Retrieved ProjectDTOs from MP");
-            return allProjectDTOs;
+            return allProjects;
         }
     }
 
@@ -295,17 +310,17 @@ public class ManagementPortalClient {
      */
     public List<SourceDataDTO> retrieveSourceData() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL getAllSourceDTOTypesUrl = new URL(config.getManagementPortalUrl(),
+        URL getAllSourceTypesUrl = new URL(config.getManagementPortalUrl(),
                 config.getSourceDataEndpoint());
-        Request getAllSourceDTOTypes = this.buildGetRequest(getAllSourceDTOTypesUrl);
-        try (Response response = this.client.newCall(getAllSourceDTOTypes).execute()) {
+        Request getAllSourceTypes = this.buildGetRequest(getAllSourceTypesUrl);
+        try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to retrieve all sourceType-data: " + responseBody);
             }
-            List<SourceDataDTO> allSourceDTOData = SOURCE_DATA_LIST_READER.readValue(responseBody);
+            List<SourceDataDTO> allSourceData = SOURCE_DATA_LIST_READER.readValue(responseBody);
             logger.info("Retrieved SourceDTOTypes from MP");
-            return allSourceDTOData;
+            return allSourceData;
         }
     }
 
@@ -327,8 +342,8 @@ public class ManagementPortalClient {
     private List<SourceDTO> retrieveSources() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL url = new URL(config.getManagementPortalUrl(), config.getSourceEndpoint());
-        Request getAllSourceDTOsRequest = this.buildGetRequest(url);
-        try (Response response = this.client.newCall(getAllSourceDTOsRequest).execute()) {
+        Request getAllSourcesRequest = this.buildGetRequest(url);
+        try (Response response = this.client.newCall(getAllSourcesRequest).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
                 throw new IOException("Failed to retrieve all sources: " + responseBody);
@@ -356,7 +371,7 @@ public class ManagementPortalClient {
         }
     }
 
-    private Request buildGetRequest(URL url) {
+    private Request buildGetRequest(URL url) throws IOException {
         return new Request.Builder()
                 .addHeader("Accept", "application/json")
                 .addHeader("Authorization", "Bearer " + getToken())

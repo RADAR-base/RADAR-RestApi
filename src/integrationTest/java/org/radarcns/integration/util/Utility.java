@@ -26,26 +26,18 @@ import static org.radarcns.mongo.util.MongoHelper.VALUE;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.apache.avro.specific.SpecificRecord;
 import org.bson.Document;
 import org.radarcns.config.Properties;
 import org.radarcns.domain.restapi.Application;
-import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
-import org.radarcns.listener.MongoFactory;
 import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
 
 public class Utility {
@@ -55,25 +47,9 @@ public class Utility {
      */
     public static MongoClient getMongoClient() {
         MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();
-        MongoClient client = new MongoClient(Properties.getApiConfig().getMongoDbHosts(),
+
+        return new MongoClient(Properties.getApiConfig().getMongoDbHosts(),
                 credentials, MongoClientOptions.builder().build());
-        if (!MongoFactory.checkMongoConnection(client)) {
-            throw new IllegalStateException("MongoDB connection invalid for hosts "
-                    + Properties.getApiConfig().getMongoDbHosts() + " and credentials "
-                    + Properties.getApiConfig().getMongoDbCredentials());
-        }
-
-        return client;
-    }
-
-    /**
-     * Drop mongo collection called name.
-     *
-     * @param client mongoDB client
-     * @param name collection name that has to be dropped
-     */
-    public static void dropCollection(MongoClient client, String name) {
-        MongoHelper.getCollection(client, name).drop();
     }
 
     /**
@@ -82,7 +58,7 @@ public class Utility {
      * @param client mongoDB client
      * @param names collection names that have to be dropped
      */
-    public static void dropCollection(MongoClient client, List<String> names) {
+    public static void dropCollection(MongoClient client, String... names) {
         for (String tmp : names) {
             MongoHelper.getCollection(client, tmp).drop();
         }
@@ -163,48 +139,6 @@ public class Utility {
                 ((Document)documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsSent"),
                 ((Document)documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsUnsent")
         );
-    }
-
-    /**
-     * Converts add data in an InputStream to a String.
-     *
-     * @param in inputstream
-     * @return a String representing the file content
-     */
-    public static String readAll(InputStream in) throws IOException {
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = in.read(buffer)) != -1) {
-            result.write(buffer, 0, length);
-        }
-        return result.toString("UTF-8");
-    }
-
-    /**
-     * Computes the {@link EffectiveTimeFrame} related to the {@code List<Document>}. {@code start}
-     * {@code end} can be used to update an exiting {@link EffectiveTimeFrame} using the given
-     * {@code List<Document>}.
-     *
-     * @param start time window start time
-     * @param end time window end time
-     * @param docs list of mock documents that has to be analysed to compute the {@link
-     * EffectiveTimeFrame}
-     * @return {@link EffectiveTimeFrame} related to the {@code List<Document>}
-     */
-    public static EffectiveTimeFrame getExpectedTimeFrame(long start, long end,
-            List<Document> docs) {
-        long expectedStart = start;
-        long expectedEnd = end;
-
-        for (Document doc : docs) {
-            expectedStart = Math.min(expectedStart, doc.getDate(START).getTime());
-            expectedEnd = Math.max(expectedEnd, doc.getDate(END).getTime());
-        }
-
-        return new EffectiveTimeFrame(
-                RadarConverter.getISO8601(expectedStart),
-                RadarConverter.getISO8601(expectedEnd));
     }
 
     /**

@@ -49,9 +49,9 @@ public class SourceMonitorServiceDbTest {
     private static final String SOURCETYPE_CATALOGUE_VERSION = "v1";
     private static final String MONITOR_STATISTICS_TOPIC = "Empatica_E4_statistics";
 
-    private static int WINDOWS = 2;
+    private static final int WINDOWS = 2;
 
-    private static MongoClient mongoClient = Utility.getMongoClient();
+    private static final MongoClient mongoClient = Utility.getMongoClient();
 
     private static SourceTypeDTO sourceType;
 
@@ -63,7 +63,7 @@ public class SourceMonitorServiceDbTest {
     @Before
     public void setUp() {
         sourceType = new SourceTypeDTO();
-        sourceType.setId(1l);
+        sourceType.setId(1L);
         sourceType.setProducer(SOURCETYPE_PRODUCER);
         sourceType.setCanRegisterDynamically(false);
         sourceType.setModel(SOURCETYPE_MODEL);

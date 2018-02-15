@@ -108,7 +108,7 @@ public class SourceEndPoint {
     public Source getLastComputedSourceStatusJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
-            @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
+            @Alphanumeric @PathParam(SOURCE_ID) String sourceId) {
 
         // TODO implement source-summary calculation which includes the compliance
         return new Source();

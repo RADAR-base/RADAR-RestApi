@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
@@ -29,8 +28,7 @@ public class ProjectEndPointTest {
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
     @Test
-    public void getAllProjectsStatusTest200()
-            throws IOException, URISyntaxException {
+    public void getAllProjectsStatusTest200() throws IOException {
 
         Response actual = apiClient.request(BasePath.PROJECTS, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
@@ -42,8 +40,7 @@ public class ProjectEndPointTest {
     }
 
     @Test
-    public void getProjectByProjectNameStatusTest200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getProjectByProjectNameStatusTest200() throws IOException {
 
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME, APPLICATION_JSON,
@@ -56,8 +53,7 @@ public class ProjectEndPointTest {
     }
 
     @Test
-    public void getProjectByUnavailableNameStatusTest404()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getProjectByUnavailableNameStatusTest404() throws IOException {
 
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + "SOMETHING", APPLICATION_JSON,

@@ -19,11 +19,8 @@ package org.radarcns.catalog;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.ws.rs.NotFoundException;
@@ -42,9 +39,9 @@ public class SourceCatalog {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceCatalog.class);
 
-    private CachedMap<SourceTypeIdentifier, SourceTypeDTO> sourceTypes;
+    private final CachedMap<SourceTypeIdentifier, SourceTypeDTO> sourceTypes;
 
-    private CachedMap<String, SourceDataDTO> sourceData;
+    private final CachedMap<String, SourceDataDTO> sourceData;
 
     private static final Duration CACHE_INVALIDATE_DEFAULT = Duration.ofMinutes(1);
 
@@ -100,16 +97,6 @@ public class SourceCatalog {
 
 
     /**
-     * Retrieves all {@link SourceDataDTO} from Management Portal using {@link ServletContext}
-     * entity.
-     *
-     * @return {@link ArrayList} of {@link SourceDataDTO} retrieved from the Management Portal
-     */
-    public List<SourceDataDTO> getSourceData() throws IOException {
-        return new ArrayList<>(sourceData.get().values());
-    }
-
-    /**
      * Retrieves a {@link SourceDataDTO} from the Management Portal using {@link ServletContext}
      * entity.
      *
@@ -128,25 +115,4 @@ public class SourceCatalog {
         }
         return result;
     }
-
-    /**
-     * Returns the supported sourceType type.
-     *
-     * @return a set containing all supported sourceType
-     */
-    public Set<String> getSupportedSourceTypes() throws IOException {
-        return sourceTypes.get().keySet().stream().map(SourceTypeIdentifier::toString).collect(
-                Collectors.toSet());
-    }
-
-    /**
-     * Returns the supported sensor set.
-     *
-     * @return a set containing all supported sourceType
-     */
-    public Set<SourceDataDTO> getSupportedSensor() throws IOException {
-        return new HashSet<>(sourceData.get().values());
-    }
-
-
 }

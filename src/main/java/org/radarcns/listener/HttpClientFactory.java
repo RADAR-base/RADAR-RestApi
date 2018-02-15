@@ -2,26 +2,16 @@ package org.radarcns.listener;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.core.Context;
 import okhttp3.OkHttpClient;
-import org.glassfish.hk2.api.Factory;
-import org.glassfish.jersey.server.CloseableService;
+import org.glassfish.jersey.internal.inject.DisposableSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpClientFactory implements Factory<OkHttpClient> {
-
+public class HttpClientFactory implements DisposableSupplier<OkHttpClient> {
     private static final Logger logger = LoggerFactory.getLogger(HttpClientFactory.class);
 
-    /**
-     * Disposes the client after use.
-     */
-    @Context
-    @SuppressWarnings("PMD.UnusedPrivateField")
-    private CloseableService closeableService;
-
     @Override
-    public OkHttpClient provide() {
+    public OkHttpClient get() {
         return new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
@@ -36,10 +26,9 @@ public class HttpClientFactory implements Factory<OkHttpClient> {
         executorService.shutdown();
         try {
             executorService.awaitTermination(3, TimeUnit.MINUTES);
-            logger.info("OKHTTP ExecutorService closed.");
+            logger.info("OkHttp ExecutorService closed.");
         } catch (InterruptedException e) {
             logger.warn("InterruptedException on destroy()", e);
         }
     }
-
 }

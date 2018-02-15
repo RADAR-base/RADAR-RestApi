@@ -66,19 +66,4 @@ public class ApplicationStatusMonitorService {
 
         return app;
     }
-
-    /**
-     * Returns all mongoDb collections used by this DAO.
-     *
-     * @return list of String
-     */
-    public List<String> getCollections() {
-        List<String> list = new LinkedList<>();
-
-        for (MongoApplicationStatusWrapper dataAccessObject : dataAccessObjects) {
-            list.add(dataAccessObject.getCollectionName());
-        }
-
-        return list;
-    }
 }

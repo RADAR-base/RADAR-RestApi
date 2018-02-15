@@ -143,37 +143,6 @@ public abstract class MongoSourceDataWrapper {
     }
 
     /**
-     * Counts the received messages within the time-window [start-end] for the couple subject
-     * sourceType.
-     *
-     * @param subject is the subjectID
-     * @param source is the sourceID
-     * @param start is time window start point in millisecond
-     * @param end is time window end point in millisecond
-     * @param collection is the mongoDb collection that has to be queried
-     * @return the number of received messages within the time-window [start-end].
-     */
-    public double countSamplesByUserSourceWindow(String subject, String source, Long start,
-            Long end, MongoCollection<Document> collection) {
-        double count = 0;
-        MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByUserSourceWindow(subject, source, start, end, collection);
-
-        if (!cursor.hasNext()) {
-            LOGGER.debug("Empty cursor");
-        }
-
-        while (cursor.hasNext()) {
-            Document doc = cursor.next();
-            count += extractCount(doc);
-        }
-
-        cursor.close();
-
-        return count;
-    }
-
-    /**
      * Builds the required {@link Dataset}. It adds the {@link EffectiveTimeFrame} to the given
      * {@link Header}.
      *

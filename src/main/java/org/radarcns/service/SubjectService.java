@@ -16,9 +16,9 @@ public class SubjectService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubjectService.class);
 
-    private ManagementPortalClient managementPortalClient;
+    private final ManagementPortalClient managementPortalClient;
 
-    private SourceService sourceService;
+    private final SourceService sourceService;
 
     /**
      * Default constructor. Injects all dependencies.
@@ -27,8 +27,8 @@ public class SubjectService {
      * @param sourceService instance
      */
     @Inject
-    public SubjectService(ManagementPortalClient managementPortalClient, SourceService
-            sourceService) {
+    public SubjectService(ManagementPortalClient managementPortalClient,
+            SourceService sourceService) {
         this.managementPortalClient = managementPortalClient;
         this.sourceService = sourceService;
     }

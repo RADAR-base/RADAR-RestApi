@@ -26,7 +26,7 @@ public enum DataFormat {
     ACCELERATION_FORMAT("AccelerationFormat"),
     DOUBLE_FORMAT("DoubleFormat");
 
-    private String format;
+    private final String format;
 
     DataFormat(String format) {
         this.format = format;

@@ -202,7 +202,7 @@ public class DataSetEndPointTest {
     }
 
     @Test
-    public void getAllDataTestEmpty() throws IOException, ReflectiveOperationException {
+    public void getAllDataTestEmpty() throws IOException {
         Dataset dataset = apiClient.requestJson(REQUEST_PATH, Dataset.class, Status.OK);
         assertThat(dataset.getDataset(), is(empty()));
     }

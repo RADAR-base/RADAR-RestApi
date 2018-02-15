@@ -63,8 +63,9 @@ public class SubjectEndPointTest {
 
 
     @Test
-    public void getSubjectsByProjectName200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getSubjectsByProjectName200() throws IOException {
+        insertMonitorStatistics();
+
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS,
                         APPLICATION_JSON, Status.OK);
@@ -87,9 +88,7 @@ public class SubjectEndPointTest {
         return buildDocument(PROJECT_NAME, SUBJECT_ID, SOURCE_ID, start, end , value);
     }
 
-    @Test
-    public void getSubjectsBySubjectIdAndProjectName200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    private void insertMonitorStatistics() {
         MongoClient mongoClient = Utility.getMongoClient();
         Date start = Date.from(Instant.now());
         Date end = Date.from(start.toInstant().plusSeconds(60));
@@ -99,6 +98,12 @@ public class SubjectEndPointTest {
         MongoCollection collection = MongoHelper
                 .getCollection(mongoClient, MONITOR_STATISTICS_TOPIC);
         collection.insertMany(Arrays.asList(doc, second));
+    }
+
+    @Test
+    public void getSubjectsBySubjectIdAndProjectName200() throws IOException {
+        insertMonitorStatistics();
+
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS + "/"
                         + SUBJECT_ID, APPLICATION_JSON, Status.OK);
@@ -121,7 +126,7 @@ public class SubjectEndPointTest {
     }
 
     @Test
-    public void getSubjectTest404() throws IOException, ReflectiveOperationException {
+    public void getSubjectTest404() throws IOException {
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS + "/"
                         + "OTHER", APPLICATION_JSON, Status.NOT_FOUND);

@@ -18,15 +18,12 @@ package org.radarcns.service;
 
 import com.mongodb.MongoClient;
 import java.io.IOException;
-import java.net.ConnectException;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import org.radarcns.catalog.SourceCatalog;
-import org.radarcns.domain.restapi.Source;
+import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
@@ -53,29 +50,25 @@ public class DataSetService {
      **/
     private final Map<String, MongoSourceDataWrapper> mongoSensorMap = new HashMap<>();
 
-    private SourceMonitorService sourceMonitorService;
+    private final SourceMonitorService sourceMonitorService;
 
-    private ManagementPortalClient managementPortalClient;
+    private final ManagementPortalClient managementPortalClient;
 
-    private SourceCatalog sourceCatalog;
+    private final SourceCatalog sourceCatalog;
 
-    private MongoClient mongoClient;
-
-    private SourceService sourceService;
+    private final MongoClient mongoClient;
 
     /**
      * Constructor.
      **/
     @Inject
     public DataSetService(SourceCatalog sourceCatalog, SourceMonitorService sourceMonitorService,
-            ManagementPortalClient managementPortalClient, MongoClient mongoClient,
-            SourceService sourceService)
+            ManagementPortalClient managementPortalClient, MongoClient mongoClient)
             throws IOException {
         this.sourceMonitorService = sourceMonitorService;
         this.managementPortalClient = managementPortalClient;
         this.sourceCatalog = sourceCatalog;
         this.mongoClient = mongoClient;
-        this.sourceService = sourceService;
         sourceCatalog.getSourceTypes().forEach(sourceType -> {
             Set<SourceDataDTO> sourceTypeConsumer = sourceType.getSourceData();
             sourceTypeConsumer.forEach(sourceData ->
@@ -102,16 +95,8 @@ public class DataSetService {
     public Dataset getLastReceivedSample(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
             throws IOException {
-        org.radarcns.domain.managementportal.SourceDTO source = managementPortalClient
-                .getSource(sourceId);
-        EffectiveTimeFrame effectiveTimeFrame = sourceMonitorService
-                .getEffectiveTimeFrame(projectName, subjectId, sourceId, sourceCatalog
-                        .getSourceType(source.getSourceType().getProducer(),
-                                source.getSourceType().getModel(),
-                                source.getSourceType().getCatalogVersion()));
         Header header = getHeader(projectName, subjectId, sourceId,
-                sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
-                source.getSourceTypeIdentifier().toString(), effectiveTimeFrame);
+                sourceDataName, stat, timeWindow);
 
         MongoSourceDataWrapper sourceDataWrapper = mongoSensorMap.get(sourceDataName);
 
@@ -136,8 +121,20 @@ public class DataSetService {
     public Dataset getAllDataItems(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
             throws IOException {
-        org.radarcns.domain.managementportal.SourceDTO source = managementPortalClient
-                .getSource(sourceId);
+        Header header = getHeader(projectName, subjectId, sourceId,
+                sourceDataName, stat, timeWindow);
+
+        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
+
+        return sensorDao.getAllRecords(projectName, subjectId, sourceId, header,
+                RadarConverter.getMongoStat(stat), MongoHelper.getCollection(mongoClient,
+                        sensorDao.getCollectionName(timeWindow)));
+    }
+
+    private Header getHeader(String projectName, String subjectId, String sourceId,
+            String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
+            throws IOException {
+        SourceDTO source = managementPortalClient.getSource(sourceId);
 
         EffectiveTimeFrame effectiveTimeFrame = sourceMonitorService
                 .getEffectiveTimeFrame(projectName, subjectId, sourceId, sourceCatalog
@@ -145,15 +142,9 @@ public class DataSetService {
                                 source.getSourceType().getModel(),
                                 source.getSourceType().getCatalogVersion()));
 
-        Header header = getHeader(projectName, subjectId, sourceId,
+        return getHeader(projectName, subjectId, sourceId,
                 sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
                 source.getSourceTypeIdentifier().toString(), effectiveTimeFrame);
-
-        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
-
-        return sensorDao.getAllRecords(projectName, subjectId, sourceId, header,
-                RadarConverter.getMongoStat(stat), MongoHelper.getCollection(mongoClient,
-                        sensorDao.getCollectionName(timeWindow)));
     }
 
     /**
@@ -175,8 +166,7 @@ public class DataSetService {
             TimeWindow timeWindow,
             Long start, Long end) throws IOException {
 
-        org.radarcns.domain.managementportal.SourceDTO source = managementPortalClient
-                .getSource(sourceId);
+        SourceDTO source = managementPortalClient.getSource(sourceId);
 
         EffectiveTimeFrame effectiveTimeFrame = new EffectiveTimeFrame(start, end);
 
@@ -193,73 +183,6 @@ public class DataSetService {
     }
 
     /**
-     * Counts the received messages within the time-window [start-end] for the couple subject
-     * sourceType.
-     *
-     * @param subject is the subjectID
-     * @param source is the sourceID
-     * @param start is time window start point in millisecond
-     * @param end is time window end point in millisecond
-     * @param sensorType is the required sensor type
-     * @param sourceType is the required sourceType type
-     * @return the number of received messages within the time-window [start-end].
-     */
-    public double count(String subject, String source, Long start,
-            Long end, String sensorType, String sourceType, MongoClient client)
-            throws ConnectException {
-        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sensorType);
-
-        return sensorDao.countSamplesByUserSourceWindow(subject, source, start, end,
-                MongoHelper.getCollection(client,
-                        sensorDao.getCollectionName(TimeWindow.TEN_SECOND)));
-    }
-
-    /**
-     * Returns {@link EffectiveTimeFrame} during which the
-     * {@link org.radarcns.domain.managementportal.SubjectDTO} have sent data.
-     *
-     * @param subject subject identifier
-     * @return {@link EffectiveTimeFrame} of the subject in relevant project.
-     * @throws ConnectException if the connection with MongoDb cannot be established
-     */
-    public EffectiveTimeFrame getEffectiveTimeFrame(String projectName, String subject)
-            throws IOException {
-        long start = Long.MAX_VALUE;
-        long end = Long.MIN_VALUE;
-
-        List<Source> sources = sourceService.getAllSourcesOfSubject(projectName, subject);
-
-        for (Source source : sources) {
-            start = Math.min(start, RadarConverter.getISO8601(source.getEffectiveTimeFrame()
-                    .getStartDateTime()).getTime());
-            end = Math.min(start, RadarConverter.getISO8601(source.getEffectiveTimeFrame()
-                    .getEndDateTime()).getTime());
-        }
-
-        return new EffectiveTimeFrame(RadarConverter.getISO8601(start),
-                RadarConverter.getISO8601(end));
-    }
-
-    /**
-     * Returns the singleton.
-     *
-     * @return the singleton {@code DataSetService} INSTANCE
-     */
-    public String getCollectionName(String sensorType, TimeWindow timeWindow) {
-        return mongoSensorMap.get(sensorType).getCollectionName(timeWindow);
-    }
-
-    /**
-     * Returns all supported {@code SensorType}s.
-     *
-     * @return collection of all {@code SensorType} for which a Data Access Object has been defined.
-     */
-    public Collection<String> getSupportedSensor() {
-        return mongoSensorMap.keySet();
-    }
-
-
-    /**
      * Returns a {@link Header} that can be used to constract a {@link Dataset}.
      *
      * @param subject is the subjectID
@@ -268,14 +191,11 @@ public class DataSetService {
      * @param stat {@link DescriptiveStatistic} stating the required statistical value
      * @param timeWindow time window is the time interval between two consecutive samples
      * @return {@link Header} related to the given inputs
-     * @throws ConnectException if the connection with MongoDb cannot be established
      * @see Dataset
      */
     private Header getHeader(String project, String subject, String source,
-            SourceDataDTO sourceData,
-            DescriptiveStatistic stat, TimeWindow timeWindow, String sourceType,
-            EffectiveTimeFrame effectiveTimeFrame) throws IOException {
-
+            SourceDataDTO sourceData, DescriptiveStatistic stat, TimeWindow timeWindow,
+            String sourceType, EffectiveTimeFrame effectiveTimeFrame) {
         return new Header(project, subject, source, sourceType, sourceData.getSourceDataType(),
                 stat, sourceData.getUnit(), timeWindow, effectiveTimeFrame);
     }
