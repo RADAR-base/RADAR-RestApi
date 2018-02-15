@@ -21,19 +21,12 @@ package org.radarcns.webapp.resource;
  */
 public interface BasePath {
 
-    String ANDROID = "android";
     String DATA = "data";
-    String GET_ALL_SOURCES = "getAllSources";
-    String GET_ALL_SUBJECTS = "getAllSubjects";
-    String GET_SUBJECT = "getSubject";
-    String REALTIME = "realTime";
-    String SPECIFICATION = "specification";
-    String SOURCE = "source";
-    String SUBJECT = "subject";
-    String STATUS = "status";
-    String STATE = "state";
+    String LATEST = "latest";
+    String APPLICATION_STATUS = "application-status";
     String PROJECTS = "projects";
     String SUBJECTS = "subjects";
+    String SOURCES = "sources";
     String SOURCE_TYPES = "source-types";
     String AVRO_BINARY = "avro/binary";
 

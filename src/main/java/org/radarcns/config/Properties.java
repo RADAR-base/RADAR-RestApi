@@ -18,7 +18,6 @@ package org.radarcns.config;
 
 import java.io.File;
 import java.io.IOException;
-import org.radarcns.config.catalog.DeviceCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,39 +26,41 @@ import org.slf4j.LoggerFactory;
  */
 public final class Properties {
 
-    /** Logger. **/
+    /**
+     * Logger.
+     **/
     private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
 
-    /** Path to the configuration file for AWS deploy. **/
-    private static final String PATH_FILE_AWS = "/usr/share/tomcat8/conf/";
+    /**
+     * Path to the configuration file for AWS deploy.
+     **/
+    private static final String PATH_FILE_AWS = "/usr/share/conf/radar/rest-api/";
 
-    /** Path to the configuration file for Docker image. **/
-    private static final String PATH_FILE_DOCKER = "/usr/local/tomcat/conf/radar/";
+    /**
+     * Path to the configuration file for Docker image.
+     **/
+    private static final String PATH_FILE_DOCKER = "/usr/local/conf/radar/rest-api/";
 
-    /** Placeholder alternative path for the config folder. **/
+    /**
+     * Placeholder alternative path for the config folder.
+     **/
     private static final String CONFIG_FOLDER = "CONFIG_FOLDER";
 
-    /** API Config file name. **/
+    /**
+     * API Config file name.
+     **/
     public static final String NAME_CONFIG_FILE = "radar.yml";
 
-    /** Device Catalog file name. **/
-    public static final String NAME_DEV_CATALOG_FILE = "device-catalog.yml";
-
-    /** Path where the config file is located. **/
-    private static String validPath;
-
-    /** Singleton. The default folder for config files is {@code PATH_FILE}. It can be
-     *      override setting the environment variable {@code CONFIG_FOLDER}. In case, no one of
-     *      those contain the expected file, the {@code ClassLoader} is used to load file from the
-     *      resources folder.
+    /**
+     * Singleton. The default folder for config files is {@code PATH_FILE}. It can be override
+     * setting the environment variable {@code CONFIG_FOLDER}. In case, no one of those contain the
+     * expected file, the {@code ClassLoader} is used to load file from the resources folder.
      **/
     private static final ApplicationConfig API_CONFIG_INSTANCE;
-    private static final DeviceCatalog DEVICE_CATALOG_INSTANCE;
 
     static {
         try {
             API_CONFIG_INSTANCE = loadApiConfig();
-            DEVICE_CATALOG_INSTANCE = loadDeviceCatalog();
         } catch (IOException exec) {
             LOGGER.error(exec.getMessage(), exec);
             throw new ExceptionInInitializerError(exec);
@@ -68,6 +69,7 @@ public final class Properties {
 
     /**
      * Gives access to the singleton API properties.
+     *
      * @return Properties
      */
     public static ApplicationConfig getApiConfig() {
@@ -75,18 +77,10 @@ public final class Properties {
     }
 
     /**
-     * Gives access to the singleton Device Catalog.
-     * @return Properties
-     */
-    public static DeviceCatalog getDeviceCatalog() {
-        return DEVICE_CATALOG_INSTANCE;
-    }
-
-    /**
      * Loads the API configuration file. First of all, the {@code CONFIG_FOLDER} env variable is
-     *      checked to verify if points a valid config file. If not, the default location for AWS
-     *      and Docker image deployment are checked. In the last instance, the config file is
-     *      searched inside the default projects resources folder.
+     * checked to verify if points a valid config file. If not, the default location for AWS and
+     * Docker image deployment are checked. In the last instance, the config file is searched inside
+     * the default projects resources folder.
      */
     private static ApplicationConfig loadApiConfig() throws IOException {
         String[] paths = new String[]{
@@ -104,7 +98,6 @@ public final class Properties {
         }
 
         String path = Properties.class.getClassLoader().getResource(NAME_CONFIG_FILE).getFile();
-        validPath = new File(path).getParent() + "/";
 
         LOGGER.info("Loading Config file located at : {}", path);
 
@@ -112,36 +105,16 @@ public final class Properties {
     }
 
     private static ApplicationConfig loadApiConfig(String path) throws IOException {
-        validPath = path;
         String filePath = path + NAME_CONFIG_FILE;
 
         if (fileExists(filePath)) {
             LOGGER.info("Loading Config file located at : {}", path);
             return new YamlConfigLoader().load(new File(filePath), ApplicationConfig.class);
         } else {
-            validPath = null;
             return null;
         }
     }
 
-    /**
-     * Loads the Device Catalog configuration file.
-     */
-    private static DeviceCatalog loadDeviceCatalog() throws IOException {
-        String path = API_CONFIG_INSTANCE.getDeviceCatalog();
-
-        if (! (new File(path).isAbsolute())) {
-            path = validPath + path;
-        }
-
-        if (!fileExists(path)) {
-            path = Properties.class.getClassLoader().getResource(NAME_DEV_CATALOG_FILE).getFile();
-        }
-
-        LOGGER.info("Loading Device Catalog file located at : {}", path);
-
-        return DeviceCatalog.load(new File(path));
-    }
 
     /**
      * Checks whether the give path points a file.

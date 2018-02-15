@@ -10,7 +10,7 @@ import javax.ws.rs.NameBinding;
 
 @NameBinding
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ METHOD, TYPE })
+@Target({METHOD, TYPE})
 public @interface Authenticated {
 
 }

@@ -24,18 +24,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.dataset.DataItem;
+import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.format.Acceleration;
+import org.radarcns.domain.restapi.format.Quartiles;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mock.model.ExpectedValue;
-import org.radarcns.restapi.data.Acceleration;
-import org.radarcns.restapi.data.DoubleSample;
-import org.radarcns.restapi.data.Quartiles;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.dataset.Item;
-import org.radarcns.restapi.header.DescriptiveStatistic;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
-import org.radarcns.restapi.header.Header;
-import org.radarcns.source.SourceCatalog;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;
@@ -51,19 +48,19 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param expectedValue mock data used to test
      * @param subjectId subject identifier
      * @param sourceId source identifier
-     * @param sourceType source that has to be simulated
+     * @param sourceType sourceType that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
      * @param timeWindow time interval between two consecutive samples
      * @return {@code Dataset} resulted by the simulation
      * @see Dataset
      */
-    public Dataset getDataset(ExpectedValue expectedValue, String subjectId, String sourceId,
-            String sourceType, String sensorType, DescriptiveStatistic statistic,
-            TimeWindow timeWindow) throws InstantiationException, IllegalAccessException {
+    public Dataset getDataset(ExpectedValue expectedValue, String projectName, String subjectId,
+            String sourceId, String sourceType, String sensorType, DescriptiveStatistic statistic,
+            TimeWindow timeWindow) {
 
-        Header header = getHeader(expectedValue, subjectId, sourceId, sourceType, sensorType,
-                statistic, timeWindow);
+        Header header = getHeader(expectedValue, projectName, subjectId, sourceId, sourceType,
+                sensorType, statistic, timeWindow);
 
         return new Dataset(header, getItem(expectedValue, header));
     }
@@ -74,23 +71,23 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param expectedValue mock data used to test
      * @param subjectId subject identifier
      * @param sourceId source identifier
-     * @param sourceType source that has to be simulated
+     * @param sourceType sourceType that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
      * @param timeWindow time interval between two consecutive samples
      * @return {@link Header} for a {@link Dataset}
      */
-    public Header getHeader(ExpectedValue expectedValue, String subjectId, String sourceId,
-            String sourceType, String sensorType, DescriptiveStatistic statistic,
+    public Header getHeader(ExpectedValue expectedValue, String projectName, String subjectId,
+            String sourceId, String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeWindow) {
-        return new Header(subjectId, sourceId, sourceType, sensorType, statistic,
-                SourceCatalog.getInstance().getDefinition(sourceType)
-                        .getMeasurementUnit(sensorType), timeWindow,
+        return new Header(projectName, subjectId, sourceId, sourceType, sensorType, statistic,
+                null, timeWindow,
                 getEffectiveTimeFrame(expectedValue));
     }
 
     /**
      * Get the effective interval for a value.
+     *
      * @return {@code EffectiveTimeFrame} for the simulated inteval.
      * @see EffectiveTimeFrame
      */
@@ -107,6 +104,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
     /**
      * Get the effective time frame for a single time stamp.
+     *
      * @param value timestamp.
      * @return {@code EffectiveTimeFrame} starting on value and ending {@link
      * ExpectedValue#DURATION} milliseconds after.
@@ -122,13 +120,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * It generates the {@code List<Item>} for the resulting {@link Dataset}.
      *
      * @param header {@link Header} used to provide data context
-
      * @return {@code List<Item>} for a {@link Dataset}
-     *
-     * @see Item
+     * @see DataItem
      **/
-    public List<Item> getItem(ExpectedValue<?> expectedValue, Header header)
-            throws IllegalAccessException, InstantiationException {
+    public List<DataItem> getItem(ExpectedValue<?> expectedValue, Header header) {
 
         if (expectedValue.getSeries().isEmpty()) {
             return Collections.emptyList();
@@ -139,12 +134,11 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
         if (singleExpectedValue instanceof DoubleArrayCollector) {
             return getArrayItems(expectedValue, keys, header.getDescriptiveStatistic(),
-                    header.getType());
+                    header.getSourceDataType());
         } else if (singleExpectedValue instanceof DoubleValueCollector) {
-            return getSingletonItems(expectedValue, keys, header.getDescriptiveStatistic(),
-                header.getType());
+            return getSingletonItems(expectedValue, keys, header.getDescriptiveStatistic());
         } else {
-            throw new IllegalArgumentException(header.getType() + " not supported yet");
+            throw new IllegalArgumentException(header.getSourceDataType() + " not supported yet");
         }
     }
 
@@ -155,10 +149,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param statistic function that has to be simulated
      * @param sensor @return {@code List<Item>} for a dataset
      */
-    private List<Item> getArrayItems(ExpectedValue expectedValue,
+    private List<DataItem> getArrayItems(ExpectedValue expectedValue,
             Collection<Long> keys, DescriptiveStatistic statistic,
             String sensor) {
-        List<Item> items = new LinkedList<>();
+        List<DataItem> items = new LinkedList<>();
 
         for (Long key : keys) {
             DoubleArrayCollector dac = (DoubleArrayCollector) expectedValue.getSeries().get(key);
@@ -177,7 +171,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                         content = new Acceleration(statValues.get(0), statValues.get(1),
                                 statValues.get(2));
                     }
-                    items.add(new Item(content, getEffectiveTimeFrame(key).getStartDateTime()));
+                    items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
                     break;
                 default:
                     throw new IllegalArgumentException(sensor + " is not a supported test case");
@@ -189,6 +183,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
     /**
      * Quartile object from a list of three doubles.
+     *
      * @param list of {@code Double} values representing a quartile.
      * @return the value that has to be stored within a {@code Dataset} {@code Item}
      * @see Quartiles
@@ -202,52 +197,36 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      *
      * @param keys {@code Collection} of timewindow initial time
      * @param statistic function that has to be simulated
-     * @param sensor @return {@code List<Item>} for a data set
-     *      represented as {@code Double}.
+     * @return {@code List<Item>} for a data set represented as {@code Double}.
      **/
-    private List<Item> getSingletonItems(ExpectedValue expectedValue,
-            Collection<Long> keys, DescriptiveStatistic statistic,
-            String sensor) throws InstantiationException, IllegalAccessException {
-        List<Item> items = new LinkedList<>();
+    private List<DataItem> getSingletonItems(ExpectedValue expectedValue,
+            Collection<Long> keys, DescriptiveStatistic statistic) {
+        List<DataItem> items = new LinkedList<>();
 
         for (Long key : keys) {
             DoubleValueCollector dac = (DoubleValueCollector) expectedValue.getSeries().get(key);
 
-            Object content = getContent(getStatValue(statistic, dac), statistic,
-                    getSensorClass(sensor));
+            Object content = getContent(getStatValue(statistic, dac), statistic);
 
-            items.add(new Item(content, getEffectiveTimeFrame(key).getStartDateTime()));
+            items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
         }
 
         return items;
     }
 
 
-    private <T extends SpecificRecord> T getContent(Object object, DescriptiveStatistic stat,
-            Class<T> sampleClass) throws IllegalAccessException, InstantiationException {
+    private <T> T getContent(Object object, DescriptiveStatistic stat) {
         T content;
 
         switch (stat) {
             case QUARTILES:
-                content = sampleClass.newInstance();
-                content.put(content.getSchema().getField("value").pos(),
-                        getQuartile((List<Double>) object));
+                content = (T) getQuartile((List<Double>) object);
                 break;
             default:
-                content = sampleClass.newInstance();
-                content.put(content.getSchema().getField("value").pos(), object);
+                content = (T) object;
                 break;
         }
 
         return content;
-    }
-
-    private Class getSensorClass(String sensor) {
-        switch (sensor) {
-            case "ACCELEROMETER":
-                return Acceleration.class;
-            default:
-                return DoubleSample.class;
-        }
     }
 }

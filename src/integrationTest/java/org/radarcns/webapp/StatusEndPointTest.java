@@ -32,6 +32,7 @@ import org.radarcns.status.hdfs.HdfsBinsDataTest;
 import org.radarcns.util.RadarConverter;
 
 public class StatusEndPointTest {
+
     @Rule
     public final ApiClient apiClient = new ApiClient(
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()

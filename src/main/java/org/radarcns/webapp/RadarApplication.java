@@ -5,9 +5,15 @@ import javax.inject.Singleton;
 import okhttp3.OkHttpClient;
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.listener.HttpClientFactory;
 import org.radarcns.listener.MongoFactory;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.service.ApplicationStatusMonitorService;
+import org.radarcns.service.DataSetService;
+import org.radarcns.service.SourceMonitorService;
+import org.radarcns.service.SourceService;
+import org.radarcns.service.SubjectService;
 import org.radarcns.webapp.filter.AuthenticationFilter;
 import org.radarcns.webapp.filter.AuthorizationFeature;
 
@@ -18,7 +24,9 @@ import org.radarcns.webapp.filter.AuthorizationFeature;
  */
 public class RadarApplication extends ResourceConfig {
 
-    /** Radar application configuration. */
+    /**
+     * Radar application configuration.
+     */
     public RadarApplication() {
         packages(
                 "io.swagger.v3.jaxrs2.integration.resources",
@@ -42,6 +50,30 @@ public class RadarApplication extends ResourceConfig {
 
                 bindFactory(MongoFactory.class)
                         .to(MongoClient.class)
+                        .in(Singleton.class);
+
+                bind(SourceCatalog.class)
+                        .to(SourceCatalog.class)
+                        .in(Singleton.class);
+
+                bind(SourceMonitorService.class)
+                        .to(SourceMonitorService.class)
+                        .in(Singleton.class);
+
+                bind(SubjectService.class)
+                        .to(SubjectService.class)
+                        .in(Singleton.class);
+
+                bind(SourceService.class)
+                        .to(SourceService.class)
+                        .in(Singleton.class);
+
+                bind(DataSetService.class)
+                        .to(DataSetService.class)
+                        .in(Singleton.class);
+
+                bind(ApplicationStatusMonitorService.class)
+                        .to(ApplicationStatusMonitorService.class)
                         .in(Singleton.class);
             }
         });

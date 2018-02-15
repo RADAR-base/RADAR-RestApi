@@ -20,11 +20,11 @@ package org.radarcns.webapp.resource;
  * Static class listing End Point parameter.
  */
 public interface Parameter {
+
     String END = "end";
-    String INTERVAL = "interval";
-    String SENSOR = "sensor";
+    String TIME_WINDOW = "timeWindow";
+    String SOURCE_DATA_NAME = "sourceDataName";
     String SOURCE_ID = "sourceId";
-    String SOURCE_TYPE = "sourceType";
     String START = "start";
     String STAT = "stat";
     String PROJECT_NAME = "projectName";

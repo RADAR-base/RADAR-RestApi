@@ -22,10 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Contains bins data from the HDFS converter.
- * This data is serializable with Jackson.
+ * Contains bins data from the HDFS converter. This data is serializable with Jackson.
  */
 public class HdfsBinsData {
+
     private static final Logger logger = LoggerFactory.getLogger(HdfsBinsData.class);
     private static final DateTimeFormatter HDFS_STATUS_TIME_FORMAT = DateTimeFormatter
             .ofPattern("yyyyMMdd_HH")
@@ -36,6 +36,7 @@ public class HdfsBinsData {
 
     /**
      * Parse the bins data from given path. Lines that cannot be parsed are logged.
+     *
      * @param path file path to read from.
      * @return data from bins.
      * @throws IOException if the file cannot be read.
@@ -68,7 +69,9 @@ public class HdfsBinsData {
         }
     }
 
-    /** Parses a single line in bins.csv and adds it to a topic map. */
+    /**
+     * Parses a single line in bins.csv and adds it to a topic map.
+     */
     private static void parseLine(String[] line, int lineNumber,
             Map<String, HdfsTopicStatistics> topics, Instant healthyCutoff) {
         Instant timestamp;
@@ -84,7 +87,7 @@ public class HdfsBinsData {
         long numRecords = Long.parseLong(line[3]);
         Status status = timestamp.isAfter(healthyCutoff) ? HEALTHY : UNHEALTHY;
 
-        HdfsSourceStatus source = new HdfsSourceStatus(sourceId, status, timestamp,1L, numRecords);
+        HdfsSourceStatus source = new HdfsSourceStatus(sourceId, status, timestamp, 1L, numRecords);
 
         topics.compute(topic, (k, list) -> {
             if (list == null) {
@@ -107,7 +110,9 @@ public class HdfsBinsData {
         });
     }
 
-    /** Constructor from parsed HDFS bins data. */
+    /**
+     * Constructor from parsed HDFS bins data.
+     */
     @JsonCreator
     public HdfsBinsData(@JsonProperty("topics") Map<String, HdfsTopicStatistics> topics) {
         this.topics = topics;

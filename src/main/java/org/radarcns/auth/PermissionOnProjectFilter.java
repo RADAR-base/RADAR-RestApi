@@ -2,7 +2,6 @@ package org.radarcns.auth;
 
 import static org.radarcns.auth.PermissionFilter.abortWithForbidden;
 
-import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
@@ -15,11 +14,12 @@ import org.radarcns.webapp.filter.AuthenticationFilter;
  * Check that the token has access to given project.
  */
 public class PermissionOnProjectFilter implements ContainerRequestFilter {
+
     @Context
     private ResourceInfo resourceInfo;
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         NeedsPermissionOnProject annotation = resourceInfo.getResourceMethod()
                 .getAnnotation(NeedsPermissionOnProject.class);
         Permission permission = new Permission(annotation.entity(), annotation.operation());

@@ -25,65 +25,89 @@ import javax.annotation.Nonnull;
  * <p>Java class that defines the configuration required by the web app to handle authentication and
  * authorisation against Management Portal and REDCap instances.</p>
  *
- * <p>Current implementation support a single Management Portal instance since the current
- * RADAR-CNS Platform Architecture is designed with a centralised Management Portal. In order
- * to support multiple Management Portal instances, the following variables<ul>
- *      <li>{@code oauthClientId}</li>
- *      <li>{@code oauthClientSecret}</li>
- *      <li>{@code managementPortalUrl}</li>
- *      <li>{@code tokenEndpoint}</li>
- *      <li>{@code projectEndpoint}</li>
- *      <li>{@code subjectEndpoint}</li>
- * </ul>
+ * <p>Current implementation support a single Management Portal instance since the current RADAR-CNS
+ * Platform Architecture is designed with a centralised Management Portal. In order to support
+ * multiple Management Portal instances, the following variables<ul> <li>{@code oauthClientId}</li>
+ * <li>{@code oauthClientSecret}</li> <li>{@code managementPortalUrl}</li> <li>{@code
+ * tokenEndpoint}</li> <li>{@code projectEndpoint}</li> <li>{@code subjectEndpoint}</li> </ul>
  */
 public class ManagementPortalConfig {
-    /** OAuth2 client identifier. */
+
+    /**
+     * OAuth2 client identifier.
+     */
     @JsonProperty("oauth_client_id")
     private String oauthClientId;
 
-    /** OAuth2 client secret. */
+    /**
+     * OAuth2 client secret.
+     */
     @JsonProperty("oauth_client_secret")
     private String oauthClientSecret;
 
-    /** OAuth2 client scopes. */
+    /**
+     * OAuth2 client scopes.
+     */
     @JsonProperty("oauth_client_scopes")
     private String oauthClientScopes;
 
-    /** URL pointing a Management Portal instance. */
+    /**
+     * URL pointing a Management Portal instance.
+     */
     @JsonProperty("management_portal_url")
     private URL managementPortalUrl;
 
-    /** Web root of Management Portal token end point. It is required to refresh Access Token. */
+    /**
+     * Web root of Management Portal token end point. It is required to refresh Access Token.
+     */
     @JsonProperty("token_endpoint")
     private String tokenEndpoint;
 
     /**
      * Web root of Management Portal project end point. It is required to get a Management Portal
-     *      Project.
+     * Project.
      */
     @JsonProperty("project_endpoint")
     private String projectEndpoint;
 
     /**
      * Web root of Management Portal subject end point. It is required to create and get Managemen
-     *      Portal Subjects.
+     * Portal Subjects.
      */
     @JsonProperty("subject_endpoint")
     private String subjectEndpoint;
 
     /**
-     * Web root of Management Portal source-type end point. It is required to create and get
-     * Managemen
-     *      Portal Subjects.
+     * Web root of Management Portal sourceType-type end point. It is required to create and get
+     * ManagementPortal SourceTypes.
+     */
+    @JsonProperty("source_data_endpoint")
+    private String sourceDataEndpoint;
+
+    /**
+     * Web root of Management Portal sourceType-type end point. It is required to create and get
+     * Managemen Portal Subjects.
      */
     @JsonProperty("source_type_endpoint")
     private String sourceTypeEndpoint;
 
-    /** Time until subject and project caches are invalidated. */
+    /**
+     * Web root of Management Portal sourceType-type end point. It is required to create and get
+     * Managemen Portal Subjects.
+     */
+    @JsonProperty("source_endpoint")
+    private String sourceEndpoint;
+
+
+    /**
+     * Time until subject and project caches are invalidated.
+     */
     @JsonProperty("cache_invalidate_duration")
     private String cacheInvalidateDuration;
 
-    /** Time until subject and project caches can be retried on failed requests. */
+    /**
+     * Time until subject and project caches can be retried on failed requests.
+     */
     @JsonProperty("cache_retry_duration")
     private String cacheRetryDuration;
 
@@ -119,10 +143,18 @@ public class ManagementPortalConfig {
         return sourceTypeEndpoint;
     }
 
+    public String getSourceDataEndpoint() {
+        return sourceDataEndpoint;
+    }
+
+    public String getSourceEndpoint() {
+        return sourceEndpoint;
+    }
+
     /**
-     * Ensures that the resultant string represents a relative directory.
-     * It modifies the string if needed to start with a non-slash and ends with a slash.
-     * If referencing the current directory, this returns an empty string.
+     * Ensures that the resultant string represents a relative directory. It modifies the string if
+     * needed to start with a non-slash and ends with a slash. If referencing the current directory,
+     * this returns an empty string.
      */
     public static String ensureRelativeDirectory(@Nonnull String str) {
         Objects.requireNonNull(str);
@@ -155,6 +187,8 @@ public class ManagementPortalConfig {
                 + "projectEndpoint = '" + projectEndpoint + "'\n"
                 + "subjectEndpoint = '" + subjectEndpoint + "'\n"
                 + "sourceTypeEndpoint = '" + sourceTypeEndpoint + "'\n"
+                + "sourceDataEndpoint = '" + sourceDataEndpoint + "'\n"
+                + "sourceEndpoint = '" + sourceEndpoint + "'\n"
                 + "cacheRetryDuration = '" + cacheRetryDuration + "'\n"
                 + "cacheInvalidateDuration = '" + cacheInvalidateDuration + "'\n"
                 + '}';

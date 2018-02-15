@@ -5,11 +5,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
@@ -17,8 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.managementportal.Project;
-import org.radarcns.managementportal.Subject;
+import org.radarcns.management.service.dto.ProjectDTO;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.resource.BasePath;
 
@@ -31,35 +28,32 @@ public class ProjectEndPointTest {
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
     @Test
-    public void getAllProjectsStatusTest200()
-            throws IOException, URISyntaxException {
+    public void getAllProjectsStatusTest200() throws IOException {
 
         Response actual = apiClient.request(BasePath.PROJECTS, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerForCollection(List.class, Project.class);
-        List<Project> projects = reader.readValue(actual.body().byteStream());
+        ObjectReader reader = RadarConverter.readerForCollection(List.class, ProjectDTO.class);
+        List<ProjectDTO> projects = reader.readValue(actual.body().byteStream());
 
         assertNotNull(projects);
         assertTrue(projects.size() > 0);
     }
 
     @Test
-    public void getProjectByProjectNameStatusTest200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getProjectByProjectNameStatusTest200() throws IOException {
 
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME, APPLICATION_JSON,
                         Status.OK);
         assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(Project.class);
-        Project project = reader.readValue(actual.body().byteStream());
+        ObjectReader reader = RadarConverter.readerFor(ProjectDTO.class);
+        ProjectDTO project = reader.readValue(actual.body().byteStream());
         assertEquals(PROJECT_NAME, project.getProjectName());
 
     }
 
     @Test
-    public void getProjectByUnavailableNameStatusTest404()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getProjectByUnavailableNameStatusTest404() throws IOException {
 
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + "SOMETHING", APPLICATION_JSON,
@@ -69,22 +63,5 @@ public class ProjectEndPointTest {
 
     }
 
-
-    @Test
-    public void getSubjectsByProjectName200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
-
-        Response actual = apiClient
-                .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS, APPLICATION_JSON,
-                        Status.OK);
-        assertTrue(actual.isSuccessful());
-
-        ObjectReader reader = RadarConverter.readerForCollection(List.class, Subject.class);
-        List<Subject> subjects = reader.readValue(actual.body().byteStream());
-
-        assertNotNull(subjects);
-        assertTrue(subjects.size() > 0);
-
-    }
 
 }

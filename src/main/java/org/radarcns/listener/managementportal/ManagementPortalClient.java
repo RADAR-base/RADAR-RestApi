@@ -36,11 +36,12 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.radarcns.config.ManagementPortalConfig;
 import org.radarcns.config.Properties;
+import org.radarcns.domain.managementportal.SourceDTO;
+import org.radarcns.domain.managementportal.SourceTypeDTO;
+import org.radarcns.domain.managementportal.SubjectDTO;
 import org.radarcns.exception.TokenException;
-import org.radarcns.managementportal.Project;
-import org.radarcns.managementportal.SourceType;
-import org.radarcns.managementportal.SourceTypeIdentifier;
-import org.radarcns.managementportal.Subject;
+import org.radarcns.management.service.dto.ProjectDTO;
+import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.CachedMap;
@@ -52,15 +53,20 @@ import org.slf4j.LoggerFactory;
  * Client to interact with the RADAR Management Portal. This class is thread-safe.
  */
 public class ManagementPortalClient {
+
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalClient.class);
 
     private static final ObjectReader SUBJECT_LIST_READER = RadarConverter.readerForCollection(
-            List.class, Subject.class);
+            List.class, SubjectDTO.class);
     private static final ObjectReader PROJECT_LIST_READER = RadarConverter.readerForCollection(
-            List.class, Project.class);
+            List.class, ProjectDTO.class);
+    private static final ObjectReader SOURCE_TYPE_LIST_READER = RadarConverter.readerForCollection(
+            List.class, SourceTypeDTO.class);
+    private static final ObjectReader SOURCE_DATA_LIST_READER = RadarConverter.readerForCollection(
+            List.class, SourceDataDTO.class);
 
-    private static final ObjectReader SOURCETYPE_LIST_READER = RadarConverter.readerForCollection(
-            List.class, SourceType.class);
+    private static final ObjectReader SOURCE_LIST_READER = RadarConverter.readerForCollection(
+            List.class, SourceDTO.class);
 
     private static final Duration CACHE_INVALIDATE_DEFAULT = Duration.ofMinutes(1);
     private static final Duration CACHE_RETRY_DEFAULT = Duration.ofHours(1);
@@ -68,9 +74,10 @@ public class ManagementPortalClient {
     private final OkHttpClient client;
     private final OAuth2Client oauthClient;
 
-    private final CachedMap<String, Subject> subjects;
-    private final CachedMap<String, Project> projects;
-    private final CachedMap<SourceTypeIdentifier, SourceType> sourceTypes;
+    private final CachedMap<String, SubjectDTO> subjects;
+    private final CachedMap<String, ProjectDTO> projects;
+    private final CachedMap<String, SourceDTO> sources;
+
 
     /**
      * Client to interact with the RADAR Management Portal.
@@ -103,11 +110,11 @@ public class ManagementPortalClient {
             throw new IllegalStateException("Failed to construct MP URL", ex);
         }
 
-        subjects = new CachedMap<>(this::retrieveSubjects, Subject::getId, invalidate, retry);
-        projects = new CachedMap<>(this::retrieveProjects, Project::getProjectName,
+        subjects = new CachedMap<>(this::retrieveSubjects, SubjectDTO::getLogin, invalidate,
+                retry);
+        projects = new CachedMap<>(this::retrieveProjects, ProjectDTO::getProjectName,
                 invalidate, retry);
-        sourceTypes = new CachedMap<>(this::retrieveSourceTypes,
-                SourceType::getSourceTypeIdentifier,
+        sources = new CachedMap<>(this::retrieveSources, SourceDTO::getSourceIdentifier,
                 invalidate, retry);
     }
 
@@ -133,82 +140,86 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link Subject} from the already computed list of subjects using {@link
-     * ArrayList} of {@link Subject} else it calls a method for retrieving the subjects from MP.
+     * Retrieves all {@link SubjectDTO} from the already computed list of SubjectDTOs using {@link
+     * ArrayList} of {@link SubjectDTO} else it calls a method for retrieving the SubjectDTOs from
+     * MP.
      *
-     * @return {@link ArrayList} of {@link Subject} if a subject is found
+     * @return {@link ArrayList} of {@link SubjectDTO} if a SubjectDTO is found
      */
-    public Map<String, Subject> getSubjects() throws IOException {
+    public Map<String, SubjectDTO> getSubjects() throws IOException {
         return subjects.get();
     }
 
     /**
-     * Retrieves all {@link Subject} from Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link SubjectDTO} from Management Portal using {@link ServletContext} entity.
      *
-     * @return subjects retrieved from the Management Portal
+     * @return SubjectDTOs retrieved from the Management Portal
      */
-    private List<Subject> retrieveSubjects() throws IOException {
+    private List<SubjectDTO> retrieveSubjects() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL url = new URL(config.getManagementPortalUrl(), config.getSubjectEndpoint());
         Request getAllSubjectsRequest = this.buildGetRequest(url);
         try (Response response = this.client.newCall(getAllSubjectsRequest).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
-                throw new IOException("Failed to retrieve all subjects: " + responseBody);
+                throw new IOException("Failed to retrieve all SubjectDTOs: " + responseBody);
             }
-            List<Subject> allSubjects = SUBJECT_LIST_READER.readValue(responseBody);
-            logger.info("Retrieved Subjects from MP.");
+            List<SubjectDTO> allSubjects = SUBJECT_LIST_READER.readValue(responseBody);
+            logger.info("Retrieved SubjectDTOs from MP.");
             return allSubjects;
         }
     }
 
     /**
-     * Retrieves a {@link Subject} from the already computed list of subjects using {@link
-     * ArrayList} of {@link Subject} entity.
+     * Retrieves a {@link SubjectDTO} from the already computed list of SubjectDTOs using {@link
+     * ArrayList} of {@link SubjectDTO} entity.
      *
      * @param subjectLogin {@link String} that has to be searched.
-     * @return {@link Subject} if a subject is found
-     * @throws IOException if the subjects cannot be refreshed
-     * @throws NotFoundException if the subject is not found
+     * @return {@link SubjectDTO} if a SubjectDTO is found
+     * @throws IOException if the SubjectDTOs cannot be refreshed
+     * @throws NotFoundException if the SubjectDTO is not found
      */
-    public Subject getSubject(@Nonnull String subjectLogin) throws IOException, NotFoundException {
+    public SubjectDTO getSubject(@Nonnull String subjectLogin)
+            throws IOException, NotFoundException {
         try {
             return subjects.get(subjectLogin);
         } catch (NoSuchElementException ex) {
-            throw new NotFoundException("Subject " + subjectLogin + " not found.");
+            throw new NotFoundException("SubjectDTO " + subjectLogin + " not found.");
         }
     }
 
     /**
-     * Checks whether given subject is part of given project.
+     * Checks whether given SubjectDTO is part of given project.
      *
-     * @param projectName project that should contain the subject.
+     * @param projectName project that should contain the SubjectDTO.
      * @param subjectLogin login name that has to be searched.
-     * @throws IOException if the list of subjects cannot be refreshed.
-     * @throws NotFoundException if the subject is not found in given project.
+     * @throws IOException if the list of SubjectDTOs cannot be refreshed.
+     * @throws NotFoundException if the SubjectDTO is not found in given project.
      */
     public void checkSubjectInProject(@Nonnull String projectName, @Nonnull String subjectLogin)
             throws IOException, NotFoundException {
-        Subject subject = getSubject(subjectLogin);
+        SubjectDTO subject = getSubject(subjectLogin);
         if (!projectName.equals(subject.getProject().getProjectName())) {
             throw new NotFoundException(
-                    "Subject " + subjectLogin + " is not part of project " + projectName + ".");
+                    "SubjectDTO " + subjectLogin + " is not part of project " + projectName
+                            + ".");
         }
     }
 
+
     /**
-     * Retrieves all {@link Subject} from a study (or project) in the Management Portal using {@link
-     * ServletContext} entity.
+     * Retrieves all {@link SubjectDTO} from a study (or project) in the Management Portal using
+     * {@link ServletContext} entity.
      *
-     * @param projectName {@link String} the study from which subjects to be retrieved
-     * @return {@link List} of {@link Subject} retrieved from the Management Portal
-     * @throws MalformedURLException in case the subjects cannot be retrieved.
+     * @param projectName {@link String} the study from which SubjectDTOs to be retrieved
+     * @return {@link List} of {@link SubjectDTO} retrieved from the Management Portal
      */
-    public List<Subject> getAllSubjectsFromProject(@Nonnull String projectName) throws IOException {
+    public List<SubjectDTO> getAllSubjectsFromProject(@Nonnull String projectName)
+            throws IOException {
         // will throw not found if relevant.
         getProject(projectName);
 
-        List<Subject> result = subjects.get().values().stream()
+        List<SubjectDTO> result = subjects.get().values().stream()
                 .filter(s -> projectName.equals(s.getProject().getProjectName()))
                 .collect(Collectors.toList());
 
@@ -222,21 +233,21 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link Project} from Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link ProjectDTO} from Management Portal using {@link ServletContext} entity.
      *
-     * @return {@link ArrayList} of {@link Project} retrieved from the Management Portal
+     * @return {@link ArrayList} of {@link ProjectDTO} retrieved from the Management Portal
      * @throws IOException if the list of projects cannot be retrieved.
      */
-    public Map<String, Project> getProjects() throws IOException {
+    public Map<String, ProjectDTO> getProjects() throws IOException {
         return projects.get();
     }
 
     /**
-     * Retrieves all {@link Project} from Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link ProjectDTO} from Management Portal using {@link ServletContext} entity.
      *
      * @return projects retrieved from the management portal.
      */
-    private List<Project> retrieveProjects() throws IOException {
+    private List<ProjectDTO> retrieveProjects() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL getAllProjectsUrl = new URL(config.getManagementPortalUrl(),
                 config.getProjectEndpoint());
@@ -244,69 +255,38 @@ public class ManagementPortalClient {
         try (Response response = this.client.newCall(getAllProjects).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
-                throw new IOException("Failed to retrieve all subjects: " + responseBody);
+                throw new IOException("Failed to retrieve all SubjectDTOs: " + responseBody);
             }
-            List<Project> allProjects = PROJECT_LIST_READER.readValue(responseBody);
-            logger.info("Retrieved Projects from MP");
+            List<ProjectDTO> allProjects = PROJECT_LIST_READER.readValue(responseBody);
+            logger.info("Retrieved ProjectDTOs from MP");
             return allProjects;
         }
     }
 
     /**
-     * Retrieves a {@link Project} from the Management Portal using {@link ServletContext} entity.
+     * Retrieves a {@link ProjectDTO} from the Management Portal using {@link ServletContext}
+     * entity.
      *
-     * @param projectName {@link String} of the Project that has to be retrieved
-     * @return {@link Project} retrieved from the Management Portal
+     * @param projectName {@link String} of the ProjectDTO that has to be retrieved
+     * @return {@link ProjectDTO} retrieved from the Management Portal
      * @throws IOException if the list of projects cannot be retrieved
      * @throws NotFoundException if given project is not found
      */
-    public Project getProject(String projectName) throws IOException, NotFoundException {
+    public ProjectDTO getProject(String projectName) throws IOException, NotFoundException {
         try {
             return projects.get(projectName);
         } catch (NoSuchElementException ex) {
-            throw new NotFoundException("Project " + projectName + " not found");
+            throw new NotFoundException("ProjectDTO " + projectName + " not found");
         }
     }
 
     /**
-     * Retrieves all {@link SourceType} from Management Portal using {@link ServletContext} entity.
-     *
-     * @return {@link ArrayList} of {@link SourceType} retrieved from the Management Portal
-     * @throws IOException if the list of source types cannot be retrieved
-     */
-    public Map<SourceTypeIdentifier, SourceType> getSourceTypes() throws IOException {
-        return sourceTypes.get();
-    }
-
-    /**
-     * Retrieves a {@link SourceType} from the Management Portal using {@link ServletContext}
+     * Retrieves all {@link SourceTypeDTO} from Management Portal using {@link ServletContext}
      * entity.
      *
-     * @param producer {@link String} of the Source-type that has to be retrieved
-     * @param model {@link String} of the Source-type that has to be retrieved
-     * @param catalogVersion {@link String} of the Source-type that has to be retrieved
-     * @return {@link SourceType} retrieved from the Management Portal
-     * @throws IOException if the list of source types cannot be retrieved
-     * @throws NotFoundException if given source type is not found
-     */
-    public SourceType getSourceType(String producer, String model, String catalogVersion)
-            throws IOException, NotFoundException {
-        try {
-            return sourceTypes.get(new SourceTypeIdentifier(producer, model, catalogVersion));
-        } catch (NoSuchElementException ex) {
-            throw new NotFoundException("Source-type " + producer + " : " + model + " : "
-                    + catalogVersion + " not found");
-        }
-    }
-
-
-    /**
-     * Retrieves all {@link SourceType} from Management Portal using {@link ServletContext} entity.
-     *
      * @return source-types retrieved from the management portal.
-     * @throws IOException if the list of source types cannot be retrieved
      */
-    private List<SourceType> retrieveSourceTypes() throws IOException {
+    public List<SourceTypeDTO> retrieveSourceTypes() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL getAllSourceTypesUrl = new URL(config.getManagementPortalUrl(),
                 config.getSourceTypeEndpoint());
@@ -314,11 +294,80 @@ public class ManagementPortalClient {
         try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
-                throw new IOException("Failed to retrieve all source-types: " + responseBody);
+                throw new IOException("Failed to retrieve all sourceType-types: " + responseBody);
             }
-            List<SourceType> allSourceTypes = SOURCETYPE_LIST_READER.readValue(responseBody);
-            logger.info("Retrieved SourceTypes from MP");
+            List<SourceTypeDTO> allSourceTypes = SOURCE_TYPE_LIST_READER.readValue(responseBody);
+            logger.info("Retrieved SourceDTOTypes from MP");
             return allSourceTypes;
+        }
+    }
+
+    /**
+     * Retrieves all {@link org.radarcns.management.service.dto.SourceDataDTO} from Management
+     * Portal using {@link ServletContext} entity.
+     *
+     * @return sourceType-types retrieved from the management portal.
+     */
+    public List<SourceDataDTO> retrieveSourceData() throws IOException {
+        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
+        URL getAllSourceTypesUrl = new URL(config.getManagementPortalUrl(),
+                config.getSourceDataEndpoint());
+        Request getAllSourceTypes = this.buildGetRequest(getAllSourceTypesUrl);
+        try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
+            String responseBody = RestClient.responseBody(response);
+            if (!response.isSuccessful()) {
+                throw new IOException("Failed to retrieve all sourceType-data: " + responseBody);
+            }
+            List<SourceDataDTO> allSourceData = SOURCE_DATA_LIST_READER.readValue(responseBody);
+            logger.info("Retrieved SourceDTOTypes from MP");
+            return allSourceData;
+        }
+    }
+
+    /**
+     * Retrieves all {@link SourceDTO} from the already computed list of sources using {@link
+     * ArrayList} of {@link SourceDTO} else it calls a method for retrieving the SourceDTO from MP.
+     *
+     * @return {@link ArrayList} of {@link SourceDTO} if a SubjectDTO is found
+     */
+    public Map<String, SourceDTO> getSources() throws IOException {
+        return sources.get();
+    }
+
+    /**
+     * Retrieves all {@link SourceDTO} from Management Portal using {@link ServletContext} entity.
+     *
+     * @return SourceDTO retrieved from the Management Portal
+     */
+    private List<SourceDTO> retrieveSources() throws IOException {
+        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
+        URL url = new URL(config.getManagementPortalUrl(), config.getSourceEndpoint());
+        Request getAllSourcesRequest = this.buildGetRequest(url);
+        try (Response response = this.client.newCall(getAllSourcesRequest).execute()) {
+            String responseBody = RestClient.responseBody(response);
+            if (!response.isSuccessful()) {
+                throw new IOException("Failed to retrieve all sources: " + responseBody);
+            }
+            List<SourceDTO> sources = SOURCE_LIST_READER.readValue(responseBody);
+            logger.info("Retrieved SourceDTOs from MP.");
+            return sources;
+        }
+    }
+
+    /**
+     * Retrieves a {@link SourceDTO} from the already computed list of SubjectDTOs using {@link
+     * ArrayList} of {@link SourceDTO} entity.
+     *
+     * @param sourceId {@link String} that has to be searched.
+     * @return {@link SourceDTO} if a SubjectDTO is found
+     * @throws IOException if the SubjectDTOs cannot be refreshed
+     * @throws NotFoundException if the SubjectDTO is not found
+     */
+    public SourceDTO getSource(@Nonnull String sourceId) throws IOException, NotFoundException {
+        try {
+            return sources.get(sourceId);
+        } catch (NoSuchElementException ex) {
+            throw new NotFoundException("SourceDTO " + sourceId + " not found.");
         }
     }
 

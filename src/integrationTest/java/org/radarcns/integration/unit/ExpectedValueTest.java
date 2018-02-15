@@ -17,21 +17,19 @@
 package org.radarcns.integration.unit;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.config.TestCatalog.EMPATICA;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
 
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.junit.Test;
-import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.dataset.DataItem;
+import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.integration.util.RandomInput;
-import org.radarcns.restapi.data.DoubleSample;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.dataset.Item;
-import org.radarcns.restapi.header.EffectiveTimeFrame;
+import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -41,13 +39,14 @@ public class ExpectedValueTest {
 
     private static final String SUBJECT = "UserID_0";
     private static final String SOURCE = "SourceID_0";
+    private static final String PROJECT = "radar";
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
 
     @Test
     public void matchDatasetOnDocuments() throws Exception {
-        Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(SUBJECT, SOURCE,
-                EMPATICA, "HEART_RATE", COUNT, TIME_WINDOW, SAMPLES, false);
+        Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
+                "empatica_e4_v1", "HEART_RATE", COUNT, TIME_WINDOW, SAMPLES, false);
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
         int count = 0;
@@ -59,8 +58,8 @@ public class ExpectedValueTest {
         Dataset dataset = (Dataset) map.get(RandomInput.DATASET);
 
         count = 0;
-        for (Item item : dataset.getDataset()) {
-            count += (Double) ((DoubleSample) item.get("sample")).getValue();
+        for (DataItem item : dataset.getDataset()) {
+            count += (Double) item.getSample();
         }
         assertEquals(SAMPLES, count);
 
@@ -81,7 +80,7 @@ public class ExpectedValueTest {
      * @see EffectiveTimeFrame
      **/
     public static boolean compareEffectiveTimeFrame(EffectiveTimeFrame window1,
-                EffectiveTimeFrame window2) {
+            EffectiveTimeFrame window2) {
         return window1.getStartDateTime().equals(window2.getStartDateTime())
                 && window1.getEndDateTime().equals(window2.getEndDateTime());
     }

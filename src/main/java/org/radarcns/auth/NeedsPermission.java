@@ -14,6 +14,7 @@ import org.radarcns.auth.authorization.Permission;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NeedsPermission {
+
     /**
      * Entity that the permission is needed on.
      */

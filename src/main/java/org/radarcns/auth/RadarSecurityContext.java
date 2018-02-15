@@ -9,9 +9,12 @@ import org.radarcns.auth.token.RadarToken;
  * Security context from a {@link RadarToken}.
  */
 public class RadarSecurityContext implements SecurityContext {
+
     private final RadarToken token;
 
-    /** Constructs a SecurityContext from a RadarToken. */
+    /**
+     * Constructs a SecurityContext from a RadarToken.
+     */
     public RadarSecurityContext(RadarToken token) {
         this.token = token;
     }
@@ -22,12 +25,12 @@ public class RadarSecurityContext implements SecurityContext {
     }
 
     /**
-     * Maps roles in the shape {@code "project:role"} to a Management Portal role. Global roles
-     * take the shape of {@code ":global_role"}. This allows for example a
-     * {@code @RolesAllowed(":SYS_ADMIN")} annotation to resolve correctly.
+     * Maps roles in the shape {@code "project:role"} to a Management Portal role. Global roles take
+     * the shape of {@code ":global_role"}. This allows for example a {@code
+     *
      * @param role role to be mapped
-     * @return {@code true} if the RadarToken contains given project/role,
-     *         {@code false} otherwise
+     * @return {@code true} if the RadarToken contains given project/role, {@code false} otherwise
+     * @RolesAllowed(":SYS_ADMIN")} annotation to resolve correctly.
      */
     @Override
     public boolean isUserInRole(String role) {
@@ -47,7 +50,9 @@ public class RadarSecurityContext implements SecurityContext {
         return "JWT";
     }
 
-    /** Get the RadarToken parsed from the bearer token. */
+    /**
+     * Get the RadarToken parsed from the bearer token.
+     */
     public RadarToken getToken() {
         return token;
     }

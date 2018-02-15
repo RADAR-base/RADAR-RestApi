@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Status message to return on error.
  */
 public class StatusMessage {
+
     @JsonProperty
     private String error;
 
@@ -14,6 +15,7 @@ public class StatusMessage {
 
     /**
      * Creates an instance of StatusMessage.
+     *
      * @param error error code
      * @param message error message
      */

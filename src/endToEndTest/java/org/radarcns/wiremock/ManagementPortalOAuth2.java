@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
  * Created by dverbeec on 29/06/2017. Updated in Rest-Api by yatharthranjan on 14/11/2017.
  */
 public class ManagementPortalOAuth2 {
+
     private static final Logger logger = LoggerFactory.getLogger(ManagementPortalOAuth2.class);
 
     private static final String[] SCOPES = {"SUBJECT.READ", "PROJECT.READ", "SOURCE.READ",
@@ -59,7 +60,9 @@ public class ManagementPortalOAuth2 {
         this.algorithm = Algorithm.RSA256(publicKey, privateKey);
     }
 
-    /** Get a valid access token for the REST API. */
+    /**
+     * Get a valid access token for the REST API.
+     */
     public String getAccessToken() {
         Instant exp = Instant.now().plusSeconds(3600);
         Instant iat = Instant.now().minusSeconds(30);
@@ -83,7 +86,9 @@ public class ManagementPortalOAuth2 {
         return token;
     }
 
-    /** Get the public key associated with the signature of the access token. */
+    /**
+     * Get the public key associated with the signature of the access token.
+     */
     public String getPublicKey() {
         return publicKey;
     }

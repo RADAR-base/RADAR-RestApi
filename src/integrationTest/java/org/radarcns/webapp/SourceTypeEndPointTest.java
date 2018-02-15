@@ -8,15 +8,14 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.junit.Rule;
 import org.junit.Test;
+import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.managementportal.SourceType;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.resource.BasePath;
 
@@ -31,29 +30,27 @@ public class SourceTypeEndPointTest {
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
     @Test
-    public void getAllSourceTypesStatusTest200()
-            throws IOException, URISyntaxException {
+    public void getAllSourceTypesStatusTest200() throws IOException {
 
         Response actual = apiClient.request(BasePath.SOURCE_TYPES, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerForCollection(List.class, SourceType.class);
-        List<SourceType> sourceTypes = reader.readValue(actual.body().byteStream());
+        ObjectReader reader = RadarConverter.readerForCollection(List.class, SourceTypeDTO.class);
+        List<SourceTypeDTO> sourceTypes = reader.readValue(actual.body().byteStream());
 
         assertNotNull(sourceTypes);
         assertTrue(sourceTypes.size() > 0);
     }
 
     @Test
-    public void getSourceTypeByIdentifierStatusTest200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getSourceTypeByIdentifierStatusTest200() throws IOException {
 
         Response actual = apiClient
                 .request(BasePath.SOURCE_TYPES + "/" + PRODUCER + "/" + MODEL + "/"
                                 + CATALOGUE_VERSION, APPLICATION_JSON,
                         Status.OK);
         assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(SourceType.class);
-        SourceType project = reader.readValue(actual.body().byteStream());
+        ObjectReader reader = RadarConverter.readerFor(SourceTypeDTO.class);
+        SourceTypeDTO project = reader.readValue(actual.body().byteStream());
         assertEquals(PRODUCER, project.getProducer());
         assertEquals(MODEL, project.getModel());
         assertEquals(CATALOGUE_VERSION, project.getCatalogVersion());
@@ -61,8 +58,7 @@ public class SourceTypeEndPointTest {
     }
 
     @Test
-    public void getSourceTypeByUnavailableIdStatusTest404()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getSourceTypeByUnavailableIdStatusTest404() throws IOException {
 
         Response actual = apiClient
                 .request(BasePath.SOURCE_TYPES + "/" + "SOMETHING" + "/" + MODEL + "/"

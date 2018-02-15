@@ -8,12 +8,17 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Server for the REST-API. */
+/**
+ * Server for the REST-API.
+ */
 public class GrizzlyServer {
+
     private static final Logger logger = LoggerFactory.getLogger(GrizzlyServer.class);
     private static final String BASE_URI = "http://0.0.0.0:8080/api/";
 
-    /** Main command line server. */
+    /**
+     * Main command line server.
+     */
     public static void main(String[] args) {
         ServiceLocator locator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
 

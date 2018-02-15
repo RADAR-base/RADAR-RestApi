@@ -39,7 +39,7 @@ public class ExposedConfigTest {
     private static final String BASE_PATH = "api";
 
     @Rule
-    public ApiClient apiClient = new ApiClient("http://localhost:8080/");
+    public final ApiClient apiClient = new ApiClient("http://localhost:8080/");
 
     @Test
     public void checkSwaggerDoc() throws IOException {

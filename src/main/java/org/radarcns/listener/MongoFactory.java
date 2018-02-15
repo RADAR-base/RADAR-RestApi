@@ -28,7 +28,6 @@ import org.radarcns.config.Properties;
  * Factory to creates a singleton MongoClient with the correct credentials.
  */
 public class MongoFactory implements DisposableSupplier<MongoClient> {
-
     @Override
     public MongoClient get() {
         MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();

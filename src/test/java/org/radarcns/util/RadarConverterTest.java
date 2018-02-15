@@ -19,33 +19,35 @@ package org.radarcns.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.config.TestCatalog.ANDROID;
-import static org.radarcns.config.TestCatalog.BIOVOTION;
-import static org.radarcns.config.TestCatalog.EMPATICA;
-import static org.radarcns.restapi.header.DescriptiveStatistic.AVERAGE;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
-import static org.radarcns.restapi.header.DescriptiveStatistic.MAXIMUM;
-import static org.radarcns.restapi.header.DescriptiveStatistic.MEDIAN;
-import static org.radarcns.restapi.header.DescriptiveStatistic.MINIMUM;
-import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
-import static org.radarcns.restapi.header.DescriptiveStatistic.SUM;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.AVERAGE;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MAXIMUM;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MEDIAN;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MINIMUM;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.SUM;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
-import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
-import org.radarcns.monitor.application.ServerStatus;
+import org.radarcns.domain.restapi.ServerStatus;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.mongo.util.MongoHelper.Stat;
 
 public class RadarConverterTest {
+
+    private static final String ANDROID = "ANDROID";
+    private static final String BIOVOTION = "BIOVOTION";
+    private static final String EMPATICA = "EMPATICA";
 
     @Test
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
@@ -73,7 +75,7 @@ public class RadarConverterTest {
 
     @Test
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public void getISO8601TestFromString() throws ParseException {
+    public void getISO8601TestFromString() throws DateTimeParseException {
         Date date = RadarConverter.getISO8601("2017-03-05T22:37:59Z");
 
         Calendar cal = Calendar.getInstance();
@@ -91,7 +93,7 @@ public class RadarConverterTest {
     }
 
     @Test
-    public void getDescriptiveStatisticTest() throws ParseException {
+    public void getDescriptiveStatisticTest() throws DateTimeParseException {
         assertEquals(AVERAGE, RadarConverter.getDescriptiveStatistic(Stat.avg));
         assertEquals(COUNT, RadarConverter.getDescriptiveStatistic(Stat.count));
         assertEquals(MAXIMUM, RadarConverter.getDescriptiveStatistic(Stat.max));
@@ -102,7 +104,7 @@ public class RadarConverterTest {
     }
 
     @Test
-    public void getMongoStatTest() throws ParseException {
+    public void getMongoStatTest() throws DateTimeParseException {
         assertEquals(Stat.avg, RadarConverter.getMongoStat(AVERAGE));
         assertEquals(Stat.count, RadarConverter.getMongoStat(COUNT));
         assertEquals(Stat.iqr, RadarConverter.getMongoStat(INTERQUARTILE_RANGE));
@@ -114,14 +116,14 @@ public class RadarConverterTest {
     }
 
     @Test
-    public void roundDoubleTest() throws ParseException {
+    public void roundDoubleTest() throws DateTimeParseException {
         double value = 1234.56789;
         double expected = 1234.57;
         assertEquals(expected, RadarConverter.roundDouble(value, 2), 0);
     }
 
     @Test
-    public void getServerStatusTest() throws ParseException {
+    public void getServerStatusTest() throws DateTimeParseException {
         assertEquals(ServerStatus.CONNECTED,
                 RadarConverter.getServerStatus(ServerStatus.CONNECTED.toString()));
         assertEquals(ServerStatus.DISCONNECTED,

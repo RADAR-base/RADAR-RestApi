@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import org.junit.Test;
 
 public class HdfsBinsDataTest {
+
     @Test
     public void parse() throws IOException, URISyntaxException {
         Path binsPath = Paths.get(HdfsBinsData.class.getResource("bins.csv").toURI());
@@ -21,7 +22,9 @@ public class HdfsBinsDataTest {
         assertBinsMatchFile(HdfsBinsData.parse(binsPath));
     }
 
-    /** Test that HDFS bins data matches the data in the resource file. */
+    /**
+     * Test that HDFS bins data matches the data in the resource file.
+     */
     public static void assertBinsMatchFile(HdfsBinsData data) {
         assertThat(data.getTopics().keySet(), hasItems("t1", "t2"));
         assertThat(data.getTopics().get("t1").getSources().keySet(), hasItems("d1", "d2"));

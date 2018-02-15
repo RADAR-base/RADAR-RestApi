@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
  * <p>This class is thread-safe if given retriever and key extractors are thread-safe.
  */
 public class CachedMap<S, T> {
+
     private final ThrowingSupplier<? extends Collection<T>> retriever;
     private final Function<T, S> keyExtractor;
     private final Duration invalidateAfter;
@@ -26,6 +27,7 @@ public class CachedMap<S, T> {
     /**
      * Map that retrieves data from a supplier and converts that to a map with given key extractor.
      * Given retriever and key extractor should be thread-safe to make this class thread-safe.
+     *
      * @param retriever supplier of data.
      * @param keyExtractor key extractor of individial data points.
      * @param invalidateAfter invalidate the set of valid results after this duration.
@@ -42,6 +44,7 @@ public class CachedMap<S, T> {
 
     /**
      * Get the cached map, or retrieve a new one if the current one is old.
+     *
      * @return map of data
      * @throws IOException if the data could not be retrieved.
      */
@@ -51,6 +54,7 @@ public class CachedMap<S, T> {
 
     /**
      * Get the cached map, or retrieve a new one if the current one is old.
+     *
      * @param forceRefresh if true, the cache will be refreshed even if it is recent.
      * @return map of data
      * @throws IOException if the data could not be retrieved.
@@ -77,6 +81,7 @@ public class CachedMap<S, T> {
     /**
      * Get a key from the map. If the key is missing, it will check with {@link #mayRetry()} whether
      * the cache may be updated. If so, it will fetch the cache again and look the key up.
+     *
      * @param key key of the value to find.
      * @return element
      * @throws IOException if the cache cannot be refreshed.
@@ -103,11 +108,12 @@ public class CachedMap<S, T> {
     }
 
     /**
-     * Supplier that may throw an exception. Otherwise similar to
-     * {@link java.util.function.Supplier}.
+     * Supplier that may throw an exception. Otherwise similar to {@link
+     * java.util.function.Supplier}.
      */
     @FunctionalInterface
     public interface ThrowingSupplier<T> {
+
         T get() throws IOException;
     }
 }

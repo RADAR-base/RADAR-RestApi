@@ -8,6 +8,7 @@ import javax.validation.ConstraintValidatorContext;
  * Checks that a given String should be alphanumeric plus allowed symbols {@code -_./:#@}.
  */
 public class AlphanumericValidator implements ConstraintValidator<Alphanumeric, String> {
+
     private static final Pattern USER_PATTERN = Pattern.compile("[a-zA-Z0-9-_./:#@]+");
 
     @Override

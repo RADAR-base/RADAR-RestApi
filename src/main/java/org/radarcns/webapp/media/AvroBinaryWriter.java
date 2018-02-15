@@ -19,11 +19,14 @@ import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecord;
 import org.glassfish.jersey.internal.inject.PerThread;
 
-/** Converts Avro SpecificRecord objects to binary avro format. */
+/**
+ * Converts Avro SpecificRecord objects to binary avro format.
+ */
 @Provider
 @Produces(AVRO_BINARY)
 @PerThread
 public class AvroBinaryWriter implements MessageBodyWriter<SpecificRecord> {
+
     private BinaryEncoder encoder;
 
     @Override

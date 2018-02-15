@@ -6,12 +6,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 import javax.annotation.Priority;
+import javax.inject.Singleton;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.RadarSecurityContext;
 import org.radarcns.auth.authentication.TokenValidator;
 import org.radarcns.auth.config.ServerConfig;
@@ -27,11 +29,32 @@ import org.slf4j.LoggerFactory;
  * Checks the presence and validity of a Management Portal JWT. Will return a 401 HTTP status code
  * otherwise.
  */
+@Provider
 @Authenticated
+@Singleton
 @Priority(1000)
 public class AuthenticationFilter implements ContainerRequestFilter {
+
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
-    private static TokenValidator validator;
+    private final TokenValidator validator;
+
+    /** Constructs a filter with a fixed validator. */
+    public AuthenticationFilter() {
+        ServerConfig config = null;
+        String mpUrlString = Properties.getApiConfig().getManagementPortalConfig()
+                .getManagementPortalUrl().toString();
+        if (mpUrlString != null) {
+            try {
+                YamlServerConfig cfg = new YamlServerConfig();
+                cfg.setResourceName("res_RestApi");
+                cfg.setPublicKeyEndpoint(new URI(mpUrlString + "oauth/token_key"));
+                config = cfg;
+            } catch (URISyntaxException exc) {
+                logger.error("Failed to load Management Portal URL " + mpUrlString, exc);
+            }
+        }
+        validator = config == null ? new TokenValidator() : new TokenValidator(config);
+    }
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
@@ -50,7 +73,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
 
         try {
-            RadarToken radarToken = getValidator().validateAccessToken(token);
+            RadarToken radarToken = validator.validateAccessToken(token);
             requestContext.setSecurityContext(new RadarSecurityContext(radarToken));
         } catch (TokenValidationException ex) {
             logger.warn("[401] {}: {}", requestContext.getUriInfo().getPath(), ex.getMessage());
@@ -62,27 +85,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                                     "Token is invalid: " + ex.getMessage()))
                             .build());
         }
-    }
-
-
-    private static synchronized TokenValidator getValidator() {
-        if (validator == null) {
-            ServerConfig config = null;
-            String mpUrlString = Properties.getApiConfig().getManagementPortalConfig()
-                    .getManagementPortalUrl().toString();
-            if (mpUrlString != null) {
-                try {
-                    YamlServerConfig cfg = new YamlServerConfig();
-                    cfg.setResourceName("res_RestApi");
-                    cfg.setPublicKeyEndpoint(new URI(mpUrlString + "oauth/token_key"));
-                    config = cfg;
-                } catch (URISyntaxException exc) {
-                    logger.error("Failed to load Management Portal URL " + mpUrlString, exc);
-                }
-            }
-            validator = config == null ? new TokenValidator() : new TokenValidator(config);
-        }
-        return validator;
     }
 
     private String extractBearerToken(ContainerRequestContext requestContext) {
@@ -102,8 +104,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     /**
      * Get the token from a request context.
      *
-     * @throws IllegalStateException if the method or path was not annotated with
-     * {@link Authenticated}.
+     * @throws IllegalStateException if the method or path was not annotated with {@link
+     * Authenticated}.
      */
     public static RadarToken getToken(ContainerRequestContext context) {
         SecurityContext secContext = context.getSecurityContext();
