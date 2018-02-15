@@ -26,7 +26,7 @@ import static org.radarcns.mongo.util.MongoHelper.SOURCE_ID;
 import static org.radarcns.mongo.util.MongoHelper.USER_ID;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +40,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.mock.model.ExpectedArrayValue;
 import org.radarcns.mock.model.ExpectedDoubleValue;
 import org.radarcns.monitor.application.ServerStatus;
+import org.radarcns.util.RadarConverter;
 
 /**
  * All supported sources specifications.
@@ -64,17 +65,14 @@ public class RandomInput {
         ObservationKey key = new ObservationKey(project, user, source);
         ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
-        Long start = new Date().getTime();
-
-        for (int i = 0; i < samples; i++) {
-            instance.add(key, start, ThreadLocalRandom.current().nextDouble());
-
-            if (singleWindow) {
-                start += 1;
-            } else {
-                start += TimeUnit.SECONDS.toMillis(
-                        ThreadLocalRandom.current().nextLong(1, 15));
-            }
+        int numberOfRecords = samples;
+        if (singleWindow) {
+            numberOfRecords = 1;
+        }
+        long now = Instant.now().getEpochSecond();
+        for (int i = 0; i < numberOfRecords; i++) {
+            instance.add(key, now, ThreadLocalRandom.current().nextDouble());
+            now += TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow));
         }
 
         dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
@@ -154,8 +152,7 @@ public class RandomInput {
     private static Map<String, Object> getBoth(String project, String user, String source,
             String sourceType, String sourceDataName, DescriptiveStatistic stat,
             TimeWindow timeWindow,
-            int samples, boolean singleWindow)
-             {
+            int samples, boolean singleWindow) {
         nextValue(project, user, source, sourceType, sourceDataName, stat, timeWindow, samples,
                 singleWindow);
 
@@ -167,7 +164,7 @@ public class RandomInput {
 
     private static void nextValue(String project, String user, String source, String sourceType,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
-            boolean singleWindow)  {
+            boolean singleWindow) {
         switch (sourceDataName) {
             case "EMPATICA_E4_v1_ACCELEROMETER":
                 randomArrayValue(project, user, source, sourceType, sourceDataName, stat,

@@ -111,16 +111,14 @@ public class ExpectedDocumentFactory {
         Collections.sort(windows);
 
         List<Document> list = new ArrayList<>(windows.size());
-
+        long start = windows.get(0);
         for (Long timestamp : windows) {
             DoubleValueCollector doubleValueCollector = (DoubleValueCollector) expectedValue
                     .getSeries().get(timestamp);
 
-            long end = timestamp + DURATION;
-
             list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
                     expectedValue.getLastKey().getUserId(),
-                    expectedValue.getLastKey().getSourceId(), new Date(timestamp), new Date(end),
+                    expectedValue.getLastKey().getSourceId(), new Date(start), new Date(timestamp),
                     getDocumentFromDoubleValueCollector("batteryLevel", doubleValueCollector)));
         }
 

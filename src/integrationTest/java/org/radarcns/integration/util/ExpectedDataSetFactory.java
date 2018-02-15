@@ -97,8 +97,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
         return new EffectiveTimeFrame(
                 RadarConverter.getISO8601(new Date(windows.get(0))),
-                RadarConverter.getISO8601(new Date(windows.get(windows.size() - 1)
-                        + DURATION)));
+                RadarConverter.getISO8601(new Date(windows.get(windows.size() - 1))));
     }
 
 
