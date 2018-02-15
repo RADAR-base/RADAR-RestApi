@@ -60,16 +60,8 @@ public class SubjectEndPointTest {
 
     @Test
     public void getSubjectsByProjectName200() throws IOException {
-        MongoClient mongoClient = Utility.getMongoClient();
-        int windows = 2;
-        long start = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
-        long end = start + TimeUnit.SECONDS.toMillis(60 / (windows + 1));
-        long later = end + TimeUnit.SECONDS.toMillis(60 / (windows + 1));
-        Document doc = getDocumentsForStatistics(start, end);
-        Document second = getDocumentsForStatistics(start, later);
-        MongoCollection collection = MongoHelper
-                .getCollection(mongoClient, MONITOR_STATISTICS_TOPIC);
-        collection.insertMany(Arrays.asList(doc, second));
+        insertMonitorStatistics();
+
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS,
                         APPLICATION_JSON, Status.OK);
@@ -95,8 +87,7 @@ public class SubjectEndPointTest {
                 .append(MongoHelper.END, new Date(end));
     }
 
-    @Test
-    public void getSubjectsBySubjectIdAndProjectName200() throws IOException {
+    private void insertMonitorStatistics() {
         MongoClient mongoClient = Utility.getMongoClient();
         int windows = 2;
         long start = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
@@ -107,6 +98,12 @@ public class SubjectEndPointTest {
         MongoCollection collection = MongoHelper
                 .getCollection(mongoClient, MONITOR_STATISTICS_TOPIC);
         collection.insertMany(Arrays.asList(doc, second));
+    }
+
+    @Test
+    public void getSubjectsBySubjectIdAndProjectName200() throws IOException {
+        insertMonitorStatistics();
+
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS + "/"
                         + SUBJECT_ID, APPLICATION_JSON, Status.OK);
