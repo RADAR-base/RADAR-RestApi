@@ -24,6 +24,7 @@ import static org.radarcns.mongo.util.MongoHelper.START;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import java.net.ConnectException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -104,7 +105,8 @@ public class SourceMonitorService {
         }
 
         cursor.close();
-        return new EffectiveTimeFrame(start, end);
+        return new EffectiveTimeFrame(start == null ? Date.from(Instant.now()) : start,
+                end == null ? Date.from(Instant.now()) : end);
 
     }
 

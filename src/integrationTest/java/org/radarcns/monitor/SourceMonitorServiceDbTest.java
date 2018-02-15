@@ -37,6 +37,7 @@ import org.radarcns.integration.util.Utility;
 import org.radarcns.management.domain.enumeration.SourceTypeScope;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.service.SourceMonitorService;
+import org.radarcns.util.RadarConverter;
 
 public class SourceMonitorServiceDbTest {
 
@@ -86,8 +87,8 @@ public class SourceMonitorServiceDbTest {
         EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(PROJECT_NAME, SUBJECT_ID,
                 SOURCE_ID, sourceType);
 
-        assertEquals(result.getStartDateTime(), start);
-        assertEquals(result.getEndDateTime(), end);
+        assertEquals(RadarConverter.getISO8601(start), result.getStartDateTime());
+        assertEquals(RadarConverter.getISO8601(end), result.getEndDateTime());
     }
 
 
@@ -106,8 +107,8 @@ public class SourceMonitorServiceDbTest {
         EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(PROJECT_NAME, SUBJECT_ID,
                 SOURCE_ID, sourceType);
 
-        assertEquals(result.getStartDateTime(), earlier);
-        assertEquals(result.getEndDateTime(), later);
+        assertEquals(RadarConverter.getISO8601(earlier), result.getStartDateTime());
+        assertEquals(RadarConverter.getISO8601(later), result.getEndDateTime());
     }
 
     @After

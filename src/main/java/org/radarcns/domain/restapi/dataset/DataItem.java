@@ -3,6 +3,7 @@ package org.radarcns.domain.restapi.dataset;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.Objects;
+import org.radarcns.util.RadarConverter;
 
 public class DataItem {
 
@@ -11,7 +12,7 @@ public class DataItem {
     private Object sample;
 
     @JsonProperty
-    private Date startDateTime;
+    private String startDateTime;
 
 
     /**
@@ -29,6 +30,17 @@ public class DataItem {
      */
     public DataItem(java.lang.Object sample, Date startDateTime) {
         this.sample = sample;
+        this.startDateTime = RadarConverter.getISO8601(startDateTime);
+    }
+
+    /**
+     * All-args constructor.
+     *
+     * @param sample Sample value.
+     * @param startDateTime Point in time (ISO8601) with UTC timezone of first sample in data-set.
+     */
+    public DataItem(java.lang.Object sample, String startDateTime) {
+        this.sample = sample;
         this.startDateTime = startDateTime;
     }
 
@@ -40,11 +52,11 @@ public class DataItem {
         this.sample = sample;
     }
 
-    public Date getStartDateTime() {
+    public String getStartDateTime() {
         return startDateTime;
     }
 
-    public void setStartDateTime(Date startDateTime) {
+    public void setStartDateTime(String startDateTime) {
         this.startDateTime = startDateTime;
     }
 

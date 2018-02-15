@@ -8,43 +8,43 @@ public class EffectiveTimeFrame {
 
     //TODO convert Dates to java.time classes
     @JsonProperty
-    private Date startDateTime;
+    private String startDateTime;
 
     @JsonProperty
-    private Date endDateTime;
+    private String endDateTime;
 
     public EffectiveTimeFrame() {
         // default constructor for json
     }
 
     public EffectiveTimeFrame(String startDateTime, String endDateTime) {
-        this.startDateTime = RadarConverter.getISO8601(startDateTime);
-        this.endDateTime = RadarConverter.getISO8601(endDateTime);
-    }
-
-    public EffectiveTimeFrame(Date startDateTime, Date endDateTime) {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
     }
 
-    public EffectiveTimeFrame(Long startDateTime, Long endDateTime) {
-        this.startDateTime = RadarConverter.getISO8601ToDate(startDateTime);
-        this.endDateTime = RadarConverter.getISO8601ToDate(endDateTime);
+    public EffectiveTimeFrame(Date startDateTime, Date endDateTime) {
+        this.startDateTime = RadarConverter.getISO8601(startDateTime);
+        this.endDateTime = RadarConverter.getISO8601(endDateTime);
     }
 
-    public Date getStartDateTime() {
+    public EffectiveTimeFrame(Long startDateTime, Long endDateTime) {
+        this.startDateTime = RadarConverter.getISO8601(startDateTime);
+        this.endDateTime = RadarConverter.getISO8601(endDateTime);
+    }
+
+    public String getStartDateTime() {
         return startDateTime;
     }
 
-    public void setStartDateTime(Date startDateTime) {
+    public void setStartDateTime(String startDateTime) {
         this.startDateTime = startDateTime;
     }
 
-    public Date getEndDateTime() {
+    public String getEndDateTime() {
         return endDateTime;
     }
 
-    public void setEndDateTime(Date endDateTime) {
+    public void setEndDateTime(String endDateTime) {
         this.endDateTime = endDateTime;
     }
 }
