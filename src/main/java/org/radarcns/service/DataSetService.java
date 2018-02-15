@@ -18,6 +18,7 @@ package org.radarcns.service;
 
 import com.mongodb.MongoClient;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -164,7 +165,7 @@ public class DataSetService {
     public Dataset getAllRecordsInWindow(String projectName, String subjectId,
             String sourceId, String sourceDataName, DescriptiveStatistic stat,
             TimeWindow timeWindow,
-            Long start, Long end) throws IOException {
+            Date start, Date end) throws IOException {
 
         SourceDTO source = managementPortalClient.getSource(sourceId);
 

@@ -50,6 +50,7 @@ import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
+import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 import org.slf4j.Logger;
@@ -156,8 +157,8 @@ public class DataSetEndPoint {
             @Alphanumeric @PathParam(SOURCE_DATA_NAME) String sourceDataName,
             @PathParam(STAT) DescriptiveStatistic stat,
             @PathParam(TIME_WINDOW) TimeWindow interval,
-            @QueryParam(START) Long start,
-            @QueryParam(END) Long end) throws IOException {
+            @QueryParam(START) String start,
+            @QueryParam(END) String end) throws IOException {
         // todo: 404 if given source does not exist.
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
@@ -165,7 +166,8 @@ public class DataSetEndPoint {
         Dataset dataset;
         if (start != null && end != null) {
             dataset = dataSetService.getAllRecordsInWindow(projectName,
-                    subjectId, sourceId, sourceDataName, stat, interval, start, end);
+                    subjectId, sourceId, sourceDataName, stat, interval, RadarConverter.getISO8601(start),
+                    RadarConverter.getISO8601(end));
         } else {
             dataset = dataSetService.getAllDataItems(projectName, subjectId,
                     sourceId, sourceDataName, stat, interval);

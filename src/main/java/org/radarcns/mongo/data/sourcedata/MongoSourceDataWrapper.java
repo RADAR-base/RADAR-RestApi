@@ -134,7 +134,7 @@ public abstract class MongoSourceDataWrapper {
      * @see Dataset
      */
     public Dataset getAllRecordsInWindow(String projectName, String subject, String source,
-            Header header, MongoHelper.Stat stat, Long start, Long end,
+            Header header, MongoHelper.Stat stat, Date start, Date end,
             MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentsByProjectAndSubjectAndSourceInWindow(projectName, subject, source,
