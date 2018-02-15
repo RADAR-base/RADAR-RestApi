@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
@@ -31,8 +30,7 @@ public class SourceTypeEndPointTest {
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
     @Test
-    public void getAllSourceTypesStatusTest200()
-            throws IOException, URISyntaxException {
+    public void getAllSourceTypesStatusTest200() throws IOException {
 
         Response actual = apiClient.request(BasePath.SOURCE_TYPES, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
@@ -44,8 +42,7 @@ public class SourceTypeEndPointTest {
     }
 
     @Test
-    public void getSourceTypeByIdentifierStatusTest200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getSourceTypeByIdentifierStatusTest200() throws IOException {
 
         Response actual = apiClient
                 .request(BasePath.SOURCE_TYPES + "/" + PRODUCER + "/" + MODEL + "/"
@@ -61,8 +58,7 @@ public class SourceTypeEndPointTest {
     }
 
     @Test
-    public void getSourceTypeByUnavailableIdStatusTest404()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getSourceTypeByUnavailableIdStatusTest404() throws IOException {
 
         Response actual = apiClient
                 .request(BasePath.SOURCE_TYPES + "/" + "SOMETHING" + "/" + MODEL + "/"

@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
@@ -71,7 +70,7 @@ public class DataSetEndPointTest {
 
     @Test
     public void getRealtimeTest()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+            throws IOException, ReflectiveOperationException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
@@ -99,7 +98,7 @@ public class DataSetEndPointTest {
     }
 
     @Test
-    public void getAllDataTestEmpty() throws IOException, ReflectiveOperationException {
+    public void getAllDataTestEmpty() throws IOException {
         Dataset dataset = apiClient.requestJson(REQUEST_PATH, Dataset.class, Status.OK);
         assertThat(dataset.getDataset(), is(empty()));
     }

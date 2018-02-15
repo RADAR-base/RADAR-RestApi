@@ -25,7 +25,6 @@ public interface Parameter {
     String TIME_WINDOW = "timeWindow";
     String SOURCE_DATA_NAME = "sourceDataName";
     String SOURCE_ID = "sourceId";
-    String SOURCE_TYPE = "sourceType";
     String START = "start";
     String STAT = "stat";
     String PROJECT_NAME = "projectName";

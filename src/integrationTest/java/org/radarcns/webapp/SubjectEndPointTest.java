@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -60,8 +59,7 @@ public class SubjectEndPointTest {
 
 
     @Test
-    public void getSubjectsByProjectName200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getSubjectsByProjectName200() throws IOException {
         MongoClient mongoClient = Utility.getMongoClient();
         int windows = 2;
         long start = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
@@ -98,8 +96,7 @@ public class SubjectEndPointTest {
     }
 
     @Test
-    public void getSubjectsBySubjectIdAndProjectName200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getSubjectsBySubjectIdAndProjectName200() throws IOException {
         MongoClient mongoClient = Utility.getMongoClient();
         int windows = 2;
         long start = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
@@ -126,7 +123,7 @@ public class SubjectEndPointTest {
     }
 
     @Test
-    public void getSubjectTest404() throws IOException, ReflectiveOperationException {
+    public void getSubjectTest404() throws IOException {
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS + "/"
                         + "OTHER", APPLICATION_JSON, Status.NOT_FOUND);

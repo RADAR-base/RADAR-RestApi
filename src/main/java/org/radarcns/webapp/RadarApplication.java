@@ -3,13 +3,12 @@ package org.radarcns.webapp;
 import com.mongodb.MongoClient;
 import javax.inject.Singleton;
 import okhttp3.OkHttpClient;
-import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.listener.HttpClientFactory;
 import org.radarcns.listener.MongoFactory;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.listener.managementportal.ManagementPortalClientFactory;
 import org.radarcns.service.ApplicationStatusMonitorService;
 import org.radarcns.service.DataSetService;
 import org.radarcns.service.SourceMonitorService;
@@ -35,18 +34,19 @@ public class RadarApplication extends ResourceConfig {
                 "org.radarcns.webapp.exception",
                 "org.radarcns.webapp.media");
 
-        register(AuthenticationFilter.class);
-        register(AuthorizationFeature.class);
-
         register(new AbstractBinder() {
+            // IDEA complains about redundant bind(C.class).to(C.class) bindings, but they are
+            // necessary for the injection to work.
+            @SuppressWarnings("RedundantToBinding")
             @Override
             protected void configure() {
                 bindFactory(HttpClientFactory.class)
                         .to(OkHttpClient.class)
                         .in(Singleton.class);
 
-                bindFactory(ManagementPortalClientFactory.class, Singleton.class)
-                        .to(ManagementPortalClient.class);
+                bind(ManagementPortalClient.class)
+                        .to(ManagementPortalClient.class)
+                        .in(Singleton.class);
 
                 bindFactory(MongoFactory.class)
                         .to(MongoClient.class)
@@ -77,5 +77,8 @@ public class RadarApplication extends ResourceConfig {
                         .in(Singleton.class);
             }
         });
+
+        register(AuthenticationFilter.class);
+        register(AuthorizationFeature.class);
     }
 }

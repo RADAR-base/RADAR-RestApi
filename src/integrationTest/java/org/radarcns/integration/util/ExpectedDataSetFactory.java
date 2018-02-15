@@ -217,8 +217,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
     }
 
 
-    private <T> T getContent(Object object, DescriptiveStatistic stat)
-            throws IllegalAccessException, InstantiationException {
+    private <T> T getContent(Object object, DescriptiveStatistic stat) {
         T content;
 
         switch (stat) {

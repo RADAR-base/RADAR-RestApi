@@ -18,6 +18,7 @@ package org.radarcns.listener.managementportal;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.ws.rs.NotFoundException;
 import okhttp3.OkHttpClient;
@@ -37,9 +39,10 @@ import org.radarcns.config.Properties;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.managementportal.SubjectDTO;
+import org.radarcns.exception.TokenException;
 import org.radarcns.management.service.dto.ProjectDTO;
 import org.radarcns.management.service.dto.SourceDataDTO;
-import org.radarcns.oauth.OAuth2AccessTokenDetails;
+import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.CachedMap;
 import org.radarcns.util.RadarConverter;
@@ -69,30 +72,42 @@ public class ManagementPortalClient {
     private static final Duration CACHE_RETRY_DEFAULT = Duration.ofHours(1);
 
     private final OkHttpClient client;
+    private final OAuth2Client oauthClient;
 
     private final CachedMap<String, SubjectDTO> subjects;
     private final CachedMap<String, ProjectDTO> projects;
     private final CachedMap<String, SourceDTO> sources;
 
 
-    private String token;
-
     /**
      * Client to interact with the RADAR Management Portal.
      *
      * @param okHttpClient {@link OkHttpClient} to communicate to external web services
      * @throws IllegalStateException in case the object cannot be created
-     * @see ManagementPortalClientFactory
      */
-    public ManagementPortalClient(@Nonnull OkHttpClient okHttpClient) {
+    @Inject
+    public ManagementPortalClient(OkHttpClient okHttpClient) {
         this.client = okHttpClient;
 
         Duration invalidate = CACHE_INVALIDATE_DEFAULT;
         Duration retry = CACHE_RETRY_DEFAULT;
         ManagementPortalConfig mpConfig = Properties.getApiConfig().getManagementPortalConfig();
-        if (mpConfig != null) {
-            invalidate = parseDuration(mpConfig.getCacheInvalidateDuration(), invalidate);
-            retry = parseDuration(mpConfig.getCacheRetryDuration(), retry);
+
+        if (mpConfig == null) {
+            throw new IllegalStateException("ManagementPortal configuration not set");
+        }
+
+        invalidate = parseDuration(mpConfig.getCacheInvalidateDuration(), invalidate);
+        retry = parseDuration(mpConfig.getCacheRetryDuration(), retry);
+
+        try {
+            oauthClient = new OAuth2Client.Builder()
+                    .endpoint(mpConfig.getManagementPortalUrl(), mpConfig.getTokenEndpoint())
+                    .credentials(mpConfig.getOauthClientId(), mpConfig.getOauthClientSecret())
+                    .httpClient(client)
+                    .build();
+        } catch (MalformedURLException ex) {
+            throw new IllegalStateException("Failed to construct MP URL", ex);
         }
 
         subjects = new CachedMap<>(this::retrieveSubjects, SubjectDTO::getLogin, invalidate,
@@ -116,12 +131,12 @@ public class ManagementPortalClient {
         return defaultValue;
     }
 
-    protected synchronized void updateToken(OAuth2AccessTokenDetails tokenDetails) {
-        this.token = tokenDetails.getAccessToken();
-    }
-
-    private synchronized String getToken() {
-        return this.token;
+    private String getToken() throws IOException {
+        try {
+            return oauthClient.getValidToken(Duration.ofSeconds(30)).getAccessToken();
+        } catch (TokenException ex) {
+            throw new IOException(ex);
+        }
     }
 
     /**
@@ -356,7 +371,7 @@ public class ManagementPortalClient {
         }
     }
 
-    private Request buildGetRequest(URL url) {
+    private Request buildGetRequest(URL url) throws IOException {
         return new Request.Builder()
                 .addHeader("Accept", "application/json")
                 .addHeader("Authorization", "Bearer " + getToken())

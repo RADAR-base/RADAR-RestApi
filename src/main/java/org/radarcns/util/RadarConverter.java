@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class RadarConverter {
 
-    private static Logger logger = LoggerFactory.getLogger(RadarConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(RadarConverter.class);
     /**
      * Global JSON factory. If the reader and writer functions in this class are not sufficient, use
      * this factory to create a new ObjectMapper.
@@ -66,10 +66,6 @@ public final class RadarConverter {
      * Generic Avro SpecificRecord to JSON writer.
      */
     public static final ObjectWriter AVRO_JSON_WRITER;
-    /**
-     * Generic JSON reader.
-     */
-    public static final ObjectReader GENERIC_JSON_READER;
 
     static {
         OBJECT_MAPPER = new ObjectMapper(JSON_FACTORY);
@@ -85,8 +81,6 @@ public final class RadarConverter {
         OBJECT_MAPPER.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false);
-
-        GENERIC_JSON_READER = OBJECT_MAPPER.reader();
     }
 
     private RadarConverter() {
@@ -240,10 +234,10 @@ public final class RadarConverter {
      * Returns the expected number of records
      *
      * @param timeWindow {@link TimeWindow} to provide data context
-     * @param frequency {@link Double} to provide data context
+     * @param frequency double to provide data context
      * @return the number of expected messages
      */
-    public static Double getExpectedMessages(TimeWindow timeWindow, Double frequency) {
+    public static double getExpectedMessages(TimeWindow timeWindow, double frequency) {
         return getSecond(timeWindow) * frequency;
     }
 
@@ -253,7 +247,7 @@ public final class RadarConverter {
      * @param timeWindow time window that has to be converted in seconds
      * @return a {@link Long} representing the amount of seconds
      */
-    public static Long getSecond(TimeWindow timeWindow) {
+    public static long getSecond(TimeWindow timeWindow) {
         switch (timeWindow) {
             case TEN_SECOND:
                 return TimeUnit.SECONDS.toSeconds(10);

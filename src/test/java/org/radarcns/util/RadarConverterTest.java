@@ -33,6 +33,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 import java.util.Calendar;
 import java.util.Date;
@@ -74,7 +75,7 @@ public class RadarConverterTest {
 
     @Test
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public void getISO8601TestFromString() throws ParseException {
+    public void getISO8601TestFromString() throws DateTimeParseException {
         Date date = RadarConverter.getISO8601("2017-03-05T22:37:59Z");
 
         Calendar cal = Calendar.getInstance();
@@ -92,7 +93,7 @@ public class RadarConverterTest {
     }
 
     @Test
-    public void getDescriptiveStatisticTest() throws ParseException {
+    public void getDescriptiveStatisticTest() throws DateTimeParseException {
         assertEquals(AVERAGE, RadarConverter.getDescriptiveStatistic(Stat.avg));
         assertEquals(COUNT, RadarConverter.getDescriptiveStatistic(Stat.count));
         assertEquals(MAXIMUM, RadarConverter.getDescriptiveStatistic(Stat.max));
@@ -103,7 +104,7 @@ public class RadarConverterTest {
     }
 
     @Test
-    public void getMongoStatTest() throws ParseException {
+    public void getMongoStatTest() throws DateTimeParseException {
         assertEquals(Stat.avg, RadarConverter.getMongoStat(AVERAGE));
         assertEquals(Stat.count, RadarConverter.getMongoStat(COUNT));
         assertEquals(Stat.iqr, RadarConverter.getMongoStat(INTERQUARTILE_RANGE));
@@ -115,14 +116,14 @@ public class RadarConverterTest {
     }
 
     @Test
-    public void roundDoubleTest() throws ParseException {
+    public void roundDoubleTest() throws DateTimeParseException {
         double value = 1234.56789;
         double expected = 1234.57;
         assertEquals(expected, RadarConverter.roundDouble(value, 2), 0);
     }
 
     @Test
-    public void getServerStatusTest() throws ParseException {
+    public void getServerStatusTest() throws DateTimeParseException {
         assertEquals(ServerStatus.CONNECTED,
                 RadarConverter.getServerStatus(ServerStatus.CONNECTED.toString()));
         assertEquals(ServerStatus.DISCONNECTED,

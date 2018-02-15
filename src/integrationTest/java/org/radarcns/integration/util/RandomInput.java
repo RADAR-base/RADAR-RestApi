@@ -50,8 +50,8 @@ public class RandomInput {
     private static Dataset dataset = null;
     private static List<Document> documents = null;
 
-    private static ExpectedDocumentFactory expectedDocumentFactory = new ExpectedDocumentFactory();
-    private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
+    private static final ExpectedDocumentFactory expectedDocumentFactory = new ExpectedDocumentFactory();
+    private static final ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
 
     private static void randomDoubleValue(String project, String user, String source,
             String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
@@ -124,23 +124,6 @@ public class RandomInput {
     }
 
     /**
-     * Returns a {@code Dataset} randomly generated that mocks the behaviour of the RADAR-CNS
-     * Platform.
-     */
-    public static Dataset getDatasetRandom(String project, String user, String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow)
-            throws InstantiationException, IllegalAccessException {
-        if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
-            return getDataset(project, user, source, sourceType, sensorType, stat,
-                    timeWindow,
-                    samples, singleWindow);
-        }
-        throw new UnsupportedOperationException(sourceType + " is not"
-                + " currently supported.");
-    }
-
-    /**
      * Returns a {@code Collection<Document>} randomly generated that mocks the behaviour of the
      * RADAR-CNS Platform.
      */
@@ -156,14 +139,6 @@ public class RandomInput {
                 throw new UnsupportedOperationException(sourceType + " is not"
                         + " currently supported.");
         }
-    }
-
-    private static Dataset getDataset(String project, String user, String source, String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
-            boolean singleWindow) throws InstantiationException, IllegalAccessException {
-        nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
-                singleWindow);
-        return dataset;
     }
 
     private static List<Document> getDocument(String project, String user, String source,

@@ -45,9 +45,9 @@ public class SourceMonitorServiceDbTest {
     private static final String SOURCETYPE_CATALOGUE_VERSION = "v1";
     private static final String MONITOR_STATISTICS_TOPIC = "Empatica_E4_statistics";
 
-    private static int WINDOWS = 2;
+    private static final int WINDOWS = 2;
 
-    private static MongoClient mongoClient = Utility.getMongoClient();
+    private static final MongoClient mongoClient = Utility.getMongoClient();
 
     private static SourceTypeDTO sourceType;
 
