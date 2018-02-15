@@ -80,7 +80,8 @@ public class EndToEndTest {
 
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
-    private static final ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
+    private static final ExpectedDataSetFactory expectedDataSetFactory =
+            new ExpectedDataSetFactory();
 
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
 

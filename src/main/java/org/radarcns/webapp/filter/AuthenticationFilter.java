@@ -13,6 +13,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.Provider;
 import org.radarcns.auth.RadarSecurityContext;
 import org.radarcns.auth.authentication.TokenValidator;
 import org.radarcns.auth.config.ServerConfig;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
  * Checks the presence and validity of a Management Portal JWT. Will return a 401 HTTP status code
  * otherwise.
  */
+@Provider
 @Authenticated
 @Singleton
 @Priority(1000)
@@ -36,6 +38,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
     private final TokenValidator validator;
 
+    /** Constructs a filter with a fixed validator. */
     public AuthenticationFilter() {
         ServerConfig config = null;
         String mpUrlString = Properties.getApiConfig().getManagementPortalConfig()

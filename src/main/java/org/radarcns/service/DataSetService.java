@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
@@ -94,16 +95,8 @@ public class DataSetService {
     public Dataset getLastReceivedSample(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
             throws IOException {
-        org.radarcns.domain.managementportal.SourceDTO source = managementPortalClient
-                .getSource(sourceId);
-        EffectiveTimeFrame effectiveTimeFrame = sourceMonitorService
-                .getEffectiveTimeFrame(projectName, subjectId, sourceId, sourceCatalog
-                        .getSourceType(source.getSourceType().getProducer(),
-                                source.getSourceType().getModel(),
-                                source.getSourceType().getCatalogVersion()));
         Header header = getHeader(projectName, subjectId, sourceId,
-                sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
-                source.getSourceTypeIdentifier().toString(), effectiveTimeFrame);
+                sourceDataName, stat, timeWindow);
 
         MongoSourceDataWrapper sourceDataWrapper = mongoSensorMap.get(sourceDataName);
 
@@ -128,8 +121,20 @@ public class DataSetService {
     public Dataset getAllDataItems(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
             throws IOException {
-        org.radarcns.domain.managementportal.SourceDTO source = managementPortalClient
-                .getSource(sourceId);
+        Header header = getHeader(projectName, subjectId, sourceId,
+                sourceDataName, stat, timeWindow);
+
+        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
+
+        return sensorDao.getAllRecords(projectName, subjectId, sourceId, header,
+                RadarConverter.getMongoStat(stat), MongoHelper.getCollection(mongoClient,
+                        sensorDao.getCollectionName(timeWindow)));
+    }
+
+    private Header getHeader(String projectName, String subjectId, String sourceId,
+            String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
+            throws IOException {
+        SourceDTO source = managementPortalClient.getSource(sourceId);
 
         EffectiveTimeFrame effectiveTimeFrame = sourceMonitorService
                 .getEffectiveTimeFrame(projectName, subjectId, sourceId, sourceCatalog
@@ -137,15 +142,9 @@ public class DataSetService {
                                 source.getSourceType().getModel(),
                                 source.getSourceType().getCatalogVersion()));
 
-        Header header = getHeader(projectName, subjectId, sourceId,
+        return getHeader(projectName, subjectId, sourceId,
                 sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
                 source.getSourceTypeIdentifier().toString(), effectiveTimeFrame);
-
-        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
-
-        return sensorDao.getAllRecords(projectName, subjectId, sourceId, header,
-                RadarConverter.getMongoStat(stat), MongoHelper.getCollection(mongoClient,
-                        sensorDao.getCollectionName(timeWindow)));
     }
 
     /**
@@ -167,8 +166,7 @@ public class DataSetService {
             TimeWindow timeWindow,
             Long start, Long end) throws IOException {
 
-        org.radarcns.domain.managementportal.SourceDTO source = managementPortalClient
-                .getSource(sourceId);
+        SourceDTO source = managementPortalClient.getSource(sourceId);
 
         EffectiveTimeFrame effectiveTimeFrame = new EffectiveTimeFrame(start, end);
 
@@ -196,10 +194,8 @@ public class DataSetService {
      * @see Dataset
      */
     private Header getHeader(String project, String subject, String source,
-            SourceDataDTO sourceData,
-            DescriptiveStatistic stat, TimeWindow timeWindow, String sourceType,
-            EffectiveTimeFrame effectiveTimeFrame) {
-
+            SourceDataDTO sourceData, DescriptiveStatistic stat, TimeWindow timeWindow,
+            String sourceType, EffectiveTimeFrame effectiveTimeFrame) {
         return new Header(project, subject, source, sourceType, sourceData.getSourceDataType(),
                 stat, sourceData.getUnit(), timeWindow, effectiveTimeFrame);
     }

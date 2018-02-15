@@ -59,7 +59,7 @@ public class SourceMonitorServiceDbTest {
     @Before
     public void setUp() {
         sourceType = new SourceTypeDTO();
-        sourceType.setId(1l);
+        sourceType.setId(1L);
         sourceType.setProducer(SOURCETYPE_PRODUCER);
         sourceType.setCanRegisterDynamically(false);
         sourceType.setModel(SOURCETYPE_MODEL);

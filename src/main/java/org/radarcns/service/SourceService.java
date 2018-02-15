@@ -40,16 +40,16 @@ public class SourceService {
 
     /**
      * Builds list of {@link org.radarcns.domain.restapi.Source} of given subject under project
-     * using provided source. It calculates the {@link org.radarcns.domain.restapi.header.EffectiveTimeFrame}
-     * of each sources as well.
+     * using provided source. It calculates the
+     * {@link org.radarcns.domain.restapi.header.EffectiveTimeFrame} of each sources as well.
      *
      * @param projectId of subject
      * @param subjectId of subject
      * @param sources from MP
      * @return list of sources assigned to subject under given project.
      */
-    public List<org.radarcns.domain.restapi.Source> buildSourcesFromMinimal(String projectId, String
-            subjectId, Collection<MinimalSourceDetailsDTO> sources) {
+    private List<org.radarcns.domain.restapi.Source> buildSourcesFromMinimal(String projectId,
+            String subjectId, Collection<MinimalSourceDetailsDTO> sources) {
         return sources.stream().map(p -> buildSource(projectId, subjectId, p)).collect(Collectors
                 .toList());
     }
@@ -63,7 +63,7 @@ public class SourceService {
      * @param source instance from MP
      * @return computed Source.
      */
-    public org.radarcns.domain.restapi.Source buildSource(String projectId, String subjectId,
+    private org.radarcns.domain.restapi.Source buildSource(String projectId, String subjectId,
             MinimalSourceDetailsDTO source) {
         SourceTypeDTO sourceType;
         // a source fetched from MP should ideally have a source-type

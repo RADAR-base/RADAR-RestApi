@@ -231,7 +231,7 @@ public final class RadarConverter {
     }
 
     /**
-     * Returns the expected number of records
+     * Returns the expected number of records.
      *
      * @param timeWindow {@link TimeWindow} to provide data context
      * @param frequency double to provide data context

@@ -50,13 +50,14 @@ public class RandomInput {
     private static Dataset dataset = null;
     private static List<Document> documents = null;
 
-    private static final ExpectedDocumentFactory expectedDocumentFactory = new ExpectedDocumentFactory();
-    private static final ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
+    private static final ExpectedDocumentFactory expectedDocumentFactory =
+            new ExpectedDocumentFactory();
+    private static final ExpectedDataSetFactory expectedDataSetFactory =
+            new ExpectedDataSetFactory();
 
     private static void randomDoubleValue(String project, String user, String source,
             String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow)
-            throws InstantiationException, IllegalAccessException {
+            int samples, boolean singleWindow) {
         ObservationKey key = new ObservationKey(project, user, source);
         ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
@@ -81,7 +82,7 @@ public class RandomInput {
     private static void randomArrayValue(String project, String user, String source, String
             sourceType,
             String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
-            boolean singleWindow) throws InstantiationException, IllegalAccessException {
+            boolean singleWindow) {
 
         ExpectedArrayValue instance = new ExpectedArrayValue();
 
@@ -112,8 +113,7 @@ public class RandomInput {
      */
     public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user,
             String source, String sourceType, String sensorType, DescriptiveStatistic stat,
-            TimeWindow timeWindow, int samples, boolean singleWindow)
-            throws InstantiationException, IllegalAccessException {
+            TimeWindow timeWindow, int samples, boolean singleWindow) {
         if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
             return getBoth(project, user, source, sourceType, sensorType, stat,
                     timeWindow, samples, singleWindow);
@@ -129,8 +129,7 @@ public class RandomInput {
      */
     public static List<Document> getDocumentsRandom(String project, String user, String source,
             String sourceType, String sensorType, DescriptiveStatistic stat,
-            TimeWindow timeWindow, int samples, boolean singleWindow)
-            throws InstantiationException, IllegalAccessException {
+            TimeWindow timeWindow, int samples, boolean singleWindow) {
         switch (sourceType) {
             case "empatica_e4_v1":
                 return getDocument(project, user, source, sourceType, sensorType, stat,
@@ -143,8 +142,7 @@ public class RandomInput {
 
     private static List<Document> getDocument(String project, String user, String source,
             String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow)
-            throws InstantiationException, IllegalAccessException {
+            int samples, boolean singleWindow) {
         nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
                 singleWindow);
         return documents;
@@ -152,8 +150,7 @@ public class RandomInput {
 
     private static Map<String, Object> getBoth(String project, String user, String source,
             String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow)
-            throws InstantiationException, IllegalAccessException {
+            int samples, boolean singleWindow) {
         nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
                 singleWindow);
 
@@ -165,7 +162,7 @@ public class RandomInput {
 
     private static void nextValue(String project, String user, String source, String sourceType,
             String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
-            boolean singleWindow) throws IllegalAccessException, InstantiationException {
+            boolean singleWindow) {
         switch (sensorType) {
             case "ACCELEROMETER":
                 randomArrayValue(project, user, source, sourceType, sensorType, stat, timeWindow,
@@ -199,11 +196,9 @@ public class RandomInput {
     /**
      * Generates and returns a ApplicationStatus using the given inputs.
      **/
-    public static Map<String, Document> getRandomApplicationStatus(String project, String user,
-            String
-                    source,
-            String ipAddress, ServerStatus serverStatus, Double uptime, int recordsCached,
-            int recordsSent, int recordsUnsent) {
+    private static Map<String, Document> getRandomApplicationStatus(String project, String user,
+            String source, String ipAddress, ServerStatus serverStatus, Double uptime,
+            int recordsCached, int recordsSent, int recordsUnsent) {
         String id = user + "-" + source;
 
         Document uptimeDoc = new Document("_id", id)
@@ -240,7 +235,7 @@ public class RandomInput {
     /**
      * Returns a String representing a random IP address.
      **/
-    public static String getRandomIpAddress() {
+    private static String getRandomIpAddress() {
         long ip = ThreadLocalRandom.current().nextLong();
         StringBuilder result = new StringBuilder(15);
 

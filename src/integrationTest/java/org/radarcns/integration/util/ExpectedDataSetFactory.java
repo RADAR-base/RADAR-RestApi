@@ -57,7 +57,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      */
     public Dataset getDataset(ExpectedValue expectedValue, String projectName, String subjectId,
             String sourceId, String sourceType, String sensorType, DescriptiveStatistic statistic,
-            TimeWindow timeWindow) throws InstantiationException, IllegalAccessException {
+            TimeWindow timeWindow) {
 
         Header header = getHeader(expectedValue, projectName, subjectId, sourceId, sourceType,
                 sensorType, statistic, timeWindow);
@@ -123,8 +123,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @return {@code List<Item>} for a {@link Dataset}
      * @see DataItem
      **/
-    public List<DataItem> getItem(ExpectedValue<?> expectedValue, Header header)
-            throws IllegalAccessException, InstantiationException {
+    public List<DataItem> getItem(ExpectedValue<?> expectedValue, Header header) {
 
         if (expectedValue.getSeries().isEmpty()) {
             return Collections.emptyList();
@@ -201,8 +200,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @return {@code List<Item>} for a data set represented as {@code Double}.
      **/
     private List<DataItem> getSingletonItems(ExpectedValue expectedValue,
-            Collection<Long> keys, DescriptiveStatistic statistic)
-            throws InstantiationException, IllegalAccessException {
+            Collection<Long> keys, DescriptiveStatistic statistic) {
         List<DataItem> items = new LinkedList<>();
 
         for (Long key : keys) {
