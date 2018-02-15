@@ -30,7 +30,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -83,9 +82,9 @@ public class SubjectEndPointTest {
 
     private static Document getDocumentsForStatistics(Object start, Object end) {
         Document value = new Document()
-                .append(START , start)
+                .append(START, start)
                 .append(END, end);
-        return buildDocument(PROJECT_NAME, SUBJECT_ID, SOURCE_ID, start, end , value);
+        return buildDocument(PROJECT_NAME, SUBJECT_ID, SOURCE_ID, start, end, value);
     }
 
     private void insertMonitorStatistics() {

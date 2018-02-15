@@ -19,8 +19,6 @@ package org.radarcns.integration.util;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusServerStatus.STATUS_COLLECTION;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusUpTime.UPTIME_COLLECTION;
-import static org.radarcns.mongo.util.MongoHelper.END;
-import static org.radarcns.mongo.util.MongoHelper.START;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.MongoClient;
@@ -32,7 +30,6 @@ import java.util.Map;
 import org.bson.Document;
 import org.radarcns.config.Properties;
 import org.radarcns.domain.restapi.Application;
-import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
@@ -88,13 +85,15 @@ public class Utility {
     //TODO take field names from RADAR Mongo Connector
     public static Application convertDocToApplication(Map<String, Document> documents) {
         return new Application(
-                ((Document)documents.get(STATUS_COLLECTION).get(VALUE)).getString("clientIP"),
-                ((Document)documents.get(UPTIME_COLLECTION).get(VALUE)).getDouble("uptime"),
+                ((Document) documents.get(STATUS_COLLECTION).get(VALUE)).getString("clientIP"),
+                ((Document) documents.get(UPTIME_COLLECTION).get(VALUE)).getDouble("uptime"),
                 RadarConverter.getServerStatus(
-                        ((Document)documents.get(STATUS_COLLECTION).get(VALUE)).getString("serverStatus")),
-                ((Document)documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsCached"),
-                ((Document)documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsSent"),
-                ((Document)documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsUnsent")
+                        ((Document) documents.get(STATUS_COLLECTION).get(VALUE))
+                                .getString("serverStatus")),
+                ((Document) documents.get(RECORD_COLLECTION).get(VALUE))
+                        .getInteger("recordsCached"),
+                ((Document) documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsSent"),
+                ((Document) documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsUnsent")
         );
     }
 

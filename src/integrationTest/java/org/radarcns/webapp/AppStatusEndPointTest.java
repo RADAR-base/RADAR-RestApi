@@ -25,8 +25,6 @@ import static org.radarcns.webapp.resource.BasePath.APPLICATION_STATUS;
 
 import com.mongodb.MongoClient;
 import java.io.IOException;
-import java.util.List;
-import java.net.URISyntaxException;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
 import org.bson.Document;

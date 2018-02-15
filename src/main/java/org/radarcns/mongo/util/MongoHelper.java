@@ -16,18 +16,12 @@
 
 package org.radarcns.mongo.util;
 
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.gte;
-import static com.mongodb.client.model.Filters.lte;
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
-import java.util.Date;
 import org.bson.Document;
 import org.radarcns.config.Properties;
 
@@ -140,6 +134,7 @@ public class MongoHelper {
                 .append(KEY.concat(".").concat(SOURCE_ID), sourceId);
 
     }
+
     /**
      * Returns the needed MongoDB collection.
      *
