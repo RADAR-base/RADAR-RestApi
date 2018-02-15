@@ -36,6 +36,7 @@ import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.States;
 import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,29 +85,18 @@ public class SourceMonitorService {
                     sourceType.getSourceStatisticsMonitorTopic());
         }
 
-        Date start = null;
-        Date end = null;
+        long timeStart = Long.MIN_VALUE;
+        long timeEnd = Long.MAX_VALUE;
         if (cursor.hasNext()) {
             Document document = cursor.next();
             Document key = (Document) document.get(KEY);
-            Date localStart = key.getDate(START);
-            Date localEnd = key.getDate(END);
-            if (start == null) {
-                start = localStart;
-                end = localEnd;
-            } else {
-                if (start.after(localStart)) {
-                    start = localStart;
-                }
-                if (end.before(localEnd)) {
-                    end = localEnd;
-                }
-            }
+            timeStart = Math.max(timeStart , key.getDate(START).getTime());
+            timeEnd = Math.min(timeEnd, key.getDate(END).getTime());
         }
 
         cursor.close();
-        return new EffectiveTimeFrame(start == null ? Date.from(Instant.now()) : start,
-                end == null ? Date.from(Instant.now()) : end);
+        return new EffectiveTimeFrame(RadarConverter.getISO8601(timeStart), RadarConverter
+                .getISO8601(timeEnd));
 
     }
 
