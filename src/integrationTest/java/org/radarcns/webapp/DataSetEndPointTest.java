@@ -25,6 +25,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.AVERAGE;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.integration.util.RandomInput.DATASET;
 import static org.radarcns.integration.util.RandomInput.DOCUMENTS;
 import static org.radarcns.webapp.resource.BasePath.DATA;
@@ -35,6 +36,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
@@ -45,6 +47,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.format.Acceleration;
+import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
@@ -157,7 +161,43 @@ public class DataSetEndPointTest {
         assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
         assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
         assertEquals(expected.getDataset().size(), dataset.dataset.size());
+        Map sample = (HashMap)dataset.getDataset().get(0).getSample();
+        assertEquals(expected.getDataset().get(0).getSample(), new Acceleration(sample.get("x"), sample.get
+                ("y") , sample.get("z")));
 
+        dropAndClose(client);
+    }
+
+    @Test
+    public void getAllRecordsWithQuartiles()
+            throws IOException, ReflectiveOperationException, URISyntaxException {
+        MongoClient client = Utility.getMongoClient();
+
+        MongoCollection<Document> collection = MongoHelper
+                .getCollection(client, COLLECTION_NAME);
+        Map<String, Object> docs = RandomInput
+                .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
+                        SOURCE_TYPE, SOURCE_DATA_NAME, QUARTILES, TIME_WINDOW, SAMPLES, false);
+
+        collection.insertMany((List<Document>) docs.get(DOCUMENTS));
+
+        Dataset expected = (Dataset) docs.get(DATASET);
+        String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
+                + SOURCE_DATA_NAME + '/' + QUARTILES + '/' + TIME_WINDOW;
+
+        Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
+        assertTrue(actual.isSuccessful());
+        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
+        Dataset dataset = reader.readValue(actual.body().byteStream());
+        assertNotNull(dataset);
+        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
+        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
+        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
+        assertEquals(expected.getDataset().size(), dataset.dataset.size());
+        Map sample = (HashMap) dataset.getDataset().get(0).getSample();
+        assertEquals(expected.getDataset().get(0).getSample(),
+                new Quartiles((Double) sample.get("first"), (Double) sample.get("second"),
+                        (Double) sample.get("third")));
         dropAndClose(client);
     }
 

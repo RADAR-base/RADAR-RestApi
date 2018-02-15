@@ -68,10 +68,10 @@ public class DataItem {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        DataItem sourceType = (DataItem) o;
+        DataItem dataItem = (DataItem) o;
 
-        return Objects.equals(sample, sourceType.sample)
-                && Objects.equals(startDateTime, sourceType.startDateTime);
+        return Objects.equals(sample, dataItem.sample)
+                && Objects.equals(startDateTime, dataItem.startDateTime);
     }
 
     @Override

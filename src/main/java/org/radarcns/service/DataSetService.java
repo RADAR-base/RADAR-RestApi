@@ -215,8 +215,8 @@ public class DataSetService {
     }
 
     /**
-     * Returns {@link EffectiveTimeFrame} during which the {@link org.radarcns.domain.managementportal.SubjectDTO}
-     * have sent data.
+     * Returns {@link EffectiveTimeFrame} during which the
+     * {@link org.radarcns.domain.managementportal.SubjectDTO} have sent data.
      *
      * @param subject subject identifier
      * @return {@link EffectiveTimeFrame} of the subject in relevant project.

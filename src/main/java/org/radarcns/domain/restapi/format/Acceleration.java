@@ -1,6 +1,7 @@
 package org.radarcns.domain.restapi.format;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 
 public class Acceleration {
 
@@ -63,5 +64,26 @@ public class Acceleration {
 
     public void setZ(Object z) {
         this.z = z;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Acceleration acceleration = (Acceleration) o;
+
+        return Objects.equals(x, acceleration.x)
+                && Objects.equals(y, acceleration.y)
+                && Objects.equals(z, acceleration.z);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, z);
     }
 }

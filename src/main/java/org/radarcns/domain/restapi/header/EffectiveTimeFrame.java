@@ -2,6 +2,7 @@ package org.radarcns.domain.restapi.header;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
+import java.util.Objects;
 import org.radarcns.util.RadarConverter;
 
 public class EffectiveTimeFrame {
@@ -46,5 +47,24 @@ public class EffectiveTimeFrame {
 
     public void setEndDateTime(String endDateTime) {
         this.endDateTime = endDateTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        EffectiveTimeFrame effectiveTimeFrame = (EffectiveTimeFrame) o;
+
+        return Objects.equals(startDateTime, effectiveTimeFrame.startDateTime)
+                && Objects.equals(endDateTime, effectiveTimeFrame.endDateTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(startDateTime, endDateTime);
     }
 }
