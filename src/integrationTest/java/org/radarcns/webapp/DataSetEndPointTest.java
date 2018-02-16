@@ -289,7 +289,7 @@ public class DataSetEndPointTest {
                 dataset.getHeader().getEffectiveTimeFrame().getStartDateTime());
         assertEquals(RadarConverter.getISO8601(end),
                 dataset.getHeader().getEffectiveTimeFrame().getEndDateTime());
-        assertEquals(window , dataset.getHeader().getTimeWindow());
+        assertEquals(window, dataset.getHeader().getTimeWindow());
 
         dropAndClose(client);
     }
