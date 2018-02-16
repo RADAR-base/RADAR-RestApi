@@ -84,19 +84,14 @@ public class DataSetEndPoint {
     @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + SOURCE_DATA_NAME
             + "}/{" + STAT + "}/" + LATEST)
-    @Operation(summary = "Returns a dataset object formatted in JSON.",
+    @Operation(summary = "Returns a Dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
-                    + "statistical "
-                    + "results. This end-point returns the last computed result of type stat for "
-                    + "the "
-                    + "given subjectID, sourceID, and sensor. Data can be queried using different "
-                    + "time-frame resolutions. The response is formatted in JSON.")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body "
-            + "there is a message.avsc object with more details.")
-    @ApiResponse(responseCode = "200", description =
-            "Returns a dataset.avsc object containing last "
-                    + "computed sample for the given inputs formatted either Acceleration.avsc or "
-                    + "DoubleValue.avsc")
+                    + "statistical results. This end-point returns the latest available record "
+                    + "for the stat for the given projectID, subjectID, sourceID and SourceDataName"
+                    + " Data can be queried using different time-frame resolutions.")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "200", description = "Returns a dataset object containing latest "
+            + "available record for the given inputs")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")
@@ -138,17 +133,14 @@ public class DataSetEndPoint {
     @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + SOURCE_DATA_NAME
             + "}/{" + STAT + "}")
-    @Operation(summary = "Returns a dataset object formatted in JSON.",
+    @Operation(summary = "Returns a Dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
-                    + "statistical "
-                    + "results. This end-point returns all available results of type stat for the "
-                    + "given subjectID, sourceID, and sensor. Data can be queried using different "
-                    + "time-frame resolutions. The response is formatted in JSON.")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body "
-            + "there is a message.avsc object with more details.")
-    @ApiResponse(responseCode = "200", description = "Returns a dataset.avsc object containing all "
-            + "available samples for the given inputs formatted either Acceleration.avsc or "
-            + "DoubleValue.avsc")
+                    + "statistical results. This end-point returns the all available record "
+                    + "for the stat for the given projectID, subjectID, sourceID and SourceDataName"
+                    + " Data can be queried using different time-frame resolutions.")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "200", description = "Returns a dataset object containing all "
+            + "available record for the given inputs")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")

@@ -38,8 +38,7 @@ public class ProjectEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Returns a list of projects",
             description = "Each project can have multiple source-types associated with it")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Return a list of project objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
@@ -55,18 +54,13 @@ public class ProjectEndPoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{" + PROJECT_NAME + "}")
     @Operation(summary = "Return the information related to given project identifier",
-            description = "Each project can have multiple deviceID associated with it")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "404", description =
-            "No value for the given parameters, in the body"
-                    + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description =
-            "Return the project object associated with the "
-                    + "given project identifier")
+            description = "Each project can have multiple source-types associated with it")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "200", description = "Return the project object associated with "
+            + "the given project identifier")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Project not found")
+    @ApiResponse(responseCode = "404", description = "Project cannot be found")
     @NeedsPermission(entity = PROJECT, operation = READ)
     public ProjectDTO getProjectJson(
             @PathParam(PROJECT_NAME) String projectName) throws IOException {
