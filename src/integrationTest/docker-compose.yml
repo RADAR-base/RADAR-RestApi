@@ -20,21 +20,21 @@ services:
         RADAR_PWD: radar
         RADAR_DB: hotstorage
 
-#    #----------------------------------------#
-#    #             RADAR Rest Api             #
-#    #----------------------------------------#
-#    rest-api:
-#      image: radarcns/radar-restapi:dev
-#      depends_on:
-#        - hotstorage
-#        - managementportal-app
-#      networks:
-#        - simplestack
-#      ports:
-#        - "8080:8080"
-#      volumes:
-#        - ./volumes/radar:/usr/local/conf/radar/rest-api
-#        - ../test/resources/org/radarcns/status/hdfs/bins.csv:/var/lib/hdfs/output/bins.csv
+    #----------------------------------------#
+    #             RADAR Rest Api             #
+    #----------------------------------------#
+    rest-api:
+      image: radarcns/radar-restapi:dev
+      depends_on:
+        - hotstorage
+        - managementportal-app
+      networks:
+        - simplestack
+      ports:
+        - "8080:8080"
+      volumes:
+        - ./volumes/radar:/usr/local/conf/radar/rest-api
+        - ../test/resources/org/radarcns/status/hdfs/bins.csv:/var/lib/hdfs/output/bins.csv
 
     #---------------------------------------------------------------------------#
     # Management Portal                                                         #
