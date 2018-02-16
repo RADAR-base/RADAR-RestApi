@@ -16,6 +16,7 @@
 
 package org.radarcns.webapp;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
@@ -36,6 +37,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +58,7 @@ import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
+import org.radarcns.webapp.resource.Parameter;
 
 public class DataSetEndPointTest {
 
@@ -161,9 +165,10 @@ public class DataSetEndPointTest {
         assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
         assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
         assertEquals(expected.getDataset().size(), dataset.dataset.size());
-        Map sample = (HashMap)dataset.getDataset().get(0).getSample();
-        assertEquals(expected.getDataset().get(0).getSample(), new Acceleration(sample.get("x"), sample.get
-                ("y") , sample.get("z")));
+        Map sample = (HashMap) dataset.getDataset().get(0).getSample();
+        assertEquals(expected.getDataset().get(0).getSample(),
+                new Acceleration(sample.get("x"), sample.get
+                        ("y"), sample.get("z")));
 
         dropAndClose(client);
     }
@@ -205,7 +210,9 @@ public class DataSetEndPointTest {
     public void getAllRecordsWithQuartilesInTimeRange()
             throws IOException, ReflectiveOperationException, URISyntaxException {
         MongoClient client = Utility.getMongoClient();
-
+        Instant now = Instant.now();
+        Date start = Date.from(now.plus(RadarConverter.getSecond(TIME_WINDOW), SECONDS));
+        Date end = Date.from(now.plus(7 * RadarConverter.getSecond(TIME_WINDOW), SECONDS));
         MongoCollection<Document> collection = MongoHelper
                 .getCollection(client, COLLECTION_NAME);
         Map<String, Object> docs = RandomInput
@@ -216,7 +223,9 @@ public class DataSetEndPointTest {
 
         Dataset expected = (Dataset) docs.get(DATASET);
         String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
-                + SOURCE_DATA_NAME + '/' + QUARTILES + '/' + TIME_WINDOW;
+                + SOURCE_DATA_NAME + '/' + QUARTILES + '/' + TIME_WINDOW + '?'
+                + Parameter.START + '=' + RadarConverter.getISO8601(start) + '&'
+                + Parameter.END + '=' + RadarConverter.getISO8601(end);
 
         Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
@@ -226,11 +235,8 @@ public class DataSetEndPointTest {
         assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
         assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
         assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
-        assertEquals(expected.getDataset().size(), dataset.dataset.size());
-        Map sample = (HashMap) dataset.getDataset().get(0).getSample();
-        assertEquals(expected.getDataset().get(0).getSample(),
-                new Quartiles((Double) sample.get("first"), (Double) sample.get("second"),
-                        (Double) sample.get("third")));
+        assertTrue(dataset.getDataset().size() < 7 && dataset.getDataset().size() >= 5);
+
         dropAndClose(client);
     }
 

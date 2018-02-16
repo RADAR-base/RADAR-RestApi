@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
@@ -82,7 +83,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             TimeWindow timeWindow) {
         return new Header(projectName, subjectId, sourceId, sourceType, sensorType, statistic,
                 null, timeWindow,
-                getEffectiveTimeFrame(expectedValue));
+                getEffectiveTimeFrame(expectedValue, timeWindow));
     }
 
     /**
@@ -91,13 +92,15 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @return {@code EffectiveTimeFrame} for the simulated inteval.
      * @see EffectiveTimeFrame
      */
-    public EffectiveTimeFrame getEffectiveTimeFrame(ExpectedValue<?> expectedValue) {
+    public EffectiveTimeFrame getEffectiveTimeFrame(ExpectedValue<?> expectedValue, TimeWindow
+            timeWindow) {
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
 
         return new EffectiveTimeFrame(
                 RadarConverter.getISO8601(new Date(windows.get(0))),
-                RadarConverter.getISO8601(new Date(windows.get(windows.size() - 1))));
+                RadarConverter.getISO8601(new Date(windows.get(windows.size() - 1)
+                        + TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow)))));
     }
 
 

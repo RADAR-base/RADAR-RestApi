@@ -69,7 +69,7 @@ public class RandomInput {
         if (singleWindow) {
             numberOfRecords = 1;
         }
-        long now = Instant.now().getEpochSecond();
+        long now = Instant.now().toEpochMilli();
         for (int i = 0; i < numberOfRecords; i++) {
             instance.add(key, now, ThreadLocalRandom.current().nextDouble());
             now += TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow));
@@ -77,7 +77,7 @@ public class RandomInput {
 
         dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
                 sensorType, stat, timeWindow);
-        documents = expectedDocumentFactory.produceExpectedData(instance);
+        documents = expectedDocumentFactory.produceExpectedDocuments(instance, timeWindow);
     }
 
     private static void randomArrayValue(String project, String user, String source,
@@ -105,7 +105,7 @@ public class RandomInput {
         dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
                 sensorType,
                 stat, timeWindow);
-        documents = expectedDocumentFactory.produceExpectedData(instance);
+        documents = expectedDocumentFactory.produceExpectedDocuments(instance, timeWindow);
     }
 
     /**

@@ -39,12 +39,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.bson.Document;
+import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.util.RadarConverter;
 
 /**
  * It computes the expected Documents for a test case i.e. {@link ExpectedValue}.
@@ -105,20 +108,20 @@ public class ExpectedDocumentFactory {
     }
 
 
-    private List<Document> getDocumentsBySingle(ExpectedValue<?> expectedValue) {
+    private List<Document> getDocumentsBySingle(ExpectedValue<?> expectedValue , TimeWindow timeWindow) {
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
 
         List<Document> list = new ArrayList<>(windows.size());
-        long start = windows.get(0);
+
         for (Long timestamp : windows) {
             DoubleValueCollector doubleValueCollector = (DoubleValueCollector) expectedValue
                     .getSeries().get(timestamp);
-
+            long end = timestamp + TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow));
             list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
                     expectedValue.getLastKey().getUserId(),
-                    expectedValue.getLastKey().getSourceId(), new Date(start), new Date(timestamp),
+                    expectedValue.getLastKey().getSourceId(), new Date(timestamp), new Date(end),
                     getDocumentFromDoubleValueCollector("batteryLevel", doubleValueCollector)));
         }
 
@@ -198,7 +201,8 @@ public class ExpectedDocumentFactory {
      * @param expectedValue for test
      * @return {@link List} of {@link Document}s
      */
-    public List<Document> produceExpectedData(ExpectedValue expectedValue) {
+    public List<Document> produceExpectedDocuments(ExpectedValue expectedValue, TimeWindow
+            timeWindow) {
         Map series = expectedValue.getSeries();
         if (series.isEmpty()) {
             return Collections.emptyList();
@@ -207,7 +211,7 @@ public class ExpectedDocumentFactory {
         if (firstCollector instanceof DoubleArrayCollector) {
             return getDocumentsByArray(expectedValue);
         } else {
-            return getDocumentsBySingle(expectedValue);
+            return getDocumentsBySingle(expectedValue ,timeWindow);
         }
     }
 }
