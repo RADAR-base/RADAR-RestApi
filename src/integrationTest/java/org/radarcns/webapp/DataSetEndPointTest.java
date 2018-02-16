@@ -167,8 +167,7 @@ public class DataSetEndPointTest {
         assertEquals(expected.getDataset().size(), dataset.dataset.size());
         Map sample = (HashMap) dataset.getDataset().get(0).getSample();
         assertEquals(expected.getDataset().get(0).getSample(),
-                new Acceleration(sample.get("x"), sample.get
-                        ("y"), sample.get("z")));
+                new Acceleration(sample.get("x"), sample.get("y"), sample.get("z")));
 
         dropAndClose(client);
     }

@@ -81,7 +81,7 @@ public class SourceMonitorService {
         if (cursor.hasNext()) {
             Document document = cursor.next();
             Document key = (Document) document.get(KEY);
-            timeStart = Math.min(timeStart , key.getDate(START).getTime());
+            timeStart = Math.min(timeStart, key.getDate(START).getTime());
             timeEnd = Math.max(timeEnd, key.getDate(END).getTime());
         }
 

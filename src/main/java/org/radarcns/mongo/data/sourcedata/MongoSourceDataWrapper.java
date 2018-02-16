@@ -195,7 +195,7 @@ public abstract class MongoSourceDataWrapper {
 
         cursor.close();
         // reset EffectiveTimeFrame if it is not set
-        if(Long.MAX_VALUE == RadarConverter.getISO8601(header.getEffectiveTimeFrame()
+        if (Long.MAX_VALUE == RadarConverter.getISO8601(header.getEffectiveTimeFrame()
                 .getStartDateTime())
                 .getTime()) {
             EffectiveTimeFrame etf = new EffectiveTimeFrame(start, end);

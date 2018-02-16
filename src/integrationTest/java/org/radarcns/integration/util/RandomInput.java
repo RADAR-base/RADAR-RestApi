@@ -216,19 +216,19 @@ public class RandomInput {
                 .append("recordsUnsent", recordsUnsent);
 
         Map<String, Document> documents = new HashMap<>();
-        documents.put(STATUS_COLLECTION, buildDocument(project, user, source, statusDoc));
-        documents.put(RECORD_COLLECTION, buildDocument(project, user, source, recordsDoc));
-        documents.put(UPTIME_COLLECTION, buildDocument(project, user, source, uptimeDoc));
+        documents.put(STATUS_COLLECTION, buildAppStatusDocument(project, user, source, statusDoc));
+        documents.put(RECORD_COLLECTION, buildAppStatusDocument(project, user, source, recordsDoc));
+        documents.put(UPTIME_COLLECTION, buildAppStatusDocument(project, user, source, uptimeDoc));
         return documents;
     }
 
-    public static Document buildKeyDocument(String projectName, String subjectId, String sourceId) {
+    private static Document buildKeyDocument(String projectName, String subjectId, String sourceId) {
         return new Document().append(PROJECT_ID, projectName)
                 .append(USER_ID, subjectId)
                 .append(SOURCE_ID, sourceId);
     }
 
-    public static Document buildDocument(String projectName, String subjectId, String sourceId,
+    private static Document buildAppStatusDocument(String projectName, String subjectId, String sourceId,
             Document value) {
         return new Document().append(ID, "{"
                 + PROJECT_ID + ":" + projectName + ","

@@ -108,7 +108,8 @@ public class ExpectedDocumentFactory {
     }
 
 
-    private List<Document> getDocumentsBySingle(ExpectedValue<?> expectedValue , TimeWindow timeWindow) {
+    private List<Document> getDocumentsBySingle(ExpectedValue<?> expectedValue,
+            TimeWindow timeWindow) {
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
@@ -140,7 +141,7 @@ public class ExpectedDocumentFactory {
                 .append(Stat.quartile.getParam(), getStatValue(QUARTILES, doubleValueCollector));
     }
 
-    public static Document buildKeyDocument(String projectName, String subjectId, String sourceId,
+    private static Document buildKeyDocument(String projectName, String subjectId, String sourceId,
             Object start, Object end) {
         return new Document().append(PROJECT_ID, projectName)
                 .append(USER_ID, subjectId)
@@ -149,6 +150,16 @@ public class ExpectedDocumentFactory {
                 .append(END, end);
     }
 
+    /**
+     * Builds a {@link Document} from given parameter values.
+     * @param projectName of the subject
+     * @param subjectId of the subject
+     * @param sourceId of the source
+     * @param start of the measurement
+     * @param end of the measurement
+     * @param value document
+     * @return built document
+     */
     public static Document buildDocument(String projectName, String subjectId, String sourceId,
             Object start, Object end, Document value) {
         return new Document().append(ID, "{"
@@ -211,7 +222,7 @@ public class ExpectedDocumentFactory {
         if (firstCollector instanceof DoubleArrayCollector) {
             return getDocumentsByArray(expectedValue);
         } else {
-            return getDocumentsBySingle(expectedValue ,timeWindow);
+            return getDocumentsBySingle(expectedValue, timeWindow);
         }
     }
 }

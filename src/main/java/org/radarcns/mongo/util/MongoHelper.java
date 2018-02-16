@@ -91,9 +91,10 @@ public class MongoHelper {
             String projectName, String subjectId, String sourceId, Date start, Date end,
             MongoCollection<Document> collection) {
         BasicDBObject query = getByProjectSubjectSource(projectName, subjectId, sourceId)
-                .append(KEY.concat(".").concat(START), new BasicDBObject("$gte" , start))
-                .append(KEY.concat(".").concat(END), new BasicDBObject("$lte" , end));
-        FindIterable<Document> result = collection.find(query).sort(new BasicDBObject(START, ASCENDING));
+                .append(KEY.concat(".").concat(START), new BasicDBObject("$gte", start))
+                .append(KEY.concat(".").concat(END), new BasicDBObject("$lte", end));
+        FindIterable<Document> result = collection.find(query)
+                .sort(new BasicDBObject(START, ASCENDING));
 
         return result.iterator();
     }
