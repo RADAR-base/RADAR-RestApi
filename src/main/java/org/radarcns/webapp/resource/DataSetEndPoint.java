@@ -19,6 +19,7 @@ package org.radarcns.webapp.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
+import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.resource.BasePath.DATA;
 import static org.radarcns.webapp.resource.BasePath.LATEST;
@@ -53,6 +54,7 @@ import org.radarcns.service.DataSetService;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
+import org.radarcns.webapp.validation.ISO8601DateString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +83,7 @@ public class DataSetEndPoint {
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + SOURCE_DATA_NAME
-            + "}/{" + STAT + "}/{" + TIME_WINDOW + "}/" + LATEST)
+            + "}/{" + STAT + "}/" + LATEST)
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical "
@@ -105,16 +107,17 @@ public class DataSetEndPoint {
             @Alphanumeric @PathParam(SOURCE_ID) String sourceId,
             @Alphanumeric @PathParam(SOURCE_DATA_NAME) String sourceDataName,
             @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(TIME_WINDOW) TimeWindow interval) throws IOException {
+            @QueryParam(TIME_WINDOW) TimeWindow interval) throws IOException {
         // todo: 404 if given source does not exist.
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
+        // if timeWindow is not set use default TEN_SECOND
+        TimeWindow timeWindow = interval != null ? interval : TEN_SECOND;
 
         Dataset dataset = this.dataSetService
                 .getLastReceivedSample(projectName, subjectId, sourceId, sourceDataName, stat,
-                        interval);
-
+                        timeWindow);
         if (dataset.getDataset().isEmpty()) {
             LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
             return emptyDataset(projectName, subjectId, sourceId, sourceDataName, stat, interval,
@@ -134,7 +137,7 @@ public class DataSetEndPoint {
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/{" + SOURCE_ID + "}/{" + SOURCE_DATA_NAME
-            + "}/{" + STAT + "}/{" + TIME_WINDOW + "}")
+            + "}/{" + STAT + "}")
     @Operation(summary = "Returns a dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical "
@@ -156,21 +159,24 @@ public class DataSetEndPoint {
             @Alphanumeric @PathParam(SOURCE_ID) String sourceId,
             @Alphanumeric @PathParam(SOURCE_DATA_NAME) String sourceDataName,
             @PathParam(STAT) DescriptiveStatistic stat,
-            @PathParam(TIME_WINDOW) TimeWindow interval,
-            @QueryParam(START) String start,
-            @QueryParam(END) String end) throws IOException {
+            @QueryParam(TIME_WINDOW) TimeWindow interval,
+            @ISO8601DateString @QueryParam(START) String start,
+            @ISO8601DateString @QueryParam(END) String end) throws IOException {
         // todo: 404 if given source does not exist.
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
         mpClient.getSubject(subjectId);
         Dataset dataset;
+
+        TimeWindow timeWindow = interval != null ? interval : TEN_SECOND;
+
         if (start != null && end != null) {
             dataset = dataSetService.getAllRecordsInWindow(projectName,
-                    subjectId, sourceId, sourceDataName, stat, interval,
+                    subjectId, sourceId, sourceDataName, stat, timeWindow,
                     RadarConverter.getISO8601(start), RadarConverter.getISO8601(end));
         } else {
             dataset = dataSetService.getAllDataItems(projectName, subjectId,
-                    sourceId, sourceDataName, stat, interval);
+                    sourceId, sourceDataName, stat, timeWindow);
         }
 
         if (dataset.getDataset().isEmpty()) {

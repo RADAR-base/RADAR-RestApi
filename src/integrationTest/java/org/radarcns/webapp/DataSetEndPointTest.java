@@ -70,7 +70,7 @@ public class DataSetEndPointTest {
     private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
     private static final String REQUEST_PATH = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
-            + SOURCE_DATA_NAME + '/' + COUNT + '/' + TIME_WINDOW;
+            + SOURCE_DATA_NAME + '/' + COUNT;
     private static final String COLLECTION_NAME = "android_empatica_e4_battery_level_output";
     private static final String ACCELERATION_COLLECTION = "android_empatica_e4_acceleration_output";
 
@@ -95,7 +95,9 @@ public class DataSetEndPointTest {
         Dataset expected = (Dataset) docs.get(DATASET);
 
         Response actual = apiClient
-                .request(REQUEST_PATH + '/' + LATEST, APPLICATION_JSON, Status.OK);
+                .request(REQUEST_PATH + '/' + LATEST
+                                + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW, APPLICATION_JSON,
+                        Status.OK);
         assertTrue(actual.isSuccessful());
         ObjectReader reader = RadarConverter.readerFor(Dataset.class);
         Dataset dataset = reader.readValue(actual.body().byteStream());
@@ -124,7 +126,10 @@ public class DataSetEndPointTest {
 
         Dataset expected = (Dataset) docs.get(DATASET);
 
-        Response actual = apiClient.request(REQUEST_PATH, APPLICATION_JSON, Status.OK);
+        Response actual = apiClient
+                .request(REQUEST_PATH + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW,
+                        APPLICATION_JSON,
+                        Status.OK);
         assertTrue(actual.isSuccessful());
         ObjectReader reader = RadarConverter.readerFor(Dataset.class);
         Dataset dataset = reader.readValue(actual.body().byteStream());
@@ -154,7 +159,7 @@ public class DataSetEndPointTest {
 
         Dataset expected = (Dataset) docs.get(DATASET);
         String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
-                + sourceDataName + '/' + AVERAGE + '/' + TIME_WINDOW;
+                + sourceDataName + '/' + AVERAGE + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW;
 
         Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
@@ -187,7 +192,8 @@ public class DataSetEndPointTest {
 
         Dataset expected = (Dataset) docs.get(DATASET);
         String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
-                + SOURCE_DATA_NAME + '/' + QUARTILES + '/' + TIME_WINDOW;
+                + SOURCE_DATA_NAME + '/' + QUARTILES + '?' + Parameter.TIME_WINDOW + '='
+                + TIME_WINDOW;
 
         Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
@@ -222,7 +228,8 @@ public class DataSetEndPointTest {
 
         Dataset expected = (Dataset) docs.get(DATASET);
         String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
-                + SOURCE_DATA_NAME + '/' + QUARTILES + '/' + TIME_WINDOW + '?'
+                + SOURCE_DATA_NAME + '/' + QUARTILES + '/' + '?'
+                + Parameter.TIME_WINDOW + '=' + TIME_WINDOW + '&'
                 + Parameter.START + '=' + RadarConverter.getISO8601(start) + '&'
                 + Parameter.END + '=' + RadarConverter.getISO8601(end);
 
@@ -235,6 +242,10 @@ public class DataSetEndPointTest {
         assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
         assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
         assertTrue(dataset.getDataset().size() < 7 && dataset.getDataset().size() >= 5);
+        assertEquals(RadarConverter.getISO8601(start),
+                dataset.getHeader().getEffectiveTimeFrame().getStartDateTime());
+        assertEquals(RadarConverter.getISO8601(end),
+                dataset.getHeader().getEffectiveTimeFrame().getEndDateTime());
 
         dropAndClose(client);
     }
