@@ -166,8 +166,8 @@ public class DataSetEndPoint {
         Dataset dataset;
         if (start != null && end != null) {
             dataset = dataSetService.getAllRecordsInWindow(projectName,
-                    subjectId, sourceId, sourceDataName, stat, interval, RadarConverter.getISO8601(start),
-                    RadarConverter.getISO8601(end));
+                    subjectId, sourceId, sourceDataName, stat, interval,
+                    RadarConverter.getISO8601(start), RadarConverter.getISO8601(end));
         } else {
             dataset = dataSetService.getAllDataItems(projectName, subjectId,
                     sourceId, sourceDataName, stat, interval);

@@ -89,22 +89,18 @@ public class RandomInput {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         ObservationKey key = new ObservationKey(project, user, source);
 
-        long start = System.currentTimeMillis();
-
-        for (int i = 0; i < samples; i++) {
-            instance.add(key, start, random.nextDouble(), random.nextDouble(), random.nextDouble());
-
-            if (singleWindow) {
-                start += 1;
-            } else {
-                start += TimeUnit.SECONDS.toMillis(
-                        ThreadLocalRandom.current().nextLong(1, 15));
-            }
+        int numberOfRecords = samples;
+        if (singleWindow) {
+            numberOfRecords = 1;
+        }
+        long now = Instant.now().toEpochMilli();
+        for (int i = 0; i < numberOfRecords; i++) {
+            instance.add(key, now, random.nextDouble(), random.nextDouble(), random.nextDouble());
+            now += TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow));
         }
 
         dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
-                sensorType,
-                stat, timeWindow);
+                sensorType, stat, timeWindow);
         documents = expectedDocumentFactory.produceExpectedDocuments(instance, timeWindow);
     }
 
