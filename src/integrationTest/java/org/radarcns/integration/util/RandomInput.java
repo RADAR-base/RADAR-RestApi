@@ -222,13 +222,15 @@ public class RandomInput {
         return documents;
     }
 
-    private static Document buildKeyDocument(String projectName, String subjectId, String sourceId) {
+    private static Document buildKeyDocument(String projectName, String subjectId,
+            String sourceId) {
         return new Document().append(PROJECT_ID, projectName)
                 .append(USER_ID, subjectId)
                 .append(SOURCE_ID, sourceId);
     }
 
-    private static Document buildAppStatusDocument(String projectName, String subjectId, String sourceId,
+    private static Document buildAppStatusDocument(String projectName, String subjectId,
+            String sourceId,
             Document value) {
         return new Document().append(ID, "{"
                 + PROJECT_ID + ":" + projectName + ","
