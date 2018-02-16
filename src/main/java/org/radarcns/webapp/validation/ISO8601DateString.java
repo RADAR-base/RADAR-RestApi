@@ -15,6 +15,7 @@ import javax.validation.Constraint;
 @Target({METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
 @Constraint(validatedBy = ISO8601DateStringValidator.class)
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public @interface ISO8601DateString {
 
 }

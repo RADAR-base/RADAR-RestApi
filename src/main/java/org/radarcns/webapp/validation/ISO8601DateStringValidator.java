@@ -8,6 +8,8 @@ import org.radarcns.util.RadarConverter;
 /**
  * Checks that a given String should be ISO8601 compatible Date.
  */
+
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class ISO8601DateStringValidator implements ConstraintValidator<ISO8601DateString, String> {
 
     @Override

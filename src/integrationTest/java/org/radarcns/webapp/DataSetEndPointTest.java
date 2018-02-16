@@ -73,6 +73,8 @@ public class DataSetEndPointTest {
             + SOURCE_DATA_NAME + '/' + COUNT;
     private static final String COLLECTION_NAME = "android_empatica_e4_battery_level_output";
     private static final String ACCELERATION_COLLECTION = "android_empatica_e4_acceleration_output";
+    private static final String COLLECTION_FOR_TEN_MINUTES =
+            "android_empatica_e4_battery_level_output_10min";
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
@@ -251,6 +253,49 @@ public class DataSetEndPointTest {
     }
 
     @Test
+    public void getAllRecordsWithQuartilesInTimeRangeWithTenMinutes()
+            throws IOException, ReflectiveOperationException, URISyntaxException {
+        MongoClient client = Utility.getMongoClient();
+        Instant now = Instant.now();
+        TimeWindow window = TimeWindow.TEN_MIN;
+
+        Date start = Date.from(now.plus(RadarConverter.getSecond(window), SECONDS));
+        Date end = Date.from(now.plus(7 * RadarConverter.getSecond(window), SECONDS));
+        MongoCollection<Document> collection = MongoHelper
+                .getCollection(client, COLLECTION_FOR_TEN_MINUTES);
+        Map<String, Object> docs = RandomInput
+                .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
+                        SOURCE_TYPE, SOURCE_DATA_NAME, QUARTILES, window, SAMPLES, false);
+
+        collection.insertMany((List<Document>) docs.get(DOCUMENTS));
+
+        Dataset expected = (Dataset) docs.get(DATASET);
+        String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
+                + SOURCE_DATA_NAME + '/' + QUARTILES + '/' + '?'
+                + Parameter.TIME_WINDOW + '=' + window + '&'
+                + Parameter.START + '=' + RadarConverter.getISO8601(start) + '&'
+                + Parameter.END + '=' + RadarConverter.getISO8601(end);
+
+        Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
+        assertTrue(actual.isSuccessful());
+        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
+        Dataset dataset = reader.readValue(actual.body().byteStream());
+        assertNotNull(dataset);
+        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
+        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
+        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
+        assertTrue(dataset.getDataset().size() < 7 && dataset.getDataset().size() >= 5);
+        assertEquals(RadarConverter.getISO8601(start),
+                dataset.getHeader().getEffectiveTimeFrame().getStartDateTime());
+        assertEquals(RadarConverter.getISO8601(end),
+                dataset.getHeader().getEffectiveTimeFrame().getEndDateTime());
+        assertEquals(window , dataset.getHeader().getTimeWindow());
+
+        dropAndClose(client);
+    }
+
+
+    @Test
     public void getAllDataTestEmpty() throws IOException {
         Dataset dataset = apiClient.requestJson(REQUEST_PATH, Dataset.class, Status.OK);
         assertThat(dataset.getDataset(), is(empty()));
@@ -268,6 +313,7 @@ public class DataSetEndPointTest {
     private void dropAndClose(MongoClient client) {
         Utility.dropCollection(client, COLLECTION_NAME);
         Utility.dropCollection(client, ACCELERATION_COLLECTION);
+        Utility.dropCollection(client, COLLECTION_FOR_TEN_MINUTES);
         client.close();
     }
 
