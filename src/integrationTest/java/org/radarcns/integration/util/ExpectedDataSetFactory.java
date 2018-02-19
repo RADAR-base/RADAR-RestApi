@@ -17,7 +17,6 @@
 package org.radarcns.integration.util;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.radarcns.mock.model.ExpectedValue.DURATION;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -105,19 +104,6 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
 
     /**
-     * Get the effective time frame for a single time stamp.
-     *
-     * @param value timestamp.
-     * @return {@code TimeFrame} starting on value and ending {@link ExpectedValue#DURATION}
-     * milliseconds after.
-     * @see TimeFrame
-     */
-    public TimeFrame getEffectiveTimeFrame(Long value) {
-        return new TimeFrame(new Date(value).toInstant(), new Date(value + DURATION).toInstant());
-    }
-
-
-    /**
      * It generates the {@code List<Item>} for the resulting {@link Dataset}.
      *
      * @param header {@link Header} used to provide data context
@@ -172,7 +158,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                         content = new Acceleration(statValues.get(0), statValues.get(1),
                                 statValues.get(2));
                     }
-                    items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
+                    items.add(new DataItem(content, new Date(key).toInstant()));
                     break;
                 default:
                     throw new IllegalArgumentException(sensor + " is not a supported test case");
@@ -209,7 +195,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
             Object content = getContent(getStatValue(statistic, dac), statistic);
 
-            items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
+            items.add(new DataItem(content, new Date(key).toInstant()));
         }
 
         return items;
