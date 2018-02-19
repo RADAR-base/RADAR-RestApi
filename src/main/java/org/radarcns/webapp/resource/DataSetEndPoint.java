@@ -37,6 +37,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Date;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -53,8 +54,8 @@ import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.filter.Authenticated;
+import org.radarcns.webapp.param.InstantParam;
 import org.radarcns.webapp.validation.Alphanumeric;
-import org.radarcns.webapp.validation.ISO8601DateString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,8 +154,8 @@ public class DataSetEndPoint {
             @Alphanumeric @PathParam(SOURCE_DATA_NAME) String sourceDataName,
             @PathParam(STAT) DescriptiveStatistic stat,
             @QueryParam(TIME_WINDOW) TimeWindow interval,
-            @ISO8601DateString @QueryParam(START) String start,
-            @ISO8601DateString @QueryParam(END) String end) throws IOException {
+            @QueryParam(START) InstantParam start,
+            @QueryParam(END) InstantParam end) throws IOException {
         // todo: 404 if given source does not exist.
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
@@ -166,7 +167,7 @@ public class DataSetEndPoint {
         if (start != null && end != null) {
             dataset = dataSetService.getAllRecordsInWindow(projectName,
                     subjectId, sourceId, sourceDataName, stat, timeWindow,
-                    RadarConverter.getISO8601(start), RadarConverter.getISO8601(end));
+                    Date.from(start.getValue()), Date.from(end.getValue()));
         } else {
             dataset = dataSetService.getAllDataItems(projectName, subjectId,
                     sourceId, sourceDataName, stat, timeWindow);
