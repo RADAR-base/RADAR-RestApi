@@ -47,7 +47,7 @@ import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
@@ -186,7 +186,7 @@ public class DataSetEndPoint {
             DescriptiveStatistic stat, TimeWindow interval, Instant timeFrameStart) {
         String time = timeFrameStart.toString();
         return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
-                null, interval, new EffectiveTimeFrame(time, time)),
+                null, interval, new TimeFrame(time, time), new TimeFrame(time, time)),
                 Collections.emptyList());
     }
 }

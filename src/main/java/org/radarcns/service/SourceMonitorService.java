@@ -26,7 +26,7 @@ import com.mongodb.client.MongoCursor;
 import javax.inject.Inject;
 import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
@@ -58,9 +58,9 @@ public class SourceMonitorService {
      * @param subjectId of the subject
      * @param sourceId of the source
      * @param sourceType of the source
-     * @return calculated {@link EffectiveTimeFrame} with earliest and latest timestamps
+     * @return calculated {@link TimeFrame} with earliest and latest timestamps
      */
-    public EffectiveTimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
+    public TimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
             String sourceId, SourceTypeDTO sourceType) {
 
         // get the last document sorted by timeEnd
@@ -86,7 +86,7 @@ public class SourceMonitorService {
         }
 
         cursor.close();
-        return new EffectiveTimeFrame(RadarConverter.getISO8601(timeStart), RadarConverter
+        return new TimeFrame(RadarConverter.getISO8601(timeStart), RadarConverter
                 .getISO8601(timeEnd));
 
     }

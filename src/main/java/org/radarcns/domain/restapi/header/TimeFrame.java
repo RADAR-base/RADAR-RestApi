@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.Objects;
 import org.radarcns.util.RadarConverter;
 
-public class EffectiveTimeFrame {
+public class TimeFrame {
 
     @JsonProperty
     private String startDateTime;
@@ -13,21 +13,21 @@ public class EffectiveTimeFrame {
     @JsonProperty
     private String endDateTime;
 
-    public EffectiveTimeFrame() {
+    public TimeFrame() {
         // default constructor for json
     }
 
-    public EffectiveTimeFrame(String startDateTime, String endDateTime) {
+    public TimeFrame(String startDateTime, String endDateTime) {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
     }
 
-    public EffectiveTimeFrame(Date startDateTime, Date endDateTime) {
+    public TimeFrame(Date startDateTime, Date endDateTime) {
         this.startDateTime = RadarConverter.getISO8601(startDateTime);
         this.endDateTime = RadarConverter.getISO8601(endDateTime);
     }
 
-    public EffectiveTimeFrame(Long startDateTime, Long endDateTime) {
+    public TimeFrame(Long startDateTime, Long endDateTime) {
         this.startDateTime = RadarConverter.getISO8601(startDateTime);
         this.endDateTime = RadarConverter.getISO8601(endDateTime);
     }
@@ -56,7 +56,7 @@ public class EffectiveTimeFrame {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        EffectiveTimeFrame effectiveTimeFrame = (EffectiveTimeFrame) o;
+        TimeFrame effectiveTimeFrame = (TimeFrame) o;
 
         return Objects.equals(startDateTime, effectiveTimeFrame.startDateTime)
                 && Objects.equals(endDateTime, effectiveTimeFrame.endDateTime);

@@ -1,7 +1,7 @@
 package org.radarcns.domain.restapi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.TimeFrame;
 
 public class Source {
 
@@ -27,7 +27,7 @@ public class Source {
     private String status;
 
     @JsonProperty
-    private EffectiveTimeFrame effectiveTimeFrame;
+    private TimeFrame effectiveTimeFrame;
 
     /**
      * Default constructor.  Note that this does not initialize fields to their default values from
@@ -117,12 +117,12 @@ public class Source {
     }
 
 
-    public Source effectiveTimeFrame(EffectiveTimeFrame effectiveTimeFrame) {
+    public Source effectiveTimeFrame(TimeFrame effectiveTimeFrame) {
         this.effectiveTimeFrame = effectiveTimeFrame;
         return this;
     }
 
-    public EffectiveTimeFrame getEffectiveTimeFrame() {
+    public TimeFrame getEffectiveTimeFrame() {
         return effectiveTimeFrame;
     }
 

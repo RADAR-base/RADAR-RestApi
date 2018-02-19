@@ -32,7 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.management.domain.enumeration.SourceTypeScope;
 import org.radarcns.mongo.util.MongoHelper;
@@ -84,7 +84,7 @@ public class SourceMonitorServiceDbTest {
                 .getSourceStatisticsMonitorTopic());
         collection.insertOne(doc);
 
-        EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(PROJECT_NAME, SUBJECT_ID,
+        TimeFrame result = monitor.getEffectiveTimeFrame(PROJECT_NAME, SUBJECT_ID,
                 SOURCE_ID, sourceType);
 
         assertEquals(RadarConverter.getISO8601(start), result.getStartDateTime());
@@ -104,7 +104,7 @@ public class SourceMonitorServiceDbTest {
                 .getSourceStatisticsMonitorTopic());
         collection.insertMany(Arrays.asList(doc, second));
 
-        EffectiveTimeFrame result = monitor.getEffectiveTimeFrame(PROJECT_NAME, SUBJECT_ID,
+        TimeFrame result = monitor.getEffectiveTimeFrame(PROJECT_NAME, SUBJECT_ID,
                 SOURCE_ID, sourceType);
 
         assertEquals(RadarConverter.getISO8601(earlier), result.getStartDateTime());

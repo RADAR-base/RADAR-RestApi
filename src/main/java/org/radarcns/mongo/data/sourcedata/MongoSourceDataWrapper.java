@@ -32,8 +32,8 @@ import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
@@ -145,8 +145,8 @@ public abstract class MongoSourceDataWrapper {
     }
 
     /**
-     * Builds the required {@link Dataset}. It adds the {@link EffectiveTimeFrame} to the given
-     * {@link Header}.
+     * Builds the required {@link Dataset}. It adds the {@link TimeFrame} to the given {@link
+     * Header}.
      *
      * @param field is the mongodb field that has to be extracted
      * @param stat is the statistical functional represented by the extracted field
@@ -194,19 +194,14 @@ public abstract class MongoSourceDataWrapper {
         }
 
         cursor.close();
-        // reset EffectiveTimeFrame if it is not set
-        if (Long.MAX_VALUE == RadarConverter.getISO8601(header.getEffectiveTimeFrame()
-                .getStartDateTime())
-                .getTime()) {
-            EffectiveTimeFrame etf = new EffectiveTimeFrame(start, end);
 
-            header.setEffectiveTimeFrame(etf);
-        }
-        Dataset hrd = new Dataset(header, list);
+        TimeFrame effectiveTimeFrame = new TimeFrame(start, end);
+
+        header.setEffectiveTimeFrame(effectiveTimeFrame);
 
         LOGGER.debug("Found {} value", list.size());
 
-        return hrd;
+        return new Dataset(header, list);
     }
 
     /**

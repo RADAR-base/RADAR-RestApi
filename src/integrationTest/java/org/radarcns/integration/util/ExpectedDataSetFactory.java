@@ -31,7 +31,7 @@ import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.stream.collector.DoubleArrayCollector;
@@ -82,22 +82,22 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             String sourceId, String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeWindow) {
         return new Header(projectName, subjectId, sourceId, sourceType, sensorType, statistic,
-                null, timeWindow,
+                null, timeWindow, null,
                 getEffectiveTimeFrame(expectedValue, timeWindow));
     }
 
     /**
      * Get the effective interval for a value.
      *
-     * @return {@code EffectiveTimeFrame} for the simulated inteval.
-     * @see EffectiveTimeFrame
+     * @return {@code TimeFrame} for the simulated inteval.
+     * @see TimeFrame
      */
-    public EffectiveTimeFrame getEffectiveTimeFrame(ExpectedValue<?> expectedValue, TimeWindow
+    public TimeFrame getEffectiveTimeFrame(ExpectedValue<?> expectedValue, TimeWindow
             timeWindow) {
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
 
-        return new EffectiveTimeFrame(
+        return new TimeFrame(
                 RadarConverter.getISO8601(new Date(windows.get(0))),
                 RadarConverter.getISO8601(new Date(windows.get(windows.size() - 1)
                         + TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow)))));
@@ -108,12 +108,12 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * Get the effective time frame for a single time stamp.
      *
      * @param value timestamp.
-     * @return {@code EffectiveTimeFrame} starting on value and ending {@link
+     * @return {@code TimeFrame} starting on value and ending {@link
      * ExpectedValue#DURATION} milliseconds after.
-     * @see EffectiveTimeFrame
+     * @see TimeFrame
      */
-    public EffectiveTimeFrame getEffectiveTimeFrame(Long value) {
-        return new EffectiveTimeFrame(RadarConverter.getISO8601(new Date(value)),
+    public TimeFrame getEffectiveTimeFrame(Long value) {
+        return new TimeFrame(RadarConverter.getISO8601(new Date(value)),
                 RadarConverter.getISO8601(new Date(value + DURATION)));
     }
 

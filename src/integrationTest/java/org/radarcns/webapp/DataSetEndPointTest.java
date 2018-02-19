@@ -245,9 +245,9 @@ public class DataSetEndPointTest {
         assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
         assertTrue(dataset.getDataset().size() < 7 && dataset.getDataset().size() >= 5);
         assertEquals(RadarConverter.getISO8601(start),
-                dataset.getHeader().getEffectiveTimeFrame().getStartDateTime());
+                dataset.getHeader().getTimeFrame().getStartDateTime());
         assertEquals(RadarConverter.getISO8601(end),
-                dataset.getHeader().getEffectiveTimeFrame().getEndDateTime());
+                dataset.getHeader().getTimeFrame().getEndDateTime());
 
         dropAndClose(client);
     }
@@ -286,9 +286,9 @@ public class DataSetEndPointTest {
         assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
         assertTrue(dataset.getDataset().size() < 7 && dataset.getDataset().size() >= 5);
         assertEquals(RadarConverter.getISO8601(start),
-                dataset.getHeader().getEffectiveTimeFrame().getStartDateTime());
+                dataset.getHeader().getTimeFrame().getStartDateTime());
         assertEquals(RadarConverter.getISO8601(end),
-                dataset.getHeader().getEffectiveTimeFrame().getEndDateTime());
+                dataset.getHeader().getTimeFrame().getEndDateTime());
         assertEquals(window, dataset.getHeader().getTimeWindow());
 
         dropAndClose(client);

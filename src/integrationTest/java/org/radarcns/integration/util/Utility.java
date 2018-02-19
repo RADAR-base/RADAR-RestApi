@@ -33,7 +33,7 @@ import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
@@ -105,14 +105,17 @@ public class Utility {
      */
     public static Dataset cloneDataset(Dataset input) {
         Header inputHeader = input.getHeader();
-        EffectiveTimeFrame cloneEffectiveTimeFrame = new EffectiveTimeFrame(
+        TimeFrame cloneEffectiveTimeFrame = new TimeFrame(
                 inputHeader.getEffectiveTimeFrame().getStartDateTime(),
                 inputHeader.getEffectiveTimeFrame().getEndDateTime());
+        TimeFrame cloneTimeFrame = new TimeFrame(
+                inputHeader.getTimeFrame().getStartDateTime(),
+                inputHeader.getTimeFrame().getEndDateTime());
         Header cloneHeader = new Header(inputHeader.getProjectId(), inputHeader.getSubjectId(),
                 inputHeader.getSourceId(), inputHeader.getSourceType(),
                 inputHeader.getSourceDataType(),
                 inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
-                inputHeader.getTimeWindow(), cloneEffectiveTimeFrame);
+                inputHeader.getTimeWindow(), cloneTimeFrame, cloneEffectiveTimeFrame);
 
         List<DataItem> cloneItem = new ArrayList<>();
         Object value;

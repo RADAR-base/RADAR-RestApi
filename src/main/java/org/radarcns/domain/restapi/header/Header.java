@@ -51,7 +51,13 @@ public class Header {
      * Timestamps of the first and the last samples contained in the dataset.
      */
     @JsonProperty
-    public EffectiveTimeFrame effectiveTimeFrame;
+    public TimeFrame effectiveTimeFrame;
+
+    /**
+     * Timestamps of the request if provided.
+     */
+    @JsonProperty
+    public TimeFrame timeFrame;
 
     public Header() {
     }
@@ -66,12 +72,14 @@ public class Header {
      * @param descriptiveStatistic Statical value expressed by samples.
      * @param unit Unit used by the sourceType.
      * @param timeWindow Time interval between two consecutive samples.
+     * @param timeFrame Timestamps of request.
      * @param effectiveTimeFrame Timestamps of the first and the last samples in the data-set.
      */
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public Header(String projectId, String subjectId, String sourceId, String sourceType, String
             sourceDataType,
             DescriptiveStatistic descriptiveStatistic, String unit, TimeWindow timeWindow,
-            EffectiveTimeFrame effectiveTimeFrame) {
+            TimeFrame timeFrame, TimeFrame effectiveTimeFrame) {
         this.projectId = projectId;
         this.subjectId = subjectId;
         this.sourceId = sourceId;
@@ -80,6 +88,7 @@ public class Header {
         this.descriptiveStatistic = descriptiveStatistic;
         this.unit = unit;
         this.timeWindow = timeWindow;
+        this.timeFrame = timeFrame;
         this.effectiveTimeFrame = effectiveTimeFrame;
     }
 
@@ -148,14 +157,20 @@ public class Header {
         this.timeWindow = timeWindow;
     }
 
-    public EffectiveTimeFrame getEffectiveTimeFrame() {
+    public TimeFrame getEffectiveTimeFrame() {
         return effectiveTimeFrame;
     }
 
     public void setEffectiveTimeFrame(
-            EffectiveTimeFrame effectiveTimeFrame) {
+            TimeFrame effectiveTimeFrame) {
         this.effectiveTimeFrame = effectiveTimeFrame;
     }
 
+    public TimeFrame getTimeFrame() {
+        return timeFrame;
+    }
 
+    public void setTimeFrame(TimeFrame timeFrame) {
+        this.timeFrame = timeFrame;
+    }
 }

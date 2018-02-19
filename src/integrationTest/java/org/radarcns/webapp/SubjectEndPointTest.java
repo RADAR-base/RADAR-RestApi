@@ -121,6 +121,7 @@ public class SubjectEndPointTest {
         assertNotNull(subject.getSources().get(0)
                 .getEffectiveTimeFrame()
                 .getEndDateTime());
+        assertNotNull(subject.getLastSeen());
 
     }
 
