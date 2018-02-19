@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.math.BigDecimal;
@@ -75,6 +76,7 @@ public final class RadarConverter {
         OBJECT_MAPPER.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
         OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         OBJECT_MAPPER.setSerializationInclusion(Include.NON_NULL);
+        OBJECT_MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         AVRO_JSON_WRITER = OBJECT_MAPPER.writer();
 
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

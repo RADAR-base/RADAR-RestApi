@@ -28,6 +28,10 @@ import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MINIMUM;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.SUM;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -177,5 +181,16 @@ public class RadarConverterTest {
         Duration moreThanAnHour = lessThanAnHour.plus(Duration.ofMinutes(2));
         assertTrue(RadarConverter.isThresholdPassed(hourAgo, lessThanAnHour));
         assertFalse(RadarConverter.isThresholdPassed(hourAgo, moreThanAnHour));
+    }
+
+    @Test
+    public void testInstant() throws IOException {
+        ObjectWriter writer = RadarConverter
+                .writerFor(Instant.class);
+        String epochString = writer.writeValueAsString(Instant.EPOCH);
+        assertEquals("\"1970-01-01T00:00:00Z\"", epochString);
+
+        ObjectReader reader = RadarConverter.readerFor(Instant.class);
+        assertEquals(Instant.EPOCH, reader.readValue(epochString));
     }
 }
