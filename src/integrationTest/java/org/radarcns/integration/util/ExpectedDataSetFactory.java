@@ -16,6 +16,7 @@
 
 package org.radarcns.integration.util;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.radarcns.mock.model.ExpectedValue.DURATION;
 
 import java.util.ArrayList;
@@ -98,9 +99,9 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         Collections.sort(windows);
 
         return new TimeFrame(
-                RadarConverter.getISO8601(new Date(windows.get(0))),
-                RadarConverter.getISO8601(new Date(windows.get(windows.size() - 1)
-                        + TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow)))));
+                new Date(windows.get(0)).toInstant(),
+                new Date(windows.get(windows.size() - 1)).toInstant().plus(RadarConverter
+                        .getSecond(timeWindow) , SECONDS));
     }
 
 
@@ -113,8 +114,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @see TimeFrame
      */
     public TimeFrame getEffectiveTimeFrame(Long value) {
-        return new TimeFrame(RadarConverter.getISO8601(new Date(value)),
-                RadarConverter.getISO8601(new Date(value + DURATION)));
+        return new TimeFrame(new Date(value).toInstant(), new Date(value + DURATION).toInstant());
     }
 
 
