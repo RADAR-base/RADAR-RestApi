@@ -77,6 +77,30 @@ public class MongoHelper {
     }
 
     /**
+     * Finds whether document is available for given query parameters.
+     * https://stackoverflow.com/a/8390458/822964 suggests find().limit(1).count(true) is the
+     * optimal way to do it.
+     *
+     * @param projectName of the project
+     * @param subjectId is the subjectID
+     * @param sourceId is the sourceID
+     * @param start is the start time of the queried timewindow
+     * @param end is the end time of the queried timewindow
+     * @param collection is the MongoDB that will be queried
+     * @return a MongoDB cursor containing all documents from the query.
+     */
+    public static MongoCursor<Document> doesExistsByProjectAndSubjectAndSourceInWindow(
+            String projectName, String subjectId, String sourceId, Date start, Date end,
+            MongoCollection<Document> collection) {
+        BasicDBObject query = getByProjectSubjectSource(projectName, subjectId, sourceId)
+                .append(KEY.concat(".").concat(START), new BasicDBObject("$gte", start))
+                .append(KEY.concat(".").concat(END), new BasicDBObject("$lte", end));
+        FindIterable<Document> result = collection.find(query).limit(1);
+
+        return result.iterator();
+    }
+
+    /**
      * Finds all documents within a time window belonging to the given subject, source and project.
      *
      * @param projectName of the project
