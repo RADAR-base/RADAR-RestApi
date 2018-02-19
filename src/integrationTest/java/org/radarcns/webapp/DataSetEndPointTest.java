@@ -29,7 +29,6 @@ import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.integration.util.RandomInput.DATASET;
 import static org.radarcns.integration.util.RandomInput.DOCUMENTS;
 import static org.radarcns.webapp.resource.BasePath.DATA;
-import static org.radarcns.webapp.resource.BasePath.LATEST;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -91,14 +90,9 @@ public class DataSetEndPointTest {
 
         Dataset expected = (Dataset) docs.get(DATASET);
 
-        Dataset actual = apiClient.requestJson(
-                REQUEST_PATH + '/' + LATEST
-                        + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW,
-                Dataset.class, Status.OK);
-        assertNotNull(actual);
-        assertEquals(expected.getHeader().projectId, actual.getHeader().getProjectId());
-        assertEquals(expected.getHeader().subjectId, actual.getHeader().getSubjectId());
-        assertEquals(expected.getHeader().sourceId, actual.getHeader().getSourceId());
+        Dataset actual = assertRequestsMatch(
+                REQUEST_PATH + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW, expected);
+
         assertEquals(expected.getDataset(), actual.getDataset());
 
         dropAndClose(client);
@@ -200,9 +194,9 @@ public class DataSetEndPointTest {
 
         Dataset actual = assertRequestsMatch(requestPath, expected);
         assertTrue(actual.getDataset().size() < 7 && actual.getDataset().size() >= 5);
-        assertEquals(start.toString(),
+        assertEquals(start,
                 actual.getHeader().getTimeFrame().getStartDateTime());
-        assertEquals(end.toString(),
+        assertEquals(end,
                 actual.getHeader().getTimeFrame().getEndDateTime());
 
         dropAndClose(client);
@@ -233,9 +227,9 @@ public class DataSetEndPointTest {
 
         Dataset actual = assertRequestsMatch(requestPath, expected);
         assertTrue(actual.getDataset().size() < 7 && actual.getDataset().size() >= 5);
-        assertEquals(start.toString(),
+        assertEquals(start,
                 actual.getHeader().getTimeFrame().getStartDateTime());
-        assertEquals(end.toString(),
+        assertEquals(end,
                 actual.getHeader().getTimeFrame().getEndDateTime());
         assertEquals(window, actual.getHeader().getTimeWindow());
 

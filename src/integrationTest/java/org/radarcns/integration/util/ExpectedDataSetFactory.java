@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
@@ -101,7 +100,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         return new TimeFrame(
                 new Date(windows.get(0)).toInstant(),
                 new Date(windows.get(windows.size() - 1)).toInstant().plus(RadarConverter
-                        .getSecond(timeWindow) , SECONDS));
+                        .getSecond(timeWindow), SECONDS));
     }
 
 
@@ -109,8 +108,8 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * Get the effective time frame for a single time stamp.
      *
      * @param value timestamp.
-     * @return {@code TimeFrame} starting on value and ending {@link
-     * ExpectedValue#DURATION} milliseconds after.
+     * @return {@code TimeFrame} starting on value and ending {@link ExpectedValue#DURATION}
+     * milliseconds after.
      * @see TimeFrame
      */
     public TimeFrame getEffectiveTimeFrame(Long value) {

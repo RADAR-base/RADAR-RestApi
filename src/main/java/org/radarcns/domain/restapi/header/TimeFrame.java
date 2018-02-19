@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
-import org.radarcns.util.RadarConverter;
 
 public class TimeFrame {
 
@@ -25,7 +24,7 @@ public class TimeFrame {
 
     public TimeFrame(Date startDateTime, Date endDateTime) {
         this.startDateTime = startDateTime.toInstant();
-        this.endDateTime = startDateTime.toInstant();
+        this.endDateTime = endDateTime.toInstant();
     }
 
     public Instant getStartDateTime() {

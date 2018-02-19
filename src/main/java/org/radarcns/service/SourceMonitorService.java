@@ -23,7 +23,6 @@ import static org.radarcns.mongo.util.MongoHelper.START;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
-import io.swagger.models.auth.In;
 import java.time.Instant;
 import java.util.Date;
 import javax.inject.Inject;
@@ -31,7 +30,6 @@ import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +85,7 @@ public class SourceMonitorService {
             Date localStart = key.getDate(START);
             Date localEnd = key.getDate(END);
 
-            if( localStart != null && localEnd != null) {
+            if (localStart != null && localEnd != null) {
                 timeStart = localStart.toInstant();
                 timeEnd = localEnd.toInstant();
             }

@@ -96,8 +96,8 @@ public class DataSetService {
     public Dataset getLastReceivedSample(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
             throws IOException {
-        TimeFrame timeFrame = new TimeFrame(Date.from(Instant.now()), Date.from(Instant
-                .now().minus(RadarConverter.getSecond(timeWindow), SECONDS)));
+        TimeFrame timeFrame = new TimeFrame(Instant.now(), Instant
+                .now().minus(RadarConverter.getSecond(timeWindow), SECONDS));
 
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeWindow, timeFrame);

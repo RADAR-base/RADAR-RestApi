@@ -2,9 +2,7 @@ package org.radarcns.domain.restapi.dataset;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Objects;
-import org.radarcns.util.RadarConverter;
 
 public class DataItem {
 
