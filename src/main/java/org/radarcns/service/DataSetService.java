@@ -16,8 +16,6 @@
 
 package org.radarcns.service;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
-
 import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.time.Instant;
@@ -96,8 +94,8 @@ public class DataSetService {
     public Dataset getLastReceivedSample(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
             throws IOException {
-        TimeFrame timeFrame = new TimeFrame(Instant.now(), Instant
-                .now().minus(RadarConverter.getSecond(timeWindow), SECONDS));
+        Instant now = Instant.now();
+        TimeFrame timeFrame = new TimeFrame(now.minus(RadarConverter.getDuration(timeWindow)), now);
 
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeWindow, timeFrame);
@@ -135,17 +133,6 @@ public class DataSetService {
                         sensorDao.getCollectionName(timeWindow)));
     }
 
-    private Header getHeader(String projectName, String subjectId, String sourceId,
-            String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow,
-            TimeFrame timeFrame)
-            throws IOException {
-        SourceDTO source = managementPortalClient.getSource(sourceId);
-
-        return getHeader(projectName, subjectId, sourceId,
-                sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
-                source.getSourceTypeIdentifier().toString(), timeFrame);
-    }
-
     /**
      * Returns a {@link Dataset} containing alla available values for the couple subject surce.
      *
@@ -179,6 +166,18 @@ public class DataSetService {
                 RadarConverter.getMongoStat(stat), start, end,
                 MongoHelper.getCollection(mongoClient,
                         sensorDao.getCollectionName(timeWindow)));
+    }
+
+
+    private Header getHeader(String projectName, String subjectId, String sourceId,
+            String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow,
+            TimeFrame timeFrame)
+            throws IOException {
+        SourceDTO source = managementPortalClient.getSource(sourceId);
+
+        return getHeader(projectName, subjectId, sourceId,
+                sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
+                source.getSourceTypeIdentifier().toString(), timeFrame);
     }
 
     /**

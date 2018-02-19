@@ -6,8 +6,8 @@ public class SourceDTO extends org.radarcns.management.service.dto.SourceDTO {
 
     @JsonIgnore
     public SourceTypeIdentifier getSourceTypeIdentifier() {
-        return new SourceTypeIdentifier(getSourceType().getProducer(), getSourceType().getModel()
-                , getSourceType().getCatalogVersion());
+        return new SourceTypeIdentifier(getSourceType().getProducer(), getSourceType().getModel(),
+                getSourceType().getCatalogVersion());
     }
 
     public String getSourceIdentifier() {

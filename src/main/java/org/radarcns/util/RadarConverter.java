@@ -34,6 +34,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
@@ -263,6 +264,31 @@ public final class RadarConverter {
                 return TimeUnit.DAYS.toSeconds(1);
             case ONE_WEEK:
                 return TimeUnit.DAYS.toSeconds(7);
+            default:
+                throw new IllegalArgumentException(timeWindow + " is not yet supported");
+        }
+    }
+
+    /**
+     * Converts a time window to seconds.
+     *
+     * @param timeWindow time window that has to be converted in seconds
+     * @return a {@link Long} representing the amount of seconds
+     */
+    public static TemporalAmount getDuration(TimeWindow timeWindow) {
+        switch (timeWindow) {
+            case TEN_SECOND:
+                return Duration.ofSeconds(10);
+            case ONE_MIN:
+                return Duration.ofMinutes(1);
+            case TEN_MIN:
+                return Duration.ofMinutes(10);
+            case ONE_HOUR:
+                return Duration.ofHours(1);
+            case ONE_DAY:
+                return Duration.ofDays(1);
+            case ONE_WEEK:
+                return Duration.ofDays(7);
             default:
                 throw new IllegalArgumentException(timeWindow + " is not yet supported");
         }

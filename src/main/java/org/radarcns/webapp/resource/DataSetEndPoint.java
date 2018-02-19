@@ -16,7 +16,6 @@
 
 package org.radarcns.webapp.resource;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
@@ -116,9 +115,9 @@ public class DataSetEndPoint {
                         timeWindow);
         if (dataset.getDataset().isEmpty()) {
             LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
+            Instant now = Instant.now();
             return emptyDataset(projectName, subjectId, sourceId, sourceDataName, stat, interval,
-                    new TimeFrame(Instant.now() , Instant.now().minus(RadarConverter.getSecond
-                            (timeWindow) , SECONDS)));
+                    new TimeFrame(now.minus(RadarConverter.getDuration(timeWindow)), now));
         }
 
         return dataset;
@@ -184,8 +183,7 @@ public class DataSetEndPoint {
     }
 
     private static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
-            String sensor,
-            DescriptiveStatistic stat, TimeWindow interval , TimeFrame timeFrame) {
+            String sensor, DescriptiveStatistic stat, TimeWindow interval, TimeFrame timeFrame) {
 
         return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
                 null, interval, timeFrame, null),

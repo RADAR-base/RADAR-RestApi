@@ -183,8 +183,6 @@ public class ExpectedDocumentFactory {
             DoubleArrayCollector doubleArrayCollector = (DoubleArrayCollector) expectedValue
                     .getSeries().get(timestamp);
 
-            long end = timestamp + DURATION;
-
             List<Document> documents = new ArrayList<>();
 
             documents.add(
@@ -196,6 +194,8 @@ public class ExpectedDocumentFactory {
             documents.add(
                     getDocumentFromDoubleValueCollector("z",
                             doubleArrayCollector.getCollectors().get(2)));
+
+            long end = timestamp + DURATION;
 
             list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
                     expectedValue.getLastKey().getUserId(),

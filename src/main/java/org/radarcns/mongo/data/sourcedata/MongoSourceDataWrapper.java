@@ -176,8 +176,8 @@ public abstract class MongoSourceDataWrapper {
 
             Date localStart = key.getDate(START);
             Date localEnd = key.getDate(END);
-            if(localStart != null && localEnd != null) {
-                if (start == null ) {
+            if (localStart != null && localEnd != null) {
+                if (start == null) {
                     start = localStart.toInstant();
                     end = localEnd.toInstant();
                 } else {

@@ -58,14 +58,15 @@ public class SubjectService {
 
     private Subject buildSubject(SubjectDTO subject)
             throws IOException {
-        Subject builtSubject = new Subject()
+        List<Source> sources = this.sourceService.getAllSourcesOfSubject(subject.getProject()
+                .getProjectName(), subject.getLogin());
+        return new Subject()
                 .subjectId(subject.getLogin())
                 .projectName(subject.getProject().getProjectName())
                 .status(subject.getStatus().toString())
                 .humanReadableId(subject.getHumanReadableIdentifier())
-                .sources(this.sourceService.getAllSourcesOfSubject(subject.getProject()
-                        .getProjectName(), subject.getLogin()));
-        return builtSubject.lastSeen(getLastSeenForSubject(builtSubject.getSources()));
+                .sources(sources)
+                .lastSeen(getLastSeenForSubject(sources));
     }
 
     private Instant getLastSeenForSubject(List<Source> sources) {
@@ -74,10 +75,8 @@ public class SubjectService {
             if (lastSeen == null) {
                 lastSeen = source.getEffectiveTimeFrame().getEndDateTime();
             } else {
-                if (source.getEffectiveTimeFrame().getEndDateTime()
-                        .isAfter(lastSeen)) {
-                    lastSeen = source.getEffectiveTimeFrame()
-                            .getEndDateTime();
+                if (source.getEffectiveTimeFrame().getEndDateTime().isAfter(lastSeen)) {
+                    lastSeen = source.getEffectiveTimeFrame().getEndDateTime();
                 }
             }
         }
