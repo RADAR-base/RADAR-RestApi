@@ -17,7 +17,6 @@
 package org.radarcns.webapp;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -32,18 +31,14 @@ import static org.radarcns.integration.util.RandomInput.DOCUMENTS;
 import static org.radarcns.webapp.resource.BasePath.DATA;
 import static org.radarcns.webapp.resource.BasePath.LATEST;
 
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.time.Instant;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
@@ -52,6 +47,7 @@ import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.format.Quartiles;
+import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
@@ -82,8 +78,7 @@ public class DataSetEndPointTest {
                     + DATA + '/');
 
     @Test
-    public void getLatestRecord()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getLatestRecord() throws IOException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
@@ -96,26 +91,21 @@ public class DataSetEndPointTest {
 
         Dataset expected = (Dataset) docs.get(DATASET);
 
-        Response actual = apiClient
-                .request(REQUEST_PATH + '/' + LATEST
-                                + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW, APPLICATION_JSON,
-                        Status.OK);
-        assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
-        Dataset dataset = reader.readValue(actual.body().byteStream());
-        assertNotNull(dataset);
-        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
-        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
-        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
-        assertEquals(1, dataset.getDataset().size());
-        assertEquals(expected.getDataset().get(0), dataset.dataset.get(0));
+        Dataset actual = apiClient.requestJson(
+                REQUEST_PATH + '/' + LATEST
+                        + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW,
+                Dataset.class, Status.OK);
+        assertNotNull(actual);
+        assertEquals(expected.getHeader().projectId, actual.getHeader().getProjectId());
+        assertEquals(expected.getHeader().subjectId, actual.getHeader().getSubjectId());
+        assertEquals(expected.getHeader().sourceId, actual.getHeader().getSourceId());
+        assertEquals(expected.getDataset(), actual.getDataset());
 
         dropAndClose(client);
     }
 
     @Test
-    public void getAllRecords()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getAllRecords() throws IOException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
@@ -128,26 +118,15 @@ public class DataSetEndPointTest {
 
         Dataset expected = (Dataset) docs.get(DATASET);
 
-        Response actual = apiClient
-                .request(REQUEST_PATH + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW,
-                        APPLICATION_JSON,
-                        Status.OK);
-        assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
-        Dataset dataset = reader.readValue(actual.body().byteStream());
-        assertNotNull(dataset);
-        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
-        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
-        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
-        assertEquals(expected.getDataset().size(), dataset.dataset.size());
-        assertEquals(expected.getDataset().get(0), dataset.dataset.get(0));
+        Dataset actual = assertRequestsMatch(
+                REQUEST_PATH + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW, expected);
+        assertEquals(expected.getDataset(), actual.getDataset());
 
         dropAndClose(client);
     }
 
     @Test
-    public void getAllRecordsForAcceleration()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getAllRecordsForAcceleration() throws IOException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper
@@ -163,16 +142,9 @@ public class DataSetEndPointTest {
         String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
                 + sourceDataName + '/' + AVERAGE + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW;
 
-        Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
-        assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
-        Dataset dataset = reader.readValue(actual.body().byteStream());
-        assertNotNull(dataset);
-        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
-        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
-        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
-        assertEquals(expected.getDataset().size(), dataset.dataset.size());
-        Map sample = (HashMap) dataset.getDataset().get(0).getSample();
+        Dataset actual = assertRequestsMatch(requestPath, expected);
+        assertEquals(expected.getDataset().size(), actual.getDataset().size());
+        Map sample = (HashMap) actual.getDataset().get(0).getSample();
         assertEquals(expected.getDataset().get(0).getSample(),
                 new Acceleration(sample.get("x"), sample.get("y"), sample.get("z")));
 
@@ -180,8 +152,7 @@ public class DataSetEndPointTest {
     }
 
     @Test
-    public void getAllRecordsWithQuartiles()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getAllRecordsWithQuartiles() throws IOException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper
@@ -197,16 +168,9 @@ public class DataSetEndPointTest {
                 + SOURCE_DATA_NAME + '/' + QUARTILES + '?' + Parameter.TIME_WINDOW + '='
                 + TIME_WINDOW;
 
-        Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
-        assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
-        Dataset dataset = reader.readValue(actual.body().byteStream());
-        assertNotNull(dataset);
-        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
-        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
-        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
-        assertEquals(expected.getDataset().size(), dataset.dataset.size());
-        Map sample = (HashMap) dataset.getDataset().get(0).getSample();
+        Dataset actual = assertRequestsMatch(requestPath, expected);
+        assertEquals(expected.getDataset().size(), actual.getDataset().size());
+        Map sample = (HashMap) actual.getDataset().get(0).getSample();
         assertEquals(expected.getDataset().get(0).getSample(),
                 new Quartiles((Double) sample.get("first"), (Double) sample.get("second"),
                         (Double) sample.get("third")));
@@ -214,12 +178,11 @@ public class DataSetEndPointTest {
     }
 
     @Test
-    public void getAllRecordsWithQuartilesInTimeRange()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getAllRecordsWithQuartilesInTimeRange() throws IOException {
         MongoClient client = Utility.getMongoClient();
         Instant now = Instant.now();
-        Date start = Date.from(now.plus(RadarConverter.getSecond(TIME_WINDOW), SECONDS));
-        Date end = Date.from(now.plus(7 * RadarConverter.getSecond(TIME_WINDOW), SECONDS));
+        Instant start = now.plus(RadarConverter.getSecond(TIME_WINDOW), SECONDS);
+        Instant end = now.plus(7 * RadarConverter.getSecond(TIME_WINDOW), SECONDS);
         MongoCollection<Document> collection = MongoHelper
                 .getCollection(client, COLLECTION_NAME);
         Map<String, Object> docs = RandomInput
@@ -232,35 +195,27 @@ public class DataSetEndPointTest {
         String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
                 + SOURCE_DATA_NAME + '/' + QUARTILES + '/' + '?'
                 + Parameter.TIME_WINDOW + '=' + TIME_WINDOW + '&'
-                + Parameter.START + '=' + RadarConverter.getISO8601(start) + '&'
-                + Parameter.END + '=' + RadarConverter.getISO8601(end);
+                + Parameter.START + '=' + start + '&'
+                + Parameter.END + '=' + end;
 
-        Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
-        assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
-        Dataset dataset = reader.readValue(actual.body().byteStream());
-        assertNotNull(dataset);
-        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
-        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
-        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
-        assertTrue(dataset.getDataset().size() < 7 && dataset.getDataset().size() >= 5);
-        assertEquals(RadarConverter.getISO8601(start),
-                dataset.getHeader().getTimeFrame().getStartDateTime());
-        assertEquals(RadarConverter.getISO8601(end),
-                dataset.getHeader().getTimeFrame().getEndDateTime());
+        Dataset actual = assertRequestsMatch(requestPath, expected);
+        assertTrue(actual.getDataset().size() < 7 && actual.getDataset().size() >= 5);
+        assertEquals(start.toString(),
+                actual.getHeader().getTimeFrame().getStartDateTime());
+        assertEquals(end.toString(),
+                actual.getHeader().getTimeFrame().getEndDateTime());
 
         dropAndClose(client);
     }
 
     @Test
-    public void getAllRecordsWithQuartilesInTimeRangeWithTenMinutes()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getAllRecordsWithQuartilesInTimeRangeWithTenMinutes() throws IOException {
         MongoClient client = Utility.getMongoClient();
         Instant now = Instant.now();
         TimeWindow window = TimeWindow.TEN_MIN;
 
-        Date start = Date.from(now.plus(RadarConverter.getSecond(window), SECONDS));
-        Date end = Date.from(now.plus(7 * RadarConverter.getSecond(window), SECONDS));
+        Instant start = now.plus(RadarConverter.getSecond(window), SECONDS);
+        Instant end = now.plus(7 * RadarConverter.getSecond(window), SECONDS);
         MongoCollection<Document> collection = MongoHelper
                 .getCollection(client, COLLECTION_FOR_TEN_MINUTES);
         Map<String, Object> docs = RandomInput
@@ -273,27 +228,31 @@ public class DataSetEndPointTest {
         String requestPath = PROJECT + '/' + SUBJECT + '/' + SOURCE + '/'
                 + SOURCE_DATA_NAME + '/' + QUARTILES + '/' + '?'
                 + Parameter.TIME_WINDOW + '=' + window + '&'
-                + Parameter.START + '=' + RadarConverter.getISO8601(start) + '&'
-                + Parameter.END + '=' + RadarConverter.getISO8601(end);
+                + Parameter.START + '=' + start + '&'
+                + Parameter.END + '=' + end;
 
-        Response actual = apiClient.request(requestPath, APPLICATION_JSON, Status.OK);
-        assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(Dataset.class);
-        Dataset dataset = reader.readValue(actual.body().byteStream());
-        assertNotNull(dataset);
-        assertEquals(expected.getHeader().projectId, dataset.getHeader().getProjectId());
-        assertEquals(expected.getHeader().subjectId, dataset.getHeader().getSubjectId());
-        assertEquals(expected.getHeader().sourceId, dataset.getHeader().getSourceId());
-        assertTrue(dataset.getDataset().size() < 7 && dataset.getDataset().size() >= 5);
-        assertEquals(RadarConverter.getISO8601(start),
-                dataset.getHeader().getTimeFrame().getStartDateTime());
-        assertEquals(RadarConverter.getISO8601(end),
-                dataset.getHeader().getTimeFrame().getEndDateTime());
-        assertEquals(window, dataset.getHeader().getTimeWindow());
+        Dataset actual = assertRequestsMatch(requestPath, expected);
+        assertTrue(actual.getDataset().size() < 7 && actual.getDataset().size() >= 5);
+        assertEquals(start.toString(),
+                actual.getHeader().getTimeFrame().getStartDateTime());
+        assertEquals(end.toString(),
+                actual.getHeader().getTimeFrame().getEndDateTime());
+        assertEquals(window, actual.getHeader().getTimeWindow());
 
         dropAndClose(client);
     }
 
+    private Dataset assertRequestsMatch(String relativeUrl, Dataset expected)
+            throws IOException {
+        Dataset actual = apiClient.requestJson(relativeUrl, Dataset.class, Status.OK);
+        assertNotNull(actual);
+        Header expectedHeader = expected.getHeader();
+        Header actualHeader = actual.getHeader();
+        assertEquals(expectedHeader.getProjectId(), actualHeader.getProjectId());
+        assertEquals(expectedHeader.getSubjectId(), actualHeader.getSubjectId());
+        assertEquals(expectedHeader.getSourceId(), actualHeader.getSourceId());
+        return actual;
+    }
 
     @Test
     public void getAllDataTestEmpty() throws IOException {
