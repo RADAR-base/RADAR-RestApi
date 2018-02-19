@@ -16,12 +16,12 @@
 
 package org.radarcns.integration.util;
 
-import static org.radarcns.dao.mongo.data.android.AndroidAppStatus.UPTIME_COLLECTION;
-import static org.radarcns.dao.mongo.data.android.AndroidRecordCounter.RECORD_COLLECTION;
-import static org.radarcns.dao.mongo.data.android.AndroidServerStatus.STATUS_COLLECTION;
-import static org.radarcns.unit.config.TestCatalog.ANDROID;
-import static org.radarcns.unit.config.TestCatalog.BIOVOTION;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
+import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusServerStatus.STATUS_COLLECTION;
+import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusUpTime.UPTIME_COLLECTION;
+import static org.radarcns.mongo.util.MongoHelper.PROJECT_ID;
+import static org.radarcns.mongo.util.MongoHelper.SOURCE_ID;
+import static org.radarcns.mongo.util.MongoHelper.USER_ID;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -30,35 +30,35 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.bson.Document;
-import org.radarcns.catalogue.TimeWindow;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.mock.model.ExpectedArrayValue;
 import org.radarcns.mock.model.ExpectedDoubleValue;
 import org.radarcns.monitor.application.ServerStatus;
-import org.radarcns.restapi.dataset.Dataset;
-import org.radarcns.restapi.header.DescriptiveStatistic;
 
 /**
  * All supported sources specifications.
  */
 public class RandomInput {
 
-    //private static final Logger LOGGER = LoggerFactory.getLogger(RandomInput.class);
-
     public static final String DATASET = "dataset";
     public static final String DOCUMENTS = "documents";
+    private static final String SUPPORTED_SOURCE_TYPE = "empatica_e4_v1";
 
     private static Dataset dataset = null;
     private static List<Document> documents = null;
 
-    private static ExpectedDocumentFactory expectedDocumentFactory = new ExpectedDocumentFactory();
-    private static ExpectedDataSetFactory expectedDataSetFactory = new ExpectedDataSetFactory();
+    private static final ExpectedDocumentFactory expectedDocumentFactory =
+            new ExpectedDocumentFactory();
+    private static final ExpectedDataSetFactory expectedDataSetFactory =
+            new ExpectedDataSetFactory();
 
-    private static void randomDoubleValue(String user, String source, String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeFrame,
-            int samples, boolean singleWindow) throws InstantiationException,
-            IllegalAccessException {
-        ObservationKey key = new ObservationKey(null, user, source);
+    private static void randomDoubleValue(String project, String user, String source,
+            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            int samples, boolean singleWindow) {
+        ObservationKey key = new ObservationKey(project, user, source);
         ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
         Long start = new Date().getTime();
@@ -70,18 +70,19 @@ public class RandomInput {
                 start += 1;
             } else {
                 start += TimeUnit.SECONDS.toMillis(
-                    ThreadLocalRandom.current().nextLong(1, 15));
+                        ThreadLocalRandom.current().nextLong(1, 15));
             }
         }
 
-        dataset = expectedDataSetFactory.getDataset(instance, user, source, sourceType, sensorType,
-                stat, timeFrame);
+        dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
+                sensorType, stat, timeWindow);
         documents = expectedDocumentFactory.produceExpectedData(instance);
     }
 
-    private static void randomArrayValue(String user, String source, String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeFrame, int samples,
-            boolean singleWindow) throws InstantiationException, IllegalAccessException {
+    private static void randomArrayValue(String project, String user, String source, String
+            sourceType,
+            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
+            boolean singleWindow) {
 
         ExpectedArrayValue instance = new ExpectedArrayValue();
 
@@ -100,89 +101,58 @@ public class RandomInput {
             }
         }
 
-        dataset = expectedDataSetFactory.getDataset(instance, user, source, sourceType, sensorType,
-                    stat, timeFrame);
+        dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
+                sensorType,
+                stat, timeWindow);
         documents = expectedDocumentFactory.produceExpectedData(instance);
     }
 
     /**
      * Returns a Map containing a {@code Dataset} and a {@code Collection<Document>} randomly
-     *      generated mocking the behaviour of the RADAR-CNS Platform.
+     * generated mocking the behaviour of the RADAR-CNS Platform.
      */
-    public static Map<String, Object> getDatasetAndDocumentsRandom(String user, String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat,
-            TimeWindow timeFrame, int samples, boolean singleWindow) throws InstantiationException,
-            IllegalAccessException {
-        switch (sourceType) {
-            case ANDROID: break;
-            case BIOVOTION: break;
-            case EMPATICA: return getBoth(user, source, sourceType, sensorType, stat, timeFrame,
-                    samples, singleWindow);
-            case "PEBBLE": break;
-            default: break;
+    public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user,
+            String source, String sourceType, String sensorType, DescriptiveStatistic stat,
+            TimeWindow timeWindow, int samples, boolean singleWindow) {
+        if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
+            return getBoth(project, user, source, sourceType, sensorType, stat,
+                    timeWindow, samples, singleWindow);
         }
 
         throw new UnsupportedOperationException(sourceType + " is not"
-            + " currently supported.");
+                + " currently supported.");
     }
 
     /**
-     * Returns a {@code Dataset} randomly generated that mocks the behaviour of
-     *      the RADAR-CNS Platform.
+     * Returns a {@code Collection<Document>} randomly generated that mocks the behaviour of the
+     * RADAR-CNS Platform.
      */
-    public static Dataset getDatasetRandom(String user, String source, String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeFrame,
-            int samples, boolean singleWindow) throws InstantiationException,
-            IllegalAccessException {
-        switch (sourceType) {
-            case ANDROID: break;
-            case BIOVOTION: break;
-            case EMPATICA: return getDataset(user, source, sourceType, sensorType, stat, timeFrame,
-                            samples, singleWindow);
-            case "PEBBLE": break;
-            default: break;
-        }
-
-        throw new UnsupportedOperationException(sourceType + " is not"
-            + " currently supported.");
-    }
-
-    /**
-     * Returns a {@code Collection<Document>} randomly generated that mocks the behaviour of
-     *      the RADAR-CNS Platform.
-     */
-    public static List<Document> getDocumentsRandom(String user, String source,
+    public static List<Document> getDocumentsRandom(String project, String user, String source,
             String sourceType, String sensorType, DescriptiveStatistic stat,
-            TimeWindow timeFrame, int samples, boolean singleWindow)
-            throws InstantiationException, IllegalAccessException {
+            TimeWindow timeWindow, int samples, boolean singleWindow) {
         switch (sourceType) {
-            case EMPATICA:
-                return getDocument(user, source, sourceType, sensorType, stat,
-                            timeFrame, samples, singleWindow);
+            case "empatica_e4_v1":
+                return getDocument(project, user, source, sourceType, sensorType, stat,
+                        timeWindow, samples, singleWindow);
             default:
                 throw new UnsupportedOperationException(sourceType + " is not"
                         + " currently supported.");
         }
     }
 
-    private static Dataset getDataset(String user, String source, String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeFrame, int samples,
-            boolean singleWindow) throws InstantiationException, IllegalAccessException {
-        nextValue(user, source, sourceType, sensorType, stat, timeFrame, samples, singleWindow);
-        return dataset;
-    }
-
-    private static List<Document> getDocument(String user, String source, String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeFrame, int samples,
-            boolean singleWindow) throws InstantiationException, IllegalAccessException {
-        nextValue(user, source, sourceType, sensorType, stat, timeFrame, samples, singleWindow);
+    private static List<Document> getDocument(String project, String user, String source,
+            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            int samples, boolean singleWindow) {
+        nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
+                singleWindow);
         return documents;
     }
 
-    private static Map<String, Object> getBoth(String user, String source, String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeFrame, int samples,
-            boolean singleWindow) throws InstantiationException, IllegalAccessException {
-        nextValue(user, source, sourceType, sensorType, stat, timeFrame, samples, singleWindow);
+    private static Map<String, Object> getBoth(String project, String user, String source,
+            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            int samples, boolean singleWindow) {
+        nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
+                singleWindow);
 
         Map<String, Object> map = new HashMap<>();
         map.put(DATASET, dataset);
@@ -190,24 +160,27 @@ public class RandomInput {
         return map;
     }
 
-    private static void nextValue(String user, String source, String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeFrame, int samples,
-            boolean singleWindow) throws IllegalAccessException, InstantiationException {
+    private static void nextValue(String project, String user, String source, String sourceType,
+            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
+            boolean singleWindow) {
         switch (sensorType) {
             case "ACCELEROMETER":
-                randomArrayValue(user, source, sourceType, sensorType, stat, timeFrame, samples,
-                                singleWindow);
+                randomArrayValue(project, user, source, sourceType, sensorType, stat, timeWindow,
+                        samples, singleWindow);
                 break;
-            default: randomDoubleValue(user, source, sourceType, sensorType, stat, timeFrame,
-                                samples, singleWindow);
+            default:
+                randomDoubleValue(project, user, source, sourceType, sensorType, stat,
+                        timeWindow, samples, singleWindow);
                 break;
         }
     }
 
-    /** Generates and returns a randomly generated {@code ApplicationStatus} mocking data sent
-     *      by RADAR-CNS pRMT.
+    /**
+     * Generates and returns a randomly generated {@code ApplicationStatus} mocking data sent by
+     * RADAR-CNS pRMT.
      **/
-    public static Map<String, Document> getRandomApplicationStatus(String user, String source) {
+    public static Map<String, Document> getRandomApplicationStatus(String project, String user,
+            String source) {
         String ipAdress = getRandomIpAddress();
         ServerStatus serverStatus = ServerStatus.values()[
                 ThreadLocalRandom.current().nextInt(0, ServerStatus.values().length)];
@@ -216,30 +189,38 @@ public class RandomInput {
         int recordsSent = ThreadLocalRandom.current().nextInt();
         int recordsUnsent = ThreadLocalRandom.current().nextInt();
 
-        return getRandomApplicationStatus(user, source, ipAdress, serverStatus, uptime,
+        return getRandomApplicationStatus(project, user, source, ipAdress, serverStatus, uptime,
                 recordsCached, recordsSent, recordsUnsent);
     }
 
-    /** Generates and returns a ApplicationStatus using the given inputs. **/
-    public static Map<String, Document> getRandomApplicationStatus(String user, String source,
-            String ipAddress, ServerStatus serverStatus, Double uptime, int recordsCached,
-            int recordsSent, int recordsUnsent) {
+    /**
+     * Generates and returns a ApplicationStatus using the given inputs.
+     **/
+    private static Map<String, Document> getRandomApplicationStatus(String project, String user,
+            String source, String ipAddress, ServerStatus serverStatus, Double uptime,
+            int recordsCached, int recordsSent, int recordsUnsent) {
         String id = user + "-" + source;
 
         Document uptimeDoc = new Document("_id", id)
-                .append("user", user)
-                .append("source", source)
+                .append(USER_ID, user)
+                .append(SOURCE_ID, source)
+                .append(PROJECT_ID, project)
+                .append("sourceType", source)
                 .append("applicationUptime", uptime);
 
         Document statusDoc = new Document("_id", id)
-                .append("user", user)
-                .append("source", source)
+                .append(USER_ID, user)
+                .append(SOURCE_ID, source)
+                .append(PROJECT_ID, project)
+                .append("sourceType", source)
                 .append("clientIP", ipAddress)
                 .append("serverStatus", serverStatus.toString());
 
         Document recordsDoc = new Document("_id", id)
-                .append("user", user)
-                .append("source", source)
+                .append(USER_ID, user)
+                .append(SOURCE_ID, source)
+                .append(PROJECT_ID, project)
+                .append("sourceType", source)
                 .append("recordsCached", recordsCached)
                 .append("recordsSent", recordsSent)
                 .append("recordsUnsent", recordsUnsent);
@@ -251,15 +232,17 @@ public class RandomInput {
         return documents;
     }
 
-    /** Returns a String representing a random IP address. **/
-    public static String getRandomIpAddress() {
+    /**
+     * Returns a String representing a random IP address.
+     **/
+    private static String getRandomIpAddress() {
         long ip = ThreadLocalRandom.current().nextLong();
         StringBuilder result = new StringBuilder(15);
 
         for (int i = 0; i < 4; i++) {
-            result.insert(0,Long.toString(ip & 0xff));
+            result.insert(0, Long.toString(ip & 0xff));
             if (i < 3) {
-                result.insert(0,'.');
+                result.insert(0, '.');
             }
             ip = ip >> 8;
         }

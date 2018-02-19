@@ -35,9 +35,12 @@ sourceSets {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: junitVersion
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
+    testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 
     integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: wireMockVersion
     integrationTestImplementation group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommons
+    integrationTestRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
 }
 
 task copyFrontendConfigIntegrationTest(type: Copy) {
@@ -109,7 +112,7 @@ task integrationTest(type: Test, dependsOn: ['copyFrontendConfigIntegrationTest'
         events "skipped", "failed", "passed"
     }
 }
-integrationTest.finalizedBy 'stopSimpleStack'
+//integrationTest.finalizedBy 'stopSimpleStack'
 
 task endToEndTest(type: Test, dependsOn: ['copyFrontendConfigEndToEndTest', 'installRadarStack']) {
     description = "Run end to end tests (located in src/endToEndTest/...)."

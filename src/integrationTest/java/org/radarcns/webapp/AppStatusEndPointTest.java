@@ -17,96 +17,96 @@
 package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.unit.config.TestCatalog.EMPATICA;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.STATUS;
+import static org.junit.Assert.assertSame;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusServerStatus.STATUS_COLLECTION;
+import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusUpTime.UPTIME_COLLECTION;
+import static org.radarcns.webapp.resource.BasePath.APPLICATION_STATUS;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.config.Properties;
-import org.radarcns.dao.AndroidAppDataAccessObject;
-import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.domain.restapi.Application;
+import org.radarcns.domain.restapi.ServerStatus;
+import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
+import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.restapi.app.Application;
-import org.radarcns.webapp.util.BasePath;
+import org.radarcns.mongo.util.MongoHelper;
 
 public class AppStatusEndPointTest {
+
+    private static final String PROJECT = "radar";
     private static final String SUBJECT = "sub-1";
-    private static final String SOURCE = "SourceID_0";
-    private static final String SOURCE_TYPE = EMPATICA;
+    private static final String SOURCE = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
+    private static final String SOURCE_TYPE = "empatica_e4_v1";
     private static final String SENSOR_TYPE = "HEART_RATE";
-    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
+    private static final TimeWindow TIME_WINDOW = TimeWindow.TEN_SECOND;
     private static final int SAMPLES = 10;
-    private static final String SOURCE_PATH = SUBJECT + '/' + SOURCE;
+    private static final String SOURCE_PATH =
+            APPLICATION_STATUS + '/' + PROJECT + '/' + SUBJECT + '/' + SOURCE;
+    private static final String COLLECTION_NAME = "android_empatica_e4_heartrate_10sec";
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            Properties.getApiConfig().getApiUrl() + BasePath.ANDROID + '/' + STATUS + '/');
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
     @Test
-    public void getStatusTest204() throws IOException {
-        try (Response response = apiClient.request(SOURCE_PATH, AVRO_BINARY, Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
+    public void getStatusTest200Unknown() throws IOException, ReflectiveOperationException {
+        Application actual = apiClient.requestJson(SOURCE_PATH, Application.class, Status.OK);
+        assertSame(ServerStatus.UNKNOWN, actual.getServerStatus());
     }
 
     @Test
     public void getStatusTest200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+            throws IOException, ReflectiveOperationException {
         MongoClient client = Utility.getMongoClient();
 
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
+        MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
 
-        List<Document> list = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
+        List<Document> list = RandomInput.getDocumentsRandom(PROJECT, SUBJECT, SOURCE, SOURCE_TYPE,
+                SENSOR_TYPE, COUNT, TIME_WINDOW, SAMPLES, false);
 
         collection.insertMany(list);
 
-        Map<String, Document> map = RandomInput.getRandomApplicationStatus(
+        Map<String, Document> map = RandomInput.getRandomApplicationStatus(PROJECT,
                 SUBJECT, SOURCE);
 
         Utility.insertMixedDocs(client, map);
 
         Application expected = Utility.convertDocToApplication(map);
-        Application actual = apiClient.requestAvro(SOURCE_PATH, Application.class, Status.OK);
+        Application actual = apiClient.requestJson(SOURCE_PATH, Application.class, Status.OK);
 
-        assertEquals(expected, actual);
+        assertEquals(expected.getServerStatus(), actual.getServerStatus());
+        assertEquals(expected.getIpAddress(), actual.getIpAddress());
 
         dropAndClose(client);
     }
 
     @After
-    public void dropAndClose() throws URISyntaxException {
+    public void dropAndClose() {
         dropAndClose(Utility.getMongoClient());
     }
 
-    /** Drops all used collections to bring the database back to the initial state, and close the
-     *      database connection.
+    /**
+     * Drops all used collections to bring the database back to the initial state, and close the
+     * database connection.
      **/
     public void dropAndClose(MongoClient client) {
-        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-        Utility.dropCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
-        Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
+        Utility.dropCollection(client, COLLECTION_NAME);
+        Utility.dropCollection(client, STATUS_COLLECTION);
+        Utility.dropCollection(client, UPTIME_COLLECTION);
+        Utility.dropCollection(client, RECORD_COLLECTION);
+
         client.close();
     }
 

@@ -2,6 +2,7 @@
 .idea/
 *.iml
 *.iws
+*.ipr
 out/
 
 # Mac
@@ -29,6 +30,3 @@ src/endToEndTest/resources/*.json
 src/main/webapp/frontend/*.json
 .RUNNING_INSTANCE_LOCK
 /classes/
-
-# bins.csv file
-bins.csv

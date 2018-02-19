@@ -1,27 +1,24 @@
-version: 1.0
-released: 2017-04-27
 
-# Swagger documentation version
-swagger_version: 1.0.0
-
-# Comma separated list stating supported Application Protocols applicable to query APIs
-application_protocol: http
-
-# Machine address hosting the APIs
-host: localhost:8080/radar
-
-# Base or Root path for the RESTFul interface
-api_base_path: api
-
-# Mongodb hosts
-mongo_hosts:
+# Mongodb hosts a map of hostname and port
+mongodb_hosts:
     localhost: 27017
 
 # Mongodb User
-mongo_user:
-    usr: restapi
-    pwd: radar
-    db: hotstorage
+mongodb_credentials:
+    username: restapi
+    password: radar
+    database_name: hotstorage
 
-# Path to the Device Catalog
-device_catalog: device-catalog.yml
+management_portal_config:
+    oauth_client_id: radar_restapi #OAuth2 clientId used by the webApp for making requests
+    oauth_client_secret: secret #OAuth2 client secret
+    oauth_client_scopes: SUBJECT.READ PROJECT.READ SOURCE.READ SOURCETYPE.READ
+    management_portal_url: http://managementportal-app:8090/ #URL pointing Management Portal
+    token_endpoint: oauth/token #URL managing tokens
+    project_endpoint: api/projects/ #URL managing project function
+    subject_endpoint: api/subjects/
+    source_type_endpoint: api/source-types/
+    source_data_endpoint: api/source-data/
+    source_endpoint: api/sources/
+
+hdfs_output_dir: /var/lib/hdfs/output

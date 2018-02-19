@@ -16,14 +16,14 @@ package org.radarcns.integration.util;
  * limitations under the License.
  */
 
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.AVERAGE;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MAXIMUM;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MINIMUM;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.SUM;
 import static org.radarcns.mock.model.ExpectedValue.DURATION;
-import static org.radarcns.restapi.header.DescriptiveStatistic.AVERAGE;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
-import static org.radarcns.restapi.header.DescriptiveStatistic.MAXIMUM;
-import static org.radarcns.restapi.header.DescriptiveStatistic.MINIMUM;
-import static org.radarcns.restapi.header.DescriptiveStatistic.QUARTILES;
-import static org.radarcns.restapi.header.DescriptiveStatistic.SUM;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,11 +32,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
-import org.radarcns.dao.mongo.data.sensor.AccelerationFormat;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.mock.model.ExpectedValue;
-import org.radarcns.restapi.header.DescriptiveStatistic;
+import org.radarcns.mongo.data.sourcedata.AccelerationFormat;
+import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 
@@ -115,9 +115,11 @@ public class ExpectedDocumentFactory {
             list.add(new Document(MongoHelper.ID,
                     expectedValue.getLastKey().getUserId()
                             + "-" + expectedValue.getLastKey().getSourceId()
+                            + "-" + expectedValue.getLastKey().getProjectId()
                             + "-" + timestamp + "-" + end)
-                    .append(MongoHelper.USER, expectedValue.getLastKey().getUserId())
-                    .append(MongoHelper.SOURCE, expectedValue.getLastKey().getSourceId())
+                    .append(MongoHelper.USER_ID, expectedValue.getLastKey().getUserId())
+                    .append(MongoHelper.SOURCE_ID, expectedValue.getLastKey().getSourceId())
+                    .append(MongoHelper.PROJECT_ID, expectedValue.getLastKey().getProjectId())
                     .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
                     .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleValueCollector))
                     .append(Stat.sum.getParam(), getStatValue(SUM, doubleValueCollector))
@@ -151,8 +153,8 @@ public class ExpectedDocumentFactory {
                     expectedValue.getLastKey().getUserId()
                             + "-" + expectedValue.getLastKey().getUserId()
                             + "-" + timestamp + "-" + end)
-                    .append(MongoHelper.USER, expectedValue.getLastKey().getUserId())
-                    .append(MongoHelper.SOURCE, expectedValue.getLastKey().getUserId())
+                    .append(MongoHelper.USER_ID, expectedValue.getLastKey().getUserId())
+                    .append(MongoHelper.SOURCE_ID, expectedValue.getLastKey().getSourceId())
                     .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleArrayCollector))
                     .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleArrayCollector))
                     .append(Stat.sum.getParam(), getStatValue(SUM, doubleArrayCollector))
@@ -187,6 +189,7 @@ public class ExpectedDocumentFactory {
 
     /**
      * Produces {@link List} of {@link Document}s for given {@link ExpectedValue}.
+     *
      * @param expectedValue for test
      * @return {@link List} of {@link Document}s
      */

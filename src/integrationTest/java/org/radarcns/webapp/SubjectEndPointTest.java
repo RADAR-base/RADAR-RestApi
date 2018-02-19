@@ -16,158 +16,122 @@
 
 package org.radarcns.webapp;
 
-import static java.util.function.Function.identity;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.radarcns.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.webapp.util.BasePath.AVRO_BINARY;
-import static org.radarcns.webapp.util.BasePath.GET_ALL_SUBJECTS;
-import static org.radarcns.webapp.util.BasePath.GET_SUBJECT;
+import static org.junit.Assert.assertTrue;
+import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.catalogue.TimeWindow;
-import org.radarcns.config.Properties;
-import org.radarcns.dao.AndroidAppDataAccessObject;
-import org.radarcns.dao.SensorDataAccessObject;
-import org.radarcns.dao.mongo.util.MongoHelper;
+import org.radarcns.domain.restapi.Subject;
 import org.radarcns.integration.util.ApiClient;
-import org.radarcns.integration.util.RandomInput;
+import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.restapi.source.Sensor;
-import org.radarcns.restapi.source.Source;
-import org.radarcns.restapi.source.SourceSummary;
-import org.radarcns.restapi.source.States;
-import org.radarcns.restapi.subject.Cohort;
-import org.radarcns.restapi.subject.Subject;
-import org.radarcns.webapp.util.BasePath;
+import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.util.RadarConverter;
+import org.radarcns.webapp.resource.BasePath;
 
 public class SubjectEndPointTest {
-    private static final String SUBJECT = "sub-1";
-    private static final String SOURCE = "SourceID_0";
-    private static final String STUDY = "0";
-    private static final String SOURCE_TYPE = org.radarcns.unit.config.TestCatalog.EMPATICA;
-    private static final String SENSOR_TYPE = "HEART_RATE";
-    private static final TimeWindow TIME_FRAME = TimeWindow.TEN_SECOND;
-    private static final int SAMPLES = 10;
+
+    private static final String PROJECT_NAME = "radar";
+    private static final String SUBJECT_ID = "sub-1";
+    private static final String SOURCE_ID = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
+    private static final String MONITOR_STATISTICS_TOPIC = "source_statistics_empatica_e4";
+
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
-            Properties.getApiConfig().getApiUrl() + BasePath.SUBJECT + '/');
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
+
 
     @Test
-    public void getAllSubjectsTest204() throws IOException {
-        try (Response response = apiClient.request(GET_ALL_SUBJECTS + "/" + STUDY, AVRO_BINARY,
-                Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
+    public void getSubjectsByProjectName200() throws IOException {
+        insertMonitorStatistics();
+
+        Response actual = apiClient
+                .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS,
+                        APPLICATION_JSON, Status.OK);
+        assertTrue(actual.isSuccessful());
+
+        ObjectReader reader = RadarConverter.readerForCollection(List.class, Subject.class);
+        List<Subject> subjects = reader.readValue(actual.body().byteStream());
+
+        assertNotNull(subjects);
+        assertTrue(subjects.size() > 0);
+        assertEquals(PROJECT_NAME, subjects.get(0).getProject());
+
+    }
+
+
+    private static Document getDocumentsForStatistics(long start, long end) {
+        return new Document(MongoHelper.ID, PROJECT_NAME + "_" + SUBJECT_ID + "-" + SOURCE_ID
+                + "-" + start + "-" + end)
+                .append(MongoHelper.USER_ID, SUBJECT_ID)
+                .append(MongoHelper.SOURCE_ID, SOURCE_ID)
+                .append(MongoHelper.PROJECT_ID, PROJECT_NAME)
+                .append(MongoHelper.START, new Date(start))
+                .append(MongoHelper.END, new Date(end));
+    }
+
+    private void insertMonitorStatistics() {
+        MongoClient mongoClient = Utility.getMongoClient();
+        int windows = 2;
+        long start = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
+        long end = start + TimeUnit.SECONDS.toMillis(60 / (windows + 1));
+        long later = end + TimeUnit.SECONDS.toMillis(60 / (windows + 1));
+        Document doc = getDocumentsForStatistics(start, end);
+        Document second = getDocumentsForStatistics(start, later);
+        MongoCollection collection = MongoHelper
+                .getCollection(mongoClient, MONITOR_STATISTICS_TOPIC);
+        collection.insertMany(Arrays.asList(doc, second));
     }
 
     @Test
-    public void getAllSubjectsTest200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
+    public void getSubjectsBySubjectIdAndProjectName200() throws IOException {
+        insertMonitorStatistics();
 
-        MongoClient client = Utility.getMongoClient();
+        Response actual = apiClient
+                .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS + "/"
+                        + SUBJECT_ID, APPLICATION_JSON, Status.OK);
+        assertTrue(actual.isSuccessful());
 
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
-        collection.insertMany(RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false));
+        ObjectReader reader = RadarConverter.readerFor(Subject.class);
+        Subject subject = reader.readValue(actual.body().byteStream());
 
-        Utility.insertMixedDocs(client,
-                RandomInput.getRandomApplicationStatus(SUBJECT.concat("1"), SOURCE.concat("1")));
+        assertNotNull(subject);
+        assertEquals(SUBJECT_ID, subject.getSubjectId());
+        assertEquals(PROJECT_NAME, subject.getProject());
+        assertTrue(subject.getSources().size() > 0);
 
-        Cohort cohort = apiClient.requestAvro(
-                GET_ALL_SUBJECTS + "/" + STUDY, Cohort.class, Status.OK);
-
-        for (Subject patient : cohort.getSubjects()) {
-            if (patient.getSubjectId().equalsIgnoreCase(SUBJECT)) {
-                Source source = patient.getSources().get(0);
-                assertEquals(SOURCE_TYPE, source.getType());
-                assertEquals(SOURCE, source.getId());
-            } else if (patient.getSubjectId().equalsIgnoreCase(SUBJECT.concat("1"))) {
-                Source source = patient.getSources().get(0);
-                assertEquals(org.radarcns.unit.config.TestCatalog.ANDROID, source.getType());
-                assertEquals(SOURCE.concat("1"), source.getId());
-            }
-        }
-
-        dropAndClose(client);
     }
 
     @Test
-    public void getSubjectTest204() throws IOException {
-        try (Response response = apiClient.request(
-                GET_SUBJECT + '/' + SUBJECT, AVRO_BINARY, Status.NO_CONTENT)) {
-            assertNotNull(response);
-        }
-    }
-
-    @Test
-    public void getSubjectTest200()
-            throws IOException, ReflectiveOperationException, URISyntaxException {
-
-        MongoClient client = Utility.getMongoClient();
-
-        MongoCollection<Document> collection = MongoHelper.getCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
-
-        List<Document> randomInput = RandomInput.getDocumentsRandom(SUBJECT, SOURCE, SOURCE_TYPE,
-                SENSOR_TYPE, COUNT, TIME_FRAME, SAMPLES, false);
-
-        collection.insertMany(randomInput);
-
-        Subject actual = apiClient.requestAvro(
-                GET_SUBJECT + '/' + SUBJECT, Subject.class, Status.OK);
-
-        Map<String, Sensor> sensorMap = Arrays.stream(
-                new String[] {
-                        "INTER_BEAT_INTERVAL", "BATTERY", "HEART_RATE", "THERMOMETER",
-                        "ACCELEROMETER", "ELECTRODERMAL_ACTIVITY", "BLOOD_VOLUME_PULSE"
-                })
-                .collect(Collectors.toMap(identity(), s -> new Sensor(
-                        s, States.DISCONNECTED, 0, 1.0)));
-
-        Subject expected = new Subject(SUBJECT, true,
-                Utility.getExpectedTimeFrame(Long.MAX_VALUE, Long.MIN_VALUE, randomInput),
-                Collections.singletonList(new Source(SOURCE, SOURCE_TYPE, new SourceSummary(
-                        States.DISCONNECTED, 0, 1.0, sensorMap))));
-
-        assertEquals(expected, actual);
-
-        dropAndClose(client);
+    public void getSubjectTest404() throws IOException {
+        Response actual = apiClient
+                .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS + "/"
+                        + "OTHER", APPLICATION_JSON, Status.NOT_FOUND);
+        assertFalse(actual.isSuccessful());
+        assertEquals(actual.code(), Status.NOT_FOUND.getStatusCode());
     }
 
     @After
     public void dropAndClose() {
-        dropAndClose(Utility.getMongoClient());
+        Utility.dropCollection(Utility.getMongoClient(), MONITOR_STATISTICS_TOPIC);
     }
 
-    /** Drops all used collections to bring the database back to the initial state, and close the
-     *      database connection.
-     **/
-    public void dropAndClose(MongoClient client) {
-        Utility.dropCollection(client, MongoHelper.DEVICE_CATALOG);
-        Utility.dropCollection(client,
-                SensorDataAccessObject.getInstance(SENSOR_TYPE).getCollectionName(
-                    SOURCE_TYPE, TIME_FRAME));
-        Utility.dropCollection(client, AndroidAppDataAccessObject.getInstance().getCollections());
-        client.close();
-    }
 
 }

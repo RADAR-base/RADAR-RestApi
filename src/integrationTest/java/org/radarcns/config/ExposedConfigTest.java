@@ -17,53 +17,45 @@
 package org.radarcns.config;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import javax.ws.rs.core.Response.Status;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.integration.util.ApiClient;
-import org.radarcns.integration.util.Utility;
 
 /**
- * Checks if the config file for the Front-End ecosystem is where expected, and checks the
- *      validity of the swagger documentation.
+ * Checks if the config file for the Front-End ecosystem is where expected, and checks the validity
+ * of the swagger documentation.
  */
 public class ExposedConfigTest {
-    public static final String CONFIG_JSON = "config.json";
+
     public static final String OPENAPI_JSON = "openapi.json";
+    public static final String OPENAPI = "openapi";
 
     private static final String BASE_PATH = "api";
-    private static final String FRONTEND = "frontend";
 
     @Rule
-    public ApiClient apiClient = new ApiClient("http://localhost:8080/radar/");
+    public final ApiClient apiClient = new ApiClient("http://localhost:8080/");
 
     @Test
-    public void checkFrontEndConfig()
-            throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        String actual = apiClient.requestString(FRONTEND + '/' + CONFIG_JSON, "*/*", Status.OK);
-        String expected = Utility.readAll(
-                ExposedConfigTest.class.getClassLoader().getResourceAsStream(CONFIG_JSON));
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void checkSwaggerDoc()
-            throws IOException, GeneralSecurityException {
+    public void checkSwaggerDoc() throws IOException {
         String response = apiClient.requestString(BASE_PATH + '/' + OPENAPI_JSON,
                 APPLICATION_JSON, Status.OK);
         JsonNode node = new ObjectMapper().readTree(response);
-        assertTrue(node.has("servers"));
-        String serverUrl = node.get("servers").elements().next().get("url").asText();
-        assertEquals(Properties.getApiConfig().getApiUrl(), serverUrl);
+        assertTrue(node.has("openapi"));
+        assertTrue(node.get("openapi").asText().startsWith("3."));
+    }
+
+    @Test
+    public void checkSwaggerDocWithoutExtension() throws IOException {
+        String response = apiClient.requestString(BASE_PATH + '/' + OPENAPI,
+                APPLICATION_JSON, Status.OK);
+        JsonNode node = new ObjectMapper().readTree(response);
+        assertTrue(node.has("openapi"));
+        assertTrue(node.get("openapi").asText().startsWith("3."));
     }
 }

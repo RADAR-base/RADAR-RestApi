@@ -3,3 +3,7 @@ apply from: 'gradle/test.gradle'
 apply from: 'gradle/codacy.gradle'
 apply from: 'gradle/style.gradle'
 apply from: 'gradle/utilities.gradle'
+
+tasks.withType(Tar){
+    compression = Compression.GZIP
+}
