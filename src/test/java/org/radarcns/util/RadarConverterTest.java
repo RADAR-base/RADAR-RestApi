@@ -28,7 +28,6 @@ import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MINIMUM;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.SUM;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.io.IOException;
