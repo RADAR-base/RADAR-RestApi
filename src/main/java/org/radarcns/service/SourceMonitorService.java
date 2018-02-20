@@ -23,12 +23,12 @@ import static org.radarcns.mongo.util.MongoHelper.START;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
+import java.time.Instant;
 import javax.inject.Inject;
 import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,18 +76,24 @@ public class SourceMonitorService {
                     sourceType.getSourceStatisticsMonitorTopic());
         }
 
-        long timeStart = Long.MAX_VALUE;
-        long timeEnd = Long.MIN_VALUE;
+        Instant timeStart = null;
+        Instant timeEnd = null;
         if (cursor.hasNext()) {
             Document document = cursor.next();
             Document key = (Document) document.get(KEY);
-            timeStart = Math.min(timeStart, key.getDate(START).getTime());
-            timeEnd = Math.max(timeEnd, key.getDate(END).getTime());
+            Instant localStart = key.getDate(START).toInstant();
+            Instant localEnd = key.getDate(END).toInstant();
+
+            if (timeStart == null || localStart.isBefore(timeStart)) {
+                timeStart = localStart;
+            }
+            if (timeEnd == null || localEnd.isAfter(timeEnd)) {
+                timeEnd = localEnd;
+            }
         }
 
         cursor.close();
-        return new TimeFrame(RadarConverter.getISO8601(timeStart), RadarConverter
-                .getISO8601(timeEnd));
+        return new TimeFrame(timeStart, timeEnd);
 
     }
 }

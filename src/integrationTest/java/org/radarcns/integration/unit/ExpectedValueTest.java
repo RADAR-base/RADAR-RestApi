@@ -70,20 +70,7 @@ public class ExpectedValueTest {
                 ((Document) docs.get(docs.size() - 1).get(KEY)).getDate(MongoHelper.END));
 
         TimeFrame window2 = dataset.getHeader().getEffectiveTimeFrame();
-        assertEquals(true, compareEffectiveTimeFrame(window1, window2));
+        assertEquals(window1, window2);
     }
 
-    /**
-     * Compare two {@code TimeFrame} values.
-     *
-     * @param window1 first component that to has to be compared
-     * @param window2 second component that to has to be compared
-     * @return {@code true} if they match, false otherwise
-     * @see TimeFrame
-     **/
-    public static boolean compareEffectiveTimeFrame(TimeFrame window1,
-            TimeFrame window2) {
-        return window1.getStartDateTime().equals(window2.getStartDateTime())
-                && window1.getEndDateTime().equals(window2.getEndDateTime());
-    }
 }

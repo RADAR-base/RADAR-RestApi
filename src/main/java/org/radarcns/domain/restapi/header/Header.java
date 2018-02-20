@@ -1,6 +1,7 @@
 package org.radarcns.domain.restapi.header;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 import org.radarcns.domain.restapi.TimeWindow;
 
 public class Header {
@@ -172,5 +173,34 @@ public class Header {
 
     public void setTimeFrame(TimeFrame timeFrame) {
         this.timeFrame = timeFrame;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Header effectiveTimeFrame = (Header) o;
+
+        return Objects.equals(subjectId, effectiveTimeFrame.subjectId)
+                && Objects.equals(projectId, effectiveTimeFrame.projectId)
+                && Objects.equals(sourceId, effectiveTimeFrame.sourceId)
+                && Objects.equals(sourceType, effectiveTimeFrame.sourceType)
+                && Objects.equals(sourceDataType, effectiveTimeFrame.sourceDataType)
+                && Objects.equals(descriptiveStatistic, effectiveTimeFrame.descriptiveStatistic)
+                && Objects.equals(unit, effectiveTimeFrame.unit)
+                && Objects.equals(timeWindow, effectiveTimeFrame.timeWindow)
+                && Objects.equals(timeFrame, effectiveTimeFrame.timeFrame)
+                && Objects.equals(effectiveTimeFrame, effectiveTimeFrame.effectiveTimeFrame);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(subjectId, projectId, sourceId, sourceType, sourceDataType,
+                descriptiveStatistic, unit, timeWindow, timeFrame, effectiveTimeFrame);
     }
 }

@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -22,16 +21,16 @@ import org.radarcns.util.RadarConverter;
 @Provider
 @Produces(APPLICATION_JSON)
 @Singleton
-public class AvroJsonWriter implements MessageBodyWriter<SpecificRecord> {
+public class AvroJsonWriter implements MessageBodyWriter<Object> {
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations,
             MediaType mediaType) {
-        return SpecificRecord.class.isAssignableFrom(type);
+        return true;
     }
 
     @Override
-    public void writeTo(SpecificRecord record, Class<?> type, Type genericType,
+    public void writeTo(Object record, Class<?> type, Type genericType,
             Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException, WebApplicationException {

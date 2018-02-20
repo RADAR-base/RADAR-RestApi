@@ -37,6 +37,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Date;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -47,14 +48,14 @@ import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.filter.Authenticated;
+import org.radarcns.webapp.param.InstantParam;
 import org.radarcns.webapp.validation.Alphanumeric;
-import org.radarcns.webapp.validation.ISO8601DateString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,8 +116,9 @@ public class DataSetEndPoint {
                         timeWindow);
         if (dataset.getDataset().isEmpty()) {
             LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
+            Instant now = Instant.now();
             return emptyDataset(projectName, subjectId, sourceId, sourceDataName, stat, interval,
-                    Instant.now());
+                    new TimeFrame(now.minus(RadarConverter.getDuration(timeWindow)), now));
         }
 
         return dataset;
@@ -152,8 +154,8 @@ public class DataSetEndPoint {
             @Alphanumeric @PathParam(SOURCE_DATA_NAME) String sourceDataName,
             @PathParam(STAT) DescriptiveStatistic stat,
             @QueryParam(TIME_WINDOW) TimeWindow interval,
-            @ISO8601DateString @QueryParam(START) String start,
-            @ISO8601DateString @QueryParam(END) String end) throws IOException {
+            @QueryParam(START) InstantParam start,
+            @QueryParam(END) InstantParam end) throws IOException {
         // todo: 404 if given source does not exist.
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
@@ -165,7 +167,7 @@ public class DataSetEndPoint {
         if (start != null && end != null) {
             dataset = dataSetService.getAllRecordsInWindow(projectName,
                     subjectId, sourceId, sourceDataName, stat, timeWindow,
-                    RadarConverter.getISO8601(start), RadarConverter.getISO8601(end));
+                    Date.from(start.getValue()), Date.from(end.getValue()));
         } else {
             dataset = dataSetService.getAllDataItems(projectName, subjectId,
                     sourceId, sourceDataName, stat, timeWindow);
@@ -174,7 +176,7 @@ public class DataSetEndPoint {
         if (dataset.getDataset().isEmpty()) {
             LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
             return emptyDataset(projectName, subjectId, sourceId, sourceDataName, stat, interval,
-                    Instant.now());
+                    new TimeFrame());
         }
 
         return dataset;
@@ -182,11 +184,10 @@ public class DataSetEndPoint {
     }
 
     private static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
-            String sensor,
-            DescriptiveStatistic stat, TimeWindow interval, Instant timeFrameStart) {
-        String time = timeFrameStart.toString();
+            String sensor, DescriptiveStatistic stat, TimeWindow interval, TimeFrame timeFrame) {
+
         return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
-                null, interval, new TimeFrame(time, time), new TimeFrame(time, time)),
+                null, interval, timeFrame, null),
                 Collections.emptyList());
     }
 }

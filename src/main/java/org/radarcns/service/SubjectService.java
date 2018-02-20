@@ -1,7 +1,7 @@
 package org.radarcns.service;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -11,7 +11,6 @@ import org.radarcns.domain.managementportal.SubjectDTO;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.Subject;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.exception.BadGatewayException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,31 +58,26 @@ public class SubjectService {
 
     private Subject buildSubject(SubjectDTO subject)
             throws IOException {
-        Subject builtSubject = new Subject()
+        List<Source> sources = this.sourceService.getAllSourcesOfSubject(subject.getProject()
+                .getProjectName(), subject.getLogin());
+        return new Subject()
                 .subjectId(subject.getLogin())
                 .projectName(subject.getProject().getProjectName())
                 .status(subject.getStatus().toString())
                 .humanReadableId(subject.getHumanReadableIdentifier())
-                .sources(this.sourceService.getAllSourcesOfSubject(subject.getProject()
-                        .getProjectName(), subject.getLogin()));
-        return builtSubject.lastSeen(getLastSeenForSubject(builtSubject.getSources()));
+                .sources(sources)
+                .lastSeen(getLastSeenForSubject(sources));
     }
 
-    private String getLastSeenForSubject(List<Source> sources) {
-        Date lastSeen = null;
+    private Instant getLastSeenForSubject(List<Source> sources) {
+        Instant lastSeen = null;
         for (Source source : sources) {
-            if (lastSeen == null) {
-                lastSeen = RadarConverter
-                        .getISO8601(source.getEffectiveTimeFrame().getEndDateTime());
-            } else {
-                if (RadarConverter.getISO8601(source.getEffectiveTimeFrame().getEndDateTime())
-                        .after(lastSeen)) {
-                    lastSeen = RadarConverter.getISO8601(source.getEffectiveTimeFrame()
-                            .getEndDateTime());
-                }
+            if (lastSeen == null || source.getEffectiveTimeFrame().getEndDateTime()
+                    .isAfter(lastSeen)) {
+                lastSeen = source.getEffectiveTimeFrame().getEndDateTime();
             }
         }
-        return lastSeen != null ? RadarConverter.getISO8601(lastSeen) : null;
+        return lastSeen;
     }
 
     /**

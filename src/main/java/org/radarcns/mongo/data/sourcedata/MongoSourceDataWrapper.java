@@ -25,6 +25,7 @@ import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedList;
 import org.bson.Document;
@@ -157,8 +158,8 @@ public abstract class MongoSourceDataWrapper {
      */
     private Dataset getDataSet(String field, DescriptiveStatistic stat, Header header,
             MongoCursor<Document> cursor) {
-        Date start = null;
-        Date end = null;
+        Instant start = null;
+        Instant end = null;
 
         LinkedList<DataItem> list = new LinkedList<>();
 
@@ -175,20 +176,22 @@ public abstract class MongoSourceDataWrapper {
 
             Date localStart = key.getDate(START);
             Date localEnd = key.getDate(END);
-            if (start == null) {
-                start = localStart;
-                end = localEnd;
-            } else {
-                if (start.after(localStart)) {
-                    start = localStart;
-                }
-                if (end.before(localEnd)) {
-                    end = localEnd;
+            if (localStart != null && localEnd != null) {
+                if (start == null) {
+                    start = localStart.toInstant();
+                    end = localEnd.toInstant();
+                } else {
+                    if (start.isBefore(localStart.toInstant())) {
+                        start = localStart.toInstant();
+                    }
+                    if (end.isAfter(localEnd.toInstant())) {
+                        end = localEnd.toInstant();
+                    }
                 }
             }
 
             DataItem item = new DataItem(documentToDataFormat(value, field, stat, header),
-                    localStart);
+                    localStart.toInstant());
 
             list.addLast(item);
         }
