@@ -16,8 +16,16 @@
 
 package org.radarcns.mongo.data.sourcedata;
 
+import static org.radarcns.mongo.util.MongoHelper.ASCENDING;
+import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
+import static org.radarcns.mongo.util.MongoHelper.END;
+import static org.radarcns.mongo.util.MongoHelper.KEY;
+import static org.radarcns.mongo.util.MongoHelper.START;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
+
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedList;
 import org.bson.Document;
@@ -25,8 +33,8 @@ import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
@@ -83,8 +91,8 @@ public abstract class MongoSourceDataWrapper {
     public Dataset getLatestRecord(String projectName, String subject, String source, Header
             header, Stat stat, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, MongoHelper
-                        .END, -1, 1, collection);
+                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, END,
+                        DESCENDING, 1, collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                 cursor);
@@ -102,11 +110,11 @@ public abstract class MongoSourceDataWrapper {
      * @return data dataset for the given subject and sourceType, otherwise empty dataset
      * @see Dataset
      */
-    public Dataset getAllRecords(String projectName, String subject, String source, Header
-            header, MongoHelper.Stat stat, MongoCollection<Document> collection) {
+    public Dataset getAllRecords(String projectName, String subject, String source, Header header,
+            MongoHelper.Stat stat, MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, MongoHelper
-                        .START, 1, null, collection);
+                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, START,
+                        ASCENDING, null, collection);
 
         return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                 cursor);
@@ -126,8 +134,8 @@ public abstract class MongoSourceDataWrapper {
      * @return data-set for the given subject and source within the window, otherwise empty data-set
      * @see Dataset
      */
-    public Dataset getAllRecordsInWindow(String projectName, String subject, String source, Header
-            header, MongoHelper.Stat stat, Long start, Long end,
+    public Dataset getAllRecordsInWindow(String projectName, String subject, String source,
+            Header header, MongoHelper.Stat stat, Date start, Date end,
             MongoCollection<Document> collection) {
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentsByProjectAndSubjectAndSourceInWindow(projectName, subject, source,
@@ -138,8 +146,8 @@ public abstract class MongoSourceDataWrapper {
     }
 
     /**
-     * Builds the required {@link Dataset}. It adds the {@link EffectiveTimeFrame} to the given
-     * {@link Header}.
+     * Builds the required {@link Dataset}. It adds the {@link TimeFrame} to the given {@link
+     * Header}.
      *
      * @param field is the mongodb field that has to be extracted
      * @param stat is the statistical functional represented by the extracted field
@@ -150,8 +158,8 @@ public abstract class MongoSourceDataWrapper {
      */
     private Dataset getDataSet(String field, DescriptiveStatistic stat, Header header,
             MongoCursor<Document> cursor) {
-        Date start = null;
-        Date end = null;
+        Instant start = null;
+        Instant end = null;
 
         LinkedList<DataItem> list = new LinkedList<>();
 
@@ -163,41 +171,43 @@ public abstract class MongoSourceDataWrapper {
 
         while (cursor.hasNext()) {
             Document doc = cursor.next();
+            Document key = (Document) doc.get(KEY);
+            Document value = (Document) doc.get(VALUE);
 
-            Date localStart = doc.getDate(MongoHelper.START);
-            Date localEnd = doc.getDate(MongoHelper.END);
+            Date localStart = key.getDate(START);
+            Date localEnd = key.getDate(END);
+            Instant startInstant;
 
-            if (start == null) {
-                start = localStart;
-                end = localEnd;
+            if (localStart != null && localEnd != null) {
+                startInstant = localStart.toInstant();
+                Instant endInstant = localEnd.toInstant();
+                if (start == null) {
+                    start = startInstant;
+                    end = endInstant;
+                } else {
+                    if (start.isAfter(startInstant)) {
+                        start = startInstant;
+                    }
+                    if (end.isBefore(endInstant)) {
+                        end = endInstant;
+                    }
+                }
             } else {
-                if (start.after(localStart)) {
-                    start = localStart;
-                }
-                if (end.before(localEnd)) {
-                    end = localEnd;
-                }
+                startInstant = null;
             }
 
-            DataItem item = new DataItem(documentToDataFormat(doc, field, stat, header),
-                    RadarConverter.getISO8601(doc.getDate(MongoHelper.START)));
-
-            list.addLast(item);
+            list.addLast(new DataItem(
+                    documentToDataFormat(value, field, stat, header),
+                    startInstant));
         }
 
         cursor.close();
 
-        EffectiveTimeFrame etf = new EffectiveTimeFrame(
-                RadarConverter.getISO8601(start),
-                RadarConverter.getISO8601(end));
-
-        header.setEffectiveTimeFrame(etf);
-
-        Dataset hrd = new Dataset(header, list);
+        header.setEffectiveTimeFrame(new TimeFrame(start, end));
 
         LOGGER.debug("Found {} value", list.size());
 
-        return hrd;
+        return new Dataset(header, list);
     }
 
     /**

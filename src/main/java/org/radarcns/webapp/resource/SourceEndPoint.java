@@ -68,12 +68,11 @@ public class SourceEndPoint {
     @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS + "/{" + SUBJECT_ID + "}" + "/" + SOURCES)
     @Operation(summary = "Return all the sources used by a subject",
             description = "Return all known sources associated with the give subjectID")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Return a subject.avsc object")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
+    @ApiResponse(responseCode = "404", description = "Project or Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public List<Source> getAllSourcesJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
@@ -94,16 +93,13 @@ public class SourceEndPoint {
     @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS + "/{" + SUBJECT_ID + "}" + "/" + SOURCES
             + "}/{" + SOURCE_ID + "}")
-    @Operation(summary = "Return a SourceDefinition values",
-            description = "Using the source sensors values arrived within last 60sec, it computes"
-                    + " the sender status for the given subjectID and sourceID")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "200", description = "Return a source.avsc object containing last"
+    @Operation(summary = "Return a source requested")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
+    @ApiResponse(responseCode = "200", description = "Return a source object containing last"
             + "computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
+    @ApiResponse(responseCode = "404", description = "Project, Subject or Source cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public Source getLastComputedSourceStatusJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,

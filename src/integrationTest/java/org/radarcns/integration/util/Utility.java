@@ -19,6 +19,7 @@ package org.radarcns.integration.util;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusServerStatus.STATUS_COLLECTION;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusUpTime.UPTIME_COLLECTION;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
@@ -32,8 +33,8 @@ import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
 
@@ -73,6 +74,7 @@ public class Utility {
         }
     }
 
+
     /**
      * Converts Bson Document into an ApplicationConfig.
      *
@@ -83,13 +85,15 @@ public class Utility {
     //TODO take field names from RADAR Mongo Connector
     public static Application convertDocToApplication(Map<String, Document> documents) {
         return new Application(
-                documents.get(STATUS_COLLECTION).getString("clientIP"),
-                documents.get(UPTIME_COLLECTION).getDouble("applicationUptime"),
+                ((Document) documents.get(STATUS_COLLECTION).get(VALUE)).getString("clientIP"),
+                ((Document) documents.get(UPTIME_COLLECTION).get(VALUE)).getDouble("uptime"),
                 RadarConverter.getServerStatus(
-                        documents.get(STATUS_COLLECTION).getString("serverStatus")),
-                documents.get(RECORD_COLLECTION).getInteger("recordsCached"),
-                documents.get(RECORD_COLLECTION).getInteger("recordsSent"),
-                documents.get(RECORD_COLLECTION).getInteger("recordsUnsent")
+                        ((Document) documents.get(STATUS_COLLECTION).get(VALUE))
+                                .getString("serverStatus")),
+                ((Document) documents.get(RECORD_COLLECTION).get(VALUE))
+                        .getInteger("recordsCached"),
+                ((Document) documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsSent"),
+                ((Document) documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsUnsent")
         );
     }
 
@@ -101,14 +105,17 @@ public class Utility {
      */
     public static Dataset cloneDataset(Dataset input) {
         Header inputHeader = input.getHeader();
-        EffectiveTimeFrame cloneEffectiveTimeFrame = new EffectiveTimeFrame(
+        TimeFrame cloneEffectiveTimeFrame = new TimeFrame(
                 inputHeader.getEffectiveTimeFrame().getStartDateTime(),
                 inputHeader.getEffectiveTimeFrame().getEndDateTime());
+        TimeFrame cloneTimeFrame = new TimeFrame(
+                inputHeader.getTimeFrame().getStartDateTime(),
+                inputHeader.getTimeFrame().getEndDateTime());
         Header cloneHeader = new Header(inputHeader.getProjectId(), inputHeader.getSubjectId(),
                 inputHeader.getSourceId(), inputHeader.getSourceType(),
                 inputHeader.getSourceDataType(),
                 inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
-                inputHeader.getTimeWindow(), cloneEffectiveTimeFrame);
+                inputHeader.getTimeWindow(), cloneTimeFrame, cloneEffectiveTimeFrame);
 
         List<DataItem> cloneItem = new ArrayList<>();
         Object value;

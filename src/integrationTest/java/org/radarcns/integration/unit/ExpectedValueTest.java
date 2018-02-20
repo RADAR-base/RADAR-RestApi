@@ -18,6 +18,8 @@ package org.radarcns.integration.unit;
 
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.mongo.util.MongoHelper.KEY;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import java.util.List;
 import java.util.Map;
@@ -26,11 +28,10 @@ import org.junit.Test;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
-import org.radarcns.util.RadarConverter;
 
 /**
  * ExpectedValueTest Test.
@@ -51,7 +52,8 @@ public class ExpectedValueTest {
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
         int count = 0;
         for (Document doc : docs) {
-            count += doc.getDouble(Stat.count.getParam()).intValue();
+
+            count += ((Document) doc.get(VALUE)).getDouble(Stat.count.getParam()).intValue();
         }
         assertEquals(SAMPLES, count);
 
@@ -63,25 +65,12 @@ public class ExpectedValueTest {
         }
         assertEquals(SAMPLES, count);
 
-        EffectiveTimeFrame window1 = new EffectiveTimeFrame(
-                RadarConverter.getISO8601(docs.get(0).getDate(MongoHelper.START)),
-                RadarConverter.getISO8601(docs.get(docs.size() - 1).getDate(MongoHelper.END)));
+        TimeFrame window1 = new TimeFrame(
+                ((Document) docs.get(0).get(KEY)).getDate(MongoHelper.START),
+                ((Document) docs.get(docs.size() - 1).get(KEY)).getDate(MongoHelper.END));
 
-        EffectiveTimeFrame window2 = dataset.getHeader().getEffectiveTimeFrame();
-        assertEquals(true, compareEffectiveTimeFrame(window1, window2));
+        TimeFrame window2 = dataset.getHeader().getEffectiveTimeFrame();
+        assertEquals(window1, window2);
     }
 
-    /**
-     * Compare two {@code EffectiveTimeFrame} values.
-     *
-     * @param window1 first component that to has to be compared
-     * @param window2 second component that to has to be compared
-     * @return {@code true} if they match, false otherwise
-     * @see EffectiveTimeFrame
-     **/
-    public static boolean compareEffectiveTimeFrame(EffectiveTimeFrame window1,
-            EffectiveTimeFrame window2) {
-        return window1.getStartDateTime().equals(window2.getStartDateTime())
-                && window1.getEndDateTime().equals(window2.getEndDateTime());
-    }
 }

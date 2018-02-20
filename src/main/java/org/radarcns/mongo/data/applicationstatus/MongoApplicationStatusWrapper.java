@@ -16,6 +16,9 @@
 
 package org.radarcns.mongo.data.applicationstatus;
 
+import static org.radarcns.mongo.util.MongoHelper.ASCENDING;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
@@ -45,8 +48,8 @@ public abstract class MongoApplicationStatusWrapper {
             MongoClient client) {
 
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(project, subject, source, null, -1, 1,
-                        MongoHelper.getCollection(client, getCollectionName()));
+                .findDocumentByProjectAndSubjectAndSource(project, subject, source, null, ASCENDING,
+                        1, MongoHelper.getCollection(client, getCollectionName()));
 
         if (!cursor.hasNext()) {
             LOGGER.debug("Empty cursor");
@@ -58,10 +61,10 @@ public abstract class MongoApplicationStatusWrapper {
         cursor.close();
 
         if (app == null) {
-            return getApplication(doc, new Application());
+            return getApplication((Document) doc.get(VALUE), new Application());
         }
 
-        return getApplication(doc, app);
+        return getApplication((Document) doc.get(VALUE), app);
 
     }
 

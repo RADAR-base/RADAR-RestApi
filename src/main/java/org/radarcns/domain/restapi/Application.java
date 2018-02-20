@@ -120,14 +120,14 @@ public class Application {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Application sourceType = (Application) o;
+        Application application = (Application) o;
 
-        return Objects.equals(ipAddress, sourceType.ipAddress)
-                && Objects.equals(uptime, sourceType.uptime)
-                && Objects.equals(serverStatus, sourceType.serverStatus)
-                && Objects.equals(recordsCached, sourceType.recordsCached)
-                && Objects.equals(recordsSent, sourceType.recordsSent)
-                && Objects.equals(recordsUnsent, sourceType.recordsUnsent);
+        return Objects.equals(ipAddress, application.ipAddress)
+                && Objects.equals(uptime, application.uptime)
+                && Objects.equals(serverStatus, application.serverStatus)
+                && Objects.equals(recordsCached, application.recordsCached)
+                && Objects.equals(recordsSent, application.recordsSent)
+                && Objects.equals(recordsUnsent, application.recordsUnsent);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.radarcns.domain.restapi.format;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 
 public class Quartiles {
 
@@ -62,5 +63,26 @@ public class Quartiles {
 
     public void setThird(double third) {
         this.third = third;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Quartiles quartiles = (Quartiles) o;
+
+        return Objects.equals(first, quartiles.first)
+                && Objects.equals(second, quartiles.second)
+                && Objects.equals(third, quartiles.third);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(first, second, third);
     }
 }

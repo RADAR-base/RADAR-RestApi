@@ -16,6 +16,7 @@
 
 package org.radarcns.mongo.util;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lte;
@@ -26,9 +27,9 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
 import java.util.Date;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.radarcns.config.Properties;
 
 /**
@@ -49,6 +50,7 @@ public class MongoHelper {
     public static final String FIELDS = "fields";
     public static final String QUARTILE = "quartile";
     public static final String COUNT = "count";
+    public static final String NAME = "name";
 
 
     public static final int ASCENDING = 1;
@@ -81,32 +83,32 @@ public class MongoHelper {
     }
 
     /**
-     * Finds all Documents within [start-end] belonging to the given subject for the give
-     * sourceType.
+     * Finds all documents within a time window belonging to the given subject, source and project.
      *
-     * @param subject is the subjectID
-     * @param source is the sourceID
+     * @param projectName of the project
+     * @param subjectId is the subjectID
+     * @param sourceId is the sourceID
      * @param start is the start time of the queried timewindow
      * @param end is the end time of the queried timewindow
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents from the query.
      */
     public static MongoCursor<Document> findDocumentsByProjectAndSubjectAndSourceInWindow(
-            String projectName, String subject, String source, Long start, Long end,
+            String projectName, String subjectId, String sourceId, Date start, Date end,
             MongoCollection<Document> collection) {
-        FindIterable<Document> result = collection.find(
-                Filters.and(
-                        eq(PROJECT_ID, projectName),
-                        eq(USER_ID, subject),
-                        eq(SOURCE_ID, source),
-                        gte(START, new Date(start)),
-                        lte(END, new Date(end)))).sort(new BasicDBObject(START, 1));
+        Bson query = and(eq(KEY + "." + PROJECT_ID, projectName),
+                eq(KEY + "." + USER_ID, subjectId),
+                eq(KEY + "." + SOURCE_ID, sourceId),
+                gte(KEY + "." + START, start),
+                lte(KEY + "." + END, end));
+        FindIterable<Document> result = collection.find(query)
+                .sort(new BasicDBObject(START, ASCENDING));
 
         return result.iterator();
     }
 
     /**
-     * Finds all Documents belonging to the given subject for the give sourceType.
+     * Finds all documents belonging to the given subject, source and project.
      *
      * @param project is the projectName
      * @param subject is the subjectID
@@ -122,18 +124,10 @@ public class MongoHelper {
         FindIterable<Document> result;
 
         if (sortBy == null) {
-            result = collection.find(
-                    Filters.and(
-                            eq(USER_ID, subject),
-                            eq(SOURCE_ID, source),
-                            eq(PROJECT_ID, project)));
+            result = collection.find(getByProjectSubjectSource(project, subject, source));
         } else {
-            result = collection.find(
-                    Filters.and(
-                            eq(USER_ID, subject),
-                            eq(SOURCE_ID, source),
-                            eq(PROJECT_ID, project))
-            ).sort(new BasicDBObject(sortBy, order));
+            result = collection.find(getByProjectSubjectSource(project, subject, source))
+                    .sort(new BasicDBObject(sortBy, order));
         }
 
         if (limit != null) {
@@ -141,6 +135,13 @@ public class MongoHelper {
         }
 
         return result.iterator();
+    }
+
+    private static Bson getByProjectSubjectSource(String projectName, String subjectId,
+            String sourceId) {
+        return and(eq(KEY + "." + PROJECT_ID, projectName),
+                eq(KEY + "." + USER_ID, subjectId),
+                eq(KEY + "." + SOURCE_ID, sourceId));
     }
 
     /**

@@ -21,16 +21,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.radarcns.integration.util.ExpectedDocumentFactory.buildDocument;
+import static org.radarcns.mongo.util.MongoHelper.END;
+import static org.radarcns.mongo.util.MongoHelper.START;
 import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.bson.Document;
@@ -77,22 +80,18 @@ public class SubjectEndPointTest {
     }
 
 
-    private static Document getDocumentsForStatistics(long start, long end) {
-        return new Document(MongoHelper.ID, PROJECT_NAME + "_" + SUBJECT_ID + "-" + SOURCE_ID
-                + "-" + start + "-" + end)
-                .append(MongoHelper.USER_ID, SUBJECT_ID)
-                .append(MongoHelper.SOURCE_ID, SOURCE_ID)
-                .append(MongoHelper.PROJECT_ID, PROJECT_NAME)
-                .append(MongoHelper.START, new Date(start))
-                .append(MongoHelper.END, new Date(end));
+    private static Document getDocumentsForStatistics(Object start, Object end) {
+        Document value = new Document()
+                .append(START, start)
+                .append(END, end);
+        return buildDocument(PROJECT_NAME, SUBJECT_ID, SOURCE_ID, start, end, value);
     }
 
     private void insertMonitorStatistics() {
         MongoClient mongoClient = Utility.getMongoClient();
-        int windows = 2;
-        long start = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
-        long end = start + TimeUnit.SECONDS.toMillis(60 / (windows + 1));
-        long later = end + TimeUnit.SECONDS.toMillis(60 / (windows + 1));
+        Date start = Date.from(Instant.now());
+        Date end = Date.from(start.toInstant().plusSeconds(60));
+        Date later = Date.from(end.toInstant().plusSeconds(65));
         Document doc = getDocumentsForStatistics(start, end);
         Document second = getDocumentsForStatistics(start, later);
         MongoCollection collection = MongoHelper
@@ -116,6 +115,13 @@ public class SubjectEndPointTest {
         assertEquals(SUBJECT_ID, subject.getSubjectId());
         assertEquals(PROJECT_NAME, subject.getProject());
         assertTrue(subject.getSources().size() > 0);
+        assertNotNull(subject.getSources().get(0)
+                .getEffectiveTimeFrame()
+                .getStartDateTime());
+        assertNotNull(subject.getSources().get(0)
+                .getEffectiveTimeFrame()
+                .getEndDateTime());
+        assertNotNull(subject.getLastSeen());
 
     }
 

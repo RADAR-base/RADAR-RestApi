@@ -19,11 +19,14 @@ package org.radarcns.integration.util;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusServerStatus.STATUS_COLLECTION;
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusUpTime.UPTIME_COLLECTION;
+import static org.radarcns.mongo.util.MongoHelper.ID;
+import static org.radarcns.mongo.util.MongoHelper.KEY;
 import static org.radarcns.mongo.util.MongoHelper.PROJECT_ID;
 import static org.radarcns.mongo.util.MongoHelper.SOURCE_ID;
 import static org.radarcns.mongo.util.MongoHelper.USER_ID;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +40,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.mock.model.ExpectedArrayValue;
 import org.radarcns.mock.model.ExpectedDoubleValue;
 import org.radarcns.monitor.application.ServerStatus;
+import org.radarcns.util.RadarConverter;
 
 /**
  * All supported sources specifications.
@@ -61,50 +65,44 @@ public class RandomInput {
         ObservationKey key = new ObservationKey(project, user, source);
         ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
-        Long start = new Date().getTime();
-
-        for (int i = 0; i < samples; i++) {
-            instance.add(key, start, ThreadLocalRandom.current().nextDouble());
-
-            if (singleWindow) {
-                start += 1;
-            } else {
-                start += TimeUnit.SECONDS.toMillis(
-                        ThreadLocalRandom.current().nextLong(1, 15));
-            }
+        int numberOfRecords = samples;
+        if (singleWindow) {
+            numberOfRecords = 1;
+        }
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        long now = Instant.now().toEpochMilli();
+        for (int i = 0; i < numberOfRecords; i++) {
+            instance.add(key, now, random.nextDouble());
+            now += TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow));
         }
 
         dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
                 sensorType, stat, timeWindow);
-        documents = expectedDocumentFactory.produceExpectedData(instance);
+        documents = expectedDocumentFactory.produceExpectedDocuments(instance, timeWindow);
     }
 
-    private static void randomArrayValue(String project, String user, String source, String
-            sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
-            boolean singleWindow) {
+    private static void randomArrayValue(String project, String user, String source,
+            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            int samples, boolean singleWindow) {
 
         ExpectedArrayValue instance = new ExpectedArrayValue();
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        ObservationKey key = new ObservationKey(null, user, source);
+        ObservationKey key = new ObservationKey(project, user, source);
 
-        long start = System.currentTimeMillis();
-
-        for (int i = 0; i < samples; i++) {
-            instance.add(key, start, random.nextDouble(), random.nextDouble(), random.nextDouble());
-
-            if (singleWindow) {
-                start += random.nextInt(1000, 12000);
-            } else {
-                start += 1L;
-            }
+        int numberOfRecords = samples;
+        if (singleWindow) {
+            numberOfRecords = 1;
+        }
+        long now = Instant.now().toEpochMilli();
+        for (int i = 0; i < numberOfRecords; i++) {
+            instance.add(key, now, random.nextDouble(), random.nextDouble(), random.nextDouble());
+            now += TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow));
         }
 
         dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
-                sensorType,
-                stat, timeWindow);
-        documents = expectedDocumentFactory.produceExpectedData(instance);
+                sensorType, stat, timeWindow);
+        documents = expectedDocumentFactory.produceExpectedDocuments(instance, timeWindow);
     }
 
     /**
@@ -112,10 +110,10 @@ public class RandomInput {
      * generated mocking the behaviour of the RADAR-CNS Platform.
      */
     public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user,
-            String source, String sourceType, String sensorType, DescriptiveStatistic stat,
+            String source, String sourceType, String sourceDataName, DescriptiveStatistic stat,
             TimeWindow timeWindow, int samples, boolean singleWindow) {
         if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
-            return getBoth(project, user, source, sourceType, sensorType, stat,
+            return getBoth(project, user, source, sourceType, sourceDataName, stat,
                     timeWindow, samples, singleWindow);
         }
 
@@ -123,35 +121,11 @@ public class RandomInput {
                 + " currently supported.");
     }
 
-    /**
-     * Returns a {@code Collection<Document>} randomly generated that mocks the behaviour of the
-     * RADAR-CNS Platform.
-     */
-    public static List<Document> getDocumentsRandom(String project, String user, String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat,
-            TimeWindow timeWindow, int samples, boolean singleWindow) {
-        switch (sourceType) {
-            case "empatica_e4_v1":
-                return getDocument(project, user, source, sourceType, sensorType, stat,
-                        timeWindow, samples, singleWindow);
-            default:
-                throw new UnsupportedOperationException(sourceType + " is not"
-                        + " currently supported.");
-        }
-    }
-
-    private static List<Document> getDocument(String project, String user, String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow) {
-        nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
-                singleWindow);
-        return documents;
-    }
-
     private static Map<String, Object> getBoth(String project, String user, String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
+            String sourceType, String sourceDataName, DescriptiveStatistic stat,
+            TimeWindow timeWindow,
             int samples, boolean singleWindow) {
-        nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
+        nextValue(project, user, source, sourceType, sourceDataName, stat, timeWindow, samples,
                 singleWindow);
 
         Map<String, Object> map = new HashMap<>();
@@ -161,15 +135,16 @@ public class RandomInput {
     }
 
     private static void nextValue(String project, String user, String source, String sourceType,
-            String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
+            String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
             boolean singleWindow) {
-        switch (sensorType) {
-            case "ACCELEROMETER":
-                randomArrayValue(project, user, source, sourceType, sensorType, stat, timeWindow,
+        switch (sourceDataName) {
+            case "EMPATICA_E4_v1_ACCELEROMETER":
+                randomArrayValue(project, user, source, sourceType, sourceDataName, stat,
+                        timeWindow,
                         samples, singleWindow);
                 break;
             default:
-                randomDoubleValue(project, user, source, sourceType, sensorType, stat,
+                randomDoubleValue(project, user, source, sourceType, sourceDataName, stat,
                         timeWindow, samples, singleWindow);
                 break;
         }
@@ -184,52 +159,61 @@ public class RandomInput {
         String ipAdress = getRandomIpAddress();
         ServerStatus serverStatus = ServerStatus.values()[
                 ThreadLocalRandom.current().nextInt(0, ServerStatus.values().length)];
-        Double uptime = ThreadLocalRandom.current().nextDouble();
+        double uptime = ThreadLocalRandom.current().nextDouble();
+        double timestamp = ThreadLocalRandom.current().nextDouble();
         int recordsCached = ThreadLocalRandom.current().nextInt();
         int recordsSent = ThreadLocalRandom.current().nextInt();
         int recordsUnsent = ThreadLocalRandom.current().nextInt();
 
         return getRandomApplicationStatus(project, user, source, ipAdress, serverStatus, uptime,
-                recordsCached, recordsSent, recordsUnsent);
+                recordsCached, recordsSent, recordsUnsent, timestamp);
     }
 
     /**
      * Generates and returns a ApplicationStatus using the given inputs.
      **/
-    private static Map<String, Document> getRandomApplicationStatus(String project, String user,
-            String source, String ipAddress, ServerStatus serverStatus, Double uptime,
-            int recordsCached, int recordsSent, int recordsUnsent) {
-        String id = user + "-" + source;
+    @SuppressWarnings("PMD.ExcessiveParameterList")
+    public static Map<String, Document> getRandomApplicationStatus(String project, String user,
+            String source, String ipAddress, ServerStatus serverStatus, double uptime,
+            int recordsCached, int recordsSent, int recordsUnsent, double timeStamp) {
+        Document uptimeDoc = new Document()
+                .append("time", timeStamp)
+                .append("uptime", uptime);
 
-        Document uptimeDoc = new Document("_id", id)
-                .append(USER_ID, user)
-                .append(SOURCE_ID, source)
-                .append(PROJECT_ID, project)
-                .append("sourceType", source)
-                .append("applicationUptime", uptime);
-
-        Document statusDoc = new Document("_id", id)
-                .append(USER_ID, user)
-                .append(SOURCE_ID, source)
-                .append(PROJECT_ID, project)
-                .append("sourceType", source)
+        Document statusDoc = new Document()
+                .append("time", timeStamp)
                 .append("clientIP", ipAddress)
                 .append("serverStatus", serverStatus.toString());
 
-        Document recordsDoc = new Document("_id", id)
-                .append(USER_ID, user)
-                .append(SOURCE_ID, source)
-                .append(PROJECT_ID, project)
-                .append("sourceType", source)
+        Document recordsDoc = new Document()
+                .append("time", timeStamp)
                 .append("recordsCached", recordsCached)
                 .append("recordsSent", recordsSent)
                 .append("recordsUnsent", recordsUnsent);
 
         Map<String, Document> documents = new HashMap<>();
-        documents.put(STATUS_COLLECTION, statusDoc);
-        documents.put(RECORD_COLLECTION, recordsDoc);
-        documents.put(UPTIME_COLLECTION, uptimeDoc);
+        documents.put(STATUS_COLLECTION, buildAppStatusDocument(project, user, source, statusDoc));
+        documents.put(RECORD_COLLECTION, buildAppStatusDocument(project, user, source, recordsDoc));
+        documents.put(UPTIME_COLLECTION, buildAppStatusDocument(project, user, source, uptimeDoc));
         return documents;
+    }
+
+    private static Document buildKeyDocument(String projectName, String subjectId,
+            String sourceId) {
+        return new Document().append(PROJECT_ID, projectName)
+                .append(USER_ID, subjectId)
+                .append(SOURCE_ID, sourceId);
+    }
+
+    private static Document buildAppStatusDocument(String projectName, String subjectId,
+            String sourceId,
+            Document value) {
+        return new Document().append(ID, "{"
+                + PROJECT_ID + ":" + projectName + ","
+                + USER_ID + ":" + subjectId + ","
+                + SOURCE_ID + ":" + sourceId + "}")
+                .append(KEY, buildKeyDocument(projectName, subjectId, sourceId))
+                .append(VALUE, value);
     }
 
     /**
