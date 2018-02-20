@@ -5,8 +5,6 @@ import java.time.Instant;
 import java.util.Objects;
 
 public class DataItem {
-
-
     @JsonProperty
     private Object sample;
 

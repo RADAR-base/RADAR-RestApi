@@ -69,9 +69,10 @@ public class RandomInput {
         if (singleWindow) {
             numberOfRecords = 1;
         }
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         long now = Instant.now().toEpochMilli();
         for (int i = 0; i < numberOfRecords; i++) {
-            instance.add(key, now, ThreadLocalRandom.current().nextDouble());
+            instance.add(key, now, random.nextDouble());
             now += TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow));
         }
 
@@ -120,31 +121,6 @@ public class RandomInput {
                 + " currently supported.");
     }
 
-    /**
-     * Returns a {@code Collection<Document>} randomly generated that mocks the behaviour of the
-     * RADAR-CNS Platform.
-     */
-    public static List<Document> getDocumentsRandom(String project, String user, String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat,
-            TimeWindow timeWindow, int samples, boolean singleWindow) {
-        switch (sourceType) {
-            case SUPPORTED_SOURCE_TYPE:
-                return getDocument(project, user, source, sourceType, sensorType, stat,
-                        timeWindow, samples, singleWindow);
-            default:
-                throw new UnsupportedOperationException(sourceType + " is not"
-                        + " currently supported.");
-        }
-    }
-
-    private static List<Document> getDocument(String project, String user, String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow) {
-        nextValue(project, user, source, sourceType, sensorType, stat, timeWindow, samples,
-                singleWindow);
-        return documents;
-    }
-
     private static Map<String, Object> getBoth(String project, String user, String source,
             String sourceType, String sourceDataName, DescriptiveStatistic stat,
             TimeWindow timeWindow,
@@ -183,8 +159,8 @@ public class RandomInput {
         String ipAdress = getRandomIpAddress();
         ServerStatus serverStatus = ServerStatus.values()[
                 ThreadLocalRandom.current().nextInt(0, ServerStatus.values().length)];
-        Double uptime = ThreadLocalRandom.current().nextDouble();
-        Double timestamp = ThreadLocalRandom.current().nextDouble();
+        double uptime = ThreadLocalRandom.current().nextDouble();
+        double timestamp = ThreadLocalRandom.current().nextDouble();
         int recordsCached = ThreadLocalRandom.current().nextInt();
         int recordsSent = ThreadLocalRandom.current().nextInt();
         int recordsUnsent = ThreadLocalRandom.current().nextInt();
@@ -198,7 +174,7 @@ public class RandomInput {
      **/
     @SuppressWarnings("PMD.ExcessiveParameterList")
     public static Map<String, Document> getRandomApplicationStatus(String project, String user,
-            String source, String ipAddress, ServerStatus serverStatus, Double uptime,
+            String source, String ipAddress, ServerStatus serverStatus, double uptime,
             int recordsCached, int recordsSent, int recordsUnsent, double timeStamp) {
         Document uptimeDoc = new Document()
                 .append("time", timeStamp)

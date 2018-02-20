@@ -176,31 +176,34 @@ public abstract class MongoSourceDataWrapper {
 
             Date localStart = key.getDate(START);
             Date localEnd = key.getDate(END);
+            Instant startInstant;
+
             if (localStart != null && localEnd != null) {
+                startInstant = localStart.toInstant();
+                Instant endInstant = localEnd.toInstant();
                 if (start == null) {
-                    start = localStart.toInstant();
-                    end = localEnd.toInstant();
+                    start = startInstant;
+                    end = endInstant;
                 } else {
-                    if (start.isBefore(localStart.toInstant())) {
-                        start = localStart.toInstant();
+                    if (start.isAfter(startInstant)) {
+                        start = startInstant;
                     }
-                    if (end.isAfter(localEnd.toInstant())) {
-                        end = localEnd.toInstant();
+                    if (end.isBefore(endInstant)) {
+                        end = endInstant;
                     }
                 }
+            } else {
+                startInstant = null;
             }
 
-            DataItem item = new DataItem(documentToDataFormat(value, field, stat, header),
-                    localStart.toInstant());
-
-            list.addLast(item);
+            list.addLast(new DataItem(
+                    documentToDataFormat(value, field, stat, header),
+                    startInstant));
         }
 
         cursor.close();
 
-        TimeFrame effectiveTimeFrame = new TimeFrame(start, end);
-
-        header.setEffectiveTimeFrame(effectiveTimeFrame);
+        header.setEffectiveTimeFrame(new TimeFrame(start, end));
 
         LOGGER.debug("Found {} value", list.size());
 
