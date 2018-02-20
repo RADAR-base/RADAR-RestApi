@@ -19,6 +19,7 @@ package org.radarcns.service;
 import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -196,5 +197,13 @@ public class DataSetService {
             String sourceType, TimeFrame timeFrame) {
         return new Header(project, subject, source, sourceType, sourceData.getSourceDataType(),
                 stat, sourceData.getUnit(), timeWindow, timeFrame, null);
+    }
+
+    public static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
+            String sensor, DescriptiveStatistic stat, TimeWindow interval, TimeFrame timeFrame) {
+
+        return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
+                null, interval, timeFrame, null),
+                Collections.emptyList());
     }
 }
