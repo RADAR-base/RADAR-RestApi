@@ -16,12 +16,10 @@
 
 package org.radarcns.integration.util;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
-
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.radarcns.domain.restapi.TimeWindow;
@@ -97,9 +95,9 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         Collections.sort(windows);
 
         return new TimeFrame(
-                new Date(windows.get(0)).toInstant(),
-                new Date(windows.get(windows.size() - 1)).toInstant().plus(RadarConverter
-                        .getSecond(timeWindow), SECONDS));
+                Instant.ofEpochMilli(windows.get(0)),
+                Instant.ofEpochMilli(windows.get(windows.size() - 1))
+                        .plus(RadarConverter.getDuration(timeWindow)));
     }
 
 
@@ -158,7 +156,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                         content = new Acceleration(statValues.get(0), statValues.get(1),
                                 statValues.get(2));
                     }
-                    items.add(new DataItem(content, new Date(key).toInstant()));
+                    items.add(new DataItem(content, Instant.ofEpochMilli(key)));
                     break;
                 default:
                     throw new IllegalArgumentException(sensor + " is not a supported test case");
@@ -195,7 +193,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
             Object content = getContent(getStatValue(statistic, dac), statistic);
 
-            items.add(new DataItem(content, new Date(key).toInstant()));
+            items.add(new DataItem(content, Instant.ofEpochMilli(key)));
         }
 
         return items;

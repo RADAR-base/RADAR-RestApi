@@ -32,17 +32,6 @@ public class DataItem {
         this.startDateTime = startDateTime;
     }
 
-    /**
-     * All-args constructor.
-     *
-     * @param sample Sample value.
-     * @param startDateTime Point in time (ISO8601) with UTC timezone of first sample in data-set.
-     */
-    public DataItem(java.lang.Object sample, String startDateTime) {
-        this.sample = sample;
-        this.startDateTime = Instant.parse(startDateTime);
-    }
-
     public Object getSample() {
         return sample;
     }

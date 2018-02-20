@@ -16,6 +16,11 @@
 
 package org.radarcns.mongo.util;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lte;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
@@ -24,6 +29,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import java.util.Date;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.radarcns.config.Properties;
 
 /**
@@ -90,9 +96,11 @@ public class MongoHelper {
     public static MongoCursor<Document> findDocumentsByProjectAndSubjectAndSourceInWindow(
             String projectName, String subjectId, String sourceId, Date start, Date end,
             MongoCollection<Document> collection) {
-        BasicDBObject query = getByProjectSubjectSource(projectName, subjectId, sourceId)
-                .append(KEY + "." + START, new BasicDBObject("$gte", start))
-                .append(KEY + "." + END, new BasicDBObject("$lte", end));
+        Bson query = and(eq(KEY + "." + PROJECT_ID, projectName),
+                eq(KEY + "." + USER_ID, subjectId),
+                eq(KEY + "." + SOURCE_ID, sourceId),
+                gte(KEY + "." + START, start),
+                lte(KEY + "." + END, end));
         FindIterable<Document> result = collection.find(query)
                 .sort(new BasicDBObject(START, ASCENDING));
 
@@ -129,12 +137,11 @@ public class MongoHelper {
         return result.iterator();
     }
 
-    private static BasicDBObject getByProjectSubjectSource(String projectName, String subjectId,
+    private static Bson getByProjectSubjectSource(String projectName, String subjectId,
             String sourceId) {
-        return new BasicDBObject().append(KEY.concat(".").concat(PROJECT_ID), projectName)
-                .append(KEY.concat(".").concat(USER_ID), subjectId)
-                .append(KEY.concat(".").concat(SOURCE_ID), sourceId);
-
+        return and(eq(KEY + "." + PROJECT_ID, projectName),
+                eq(KEY + "." + USER_ID, subjectId),
+                eq(KEY + "." + SOURCE_ID, sourceId));
     }
 
     /**

@@ -34,12 +34,12 @@ import static org.radarcns.mongo.util.MongoHelper.START;
 import static org.radarcns.mongo.util.MongoHelper.USER_ID;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
@@ -119,10 +119,11 @@ public class ExpectedDocumentFactory {
         for (Long timestamp : windows) {
             DoubleValueCollector doubleValueCollector = (DoubleValueCollector) expectedValue
                     .getSeries().get(timestamp);
-            long end = timestamp + TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow));
+            Instant start = Instant.ofEpochMilli(timestamp);
+            Instant end = start.plus(RadarConverter.getDuration(timeWindow));
             list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
                     expectedValue.getLastKey().getUserId(),
-                    expectedValue.getLastKey().getSourceId(), new Date(timestamp), new Date(end),
+                    expectedValue.getLastKey().getSourceId(), Date.from(start), Date.from(end),
                     getDocumentFromDoubleValueCollector("batteryLevel", doubleValueCollector)));
         }
 
