@@ -24,10 +24,10 @@ import java.util.NoSuchElementException;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.ws.rs.NotFoundException;
+import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.util.CachedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,9 +77,9 @@ public class SourceCatalog {
      * Retrieves a {@link SourceTypeDTO} from the Management Portal using {@link ServletContext}
      * entity.
      *
-     * @param producer {@link String} of the Source-type that has to be retrieved
-     * @param model {@link String} of the Source-type that has to be retrieved
-     * @param catalogVersion {@link String} of the Source-type that has to be retrieved
+     * @param producer {@link String} of the SourceDTO-type that has to be retrieved
+     * @param model {@link String} of the SourceDTO-type that has to be retrieved
+     * @param catalogVersion {@link String} of the SourceDTO-type that has to be retrieved
      * @return {@link SourceTypeDTO} retrieved from the Management Portal
      */
     public SourceTypeDTO getSourceType(String producer, String model, String catalogVersion)
@@ -100,7 +100,7 @@ public class SourceCatalog {
      * Retrieves a {@link SourceDataDTO} from the Management Portal using {@link ServletContext}
      * entity.
      *
-     * @param sourceDataName {@link String} of the Source-Data that has to be retrieved
+     * @param sourceDataName {@link String} of the SourceDTO-Data that has to be retrieved
      * @return {@link SourceDataDTO} retrieved from the Management Portal
      */
     public SourceDataDTO getSourceData(String sourceDataName)

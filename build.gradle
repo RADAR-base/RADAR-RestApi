@@ -58,7 +58,6 @@ dependencies {
 
     compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthVersion
     compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
-    compile group: 'org.radarcns', name: 'management-portal', version: managmentPortalClientVersion
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version:
             jacksonVersion

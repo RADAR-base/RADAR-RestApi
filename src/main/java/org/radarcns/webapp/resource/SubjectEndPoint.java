@@ -42,8 +42,8 @@ import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
- * Subject web-app. Function set to access subject information. A subject is a person enrolled for
- * in a study.
+ * SubjectDTO web-app. Function set to access subject information. A subject is a person enrolled
+ * for in a study.
  */
 @Authenticated
 @Path("/" + PROJECTS)
@@ -86,7 +86,7 @@ public class SubjectEndPoint {
             "Return the subject object associated with the subject identifier")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
+    @ApiResponse(responseCode = "404", description = "SubjectDTO cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SUBJECT, operation = READ)
     public Subject getSubjectJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,

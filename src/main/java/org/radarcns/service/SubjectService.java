@@ -3,6 +3,7 @@ package org.radarcns.service;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -50,8 +51,9 @@ public class SubjectService {
         if (subject.getSources().stream().filter(p -> p.getSourceId().toString().equals(sourceId))
                 .collect(Collectors.toList()).isEmpty()) {
             LOGGER.error("Cannot find source-id " + sourceId + "for subject" + subject.getId());
-            throw new BadRequestException("Source-id " + sourceId + " is not available for subject "
-                    + subject.getId());
+            throw new BadRequestException(
+                    "SourceDTO-id " + sourceId + " is not available for subject "
+                            + subject.getId());
         }
         return true;
     }
@@ -59,11 +61,11 @@ public class SubjectService {
     private Subject buildSubject(SubjectDTO subject)
             throws IOException {
         List<Source> sources = this.sourceService.getAllSourcesOfSubject(subject.getProject()
-                .getProjectName(), subject.getLogin());
+                .getProjectName(), subject.getId());
         return new Subject()
-                .subjectId(subject.getLogin())
+                .subjectId(subject.getId())
                 .projectName(subject.getProject().getProjectName())
-                .status(subject.getStatus().toString())
+                .status(subject.getStatus())
                 .humanReadableId(subject.getHumanReadableIdentifier())
                 .sources(sources)
                 .lastSeen(getLastSeenForSubject(sources));
@@ -72,6 +74,7 @@ public class SubjectService {
     private Instant getLastSeenForSubject(List<Source> sources) {
         return sources.stream()
                 .map(s -> s.getEffectiveTimeFrame().getEndDateTime())
+                .filter(Objects::nonNull)
                 .reduce((i1, i2) -> i1.isAfter(i2) ? i1 : i2)
                 .orElse(null);
     }

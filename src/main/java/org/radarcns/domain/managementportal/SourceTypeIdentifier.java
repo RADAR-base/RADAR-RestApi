@@ -14,6 +14,10 @@ public class SourceTypeIdentifier {
     @JsonProperty
     private String catalogVersion;
 
+    public SourceTypeIdentifier() {
+
+    }
+
     /**
      * Creates a source-type identifier from parameters.
      *

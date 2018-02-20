@@ -39,8 +39,8 @@ public class Source {
     /**
      * All-args constructor.
      *
-     * @param id Source identifier.
-     * @param type Source name.
+     * @param id SourceDTO identifier.
+     * @param type SourceDTO name.
      */
     public Source(java.lang.String id, java.lang.String type) {
         this.sourceId = id;
