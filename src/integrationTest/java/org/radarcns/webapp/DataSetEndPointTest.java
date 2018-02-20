@@ -77,7 +77,7 @@ public class DataSetEndPointTest {
                     + DATA + '/');
 
     @Test
-    public void getLatestRecord() throws IOException {
+    public void getRecords() throws IOException {
         MongoClient client = Utility.getMongoClient();
 
         MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
@@ -93,27 +93,6 @@ public class DataSetEndPointTest {
         Dataset actual = assertRequestsMatch(
                 REQUEST_PATH + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW, expected);
 
-        assertEquals(expected.getDataset(), actual.getDataset());
-
-        dropAndClose(client);
-    }
-
-    @Test
-    public void getAllRecords() throws IOException {
-        MongoClient client = Utility.getMongoClient();
-
-        MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
-
-        Map<String, Object> docs = RandomInput
-                .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
-                        SOURCE_TYPE, SOURCE_DATA_NAME, COUNT, TIME_WINDOW, SAMPLES, false);
-
-        collection.insertMany((List<Document>) docs.get(DOCUMENTS));
-
-        Dataset expected = (Dataset) docs.get(DATASET);
-
-        Dataset actual = assertRequestsMatch(
-                REQUEST_PATH + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW, expected);
         assertEquals(expected.getDataset(), actual.getDataset());
 
         dropAndClose(client);

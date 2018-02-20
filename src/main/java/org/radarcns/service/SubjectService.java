@@ -70,14 +70,10 @@ public class SubjectService {
     }
 
     private Instant getLastSeenForSubject(List<Source> sources) {
-        Instant lastSeen = null;
-        for (Source source : sources) {
-            if (lastSeen == null || source.getEffectiveTimeFrame().getEndDateTime()
-                    .isAfter(lastSeen)) {
-                lastSeen = source.getEffectiveTimeFrame().getEndDateTime();
-            }
-        }
-        return lastSeen;
+        return sources.stream()
+                .map(s -> s.getEffectiveTimeFrame().getEndDateTime())
+                .reduce((i1, i2) -> i1.isAfter(i2) ? i1 : i2)
+                .orElse(null);
     }
 
     /**
