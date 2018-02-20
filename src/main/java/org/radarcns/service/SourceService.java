@@ -61,7 +61,7 @@ public class SourceService {
      * @param projectId of subject
      * @param subjectId of subject
      * @param source instance from MP
-     * @return computed SourceDTO.
+     * @return computed Source.
      */
     private org.radarcns.domain.restapi.Source buildSource(String projectId, String subjectId,
             MinimalSourceDetailsDTO source) {

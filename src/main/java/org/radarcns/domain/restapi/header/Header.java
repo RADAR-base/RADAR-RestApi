@@ -7,28 +7,28 @@ import org.radarcns.domain.restapi.TimeWindow;
 public class Header {
 
     /**
-     * SourceDTO identifier.
+     * Subject identifier.
      */
     @JsonProperty
     public String subjectId;
     /**
-     * SourceDTO identifier.
+     * Source identifier.
      */
     @JsonProperty
     public String sourceId;
     /**
-     * SourceDTO identifier.
+     * Project identifier.
      */
     @JsonProperty
     public String projectId;
     /**
-     * SourceDTO information, it can be a device or assessment name.
+     * SourceType information.
      */
     @JsonProperty
     public String sourceType;
 
     /**
-     * Report the sensor name or specific type of assessment.
+     * Report the source data name or specific type of assessment.
      */
     @JsonProperty
     public String sourceDataType;
@@ -66,10 +66,10 @@ public class Header {
     /**
      * All-args constructor.
      *
-     * @param subjectId SubjectDTO identifier.
-     * @param sourceId SourceDTO identifier.
-     * @param sourceType SourceDTO information, it can be a device or assessment name.
-     * @param sourceDataType SourceDTO information, it can be a device or assessment name.
+     * @param subjectId Subject identifier.
+     * @param sourceId Source identifier.
+     * @param sourceType Sourcetype information, it can be a device or assessment name.
+     * @param sourceDataType Source data information, it can be a device or assessment name.
      * @param descriptiveStatistic Statical value expressed by samples.
      * @param unit Unit used by the sourceType.
      * @param timeWindow Time interval between two consecutive samples.

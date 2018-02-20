@@ -52,7 +52,7 @@ public class SubjectService {
                 .collect(Collectors.toList()).isEmpty()) {
             LOGGER.error("Cannot find source-id " + sourceId + "for subject" + subject.getId());
             throw new BadRequestException(
-                    "SourceDTO-id " + sourceId + " is not available for subject "
+                    "Source-id " + sourceId + " is not available for subject "
                             + subject.getId());
         }
         return true;

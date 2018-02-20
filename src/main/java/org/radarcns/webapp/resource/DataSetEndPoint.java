@@ -95,7 +95,7 @@ public class DataSetEndPoint {
             + "available record for the given inputs")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "SubjectDTO not found.")
+    @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getLastReceivedSampleJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
@@ -145,7 +145,7 @@ public class DataSetEndPoint {
             + "available record for the given inputs")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "SubjectDTO not found.")
+    @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
     public Dataset getSamplesJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,

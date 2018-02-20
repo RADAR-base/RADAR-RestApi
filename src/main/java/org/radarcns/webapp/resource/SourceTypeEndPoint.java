@@ -61,7 +61,7 @@ public class SourceTypeEndPoint {
     @ApiResponse(responseCode = "200", description = "Return the source-type requested")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "SourceDTO type not found")
+    @ApiResponse(responseCode = "404", description = "Source type not found")
     @NeedsPermission(entity = SOURCETYPE, operation = READ)
     public SourceTypeDTO getSourceTypeJson(
             @Alphanumeric @PathParam(PRODUCER) String producer,

@@ -174,7 +174,7 @@ public class SourceTypeDTO implements Serializable {
     @JsonIgnore
     public String getSourceStatisticsMonitorTopic() {
         // based on the convention
-        if (Objects.isNull(sourceStatisticsMonitorTopic) || sourceStatisticsMonitorTopic
+        if (sourceStatisticsMonitorTopic == null || sourceStatisticsMonitorTopic
                 .isEmpty()) {
             return (SOURCE_STATISTICS_MONITOR + "_" + this.producer + "_" + this.model)
                     .toLowerCase();

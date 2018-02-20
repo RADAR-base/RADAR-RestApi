@@ -42,7 +42,7 @@ import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
- * SubjectDTO web-app. Function set to access subject information. A subject is a person enrolled
+ * Subject web-app. Function set to access subject information. A subject is a person enrolled
  * for in a study.
  */
 @Authenticated

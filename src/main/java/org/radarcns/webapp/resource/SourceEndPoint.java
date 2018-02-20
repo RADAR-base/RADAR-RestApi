@@ -72,7 +72,7 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "200", description = "Return a subject.avsc object")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Project or SubjectDTO cannot be found")
+    @ApiResponse(responseCode = "404", description = "Project or Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public List<Source> getAllSourcesJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
@@ -99,7 +99,7 @@ public class SourceEndPoint {
             + "computed status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Project, SubjectDTO or SourceDTO cannot be found")
+    @ApiResponse(responseCode = "404", description = "Project, Subject or Source cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
     public Source getLastComputedSourceStatusJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
