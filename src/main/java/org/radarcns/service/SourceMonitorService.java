@@ -24,7 +24,6 @@ import static org.radarcns.mongo.util.MongoHelper.START;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import java.time.Instant;
-import java.util.Date;
 import javax.inject.Inject;
 import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
@@ -82,14 +81,15 @@ public class SourceMonitorService {
         if (cursor.hasNext()) {
             Document document = cursor.next();
             Document key = (Document) document.get(KEY);
-            Date localStart = key.getDate(START);
-            Date localEnd = key.getDate(END);
+            Instant localStart = key.getDate(START).toInstant();
+            Instant localEnd = key.getDate(END).toInstant();
 
-            if (localStart != null && localEnd != null) {
-                timeStart = localStart.toInstant();
-                timeEnd = localEnd.toInstant();
+            if (timeStart == null || localStart.isBefore(timeStart)) {
+                timeStart = localStart;
             }
-
+            if (timeEnd == null || localEnd.isAfter(timeEnd)) {
+                timeEnd = localEnd;
+            }
         }
 
         cursor.close();
