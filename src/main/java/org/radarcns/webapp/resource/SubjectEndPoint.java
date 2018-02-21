@@ -86,7 +86,7 @@ public class SubjectEndPoint {
             "Return the subject object associated with the subject identifier")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "SubjectDTO cannot be found")
+    @ApiResponse(responseCode = "404", description = "Subject cannot be found")
     @NeedsPermissionOnSubject(entity = Entity.SUBJECT, operation = READ)
     public Subject getSubjectJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
