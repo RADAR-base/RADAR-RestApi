@@ -34,7 +34,6 @@ import org.junit.Test;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.management.domain.enumeration.SourceTypeScope;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.service.SourceMonitorService;
 
@@ -62,13 +61,12 @@ public class SourceMonitorServiceDbTest {
     @Before
     public void setUp() {
         sourceType = new SourceTypeDTO();
-        sourceType.setId(1L);
         sourceType.setProducer(SOURCETYPE_PRODUCER);
         sourceType.setCanRegisterDynamically(false);
         sourceType.setModel(SOURCETYPE_MODEL);
         sourceType.setCatalogVersion(SOURCETYPE_CATALOGUE_VERSION);
-        sourceType.sourceStatisticsMonitorTopic(MONITOR_STATISTICS_TOPIC);
-        sourceType.setSourceTypeScope(SourceTypeScope.PASSIVE);
+        sourceType.setSourceStatisticsMonitorTopic(MONITOR_STATISTICS_TOPIC);
+        sourceType.setSourceTypeScope("PASSIVE");
         monitor = new SourceMonitorService(mongoClient);
     }
 

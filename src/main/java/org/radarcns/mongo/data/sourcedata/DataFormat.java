@@ -20,7 +20,7 @@ import static org.radarcns.mongo.util.MongoHelper.QUARTILE;
 
 import java.util.List;
 import org.bson.Document;
-import org.radarcns.management.service.dto.SourceDataDTO;
+import org.radarcns.domain.managementportal.SourceDataDTO;
 
 public enum DataFormat {
     ACCELERATION_FORMAT("AccelerationFormat"),
@@ -30,10 +30,6 @@ public enum DataFormat {
 
     DataFormat(String format) {
         this.format = format;
-    }
-
-    public String format() {
-        return format;
     }
 
     /**
@@ -56,5 +52,9 @@ public enum DataFormat {
     @SuppressWarnings("unchecked")
     public static List<Double> getQuartiles(Document doc) {
         return (List<Double>) doc.get(QUARTILE);
+    }
+
+    public String format() {
+        return format;
     }
 }

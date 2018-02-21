@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.domain.managementportal.MinimalSourceDetailsDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.management.service.dto.MinimalSourceDetailsDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,8 +87,7 @@ public class SourceService {
                 .sourceTypeModel(source.getSourceTypeModel())
                 .effectiveTimeFrame(this.sourceMonitorService
                         .getEffectiveTimeFrame(projectId, subjectId,
-                                source.getSourceId().toString(),
-                                sourceType));
+                                source.getSourceId().toString(), sourceType));
     }
 
     /**

@@ -36,12 +36,12 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.radarcns.config.ManagementPortalConfig;
 import org.radarcns.config.Properties;
+import org.radarcns.domain.managementportal.ProjectDTO;
 import org.radarcns.domain.managementportal.SourceDTO;
+import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.managementportal.SubjectDTO;
 import org.radarcns.exception.TokenException;
-import org.radarcns.management.service.dto.ProjectDTO;
-import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.CachedMap;
@@ -110,11 +110,11 @@ public class ManagementPortalClient {
             throw new IllegalStateException("Failed to construct MP URL", ex);
         }
 
-        subjects = new CachedMap<>(this::retrieveSubjects, SubjectDTO::getLogin, invalidate,
+        subjects = new CachedMap<>(this::retrieveSubjects, SubjectDTO::getId, invalidate,
                 retry);
         projects = new CachedMap<>(this::retrieveProjects, ProjectDTO::getProjectName,
                 invalidate, retry);
-        sources = new CachedMap<>(this::retrieveSources, SourceDTO::getSourceIdentifier,
+        sources = new CachedMap<>(this::retrieveSources, SourceDTO::getSourceId,
                 invalidate, retry);
     }
 
@@ -303,8 +303,8 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link org.radarcns.management.service.dto.SourceDataDTO} from Management
-     * Portal using {@link ServletContext} entity.
+     * Retrieves all {@link SourceDataDTO} from Management Portal using {@link ServletContext}
+     * entity.
      *
      * @return sourceType-types retrieved from the management portal.
      */
