@@ -16,8 +16,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.NeedsPermission;
+import org.radarcns.domain.managementportal.ProjectDTO;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.management.service.dto.ProjectDTO;
 import org.radarcns.webapp.filter.Authenticated;
 
 @Authenticated

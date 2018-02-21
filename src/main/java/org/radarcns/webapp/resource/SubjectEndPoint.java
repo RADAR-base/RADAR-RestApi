@@ -42,8 +42,8 @@ import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
- * Subject web-app. Function set to access subject information. A subject is a person enrolled for
- * in a study.
+ * Subject web-app. Function set to access subject information. A subject is a person enrolled
+ * for in a study.
  */
 @Authenticated
 @Path("/" + PROJECTS)

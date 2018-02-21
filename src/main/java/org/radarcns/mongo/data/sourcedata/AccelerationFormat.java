@@ -22,11 +22,11 @@ import static org.radarcns.mongo.util.MongoHelper.FIELDS;
 
 import java.util.List;
 import org.bson.Document;
+import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
-import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -40,6 +40,10 @@ public class AccelerationFormat extends MongoSourceDataWrapper {
 
     public AccelerationFormat(SourceDataDTO sourceData) {
         super(sourceData);
+    }
+
+    private static int intProperty(Document doc, String key) {
+        return ((Number) doc.get(key)).intValue();
     }
 
     @Override
@@ -95,9 +99,5 @@ public class AccelerationFormat extends MongoSourceDataWrapper {
         return (intProperty(fields.get(0), X_LABEL)
                 + intProperty(fields.get(1), Y_LABEL)
                 + intProperty(fields.get(2), Z_LABEL)) / 3;
-    }
-
-    private static int intProperty(Document doc, String key) {
-        return ((Number) doc.get(key)).intValue();
     }
 }

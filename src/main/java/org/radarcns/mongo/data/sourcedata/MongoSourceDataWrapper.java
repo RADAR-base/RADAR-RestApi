@@ -29,13 +29,13 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedList;
 import org.bson.Document;
+import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
-import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
@@ -176,31 +176,34 @@ public abstract class MongoSourceDataWrapper {
 
             Date localStart = key.getDate(START);
             Date localEnd = key.getDate(END);
+            Instant startInstant;
+
             if (localStart != null && localEnd != null) {
+                startInstant = localStart.toInstant();
+                Instant endInstant = localEnd.toInstant();
                 if (start == null) {
-                    start = localStart.toInstant();
-                    end = localEnd.toInstant();
+                    start = startInstant;
+                    end = endInstant;
                 } else {
-                    if (start.isBefore(localStart.toInstant())) {
-                        start = localStart.toInstant();
+                    if (start.isAfter(startInstant)) {
+                        start = startInstant;
                     }
-                    if (end.isAfter(localEnd.toInstant())) {
-                        end = localEnd.toInstant();
+                    if (end.isBefore(endInstant)) {
+                        end = endInstant;
                     }
                 }
+            } else {
+                startInstant = null;
             }
 
-            DataItem item = new DataItem(documentToDataFormat(value, field, stat, header),
-                    localStart.toInstant());
-
-            list.addLast(item);
+            list.addLast(new DataItem(
+                    documentToDataFormat(value, field, stat, header),
+                    startInstant));
         }
 
         cursor.close();
 
-        TimeFrame effectiveTimeFrame = new TimeFrame(start, end);
-
-        header.setEffectiveTimeFrame(effectiveTimeFrame);
+        header.setEffectiveTimeFrame(new TimeFrame(start, end));
 
         LOGGER.debug("Found {} value", list.size());
 

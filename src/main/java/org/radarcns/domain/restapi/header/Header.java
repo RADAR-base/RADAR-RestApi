@@ -7,7 +7,7 @@ import org.radarcns.domain.restapi.TimeWindow;
 public class Header {
 
     /**
-     * Source identifier.
+     * Subject identifier.
      */
     @JsonProperty
     public String subjectId;
@@ -17,18 +17,18 @@ public class Header {
     @JsonProperty
     public String sourceId;
     /**
-     * Source identifier.
+     * Project identifier.
      */
     @JsonProperty
     public String projectId;
     /**
-     * Source information, it can be a device or assessment name.
+     * SourceType information.
      */
     @JsonProperty
     public String sourceType;
 
     /**
-     * Report the sensor name or specific type of assessment.
+     * Report the source data name or specific type of assessment.
      */
     @JsonProperty
     public String sourceDataType;
@@ -68,8 +68,8 @@ public class Header {
      *
      * @param subjectId Subject identifier.
      * @param sourceId Source identifier.
-     * @param sourceType Source information, it can be a device or assessment name.
-     * @param sourceDataType Source information, it can be a device or assessment name.
+     * @param sourceType Sourcetype information, it can be a device or assessment name.
+     * @param sourceDataType Source data information, it can be a device or assessment name.
      * @param descriptiveStatistic Statical value expressed by samples.
      * @param unit Unit used by the sourceType.
      * @param timeWindow Time interval between two consecutive samples.

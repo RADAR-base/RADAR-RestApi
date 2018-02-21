@@ -13,9 +13,9 @@ import javax.ws.rs.core.Response.Status;
 import okhttp3.Response;
 import org.junit.Rule;
 import org.junit.Test;
+import org.radarcns.domain.managementportal.ProjectDTO;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.management.service.dto.ProjectDTO;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.resource.BasePath;
 
