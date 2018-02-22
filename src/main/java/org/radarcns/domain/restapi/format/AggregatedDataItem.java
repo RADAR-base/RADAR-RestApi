@@ -3,7 +3,7 @@ package org.radarcns.domain.restapi.format;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.radarcns.domain.restapi.header.TimeFrame;
 
-public class AggregatedDataSet {
+public class AggregatedDataItem {
 
     @JsonProperty
     private Integer count;
@@ -11,10 +11,10 @@ public class AggregatedDataSet {
     @JsonProperty
     private TimeFrame timeFrame;
 
-    public AggregatedDataSet() {
+    public AggregatedDataItem() {
     }
 
-    public AggregatedDataSet(Integer count, TimeFrame timeFrame) {
+    public AggregatedDataItem(Integer count, TimeFrame timeFrame) {
         this.count = count;
         this.timeFrame = timeFrame;
     }

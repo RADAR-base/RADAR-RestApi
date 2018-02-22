@@ -86,7 +86,7 @@ public class AggregatedDataPointsEndPoint {
 
         AggregatedData dataSet = this.dataSetService.getDataAggregate(projectName, subjectId,
                 aggregateParam.getSources(), timeWindow, start.getValue(), end.getValue());
-        if (dataSet == null || dataSet.getAggregatedDataSetList().isEmpty()) {
+        if (dataSet == null || dataSet.getAggregatedDataItemList().isEmpty()) {
             LOGGER.debug("No aggregated available for the subject {} with source", subjectId);
             return emptyAggregatedData(projectName, subjectId, interval,
                     new TimeFrame(start.getValue(), end.getValue()), aggregateParam.getSources());

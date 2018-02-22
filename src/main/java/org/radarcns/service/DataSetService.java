@@ -35,7 +35,7 @@ import org.radarcns.domain.restapi.AggregateDataSource;
 import org.radarcns.domain.restapi.AggregatedData;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
-import org.radarcns.domain.restapi.format.AggregatedDataSet;
+import org.radarcns.domain.restapi.format.AggregatedDataItem;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
@@ -252,16 +252,15 @@ public class DataSetService {
      */
     public AggregatedData getDataAggregate(String projectName, String subjectId,
             List<AggregateDataSource> sources, TimeWindow timeWindow, Instant start, Instant end) {
-        List<AggregatedDataSet> dataItems = calculateIntervals(start, end, timeWindow).stream()
-                .map(p -> getAggregatedDataSet(projectName, subjectId,
-                        sources, p, timeWindow))
+        List<AggregatedDataItem> dataItems = calculateIntervals(start, end, timeWindow).stream()
+                .map(p -> computeAggregatedDataItem(projectName, subjectId, sources, p, timeWindow))
                 .collect(Collectors.toList());
 
         return new AggregatedData(projectName, subjectId, 0, new TimeFrame(start, end),
                 timeWindow, sources, dataItems);
     }
 
-    private AggregatedDataSet getAggregatedDataSet(String projectName, String subjectId,
+    private AggregatedDataItem computeAggregatedDataItem(String projectName, String subjectId,
             List<AggregateDataSource> aggregateDataSources, TimeFrame timeFrame,
             TimeWindow timeWindow) {
         Integer count = 0;
@@ -275,7 +274,7 @@ public class DataSetService {
                                 sourceDataWrapper.getCollectionName(timeWindow)));
             }
         }
-        return new AggregatedDataSet(count, timeFrame);
+        return new AggregatedDataItem(count, timeFrame);
     }
 
     private List<TimeFrame> calculateIntervals(Instant start, Instant end, TimeWindow timeWindow) {

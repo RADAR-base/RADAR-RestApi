@@ -2,7 +2,7 @@ package org.radarcns.domain.restapi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import org.radarcns.domain.restapi.format.AggregatedDataSet;
+import org.radarcns.domain.restapi.format.AggregatedDataItem;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.TimeFrame;
 
@@ -30,7 +30,7 @@ public class AggregatedData {
     private List<AggregateDataSource> sources;
 
     @JsonProperty
-    private List<AggregatedDataSet> aggregatedDataSetList;
+    private List<AggregatedDataItem> aggregatedDataItemList;
 
     public AggregatedData() {
 
@@ -38,13 +38,13 @@ public class AggregatedData {
 
     public AggregatedData(String projectName, String subjectId, Integer maximumCount, TimeFrame
             timeFrame, TimeWindow timeWindow, List<AggregateDataSource> sources,
-            List<AggregatedDataSet>
+            List<AggregatedDataItem>
                     aggregatedDataPoints) {
         this.projectName = projectName;
         this.subjectId = subjectId;
         this.maximumCount = maximumCount;
         this.timeFrame = timeFrame;
-        this.aggregatedDataSetList = aggregatedDataPoints;
+        this.aggregatedDataItemList = aggregatedDataPoints;
         this.timeWindow = timeWindow;
         this.sources = sources;
     }
@@ -89,12 +89,12 @@ public class AggregatedData {
         this.statistic = statistic;
     }
 
-    public List<AggregatedDataSet> getAggregatedDataSetList() {
-        return aggregatedDataSetList;
+    public List<AggregatedDataItem> getAggregatedDataItemList() {
+        return aggregatedDataItemList;
     }
 
-    public void setAggregatedDataSetList(List<AggregatedDataSet> aggregatedDataSetList) {
-        this.aggregatedDataSetList = aggregatedDataSetList;
+    public void setAggregatedDataItemList(List<AggregatedDataItem> aggregatedDataItemList) {
+        this.aggregatedDataItemList = aggregatedDataItemList;
     }
 
     public TimeWindow getTimeWindow() {
