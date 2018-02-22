@@ -1,6 +1,7 @@
 package org.radarcns.webapp;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.junit.Assert.assertNotNull;
 import static org.radarcns.domain.restapi.TimeWindow.ONE_MIN;
 import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
@@ -87,7 +88,7 @@ public class AggregatedDataPointsEndPointTest {
                 .writeValueAsBytes(aggregateParam), Status.OK);
         ObjectReader reader = RadarConverter.readerFor(AggregatedData.class);
         AggregatedData dateset = reader.readValue(actual.body().byteStream());
-
+        assertNotNull(dateset);
         dropAndClose(client);
     }
 
