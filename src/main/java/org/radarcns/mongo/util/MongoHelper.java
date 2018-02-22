@@ -98,11 +98,9 @@ public class MongoHelper {
     public static MongoCursor<Document> doesExistsByProjectAndSubjectAndSourceInWindow(
             String projectName, String subjectId, String sourceId, Date start, Date end,
             MongoCollection<Document> collection) {
-        BasicDBObject query = getByProjectSubjectSource(projectName, subjectId, sourceId)
-                .append(KEY.concat(".").concat(START), new BasicDBObject("$gte", start))
-                .append(KEY.concat(".").concat(END), new BasicDBObject("$lte", end));
-        FindIterable<Document> result = collection.find(query).limit(1);
-
+        FindIterable<Document> result = collection.find
+                (getQueryWithProjectAndSubjectAndSourceWithTimeWindow(projectName, subjectId,
+                        sourceId, start, end)).limit(1);
         return result.iterator();
     }
 
@@ -120,15 +118,22 @@ public class MongoHelper {
     public static MongoCursor<Document> findDocumentsByProjectAndSubjectAndSourceInWindow(
             String projectName, String subjectId, String sourceId, Date start, Date end,
             MongoCollection<Document> collection) {
-        Bson query = and(eq(KEY + "." + PROJECT_ID, projectName),
+
+        FindIterable<Document> result = collection
+                .find(getQueryWithProjectAndSubjectAndSourceWithTimeWindow(projectName, subjectId,
+                        sourceId, start, end))
+                .sort(new BasicDBObject(START, ASCENDING));
+
+        return result.iterator();
+    }
+
+    private static Bson getQueryWithProjectAndSubjectAndSourceWithTimeWindow(String projectName,
+            String subjectId, String sourceId, Date start, Date end) {
+        return and(eq(KEY + "." + PROJECT_ID, projectName),
                 eq(KEY + "." + USER_ID, subjectId),
                 eq(KEY + "." + SOURCE_ID, sourceId),
                 gte(KEY + "." + START, start),
                 lte(KEY + "." + END, end));
-        FindIterable<Document> result = collection.find(query)
-                .sort(new BasicDBObject(START, ASCENDING));
-
-        return result.iterator();
     }
 
     /**

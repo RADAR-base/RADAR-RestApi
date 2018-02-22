@@ -270,4 +270,23 @@ public abstract class MongoSourceDataWrapper {
     public Double getExpectedRecordCount(TimeWindow timeWindow) {
         return RadarConverter.getSecond(timeWindow) * getFrequency();
     }
+
+    public Integer doesExist(String projectName, String subjectId, String sourceId,
+            Date start, Date end, MongoCollection<Document> collection) {
+
+        MongoCursor<Document> cursor = MongoHelper
+                .doesExistsByProjectAndSubjectAndSourceInWindow(projectName, subjectId, sourceId,
+                        start, end, collection);
+
+        if (!cursor.hasNext()) {
+            LOGGER.debug("Empty cursor");
+            cursor.close();
+            return 0;
+        }
+
+        if (cursor.hasNext()) {
+            return 1;
+        }
+        return 0;
+    }
 }

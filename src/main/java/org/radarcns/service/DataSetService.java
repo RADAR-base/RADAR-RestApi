@@ -19,17 +19,23 @@ package org.radarcns.service;
 import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.managementportal.SourceDataDTO;
+import org.radarcns.domain.restapi.AggregateDataSource;
+import org.radarcns.domain.restapi.AggregatedData;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.format.AggregatedDataSet;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
@@ -205,5 +211,54 @@ public class DataSetService {
         return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
                 null, interval, timeFrame, null),
                 Collections.emptyList());
+    }
+
+    public static AggregatedData emptyAggregatedData(String projectName, String subjectId,
+            TimeWindow interval, TimeFrame timeFrame, List<AggregateDataSource> sources) {
+
+        return new AggregatedData(projectName, subjectId, 0, timeFrame, interval, sources,
+                Collections.emptyList());
+    }
+
+    public AggregatedData getDataAggregate(String projectName, String subjectId,
+            List<AggregateDataSource> sources, TimeWindow timeWindow, Instant start, Instant end)
+            throws IOException {
+        List<AggregatedDataSet> dataItems = calculateIntervals(start, end, timeWindow).stream()
+                .map(p -> getAggregatedDataSet(projectName, subjectId,
+                        sources, p, timeWindow))
+                .collect(Collectors.toList());
+
+        return new AggregatedData(projectName, subjectId, 0, new TimeFrame(start, end),
+                timeWindow, sources, dataItems);
+    }
+
+    private AggregatedDataSet getAggregatedDataSet(String projectName, String subjectId,
+            List<AggregateDataSource> aggregateDataSources, TimeFrame timeFrame,
+            TimeWindow timeWindow) {
+        Integer count = 0;
+        for (AggregateDataSource aggregate : aggregateDataSources) {
+            for (String sourceDataName : aggregate.getSourceDataName()) {
+                MongoSourceDataWrapper sourceDataWrapper = mongoSensorMap.get(sourceDataName);
+                count += sourceDataWrapper.doesExist(projectName, subjectId, aggregate
+                                .getSourceId(), Date.from(timeFrame.getStartDateTime()),
+                        Date.from(timeFrame.getEndDateTime()),
+                        MongoHelper.getCollection(mongoClient,
+                                sourceDataWrapper.getCollectionName(timeWindow)));
+            }
+        }
+        return new AggregatedDataSet(count, timeFrame);
+    }
+
+    private List<TimeFrame> calculateIntervals(Instant start, Instant end, TimeWindow timeWindow) {
+        Instant intervalStartDateTime = start;
+        List<TimeFrame> timeFrames = new ArrayList<>();
+        while (intervalStartDateTime.plus(RadarConverter.getDuration(timeWindow)).isBefore(end)
+                || intervalStartDateTime.plus(RadarConverter.getDuration(timeWindow)).equals(end)) {
+            Instant intervalEndTime = intervalStartDateTime.plus
+                    (RadarConverter.getDuration(timeWindow));
+            timeFrames.add(new TimeFrame(intervalStartDateTime, intervalEndTime));
+            intervalStartDateTime = intervalEndTime;
+        }
+        return timeFrames;
     }
 }
