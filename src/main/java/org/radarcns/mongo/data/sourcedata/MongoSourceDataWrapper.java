@@ -285,8 +285,8 @@ public abstract class MongoSourceDataWrapper {
             Date start, Date end, MongoCollection<Document> collection) {
 
         MongoCursor<Document> cursor = MongoHelper
-                .doesExistsByProjectAndSubjectAndSourceInWindow(projectName, subjectId, sourceId,
-                        start, end, collection);
+                .doesExistsByProjectAndSubjectAndSourceInWindowForStartTime(projectName, subjectId,
+                        sourceId, start, end, collection);
         return cursor.hasNext() ? 1 : 0;
     }
 }

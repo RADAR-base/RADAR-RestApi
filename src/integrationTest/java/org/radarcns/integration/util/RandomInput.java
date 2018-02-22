@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
@@ -59,9 +58,10 @@ public class RandomInput {
     private static final ExpectedDataSetFactory expectedDataSetFactory =
             new ExpectedDataSetFactory();
 
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     private static void randomDoubleValue(String project, String user, String source,
             String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow) {
+            int samples, boolean singleWindow, Instant startTime) {
         ObservationKey key = new ObservationKey(project, user, source);
         ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
@@ -69,11 +69,11 @@ public class RandomInput {
         if (singleWindow) {
             numberOfRecords = 1;
         }
+        Instant timeStamp = startTime;
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        long now = Instant.now().toEpochMilli();
         for (int i = 0; i < numberOfRecords; i++) {
-            instance.add(key, now, random.nextDouble());
-            now += TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow));
+            instance.add(key, timeStamp.toEpochMilli(), random.nextDouble());
+            timeStamp = timeStamp.plus(RadarConverter.getDuration(timeWindow));
         }
 
         dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
@@ -81,26 +81,29 @@ public class RandomInput {
         documents = expectedDocumentFactory.produceExpectedDocuments(instance, timeWindow);
     }
 
-    private static void randomArrayValue(String project, String user, String source,
+    @SuppressWarnings("PMD.ExcessiveParameterList")
+    private static void randomArrayValue(String project, String subject, String source,
             String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow) {
+            int samples, boolean singleWindow, Instant startTime) {
 
         ExpectedArrayValue instance = new ExpectedArrayValue();
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        ObservationKey key = new ObservationKey(project, user, source);
+        ObservationKey key = new ObservationKey(project, subject, source);
 
         int numberOfRecords = samples;
         if (singleWindow) {
             numberOfRecords = 1;
         }
-        long now = Instant.now().toEpochMilli();
+        Instant timeStamp = startTime;
         for (int i = 0; i < numberOfRecords; i++) {
-            instance.add(key, now, random.nextDouble(), random.nextDouble(), random.nextDouble());
-            now += TimeUnit.SECONDS.toMillis(RadarConverter.getSecond(timeWindow));
+            instance.add(key, timeStamp.toEpochMilli(), random.nextDouble(), random.nextDouble(),
+                    random
+                            .nextDouble());
+            timeStamp = timeStamp.plus(RadarConverter.getDuration(timeWindow));
         }
 
-        dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
+        dataset = expectedDataSetFactory.getDataset(instance, project, subject, source, sourceType,
                 sensorType, stat, timeWindow);
         documents = expectedDocumentFactory.produceExpectedDocuments(instance, timeWindow);
     }
@@ -109,24 +112,26 @@ public class RandomInput {
      * Returns a Map containing a {@code Dataset} and a {@code Collection<Document>} randomly
      * generated mocking the behaviour of the RADAR-CNS Platform.
      */
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user,
             String source, String sourceType, String sourceDataName, DescriptiveStatistic stat,
-            TimeWindow timeWindow, int samples, boolean singleWindow) {
+            TimeWindow timeWindow, int samples, boolean singleWindow, Instant startTime) {
         if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
             return getBoth(project, user, source, sourceType, sourceDataName, stat,
-                    timeWindow, samples, singleWindow);
+                    timeWindow, samples, singleWindow, startTime);
         }
 
         throw new UnsupportedOperationException(sourceType + " is not"
                 + " currently supported.");
     }
 
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     private static Map<String, Object> getBoth(String project, String user, String source,
             String sourceType, String sourceDataName, DescriptiveStatistic stat,
             TimeWindow timeWindow,
-            int samples, boolean singleWindow) {
+            int samples, boolean singleWindow, Instant startTime) {
         nextValue(project, user, source, sourceType, sourceDataName, stat, timeWindow, samples,
-                singleWindow);
+                singleWindow, startTime);
 
         Map<String, Object> map = new HashMap<>();
         map.put(DATASET, dataset);
@@ -134,18 +139,19 @@ public class RandomInput {
         return map;
     }
 
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     private static void nextValue(String project, String user, String source, String sourceType,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
-            boolean singleWindow) {
+            boolean singleWindow, Instant startTime) {
         switch (sourceDataName) {
             case "EMPATICA_E4_v1_ACCELEROMETER":
                 randomArrayValue(project, user, source, sourceType, sourceDataName, stat,
                         timeWindow,
-                        samples, singleWindow);
+                        samples, singleWindow, startTime);
                 break;
             default:
                 randomDoubleValue(project, user, source, sourceType, sourceDataName, stat,
-                        timeWindow, samples, singleWindow);
+                        timeWindow, samples, singleWindow, startTime);
                 break;
         }
     }

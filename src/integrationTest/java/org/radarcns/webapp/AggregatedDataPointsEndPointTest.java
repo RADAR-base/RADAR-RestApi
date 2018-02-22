@@ -1,11 +1,23 @@
 package org.radarcns.webapp;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_MIN;
-import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
+import static org.junit.Assert.assertTrue;
+import static org.radarcns.domain.restapi.TimeWindow.ONE_HOUR;
+import static org.radarcns.domain.restapi.TimeWindow.TEN_MIN;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.AVERAGE;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.integration.util.RandomInput.DOCUMENTS;
+import static org.radarcns.webapp.SampleDataHandler.ACCELERATION_COLLECTION_FOR_TEN_MINITES;
+import static org.radarcns.webapp.SampleDataHandler.ACCELEROMETER_SOURCE_DATA_NAME;
+import static org.radarcns.webapp.SampleDataHandler.BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES;
+import static org.radarcns.webapp.SampleDataHandler.BATTERY_LEVEL_SOURCE_DATA_NAME;
+import static org.radarcns.webapp.SampleDataHandler.PROJECT;
+import static org.radarcns.webapp.SampleDataHandler.SAMPLES;
+import static org.radarcns.webapp.SampleDataHandler.SOURCE;
+import static org.radarcns.webapp.SampleDataHandler.SOURCE_TYPE;
+import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
 import static org.radarcns.webapp.resource.BasePath.AGGREGATED_DATA_POINTS;
 
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -24,7 +36,9 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.domain.restapi.AggregateDataSource;
-import org.radarcns.domain.restapi.AggregatedData;
+import org.radarcns.domain.restapi.AggregatedDataPoints;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.format.AggregatedDataItem;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
@@ -36,14 +50,6 @@ import org.radarcns.webapp.resource.Parameter;
 
 public class AggregatedDataPointsEndPointTest {
 
-    private static final String PROJECT = "radar";
-    private static final String SUBJECT = "sub-1";
-    private static final String SOURCE = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
-    private static final String SOURCE_TYPE = "empatica_e4_v1";
-    private static final String SOURCE_DATA_NAME = "EMPATICA_E4_v1_BATTERY";
-    private static final int SAMPLES = 10;
-    private static final String COLLECTION_NAME = "android_empatica_e4_battery_level_output";
-    private static final String ACCELERATION_COLLECTION = "android_empatica_e4_acceleration_output";
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
@@ -54,40 +60,48 @@ public class AggregatedDataPointsEndPointTest {
     public void getAllRecordsWithQuartilesInTimeRange() throws IOException {
         MongoClient client = Utility.getMongoClient();
         Instant now = Instant.now();
+        TimeWindow window = TEN_MIN;
 
-        Instant start = now.plus(RadarConverter.getDuration(TEN_SECOND));
-        Instant end = start.plus(RadarConverter.getDuration(ONE_MIN));
+        Instant start = now.plus(RadarConverter.getDuration(TEN_MIN));
+        Instant end = start.plus(RadarConverter.getDuration(ONE_HOUR));
         MongoCollection<Document> collection = MongoHelper
-                .getCollection(client, COLLECTION_NAME);
+                .getCollection(client, BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES);
         Map<String, Object> docs = RandomInput
                 .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
-                        SOURCE_TYPE, SOURCE_DATA_NAME, QUARTILES, TEN_SECOND, SAMPLES, false);
+                        SOURCE_TYPE, BATTERY_LEVEL_SOURCE_DATA_NAME, QUARTILES, window, SAMPLES,
+                        false, now);
 
-        String sourceDataName = "EMPATICA_E4_v1_ACCELEROMETER";
-        Map<String, Object> accelerationDocs = RandomInput
+        MongoCollection<Document> accelerationCollection = MongoHelper
+                .getCollection(client, ACCELERATION_COLLECTION_FOR_TEN_MINITES);
+
+        Map<String, Object> accDocs = RandomInput
                 .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
-                        SOURCE_TYPE, sourceDataName, QUARTILES, TEN_SECOND, SAMPLES, false);
-        MongoCollection<Document> accCollection = MongoHelper
-                .getCollection(client, ACCELERATION_COLLECTION);
+                        SOURCE_TYPE, ACCELEROMETER_SOURCE_DATA_NAME, AVERAGE, TEN_MIN,
+                        5, false, Instant.now());
 
         collection.insertMany((List<Document>) docs.get(DOCUMENTS));
-        accCollection.insertMany((List<Document>) accelerationDocs.get(DOCUMENTS));
 
-        DataAggregateParam aggregateParam = new DataAggregateParam();
-        AggregateDataSource aggregate = new AggregateDataSource();
-        aggregate.setSourceId(SOURCE);
-        aggregate.setSourceDataName(Arrays.asList(SOURCE_DATA_NAME, sourceDataName));
-        aggregateParam.setSources(Arrays.asList(aggregate));
+        accelerationCollection.insertMany((List<Document>) accDocs.get(DOCUMENTS));
+
+        DataAggregateParam aggregateParam = new DataAggregateParam(Arrays.asList(
+                new AggregateDataSource(SOURCE,
+                        Arrays.asList(BATTERY_LEVEL_SOURCE_DATA_NAME,
+                                ACCELEROMETER_SOURCE_DATA_NAME))));
         ObjectWriter writer = RadarConverter.writerFor(DataAggregateParam.class);
         String requestPath = PROJECT + '/' + SUBJECT + '?'
-                + Parameter.TIME_WINDOW + '=' + TEN_SECOND + '&'
+                + Parameter.TIME_WINDOW + '=' + window + '&'
                 + Parameter.START + '=' + start + '&'
                 + Parameter.END + '=' + end;
         Response actual = apiClient.postRequest(requestPath, APPLICATION_JSON, writer
                 .writeValueAsBytes(aggregateParam), Status.OK);
-        ObjectReader reader = RadarConverter.readerFor(AggregatedData.class);
-        AggregatedData dateset = reader.readValue(actual.body().byteStream());
+        ObjectReader reader = RadarConverter.readerFor(AggregatedDataPoints.class);
+        AggregatedDataPoints dateset = reader.readValue(actual.body().byteStream());
         assertNotNull(dateset);
+        assertTrue(dateset.getAggregatedDataItemList().size() <= 6);
+        List<AggregatedDataItem> dataItems = dateset.getAggregatedDataItemList();
+        assertEquals(Integer.valueOf(2), dataItems.get(0).getCount());
+        assertEquals(Integer.valueOf(1), dataItems.get(4).getCount());
+
         dropAndClose(client);
     }
 
@@ -101,8 +115,8 @@ public class AggregatedDataPointsEndPointTest {
      * database connection.
      **/
     private void dropAndClose(MongoClient client) {
-        Utility.dropCollection(client, COLLECTION_NAME);
-        Utility.dropCollection(client, ACCELERATION_COLLECTION);
+        Utility.dropCollection(client, BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES);
+        Utility.dropCollection(client, ACCELERATION_COLLECTION_FOR_TEN_MINITES);
         client.close();
     }
 

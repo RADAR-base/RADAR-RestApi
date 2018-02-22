@@ -32,7 +32,7 @@ import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.restapi.AggregateDataSource;
-import org.radarcns.domain.restapi.AggregatedData;
+import org.radarcns.domain.restapi.AggregatedDataPoints;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.AggregatedDataItem;
@@ -115,8 +115,7 @@ public class DataSetService {
     }
 
     /**
-     * Returns a {@code Dataset} containing all available values for the couple subject
-     * sourceType.
+     * Returns a {@code Dataset} containing all available values for the couple subject sourceType.
      *
      * @param projectName of the subject
      * @param subjectId of the subject
@@ -207,6 +206,7 @@ public class DataSetService {
 
     /**
      * Returns an empty {@link Dataset} using given parameters.
+     *
      * @param projectName of project
      * @param subjectId of subject
      * @param sourceId of source
@@ -225,23 +225,25 @@ public class DataSetService {
     }
 
     /**
-     * Returns an empty {@link AggregatedData} using given parameters.
+     * Returns an empty {@link AggregatedDataPoints} using given parameters.
+     *
      * @param projectName of project
      * @param subjectId of subject
      * @param interval timeWindow
      * @param timeFrame startToEnd
      * @param sources requested
-     * @return an instance of AggregatedData
+     * @return an instance of AggregatedDataPoints
      */
-    public static AggregatedData emptyAggregatedData(String projectName, String subjectId,
+    public static AggregatedDataPoints emptyAggregatedData(String projectName, String subjectId,
             TimeWindow interval, TimeFrame timeFrame, List<AggregateDataSource> sources) {
 
-        return new AggregatedData(projectName, subjectId, 0, timeFrame, interval, sources,
+        return new AggregatedDataPoints(projectName, subjectId, 0, timeFrame, interval, sources,
                 Collections.emptyList());
     }
 
     /**
-     * Returns calculated {@link AggregatedData} using given parameters.
+     * Returns calculated {@link AggregatedDataPoints} using given parameters.
+     *
      * @param projectName of project
      * @param subjectId of subject
      * @param sources requested
@@ -250,14 +252,15 @@ public class DataSetService {
      * @param end time
      * @return calculated data.
      */
-    public AggregatedData getDataAggregate(String projectName, String subjectId,
+    public AggregatedDataPoints getAggregatedData(String projectName, String subjectId,
             List<AggregateDataSource> sources, TimeWindow timeWindow, Instant start, Instant end) {
         List<AggregatedDataItem> dataItems = calculateIntervals(start, end, timeWindow).stream()
                 .map(p -> computeAggregatedDataItem(projectName, subjectId, sources, p, timeWindow))
                 .collect(Collectors.toList());
 
-        return new AggregatedData(projectName, subjectId, 0, new TimeFrame(start, end),
-                timeWindow, sources, dataItems);
+        return new AggregatedDataPoints(projectName, subjectId,
+                dataItems.stream().map(AggregatedDataItem::getCount).reduce(Integer::max).get(),
+                new TimeFrame(start, end), timeWindow, sources, dataItems);
     }
 
     private AggregatedDataItem computeAggregatedDataItem(String projectName, String subjectId,

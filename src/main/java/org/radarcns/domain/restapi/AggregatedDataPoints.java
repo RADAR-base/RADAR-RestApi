@@ -6,7 +6,7 @@ import org.radarcns.domain.restapi.format.AggregatedDataItem;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.TimeFrame;
 
-public class AggregatedData {
+public class AggregatedDataPoints {
 
     @JsonProperty
     private String projectName;
@@ -32,12 +32,23 @@ public class AggregatedData {
     @JsonProperty
     private List<AggregatedDataItem> aggregatedDataItemList;
 
-    public AggregatedData() {
+    public AggregatedDataPoints() {
 
     }
 
-    public AggregatedData(String projectName, String subjectId, Integer maximumCount, TimeFrame
-            timeFrame, TimeWindow timeWindow, List<AggregateDataSource> sources,
+
+    /**
+     * Constructor.
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param maximumCount of records
+     * @param timeFrame start to end
+     * @param timeWindow interval window
+     * @param sources to request availability
+     * @param aggregatedDataPoints computed data.
+     */
+    public AggregatedDataPoints(String projectName, String subjectId, Integer maximumCount,
+            TimeFrame timeFrame, TimeWindow timeWindow, List<AggregateDataSource> sources,
             List<AggregatedDataItem>
                     aggregatedDataPoints) {
         this.projectName = projectName;

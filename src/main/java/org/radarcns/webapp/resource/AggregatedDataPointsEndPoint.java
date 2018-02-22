@@ -24,7 +24,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import org.radarcns.auth.NeedsPermissionOnSubject;
-import org.radarcns.domain.restapi.AggregatedData;
+import org.radarcns.domain.restapi.AggregatedDataPoints;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
@@ -72,7 +72,7 @@ public class AggregatedDataPointsEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
-    public AggregatedData getAggregatedDataPoints(DataAggregateParam aggregateParam,
+    public AggregatedDataPoints getAggregatedDataPoints(DataAggregateParam aggregateParam,
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
             @QueryParam(TIME_WINDOW) TimeWindow interval,
@@ -84,7 +84,7 @@ public class AggregatedDataPointsEndPoint {
         // if timeWindow is not set use default TEN_SECOND
         TimeWindow timeWindow = interval != null ? interval : TEN_SECOND;
 
-        AggregatedData dataSet = this.dataSetService.getDataAggregate(projectName, subjectId,
+        AggregatedDataPoints dataSet = this.dataSetService.getAggregatedData(projectName, subjectId,
                 aggregateParam.getSources(), timeWindow, start.getValue(), end.getValue());
         if (dataSet == null || dataSet.getAggregatedDataItemList().isEmpty()) {
             LOGGER.debug("No aggregated available for the subject {} with source", subjectId);

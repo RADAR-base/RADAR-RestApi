@@ -95,12 +95,17 @@ public class MongoHelper {
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents from the query.
      */
-    public static MongoCursor<Document> doesExistsByProjectAndSubjectAndSourceInWindow(
+    public static MongoCursor<Document> doesExistsByProjectAndSubjectAndSourceInWindowForStartTime(
             String projectName, String subjectId, String sourceId, Date start, Date end,
             MongoCollection<Document> collection) {
+        Bson query = and(eq(KEY + "." + PROJECT_ID, projectName),
+                eq(KEY + "." + USER_ID, subjectId),
+                eq(KEY + "." + SOURCE_ID, sourceId),
+                gte(KEY + "." + START, start),
+                lte(KEY + "." + START, end));
+
         FindIterable<Document> result = collection
-                .find(getQueryWithProjectAndSubjectAndSourceWithTimeWindow(projectName, subjectId,
-                        sourceId, start, end)).limit(1);
+                .find(query).limit(1);
         return result.iterator();
     }
 
