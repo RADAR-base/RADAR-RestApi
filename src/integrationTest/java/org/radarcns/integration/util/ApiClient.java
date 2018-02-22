@@ -13,7 +13,9 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response.Status;
+import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.hamcrest.CoreMatchers;
@@ -35,14 +37,8 @@ import org.slf4j.LoggerFactory;
 public class ApiClient extends ExternalResource {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiClient.class);
-
-    private final ServerConfig config;
-
     private static final OAuth2Client oAuth2Client;
-
     private static final OAuth2AccessTokenDetails token;
-
-    private RestClient client;
 
     static {
         try {
@@ -63,6 +59,9 @@ public class ApiClient extends ExternalResource {
             throw new AssertionError();
         }
     }
+
+    private final ServerConfig config;
+    private RestClient client;
 
     /**
      * Client to the REST API with given server and base path.
@@ -109,6 +108,41 @@ public class ApiClient extends ExternalResource {
     public Response request(String relativePath, String accept, Status... expectedResponseCode)
             throws IOException {
         Request request = this.client.requestBuilder(relativePath)
+                .addHeader("User-Agent", "Mozilla/5.0")
+                .addHeader("Accept", accept)
+                .header("Authorization", "Bearer " + token.getAccessToken())
+                .build();
+
+        logger.info("Requesting {} expecting code {}", request.url(), expectedResponseCode);
+
+        Response response = client.request(request);
+        if (expectedResponseCode.length == 0) {
+            assertTrue(response.isSuccessful());
+        } else {
+            assertThat(Status.fromStatusCode(response.code()),
+                    anyOf(Arrays.stream(expectedResponseCode)
+                            .map(CoreMatchers::equalTo)
+                            .collect(Collectors.toList())));
+        }
+        return response;
+    }
+
+    /**
+     * Makes an HTTP request to given URL.
+     *
+     * @param relativePath path relative to the base URL, without starting slash.
+     * @param accept Accept Header for content negotiation
+     * @param expectedResponseCode response codes that are considered valid.
+     * @return HTTP Response
+     * @throws IOException if the request could not be executed
+     */
+    public Response postRequest(String relativePath, String accept, byte[] jsonBody, Status...
+            expectedResponseCode)
+            throws IOException {
+        RequestBody body = RequestBody
+                .create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
+        Request request = this.client.requestBuilder(relativePath)
+                .post(body)
                 .addHeader("User-Agent", "Mozilla/5.0")
                 .addHeader("Accept", accept)
                 .header("Authorization", "Bearer " + token.getAccessToken())
