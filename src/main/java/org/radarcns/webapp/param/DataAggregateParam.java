@@ -8,9 +8,6 @@ public class DataAggregateParam {
 
     private List<AggregateDataSource> sources;
 
-    public DataAggregateParam() {
-    }
-
     public List<AggregateDataSource> getSources() {
         return sources;
     }

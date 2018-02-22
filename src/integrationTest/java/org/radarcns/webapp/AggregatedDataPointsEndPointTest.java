@@ -73,17 +73,16 @@ public class AggregatedDataPointsEndPointTest {
         collection.insertMany((List<Document>) docs.get(DOCUMENTS));
         accCollection.insertMany((List<Document>) accelerationDocs.get(DOCUMENTS));
 
-        String requestPath = PROJECT + '/' + SUBJECT + '?'
-                + Parameter.TIME_WINDOW + '=' + TEN_SECOND + '&'
-                + Parameter.START + '=' + start + '&'
-                + Parameter.END + '=' + end;
-
         DataAggregateParam aggregateParam = new DataAggregateParam();
         AggregateDataSource aggregate = new AggregateDataSource();
         aggregate.setSourceId(SOURCE);
         aggregate.setSourceDataName(Arrays.asList(SOURCE_DATA_NAME, sourceDataName));
         aggregateParam.setSources(Arrays.asList(aggregate));
         ObjectWriter writer = RadarConverter.writerFor(DataAggregateParam.class);
+        String requestPath = PROJECT + '/' + SUBJECT + '?'
+                + Parameter.TIME_WINDOW + '=' + TEN_SECOND + '&'
+                + Parameter.START + '=' + start + '&'
+                + Parameter.END + '=' + end;
         Response actual = apiClient.postRequest(requestPath, APPLICATION_JSON, writer
                 .writeValueAsBytes(aggregateParam), Status.OK);
         ObjectReader reader = RadarConverter.readerFor(AggregatedData.class);

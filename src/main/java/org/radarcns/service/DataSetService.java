@@ -115,7 +115,7 @@ public class DataSetService {
     }
 
     /**
-     * Returns a {@code Dataset} containing alla available values for the couple subject
+     * Returns a {@code Dataset} containing all available values for the couple subject
      * sourceType.
      *
      * @param projectName of the subject
@@ -141,7 +141,7 @@ public class DataSetService {
     }
 
     /**
-     * Returns a {@link Dataset} containing alla available values for the couple subject surce.
+     * Returns a {@link Dataset} containing all available values for the couple subject surce.
      *
      * @param projectName of the subject
      * @param subjectId of the subject
@@ -205,6 +205,17 @@ public class DataSetService {
                 stat, sourceData.getUnit(), timeWindow, timeFrame, null);
     }
 
+    /**
+     * Returns an empty {@link Dataset} using given parameters.
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param sourceId of source
+     * @param sensor sourceDataName
+     * @param stat statistic
+     * @param interval timeWindow
+     * @param timeFrame start to end
+     * @return an instance of Dataset.
+     */
     public static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
             String sensor, DescriptiveStatistic stat, TimeWindow interval, TimeFrame timeFrame) {
 
@@ -213,6 +224,15 @@ public class DataSetService {
                 Collections.emptyList());
     }
 
+    /**
+     * Returns an empty {@link AggregatedData} using given parameters.
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param interval timeWindow
+     * @param timeFrame startToEnd
+     * @param sources requested
+     * @return an instance of AggregatedData
+     */
     public static AggregatedData emptyAggregatedData(String projectName, String subjectId,
             TimeWindow interval, TimeFrame timeFrame, List<AggregateDataSource> sources) {
 
@@ -220,9 +240,18 @@ public class DataSetService {
                 Collections.emptyList());
     }
 
+    /**
+     * Returns calculated {@link AggregatedData} using given parameters.
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param sources requested
+     * @param timeWindow interval
+     * @param start time
+     * @param end time
+     * @return calculated data.
+     */
     public AggregatedData getDataAggregate(String projectName, String subjectId,
-            List<AggregateDataSource> sources, TimeWindow timeWindow, Instant start, Instant end)
-            throws IOException {
+            List<AggregateDataSource> sources, TimeWindow timeWindow, Instant start, Instant end) {
         List<AggregatedDataSet> dataItems = calculateIntervals(start, end, timeWindow).stream()
                 .map(p -> getAggregatedDataSet(projectName, subjectId,
                         sources, p, timeWindow))
@@ -254,8 +283,8 @@ public class DataSetService {
         List<TimeFrame> timeFrames = new ArrayList<>();
         while (intervalStartDateTime.plus(RadarConverter.getDuration(timeWindow)).isBefore(end)
                 || intervalStartDateTime.plus(RadarConverter.getDuration(timeWindow)).equals(end)) {
-            Instant intervalEndTime = intervalStartDateTime.plus
-                    (RadarConverter.getDuration(timeWindow));
+            Instant intervalEndTime = intervalStartDateTime
+                    .plus(RadarConverter.getDuration(timeWindow));
             timeFrames.add(new TimeFrame(intervalStartDateTime, intervalEndTime));
             intervalStartDateTime = intervalEndTime;
         }

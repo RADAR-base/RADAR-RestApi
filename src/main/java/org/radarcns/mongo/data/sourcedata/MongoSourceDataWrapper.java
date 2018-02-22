@@ -271,22 +271,22 @@ public abstract class MongoSourceDataWrapper {
         return RadarConverter.getSecond(timeWindow) * getFrequency();
     }
 
+    /**
+     * Checks whether any record available in the collection for given time window.
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param sourceId of source
+     * @param start time
+     * @param end time
+     * @param collection to query
+     * @return 1 if any record available 0 otherwise
+     */
     public Integer doesExist(String projectName, String subjectId, String sourceId,
             Date start, Date end, MongoCollection<Document> collection) {
 
         MongoCursor<Document> cursor = MongoHelper
                 .doesExistsByProjectAndSubjectAndSourceInWindow(projectName, subjectId, sourceId,
                         start, end, collection);
-
-        if (!cursor.hasNext()) {
-            LOGGER.debug("Empty cursor");
-            cursor.close();
-            return 0;
-        }
-
-        if (cursor.hasNext()) {
-            return 1;
-        }
-        return 0;
+        return cursor.hasNext() ? 1 : 0;
     }
 }

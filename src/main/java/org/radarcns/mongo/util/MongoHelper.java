@@ -98,8 +98,8 @@ public class MongoHelper {
     public static MongoCursor<Document> doesExistsByProjectAndSubjectAndSourceInWindow(
             String projectName, String subjectId, String sourceId, Date start, Date end,
             MongoCollection<Document> collection) {
-        FindIterable<Document> result = collection.find
-                (getQueryWithProjectAndSubjectAndSourceWithTimeWindow(projectName, subjectId,
+        FindIterable<Document> result = collection
+                .find(getQueryWithProjectAndSubjectAndSourceWithTimeWindow(projectName, subjectId,
                         sourceId, start, end)).limit(1);
         return result.iterator();
     }

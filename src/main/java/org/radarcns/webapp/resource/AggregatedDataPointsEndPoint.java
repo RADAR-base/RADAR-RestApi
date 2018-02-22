@@ -54,7 +54,7 @@ public class AggregatedDataPointsEndPoint {
     //--------------------------------------------------------------------------------------------//
 
     /**
-     * JSON function that returns aggregated volumes of source-data requested
+     * JSON function that returns aggregated volumes of source-data requested.
      */
     @POST
     @Produces({APPLICATION_JSON, AVRO_BINARY})
