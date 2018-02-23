@@ -1,6 +1,7 @@
 package org.radarcns.domain.restapi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.List;
 
 public class Subject {
@@ -21,7 +22,7 @@ public class Subject {
     private List<Source> sources;
 
     @JsonProperty
-    private String lastSeen;
+    private Instant lastSeen;
 
     public Subject subjectId(String subjectId) {
         this.subjectId = subjectId;
@@ -79,12 +80,12 @@ public class Subject {
     }
 
 
-    public Subject lastSeen(String lastSeen) {
+    public Subject lastSeen(Instant lastSeen) {
         this.lastSeen = lastSeen;
         return this;
     }
 
-    public String getLastSeen() {
+    public Instant getLastSeen() {
         return lastSeen;
     }
 

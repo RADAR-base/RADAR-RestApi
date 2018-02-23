@@ -16,12 +16,10 @@
 
 package org.radarcns.integration.util;
 
-import static org.radarcns.mock.model.ExpectedValue.DURATION;
-
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.radarcns.domain.restapi.TimeWindow;
@@ -30,8 +28,8 @@ import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
 import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
@@ -81,38 +79,25 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             String sourceId, String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeWindow) {
         return new Header(projectName, subjectId, sourceId, sourceType, sensorType, statistic,
-                null, timeWindow,
-                getEffectiveTimeFrame(expectedValue));
+                null, timeWindow, null,
+                getEffectiveTimeFrame(expectedValue, timeWindow));
     }
 
     /**
      * Get the effective interval for a value.
      *
-     * @return {@code EffectiveTimeFrame} for the simulated inteval.
-     * @see EffectiveTimeFrame
+     * @return {@code TimeFrame} for the simulated inteval.
+     * @see TimeFrame
      */
-    public EffectiveTimeFrame getEffectiveTimeFrame(ExpectedValue<?> expectedValue) {
+    public TimeFrame getEffectiveTimeFrame(ExpectedValue<?> expectedValue, TimeWindow
+            timeWindow) {
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
 
-        return new EffectiveTimeFrame(
-                RadarConverter.getISO8601(new Date(windows.get(0))),
-                RadarConverter.getISO8601(new Date(windows.get(windows.size() - 1)
-                        + DURATION)));
-    }
-
-
-    /**
-     * Get the effective time frame for a single time stamp.
-     *
-     * @param value timestamp.
-     * @return {@code EffectiveTimeFrame} starting on value and ending {@link
-     * ExpectedValue#DURATION} milliseconds after.
-     * @see EffectiveTimeFrame
-     */
-    public EffectiveTimeFrame getEffectiveTimeFrame(Long value) {
-        return new EffectiveTimeFrame(RadarConverter.getISO8601(new Date(value)),
-                RadarConverter.getISO8601(new Date(value + DURATION)));
+        return new TimeFrame(
+                Instant.ofEpochMilli(windows.get(0)),
+                Instant.ofEpochMilli(windows.get(windows.size() - 1))
+                        .plus(RadarConverter.getDuration(timeWindow)));
     }
 
 
@@ -158,7 +143,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             DoubleArrayCollector dac = (DoubleArrayCollector) expectedValue.getSeries().get(key);
 
             switch (sensor) {
-                case "ACCELEROMETER":
+                case "EMPATICA_E4_v1_ACCELEROMETER":
                     Object content;
 
                     if (statistic.name().equals(DescriptiveStatistic.QUARTILES.name())) {
@@ -171,7 +156,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
                         content = new Acceleration(statValues.get(0), statValues.get(1),
                                 statValues.get(2));
                     }
-                    items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
+                    items.add(new DataItem(content, Instant.ofEpochMilli(key)));
                     break;
                 default:
                     throw new IllegalArgumentException(sensor + " is not a supported test case");
@@ -208,7 +193,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
 
             Object content = getContent(getStatValue(statistic, dac), statistic);
 
-            items.add(new DataItem(content, getEffectiveTimeFrame(key).getStartDateTime()));
+            items.add(new DataItem(content, Instant.ofEpochMilli(key)));
         }
 
         return items;

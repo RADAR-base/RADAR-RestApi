@@ -1,12 +1,13 @@
 package org.radarcns.domain.restapi.header;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 import org.radarcns.domain.restapi.TimeWindow;
 
 public class Header {
 
     /**
-     * Source identifier.
+     * Subject identifier.
      */
     @JsonProperty
     public String subjectId;
@@ -16,18 +17,18 @@ public class Header {
     @JsonProperty
     public String sourceId;
     /**
-     * Source identifier.
+     * Project identifier.
      */
     @JsonProperty
     public String projectId;
     /**
-     * Source information, it can be a device or assessment name.
+     * SourceType information.
      */
     @JsonProperty
     public String sourceType;
 
     /**
-     * Report the sensor name or specific type of assessment.
+     * Report the source data name or specific type of assessment.
      */
     @JsonProperty
     public String sourceDataType;
@@ -51,7 +52,13 @@ public class Header {
      * Timestamps of the first and the last samples contained in the dataset.
      */
     @JsonProperty
-    public EffectiveTimeFrame effectiveTimeFrame;
+    public TimeFrame effectiveTimeFrame;
+
+    /**
+     * Timestamps of the request if provided.
+     */
+    @JsonProperty
+    public TimeFrame timeFrame;
 
     public Header() {
     }
@@ -61,17 +68,19 @@ public class Header {
      *
      * @param subjectId Subject identifier.
      * @param sourceId Source identifier.
-     * @param sourceType Source information, it can be a device or assessment name.
-     * @param sourceDataType Source information, it can be a device or assessment name.
+     * @param sourceType Sourcetype information, it can be a device or assessment name.
+     * @param sourceDataType Source data information, it can be a device or assessment name.
      * @param descriptiveStatistic Statical value expressed by samples.
      * @param unit Unit used by the sourceType.
      * @param timeWindow Time interval between two consecutive samples.
+     * @param timeFrame Timestamps of request.
      * @param effectiveTimeFrame Timestamps of the first and the last samples in the data-set.
      */
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public Header(String projectId, String subjectId, String sourceId, String sourceType, String
             sourceDataType,
             DescriptiveStatistic descriptiveStatistic, String unit, TimeWindow timeWindow,
-            EffectiveTimeFrame effectiveTimeFrame) {
+            TimeFrame timeFrame, TimeFrame effectiveTimeFrame) {
         this.projectId = projectId;
         this.subjectId = subjectId;
         this.sourceId = sourceId;
@@ -80,6 +89,7 @@ public class Header {
         this.descriptiveStatistic = descriptiveStatistic;
         this.unit = unit;
         this.timeWindow = timeWindow;
+        this.timeFrame = timeFrame;
         this.effectiveTimeFrame = effectiveTimeFrame;
     }
 
@@ -148,14 +158,49 @@ public class Header {
         this.timeWindow = timeWindow;
     }
 
-    public EffectiveTimeFrame getEffectiveTimeFrame() {
+    public TimeFrame getEffectiveTimeFrame() {
         return effectiveTimeFrame;
     }
 
     public void setEffectiveTimeFrame(
-            EffectiveTimeFrame effectiveTimeFrame) {
+            TimeFrame effectiveTimeFrame) {
         this.effectiveTimeFrame = effectiveTimeFrame;
     }
 
+    public TimeFrame getTimeFrame() {
+        return timeFrame;
+    }
 
+    public void setTimeFrame(TimeFrame timeFrame) {
+        this.timeFrame = timeFrame;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Header effectiveTimeFrame = (Header) o;
+
+        return Objects.equals(subjectId, effectiveTimeFrame.subjectId)
+                && Objects.equals(projectId, effectiveTimeFrame.projectId)
+                && Objects.equals(sourceId, effectiveTimeFrame.sourceId)
+                && Objects.equals(sourceType, effectiveTimeFrame.sourceType)
+                && Objects.equals(sourceDataType, effectiveTimeFrame.sourceDataType)
+                && Objects.equals(descriptiveStatistic, effectiveTimeFrame.descriptiveStatistic)
+                && Objects.equals(unit, effectiveTimeFrame.unit)
+                && Objects.equals(timeWindow, effectiveTimeFrame.timeWindow)
+                && Objects.equals(timeFrame, effectiveTimeFrame.timeFrame)
+                && Objects.equals(effectiveTimeFrame, effectiveTimeFrame.effectiveTimeFrame);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(subjectId, projectId, sourceId, sourceType, sourceDataType,
+                descriptiveStatistic, unit, timeWindow, timeFrame, effectiveTimeFrame);
+    }
 }

@@ -21,10 +21,10 @@ import static org.radarcns.mongo.util.MongoHelper.COUNT;
 
 import java.util.List;
 import org.bson.Document;
+import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
-import org.radarcns.management.service.dto.SourceDataDTO;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -55,8 +55,7 @@ public class DoubleFormat extends MongoSourceDataWrapper {
                         quartiles.get(2));
             case RECEIVED_MESSAGES:
                 return RadarConverter.roundDouble(
-                        doc.getDouble(field) / getExpectedRecordCount(header.getTimeWindow()),
-                        2);
+                        doc.getDouble(field) / getExpectedRecordCount(header.getTimeWindow()), 2);
             default:
                 return doc.getDouble(field);
         }

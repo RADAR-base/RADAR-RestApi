@@ -21,11 +21,11 @@ package org.radarcns.webapp.resource;
  */
 public interface Parameter {
 
-    String END = "end";
+    String END = "endTime";
     String TIME_WINDOW = "timeWindow";
     String SOURCE_DATA_NAME = "sourceDataName";
     String SOURCE_ID = "sourceId";
-    String START = "start";
+    String START = "startTime";
     String STAT = "stat";
     String PROJECT_NAME = "projectName";
     String SUBJECT_ID = "subjectId";

@@ -42,8 +42,8 @@ import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
- * Subject web-app. Function set to access subject information. A subject is a person enrolled for
- * in a study.
+ * Subject web-app. Function set to access subject information. A subject is a person enrolled
+ * for in a study.
  */
 @Authenticated
 @Path("/" + PROJECTS)
@@ -58,13 +58,8 @@ public class SubjectEndPoint {
     @GET
     @Produces(APPLICATION_JSON)
     @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS)
-    @Operation(summary = "Return a list of subjects contained within a study",
-            description = "Each subject can have multiple sourceID associated with him")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
-    @ApiResponse(responseCode = "404", description =
-            "No value for the given parameters, in the body"
-                    + "there is a message.avsc object with more details")
+    @Operation(summary = "Return a list of subjects contained within a study")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Return a list of subjects objects")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
@@ -85,14 +80,10 @@ public class SubjectEndPoint {
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
     @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS + "/{" + SUBJECT_ID + "}")
-    @Operation(summary = "Return the information related to given subject identifier",
-            description = "Some information are not implemented yet. The returned values are "
-                    + "hardcoded.")
-    @ApiResponse(responseCode = "500", description = "An error occurs while executing, in the body"
-            + "there is a message.avsc object with more details")
+    @Operation(summary = "Return the information related to given subject identifier")
+    @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description =
-            "Return the subject.avsc object associated with the "
-                    + "given subject identifier")
+            "Return the subject object associated with the subject identifier")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")

@@ -1,16 +1,15 @@
 package org.radarcns.domain.restapi.dataset;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.Objects;
 
 public class DataItem {
-
-
     @JsonProperty
     private Object sample;
 
     @JsonProperty
-    private String startDateTime;
+    private Instant startDateTime;
 
 
     /**
@@ -26,7 +25,7 @@ public class DataItem {
      * @param sample Sample value.
      * @param startDateTime Point in time (ISO8601) with UTC timezone of first sample in data-set.
      */
-    public DataItem(java.lang.Object sample, java.lang.String startDateTime) {
+    public DataItem(java.lang.Object sample, Instant startDateTime) {
         this.sample = sample;
         this.startDateTime = startDateTime;
     }
@@ -39,11 +38,11 @@ public class DataItem {
         this.sample = sample;
     }
 
-    public String getStartDateTime() {
+    public Instant getStartDateTime() {
         return startDateTime;
     }
 
-    public void setStartDateTime(String startDateTime) {
+    public void setStartDateTime(Instant startDateTime) {
         this.startDateTime = startDateTime;
     }
 
@@ -55,10 +54,10 @@ public class DataItem {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        DataItem sourceType = (DataItem) o;
+        DataItem dataItem = (DataItem) o;
 
-        return Objects.equals(sample, sourceType.sample)
-                && Objects.equals(startDateTime, sourceType.startDateTime);
+        return Objects.equals(sample, dataItem.sample)
+                && Objects.equals(startDateTime, dataItem.startDateTime);
     }
 
     @Override

@@ -17,15 +17,18 @@
 package org.radarcns.service;
 
 import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
+import static org.radarcns.mongo.util.MongoHelper.END;
+import static org.radarcns.mongo.util.MongoHelper.KEY;
+import static org.radarcns.mongo.util.MongoHelper.START;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
+import java.time.Instant;
 import javax.inject.Inject;
 import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
-import org.radarcns.domain.restapi.header.EffectiveTimeFrame;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +38,6 @@ import org.slf4j.LoggerFactory;
 public class SourceMonitorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceMonitorService.class);
-    private static final String TIME_START = "timeStart";
-    private static final String TIME_END = "timeEnd";
 
     private final MongoClient mongoClient;
 
@@ -57,32 +58,42 @@ public class SourceMonitorService {
      * @param subjectId of the subject
      * @param sourceId of the source
      * @param sourceType of the source
-     * @return calculated {@link EffectiveTimeFrame} with earliest and latest timestamps
+     * @return calculated {@link TimeFrame} with earliest and latest timestamps
      */
-    public EffectiveTimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
+    public TimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
             String sourceId, SourceTypeDTO sourceType) {
 
         // get the last document sorted by timeEnd
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentByProjectAndSubjectAndSource(projectId, subjectId, sourceId,
-                        TIME_END, DESCENDING, 1, MongoHelper.getCollection(this.mongoClient,
+                        KEY + "." + END, DESCENDING, 1,
+                        MongoHelper.getCollection(this
+                                        .mongoClient,
                                 sourceType.getSourceStatisticsMonitorTopic()));
 
         if (!cursor.hasNext()) {
             LOGGER.debug("Empty cursor for collection {}",
                     sourceType.getSourceStatisticsMonitorTopic());
         }
-        long timeStart = Long.MIN_VALUE;
-        long timeEnd = Long.MAX_VALUE;
+
+        Instant timeStart = null;
+        Instant timeEnd = null;
         if (cursor.hasNext()) {
             Document document = cursor.next();
-            timeStart = Math.max(timeStart, document.getDate(TIME_START).getTime());
-            timeEnd = Math.min(timeEnd, document.getDate(TIME_END).getTime());
+            Document key = (Document) document.get(KEY);
+            Instant localStart = key.getDate(START).toInstant();
+            Instant localEnd = key.getDate(END).toInstant();
+
+            if (timeStart == null || localStart.isBefore(timeStart)) {
+                timeStart = localStart;
+            }
+            if (timeEnd == null || localEnd.isAfter(timeEnd)) {
+                timeEnd = localEnd;
+            }
         }
 
         cursor.close();
-        return new EffectiveTimeFrame(RadarConverter.getISO8601(timeStart), RadarConverter
-                .getISO8601(timeEnd));
+        return new TimeFrame(timeStart, timeEnd);
 
     }
 }

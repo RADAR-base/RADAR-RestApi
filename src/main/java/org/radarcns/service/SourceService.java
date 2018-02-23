@@ -7,9 +7,10 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.domain.managementportal.MinimalSourceDetailsDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.management.service.dto.MinimalSourceDetailsDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +41,7 @@ public class SourceService {
 
     /**
      * Builds list of {@link org.radarcns.domain.restapi.Source} of given subject under project
-     * using provided source. It calculates the
-     * {@link org.radarcns.domain.restapi.header.EffectiveTimeFrame} of each sources as well.
+     * using provided source. It calculates the {@link TimeFrame} of each sources as well.
      *
      * @param projectId of subject
      * @param subjectId of subject
@@ -56,7 +56,7 @@ public class SourceService {
 
     /**
      * Build a {@link org.radarcns.domain.restapi.Source} using provided parameters and by
-     * calculating EffectiveTimeFrame of the source.
+     * calculating TimeFrame of the source.
      *
      * @param projectId of subject
      * @param subjectId of subject
@@ -73,10 +73,9 @@ public class SourceService {
                     .getSourceTypeCatalogVersion());
         } catch (NotFoundException | IOException e) {
             LOGGER.error(
-                    "Cannot retrieve sourceType-type for given sourceType " + source.getSourceId());
+                    "Cannot retrieve sourceType for given sourceType " + source.getSourceId());
             throw new IllegalStateException(
-                    "Cannot retrive sourceType-type for given sourceType " + source
-                            .getSourceId());
+                    "Cannot retrieve sourceType for given sourceType " + source.getSourceId());
         }
 
         return new org.radarcns.domain.restapi.Source()
@@ -88,8 +87,7 @@ public class SourceService {
                 .sourceTypeModel(source.getSourceTypeModel())
                 .effectiveTimeFrame(this.sourceMonitorService
                         .getEffectiveTimeFrame(projectId, subjectId,
-                                source.getSourceId().toString(),
-                                sourceType));
+                                source.getSourceId().toString(), sourceType));
     }
 
     /**
