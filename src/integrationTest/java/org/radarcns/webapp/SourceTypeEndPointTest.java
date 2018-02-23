@@ -5,6 +5,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.radarcns.webapp.SampleDataHandler.CATALOGUE_VERSION;
+import static org.radarcns.webapp.SampleDataHandler.MODEL;
+import static org.radarcns.webapp.SampleDataHandler.PRODUCER;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
@@ -21,9 +24,7 @@ import org.radarcns.webapp.resource.BasePath;
 
 public class SourceTypeEndPointTest {
 
-    private static final String PRODUCER = "Empatica";
-    private static final String MODEL = "E4";
-    private static final String CATALOGUE_VERSION = "v1";
+
 
     @Rule
     public final ApiClient apiClient = new ApiClient(

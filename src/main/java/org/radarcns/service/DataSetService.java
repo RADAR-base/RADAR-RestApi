@@ -19,15 +19,22 @@ package org.radarcns.service;
 import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.managementportal.SourceDataDTO;
+import org.radarcns.domain.restapi.AggregateDataSource;
 import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.dataset.AggregatedDataItem;
+import org.radarcns.domain.restapi.dataset.AggregatedDataPoints;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
@@ -80,6 +87,43 @@ public class DataSetService {
     }
 
     /**
+     * Returns an empty {@link Dataset} using given parameters.
+     *
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param sourceId of source
+     * @param sensor sourceDataName
+     * @param stat statistic
+     * @param interval timeWindow
+     * @param timeFrame start to end
+     * @return an instance of Dataset.
+     */
+    public static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
+            String sensor, DescriptiveStatistic stat, TimeWindow interval, TimeFrame timeFrame) {
+
+        return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
+                null, interval, timeFrame, null),
+                Collections.emptyList());
+    }
+
+    /**
+     * Returns an empty {@link AggregatedDataPoints} using given parameters.
+     *
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param interval timeWindow
+     * @param timeFrame startToEnd
+     * @param sources requested
+     * @return an instance of AggregatedDataPoints
+     */
+    public static AggregatedDataPoints emptyAggregatedData(String projectName, String subjectId,
+            TimeWindow interval, TimeFrame timeFrame, List<AggregateDataSource> sources) {
+
+        return new AggregatedDataPoints(projectName, subjectId, 0, timeFrame, interval, sources,
+                Collections.emptyList());
+    }
+
+    /**
      * Returns a {@code Dataset} containing the last seen value for the subject in source.
      *
      * @param projectName is of the subject
@@ -108,8 +152,7 @@ public class DataSetService {
     }
 
     /**
-     * Returns a {@code Dataset} containing alla available values for the couple subject
-     * sourceType.
+     * Returns a {@code Dataset} containing all available values for the couple subject sourceType.
      *
      * @param projectName of the subject
      * @param subjectId of the subject
@@ -134,7 +177,7 @@ public class DataSetService {
     }
 
     /**
-     * Returns a {@link Dataset} containing alla available values for the couple subject surce.
+     * Returns a {@link Dataset} containing all available values for the couple subject surce.
      *
      * @param projectName of the subject
      * @param subjectId of the subject
@@ -168,7 +211,6 @@ public class DataSetService {
                         sensorDao.getCollectionName(timeWindow)));
     }
 
-
     private Header getHeader(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow,
             TimeFrame timeFrame)
@@ -196,5 +238,57 @@ public class DataSetService {
             String sourceType, TimeFrame timeFrame) {
         return new Header(project, subject, source, sourceType, sourceData.getSourceDataType(),
                 stat, sourceData.getUnit(), timeWindow, timeFrame, null);
+    }
+
+    /**
+     * Returns calculated {@link AggregatedDataPoints} using given parameters.
+     *
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param sources requested
+     * @param timeWindow interval
+     * @param start time
+     * @param end time
+     * @return calculated data.
+     */
+    public AggregatedDataPoints getAggregatedData(String projectName, String subjectId,
+            List<AggregateDataSource> sources, TimeWindow timeWindow, Instant start, Instant end) {
+        List<AggregatedDataItem> dataItems = calculateIntervals(start, end, timeWindow).stream()
+                .map(p -> computeAggregatedDataItem(projectName, subjectId, sources, p, timeWindow))
+                .collect(Collectors.toList());
+
+        return new AggregatedDataPoints(projectName, subjectId,
+                dataItems.stream().map(AggregatedDataItem::getCount).reduce(Integer::max).get(),
+                new TimeFrame(start, end), timeWindow, sources, dataItems);
+    }
+
+    private AggregatedDataItem computeAggregatedDataItem(String projectName, String subjectId,
+            List<AggregateDataSource> aggregateDataSources, TimeFrame timeFrame,
+            TimeWindow timeWindow) {
+        Integer count = 0;
+        for (AggregateDataSource aggregate : aggregateDataSources) {
+            for (String sourceDataName : aggregate.getSourceDataName()) {
+                MongoSourceDataWrapper sourceDataWrapper = mongoSensorMap.get(sourceDataName);
+                count += sourceDataWrapper.doesExist(projectName, subjectId, aggregate
+                                .getSourceId(), Date.from(timeFrame.getStartDateTime()),
+                        Date.from(timeFrame.getEndDateTime()),
+                        MongoHelper.getCollection(mongoClient,
+                                sourceDataWrapper.getCollectionName(timeWindow)));
+            }
+        }
+        return new AggregatedDataItem(count, timeFrame);
+    }
+
+    private List<TimeFrame> calculateIntervals(Instant start, Instant end, TimeWindow timeWindow) {
+        Instant intervalStartDateTime = start;
+        List<TimeFrame> timeFrames = new ArrayList<>();
+        while (intervalStartDateTime.plus(RadarConverter.getDuration(timeWindow)).isBefore(end)
+                || intervalStartDateTime.plus(RadarConverter.getDuration(timeWindow)).equals(end)) {
+            Instant intervalEndTime = intervalStartDateTime
+                    .plus(RadarConverter.getDuration(timeWindow));
+            timeFrames.add(new TimeFrame(intervalStartDateTime, intervalEndTime));
+            intervalStartDateTime = intervalEndTime;
+        }
+        return timeFrames;
     }
 }

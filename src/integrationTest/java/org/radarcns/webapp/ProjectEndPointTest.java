@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.radarcns.webapp.SampleDataHandler.PROJECT;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
@@ -20,8 +21,6 @@ import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.resource.BasePath;
 
 public class ProjectEndPointTest {
-
-    private static final String PROJECT_NAME = "radar";
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
@@ -43,12 +42,12 @@ public class ProjectEndPointTest {
     public void getProjectByProjectNameStatusTest200() throws IOException {
 
         Response actual = apiClient
-                .request(BasePath.PROJECTS + "/" + PROJECT_NAME, APPLICATION_JSON,
+                .request(BasePath.PROJECTS + "/" + PROJECT, APPLICATION_JSON,
                         Status.OK);
         assertTrue(actual.isSuccessful());
         ObjectReader reader = RadarConverter.readerFor(ProjectDTO.class);
         ProjectDTO project = reader.readValue(actual.body().byteStream());
-        assertEquals(PROJECT_NAME, project.getProjectName());
+        assertEquals(PROJECT, project.getProjectName());
 
     }
 

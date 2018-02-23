@@ -162,10 +162,10 @@ public class ManagementPortalClient {
         try (Response response = this.client.newCall(getAllSubjectsRequest).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
-                throw new IOException("Failed to retrieve all SubjectDTOs: " + responseBody);
+                throw new IOException("Failed to retrieve all Subjects: " + responseBody);
             }
             List<SubjectDTO> allSubjects = SUBJECT_LIST_READER.readValue(responseBody);
-            logger.info("Retrieved SubjectDTOs from MP.");
+            logger.info("Retrieved Subjects from MP.");
             return allSubjects;
         }
     }
@@ -184,7 +184,7 @@ public class ManagementPortalClient {
         try {
             return subjects.get(subjectLogin);
         } catch (NoSuchElementException ex) {
-            throw new NotFoundException("SubjectDTO " + subjectLogin + " not found.");
+            throw new NotFoundException("Subject " + subjectLogin + " not found.");
         }
     }
 
@@ -201,7 +201,7 @@ public class ManagementPortalClient {
         SubjectDTO subject = getSubject(subjectLogin);
         if (!projectName.equals(subject.getProject().getProjectName())) {
             throw new NotFoundException(
-                    "SubjectDTO " + subjectLogin + " is not part of project " + projectName
+                    "Subject " + subjectLogin + " is not part of project " + projectName
                             + ".");
         }
     }
@@ -255,10 +255,10 @@ public class ManagementPortalClient {
         try (Response response = this.client.newCall(getAllProjects).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
-                throw new IOException("Failed to retrieve all SubjectDTOs: " + responseBody);
+                throw new IOException("Failed to retrieve all Subjects: " + responseBody);
             }
             List<ProjectDTO> allProjects = PROJECT_LIST_READER.readValue(responseBody);
-            logger.info("Retrieved ProjectDTOs from MP");
+            logger.info("Retrieved Projects from MP");
             return allProjects;
         }
     }
@@ -276,7 +276,7 @@ public class ManagementPortalClient {
         try {
             return projects.get(projectName);
         } catch (NoSuchElementException ex) {
-            throw new NotFoundException("ProjectDTO " + projectName + " not found");
+            throw new NotFoundException("Project " + projectName + " not found");
         }
     }
 
@@ -294,10 +294,10 @@ public class ManagementPortalClient {
         try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
-                throw new IOException("Failed to retrieve all sourceType-types: " + responseBody);
+                throw new IOException("Failed to retrieve all source-types: " + responseBody);
             }
             List<SourceTypeDTO> allSourceTypes = SOURCE_TYPE_LIST_READER.readValue(responseBody);
-            logger.info("Retrieved SourceDTOTypes from MP");
+            logger.info("Retrieved SourceTypes from MP");
             return allSourceTypes;
         }
     }
@@ -316,10 +316,10 @@ public class ManagementPortalClient {
         try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
             String responseBody = RestClient.responseBody(response);
             if (!response.isSuccessful()) {
-                throw new IOException("Failed to retrieve all sourceType-data: " + responseBody);
+                throw new IOException("Failed to retrieve all source-data: " + responseBody);
             }
             List<SourceDataDTO> allSourceData = SOURCE_DATA_LIST_READER.readValue(responseBody);
-            logger.info("Retrieved SourceDTOTypes from MP");
+            logger.info("Retrieved SourceData from MP");
             return allSourceData;
         }
     }
@@ -349,7 +349,7 @@ public class ManagementPortalClient {
                 throw new IOException("Failed to retrieve all sources: " + responseBody);
             }
             List<SourceDTO> sources = SOURCE_LIST_READER.readValue(responseBody);
-            logger.info("Retrieved SourceDTOs from MP.");
+            logger.info("Retrieved Sources from MP.");
             return sources;
         }
     }
@@ -367,7 +367,7 @@ public class ManagementPortalClient {
         try {
             return sources.get(sourceId);
         } catch (NoSuchElementException ex) {
-            throw new NotFoundException("SourceDTO " + sourceId + " not found.");
+            throw new NotFoundException("Source " + sourceId + " not found.");
         }
     }
 

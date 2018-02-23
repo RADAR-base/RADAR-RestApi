@@ -22,6 +22,7 @@ package org.radarcns.webapp.resource;
 public interface BasePath {
 
     String DATA = "data";
+    String AGGREGATED_DATA_POINTS = "aggregated-data-points";
     String LATEST = "latest";
     String APPLICATION_STATUS = "application-status";
     String PROJECTS = "projects";
