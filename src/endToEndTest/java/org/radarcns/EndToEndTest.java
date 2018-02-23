@@ -57,6 +57,7 @@ import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
+import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.integration.util.Utility;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.MockDataConfig;
@@ -66,7 +67,6 @@ import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mock.model.MockAggregator;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.RadarConverter;
-import org.radarcns.wiremock.ManagementPortalWireMock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +76,7 @@ public class EndToEndTest {
 
     private static final String PROJECT_NAME_MOCK = "radar";
     private static final String USER_ID_MOCK = "sub-1";
-    private static final String SOURCE_ID_MOCK = "SourceID_0";
+    private static final String SOURCE_ID_MOCK = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
 
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
@@ -112,15 +112,8 @@ public class EndToEndTest {
     private static PipelineConfig pipelineConfig;
 
     @Rule
-    public ManagementPortalWireMock wireMock = new ManagementPortalWireMock();
-
-    @SuppressWarnings("ConstantConditions")
-    @Rule
-    public final ApiClient apiClient = new ApiClient(pipelineConfig.getRestApi());
-
-    @SuppressWarnings("ConstantConditions")
-    @Rule
-    public final ApiClient frontendClient = new ApiClient(pipelineConfig.getFrontend());
+    public final ApiClient apiClient = new ApiClient(
+            RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
     /**
      * Test initialisation. It loads the config file and waits that the infrastructure is ready to
@@ -316,7 +309,7 @@ public class EndToEndTest {
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory.getDataset(
                     expectedValue.get(config), PROJECT_NAME_MOCK, USER_ID_MOCK, SOURCE_ID_MOCK,
-                    "EMPATICA",
+                    "Empatica_E4_v1",
                     getSensorType(config), stat, TIME_WINDOW));
         }
 
