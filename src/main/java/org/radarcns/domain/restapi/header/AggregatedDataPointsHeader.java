@@ -1,12 +1,11 @@
-package org.radarcns.domain.restapi;
+package org.radarcns.domain.restapi.header;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import org.radarcns.domain.restapi.format.AggregatedDataItem;
-import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.domain.restapi.header.TimeFrame;
+import org.radarcns.domain.restapi.AggregateDataSource;
+import org.radarcns.domain.restapi.TimeWindow;
 
-public class AggregatedDataPoints {
+public class AggregatedDataPointsHeader {
 
     @JsonProperty
     private String projectName;
@@ -29,34 +28,29 @@ public class AggregatedDataPoints {
     @JsonProperty
     private List<AggregateDataSource> sources;
 
-    @JsonProperty
-    private List<AggregatedDataItem> aggregatedDataItemList;
-
-    public AggregatedDataPoints() {
-
+    public AggregatedDataPointsHeader() {
     }
-
 
     /**
      * Constructor.
+     *
      * @param projectName of project
      * @param subjectId of subject
      * @param maximumCount of records
      * @param timeFrame start to end
      * @param timeWindow interval window
      * @param sources to request availability
-     * @param aggregatedDataPoints computed data.
      */
-    public AggregatedDataPoints(String projectName, String subjectId, Integer maximumCount,
-            TimeFrame timeFrame, TimeWindow timeWindow, List<AggregateDataSource> sources,
-            List<AggregatedDataItem>
-                    aggregatedDataPoints) {
+    public AggregatedDataPointsHeader(String projectName, String subjectId,
+            Integer maximumCount, TimeFrame timeFrame,
+            TimeWindow timeWindow, DescriptiveStatistic statistic,
+            List<AggregateDataSource> sources) {
         this.projectName = projectName;
         this.subjectId = subjectId;
         this.maximumCount = maximumCount;
         this.timeFrame = timeFrame;
-        this.aggregatedDataItemList = aggregatedDataPoints;
         this.timeWindow = timeWindow;
+        this.statistic = statistic;
         this.sources = sources;
     }
 
@@ -92,28 +86,20 @@ public class AggregatedDataPoints {
         this.timeFrame = timeFrame;
     }
 
-    public DescriptiveStatistic getStatistic() {
-        return statistic;
-    }
-
-    public void setStatistic(DescriptiveStatistic statistic) {
-        this.statistic = statistic;
-    }
-
-    public List<AggregatedDataItem> getAggregatedDataItemList() {
-        return aggregatedDataItemList;
-    }
-
-    public void setAggregatedDataItemList(List<AggregatedDataItem> aggregatedDataItemList) {
-        this.aggregatedDataItemList = aggregatedDataItemList;
-    }
-
     public TimeWindow getTimeWindow() {
         return timeWindow;
     }
 
     public void setTimeWindow(TimeWindow timeWindow) {
         this.timeWindow = timeWindow;
+    }
+
+    public DescriptiveStatistic getStatistic() {
+        return statistic;
+    }
+
+    public void setStatistic(DescriptiveStatistic statistic) {
+        this.statistic = statistic;
     }
 
     public List<AggregateDataSource> getSources() {

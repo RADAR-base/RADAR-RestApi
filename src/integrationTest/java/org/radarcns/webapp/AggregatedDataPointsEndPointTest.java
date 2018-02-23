@@ -36,9 +36,9 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.domain.restapi.AggregateDataSource;
-import org.radarcns.domain.restapi.AggregatedDataPoints;
 import org.radarcns.domain.restapi.TimeWindow;
-import org.radarcns.domain.restapi.format.AggregatedDataItem;
+import org.radarcns.domain.restapi.dataset.AggregatedDataItem;
+import org.radarcns.domain.restapi.dataset.AggregatedDataPoints;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
@@ -57,13 +57,14 @@ public class AggregatedDataPointsEndPointTest {
                     + AGGREGATED_DATA_POINTS + '/');
 
     @Test
-    public void getAllRecordsWithQuartilesInTimeRange() throws IOException {
+    public void getAllRecordsWithAggregatedDataPointsInTimeRange() throws IOException {
         MongoClient client = Utility.getMongoClient();
         Instant now = Instant.now();
         TimeWindow window = TEN_MIN;
 
         Instant start = now.plus(RadarConverter.getDuration(TEN_MIN));
         Instant end = start.plus(RadarConverter.getDuration(ONE_HOUR));
+        // injects 10 records for 10 min
         MongoCollection<Document> collection = MongoHelper
                 .getCollection(client, BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES);
         Map<String, Object> docs = RandomInput
@@ -73,6 +74,8 @@ public class AggregatedDataPointsEndPointTest {
 
         MongoCollection<Document> accelerationCollection = MongoHelper
                 .getCollection(client, ACCELERATION_COLLECTION_FOR_TEN_MINITES);
+
+        // injects 5 records for acceleration
 
         Map<String, Object> accDocs = RandomInput
                 .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
@@ -97,8 +100,8 @@ public class AggregatedDataPointsEndPointTest {
         ObjectReader reader = RadarConverter.readerFor(AggregatedDataPoints.class);
         AggregatedDataPoints dateset = reader.readValue(actual.body().byteStream());
         assertNotNull(dateset);
-        assertTrue(dateset.getAggregatedDataItemList().size() <= 6);
-        List<AggregatedDataItem> dataItems = dateset.getAggregatedDataItemList();
+        assertTrue(dateset.getDataset().size() <= 6);
+        List<AggregatedDataItem> dataItems = dateset.getDataset();
         assertEquals(Integer.valueOf(2), dataItems.get(0).getCount());
         assertEquals(Integer.valueOf(1), dataItems.get(4).getCount());
 

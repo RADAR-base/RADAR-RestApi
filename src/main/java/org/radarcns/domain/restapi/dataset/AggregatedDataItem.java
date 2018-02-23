@@ -1,4 +1,4 @@
-package org.radarcns.domain.restapi.format;
+package org.radarcns.domain.restapi.dataset;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.radarcns.domain.restapi.header.TimeFrame;

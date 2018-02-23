@@ -32,10 +32,10 @@ import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.restapi.AggregateDataSource;
-import org.radarcns.domain.restapi.AggregatedDataPoints;
 import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.dataset.AggregatedDataItem;
+import org.radarcns.domain.restapi.dataset.AggregatedDataPoints;
 import org.radarcns.domain.restapi.dataset.Dataset;
-import org.radarcns.domain.restapi.format.AggregatedDataItem;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
@@ -84,6 +84,43 @@ public class DataSetService {
         });
 
         LOGGER.info("DataSetService successfully loaded.");
+    }
+
+    /**
+     * Returns an empty {@link Dataset} using given parameters.
+     *
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param sourceId of source
+     * @param sensor sourceDataName
+     * @param stat statistic
+     * @param interval timeWindow
+     * @param timeFrame start to end
+     * @return an instance of Dataset.
+     */
+    public static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
+            String sensor, DescriptiveStatistic stat, TimeWindow interval, TimeFrame timeFrame) {
+
+        return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
+                null, interval, timeFrame, null),
+                Collections.emptyList());
+    }
+
+    /**
+     * Returns an empty {@link AggregatedDataPoints} using given parameters.
+     *
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param interval timeWindow
+     * @param timeFrame startToEnd
+     * @param sources requested
+     * @return an instance of AggregatedDataPoints
+     */
+    public static AggregatedDataPoints emptyAggregatedData(String projectName, String subjectId,
+            TimeWindow interval, TimeFrame timeFrame, List<AggregateDataSource> sources) {
+
+        return new AggregatedDataPoints(projectName, subjectId, 0, timeFrame, interval, sources,
+                Collections.emptyList());
     }
 
     /**
@@ -174,7 +211,6 @@ public class DataSetService {
                         sensorDao.getCollectionName(timeWindow)));
     }
 
-
     private Header getHeader(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow,
             TimeFrame timeFrame)
@@ -202,43 +238,6 @@ public class DataSetService {
             String sourceType, TimeFrame timeFrame) {
         return new Header(project, subject, source, sourceType, sourceData.getSourceDataType(),
                 stat, sourceData.getUnit(), timeWindow, timeFrame, null);
-    }
-
-    /**
-     * Returns an empty {@link Dataset} using given parameters.
-     *
-     * @param projectName of project
-     * @param subjectId of subject
-     * @param sourceId of source
-     * @param sensor sourceDataName
-     * @param stat statistic
-     * @param interval timeWindow
-     * @param timeFrame start to end
-     * @return an instance of Dataset.
-     */
-    public static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
-            String sensor, DescriptiveStatistic stat, TimeWindow interval, TimeFrame timeFrame) {
-
-        return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
-                null, interval, timeFrame, null),
-                Collections.emptyList());
-    }
-
-    /**
-     * Returns an empty {@link AggregatedDataPoints} using given parameters.
-     *
-     * @param projectName of project
-     * @param subjectId of subject
-     * @param interval timeWindow
-     * @param timeFrame startToEnd
-     * @param sources requested
-     * @return an instance of AggregatedDataPoints
-     */
-    public static AggregatedDataPoints emptyAggregatedData(String projectName, String subjectId,
-            TimeWindow interval, TimeFrame timeFrame, List<AggregateDataSource> sources) {
-
-        return new AggregatedDataPoints(projectName, subjectId, 0, timeFrame, interval, sources,
-                Collections.emptyList());
     }
 
     /**

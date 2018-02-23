@@ -57,32 +57,6 @@ public class MongoHelper {
     public static final int DESCENDING = -1;
 
     /**
-     * Enumerate all available statistical values. The string value represents the Document field
-     * that has to be used to compute the result.
-     */
-    public enum Stat {
-        avg("avg"),
-        count("count"),
-        iqr("iqr"),
-        max("max"),
-        median("quartile"),
-        min("min"),
-        quartile("quartile"),
-        receivedMessage("count"),
-        sum("sum");
-
-        private final String param;
-
-        Stat(String param) {
-            this.param = param;
-        }
-
-        public String getParam() {
-            return param;
-        }
-    }
-
-    /**
      * Finds whether document is available for given query parameters.
      * https://stackoverflow.com/a/8390458/822964 suggests find().limit(1).count(true) is the
      * optimal way to do it.
@@ -123,22 +97,17 @@ public class MongoHelper {
     public static MongoCursor<Document> findDocumentsByProjectAndSubjectAndSourceInWindow(
             String projectName, String subjectId, String sourceId, Date start, Date end,
             MongoCollection<Document> collection) {
-
-        FindIterable<Document> result = collection
-                .find(getQueryWithProjectAndSubjectAndSourceWithTimeWindow(projectName, subjectId,
-                        sourceId, start, end))
-                .sort(new BasicDBObject(START, ASCENDING));
-
-        return result.iterator();
-    }
-
-    private static Bson getQueryWithProjectAndSubjectAndSourceWithTimeWindow(String projectName,
-            String subjectId, String sourceId, Date start, Date end) {
-        return and(eq(KEY + "." + PROJECT_ID, projectName),
+        Bson query = and(eq(KEY + "." + PROJECT_ID, projectName),
                 eq(KEY + "." + USER_ID, subjectId),
                 eq(KEY + "." + SOURCE_ID, sourceId),
                 gte(KEY + "." + START, start),
                 lte(KEY + "." + END, end));
+
+        FindIterable<Document> result = collection
+                .find(query)
+                .sort(new BasicDBObject(START, ASCENDING));
+
+        return result.iterator();
     }
 
     /**
@@ -189,5 +158,31 @@ public class MongoHelper {
         MongoDatabase database = client.getDatabase(Properties.getApiConfig().getMongoDbName());
 
         return database.getCollection(collection);
+    }
+
+    /**
+     * Enumerate all available statistical values. The string value represents the Document field
+     * that has to be used to compute the result.
+     */
+    public enum Stat {
+        avg("avg"),
+        count("count"),
+        iqr("iqr"),
+        max("max"),
+        median("quartile"),
+        min("min"),
+        quartile("quartile"),
+        receivedMessage("count"),
+        sum("sum");
+
+        private final String param;
+
+        Stat(String param) {
+            this.param = param;
+        }
+
+        public String getParam() {
+            return param;
+        }
     }
 }

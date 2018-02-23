@@ -24,7 +24,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import org.radarcns.auth.NeedsPermissionOnSubject;
-import org.radarcns.domain.restapi.AggregatedDataPoints;
+import org.radarcns.domain.restapi.dataset.AggregatedDataPoints;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
@@ -86,7 +86,7 @@ public class AggregatedDataPointsEndPoint {
 
         AggregatedDataPoints dataSet = this.dataSetService.getAggregatedData(projectName, subjectId,
                 aggregateParam.getSources(), timeWindow, start.getValue(), end.getValue());
-        if (dataSet == null || dataSet.getAggregatedDataItemList().isEmpty()) {
+        if (dataSet == null || dataSet.getDataset().isEmpty()) {
             LOGGER.debug("No aggregated available for the subject {} with source", subjectId);
             return emptyAggregatedData(projectName, subjectId, interval,
                     new TimeFrame(start.getValue(), end.getValue()), aggregateParam.getSources());
