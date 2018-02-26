@@ -37,8 +37,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.domain.restapi.AggregateDataSource;
 import org.radarcns.domain.restapi.TimeWindow;
-import org.radarcns.domain.restapi.dataset.AggregatedDataItem;
 import org.radarcns.domain.restapi.dataset.AggregatedDataPoints;
+import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
@@ -62,8 +62,6 @@ public class AggregatedDataPointsEndPointTest {
         Instant now = Instant.now();
         TimeWindow window = TEN_MIN;
 
-        Instant start = now.plus(RadarConverter.getDuration(TEN_MIN));
-        Instant end = start.plus(RadarConverter.getDuration(ONE_HOUR));
         // injects 10 records for 10 min
         MongoCollection<Document> collection = MongoHelper
                 .getCollection(client, BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES);
@@ -86,11 +84,17 @@ public class AggregatedDataPointsEndPointTest {
 
         accelerationCollection.insertMany((List<Document>) accDocs.get(DOCUMENTS));
 
-        DataAggregateParam aggregateParam = new DataAggregateParam(Arrays.asList(
-                new AggregateDataSource(SOURCE,
-                        Arrays.asList(BATTERY_LEVEL_SOURCE_DATA_NAME,
-                                ACCELEROMETER_SOURCE_DATA_NAME))));
+        AggregateDataSource aggregateDataSource = new AggregateDataSource();
+        aggregateDataSource.setSourceId(SOURCE);
+        aggregateDataSource.setSourceDataNames(Arrays.asList(BATTERY_LEVEL_SOURCE_DATA_NAME,
+                ACCELEROMETER_SOURCE_DATA_NAME));
+        DataAggregateParam aggregateParam = new DataAggregateParam(
+                Arrays.asList(aggregateDataSource));
         ObjectWriter writer = RadarConverter.writerFor(DataAggregateParam.class);
+
+        Instant start = now.plus(RadarConverter.getDuration(TEN_MIN));
+        Instant end = start.plus(RadarConverter.getDuration(ONE_HOUR));
+
         String requestPath = PROJECT + '/' + SUBJECT + '?'
                 + Parameter.TIME_WINDOW + '=' + window + '&'
                 + Parameter.START + '=' + start + '&'
@@ -98,12 +102,12 @@ public class AggregatedDataPointsEndPointTest {
         Response actual = apiClient.postRequest(requestPath, APPLICATION_JSON, writer
                 .writeValueAsBytes(aggregateParam), Status.OK);
         ObjectReader reader = RadarConverter.readerFor(AggregatedDataPoints.class);
-        AggregatedDataPoints dateset = reader.readValue(actual.body().byteStream());
-        assertNotNull(dateset);
-        assertTrue(dateset.getDataset().size() <= 6);
-        List<AggregatedDataItem> dataItems = dateset.getDataset();
-        assertEquals(Integer.valueOf(2), dataItems.get(0).getCount());
-        assertEquals(Integer.valueOf(1), dataItems.get(4).getCount());
+        AggregatedDataPoints dataset = reader.readValue(actual.body().byteStream());
+        assertNotNull(dataset);
+        assertTrue(dataset.getDataset().size() <= 6);
+        List<DataItem> dataItems = dataset.getDataset();
+        assertEquals(Integer.valueOf(2), dataItems.get(0).getSample());
+        assertEquals(Integer.valueOf(1), dataItems.get(4).getSample());
 
         dropAndClose(client);
     }

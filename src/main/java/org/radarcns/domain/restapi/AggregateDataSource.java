@@ -1,7 +1,10 @@
 package org.radarcns.domain.restapi;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.radarcns.domain.restapi.format.SourceData;
 
 public class AggregateDataSource {
 
@@ -9,14 +12,14 @@ public class AggregateDataSource {
     private String sourceId;
 
     @JsonProperty
-    private List<String> sourceDataName;
+    private List<SourceData> sourceData;
 
     public AggregateDataSource() {
     }
 
-    public AggregateDataSource(String sourceId, List<String> sourceDataName) {
+    public AggregateDataSource(String sourceId, List<SourceData> sourceData) {
         this.sourceId = sourceId;
-        this.sourceDataName = sourceDataName;
+        this.sourceData = sourceData;
     }
 
     public String getSourceId() {
@@ -27,12 +30,17 @@ public class AggregateDataSource {
         this.sourceId = sourceId;
     }
 
-    public void setSourceDataName(List<String> sourceDataName) {
-        this.sourceDataName = sourceDataName;
+    @JsonIgnore
+    public void setSourceDataNames(List<String> sourceData) {
+        this.sourceData = sourceData.stream().map(SourceData::new).collect(Collectors.toList());
     }
 
-    public List<String> getSourceDataName() {
-        return sourceDataName;
+    public void setSourceData(List<SourceData> sourceData) {
+        this.sourceData = sourceData;
+    }
+
+    public List<SourceData> getSourceData() {
+        return sourceData;
     }
 
 }

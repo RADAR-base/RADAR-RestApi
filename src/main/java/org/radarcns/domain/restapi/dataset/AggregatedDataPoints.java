@@ -11,12 +11,11 @@ import org.radarcns.domain.restapi.header.TimeFrame;
 
 public class AggregatedDataPoints {
 
-
-    @JsonProperty
-    private List<AggregatedDataItem> dataset;
-
     @JsonProperty
     private AggregatedDataPointsHeader header;
+
+    @JsonProperty
+    private List<DataItem> dataset;
 
     public AggregatedDataPoints() {
 
@@ -35,7 +34,7 @@ public class AggregatedDataPoints {
      */
     public AggregatedDataPoints(String projectName, String subjectId, Integer maximumCount,
             TimeFrame timeFrame, TimeWindow timeWindow, List<AggregateDataSource> sources,
-            List<AggregatedDataItem>
+            List<DataItem>
                     dataset) {
 
         this.dataset = dataset;
@@ -44,11 +43,11 @@ public class AggregatedDataPoints {
 
     }
 
-    public List<AggregatedDataItem> getDataset() {
+    public List<DataItem> getDataset() {
         return dataset;
     }
 
-    public void setDataset(List<AggregatedDataItem> dataset) {
+    public void setDataset(List<DataItem> dataset) {
         this.dataset = dataset;
     }
 
