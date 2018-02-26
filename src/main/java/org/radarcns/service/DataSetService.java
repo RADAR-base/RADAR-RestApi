@@ -302,7 +302,7 @@ public class DataSetService {
         List<TimeFrame> timeFrames = new ArrayList<>();
         TemporalAmount window = RadarConverter.getDuration(timeWindow);
         TimeFrame timeFrame = new TimeFrame(start, start.plus(window));
-        while (!timeFrame.getEndDateTime().isAfter(end)) {
+        while (!timeFrame.getEndDateTime().isAfter(end) && timeFrames.size() < 1000) {
             timeFrames.add(timeFrame);
             timeFrame = new TimeFrame(timeFrame.getEndDateTime(),
                     timeFrame.getEndDateTime().plus(window));
