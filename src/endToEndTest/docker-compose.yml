@@ -228,6 +228,8 @@ services:
         CONNECT_CONSUMER_MAX_POLL_INTERVAL_MS: 300000
         CONNECT_CONSUMER_SESSION_TIMEOUT_MS: 10000
         CONNECT_CONSUMER_HEARTBEAT_INTERVAL_MS: 3000
+        CONNECT_LOG4J_LOGGERS: "org.reflections=ERROR"
+        CONNECT_PLUGIN_PATH: /usr/share/java/kafka-connect/plugins
         KAFKA_BROKERS: 3
         KAFKA_REST_PROXY: http://rest-proxy-1:8082
         TOPIC_LIST: ${RADAR_AGG_TOPIC_LIST}
