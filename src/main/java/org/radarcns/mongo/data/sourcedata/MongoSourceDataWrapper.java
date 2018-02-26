@@ -221,20 +221,20 @@ public abstract class MongoSourceDataWrapper {
             String topicName = sourceData.getTopic();
             switch (interval) {
                 case TEN_SECOND:
-                    return topicName.concat("_output");
+                    return topicName.concat("_10sec");
                 case ONE_MIN:
-                    return topicName.concat("_output_1min");
+                    return topicName.concat("_1min");
                 case TEN_MIN:
-                    return topicName.concat("_output_10min");
+                    return topicName.concat("_10min");
                 case ONE_HOUR:
-                    return topicName.concat("_output_1h");
+                    return topicName.concat("_1hour");
                 case ONE_DAY:
-                    return topicName.concat("_output_1d");
+                    return topicName.concat("_1day");
                 case ONE_WEEK:
-                    return topicName.concat("_output_1w");
+                    return topicName.concat("_1week");
                 case UNKNOWN:
                 default:
-                    return topicName.concat("_output");
+                    return null;
             }
         }
 
