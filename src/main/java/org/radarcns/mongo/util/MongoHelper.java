@@ -69,7 +69,7 @@ public class MongoHelper {
      * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents from the query.
      */
-    public static MongoCursor<Document> doesExistsByProjectAndSubjectAndSourceInWindowForStartTime(
+    public static MongoCursor<Document> findFirstDocumentForStartTimeWindow(
             String projectName, String subjectId, String sourceId, Date start, Date end,
             MongoCollection<Document> collection) {
         Bson query = and(eq(KEY + "." + PROJECT_ID, projectName),
