@@ -106,8 +106,8 @@ public class AggregatedDataPointsEndPointTest {
         assertNotNull(dataset);
         assertTrue(dataset.getDataset().size() <= 6);
         List<DataItem> dataItems = dataset.getDataset();
-        assertEquals(Integer.valueOf(2), dataItems.get(0).getSample());
-        assertEquals(Integer.valueOf(1), dataItems.get(4).getSample());
+        assertEquals(Integer.valueOf(2), dataItems.get(0).getValue());
+        assertEquals(Integer.valueOf(1), dataItems.get(4).getValue());
 
         dropAndClose(client);
     }

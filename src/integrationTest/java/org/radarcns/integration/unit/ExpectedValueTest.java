@@ -62,7 +62,7 @@ public class ExpectedValueTest {
 
         count = 0;
         for (DataItem item : dataset.getDataset()) {
-            count += (Double) item.getSample();
+            count += (Double) item.getValue();
         }
         assertEquals(SAMPLES, count);
 

@@ -269,7 +269,7 @@ public class DataSetService {
         }));
 
         return new AggregatedDataPoints(projectName, subjectId,
-                dataItems.stream().map(p -> (Integer) p.getSample()).reduce(Integer::max).get(),
+                dataItems.stream().map(p -> (Integer) p.getValue()).reduce(Integer::max).get(),
                 new TimeFrame(start, end), timeWindow, sources, dataItems);
     }
 

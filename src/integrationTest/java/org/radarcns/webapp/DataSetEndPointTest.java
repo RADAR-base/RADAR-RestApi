@@ -123,8 +123,8 @@ public class DataSetEndPointTest {
 
         Dataset actual = assertRequestsMatch(requestPath, expected);
         assertEquals(expected.getDataset().size(), actual.getDataset().size());
-        Map sample = (HashMap) actual.getDataset().get(0).getSample();
-        assertEquals(expected.getDataset().get(0).getSample(),
+        Map sample = (HashMap) actual.getDataset().get(0).getValue();
+        assertEquals(expected.getDataset().get(0).getValue(),
                 new Acceleration(sample.get("x"), sample.get("y"), sample.get("z")));
 
         dropAndClose(client);
@@ -152,8 +152,8 @@ public class DataSetEndPointTest {
 
         Dataset actual = assertRequestsMatch(requestPath, expected);
         assertEquals(expected.getDataset().size(), actual.getDataset().size());
-        Map sample = (HashMap) actual.getDataset().get(0).getSample();
-        assertEquals(expected.getDataset().get(0).getSample(),
+        Map sample = (HashMap) actual.getDataset().get(0).getValue();
+        assertEquals(expected.getDataset().get(0).getValue(),
                 new Quartiles((Double) sample.get("first"), (Double) sample.get("second"),
                         (Double) sample.get("third")));
         dropAndClose(client);
