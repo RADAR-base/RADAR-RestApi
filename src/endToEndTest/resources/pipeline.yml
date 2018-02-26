@@ -37,7 +37,7 @@ producer_mode: rest
 
 data:
   - topic: android_empatica_e4_acceleration
-    sensor: ACCELEROMETER
+    sensor: EMPATICA_E4_v1_ACCELEROMETER
     frequency: 32.0
     file: accelerometer.csv
     key_schema: org.radarcns.kafka.ObservationKey
@@ -47,7 +47,7 @@ data:
     maximum: 2.0
     maximum_difference: 1e-10
   - topic: android_empatica_e4_battery_level
-    sensor: BATTERY
+    sensor: EMPATICA_E4_v1_BATTERY
     frequency: 1.0
     file: battery.csv
     key_schema: org.radarcns.kafka.ObservationKey
@@ -58,41 +58,11 @@ data:
     maximum_difference: 1e-10
   - topic: android_empatica_e4_blood_volume_pulse
     frequency: 64.0
-    sensor: BLOOD_VOLUME_PULSE
+    sensor: EMPATICA_E4_v1_BLOOD_VOLUME_PULSE
     file: blood_volume_pulse.csv
     key_schema: org.radarcns.kafka.ObservationKey
     value_schema: org.radarcns.passive.empatica.EmpaticaE4BloodVolumePulse
     value_fields: [bloodVolumePulse]
     minimum: -200
     maximum: 200
-    maximum_difference: 1e-10
-  - topic: android_empatica_e4_electrodermal_activity
-    frequency: 4.0
-    sensor: ELECTRODERMAL_ACTIVITY
-    file: electrodermal_activity.csv
-    key_schema: org.radarcns.kafka.ObservationKey
-    value_schema: org.radarcns.passive.empatica.EmpaticaE4ElectroDermalActivity
-    value_fields: [electroDermalActivity]
-    minimum: 0.01
-    maximum: 0.05
-    maximum_difference: 1e-10
-  - topic: android_empatica_e4_inter_beat_interval
-    frequency: 1.0
-    sensor: INTER_BEAT_INTERVAL
-    file: inter_beat_interval.csv
-    key_schema: org.radarcns.kafka.ObservationKey
-    value_schema: org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval
-    value_fields: [interBeatInterval]
-    minimum: 0.5
-    maximum: 1.1
-    maximum_difference: 1e-10
-  - topic: android_empatica_e4_temperature
-    frequency: 4.0
-    sensor: THERMOMETER
-    file: thermometer.csv
-    key_schema: org.radarcns.kafka.ObservationKey
-    value_schema: org.radarcns.passive.empatica.EmpaticaE4Temperature
-    value_fields: [temperature]
-    minimum: 20
-    maximum: 55
     maximum_difference: 1e-10

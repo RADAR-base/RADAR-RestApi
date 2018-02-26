@@ -16,20 +16,14 @@
 
 package org.radarcns;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.radarcns.config.ExposedConfigTest.OPENAPI_JSON;
 import static org.radarcns.webapp.resource.BasePath.DATA;
 import static org.radarcns.webapp.resource.Parameter.SOURCE_DATA_NAME;
 import static org.radarcns.webapp.resource.Parameter.STAT;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
@@ -208,8 +202,6 @@ public class EndToEndTest {
 
         expectedDataset = computeExpectedDataset(expectedValue);
 
-        assertEquals(DescriptiveStatistic.values().length - 2, expectedDataset.size());
-
         for (Map<MockDataConfig, Dataset> datasets : expectedDataset.values()) {
             assertEquals(size, datasets.size());
         }
@@ -226,6 +218,7 @@ public class EndToEndTest {
 
         for (DescriptiveStatistic stat : DescriptiveStatistic.values()) {
             if (stat.equals(DescriptiveStatistic.LOWER_QUARTILE)
+                    || stat.equals(DescriptiveStatistic.AGGREGATED_DATA_POINTS)
                     || stat.equals(DescriptiveStatistic.UPPER_QUARTILE)
                     || stat.equals(DescriptiveStatistic.RECEIVED_MESSAGES)) {
                 continue;
@@ -467,19 +460,7 @@ public class EndToEndTest {
         if (config.getSensor().equals("BATTERY_LEVEL")) {
             return "BATTERY";
         }
-        return config.getSensor().toUpperCase();
+        return config.getSensor();
     }
 
-    /**
-     * Checks the correctness of the generated swagger documentation making the request via NGINX.
-     *
-     * @throws MalformedURLException if the used URL is malformed
-     */
-    @Test
-    public void checkSwaggerConfig() throws IOException {
-        String response = apiClient.requestString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
-        JsonNode node = new ObjectMapper().readTree(response);
-        assertTrue(node.has("openapi"));
-        assertTrue(node.get("openapi").asText().startsWith("3."));
-    }
 }

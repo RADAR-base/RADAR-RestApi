@@ -8,6 +8,9 @@ networks:
     kafka:
       driver: bridge
 
+volumes:
+    radar-backend-monitor-disconnect-data: {}
+
 services:
 
     #---------------------------------------------------------------------------#
@@ -150,7 +153,7 @@ services:
         - schema-registry-1
         - kafka-init
       volumes:
-        - ./etc/radar.yml:/etc/radar.yml
+        - ./volumes/radar/etc/radar.yml:/etc/radar.yml
       restart: always
       environment:
         KAFKA_REST_PROXY: http://rest-proxy-1:8082
@@ -174,7 +177,8 @@ services:
         - schema-registry-1
         - kafka-init
       volumes:
-         - ./etc/radar.yml:/etc/radar.yml
+        - ./volumes/radar/etc/radar.yml:/etc/radar.yml
+        - radar-backend-monitor-disconnect-data:/var/lib/radar/data
       restart: always
       environment:
         KAFKA_REST_PROXY: http://rest-proxy-1:8082
@@ -187,10 +191,10 @@ services:
     # RADAR mongo connector                                                     #
     #---------------------------------------------------------------------------#
     radar-mongodb-connector:
-      image: radarcns/radar-mongodb-connector-auto:0.1
+      image: radarbase/kafka-connect-mongodb-sink:0.2.0
       restart: on-failure
       volumes:
-        - ./sink-mongo.properties:/etc/kafka-connect/sink.properties
+        - ./volumes/radar/etc/sink-mongo.properties:/etc/kafka-connect/sink.properties
       networks:
         - zookeeper
         - kafka
@@ -263,7 +267,7 @@ services:
     # Management Portal                                                         #
     #---------------------------------------------------------------------------#
     managementportal-app:
-      image: radarcns/management-portal:0.3.2
+      image: radarbase/management-portal:0.3.4
       networks:
         - default
         - simplestack
@@ -273,6 +277,7 @@ services:
         MANAGEMENTPORTAL_FRONTEND_CLIENT_SECRET: my-secret
         MANAGEMENTPORTAL_OAUTH_CLIENTS_FILE: /mp-includes/config/oauth_client_details.csv
         MANAGEMENTPORTAL_CATALOGUE_SERVER_ENABLE_AUTO_IMPORT: "false"
+        MANAGEMENTPORTAL_CATALOGUE_SERVER_SERVER_URL: http://catalog-server:9010/source-types
         JHIPSTER_SLEEP: 10 # gives time for the database to boot before the application
         JAVA_OPTS: -Xmx256m  # maximum heap size for the JVM running ManagementPortal, increase this as necessary
       volumes:

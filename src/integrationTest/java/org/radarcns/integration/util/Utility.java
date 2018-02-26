@@ -108,14 +108,12 @@ public class Utility {
         TimeFrame cloneEffectiveTimeFrame = new TimeFrame(
                 inputHeader.getEffectiveTimeFrame().getStartDateTime(),
                 inputHeader.getEffectiveTimeFrame().getEndDateTime());
-        TimeFrame cloneTimeFrame = new TimeFrame(
-                inputHeader.getTimeFrame().getStartDateTime(),
-                inputHeader.getTimeFrame().getEndDateTime());
+
         Header cloneHeader = new Header(inputHeader.getProjectId(), inputHeader.getSubjectId(),
                 inputHeader.getSourceId(), inputHeader.getSourceType(),
                 inputHeader.getSourceDataType(),
                 inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
-                inputHeader.getTimeWindow(), cloneTimeFrame, cloneEffectiveTimeFrame);
+                inputHeader.getTimeWindow(), null, cloneEffectiveTimeFrame);
 
         List<DataItem> cloneItem = new ArrayList<>();
         Object value;
