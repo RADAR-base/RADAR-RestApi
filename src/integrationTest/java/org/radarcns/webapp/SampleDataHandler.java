@@ -10,12 +10,12 @@ public interface SampleDataHandler {
     String ACCELEROMETER_SOURCE_DATA_NAME = "EMPATICA_E4_v1_ACCELEROMETER";
     int SAMPLES = 10;
 
-    String BATTERY_LEVEL_COLLECTION_NAME = "android_empatica_e4_battery_level_output";
-    String ACCELERATION_COLLECTION = "android_empatica_e4_acceleration_output";
+    String BATTERY_LEVEL_COLLECTION_NAME = "android_empatica_e4_battery_level_10sec";
+    String ACCELERATION_COLLECTION = "android_empatica_e4_acceleration_10sec";
     String ACCELERATION_COLLECTION_FOR_TEN_MINITES =
-            "android_empatica_e4_acceleration_output_10min";
+            "android_empatica_e4_acceleration_10min";
     String BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES =
-            "android_empatica_e4_battery_level_output_10min";
+            "android_empatica_e4_battery_level_10min";
 
     String PRODUCER = "Empatica";
     String MODEL = "E4";
