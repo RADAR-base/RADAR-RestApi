@@ -19,6 +19,7 @@ package org.radarcns.service;
 import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -243,7 +244,8 @@ public class DataSetService {
     }
 
     /**
-     * Returns calculated {@link AggregatedDataPoints} using given parameters.
+     * Returns calculated {@link AggregatedDataPoints} using given parameters. The result is also
+     * updated with the the relevant sourceDataType of sourceData requested.
      *
      * @param projectName of project
      * @param subjectId of subject
@@ -259,17 +261,19 @@ public class DataSetService {
                 .map(p -> computeAggregatedDataItem(projectName, subjectId, sources, p, timeWindow))
                 .collect(Collectors.toList());
         // fill up sourceData.type field
-        sources.forEach(d -> d.getSourceData().forEach(e -> {
-            try {
-                e.setType(sourceCatalog
-                        .getSourceData(e.getName()).getSourceDataType());
-            } catch (IOException exe) {
-                throw new BadGatewayException(exe);
+        try {
+            for (AggregateDataSource source : sources) {
+                for (SourceData sourceData : source.getSourceData()) {
+                    SourceDataDTO definition = sourceCatalog.getSourceData(sourceData.getName());
+                    sourceData.setType(definition.getSourceDataType());
+                }
             }
-        }));
+        } catch (IOException exe) {
+            throw new BadGatewayException(exe);
+        }
 
         return new AggregatedDataPoints(projectName, subjectId,
-                dataItems.stream().map(p -> (Integer) p.getSample()).reduce(Integer::max).get(),
+                dataItems.stream().map(p -> (Integer) p.getValue()).reduce(Integer::max).get(),
                 new TimeFrame(start, end), timeWindow, sources, dataItems);
     }
 
@@ -281,25 +285,27 @@ public class DataSetService {
             for (SourceData sourceDataName : aggregate.getSourceData()) {
                 MongoSourceDataWrapper sourceDataWrapper = mongoSensorMap
                         .get(sourceDataName.getName());
-                count += sourceDataWrapper.doesExist(projectName, subjectId, aggregate
-                                .getSourceId(), Date.from(timeFrame.getStartDateTime()),
-                        Date.from(timeFrame.getEndDateTime()),
-                        MongoHelper.getCollection(mongoClient,
-                                sourceDataWrapper.getCollectionName(timeWindow)));
+                if (sourceDataWrapper
+                        .anyRecordsExist(projectName, subjectId, aggregate.getSourceId(),
+                                Date.from(timeFrame.getStartDateTime()),
+                                Date.from(timeFrame.getEndDateTime()), MongoHelper
+                                        .getCollection(mongoClient,
+                                                sourceDataWrapper.getCollectionName(timeWindow)))) {
+                    count++;
+                }
             }
         }
         return new DataItem(count, timeFrame.getStartDateTime());
     }
 
     private List<TimeFrame> calculateIntervals(Instant start, Instant end, TimeWindow timeWindow) {
-        Instant intervalStartDateTime = start;
         List<TimeFrame> timeFrames = new ArrayList<>();
-        while (intervalStartDateTime.plus(RadarConverter.getDuration(timeWindow)).isBefore(end)
-                || intervalStartDateTime.plus(RadarConverter.getDuration(timeWindow)).equals(end)) {
-            Instant intervalEndTime = intervalStartDateTime
-                    .plus(RadarConverter.getDuration(timeWindow));
-            timeFrames.add(new TimeFrame(intervalStartDateTime, intervalEndTime));
-            intervalStartDateTime = intervalEndTime;
+        TemporalAmount window = RadarConverter.getDuration(timeWindow);
+        TimeFrame timeFrame = new TimeFrame(start, start.plus(window));
+        while (!timeFrame.getEndDateTime().isAfter(end)) {
+            timeFrames.add(timeFrame);
+            timeFrame = new TimeFrame(timeFrame.getEndDateTime(),
+                    timeFrame.getEndDateTime().plus(window));
         }
         return timeFrames;
     }

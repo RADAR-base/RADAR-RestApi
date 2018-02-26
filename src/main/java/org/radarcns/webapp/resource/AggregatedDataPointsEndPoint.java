@@ -79,7 +79,6 @@ public class AggregatedDataPointsEndPoint {
             @QueryParam(START) InstantParam start,
             @QueryParam(END) InstantParam end) throws IOException {
 
-        mpClient.getProject(projectName);
         mpClient.checkSubjectInProject(projectName, subjectId);
         // if timeWindow is not set use default TEN_SECOND
         TimeWindow timeWindow = interval != null ? interval : TEN_SECOND;
