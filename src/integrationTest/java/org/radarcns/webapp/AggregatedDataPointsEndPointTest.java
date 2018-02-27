@@ -28,6 +28,7 @@ import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
@@ -50,8 +51,6 @@ import org.radarcns.webapp.param.DataAggregateParam;
 import org.radarcns.webapp.resource.Parameter;
 
 public class AggregatedDataPointsEndPointTest {
-
-
     @Rule
     public final ApiClient apiClient = new ApiClient(
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()
@@ -90,7 +89,7 @@ public class AggregatedDataPointsEndPointTest {
         aggregateDataSource.setSourceDataNames(Arrays.asList(BATTERY_LEVEL_SOURCE_DATA_NAME,
                 ACCELEROMETER_SOURCE_DATA_NAME));
         DataAggregateParam aggregateParam = new DataAggregateParam(
-                Arrays.asList(aggregateDataSource));
+                Collections.singletonList(aggregateDataSource));
         ObjectWriter writer = RadarConverter.writerFor(DataAggregateParam.class);
 
         Instant start = now.plus(RadarConverter.getDuration(TEN_MIN));
@@ -107,8 +106,8 @@ public class AggregatedDataPointsEndPointTest {
         assertNotNull(dataset);
         assertTrue(dataset.getDataset().size() <= 6);
         List<DataItem> dataItems = dataset.getDataset();
-        assertEquals(Integer.valueOf(2), dataItems.get(0).getValue());
-        assertEquals(Integer.valueOf(1), dataItems.get(4).getValue());
+        assertEquals(2, dataItems.get(0).getValue());
+        assertEquals(1, dataItems.get(4).getValue());
 
         dropAndClose(client);
     }

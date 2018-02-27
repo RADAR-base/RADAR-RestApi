@@ -176,7 +176,7 @@ public abstract class MongoSourceDataWrapper {
 
         header.setEffectiveTimeFrame(timeFrame);
 
-        LOGGER.debug("Found {} value", list.size());
+        LOGGER.debug("Found {} value(s)", list.size());
 
         return new Dataset(header, list);
     }

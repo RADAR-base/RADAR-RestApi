@@ -88,9 +88,8 @@ public class AggregatedDataPointsEndPoint {
 
         // Don't request future data
         Instant endTime = end.getValue();
-        Instant now = Instant.now();
-        if (endTime == null || endTime.isAfter(now)) {
-            endTime = now;
+        if (endTime == null) {
+            endTime = Instant.now();
         }
 
         TimeWindow timeWindow = interval;
@@ -117,7 +116,7 @@ public class AggregatedDataPointsEndPoint {
         AggregatedDataPoints dataSet = this.dataSetService.getDistinctData(projectName, subjectId,
                 aggregateParam.getSources(), timeWindow, timeFrame);
         if (dataSet == null || dataSet.getDataset().isEmpty()) {
-            LOGGER.debug("No aggregated available for the subject {} with source", subjectId);
+            LOGGER.debug("No aggregated data available for the subject {} with source", subjectId);
             return emptyAggregatedData(projectName, subjectId, timeWindow,
                     new TimeFrame(startTime, endTime), aggregateParam.getSources());
         }

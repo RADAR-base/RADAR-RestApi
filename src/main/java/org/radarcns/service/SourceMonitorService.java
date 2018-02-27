@@ -41,7 +41,6 @@ public class SourceMonitorService {
 
     private final MongoClient mongoClient;
 
-
     /**
      * Constructor.
      **/
@@ -58,41 +57,30 @@ public class SourceMonitorService {
      * @param subjectId of the subject
      * @param sourceId of the source
      * @param sourceType of the source
-     * @return calculated {@link TimeFrame} with earliest and latest timestamps
+     * @return calculated {@link TimeFrame} with earliest and latest timestamps or null if no
+     *         data was found.
      */
     public TimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
             String sourceId, SourceTypeDTO sourceType) {
 
         // get the last document sorted by timeEnd
-        MongoCursor<Document> cursor = MongoHelper
-                .findDocumentBySource(MongoHelper.getCollection(this.mongoClient,
-                        sourceType.getSourceStatisticsMonitorTopic()), projectId, subjectId,
-                        sourceId, KEY + "." + END, DESCENDING, 1
-                );
+        try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
+                MongoHelper.getCollection(this.mongoClient,
+                        sourceType.getSourceStatisticsMonitorTopic()),
+                projectId, subjectId, sourceId, KEY + "." + END, DESCENDING, 1)) {
 
-        if (!cursor.hasNext()) {
-            LOGGER.debug("Empty cursor for collection {}",
-                    sourceType.getSourceStatisticsMonitorTopic());
-        }
-
-        Instant timeStart = null;
-        Instant timeEnd = null;
-        if (cursor.hasNext()) {
-            Document document = cursor.next();
-            Document key = (Document) document.get(KEY);
-            Instant localStart = key.getDate(START).toInstant();
-            Instant localEnd = key.getDate(END).toInstant();
-
-            if (timeStart == null || localStart.isBefore(timeStart)) {
-                timeStart = localStart;
+            TimeFrame timeFrame = null;
+            while (cursor.hasNext()) {
+                Document key = (Document) cursor.next().get(KEY);
+                timeFrame = TimeFrame.span(timeFrame,
+                        new TimeFrame(key.getDate(START), key.getDate(END)));
             }
-            if (timeEnd == null || localEnd.isAfter(timeEnd)) {
-                timeEnd = localEnd;
+
+            if (timeFrame == null) {
+                LOGGER.debug("Empty cursor for collection {}",
+                        sourceType.getSourceStatisticsMonitorTopic());
             }
+            return timeFrame;
         }
-
-        cursor.close();
-        return new TimeFrame(timeStart, timeEnd);
-
     }
 }

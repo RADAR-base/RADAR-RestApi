@@ -19,7 +19,7 @@ package org.radarcns.mongo.util;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
-import static com.mongodb.client.model.Filters.lte;
+import static com.mongodb.client.model.Filters.lt;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -136,7 +136,7 @@ public class MongoHelper {
                 eq(KEY + "." + USER_ID, subjectId),
                 eq(KEY + "." + SOURCE_ID, sourceId),
                 gte(KEY + "." + START, Date.from(timeFrame.getStartDateTime())),
-                lte(KEY + "." + END, Date.from(timeFrame.getEndDateTime())));
+                lt(KEY + "." + START, Date.from(timeFrame.getEndDateTime())));
     }
 
     /**
