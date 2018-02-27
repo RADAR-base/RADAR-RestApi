@@ -65,11 +65,10 @@ public class SourceMonitorService {
 
         // get the last document sorted by timeEnd
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectId, subjectId, sourceId,
-                        KEY + "." + END, DESCENDING, 1,
-                        MongoHelper.getCollection(this
-                                        .mongoClient,
-                                sourceType.getSourceStatisticsMonitorTopic()));
+                .findDocumentBySource(MongoHelper.getCollection(this.mongoClient,
+                        sourceType.getSourceStatisticsMonitorTopic()), projectId, subjectId,
+                        sourceId, KEY + "." + END, DESCENDING, 1
+                );
 
         if (!cursor.hasNext()) {
             LOGGER.debug("Empty cursor for collection {}",

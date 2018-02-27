@@ -18,7 +18,8 @@ import static org.radarcns.webapp.SampleDataHandler.SAMPLES;
 import static org.radarcns.webapp.SampleDataHandler.SOURCE;
 import static org.radarcns.webapp.SampleDataHandler.SOURCE_TYPE;
 import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
-import static org.radarcns.webapp.resource.BasePath.AGGREGATED_DATA_POINTS;
+import static org.radarcns.webapp.resource.BasePath.AGGREGATE;
+import static org.radarcns.webapp.resource.BasePath.DISTINCT;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -54,7 +55,7 @@ public class AggregatedDataPointsEndPointTest {
     @Rule
     public final ApiClient apiClient = new ApiClient(
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()
-                    + AGGREGATED_DATA_POINTS + '/');
+                    + AGGREGATE + '/');
 
     @Test
     public void getAllRecordsWithAggregatedDataPointsInTimeRange() throws IOException {
@@ -95,7 +96,7 @@ public class AggregatedDataPointsEndPointTest {
         Instant start = now.plus(RadarConverter.getDuration(TEN_MIN));
         Instant end = start.plus(RadarConverter.getDuration(ONE_HOUR));
 
-        String requestPath = PROJECT + '/' + SUBJECT + '?'
+        String requestPath = PROJECT + '/' + SUBJECT + '/' + DISTINCT + '?'
                 + Parameter.TIME_WINDOW + '=' + window + '&'
                 + Parameter.START + '=' + start + '&'
                 + Parameter.END + '=' + end;

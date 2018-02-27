@@ -26,11 +26,12 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CountOptions;
 import java.util.Date;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.radarcns.config.Properties;
+import org.radarcns.domain.restapi.header.TimeFrame;
 
 /**
  * Generic MongoDB helper.
@@ -59,80 +60,63 @@ public class MongoHelper {
     /**
      * Finds whether document is available for given query parameters.
      * https://stackoverflow.com/a/8390458/822964 suggests find().limit(1).count(true) is the
-     * optimal way to do it.
+     * optimal way to do it. In the Java driver, this is achieved by setting the count options.
      *
+     * @param collection is the MongoDB that will be queried
      * @param projectName of the project
      * @param subjectId is the subjectID
      * @param sourceId is the sourceID
-     * @param start is the start time of the queried timewindow
-     * @param end is the end time of the queried timewindow
-     * @param collection is the MongoDB that will be queried
+     * @param timeFrame is the time frame of the queried timewindow
      * @return a MongoDB cursor containing all documents from the query.
      */
-    public static MongoCursor<Document> findFirstDocumentForStartTimeWindow(
-            String projectName, String subjectId, String sourceId, Date start, Date end,
-            MongoCollection<Document> collection) {
-        Bson query = and(eq(KEY + "." + PROJECT_ID, projectName),
-                eq(KEY + "." + USER_ID, subjectId),
-                eq(KEY + "." + SOURCE_ID, sourceId),
-                gte(KEY + "." + START, start),
-                lte(KEY + "." + START, end));
-
-        FindIterable<Document> result = collection
-                .find(query).limit(1);
-        return result.iterator();
+    public static boolean hasDataForSource(
+            MongoCollection<Document> collection, String projectName, String subjectId,
+            String sourceId, TimeFrame timeFrame) {
+        return collection.count(
+                filterSource(projectName, subjectId, sourceId, timeFrame),
+                new CountOptions().limit(1)) > 0;
     }
 
     /**
      * Finds all documents within a time window belonging to the given subject, source and project.
+     * Close the returned iterator after use, for example with a try-with-resources construct.
      *
+     * @param collection is the MongoDB that will be queried
      * @param projectName of the project
      * @param subjectId is the subjectID
      * @param sourceId is the sourceID
-     * @param start is the start time of the queried timewindow
-     * @param end is the end time of the queried timewindow
-     * @param collection is the MongoDB that will be queried
+     * @param timeFrame the queried timewindow
      * @return a MongoDB cursor containing all documents from the query.
      */
-    public static MongoCursor<Document> findDocumentsByProjectAndSubjectAndSourceInWindow(
-            String projectName, String subjectId, String sourceId, Date start, Date end,
-            MongoCollection<Document> collection) {
-        Bson query = and(eq(KEY + "." + PROJECT_ID, projectName),
-                eq(KEY + "." + USER_ID, subjectId),
-                eq(KEY + "." + SOURCE_ID, sourceId),
-                gte(KEY + "." + START, start),
-                lte(KEY + "." + END, end));
-
-        FindIterable<Document> result = collection
-                .find(query)
-                .sort(new BasicDBObject(START, ASCENDING));
-
-        return result.iterator();
+    public static MongoCursor<Document> findDocumentsBySource(
+            MongoCollection<Document> collection, String projectName, String subjectId,
+            String sourceId, TimeFrame timeFrame) {
+        return collection
+                .find(filterSource(projectName, subjectId, sourceId, timeFrame))
+                .sort(new BasicDBObject(START, ASCENDING))
+                .iterator();
     }
 
     /**
      * Finds all documents belonging to the given subject, source and project.
+     * Close the returned iterator after use, for example with a try-with-resources construct.
      *
+     * @param collection is the MongoDB that will be queried
      * @param project is the projectName
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param sortBy It is optional. {@code 1} means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
-     * @param collection is the MongoDB that will be queried
      * @return a MongoDB cursor containing all documents from query.
      */
-    public static MongoCursor<Document> findDocumentByProjectAndSubjectAndSource(String
-            project, String subject, String source, String sortBy, int order, Integer limit,
-            MongoCollection<Document> collection) {
-        FindIterable<Document> result;
+    public static MongoCursor<Document> findDocumentBySource(
+            MongoCollection<Document> collection, String project, String subject, String source,
+            String sortBy, int order, Integer limit) {
+        FindIterable<Document> result = collection.find(filterSource(project, subject, source));
 
-        if (sortBy == null) {
-            result = collection.find(getByProjectSubjectSource(project, subject, source));
-        } else {
-            result = collection.find(getByProjectSubjectSource(project, subject, source))
-                    .sort(new BasicDBObject(sortBy, order));
+        if (sortBy != null) {
+            result = result.sort(new BasicDBObject(sortBy, order));
         }
-
         if (limit != null) {
             result = result.limit(limit);
         }
@@ -140,11 +124,19 @@ public class MongoHelper {
         return result.iterator();
     }
 
-    private static Bson getByProjectSubjectSource(String projectName, String subjectId,
-            String sourceId) {
+    private static Bson filterSource(String projectName, String subjectId, String sourceId) {
         return and(eq(KEY + "." + PROJECT_ID, projectName),
                 eq(KEY + "." + USER_ID, subjectId),
                 eq(KEY + "." + SOURCE_ID, sourceId));
+    }
+
+    private static Bson filterSource(String projectName, String subjectId, String sourceId,
+            TimeFrame timeFrame) {
+        return and(eq(KEY + "." + PROJECT_ID, projectName),
+                eq(KEY + "." + USER_ID, subjectId),
+                eq(KEY + "." + SOURCE_ID, sourceId),
+                gte(KEY + "." + START, Date.from(timeFrame.getStartDateTime())),
+                lte(KEY + "." + END, Date.from(timeFrame.getEndDateTime())));
     }
 
     /**
@@ -155,9 +147,8 @@ public class MongoHelper {
      * @return the MongoDB collection named collection.
      */
     public static MongoCollection<Document> getCollection(MongoClient client, String collection) {
-        MongoDatabase database = client.getDatabase(Properties.getApiConfig().getMongoDbName());
-
-        return database.getCollection(collection);
+        return client.getDatabase(Properties.getApiConfig().getMongoDbName())
+                .getCollection(collection);
     }
 
     /**

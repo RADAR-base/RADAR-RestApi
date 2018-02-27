@@ -1,6 +1,6 @@
 package org.radarcns.domain.restapi.dataset;
 
-import static org.radarcns.domain.restapi.header.DescriptiveStatistic.AGGREGATED_DATA_POINTS;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.DISTINCT;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
@@ -34,12 +34,11 @@ public class AggregatedDataPoints {
      */
     public AggregatedDataPoints(String projectName, String subjectId, Integer maximumCount,
             TimeFrame timeFrame, TimeWindow timeWindow, List<AggregateDataSource> sources,
-            List<DataItem>
-                    dataset) {
+            List<DataItem> dataset) {
 
         this.dataset = dataset;
         this.header = new AggregatedDataPointsHeader(projectName, subjectId, maximumCount,
-                timeFrame, timeWindow, AGGREGATED_DATA_POINTS, sources);
+                timeFrame, timeWindow, DISTINCT, sources);
 
     }
 

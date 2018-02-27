@@ -3,10 +3,10 @@ package org.radarcns.webapp.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
+import static org.radarcns.domain.restapi.TimeWindow.ONE_WEEK;
 import static org.radarcns.service.DataSetService.emptyAggregatedData;
-import static org.radarcns.webapp.resource.BasePath.AGGREGATED_DATA_POINTS;
-import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
+import static org.radarcns.webapp.resource.BasePath.AGGREGATE;
+import static org.radarcns.webapp.resource.BasePath.DISTINCT;
 import static org.radarcns.webapp.resource.Parameter.END;
 import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.resource.Parameter.START;
@@ -16,6 +16,9 @@ import static org.radarcns.webapp.resource.Parameter.TIME_WINDOW;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -29,6 +32,7 @@ import org.radarcns.domain.restapi.dataset.AggregatedDataPoints;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
+import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.param.DataAggregateParam;
 import org.radarcns.webapp.param.InstantParam;
@@ -37,8 +41,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Authenticated
-@Path("/" + AGGREGATED_DATA_POINTS)
+@Path("/" + AGGREGATE)
 public class AggregatedDataPointsEndPoint {
+    private static final int DEFAULT_NUMBER_OF_WINDOWS = 100;
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AggregatedDataPointsEndPoint.class);
@@ -57,9 +62,9 @@ public class AggregatedDataPointsEndPoint {
      * JSON function that returns aggregated volumes of source-data requested.
      */
     @POST
-    @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Consumes({APPLICATION_JSON})
-    @Path("/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}")
+    @Produces(APPLICATION_JSON)
+    @Consumes(APPLICATION_JSON)
+    @Path("/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/" + DISTINCT)
     @Operation(summary = "Returns a Dataset object formatted in JSON.",
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical results. This end-point returns the latest available record "
@@ -72,7 +77,7 @@ public class AggregatedDataPointsEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
-    public AggregatedDataPoints getAggregatedDataPoints(DataAggregateParam aggregateParam,
+    public AggregatedDataPoints getDistinctDataPoints(DataAggregateParam aggregateParam,
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
             @QueryParam(TIME_WINDOW) TimeWindow interval,
@@ -80,18 +85,42 @@ public class AggregatedDataPointsEndPoint {
             @QueryParam(END) InstantParam end) throws IOException {
 
         mpClient.checkSubjectInProject(projectName, subjectId);
-        // if timeWindow is not set use default TEN_SECOND
-        TimeWindow timeWindow = interval != null ? interval : TEN_SECOND;
 
-        AggregatedDataPoints dataSet = this.dataSetService.getAggregatedData(projectName, subjectId,
-                aggregateParam.getSources(), timeWindow, start.getValue(), end.getValue());
+        // Don't request future data
+        Instant endTime = end.getValue();
+        Instant now = Instant.now();
+        if (endTime == null || endTime.isAfter(now)) {
+            endTime = now;
+        }
+
+        TimeWindow timeWindow = interval;
+        Instant startTime = start.getValue();
+        TimeFrame timeFrame = new TimeFrame(startTime, endTime);
+
+        if (startTime != null && startTime.isAfter(endTime)) {
+            // don't mix up time frame order
+            timeFrame.setStartDateTime(endTime);
+        } else if (startTime == null && timeWindow == null) {
+            // default settings, 1 year with 1 week intervals
+            timeFrame.setStartDateTime(endTime.minus(Period.ofYears(1)));
+            timeWindow = ONE_WEEK;
+        } else if (startTime == null) {
+            // use a fixed number of windows.
+            timeFrame.setStartDateTime(endTime.minus(
+                    RadarConverter.getSecond(timeWindow) * DEFAULT_NUMBER_OF_WINDOWS,
+                    ChronoUnit.SECONDS));
+        } else if (timeWindow == null) {
+            // use the fixed time frame with a time frame close to the number of windows.
+            timeWindow = dataSetService.getFittingTimeWindow(timeFrame, DEFAULT_NUMBER_OF_WINDOWS);
+        }
+
+        AggregatedDataPoints dataSet = this.dataSetService.getDistinctData(projectName, subjectId,
+                aggregateParam.getSources(), timeWindow, timeFrame);
         if (dataSet == null || dataSet.getDataset().isEmpty()) {
             LOGGER.debug("No aggregated available for the subject {} with source", subjectId);
-            return emptyAggregatedData(projectName, subjectId, interval,
-                    new TimeFrame(start.getValue(), end.getValue()), aggregateParam.getSources());
+            return emptyAggregatedData(projectName, subjectId, timeWindow,
+                    new TimeFrame(startTime, endTime), aggregateParam.getSources());
         }
         return dataSet;
     }
-
-
 }

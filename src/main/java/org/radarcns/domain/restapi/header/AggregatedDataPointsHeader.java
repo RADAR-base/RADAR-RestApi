@@ -23,7 +23,7 @@ public class AggregatedDataPointsHeader {
     private TimeWindow timeWindow;
 
     @JsonProperty
-    private DescriptiveStatistic statistic = DescriptiveStatistic.AGGREGATED_DATA_POINTS;
+    private DescriptiveStatistic statistic = DescriptiveStatistic.DISTINCT;
 
     @JsonProperty
     private List<AggregateDataSource> sources;
