@@ -6,6 +6,9 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * Time frame between two instants. The start time is inclusive, the end time is exclusive.
+ */
 public class TimeFrame {
 
     @JsonProperty
@@ -18,11 +21,25 @@ public class TimeFrame {
         // default constructor for json
     }
 
+    /**
+     * Time frame between given instants. The start must fall before the end.
+     * @param startDateTime start date time, may be {@code null}.
+     * @param endDateTime end date time, may be {@code null}.
+     */
     public TimeFrame(Instant startDateTime, Instant endDateTime) {
+        if (startDateTime != null && endDateTime != null && !startDateTime.isBefore(endDateTime)) {
+            throw new IllegalArgumentException("Time frame must start before it ends; "
+                    + startDateTime + " is not before " + endDateTime + ".");
+        }
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
     }
 
+    /**
+     * Time frame between given dates. The start must fall before the end.
+     * @param startDateTime start date, may be {@code null}.
+     * @param endDateTime end date, may be {@code null}.
+     */
     public TimeFrame(Date startDateTime, Date endDateTime) {
         this(startDateTime == null ? null : startDateTime.toInstant(),
                 endDateTime == null ? null : endDateTime.toInstant());
@@ -44,6 +61,10 @@ public class TimeFrame {
         this.endDateTime = endDateTime;
     }
 
+    /**
+     * Get the duration between the start and end time.
+     * @return duration or {@code null} if either start or end times are {@code null}.
+     */
     public Duration getDuration() {
         if (startDateTime == null || endDateTime == null) {
             return null;
@@ -82,8 +103,8 @@ public class TimeFrame {
      * Get a time frame that spans this time frame and the provided one.
      * If one time frame already spans the other or the other is {@code null}, that time frame is
      * returned. Otherwise a new time frame that spans both time frames is returned.
-     * @param first TimeFrame to span.
-     * @param second TimeFrame to span.
+     * @param first TimeFrame to span, may be {@code null}
+     * @param second TimeFrame to span, may be {@code null}
      * @return time frame spanning both time frames, or {@code null} if both time frames were
      *         {@code null}.
      */
