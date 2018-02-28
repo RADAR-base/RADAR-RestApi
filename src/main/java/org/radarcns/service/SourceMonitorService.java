@@ -67,7 +67,7 @@ public class SourceMonitorService {
         try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
                 MongoHelper.getCollection(this.mongoClient,
                         sourceType.getSourceStatisticsMonitorTopic()),
-                projectId, subjectId, sourceId, KEY + "." + END, DESCENDING, 1)) {
+                projectId, subjectId, sourceId, VALUE + "." + END, DESCENDING, 1)) {
 
             TimeFrame timeFrame = null;
             while (cursor.hasNext()) {
