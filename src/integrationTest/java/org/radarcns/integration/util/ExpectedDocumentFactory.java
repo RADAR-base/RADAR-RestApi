@@ -153,6 +153,7 @@ public class ExpectedDocumentFactory {
 
     /**
      * Builds a {@link Document} from given parameter values.
+     *
      * @param projectName of the subject
      * @param subjectId of the subject
      * @param sourceId of the source
@@ -171,6 +172,37 @@ public class ExpectedDocumentFactory {
                 + END + ":" + end + "}")
                 .append(KEY, buildKeyDocument(projectName, subjectId, sourceId, start, end))
                 .append(VALUE, value);
+    }
+
+    /**
+     * Builds a {@link Document} from given parameter values for source_statistics.
+     *
+     * @param projectName of the subject
+     * @param subjectId of the subject
+     * @param sourceId of the source
+     * @param start of the measurement
+     * @param end of the measurement
+     * @return built document
+     */
+    public static Document getDocumentsForStatistics(String projectName, String subjectId,
+            String sourceId, Object start, Object end) {
+        return new Document().append(ID, "{"
+                + PROJECT_ID + ":" + projectName + ","
+                + USER_ID + ":" + subjectId + ","
+                + SOURCE_ID + ":" + sourceId + ","
+                + START + ":" + start + ","
+                + END + ":" + end + "}")
+                .append(KEY, buildObservationKeyDocument(projectName, subjectId, sourceId))
+                .append(VALUE, new Document()
+                        .append(START, start)
+                        .append(END, end));
+    }
+
+    private static Document buildObservationKeyDocument(String projectName, String subjectId,
+            String sourceId) {
+        return new Document().append(PROJECT_ID, projectName)
+                .append(USER_ID, subjectId)
+                .append(SOURCE_ID, sourceId);
     }
 
     private List<Document> getDocumentsByArray(ExpectedValue<?> expectedValue) {

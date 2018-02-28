@@ -20,6 +20,7 @@ import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
 import static org.radarcns.mongo.util.MongoHelper.END;
 import static org.radarcns.mongo.util.MongoHelper.KEY;
 import static org.radarcns.mongo.util.MongoHelper.START;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
@@ -70,7 +71,7 @@ public class SourceMonitorService {
 
             TimeFrame timeFrame = null;
             while (cursor.hasNext()) {
-                Document key = (Document) cursor.next().get(KEY);
+                Document key = (Document) cursor.next().get(VALUE);
                 timeFrame = TimeFrame.span(timeFrame,
                         new TimeFrame(key.getDate(START), key.getDate(END)));
             }
