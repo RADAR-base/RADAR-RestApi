@@ -57,7 +57,7 @@ public class DoubleFormat extends MongoSourceDataWrapper {
                 return RadarConverter.roundDouble(
                         doc.getDouble(field) / getExpectedRecordCount(header.getTimeWindow()), 2);
             default:
-                return doc.getDouble(field);
+                return doc.get(field);
         }
     }
 
