@@ -18,7 +18,6 @@ package org.radarcns.service;
 
 import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
 import static org.radarcns.mongo.util.MongoHelper.END;
-import static org.radarcns.mongo.util.MongoHelper.KEY;
 import static org.radarcns.mongo.util.MongoHelper.START;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
@@ -57,8 +56,8 @@ public class SourceMonitorService {
      * @param subjectId of the subject
      * @param sourceId of the source
      * @param sourceType of the source
-     * @return calculated {@link TimeFrame} with earliest and latest timestamps or null if no
-     *         data was found.
+     * @return calculated {@link TimeFrame} with earliest and latest timestamps or null if no data
+     * was found.
      */
     public TimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
             String sourceId, SourceTypeDTO sourceType) {
