@@ -18,21 +18,17 @@ package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusRecordCounter.RECORD_COLLECTION;
-import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusServerStatus.STATUS_COLLECTION;
-import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusUpTime.UPTIME_COLLECTION;
 import static org.radarcns.webapp.resource.BasePath.APPLICATION_STATUS;
 
-import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.ServerStatus;
+import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
@@ -46,53 +42,31 @@ public class AppStatusEndPointTest {
     private static final String SOURCE = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
     private static final String SOURCE_PATH =
             APPLICATION_STATUS + '/' + PROJECT + '/' + SUBJECT + '/' + SOURCE;
-    private static final String COLLECTION_NAME = "android_empatica_e4_heartrate_10sec";
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
+    @Rule
+    public final MongoRule mongoRule = new MongoRule();
+
     @Test
-    public void getStatusTest200Unknown() throws IOException, ReflectiveOperationException {
+    public void getStatusTest200Unknown() throws IOException {
         Application actual = apiClient.requestJson(SOURCE_PATH, Application.class, Status.OK);
         assertSame(ServerStatus.UNKNOWN, actual.getServerStatus());
     }
 
     @Test
-    public void getStatusTest200()
-            throws IOException, ReflectiveOperationException {
-        MongoClient client = Utility.getMongoClient();
+    public void getStatusTest200() throws IOException {
+        Map<String, Document> map = RandomInput.getRandomApplicationStatus(
+                PROJECT, SUBJECT, SOURCE);
 
-        Map<String, Document> map = RandomInput.getRandomApplicationStatus(PROJECT,
-                SUBJECT, SOURCE);
-
-        Utility.insertMixedDocs(client, map);
+        map.forEach((k, v) -> mongoRule.getCollection(k).insertOne(v));
 
         Application expected = Utility.convertDocToApplication(map);
         Application actual = apiClient.requestJson(SOURCE_PATH, Application.class, Status.OK);
 
         assertEquals(expected.getServerStatus(), actual.getServerStatus());
         assertEquals(expected.getIpAddress(), actual.getIpAddress());
-
-        dropAndClose(client);
     }
-
-    @After
-    public void dropAndClose() {
-        dropAndClose(Utility.getMongoClient());
-    }
-
-    /**
-     * Drops all used collections to bring the database back to the initial state, and close the
-     * database connection.
-     **/
-    public void dropAndClose(MongoClient client) {
-        Utility.dropCollection(client, COLLECTION_NAME);
-        Utility.dropCollection(client, STATUS_COLLECTION);
-        Utility.dropCollection(client, UPTIME_COLLECTION);
-        Utility.dropCollection(client, RECORD_COLLECTION);
-
-        client.close();
-    }
-
 }

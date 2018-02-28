@@ -2,7 +2,6 @@ package org.radarcns.webapp;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -30,7 +29,7 @@ public class ProjectEndPointTest {
     @Test
     public void getAllProjectsStatusTest200() throws IOException {
 
-        Response actual = apiClient.request(BasePath.PROJECTS, APPLICATION_JSON, Status.OK);
+        Response actual = apiClient.assertRequest(BasePath.PROJECTS, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
         ObjectReader reader = RadarConverter.readerForCollection(List.class, ProjectDTO.class);
         List<ProjectDTO> projects = reader.readValue(actual.body().byteStream());
@@ -41,26 +40,15 @@ public class ProjectEndPointTest {
 
     @Test
     public void getProjectByProjectNameStatusTest200() throws IOException {
-
-        Response actual = apiClient
-                .request(BasePath.PROJECTS + "/" + PROJECT_NAME, APPLICATION_JSON,
-                        Status.OK);
-        assertTrue(actual.isSuccessful());
-        ObjectReader reader = RadarConverter.readerFor(ProjectDTO.class);
-        ProjectDTO project = reader.readValue(actual.body().byteStream());
+        ProjectDTO project = apiClient.requestJson(
+                BasePath.PROJECTS + '/' + PROJECT_NAME, ProjectDTO.class, Status.OK);
         assertEquals(PROJECT_NAME, project.getProjectName());
-
     }
 
     @Test
     public void getProjectByUnavailableNameStatusTest404() throws IOException {
-
-        Response actual = apiClient
-                .request(BasePath.PROJECTS + "/" + "SOMETHING", APPLICATION_JSON,
-                        Status.NOT_FOUND);
-        assertFalse(actual.isSuccessful());
-        assertEquals(actual.code(), Status.NOT_FOUND.getStatusCode());
-
+        apiClient.assertRequest(BasePath.PROJECTS + '/' + "SOMETHING", APPLICATION_JSON,
+                Status.NOT_FOUND);
     }
 
 

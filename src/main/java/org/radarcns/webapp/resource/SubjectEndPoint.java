@@ -46,7 +46,7 @@ import org.radarcns.webapp.validation.Alphanumeric;
  * for in a study.
  */
 @Authenticated
-@Path("/" + PROJECTS)
+@Path('/' + PROJECTS)
 public class SubjectEndPoint {
 
     @Inject
@@ -57,7 +57,7 @@ public class SubjectEndPoint {
      */
     @GET
     @Produces(APPLICATION_JSON)
-    @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS)
+    @Path("/{" + PROJECT_NAME + "}" + '/' + SUBJECTS)
     @Operation(summary = "Return a list of subjects contained within a study")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Return a list of subjects objects")
@@ -79,7 +79,7 @@ public class SubjectEndPoint {
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS + "/{" + SUBJECT_ID + "}")
+    @Path("/{" + PROJECT_NAME + "}" + '/' + SUBJECTS + "/{" + SUBJECT_ID + "}")
     @Operation(summary = "Return the information related to given subject identifier")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description =

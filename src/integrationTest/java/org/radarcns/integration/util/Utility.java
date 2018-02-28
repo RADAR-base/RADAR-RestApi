@@ -21,60 +21,19 @@ import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusServerS
 import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusUpTime.UPTIME_COLLECTION;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
-import org.radarcns.config.Properties;
 import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
-import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
 
 public class Utility {
-
-    /**
-     * Returns a MongoDB client using settings stored in the resource folder.
-     */
-    public static MongoClient getMongoClient() {
-        MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();
-
-        return new MongoClient(Properties.getApiConfig().getMongoDbHosts(),
-                credentials, MongoClientOptions.builder().build());
-    }
-
-    /**
-     * Drop mongo collection in names.
-     *
-     * @param client mongoDB client
-     * @param names collection names that have to be dropped
-     */
-    public static void dropCollection(MongoClient client, String... names) {
-        for (String tmp : names) {
-            MongoHelper.getCollection(client, tmp).drop();
-        }
-    }
-
-    /**
-     * Inserts mixed documents in mixed collections.
-     *
-     * @param client mongoDb client to access the instance
-     * @param map mapping between document and collections
-     */
-    public static void insertMixedDocs(MongoClient client, Map<String, Document> map) {
-        for (String collectionName : map.keySet()) {
-            MongoHelper.getCollection(client, collectionName).insertOne(map.get(collectionName));
-        }
-    }
-
-
     /**
      * Converts Bson Document into an ApplicationConfig.
      *

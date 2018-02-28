@@ -16,27 +16,19 @@
 
 package org.radarcns.webapp;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.webapp.resource.BasePath.PROJECTS;
 import static org.radarcns.webapp.resource.BasePath.SOURCES;
 import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.util.List;
 import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.integration.util.Utility;
-import org.radarcns.util.RadarConverter;
 
 public class SourceEndPointTest {
 
@@ -48,32 +40,12 @@ public class SourceEndPointTest {
     public final ApiClient apiClient = new ApiClient(
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
-
     @Test
     public void getAllSourcesForSubjectInProject() throws IOException {
         String requestPath = PROJECTS + '/' + PROJECT + '/' + SUBJECTS + '/' + SUBJECT + '/'
                 + SOURCES;
-        try (Response response = apiClient.request(requestPath, APPLICATION_JSON, Status.OK)) {
-            assertNotNull(response);
-            assertTrue(response.isSuccessful());
 
-            ObjectReader reader = RadarConverter.readerForCollection(List.class, Source.class);
-            List<Source> sources = reader.readValue(response.body().byteStream());
-            assertTrue(sources.size() > 0);
-        }
+        List<Source> sources = apiClient.requestJsonList(requestPath, Source.class, Status.OK);
+        assertTrue(sources.size() > 0);
     }
-
-    @After
-    public void dropAndClose() {
-        dropAndClose(Utility.getMongoClient());
-    }
-
-    /**
-     * Drops all used collections to bring the database back to the initial state, and close the
-     * database connection.
-     **/
-    public void dropAndClose(MongoClient client) {
-        client.close();
-    }
-
 }

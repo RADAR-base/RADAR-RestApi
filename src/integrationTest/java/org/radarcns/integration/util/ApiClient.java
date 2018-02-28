@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response.Status;
@@ -98,15 +99,15 @@ public class ApiClient extends ExternalResource {
     }
 
     /**
-     * Makes an HTTP request to given URL.
+     * Makes an HTTP assertRequest to given URL.
      *
      * @param relativePath path relative to the base URL, without starting slash.
      * @param accept Accept Header for content negotiation
      * @param expectedResponseCode response codes that are considered valid.
      * @return HTTP Response
-     * @throws IOException if the request could not be executed
+     * @throws IOException if the assertRequest could not be executed
      */
-    public Response request(String relativePath, String accept, Status... expectedResponseCode)
+    public Response assertRequest(String relativePath, String accept, Status... expectedResponseCode)
             throws IOException {
         Request request = this.client.requestBuilder(relativePath)
                 .addHeader("User-Agent", "Mozilla/5.0")
@@ -135,36 +136,56 @@ public class ApiClient extends ExternalResource {
      * @param accept Accept Header for content negotiation
      * @param expectedResponse response codes that are considered valid.
      * @return HTTP Response body as a string
-     * @throws IOException if the request could not be executed
+     * @throws IOException if the assertRequest could not be executed
      */
     @Nonnull
     public String requestString(String relativePath, String accept, Status... expectedResponse)
             throws IOException {
-        try (Response response = request(relativePath, accept, expectedResponse)) {
+        try (Response response = assertRequest(relativePath, accept, expectedResponse)) {
             ResponseBody body = response.body();
             assertNotNull(body);
             return body.string();
         }
     }
 
-
     /**
-     * Request an Avro SpecificRecord from the API, with given relative path. This sets the Accept
-     * header to {@code avro/binary}.
+     * Request an JSON object from the API, with given relative path. This sets the Accept
+     * header to {@code application/json}.
      *
      * @param relativePath path relative to the base URL, without starting slash.
-     * @param avroClass Avro SpecificRecord class to deserialize.
+     * @param jsonClass JSON class to deserialize.
      * @param expectedResponse response codes that are considered valid.
      * @return HTTP Response body as a string
-     * @throws IOException if the request could not be executed
+     * @throws IOException if the assertRequest could not be executed
      */
     @Nonnull
-    public <K> K requestJson(String relativePath, Class<K> avroClass,
+    public <K> K requestJson(String relativePath, Class<K> jsonClass, Status... expectedResponse)
+            throws IOException {
+        return requestJson(relativePath, RadarConverter.readerFor(jsonClass), expectedResponse);
+    }
+
+    /**
+     * Request a list of JSON objects from the API, with given relative path. This sets the Accept
+     * header to {@code application/json}.
+     *
+     * @param relativePath path relative to the base URL, without starting slash.
+     * @param jsonClass Avro SpecificRecord class to deserialize.
+     * @param expectedResponse response codes that are considered valid.
+     * @return HTTP Response body as a string
+     * @throws IOException if the assertRequest could not be executed
+     */
+    @Nonnull
+    public <K> List<K> requestJsonList(String relativePath, Class<K> jsonClass,
             Status... expectedResponse) throws IOException {
-        try (Response response = request(relativePath, APPLICATION_JSON, expectedResponse)) {
+        return requestJson(relativePath,
+                RadarConverter.readerForCollection(List.class, jsonClass), expectedResponse);
+    }
+
+    private <K> K requestJson(String relativePath, ObjectReader reader, Status... expectedResponse)
+            throws IOException {
+        try (Response response = assertRequest(relativePath, APPLICATION_JSON, expectedResponse)) {
             ResponseBody body = response.body();
             assertNotNull(body);
-            ObjectReader reader = RadarConverter.readerFor(avroClass);
             return reader.readValue(body.byteStream());
         }
     }

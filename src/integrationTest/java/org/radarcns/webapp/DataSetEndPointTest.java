@@ -30,7 +30,6 @@ import static org.radarcns.integration.util.RandomInput.DATASET;
 import static org.radarcns.integration.util.RandomInput.DOCUMENTS;
 import static org.radarcns.webapp.resource.BasePath.DATA;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.time.Instant;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.domain.restapi.TimeWindow;
@@ -47,11 +45,10 @@ import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.format.Quartiles;
 import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.integration.util.Utility;
-import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.resource.Parameter;
 
@@ -76,11 +73,12 @@ public class DataSetEndPointTest {
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString()
                     + DATA + '/');
 
+    @Rule
+    public final MongoRule mongoRule = new MongoRule();
+
     @Test
     public void getRecords() throws IOException {
-        MongoClient client = Utility.getMongoClient();
-
-        MongoCollection<Document> collection = MongoHelper.getCollection(client, COLLECTION_NAME);
+        MongoCollection<Document> collection = mongoRule.getCollection(COLLECTION_NAME);
 
         Map<String, Object> docs = RandomInput
                 .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
@@ -94,16 +92,11 @@ public class DataSetEndPointTest {
                 REQUEST_PATH + '?' + Parameter.TIME_WINDOW + '=' + TIME_WINDOW, expected);
 
         assertEquals(expected.getDataset(), actual.getDataset());
-
-        dropAndClose(client);
     }
 
     @Test
     public void getAllRecordsForAcceleration() throws IOException {
-        MongoClient client = Utility.getMongoClient();
-
-        MongoCollection<Document> collection = MongoHelper
-                .getCollection(client, ACCELERATION_COLLECTION);
+        MongoCollection<Document> collection = mongoRule.getCollection(ACCELERATION_COLLECTION);
         String sourceDataName = "EMPATICA_E4_v1_ACCELEROMETER";
         Map<String, Object> docs = RandomInput
                 .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
@@ -120,16 +113,11 @@ public class DataSetEndPointTest {
         Map sample = (HashMap) actual.getDataset().get(0).getSample();
         assertEquals(expected.getDataset().get(0).getSample(),
                 new Acceleration(sample.get("x"), sample.get("y"), sample.get("z")));
-
-        dropAndClose(client);
     }
 
     @Test
     public void getAllRecordsWithQuartiles() throws IOException {
-        MongoClient client = Utility.getMongoClient();
-
-        MongoCollection<Document> collection = MongoHelper
-                .getCollection(client, COLLECTION_NAME);
+        MongoCollection<Document> collection = mongoRule.getCollection(COLLECTION_NAME);
         Map<String, Object> docs = RandomInput
                 .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
                         SOURCE_TYPE, SOURCE_DATA_NAME, QUARTILES, TIME_WINDOW, SAMPLES, false);
@@ -147,17 +135,14 @@ public class DataSetEndPointTest {
         assertEquals(expected.getDataset().get(0).getSample(),
                 new Quartiles((Double) sample.get("first"), (Double) sample.get("second"),
                         (Double) sample.get("third")));
-        dropAndClose(client);
     }
 
     @Test
     public void getAllRecordsWithQuartilesInTimeRange() throws IOException {
-        MongoClient client = Utility.getMongoClient();
         Instant now = Instant.now();
         Instant start = now.plus(RadarConverter.getSecond(TIME_WINDOW), SECONDS);
         Instant end = now.plus(7 * RadarConverter.getSecond(TIME_WINDOW), SECONDS);
-        MongoCollection<Document> collection = MongoHelper
-                .getCollection(client, COLLECTION_NAME);
+        MongoCollection<Document> collection = mongoRule.getCollection(COLLECTION_NAME);
         Map<String, Object> docs = RandomInput
                 .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
                         SOURCE_TYPE, SOURCE_DATA_NAME, QUARTILES, TIME_WINDOW, SAMPLES, false);
@@ -177,20 +162,16 @@ public class DataSetEndPointTest {
                 actual.getHeader().getTimeFrame().getStartDateTime());
         assertEquals(end,
                 actual.getHeader().getTimeFrame().getEndDateTime());
-
-        dropAndClose(client);
     }
 
     @Test
     public void getAllRecordsWithQuartilesInTimeRangeWithTenMinutes() throws IOException {
-        MongoClient client = Utility.getMongoClient();
         Instant now = Instant.now();
         TimeWindow window = TimeWindow.TEN_MIN;
 
         Instant start = now.plus(RadarConverter.getSecond(window), SECONDS);
         Instant end = now.plus(7 * RadarConverter.getSecond(window), SECONDS);
-        MongoCollection<Document> collection = MongoHelper
-                .getCollection(client, COLLECTION_FOR_TEN_MINUTES);
+        MongoCollection<Document> collection = mongoRule.getCollection(COLLECTION_FOR_TEN_MINUTES);
         Map<String, Object> docs = RandomInput
                 .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
                         SOURCE_TYPE, SOURCE_DATA_NAME, QUARTILES, window, SAMPLES, false);
@@ -211,8 +192,6 @@ public class DataSetEndPointTest {
         assertEquals(end,
                 actual.getHeader().getTimeFrame().getEndDateTime());
         assertEquals(window, actual.getHeader().getTimeWindow());
-
-        dropAndClose(client);
     }
 
     private Dataset assertRequestsMatch(String relativeUrl, Dataset expected)
@@ -232,21 +211,4 @@ public class DataSetEndPointTest {
         Dataset dataset = apiClient.requestJson(REQUEST_PATH, Dataset.class, Status.OK);
         assertThat(dataset.getDataset(), is(empty()));
     }
-
-    @After
-    public void dropAndClose() {
-        dropAndClose(Utility.getMongoClient());
-    }
-
-    /**
-     * Drops all used collections to bring the database back to the initial state, and close the
-     * database connection.
-     **/
-    private void dropAndClose(MongoClient client) {
-        Utility.dropCollection(client, COLLECTION_NAME);
-        Utility.dropCollection(client, ACCELERATION_COLLECTION);
-        Utility.dropCollection(client, COLLECTION_FOR_TEN_MINUTES);
-        client.close();
-    }
-
 }
