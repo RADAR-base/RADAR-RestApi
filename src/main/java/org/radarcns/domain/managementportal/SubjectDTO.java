@@ -36,7 +36,7 @@ public class SubjectDTO {
     @JsonProperty
     private String externalId;
     @JsonProperty
-    private URL externalLink;
+    private String externalLink;
     @JsonProperty
     private String email;
     @JsonProperty
@@ -61,7 +61,7 @@ public class SubjectDTO {
         return externalId;
     }
 
-    public URL getExternalLink() {
+    public String getExternalLink() {
         return externalLink;
     }
 
