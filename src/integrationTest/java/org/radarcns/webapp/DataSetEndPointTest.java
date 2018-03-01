@@ -196,7 +196,7 @@ public class DataSetEndPointTest {
 
     private Dataset assertRequestsMatch(String relativeUrl, Dataset expected)
             throws IOException {
-        Dataset actual = apiClient.requestJson(relativeUrl, Dataset.class, Status.OK);
+        Dataset actual = apiClient.getJson(relativeUrl, Dataset.class, Status.OK);
         assertNotNull(actual);
         Header expectedHeader = expected.getHeader();
         Header actualHeader = actual.getHeader();
@@ -208,7 +208,7 @@ public class DataSetEndPointTest {
 
     @Test
     public void getAllDataTestEmpty() throws IOException {
-        Dataset dataset = apiClient.requestJson(REQUEST_PATH, Dataset.class, Status.OK);
+        Dataset dataset = apiClient.getJson(REQUEST_PATH, Dataset.class, Status.OK);
         assertThat(dataset.getDataset(), is(empty()));
     }
 }

@@ -59,7 +59,7 @@ public class SubjectEndPointTest {
     public void getSubjectsByProjectName200() throws IOException {
         insertMonitorStatistics();
 
-        List<Subject> subjects = apiClient.requestJsonList(
+        List<Subject> subjects = apiClient.getJsonList(
                 BasePath.PROJECTS + '/' + PROJECT_NAME + '/' + SUBJECTS,
                 Subject.class, Status.OK);
 
@@ -90,7 +90,7 @@ public class SubjectEndPointTest {
     public void getSubjectsBySubjectIdAndProjectName200() throws IOException {
         insertMonitorStatistics();
 
-        Subject subject = apiClient.requestJson(
+        Subject subject = apiClient.getJson(
                 BasePath.PROJECTS + '/' + PROJECT_NAME + '/' + SUBJECTS + '/' + SUBJECT_ID,
                 Subject.class, Status.OK);
 
@@ -110,8 +110,8 @@ public class SubjectEndPointTest {
 
     @Test
     public void getSubjectTest404() throws IOException {
-        apiClient.assertRequest(
+        assertNotNull(apiClient.get(
                 BasePath.PROJECTS + '/' + PROJECT_NAME + '/' + SUBJECTS + "/OTHER",
-                APPLICATION_JSON, Status.NOT_FOUND);
+                APPLICATION_JSON, Status.NOT_FOUND));
     }
 }

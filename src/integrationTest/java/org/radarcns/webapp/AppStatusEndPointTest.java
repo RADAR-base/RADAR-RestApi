@@ -52,7 +52,7 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest200Unknown() throws IOException {
-        Application actual = apiClient.requestJson(SOURCE_PATH, Application.class, Status.OK);
+        Application actual = apiClient.getJson(SOURCE_PATH, Application.class, Status.OK);
         assertSame(ServerStatus.UNKNOWN, actual.getServerStatus());
     }
 
@@ -64,7 +64,7 @@ public class AppStatusEndPointTest {
         map.forEach((k, v) -> mongoRule.getCollection(k).insertOne(v));
 
         Application expected = Utility.convertDocToApplication(map);
-        Application actual = apiClient.requestJson(SOURCE_PATH, Application.class, Status.OK);
+        Application actual = apiClient.getJson(SOURCE_PATH, Application.class, Status.OK);
 
         assertEquals(expected.getServerStatus(), actual.getServerStatus());
         assertEquals(expected.getIpAddress(), actual.getIpAddress());

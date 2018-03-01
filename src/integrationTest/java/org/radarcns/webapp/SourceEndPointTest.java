@@ -45,7 +45,7 @@ public class SourceEndPointTest {
         String requestPath = PROJECTS + '/' + PROJECT + '/' + SUBJECTS + '/' + SUBJECT + '/'
                 + SOURCES;
 
-        List<Source> sources = apiClient.requestJsonList(requestPath, Source.class, Status.OK);
+        List<Source> sources = apiClient.getJsonList(requestPath, Source.class, Status.OK);
         assertTrue(sources.size() > 0);
     }
 }

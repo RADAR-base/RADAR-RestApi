@@ -34,7 +34,7 @@ public class StatusEndPointTest {
 
     @Test
     public void getStatusTest200() throws IOException {
-        HdfsBinsData bins = apiClient.requestJson("hdfs", HdfsBinsData.class, Status.OK);
+        HdfsBinsData bins = apiClient.getJson("hdfs", HdfsBinsData.class, Status.OK);
         HdfsBinsDataTest.assertBinsMatchFile(bins);
     }
 }

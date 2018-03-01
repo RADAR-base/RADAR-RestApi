@@ -351,7 +351,7 @@ public class EndToEndTest {
                 String pathSensor = pathStat.replace("{" + SOURCE_DATA_NAME + "}",
                         getSensorType(config));
 
-                Dataset actual = apiClient.requestJson(pathSensor, Dataset.class, Status.OK);
+                Dataset actual = apiClient.getJson(pathSensor, Dataset.class, Status.OK);
 
                 assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
                         config.getMaximumDifference());
@@ -476,13 +476,13 @@ public class EndToEndTest {
     }
 
     /**
-     * Checks the correctness of the generated swagger documentation making the assertRequest via NGINX.
+     * Checks the correctness of the generated swagger documentation making the request via NGINX.
      *
      * @throws MalformedURLException if the used URL is malformed
      */
     @Test
     public void checkSwaggerConfig() throws IOException {
-        String response = apiClient.requestString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
+        String response = apiClient.getString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
         JsonNode node = new ObjectMapper().readTree(response);
         assertTrue(node.has("openapi"));
         assertTrue(node.get("openapi").asText().startsWith("3."));

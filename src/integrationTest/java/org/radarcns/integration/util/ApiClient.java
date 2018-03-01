@@ -99,15 +99,19 @@ public class ApiClient extends ExternalResource {
     }
 
     /**
-     * Makes an HTTP assertRequest to given URL.
+     * Makes an HTTP get to given URL. For JSON requests, preferably use
+     * {@link #getJson(String, Class, Status...)} or
+     * {@link #getJsonList(String, Class, Status...)}. For plain text requests, use
+     * {@link #getString(String, String, Status...)}. Close the response after use, for
+     * example with a try-with-resources construct.
      *
      * @param relativePath path relative to the base URL, without starting slash.
      * @param accept Accept Header for content negotiation
      * @param expectedResponseCode response codes that are considered valid.
      * @return HTTP Response
-     * @throws IOException if the assertRequest could not be executed
+     * @throws IOException if the get could not be executed
      */
-    public Response assertRequest(String relativePath, String accept, Status... expectedResponseCode)
+    public Response get(String relativePath, String accept, Status... expectedResponseCode)
             throws IOException {
         Request request = this.client.requestBuilder(relativePath)
                 .addHeader("User-Agent", "Mozilla/5.0")
@@ -115,6 +119,10 @@ public class ApiClient extends ExternalResource {
                 .header("Authorization", "Bearer " + token.getAccessToken())
                 .build();
 
+        return request(request, expectedResponseCode);
+    }
+
+    private Response request(Request request, Status... expectedResponseCode) throws IOException {
         logger.info("Requesting {} expecting code {}", request.url(), expectedResponseCode);
 
         Response response = client.request(request);
@@ -136,15 +144,37 @@ public class ApiClient extends ExternalResource {
      * @param accept Accept Header for content negotiation
      * @param expectedResponse response codes that are considered valid.
      * @return HTTP Response body as a string
-     * @throws IOException if the assertRequest could not be executed
+     * @throws IOException if the get could not be executed
      */
     @Nonnull
-    public String requestString(String relativePath, String accept, Status... expectedResponse)
+    public String getString(String relativePath, String accept, Status... expectedResponse)
             throws IOException {
-        try (Response response = assertRequest(relativePath, accept, expectedResponse)) {
+        try (Response response = get(relativePath, accept, expectedResponse)) {
             ResponseBody body = response.body();
             assertNotNull(body);
             return body.string();
+        }
+    }
+
+    /**
+     * Request a JSON object using given object reader. Preferably use shorthand
+     * {@link #getJson(String, Class, Status...)} or
+     * {@link #getJsonList(String, Class, Status...)}. This sets the Accept
+     * header to {@code application/json}.
+     *
+     * @param relativePath path relative to the base URL, without starting slash.
+     * @param reader object reader to deserialize with.
+     * @param expectedResponse response codes that are considered valid.
+     * @param <K> type of the JSON response
+     * @return HTTP Response body as an object
+     * @throws IOException if the get could not be executed
+     */
+    public <K> K getJson(String relativePath, ObjectReader reader, Status... expectedResponse)
+            throws IOException {
+        try (Response response = get(relativePath, APPLICATION_JSON, expectedResponse)) {
+            ResponseBody body = response.body();
+            assertNotNull(body);
+            return reader.readValue(body.byteStream());
         }
     }
 
@@ -155,13 +185,14 @@ public class ApiClient extends ExternalResource {
      * @param relativePath path relative to the base URL, without starting slash.
      * @param jsonClass JSON class to deserialize.
      * @param expectedResponse response codes that are considered valid.
-     * @return HTTP Response body as a string
-     * @throws IOException if the assertRequest could not be executed
+     * @param <K> type of the JSON response
+     * @return HTTP Response body as an object
+     * @throws IOException if the get could not be executed
      */
     @Nonnull
-    public <K> K requestJson(String relativePath, Class<K> jsonClass, Status... expectedResponse)
+    public <K> K getJson(String relativePath, Class<K> jsonClass, Status... expectedResponse)
             throws IOException {
-        return requestJson(relativePath, RadarConverter.readerFor(jsonClass), expectedResponse);
+        return getJson(relativePath, RadarConverter.readerFor(jsonClass), expectedResponse);
     }
 
     /**
@@ -171,23 +202,15 @@ public class ApiClient extends ExternalResource {
      * @param relativePath path relative to the base URL, without starting slash.
      * @param jsonClass Avro SpecificRecord class to deserialize.
      * @param expectedResponse response codes that are considered valid.
-     * @return HTTP Response body as a string
-     * @throws IOException if the assertRequest could not be executed
+     * @param <K> type of the JSON response
+     * @return HTTP Response body as an object
+     * @throws IOException if the get could not be executed
      */
     @Nonnull
-    public <K> List<K> requestJsonList(String relativePath, Class<K> jsonClass,
+    public <K> List<K> getJsonList(String relativePath, Class<K> jsonClass,
             Status... expectedResponse) throws IOException {
-        return requestJson(relativePath,
+        return getJson(relativePath,
                 RadarConverter.readerForCollection(List.class, jsonClass), expectedResponse);
-    }
-
-    private <K> K requestJson(String relativePath, ObjectReader reader, Status... expectedResponse)
-            throws IOException {
-        try (Response response = assertRequest(relativePath, APPLICATION_JSON, expectedResponse)) {
-            ResponseBody body = response.body();
-            assertNotNull(body);
-            return reader.readValue(body.byteStream());
-        }
     }
 
     @Override

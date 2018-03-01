@@ -1,6 +1,5 @@
 package org.radarcns.integration;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
@@ -16,14 +15,17 @@ import org.junit.rules.ExternalResource;
 import org.radarcns.config.Properties;
 import org.radarcns.mongo.util.MongoHelper;
 
+/**
+ * Rule to get a MongoClient. After use, all collections that were accessed are dropped again.
+ */
 public class MongoRule extends ExternalResource {
     private MongoClient client;
-    private ConcurrentHashSet<String> collections;
+    private ConcurrentHashSet<String> queriedCollections;
     private MongoClient originalClient;
 
     @Override
     public void before() {
-        collections = new ConcurrentHashSet<>();
+        queriedCollections = new ConcurrentHashSet<>();
         client = null;
         originalClient = null;
     }
@@ -33,14 +35,14 @@ public class MongoRule extends ExternalResource {
         if (client == null) {
             final MongoClient originalClient = getOriginalClient();
             client = spy(originalClient);
-            // test that only the wanted collections are queried.
+            // test that only the wanted queriedCollections are queried.
             doAnswer(invocation -> {
                 String dbName = invocation.getArgument(0);
                 final MongoDatabase originalDatabase = originalClient.getDatabase(dbName);
                 MongoDatabase spiedDatabase = spy(originalDatabase);
                 doAnswer(invocation1 -> {
                     String collectionName = invocation1.getArgument(0);
-                    collections.add(collectionName);
+                    queriedCollections.add(collectionName);
                     return originalDatabase.getCollection(collectionName);
                 }).when(spiedDatabase).getCollection(anyString());
                 return spiedDatabase;
@@ -60,27 +62,21 @@ public class MongoRule extends ExternalResource {
         return originalClient;
     }
 
+    /** Get a MongoDB collection. */
     public MongoCollection<Document> getCollection(String collection) {
-        collections.add(collection);
+        queriedCollections.add(collection);
         return MongoHelper.getCollection(getOriginalClient(), collection);
     }
 
-    public void assertCollectionQueried(String collectionName) {
-        assertTrue("MongoDB collection " + collectionName
-                + " should have been queried, but it was not. Collections "
-                + collections + " were queried instead.", collections.contains(collectionName));
-    }
-
-    public void assertCollectionNotQueried(String collectionName) {
-        assertTrue("MongoDB collection " + collectionName
-                + " should not have been queried, but it was. Collections "
-                + collections + " were queried.", !collections.contains(collectionName));
+    /** The list of collections that have been queried so far. */
+    public ConcurrentHashSet<String> getQueriedCollections() {
+        return queriedCollections;
     }
 
     @Override
     public void after() {
         if (originalClient != null) {
-            collections.forEach(tmp -> MongoHelper.getCollection(originalClient, tmp).drop());
+            queriedCollections.forEach(c -> MongoHelper.getCollection(originalClient, c).drop());
             originalClient.close();
         }
     }

@@ -28,7 +28,7 @@ public class SourceTypeEndPointTest {
     @Test
     public void getAllSourceTypesStatusTest200() throws IOException {
 
-        List<SourceTypeDTO> sourceTypes = apiClient.requestJsonList(
+        List<SourceTypeDTO> sourceTypes = apiClient.getJsonList(
                 BasePath.SOURCE_TYPES, SourceTypeDTO.class, Status.OK);
         assertNotNull(sourceTypes);
         assertTrue(sourceTypes.size() > 0);
@@ -36,7 +36,7 @@ public class SourceTypeEndPointTest {
 
     @Test
     public void getSourceTypeByIdentifierStatusTest200() throws IOException {
-        SourceTypeDTO project = apiClient.requestJson(
+        SourceTypeDTO project = apiClient.getJson(
                 BasePath.SOURCE_TYPES + '/' + PRODUCER + '/' + MODEL + '/' + CATALOGUE_VERSION,
                 SourceTypeDTO.class, Status.OK);
         assertEquals(PRODUCER, project.getProducer());
@@ -47,8 +47,8 @@ public class SourceTypeEndPointTest {
 
     @Test
     public void getSourceTypeByUnavailableIdStatusTest404() throws IOException {
-        apiClient.assertRequest(
+        assertNotNull(apiClient.get(
                 BasePath.SOURCE_TYPES + '/' + "SOMETHING" + '/' + MODEL + '/' + CATALOGUE_VERSION,
-                APPLICATION_JSON, Status.NOT_FOUND);
+                APPLICATION_JSON, Status.NOT_FOUND));
     }
 }
