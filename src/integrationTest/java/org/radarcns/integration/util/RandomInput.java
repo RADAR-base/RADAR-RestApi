@@ -127,8 +127,8 @@ public class RandomInput {
 
         Dataset dataset = expectedDataSetFactory.getDataset(expectedValue, key.getProjectId(),
                 key.getUserId(), key.getSourceId(), sourceType, sourceDataName, stat, timeWindow);
-        List<Document> documents = expectedDocumentFactory
-                .produceExpectedDocuments(expectedValue, timeWindow);
+        List<Document> documents = expectedDocumentFactory.produceExpectedDocuments(
+                expectedValue, timeWindow);
 
         Map<String, Object> map = new HashMap<>();
         map.put(DATASET, dataset);

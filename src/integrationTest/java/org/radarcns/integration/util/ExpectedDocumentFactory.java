@@ -194,8 +194,8 @@ public class ExpectedDocumentFactory {
         return new Document().append(ID, buildId(projectName, subjectId, sourceId, start, end))
                 .append(KEY, buildObservationKeyDocument(projectName, subjectId, sourceId))
                 .append(VALUE, new Document()
-                        .append(START, start)
-                        .append(END, end));
+                        .append(START, Date.from(start))
+                        .append(END, Date.from(end)));
     }
 
     private static Document buildObservationKeyDocument(String projectName, String subjectId,
