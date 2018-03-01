@@ -17,9 +17,10 @@
 package org.radarcns.monitor;
 
 import static org.junit.Assert.assertEquals;
-import static org.radarcns.integration.util.ExpectedDocumentFactory.buildDocument;
-import static org.radarcns.mongo.util.MongoHelper.END;
-import static org.radarcns.mongo.util.MongoHelper.START;
+import static org.radarcns.integration.util.ExpectedDocumentFactory.getDocumentsForStatistics;
+import static org.radarcns.webapp.SampleDataHandler.PROJECT;
+import static org.radarcns.webapp.SampleDataHandler.SOURCE;
+import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -39,9 +40,6 @@ import org.radarcns.service.SourceMonitorService;
 
 public class SourceMonitorServiceDbTest {
 
-    private static final String PROJECT_NAME = "radar";
-    private static final String SUBJECT_ID = "sub-1";
-    private static final String SOURCE_ID = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
     private static final String SOURCETYPE_PRODUCER = "EMPATICA";
     private static final String SOURCETYPE_MODEL = "E4";
     private static final String SOURCETYPE_CATALOGUE_VERSION = "v1";
@@ -76,13 +74,12 @@ public class SourceMonitorServiceDbTest {
         Date end = Date.from(Instant
                 .ofEpochSecond(start.getTime()
                         + TimeUnit.SECONDS.toMillis(60 / (WINDOWS + 1))));
-        Document doc = getDocumentsForStatistics(start, end);
+        Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, end);
         MongoCollection collection = MongoHelper.getCollection(mongoClient, sourceType
                 .getSourceStatisticsMonitorTopic());
         collection.insertOne(doc);
 
-        TimeFrame result = monitor.getEffectiveTimeFrame(PROJECT_NAME, SUBJECT_ID,
-                SOURCE_ID, sourceType);
+        TimeFrame result = monitor.getEffectiveTimeFrame(PROJECT, SUBJECT, SOURCE, sourceType);
 
         assertEquals(start.toInstant(), result.getStartDateTime());
         assertEquals(end.toInstant(), result.getEndDateTime());
@@ -95,14 +92,14 @@ public class SourceMonitorServiceDbTest {
         Date end = Date.from(start.toInstant().plusSeconds(60));
         Date earlier = Date.from(start.toInstant().minusSeconds(10));
         Date later = Date.from(end.toInstant().plusSeconds(65));
-        Document doc = getDocumentsForStatistics(start, end);
-        Document second = getDocumentsForStatistics(earlier, later);
+        Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, end);
+        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, earlier,
+                later);
         MongoCollection collection = MongoHelper.getCollection(mongoClient, sourceType
                 .getSourceStatisticsMonitorTopic());
         collection.insertMany(Arrays.asList(doc, second));
 
-        TimeFrame result = monitor.getEffectiveTimeFrame(PROJECT_NAME, SUBJECT_ID,
-                SOURCE_ID, sourceType);
+        TimeFrame result = monitor.getEffectiveTimeFrame(PROJECT, SUBJECT, SOURCE, sourceType);
 
         assertEquals(earlier.toInstant(), result.getStartDateTime());
         assertEquals(later.toInstant(), result.getEndDateTime());
@@ -113,12 +110,5 @@ public class SourceMonitorServiceDbTest {
         Utility.dropCollection(mongoClient, sourceType.getSourceStatisticsMonitorTopic());
     }
 
-
-    private static Document getDocumentsForStatistics(Object start, Object end) {
-        Document value = new Document()
-                .append(START, start)
-                .append(END, end);
-        return buildDocument(PROJECT_NAME, SUBJECT_ID, SOURCE_ID, start, end, value);
-    }
 
 }

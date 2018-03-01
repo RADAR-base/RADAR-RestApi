@@ -19,6 +19,8 @@ package org.radarcns.webapp;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.radarcns.webapp.SampleDataHandler.PROJECT;
+import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
 import static org.radarcns.webapp.resource.BasePath.PROJECTS;
 import static org.radarcns.webapp.resource.BasePath.SOURCES;
 import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
@@ -39,10 +41,6 @@ import org.radarcns.integration.util.Utility;
 import org.radarcns.util.RadarConverter;
 
 public class SourceEndPointTest {
-
-
-    private static final String PROJECT = "radar";
-    private static final String SUBJECT = "sub-1";
 
     @Rule
     public final ApiClient apiClient = new ApiClient(

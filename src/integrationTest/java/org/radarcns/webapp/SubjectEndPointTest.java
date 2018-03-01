@@ -21,9 +21,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.integration.util.ExpectedDocumentFactory.buildDocument;
-import static org.radarcns.mongo.util.MongoHelper.END;
-import static org.radarcns.mongo.util.MongoHelper.START;
+import static org.radarcns.integration.util.ExpectedDocumentFactory.getDocumentsForStatistics;
+import static org.radarcns.webapp.SampleDataHandler.PROJECT;
+import static org.radarcns.webapp.SampleDataHandler.SOURCE;
+import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
 import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -50,9 +51,6 @@ import org.radarcns.webapp.resource.BasePath;
 
 public class SubjectEndPointTest {
 
-    private static final String PROJECT_NAME = "radar";
-    private static final String SUBJECT_ID = "sub-1";
-    private static final String SOURCE_ID = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
     private static final String MONITOR_STATISTICS_TOPIC = "source_statistics_empatica_e4";
 
 
@@ -66,7 +64,7 @@ public class SubjectEndPointTest {
         insertMonitorStatistics();
 
         Response actual = apiClient
-                .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS,
+                .request(BasePath.PROJECTS + "/" + PROJECT + "/" + SUBJECTS,
                         APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
 
@@ -75,25 +73,18 @@ public class SubjectEndPointTest {
 
         assertNotNull(subjects);
         assertTrue(subjects.size() > 0);
-        assertEquals(PROJECT_NAME, subjects.get(0).getProject());
+        assertEquals(PROJECT, subjects.get(0).getProject());
 
     }
 
-
-    private static Document getDocumentsForStatistics(Object start, Object end) {
-        Document value = new Document()
-                .append(START, start)
-                .append(END, end);
-        return buildDocument(PROJECT_NAME, SUBJECT_ID, SOURCE_ID, start, end, value);
-    }
 
     private void insertMonitorStatistics() {
         MongoClient mongoClient = Utility.getMongoClient();
         Date start = Date.from(Instant.now());
         Date end = Date.from(start.toInstant().plusSeconds(60));
         Date later = Date.from(end.toInstant().plusSeconds(65));
-        Document doc = getDocumentsForStatistics(start, end);
-        Document second = getDocumentsForStatistics(start, later);
+        Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, end);
+        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, later);
         MongoCollection collection = MongoHelper
                 .getCollection(mongoClient, MONITOR_STATISTICS_TOPIC);
         collection.insertMany(Arrays.asList(doc, second));
@@ -104,16 +95,16 @@ public class SubjectEndPointTest {
         insertMonitorStatistics();
 
         Response actual = apiClient
-                .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS + "/"
-                        + SUBJECT_ID, APPLICATION_JSON, Status.OK);
+                .request(BasePath.PROJECTS + "/" + PROJECT + "/" + SUBJECTS + "/"
+                        + SUBJECT, APPLICATION_JSON, Status.OK);
         assertTrue(actual.isSuccessful());
 
         ObjectReader reader = RadarConverter.readerFor(Subject.class);
         Subject subject = reader.readValue(actual.body().byteStream());
 
         assertNotNull(subject);
-        assertEquals(SUBJECT_ID, subject.getSubjectId());
-        assertEquals(PROJECT_NAME, subject.getProject());
+        assertEquals(SUBJECT, subject.getSubjectId());
+        assertEquals(PROJECT, subject.getProject());
         assertTrue(subject.getSources().size() > 0);
         assertNotNull(subject.getSources().get(0)
                 .getEffectiveTimeFrame()
@@ -128,7 +119,7 @@ public class SubjectEndPointTest {
     @Test
     public void getSubjectTest404() throws IOException {
         Response actual = apiClient
-                .request(BasePath.PROJECTS + "/" + PROJECT_NAME + "/" + SUBJECTS + "/"
+                .request(BasePath.PROJECTS + "/" + PROJECT + "/" + SUBJECTS + "/"
                         + "OTHER", APPLICATION_JSON, Status.NOT_FOUND);
         assertFalse(actual.isSuccessful());
         assertEquals(actual.code(), Status.NOT_FOUND.getStatusCode());

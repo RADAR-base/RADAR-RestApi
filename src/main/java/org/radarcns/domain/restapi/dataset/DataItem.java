@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class DataItem {
     @JsonProperty
-    private Object sample;
+    private Object value;
 
     @JsonProperty
     private Instant startDateTime;
@@ -22,20 +22,20 @@ public class DataItem {
     /**
      * All-args constructor.
      *
-     * @param sample Sample value.
-     * @param startDateTime Point in time (ISO8601) with UTC timezone of first sample in data-set.
+     * @param value Sample value.
+     * @param startDateTime Point in time (ISO8601) with UTC timezone of first value in data-set.
      */
-    public DataItem(java.lang.Object sample, Instant startDateTime) {
-        this.sample = sample;
+    public DataItem(java.lang.Object value, Instant startDateTime) {
+        this.value = value;
         this.startDateTime = startDateTime;
     }
 
-    public Object getSample() {
-        return sample;
+    public Object getValue() {
+        return value;
     }
 
-    public void setSample(Object sample) {
-        this.sample = sample;
+    public void setValue(Object value) {
+        this.value = value;
     }
 
     public Instant getStartDateTime() {
@@ -56,12 +56,12 @@ public class DataItem {
         }
         DataItem dataItem = (DataItem) o;
 
-        return Objects.equals(sample, dataItem.sample)
+        return Objects.equals(value, dataItem.value)
                 && Objects.equals(startDateTime, dataItem.startDateTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sample, startDateTime);
+        return Objects.hash(value, startDateTime);
     }
 }

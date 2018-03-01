@@ -21,6 +21,7 @@ import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
 import static org.radarcns.mongo.util.MongoHelper.KEY;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
@@ -47,7 +48,7 @@ public class ExpectedValueTest {
     @Test
     public void matchDatasetOnDocuments() throws Exception {
         Map<String, Object> map = RandomInput.getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
-                "empatica_e4_v1", "HEART_RATE", COUNT, TIME_WINDOW, SAMPLES, false);
+                "empatica_e4_v1", "HEART_RATE", COUNT, TIME_WINDOW, SAMPLES, false, Instant.now());
 
         List<Document> docs = (List<Document>) map.get(RandomInput.DOCUMENTS);
         int count = 0;
@@ -61,7 +62,7 @@ public class ExpectedValueTest {
 
         count = 0;
         for (DataItem item : dataset.getDataset()) {
-            count += (Double) item.getSample();
+            count += (Double) item.getValue();
         }
         assertEquals(SAMPLES, count);
 

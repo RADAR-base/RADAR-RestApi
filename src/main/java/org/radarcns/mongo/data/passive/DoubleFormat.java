@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.sourcedata;
+package org.radarcns.mongo.data.passive;
 
-import static org.radarcns.mongo.data.sourcedata.DataFormat.getQuartiles;
+import static org.radarcns.mongo.data.passive.DataFormat.getQuartiles;
 import static org.radarcns.mongo.util.MongoHelper.COUNT;
 
 import java.util.List;
@@ -57,7 +57,7 @@ public class DoubleFormat extends MongoSourceDataWrapper {
                 return RadarConverter.roundDouble(
                         doc.getDouble(field) / getExpectedRecordCount(header.getTimeWindow()), 2);
             default:
-                return doc.getDouble(field);
+                return doc.get(field);
         }
     }
 

@@ -24,7 +24,7 @@ services:
     #             RADAR Rest Api             #
     #----------------------------------------#
     rest-api:
-      image: radarcns/radar-restapi:dev
+      image: radarbase/radar-restapi:dev
       depends_on:
         - hotstorage
         - managementportal-app

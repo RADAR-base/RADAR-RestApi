@@ -16,9 +16,9 @@
 
 package org.radarcns.integration.util;
 
-import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusRecordCounter.RECORD_COLLECTION;
-import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusServerStatus.STATUS_COLLECTION;
-import static org.radarcns.mongo.data.applicationstatus.ApplicationStatusUpTime.UPTIME_COLLECTION;
+import static org.radarcns.mongo.data.monitor.ApplicationStatusRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.mongo.data.monitor.ApplicationStatusServerStatus.STATUS_COLLECTION;
+import static org.radarcns.mongo.data.monitor.ApplicationStatusUpTime.UPTIME_COLLECTION;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.MongoClient;
@@ -121,13 +121,13 @@ public class Utility {
         Object value;
         for (DataItem item : input.getDataset()) {
 
-            if (item.getSample() instanceof Double) {
-                value = item.getSample();
-            } else if (item.getSample() instanceof Acceleration) {
-                Acceleration temp = (Acceleration) item.getSample();
+            if (item.getValue() instanceof Double) {
+                value = item.getValue();
+            } else if (item.getValue() instanceof Acceleration) {
+                Acceleration temp = (Acceleration) item.getValue();
                 value = new Acceleration(temp.getX(), temp.getY(), temp.getZ());
             } else {
-                throw new IllegalArgumentException(item.getSample().getClass().getCanonicalName()
+                throw new IllegalArgumentException(item.getValue().getClass().getCanonicalName()
                         + " is not supported yet");
             }
 

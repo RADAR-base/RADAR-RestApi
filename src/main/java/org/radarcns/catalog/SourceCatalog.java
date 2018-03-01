@@ -84,15 +84,12 @@ public class SourceCatalog {
      */
     public SourceTypeDTO getSourceType(String producer, String model, String catalogVersion)
             throws NotFoundException, IOException {
-        SourceTypeDTO result;
         try {
-            result = sourceTypes.get(new SourceTypeIdentifier(producer, model,
-                    catalogVersion));
-        } catch (NoSuchElementException exe) {
-            throw new NotFoundException("Cannot find sourceType-type of identifier "
-                    + producer + ":" + model + ":" + catalogVersion, exe);
+            return sourceTypes.get(new SourceTypeIdentifier(producer, model, catalogVersion));
+        } catch (NoSuchElementException ex) {
+            throw new NotFoundException(
+                    "Source-type " + producer + "_" + model + "_" + catalogVersion + " not found.");
         }
-        return result;
     }
 
 
@@ -105,14 +102,11 @@ public class SourceCatalog {
      */
     public SourceDataDTO getSourceData(String sourceDataName)
             throws NotFoundException, IOException {
-        SourceDataDTO result = sourceData.get(sourceDataName);
-        if (result == null) {
-            result = sourceData.get(true).get(sourceDataName);
-        }
-        if (result == null) {
+        try {
+            return sourceData.get(sourceDataName);
+        } catch (NoSuchElementException ex) {
             throw new NotFoundException(
-                    "Cannot find sourceType-data of identifier " + sourceDataName);
+                    "Source-data " + sourceDataName + " not found.");
         }
-        return result;
     }
 }

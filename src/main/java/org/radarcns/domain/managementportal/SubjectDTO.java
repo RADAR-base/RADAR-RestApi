@@ -19,7 +19,6 @@ package org.radarcns.domain.managementportal;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +35,7 @@ public class SubjectDTO {
     @JsonProperty
     private String externalId;
     @JsonProperty
-    private URL externalLink;
+    private String externalLink;
     @JsonProperty
     private String email;
     @JsonProperty
@@ -61,7 +60,7 @@ public class SubjectDTO {
         return externalId;
     }
 
-    public URL getExternalLink() {
+    public String getExternalLink() {
         return externalLink;
     }
 
