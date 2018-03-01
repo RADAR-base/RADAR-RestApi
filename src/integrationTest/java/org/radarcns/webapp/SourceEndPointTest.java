@@ -45,7 +45,6 @@ import org.radarcns.domain.restapi.Source;
 import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.webapp.resource.BasePath;
 
 public class SourceEndPointTest {
 
@@ -103,7 +102,7 @@ public class SourceEndPointTest {
     @Test
     public void getSourceByIdInvalidConnected() throws IOException {
         assertNotNull(apiClient.get(PROJECTS + '/' + PROJECT + '/' + SUBJECTS + '/' + SUBJECT + '/'
-                        + SOURCES + '/' +"OTHER",
+                        + SOURCES + '/' + "OTHER",
                 APPLICATION_JSON, Status.NOT_FOUND));
     }
 
