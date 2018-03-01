@@ -16,6 +16,7 @@
 
 package org.radarcns.webapp;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -44,6 +45,7 @@ import org.radarcns.domain.restapi.Source;
 import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
+import org.radarcns.webapp.resource.BasePath;
 
 public class SourceEndPointTest {
 
@@ -100,12 +102,9 @@ public class SourceEndPointTest {
 
     @Test
     public void getSourceByIdInvalidConnected() throws IOException {
-        Instant now = Instant.now();
-        insertMonitorStatistics(now.minus(Duration.ofMinutes(30)), now);
-
-        String requestPath = PROJECTS + '/' + PROJECT + '/' + SUBJECTS + '/' + SUBJECT + '/'
-                + SOURCES + '/' + "something";
-        apiClient.getJson(requestPath, Source.class, Status.NOT_FOUND);
+        assertNotNull(apiClient.get(PROJECTS + '/' + PROJECT + '/' + SUBJECTS + '/' + SUBJECT + '/'
+                        + SOURCES + '/' +"OTHER",
+                APPLICATION_JSON, Status.NOT_FOUND));
     }
 
 
