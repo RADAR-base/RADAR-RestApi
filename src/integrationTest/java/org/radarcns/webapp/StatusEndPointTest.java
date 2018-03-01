@@ -16,6 +16,8 @@
 
 package org.radarcns.webapp;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import javax.ws.rs.core.Response.Status;
 import org.junit.Rule;
@@ -35,6 +37,7 @@ public class StatusEndPointTest {
     @Test
     public void getStatusTest200() throws IOException {
         HdfsBinsData bins = apiClient.getJson("hdfs", HdfsBinsData.class, Status.OK);
+        assertNotNull(bins);
         HdfsBinsDataTest.assertBinsMatchFile(bins);
     }
 }
