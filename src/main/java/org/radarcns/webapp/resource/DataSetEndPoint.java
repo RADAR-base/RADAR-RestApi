@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * Sensor web-app. Function set to access all data data.
  */
 @Authenticated
-@Path("/" + DATA)
+@Path('/' + DATA)
 public class DataSetEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetEndPoint.class);

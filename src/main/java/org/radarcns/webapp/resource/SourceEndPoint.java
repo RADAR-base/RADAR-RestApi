@@ -47,7 +47,7 @@ import org.radarcns.webapp.validation.Alphanumeric;
  * SourceDefinition web-app. Function set to access source information.
  */
 @Authenticated
-@Path("/" + PROJECTS)
+@Path('/' + PROJECTS)
 public class SourceEndPoint {
 
     @Inject
@@ -65,7 +65,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS + "/{" + SUBJECT_ID + "}" + "/" + SOURCES)
+    @Path("/{" + PROJECT_NAME + "}" + '/' + SUBJECTS + "/{" + SUBJECT_ID + "}" + '/' + SOURCES)
     @Operation(summary = "Return all the sources used by a subject",
             description = "Return all known sources associated with the give subjectID")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
@@ -91,7 +91,7 @@ public class SourceEndPoint {
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/{" + PROJECT_NAME + "}" + "/" + SUBJECTS + "/{" + SUBJECT_ID + "}" + "/" + SOURCES
+    @Path("/{" + PROJECT_NAME + "}" + '/' + SUBJECTS + "/{" + SUBJECT_ID + "}" + '/' + SOURCES
             + "}/{" + SOURCE_ID + "}")
     @Operation(summary = "Return a source requested")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")

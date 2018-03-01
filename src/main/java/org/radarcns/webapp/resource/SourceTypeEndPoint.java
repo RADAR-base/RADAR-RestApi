@@ -24,7 +24,7 @@ import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 @Authenticated
-@Path("/" + SOURCE_TYPES)
+@Path('/' + SOURCE_TYPES)
 public class SourceTypeEndPoint {
 
     @Inject

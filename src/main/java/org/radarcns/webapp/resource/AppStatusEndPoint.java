@@ -47,7 +47,7 @@ import org.radarcns.webapp.validation.Alphanumeric;
  * Android application status web-app. Function set to access Android app status information.
  */
 @Authenticated
-@Path("/" + APPLICATION_STATUS)
+@Path('/' + APPLICATION_STATUS)
 public class AppStatusEndPoint {
 
     @Inject

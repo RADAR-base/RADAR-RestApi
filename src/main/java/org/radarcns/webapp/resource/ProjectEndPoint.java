@@ -21,7 +21,7 @@ import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.webapp.filter.Authenticated;
 
 @Authenticated
-@Path("/" + PROJECTS)
+@Path('/' + PROJECTS)
 public class ProjectEndPoint {
 
     @Inject
