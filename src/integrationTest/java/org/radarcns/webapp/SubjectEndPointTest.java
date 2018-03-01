@@ -21,7 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.radarcns.domain.restapi.SourceStatus.CONNECTED;
 import static org.radarcns.integration.util.ExpectedDocumentFactory.getDocumentsForStatistics;
+import static org.radarcns.webapp.SampleDataHandler.MONITOR_STATISTICS_TOPIC;
 import static org.radarcns.webapp.SampleDataHandler.PROJECT;
 import static org.radarcns.webapp.SampleDataHandler.SOURCE;
 import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
@@ -31,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -51,9 +54,6 @@ import org.radarcns.webapp.resource.BasePath;
 
 public class SubjectEndPointTest {
 
-    private static final String MONITOR_STATISTICS_TOPIC = "source_statistics_empatica_e4";
-
-
     @Rule
     public final ApiClient apiClient = new ApiClient(
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
@@ -61,7 +61,8 @@ public class SubjectEndPointTest {
 
     @Test
     public void getSubjectsByProjectName200() throws IOException {
-        insertMonitorStatistics();
+        Instant now = Instant.now();
+        insertMonitorStatistics(now.minus(Duration.ofMinutes(30)), now);
 
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT + "/" + SUBJECTS,
@@ -78,13 +79,12 @@ public class SubjectEndPointTest {
     }
 
 
-    private void insertMonitorStatistics() {
+    private void insertMonitorStatistics(Instant startTime, Instant end) {
         MongoClient mongoClient = Utility.getMongoClient();
-        Date start = Date.from(Instant.now());
-        Date end = Date.from(start.toInstant().plusSeconds(60));
-        Date later = Date.from(end.toInstant().plusSeconds(65));
-        Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, end);
-        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, later);
+        Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, Date.from(startTime),
+                Date.from(end));
+        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, Date.from(startTime),
+                Date.from(end.plus(Duration.ofMinutes(5))));
         MongoCollection collection = MongoHelper
                 .getCollection(mongoClient, MONITOR_STATISTICS_TOPIC);
         collection.insertMany(Arrays.asList(doc, second));
@@ -92,7 +92,8 @@ public class SubjectEndPointTest {
 
     @Test
     public void getSubjectsBySubjectIdAndProjectName200() throws IOException {
-        insertMonitorStatistics();
+        Instant now = Instant.now();
+        insertMonitorStatistics(now.minus(Duration.ofMinutes(30)), now);
 
         Response actual = apiClient
                 .request(BasePath.PROJECTS + "/" + PROJECT + "/" + SUBJECTS + "/"
@@ -112,6 +113,7 @@ public class SubjectEndPointTest {
         assertNotNull(subject.getSources().get(0)
                 .getEffectiveTimeFrame()
                 .getEndDateTime());
+        assertEquals(CONNECTED, subject.getSources().get(0).getStatus());
         assertNotNull(subject.getLastSeen());
 
     }

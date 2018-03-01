@@ -20,4 +20,5 @@ public interface SampleDataHandler {
     String PRODUCER = "Empatica";
     String MODEL = "E4";
     String CATALOGUE_VERSION = "v1";
+    String MONITOR_STATISTICS_TOPIC = "source_statistics_empatica_e4";
 }
