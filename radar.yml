@@ -24,7 +24,7 @@ management_portal_config:
 # Timeout duration for every source-type to decide source status whether its connected or not.
 # A source-type should be defined by following the convention of producer_model as mentioned in
 # the specification in radar-schemas
-# timeout should be specified as {@code PnDTnHnMn.nS}.
+# timeout should be specified as the ISO-8601 duration format {@code PnDTnHnMn.nS}.
 source-type-connection-timeout:
-    android_phone: 2H
-    empatica_e4: 1H
+    android_phone: PT2H
+    empatica_e4: PT1H

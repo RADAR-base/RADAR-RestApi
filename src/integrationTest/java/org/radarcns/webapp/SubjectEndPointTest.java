@@ -46,8 +46,6 @@ import org.radarcns.webapp.resource.BasePath;
 
 public class SubjectEndPointTest {
 
-    private static final String MONITOR_STATISTICS_TOPIC = "source_statistics_empatica_e4";
-
     @Rule
     public final ApiClient apiClient = new ApiClient(
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
@@ -69,27 +67,6 @@ public class SubjectEndPointTest {
 
     }
 
-
-    private void insertMonitorStatistics(Instant startTime, Instant end) {
-        MongoClient mongoClient = Utility.getMongoClient();
-        Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, Date.from(startTime),
-                Date.from(end));
-        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, Date.from(startTime),
-                Date.from(end.plus(Duration.ofMinutes(5))));
-        MongoCollection collection = MongoHelper
-                .getCollection(mongoClient, MONITOR_STATISTICS_TOPIC);
-        collection.insertMany(Arrays.asList(doc, second));
-    }
-
-    private void insertMonitorStatistics() {
-        Instant start = Instant.now();
-        Instant end = start.plusSeconds(60);
-        Instant later = end.plusSeconds(5);
-        Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, end);
-        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, later);
-        MongoCollection<Document> collection = mongoRule.getCollection(MONITOR_STATISTICS_TOPIC);
-        collection.insertMany(Arrays.asList(doc, second));
-    }
     @Test
     public void getSubjectsBySubjectIdAndProjectName200() throws IOException {
         Instant now = Instant.now();
@@ -120,4 +97,13 @@ public class SubjectEndPointTest {
                 BasePath.PROJECTS + '/' + PROJECT + '/' + SUBJECTS + "/OTHER",
                 APPLICATION_JSON, Status.NOT_FOUND));
     }
+
+    private void insertMonitorStatistics(Instant startTime, Instant end) {
+        Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, startTime, end);
+        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, startTime,
+                end.plus(Duration.ofMinutes(5)));
+        MongoCollection<Document> collection = mongoRule.getCollection(MONITOR_STATISTICS_TOPIC);
+        collection.insertMany(Arrays.asList(doc, second));
+    }
+
 }
