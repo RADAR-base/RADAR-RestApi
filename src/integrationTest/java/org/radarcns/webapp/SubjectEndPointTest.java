@@ -20,16 +20,16 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.integration.util.ExpectedDocumentFactory.buildDocument;
-import static org.radarcns.mongo.util.MongoHelper.END;
-import static org.radarcns.mongo.util.MongoHelper.START;
+import static org.radarcns.integration.util.ExpectedDocumentFactory.getDocumentsForStatistics;
+import static org.radarcns.webapp.SampleDataHandler.PROJECT;
+import static org.radarcns.webapp.SampleDataHandler.SOURCE;
+import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
 import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
@@ -43,9 +43,6 @@ import org.radarcns.webapp.resource.BasePath;
 
 public class SubjectEndPointTest {
 
-    private static final String PROJECT_NAME = "radar";
-    private static final String SUBJECT_ID = "sub-1";
-    private static final String SOURCE_ID = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
     private static final String MONITOR_STATISTICS_TOPIC = "source_statistics_empatica_e4";
 
     @Rule
@@ -60,28 +57,20 @@ public class SubjectEndPointTest {
         insertMonitorStatistics();
 
         List<Subject> subjects = apiClient.getJsonList(
-                BasePath.PROJECTS + '/' + PROJECT_NAME + '/' + SUBJECTS,
+                BasePath.PROJECTS + '/' + PROJECT + '/' + SUBJECTS,
                 Subject.class, Status.OK);
-
         assertNotNull(subjects);
         assertTrue(subjects.size() > 0);
-        assertEquals(PROJECT_NAME, subjects.get(0).getProject());
+        assertEquals(PROJECT, subjects.get(0).getProject());
 
-    }
-
-    private static Document getDocumentsForStatistics(Object start, Object end) {
-        Document value = new Document()
-                .append(START, start)
-                .append(END, end);
-        return buildDocument(PROJECT_NAME, SUBJECT_ID, SOURCE_ID, start, end, value);
     }
 
     private void insertMonitorStatistics() {
-        Date start = Date.from(Instant.now());
-        Date end = Date.from(start.toInstant().plusSeconds(60));
-        Date later = Date.from(end.toInstant().plusSeconds(65));
-        Document doc = getDocumentsForStatistics(start, end);
-        Document second = getDocumentsForStatistics(start, later);
+        Instant start = Instant.now();
+        Instant end = start.plusSeconds(60);
+        Instant later = end.plusSeconds(5);
+        Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, end);
+        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, later);
         MongoCollection<Document> collection = mongoRule.getCollection(MONITOR_STATISTICS_TOPIC);
         collection.insertMany(Arrays.asList(doc, second));
     }
@@ -91,12 +80,12 @@ public class SubjectEndPointTest {
         insertMonitorStatistics();
 
         Subject subject = apiClient.getJson(
-                BasePath.PROJECTS + '/' + PROJECT_NAME + '/' + SUBJECTS + '/' + SUBJECT_ID,
+                BasePath.PROJECTS + '/' + PROJECT + '/' + SUBJECTS + '/' + SUBJECT,
                 Subject.class, Status.OK);
 
         assertNotNull(subject);
-        assertEquals(SUBJECT_ID, subject.getSubjectId());
-        assertEquals(PROJECT_NAME, subject.getProject());
+        assertEquals(SUBJECT, subject.getSubjectId());
+        assertEquals(PROJECT, subject.getProject());
         assertTrue(subject.getSources().size() > 0);
         assertNotNull(subject.getSources().get(0)
                 .getEffectiveTimeFrame()
@@ -111,7 +100,7 @@ public class SubjectEndPointTest {
     @Test
     public void getSubjectTest404() throws IOException {
         assertNotNull(apiClient.get(
-                BasePath.PROJECTS + '/' + PROJECT_NAME + '/' + SUBJECTS + "/OTHER",
+                BasePath.PROJECTS + '/' + PROJECT + '/' + SUBJECTS + "/OTHER",
                 APPLICATION_JSON, Status.NOT_FOUND));
     }
 }

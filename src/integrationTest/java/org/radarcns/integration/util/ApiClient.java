@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response.Status;
+import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.hamcrest.CoreMatchers;
@@ -36,14 +38,8 @@ import org.slf4j.LoggerFactory;
 public class ApiClient extends ExternalResource {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiClient.class);
-
-    private final ServerConfig config;
-
     private static final OAuth2Client oAuth2Client;
-
     private static final OAuth2AccessTokenDetails token;
-
-    private RestClient client;
 
     static {
         try {
@@ -64,6 +60,9 @@ public class ApiClient extends ExternalResource {
             throw new AssertionError();
         }
     }
+
+    private final ServerConfig config;
+    private RestClient client;
 
     /**
      * Client to the REST API with given server and base path.
@@ -135,6 +134,37 @@ public class ApiClient extends ExternalResource {
                             .collect(Collectors.toList())));
         }
         return response;
+    }
+
+    /**
+     * Makes an HTTP POST request to given URL with JSON request and response types.
+     *
+     * @param relativePath path relative to the base URL, without starting slash.
+     * @param body contents to include in the POST request as JSON.
+     * @param responseClass JSON class to deserialize.
+     * @param expectedResponseCodes response codes that are considered valid.
+     * @param <T> response class type
+     * @return Parsed JSON response
+     * @throws IOException if the request could not be executed
+     */
+    public <T> T postJson(String relativePath, Object body, Class<T> responseClass,
+            Status... expectedResponseCodes) throws IOException {
+        RequestBody requestBody = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"),
+                RadarConverter.writerFor(body.getClass()).writeValueAsBytes(body));
+
+        Request request = this.client.requestBuilder(relativePath)
+                .post(requestBody)
+                .addHeader("User-Agent", "Mozilla/5.0")
+                .addHeader("Accept", APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token.getAccessToken())
+                .build();
+
+        try (Response response = request(request, expectedResponseCodes)) {
+            ResponseBody responseBody = response.body();
+            assertNotNull(responseBody);
+            return RadarConverter.readerFor(responseClass).readValue(responseBody.byteStream());
+        }
     }
 
     /**

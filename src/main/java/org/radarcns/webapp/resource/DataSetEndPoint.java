@@ -20,6 +20,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
+import static org.radarcns.service.DataSetService.emptyDataset;
 import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
 import static org.radarcns.webapp.resource.BasePath.DATA;
 import static org.radarcns.webapp.resource.BasePath.LATEST;
@@ -36,7 +37,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Date;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -48,7 +48,6 @@ import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
@@ -183,11 +182,5 @@ public class DataSetEndPoint {
 
     }
 
-    private static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
-            String sensor, DescriptiveStatistic stat, TimeWindow interval, TimeFrame timeFrame) {
 
-        return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
-                null, interval, timeFrame, null),
-                Collections.emptyList());
-    }
 }

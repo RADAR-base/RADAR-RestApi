@@ -18,6 +18,9 @@ package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.radarcns.webapp.SampleDataHandler.PROJECT;
+import static org.radarcns.webapp.SampleDataHandler.SOURCE;
+import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
 import static org.radarcns.webapp.resource.BasePath.APPLICATION_STATUS;
 
 import java.io.IOException;
@@ -37,9 +40,6 @@ import org.radarcns.integration.util.Utility;
 
 public class AppStatusEndPointTest {
 
-    private static final String PROJECT = "radar";
-    private static final String SUBJECT = "sub-1";
-    private static final String SOURCE = "03d28e5c-e005-46d4-a9b3-279c27fbbc83";
     private static final String SOURCE_PATH =
             APPLICATION_STATUS + '/' + PROJECT + '/' + SUBJECT + '/' + SOURCE;
 

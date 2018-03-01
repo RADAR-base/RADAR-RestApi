@@ -16,7 +16,7 @@ ext.simpleStackLock = "${simpleStackPath}/.RUNNING_INSTANCE_LOCK"
 ext.radarVolumePath = "${simpleStackPath}/volumes/radar"
 
 task buildDocker(type: Exec) {
-  commandLine sudoLinux + ['docker', 'image', 'build', '-t', 'radarcns/radar-restapi:dev', '.']
+  commandLine sudoLinux + ['docker', 'image', 'build', '-t', 'radarbase/radar-restapi:dev', '.']
 }
 
 task simpleConfigJson(type: Copy) {

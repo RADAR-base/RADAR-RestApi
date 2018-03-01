@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.sourcedata;
+package org.radarcns.mongo.data.passive;
 
 import static org.radarcns.mongo.util.MongoHelper.ASCENDING;
 import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
@@ -25,9 +25,8 @@ import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import java.time.Instant;
-import java.util.Date;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.restapi.TimeWindow;
@@ -90,59 +89,54 @@ public abstract class MongoSourceDataWrapper {
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public Dataset getLatestRecord(String projectName, String subject, String source, Header
             header, Stat stat, MongoCollection<Document> collection) {
-        MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, END,
-                        DESCENDING, 1, collection);
-
-        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
-                cursor);
+        try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
+                collection, projectName, subject, source, END, DESCENDING, 1)) {
+            return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
+                    cursor);
+        }
     }
 
     /**
      * Returns a {@code Dataset} containing alla available values for the couple subject
      * sourceType.
      *
+     * @param collection is the mongoDb collection that has to be queried
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param header information used to provide the data context
      * @param stat is the required statistical value
-     * @param collection is the mongoDb collection that has to be queried
      * @return data dataset for the given subject and sourceType, otherwise empty dataset
      * @see Dataset
      */
-    public Dataset getAllRecords(String projectName, String subject, String source, Header header,
-            MongoHelper.Stat stat, MongoCollection<Document> collection) {
-        MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectName, subject, source, START,
-                        ASCENDING, null, collection);
-
-        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
-                cursor);
+    public Dataset getAllRecords(MongoCollection<Document> collection, String projectName,
+            String subject, String source, Header header, Stat stat) {
+        try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
+                collection, projectName, subject, source, START, ASCENDING, null)) {
+            return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
+                    cursor);
+        }
     }
 
     /**
      * Returns a {@code Dataset} containing alla available values for the couple subject
      * sourceType.
      *
+     * @param collection is the mongoDb collection that has to be queried
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param header information used to provide the data context
      * @param stat is the required statistical value
-     * @param start is time window start point in millisecond
-     * @param end is time window end point in millisecond
-     * @param collection is the mongoDb collection that has to be queried
+     * @param timeFrame is time window
      * @return data-set for the given subject and source within the window, otherwise empty data-set
      * @see Dataset
      */
-    public Dataset getAllRecordsInWindow(String projectName, String subject, String source,
-            Header header, MongoHelper.Stat stat, Date start, Date end,
-            MongoCollection<Document> collection) {
-        MongoCursor<Document> cursor = MongoHelper
-                .findDocumentsByProjectAndSubjectAndSourceInWindow(projectName, subject, source,
-                        start, end, collection);
-
-        return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
-                cursor);
+    public Dataset getAllRecordsInWindow(MongoCollection<Document> collection, String projectName,
+            String subject, String source, Header header, Stat stat, TimeFrame timeFrame) {
+        try (MongoCursor<Document> cursor = MongoHelper.findDocumentsBySource(
+                collection, projectName, subject, source, timeFrame)) {
+            return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
+                    cursor);
+        }
     }
 
     /**
@@ -158,54 +152,31 @@ public abstract class MongoSourceDataWrapper {
      */
     private Dataset getDataSet(String field, DescriptiveStatistic stat, Header header,
             MongoCursor<Document> cursor) {
-        Instant start = null;
-        Instant end = null;
 
-        LinkedList<DataItem> list = new LinkedList<>();
+        TimeFrame timeFrame = null;
+
+        List<DataItem> list = new ArrayList<>();
 
         if (!cursor.hasNext()) {
             LOGGER.debug("Empty cursor");
-            cursor.close();
             return new Dataset(header, list);
         }
 
         while (cursor.hasNext()) {
             Document doc = cursor.next();
             Document key = (Document) doc.get(KEY);
-            Document value = (Document) doc.get(VALUE);
 
-            Date localStart = key.getDate(START);
-            Date localEnd = key.getDate(END);
-            Instant startInstant;
+            TimeFrame currentFrame = new TimeFrame(key.getDate(START), key.getDate(END));
+            timeFrame = TimeFrame.span(timeFrame, currentFrame);
 
-            if (localStart != null && localEnd != null) {
-                startInstant = localStart.toInstant();
-                Instant endInstant = localEnd.toInstant();
-                if (start == null) {
-                    start = startInstant;
-                    end = endInstant;
-                } else {
-                    if (start.isAfter(startInstant)) {
-                        start = startInstant;
-                    }
-                    if (end.isBefore(endInstant)) {
-                        end = endInstant;
-                    }
-                }
-            } else {
-                startInstant = null;
-            }
-
-            list.addLast(new DataItem(
-                    documentToDataFormat(value, field, stat, header),
-                    startInstant));
+            list.add(new DataItem(
+                    documentToDataFormat((Document) doc.get(VALUE), field, stat, header),
+                    currentFrame.getStartDateTime()));
         }
 
-        cursor.close();
+        header.setEffectiveTimeFrame(timeFrame);
 
-        header.setEffectiveTimeFrame(new TimeFrame(start, end));
-
-        LOGGER.debug("Found {} value", list.size());
+        LOGGER.debug("Found {} value(s)", list.size());
 
         return new Dataset(header, list);
     }
@@ -221,20 +192,20 @@ public abstract class MongoSourceDataWrapper {
             String topicName = sourceData.getTopic();
             switch (interval) {
                 case TEN_SECOND:
-                    return topicName.concat("_output");
+                    return topicName.concat("_10sec");
                 case ONE_MIN:
-                    return topicName.concat("_output_1min");
+                    return topicName.concat("_1min");
                 case TEN_MIN:
-                    return topicName.concat("_output_10min");
+                    return topicName.concat("_10min");
                 case ONE_HOUR:
-                    return topicName.concat("_output_1h");
+                    return topicName.concat("_1hour");
                 case ONE_DAY:
-                    return topicName.concat("_output_1d");
+                    return topicName.concat("_1day");
                 case ONE_WEEK:
-                    return topicName.concat("_output_1w");
+                    return topicName.concat("_1week");
                 case UNKNOWN:
                 default:
-                    return topicName.concat("_output");
+                    return null;
             }
         }
 
@@ -269,5 +240,20 @@ public abstract class MongoSourceDataWrapper {
 
     public Double getExpectedRecordCount(TimeWindow timeWindow) {
         return RadarConverter.getSecond(timeWindow) * getFrequency();
+    }
+
+    /**
+     * Checks whether any record available in the collection for given time window.
+     * @param collection to query
+     * @param projectName of project
+     * @param subjectId of subject
+     * @param sourceId of source
+     * @param timeFrame time
+     * @return {@code true} if any record available {@code false} otherwise
+     */
+    public boolean anyRecordsExist(MongoCollection<Document> collection, String projectName,
+            String subjectId, String sourceId, TimeFrame timeFrame) {
+        return MongoHelper.hasDataForSource(collection, projectName, subjectId,
+                        sourceId, timeFrame);
     }
 }

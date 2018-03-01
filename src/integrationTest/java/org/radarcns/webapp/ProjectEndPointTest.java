@@ -4,6 +4,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.radarcns.webapp.SampleDataHandler.PROJECT;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,8 +17,6 @@ import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.webapp.resource.BasePath;
 
 public class ProjectEndPointTest {
-
-    private static final String PROJECT_NAME = "radar";
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
@@ -34,13 +33,13 @@ public class ProjectEndPointTest {
     @Test
     public void getProjectByProjectNameStatusTest200() throws IOException {
         ProjectDTO project = apiClient.getJson(
-                BasePath.PROJECTS + '/' + PROJECT_NAME, ProjectDTO.class, Status.OK);
-        assertEquals(PROJECT_NAME, project.getProjectName());
+                BasePath.PROJECTS + '/' + PROJECT, ProjectDTO.class, Status.OK);
+        assertEquals(PROJECT, project.getProjectName());
     }
 
     @Test
     public void getProjectByUnavailableNameStatusTest404() throws IOException {
-        assertNotNull(apiClient.get(BasePath.PROJECTS + '/' + "SOMETHING", APPLICATION_JSON,
+        assertNotNull(apiClient.get(BasePath.PROJECTS + "/SOMETHING", APPLICATION_JSON,
                 Status.NOT_FOUND));
     }
 }

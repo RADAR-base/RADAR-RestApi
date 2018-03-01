@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.sourcedata;
+package org.radarcns.mongo.data.passive;
 
 import static org.radarcns.mongo.util.MongoHelper.QUARTILE;
 

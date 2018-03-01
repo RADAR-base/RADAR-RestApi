@@ -18,12 +18,11 @@ package org.radarcns.service;
 
 import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
 import static org.radarcns.mongo.util.MongoHelper.END;
-import static org.radarcns.mongo.util.MongoHelper.KEY;
 import static org.radarcns.mongo.util.MongoHelper.START;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
-import java.time.Instant;
 import javax.inject.Inject;
 import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
@@ -41,7 +40,6 @@ public class SourceMonitorService {
 
     private final MongoClient mongoClient;
 
-
     /**
      * Constructor.
      **/
@@ -58,42 +56,30 @@ public class SourceMonitorService {
      * @param subjectId of the subject
      * @param sourceId of the source
      * @param sourceType of the source
-     * @return calculated {@link TimeFrame} with earliest and latest timestamps
+     * @return calculated {@link TimeFrame} with earliest and latest timestamps or null if no data
+     * was found.
      */
     public TimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
             String sourceId, SourceTypeDTO sourceType) {
 
         // get the last document sorted by timeEnd
-        MongoCursor<Document> cursor = MongoHelper
-                .findDocumentByProjectAndSubjectAndSource(projectId, subjectId, sourceId,
-                        KEY + "." + END, DESCENDING, 1,
-                        MongoHelper.getCollection(this
-                                        .mongoClient,
-                                sourceType.getSourceStatisticsMonitorTopic()));
+        try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
+                MongoHelper.getCollection(this.mongoClient,
+                        sourceType.getSourceStatisticsMonitorTopic()),
+                projectId, subjectId, sourceId, VALUE + "." + END, DESCENDING, 1)) {
 
-        if (!cursor.hasNext()) {
-            LOGGER.debug("Empty cursor for collection {}",
-                    sourceType.getSourceStatisticsMonitorTopic());
-        }
-
-        Instant timeStart = null;
-        Instant timeEnd = null;
-        if (cursor.hasNext()) {
-            Document document = cursor.next();
-            Document key = (Document) document.get(KEY);
-            Instant localStart = key.getDate(START).toInstant();
-            Instant localEnd = key.getDate(END).toInstant();
-
-            if (timeStart == null || localStart.isBefore(timeStart)) {
-                timeStart = localStart;
+            TimeFrame timeFrame = null;
+            while (cursor.hasNext()) {
+                Document key = (Document) cursor.next().get(VALUE);
+                timeFrame = TimeFrame.span(timeFrame,
+                        new TimeFrame(key.getDate(START), key.getDate(END)));
             }
-            if (timeEnd == null || localEnd.isAfter(timeEnd)) {
-                timeEnd = localEnd;
+
+            if (timeFrame == null) {
+                LOGGER.debug("Empty cursor for collection {}",
+                        sourceType.getSourceStatisticsMonitorTopic());
             }
+            return timeFrame;
         }
-
-        cursor.close();
-        return new TimeFrame(timeStart, timeEnd);
-
     }
 }

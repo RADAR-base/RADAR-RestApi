@@ -264,14 +264,14 @@ public class EndToEndTest {
             dataset.setHeader(updatedHeader);
 
             for (DataItem item : dataset.getDataset()) {
-                if (item.getSample() instanceof Double) {
-                    Double sample = (Double) item.getSample();
-                    item.setSample(RadarConverter.roundDouble(
+                if (item.getValue() instanceof Double) {
+                    Double sample = (Double) item.getValue();
+                    item.setValue(RadarConverter.roundDouble(
                             sample / RadarConverter.getExpectedMessages(
                                     updatedHeader.getTimeWindow(), 1), 2));
-                } else if (item.getSample() instanceof Acceleration) {
-                    Acceleration sample = (Acceleration) item.getSample();
-                    item.setSample(new Acceleration(
+                } else if (item.getValue() instanceof Acceleration) {
+                    Acceleration sample = (Acceleration) item.getValue();
+                    item.setValue(new Acceleration(
                             RadarConverter.roundDouble(
                                     (Double) sample.getX() / RadarConverter
                                             .getExpectedMessages(updatedHeader.getTimeWindow(),
@@ -286,7 +286,7 @@ public class EndToEndTest {
                                                     1), 2)));
                 } else {
                     throw new IllegalArgumentException(
-                            item.getSample().getClass().getCanonicalName()
+                            item.getValue().getClass().getCanonicalName()
                                     + " is not supported yet");
                 }
             }
@@ -378,8 +378,8 @@ public class EndToEndTest {
 
             assertEquals(expectedItem.getStartDateTime(), actualItem.getStartDateTime());
 
-            SpecificRecord expectedRecord = (SpecificRecord) expectedItem.getSample();
-            SpecificRecord actualRecord = (SpecificRecord) actualItem.getSample();
+            SpecificRecord expectedRecord = (SpecificRecord) expectedItem.getValue();
+            SpecificRecord actualRecord = (SpecificRecord) actualItem.getValue();
 
             switch (sensorType) {
                 case "ACCELEROMETER":
