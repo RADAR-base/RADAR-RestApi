@@ -16,20 +16,16 @@
 
 package org.radarcns.webapp;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
-import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
 import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
 import org.radarcns.status.hdfs.HdfsBinsData;
 import org.radarcns.status.hdfs.HdfsBinsDataTest;
-import org.radarcns.util.RadarConverter;
 
 public class StatusEndPointTest {
 
@@ -40,12 +36,8 @@ public class StatusEndPointTest {
 
     @Test
     public void getStatusTest200() throws IOException {
-        try (Response response = apiClient.request("hdfs",
-                APPLICATION_JSON, Status.OK)) {
-            assertTrue(response.isSuccessful());
-            ObjectReader reader = RadarConverter.readerFor(HdfsBinsData.class);
-            HdfsBinsData bins = reader.readValue(response.body().byteStream());
-            HdfsBinsDataTest.assertBinsMatchFile(bins);
-        }
+        HdfsBinsData bins = apiClient.getJson("hdfs", HdfsBinsData.class, Status.OK);
+        assertNotNull(bins);
+        HdfsBinsDataTest.assertBinsMatchFile(bins);
     }
 }

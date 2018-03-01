@@ -43,7 +43,7 @@ public class ExposedConfigTest {
 
     @Test
     public void checkSwaggerDoc() throws IOException {
-        String response = apiClient.requestString(BASE_PATH + '/' + OPENAPI_JSON,
+        String response = apiClient.getString(BASE_PATH + '/' + OPENAPI_JSON,
                 APPLICATION_JSON, Status.OK);
         JsonNode node = new ObjectMapper().readTree(response);
         assertTrue(node.has("openapi"));
@@ -52,7 +52,7 @@ public class ExposedConfigTest {
 
     @Test
     public void checkSwaggerDocWithoutExtension() throws IOException {
-        String response = apiClient.requestString(BASE_PATH + '/' + OPENAPI,
+        String response = apiClient.getString(BASE_PATH + '/' + OPENAPI,
                 APPLICATION_JSON, Status.OK);
         JsonNode node = new ObjectMapper().readTree(response);
         assertTrue(node.has("openapi"));

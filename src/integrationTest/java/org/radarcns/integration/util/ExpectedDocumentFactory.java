@@ -1,5 +1,3 @@
-package org.radarcns.integration.util;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -15,6 +13,8 @@ package org.radarcns.integration.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.integration.util;
 
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.AVERAGE;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
@@ -123,7 +123,7 @@ public class ExpectedDocumentFactory {
             Instant end = start.plus(RadarConverter.getDuration(timeWindow));
             list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
                     expectedValue.getLastKey().getUserId(),
-                    expectedValue.getLastKey().getSourceId(), Date.from(start), Date.from(end),
+                    expectedValue.getLastKey().getSourceId(), start, end,
                     getDocumentFromDoubleValueCollector("batteryLevel", doubleValueCollector)));
         }
 
@@ -143,12 +143,12 @@ public class ExpectedDocumentFactory {
     }
 
     private static Document buildKeyDocument(String projectName, String subjectId, String sourceId,
-            Object start, Object end) {
+            Instant start, Instant end) {
         return new Document().append(PROJECT_ID, projectName)
                 .append(USER_ID, subjectId)
                 .append(SOURCE_ID, sourceId)
-                .append(START, start)
-                .append(END, end);
+                .append(START, Date.from(start))
+                .append(END, Date.from(end));
     }
 
     /**
@@ -163,15 +163,20 @@ public class ExpectedDocumentFactory {
      * @return built document
      */
     public static Document buildDocument(String projectName, String subjectId, String sourceId,
-            Object start, Object end, Document value) {
-        return new Document().append(ID, "{"
-                + PROJECT_ID + ":" + projectName + ","
-                + USER_ID + ":" + subjectId + ","
-                + SOURCE_ID + ":" + sourceId + ","
-                + START + ":" + start + ","
-                + END + ":" + end + "}")
+            Instant start, Instant end, Document value) {
+        return new Document().append(ID, buildId(projectName, subjectId, sourceId, start, end))
                 .append(KEY, buildKeyDocument(projectName, subjectId, sourceId, start, end))
                 .append(VALUE, value);
+    }
+
+    private static String buildId(String projectName, String subjectId, String sourceId,
+            Instant start, Instant end) {
+        return '{'
+                + PROJECT_ID + ':' + projectName + ','
+                + USER_ID + ':' + subjectId + ','
+                + SOURCE_ID + ':' + sourceId + ','
+                + START + ':' + (start.toEpochMilli() / 1000d) + ','
+                + END + ':' + (end.toEpochMilli() / 1000d) + '}';
     }
 
     /**
@@ -185,17 +190,12 @@ public class ExpectedDocumentFactory {
      * @return built document
      */
     public static Document getDocumentsForStatistics(String projectName, String subjectId,
-            String sourceId, Object start, Object end) {
-        return new Document().append(ID, "{"
-                + PROJECT_ID + ":" + projectName + ","
-                + USER_ID + ":" + subjectId + ","
-                + SOURCE_ID + ":" + sourceId + ","
-                + START + ":" + start + ","
-                + END + ":" + end + "}")
+            String sourceId, Instant start, Instant end) {
+        return new Document().append(ID, buildId(projectName, subjectId, sourceId, start, end))
                 .append(KEY, buildObservationKeyDocument(projectName, subjectId, sourceId))
                 .append(VALUE, new Document()
-                        .append(START, start)
-                        .append(END, end));
+                        .append(START, Date.from(start))
+                        .append(END, Date.from(end)));
     }
 
     private static Document buildObservationKeyDocument(String projectName, String subjectId,
@@ -232,7 +232,9 @@ public class ExpectedDocumentFactory {
 
             list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
                     expectedValue.getLastKey().getUserId(),
-                    expectedValue.getLastKey().getSourceId(), new Date(timestamp), new Date(end),
+                    expectedValue.getLastKey().getSourceId(),
+                    Instant.ofEpochMilli(timestamp),
+                    Instant.ofEpochMilli(end),
                     new Document().append(FIELDS, documents)));
         }
 
@@ -245,9 +247,9 @@ public class ExpectedDocumentFactory {
      * @param expectedValue for test
      * @return {@link List} of {@link Document}s
      */
-    public List<Document> produceExpectedDocuments(ExpectedValue expectedValue, TimeWindow
+    public List<Document> produceExpectedDocuments(ExpectedValue<?> expectedValue, TimeWindow
             timeWindow) {
-        Map series = expectedValue.getSeries();
+        Map<Long, ?> series = expectedValue.getSeries();
         if (series.isEmpty()) {
             return Collections.emptyList();
         }

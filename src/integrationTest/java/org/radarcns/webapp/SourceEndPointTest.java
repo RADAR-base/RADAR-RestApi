@@ -20,37 +20,20 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.integration.util.ExpectedDocumentFactory.getDocumentsForStatistics;
-import static org.radarcns.webapp.SampleDataHandler.MONITOR_STATISTICS_TOPIC;
 import static org.radarcns.webapp.SampleDataHandler.PROJECT;
-import static org.radarcns.webapp.SampleDataHandler.SOURCE;
 import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
 import static org.radarcns.webapp.resource.BasePath.PROJECTS;
 import static org.radarcns.webapp.resource.BasePath.SOURCES;
 import static org.radarcns.webapp.resource.BasePath.SUBJECTS;
 
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import javax.ws.rs.core.Response.Status;
-import okhttp3.Response;
-import org.bson.Document;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.domain.restapi.Source;
-import org.radarcns.domain.restapi.SourceStatus;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.integration.util.Utility;
-import org.radarcns.mongo.util.MongoHelper;
-import org.radarcns.util.RadarConverter;
 
 public class SourceEndPointTest {
 
@@ -58,12 +41,13 @@ public class SourceEndPointTest {
     public final ApiClient apiClient = new ApiClient(
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
-
     @Test
     public void getAllSourcesForSubjectInProject() throws IOException {
-        List<Source> sources = requestSourcesOfSubject();
-        // not effective time available
-        assertEquals(SourceStatus.UNKNOWN, sources.get(0).getStatus());
+        String requestPath = PROJECTS + '/' + PROJECT + '/' + SUBJECTS + '/' + SUBJECT + '/'
+                + SOURCES;
+
+        List<Source> sources = apiClient.getJsonList(requestPath, Source.class, Status.OK);
+        assertTrue(sources.size() > 0);
     }
 
     @Test
@@ -119,28 +103,12 @@ public class SourceEndPointTest {
     private List<Source> requestSourcesOfSubject() throws IOException {
         String requestPath = PROJECTS + '/' + PROJECT + '/' + SUBJECTS + '/' + SUBJECT + '/'
                 + SOURCES;
-        try (Response response = apiClient.request(requestPath, APPLICATION_JSON, Status.OK)) {
-            assertNotNull(response);
-            assertTrue(response.isSuccessful());
 
-            ObjectReader reader = RadarConverter.readerForCollection(List.class, Source.class);
-            List<Source> sources = reader.readValue(response.body().byteStream());
-            assertTrue(sources.size() > 0);
-            return sources;
-        }
+        List<Source> sources = apiClient.getJsonList(requestPath, Source.class, Status.OK);
+        assertTrue(sources.size() > 0);
     }
 
-    private void insertMonitorStatistics(Instant startTime, Instant end) {
-        MongoClient mongoClient = Utility.getMongoClient();
-        Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, Date.from(startTime),
-                Date.from(end));
-        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, Date.from(startTime),
-                Date.from(end.plus(Duration.ofMinutes(5))));
-        MongoCollection collection = MongoHelper
-                .getCollection(mongoClient, MONITOR_STATISTICS_TOPIC);
-        collection.insertMany(Arrays.asList(doc, second));
-    }
-
+}
 
     @After
     public void dropAndClose() {

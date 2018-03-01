@@ -22,20 +22,16 @@ import static org.radarcns.webapp.SampleDataHandler.PROJECT;
 import static org.radarcns.webapp.SampleDataHandler.SOURCE;
 import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 import org.bson.Document;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.restapi.header.TimeFrame;
-import org.radarcns.integration.util.Utility;
-import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.integration.MongoRule;
 import org.radarcns.service.SourceMonitorService;
 
 public class SourceMonitorServiceDbTest {
@@ -47,7 +43,9 @@ public class SourceMonitorServiceDbTest {
 
     private static final int WINDOWS = 2;
 
-    private static final MongoClient mongoClient = Utility.getMongoClient();
+
+    @Rule
+    public final MongoRule mongoRule = new MongoRule();
 
     private static SourceTypeDTO sourceType;
 
@@ -65,50 +63,39 @@ public class SourceMonitorServiceDbTest {
         sourceType.setCatalogVersion(SOURCETYPE_CATALOGUE_VERSION);
         sourceType.setSourceStatisticsMonitorTopic(MONITOR_STATISTICS_TOPIC);
         sourceType.setSourceTypeScope("PASSIVE");
-        monitor = new SourceMonitorService(mongoClient);
+        monitor = new SourceMonitorService(mongoRule.getClient());
     }
 
     @Test
     public void testEffectiveTime() {
-        Date start = Date.from(Instant.now());
-        Date end = Date.from(Instant
-                .ofEpochSecond(start.getTime()
-                        + TimeUnit.SECONDS.toMillis(60 / (WINDOWS + 1))));
+        Instant start = Instant.now();
+        Instant end = start.plusSeconds(60 / (WINDOWS + 1));
         Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, end);
-        MongoCollection collection = MongoHelper.getCollection(mongoClient, sourceType
-                .getSourceStatisticsMonitorTopic());
+        MongoCollection<Document> collection = mongoRule.getCollection(
+                sourceType.getSourceStatisticsMonitorTopic());
         collection.insertOne(doc);
 
         TimeFrame result = monitor.getEffectiveTimeFrame(PROJECT, SUBJECT, SOURCE, sourceType);
 
-        assertEquals(start.toInstant(), result.getStartDateTime());
-        assertEquals(end.toInstant(), result.getEndDateTime());
+        assertEquals(start, result.getStartDateTime());
+        assertEquals(end, result.getEndDateTime());
     }
-
 
     @Test
     public void testEffectiveTimeWithMultipleDocuments() {
-        Date start = Date.from(Instant.now());
-        Date end = Date.from(start.toInstant().plusSeconds(60));
-        Date earlier = Date.from(start.toInstant().minusSeconds(10));
-        Date later = Date.from(end.toInstant().plusSeconds(65));
+        Instant start = Instant.now();
+        Instant end = start.plusSeconds(60);
+        Instant earlier = start.minusSeconds(10);
+        Instant later = end.plusSeconds(5);
         Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, end);
-        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, earlier,
-                later);
-        MongoCollection collection = MongoHelper.getCollection(mongoClient, sourceType
-                .getSourceStatisticsMonitorTopic());
+        Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, earlier, later);
+        MongoCollection<Document> collection = mongoRule.getCollection(
+                sourceType.getSourceStatisticsMonitorTopic());
         collection.insertMany(Arrays.asList(doc, second));
 
         TimeFrame result = monitor.getEffectiveTimeFrame(PROJECT, SUBJECT, SOURCE, sourceType);
 
-        assertEquals(earlier.toInstant(), result.getStartDateTime());
-        assertEquals(later.toInstant(), result.getEndDateTime());
+        assertEquals(earlier, result.getStartDateTime());
+        assertEquals(later, result.getEndDateTime());
     }
-
-    @After
-    public void cleanUp() {
-        Utility.dropCollection(mongoClient, sourceType.getSourceStatisticsMonitorTopic());
-    }
-
-
 }

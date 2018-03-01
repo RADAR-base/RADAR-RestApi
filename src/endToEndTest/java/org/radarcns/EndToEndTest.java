@@ -309,8 +309,7 @@ public class EndToEndTest {
      * @see ExpectedValue
      **/
     public static Map<MockDataConfig, Dataset> getExpectedDataset(
-            Map<MockDataConfig, ExpectedValue> expectedValue, DescriptiveStatistic stat)
-            throws IllegalAccessException, InstantiationException {
+            Map<MockDataConfig, ExpectedValue> expectedValue, DescriptiveStatistic stat) {
         Map<MockDataConfig, Dataset> map = new HashMap<>();
 
         for (MockDataConfig config : expectedValue.keySet()) {
@@ -336,13 +335,12 @@ public class EndToEndTest {
     /**
      * Queries the REST-API for each statistical function and for each data.
      */
-    private void assertRestApiMatches()
-            throws IOException, ReflectiveOperationException {
+    private void assertRestApiMatches() throws IOException {
         LOGGER.info("Fetching APIs ...");
 
         final String path =
                 DATA + "/{" + SOURCE_DATA_NAME + "}/{" + STAT + "}/" + TimeWindow.TEN_SECOND
-                        + '/' + PROJECT_NAME_MOCK + '/' + USER_ID_MOCK + "/" + SOURCE_ID_MOCK;
+                        + '/' + PROJECT_NAME_MOCK + '/' + USER_ID_MOCK + '/' + SOURCE_ID_MOCK;
 
         for (DescriptiveStatistic stat : expectedDataset.keySet()) {
             String pathStat = path.replace("{" + STAT + "}", stat.name());
@@ -353,7 +351,7 @@ public class EndToEndTest {
                 String pathSensor = pathStat.replace("{" + SOURCE_DATA_NAME + "}",
                         getSensorType(config));
 
-                Dataset actual = apiClient.requestJson(pathSensor, Dataset.class, Status.OK);
+                Dataset actual = apiClient.getJson(pathSensor, Dataset.class, Status.OK);
 
                 assertDatasetEquals(getSensorType(config), datasets.get(config), actual,
                         config.getMaximumDifference());
@@ -484,7 +482,7 @@ public class EndToEndTest {
      */
     @Test
     public void checkSwaggerConfig() throws IOException {
-        String response = apiClient.requestString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
+        String response = apiClient.getString(OPENAPI_JSON, APPLICATION_JSON, Status.OK);
         JsonNode node = new ObjectMapper().readTree(response);
         assertTrue(node.has("openapi"));
         assertTrue(node.get("openapi").asText().startsWith("3."));
