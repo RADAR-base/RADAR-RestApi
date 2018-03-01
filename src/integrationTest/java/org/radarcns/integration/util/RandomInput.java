@@ -38,7 +38,10 @@ import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.mock.model.ExpectedArrayValue;
 import org.radarcns.mock.model.ExpectedDoubleValue;
+import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.monitor.application.ServerStatus;
+import org.radarcns.stream.collector.DoubleArrayCollector;
+import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarConverter;
 
 /**
@@ -50,25 +53,15 @@ public class RandomInput {
     public static final String DOCUMENTS = "documents";
     private static final String SUPPORTED_SOURCE_TYPE = "empatica_e4_v1";
 
-    private static Dataset dataset = null;
-    private static List<Document> documents = null;
-
     private static final ExpectedDocumentFactory expectedDocumentFactory =
             new ExpectedDocumentFactory();
     private static final ExpectedDataSetFactory expectedDataSetFactory =
             new ExpectedDataSetFactory();
 
-    @SuppressWarnings("PMD.ExcessiveParameterList")
-    private static void randomDoubleValue(String project, String user, String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow, Instant startTime) {
-        ObservationKey key = new ObservationKey(project, user, source);
+    private static ExpectedValue<DoubleValueCollector> randomDoubleValue(
+            ObservationKey key, TimeWindow timeWindow, int numberOfRecords, Instant startTime) {
         ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
-        int numberOfRecords = samples;
-        if (singleWindow) {
-            numberOfRecords = 1;
-        }
         Instant timeStamp = startTime;
         ThreadLocalRandom random = ThreadLocalRandom.current();
         for (int i = 0; i < numberOfRecords; i++) {
@@ -76,36 +69,22 @@ public class RandomInput {
             timeStamp = timeStamp.plus(RadarConverter.getDuration(timeWindow));
         }
 
-        dataset = expectedDataSetFactory.getDataset(instance, project, user, source, sourceType,
-                sensorType, stat, timeWindow);
-        documents = expectedDocumentFactory.produceExpectedDocuments(instance, timeWindow);
+        return instance;
     }
 
-    @SuppressWarnings("PMD.ExcessiveParameterList")
-    private static void randomArrayValue(String project, String subject, String source,
-            String sourceType, String sensorType, DescriptiveStatistic stat, TimeWindow timeWindow,
-            int samples, boolean singleWindow, Instant startTime) {
-
+    private static ExpectedValue<DoubleArrayCollector> randomArrayValue(ObservationKey key,
+            TimeWindow timeWindow, int numberOfRecords, Instant startTime) {
         ExpectedArrayValue instance = new ExpectedArrayValue();
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        ObservationKey key = new ObservationKey(project, subject, source);
-
-        int numberOfRecords = samples;
-        if (singleWindow) {
-            numberOfRecords = 1;
-        }
         Instant timeStamp = startTime;
         for (int i = 0; i < numberOfRecords; i++) {
             instance.add(key, timeStamp.toEpochMilli(), random.nextDouble(), random.nextDouble(),
-                    random
-                            .nextDouble());
+                    random.nextDouble());
             timeStamp = timeStamp.plus(RadarConverter.getDuration(timeWindow));
         }
 
-        dataset = expectedDataSetFactory.getDataset(instance, project, subject, source, sourceType,
-                sensorType, stat, timeWindow);
-        documents = expectedDocumentFactory.produceExpectedDocuments(instance, timeWindow);
+        return instance;
     }
 
     /**
@@ -116,9 +95,16 @@ public class RandomInput {
     public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user,
             String source, String sourceType, String sourceDataName, DescriptiveStatistic stat,
             TimeWindow timeWindow, int samples, boolean singleWindow, Instant startTime) {
+        ObservationKey key = new ObservationKey(project, user, source);
+
+        int numberOfRecords = samples;
+        if (singleWindow) {
+            numberOfRecords = 1;
+        }
+
         if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
-            return getBoth(project, user, source, sourceType, sourceDataName, stat,
-                    timeWindow, samples, singleWindow, startTime);
+            return getBoth(key, sourceType, sourceDataName, stat,
+                    timeWindow, numberOfRecords, startTime);
         }
 
         throw new UnsupportedOperationException(sourceType + " is not"
@@ -126,34 +112,28 @@ public class RandomInput {
     }
 
     @SuppressWarnings("PMD.ExcessiveParameterList")
-    private static Map<String, Object> getBoth(String project, String user, String source,
+    private static Map<String, Object> getBoth(ObservationKey key,
             String sourceType, String sourceDataName, DescriptiveStatistic stat,
-            TimeWindow timeWindow,
-            int samples, boolean singleWindow, Instant startTime) {
-        nextValue(project, user, source, sourceType, sourceDataName, stat, timeWindow, samples,
-                singleWindow, startTime);
+            TimeWindow timeWindow, int numberOfRecords, Instant startTime) {
+        ExpectedValue<?> expectedValue;
+        switch (sourceDataName) {
+            case "EMPATICA_E4_v1_ACCELEROMETER":
+                expectedValue = randomArrayValue(key, timeWindow, numberOfRecords, startTime);
+                break;
+            default:
+                expectedValue = randomDoubleValue(key, timeWindow, numberOfRecords, startTime);
+                break;
+        }
+
+        Dataset dataset = expectedDataSetFactory.getDataset(expectedValue, key.getProjectId(),
+                key.getUserId(), key.getSourceId(), sourceType, sourceDataName, stat, timeWindow);
+        List<Document> documents = expectedDocumentFactory
+                .produceExpectedDocuments(expectedValue, timeWindow);
 
         Map<String, Object> map = new HashMap<>();
         map.put(DATASET, dataset);
         map.put(DOCUMENTS, documents);
         return map;
-    }
-
-    @SuppressWarnings("PMD.ExcessiveParameterList")
-    private static void nextValue(String project, String user, String source, String sourceType,
-            String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow, int samples,
-            boolean singleWindow, Instant startTime) {
-        switch (sourceDataName) {
-            case "EMPATICA_E4_v1_ACCELEROMETER":
-                randomArrayValue(project, user, source, sourceType, sourceDataName, stat,
-                        timeWindow,
-                        samples, singleWindow, startTime);
-                break;
-            default:
-                randomDoubleValue(project, user, source, sourceType, sourceDataName, stat,
-                        timeWindow, samples, singleWindow, startTime);
-                break;
-        }
     }
 
     /**
@@ -163,13 +143,16 @@ public class RandomInput {
     public static Map<String, Document> getRandomApplicationStatus(String project, String user,
             String source) {
         String ipAdress = getRandomIpAddress();
+
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+
         ServerStatus serverStatus = ServerStatus.values()[
-                ThreadLocalRandom.current().nextInt(0, ServerStatus.values().length)];
-        double uptime = ThreadLocalRandom.current().nextDouble();
-        double timestamp = ThreadLocalRandom.current().nextDouble();
-        int recordsCached = ThreadLocalRandom.current().nextInt();
-        int recordsSent = ThreadLocalRandom.current().nextInt();
-        int recordsUnsent = ThreadLocalRandom.current().nextInt();
+                random.nextInt(0, ServerStatus.values().length)];
+        double uptime = random.nextDouble();
+        double timestamp = random.nextDouble();
+        int recordsCached = random.nextInt();
+        int recordsSent = random.nextInt();
+        int recordsUnsent = random.nextInt();
 
         return getRandomApplicationStatus(project, user, source, ipAdress, serverStatus, uptime,
                 recordsCached, recordsSent, recordsUnsent, timestamp);

@@ -37,6 +37,7 @@ import static org.radarcns.mongo.util.MongoHelper.VALUE;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
@@ -142,12 +143,12 @@ public class ExpectedDocumentFactory {
     }
 
     private static Document buildKeyDocument(String projectName, String subjectId, String sourceId,
-            Object start, Object end) {
+            Instant start, Instant end) {
         return new Document().append(PROJECT_ID, projectName)
                 .append(USER_ID, subjectId)
                 .append(SOURCE_ID, sourceId)
-                .append(START, start)
-                .append(END, end);
+                .append(START, Date.from(start))
+                .append(END, Date.from(end));
     }
 
     /**
@@ -246,9 +247,9 @@ public class ExpectedDocumentFactory {
      * @param expectedValue for test
      * @return {@link List} of {@link Document}s
      */
-    public List<Document> produceExpectedDocuments(ExpectedValue expectedValue, TimeWindow
+    public List<Document> produceExpectedDocuments(ExpectedValue<?> expectedValue, TimeWindow
             timeWindow) {
-        Map series = expectedValue.getSeries();
+        Map<Long, ?> series = expectedValue.getSeries();
         if (series.isEmpty()) {
             return Collections.emptyList();
         }

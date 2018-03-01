@@ -60,22 +60,19 @@ public class AggregatedDataPointsEndPointTest {
         // injects 10 records for 10 min
         MongoCollection<Document> collection = mongoRule.getCollection(
                 BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES);
-        Map<String, Object> docs = RandomInput
-                .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
-                        SOURCE_TYPE, BATTERY_LEVEL_SOURCE_DATA_NAME, QUARTILES, window, SAMPLES,
-                        false, now);
+
+        Map<String, Object> docs = RandomInput.getDatasetAndDocumentsRandom(
+                PROJECT, SUBJECT, SOURCE, SOURCE_TYPE, BATTERY_LEVEL_SOURCE_DATA_NAME, QUARTILES,
+                window, SAMPLES, false, now);
+        collection.insertMany((List<Document>) docs.get(DOCUMENTS));
 
         MongoCollection<Document> accelerationCollection = mongoRule.getCollection(
                 ACCELERATION_COLLECTION_FOR_TEN_MINITES);
 
         // injects 5 records for acceleration
-
-        Map<String, Object> accDocs = RandomInput
-                .getDatasetAndDocumentsRandom(PROJECT, SUBJECT, SOURCE,
-                        SOURCE_TYPE, ACCELEROMETER_SOURCE_DATA_NAME, AVERAGE, TEN_MIN,
-                        5, false, Instant.now());
-
-        collection.insertMany((List<Document>) docs.get(DOCUMENTS));
+        Map<String, Object> accDocs = RandomInput.getDatasetAndDocumentsRandom(
+                PROJECT, SUBJECT, SOURCE, SOURCE_TYPE, ACCELEROMETER_SOURCE_DATA_NAME, AVERAGE,
+                TEN_MIN,5, false, Instant.now());
 
         accelerationCollection.insertMany((List<Document>) accDocs.get(DOCUMENTS));
 
