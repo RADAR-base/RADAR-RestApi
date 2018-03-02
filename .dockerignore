@@ -9,3 +9,4 @@ out
 .gradle
 .idea
 .git
+.gitmodules
