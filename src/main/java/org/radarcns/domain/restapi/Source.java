@@ -24,7 +24,7 @@ public class Source {
     private Boolean assigned;
 
     @JsonProperty
-    private String status;
+    private SourceStatus status;
 
     @JsonProperty
     private TimeFrame effectiveTimeFrame;
@@ -107,12 +107,12 @@ public class Source {
     }
 
 
-    public Source status(String status) {
+    public Source status(SourceStatus status) {
         this.status = status;
         return this;
     }
 
-    public String getStatus() {
+    public SourceStatus getStatus() {
         return status;
     }
 

@@ -22,3 +22,11 @@ management_portal_config:
     source_endpoint: api/sources/
 
 hdfs_output_dir: /var/lib/hdfs/output
+
+# Timeout duration for every source-type to decide source status whether its connected or not.
+# A source-type should be defined by following the convention of producer_model as mentioned in
+# the specification in radar-schemas
+# timeout should be specified as the ISO-8601 duration format {@code PnDTnHnMn.nS}.
+source-type-connection-timeout:
+    android_phone: PT2H
+    empatica_e4: PT1H

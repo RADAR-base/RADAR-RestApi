@@ -77,22 +77,21 @@ public class SourceEndPoint {
     public List<Source> getAllSourcesJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {
-        managementPortalClient.getProject(projectName);
         managementPortalClient.checkSubjectInProject(projectName, subjectId);
         return sourceService.getAllSourcesOfSubject(projectName, subjectId);
     }
 
     //------------------------------------------------------------------------------------------//
-    //                                       STATE FUNCTIONS                                    //
+    //                                       SOURCE BY ID FUNCTIONS                             //
     //------------------------------------------------------------------------------------------//
 
     /**
-     * JSON function that returns the status of the given source.
+     * JSON function that returns the source of the given source-id.
      */
     @GET
     @Produces({APPLICATION_JSON, AVRO_BINARY})
-    @Path("/{" + PROJECT_NAME + "}" + '/' + SUBJECTS + "/{" + SUBJECT_ID + "}" + '/' + SOURCES
-            + "}/{" + SOURCE_ID + "}")
+    @Path("/{" + PROJECT_NAME + "}" + '/' + SUBJECTS + "/{" + SUBJECT_ID + "}/" + SOURCES
+            + "/{" + SOURCE_ID + '}')
     @Operation(summary = "Return a source requested")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Return a source object containing last"
@@ -104,10 +103,10 @@ public class SourceEndPoint {
     public Source getLastComputedSourceStatusJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
-            @Alphanumeric @PathParam(SOURCE_ID) String sourceId) {
+            @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
 
-        // TODO implement source-summary calculation which includes the compliance
-        return new Source();
+        managementPortalClient.checkSubjectInProject(projectName, subjectId);
+        return sourceService.getSourceBySourceId(projectName, subjectId, sourceId);
     }
 
 }

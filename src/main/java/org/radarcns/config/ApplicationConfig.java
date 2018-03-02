@@ -48,6 +48,9 @@ public class ApplicationConfig {
     @JsonProperty("management_portal_config")
     private ManagementPortalConfig managementPortalConfig;
 
+    @JsonProperty("source-type-connection-timeout")
+    private Map<String, String> sourceTypeConnectionTimeout;
+
     /**
      * Returns MongoDb hosts.
      **/
@@ -58,8 +61,9 @@ public class ApplicationConfig {
     /**
      * Sets MongoDb instance.
      **/
-    public void setMongoHosts(Map<String, String> mongoHosts) {
+    public ApplicationConfig mongoHosts(Map<String, String> mongoHosts) {
         this.mongoHosts = mongoHosts;
+        return this;
     }
 
     /**
@@ -72,8 +76,9 @@ public class ApplicationConfig {
     /**
      * Sets MongoDb users.
      **/
-    public void setMongoUser(Map<String, String> mongoUser) {
+    public ApplicationConfig mongoUser(Map<String, String> mongoUser) {
         this.mongoUser = mongoUser;
+        return this;
     }
 
     /**
@@ -118,7 +123,17 @@ public class ApplicationConfig {
         return hdfsOutputDir;
     }
 
-    public void setHdfsOutputDir(String hdfsOutputDir) {
+    public ApplicationConfig hdfsOutputDir(String hdfsOutputDir) {
         this.hdfsOutputDir = hdfsOutputDir;
+        return this;
+    }
+
+    public Map<String, String> getSourceTypeConnectionTimeout() {
+        return sourceTypeConnectionTimeout;
+    }
+
+    public ApplicationConfig sourceTypeConnectionTimeout(Map<String, String> sourceTypeTimeout) {
+        this.sourceTypeConnectionTimeout = sourceTypeTimeout;
+        return this;
     }
 }
