@@ -1,0 +1,11 @@
+build
+classes
+config
+src/integrationTest
+src/endToEndTest
+src/test
+libs
+out
+.gradle
+.idea
+.git

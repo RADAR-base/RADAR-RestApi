@@ -1,4 +1,8 @@
-version: '2'
+version: '3'
+
+networks:
+    simplestack:
+      driver: bridge
 
 services:
     #----------------------------------------#
@@ -9,6 +13,8 @@ services:
       ports:
         - "27017:27017"
         - "28017:28017"
+      networks:
+        - simplestack
       environment:
         RADAR_USER: restapi
         RADAR_PWD: radar
@@ -18,11 +24,39 @@ services:
     #             RADAR Rest Api             #
     #----------------------------------------#
     rest-api:
-      build: image
-      image: radarcns/radar-restapi:0.1
+      image: radarbase/radar-restapi:dev
       depends_on:
         - hotstorage
+        - managementportal-app
+      networks:
+        - simplestack
       ports:
         - "8080:8080"
       volumes:
-        - "./volumes/radar:/usr/local/tomcat/conf/radar"
+        - ./volumes/radar:/usr/local/conf/radar/rest-api
+        - ../test/resources/org/radarcns/status/hdfs/bins.csv:/var/lib/hdfs/output/bins.csv
+
+    #---------------------------------------------------------------------------#
+    # Management Portal                                                         #
+    #---------------------------------------------------------------------------#
+    managementportal-app:
+      image: radarcns/management-portal:0.3.3
+      networks:
+        - default
+        - simplestack
+      environment:
+        SERVER_PORT : 8090
+        SPRING_PROFILES_ACTIVE: dev,swagger
+        MANAGEMENTPORTAL_FRONTEND_CLIENT_SECRET: my-secret
+        MANAGEMENTPORTAL_OAUTH_CLIENTS_FILE: /mp-includes/config/oauth_client_details.csv
+        MANAGEMENTPORTAL_CATALOGUE_SERVER_ENABLE_AUTO_IMPORT: "false"
+        JAVA_OPTS: -Xmx256m  # maximum heap size for the JVM running ManagementPortal, increase this as necessary
+      volumes:
+        - ./volumes/radar/:/mp-includes/
+      ports:
+        - "8090:8090"
+      healthcheck:
+        test: ["CMD", "wget", "--spider", "localhost:8090/oauth/token_key"]
+        interval: 1m30s
+        timeout: 5s
+        retries: 3

@@ -1,5 +1,3 @@
-package org.radarcns.integration.util;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -16,29 +14,40 @@ package org.radarcns.integration.util;
  * limitations under the License.
  */
 
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.AVERAGE;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.COUNT;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.INTERQUARTILE_RANGE;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MAXIMUM;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.MINIMUM;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.QUARTILES;
-import static org.radarcns.avro.restapi.header.DescriptiveStatistic.SUM;
-import static org.radarcns.mock.model.ExpectedValue.DURATION;
+package org.radarcns.integration.util;
 
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.AVERAGE;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.COUNT;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MAXIMUM;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MINIMUM;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
+import static org.radarcns.domain.restapi.header.DescriptiveStatistic.SUM;
+import static org.radarcns.mock.model.ExpectedValue.DURATION;
+import static org.radarcns.mongo.util.MongoHelper.END;
+import static org.radarcns.mongo.util.MongoHelper.FIELDS;
+import static org.radarcns.mongo.util.MongoHelper.ID;
+import static org.radarcns.mongo.util.MongoHelper.KEY;
+import static org.radarcns.mongo.util.MongoHelper.NAME;
+import static org.radarcns.mongo.util.MongoHelper.PROJECT_ID;
+import static org.radarcns.mongo.util.MongoHelper.SOURCE_ID;
+import static org.radarcns.mongo.util.MongoHelper.START;
+import static org.radarcns.mongo.util.MongoHelper.USER_ID;
+import static org.radarcns.mongo.util.MongoHelper.VALUE;
+
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
-import org.radarcns.avro.restapi.header.DescriptiveStatistic;
-import org.radarcns.dao.mongo.data.sensor.AccelerationFormat;
-import org.radarcns.dao.mongo.util.MongoHelper;
-import org.radarcns.dao.mongo.util.MongoHelper.Stat;
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.mock.model.ExpectedValue;
+import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.util.RadarConverter;
 
 /**
  * It computes the expected Documents for a test case i.e. {@link ExpectedValue}.
@@ -99,7 +108,8 @@ public class ExpectedDocumentFactory {
     }
 
 
-    private List<Document> getDocumentsBySingle(ExpectedValue<?> expectedValue) {
+    private List<Document> getDocumentsBySingle(ExpectedValue<?> expectedValue,
+            TimeWindow timeWindow) {
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
@@ -109,29 +119,90 @@ public class ExpectedDocumentFactory {
         for (Long timestamp : windows) {
             DoubleValueCollector doubleValueCollector = (DoubleValueCollector) expectedValue
                     .getSeries().get(timestamp);
-
-            long end = timestamp + DURATION;
-
-            list.add(new Document(MongoHelper.ID,
-                    expectedValue.getLastKey().getUserId()
-                            + "-" + expectedValue.getLastKey().getSourceId()
-                            + "-" + timestamp + "-" + end)
-                    .append(MongoHelper.USER, expectedValue.getLastKey().getUserId())
-                    .append(MongoHelper.SOURCE, expectedValue.getLastKey().getSourceId())
-                    .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
-                    .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleValueCollector))
-                    .append(Stat.sum.getParam(), getStatValue(SUM, doubleValueCollector))
-                    .append(Stat.count.getParam(), getStatValue(COUNT, doubleValueCollector))
-                    .append(Stat.avg.getParam(), getStatValue(AVERAGE, doubleValueCollector))
-                    .append(Stat.quartile.getParam(), extractQuartile((List<Double>) getStatValue(
-                            QUARTILES, doubleValueCollector)))
-                    .append(Stat.iqr.getParam(), getStatValue(INTERQUARTILE_RANGE,
-                            doubleValueCollector))
-                    .append(MongoHelper.START, new Date(timestamp))
-                    .append(MongoHelper.END, new Date(end)));
+            Instant start = Instant.ofEpochMilli(timestamp);
+            Instant end = start.plus(RadarConverter.getDuration(timeWindow));
+            list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
+                    expectedValue.getLastKey().getUserId(),
+                    expectedValue.getLastKey().getSourceId(), start, end,
+                    getDocumentFromDoubleValueCollector("batteryLevel", doubleValueCollector)));
         }
 
         return list;
+    }
+
+    private Document getDocumentFromDoubleValueCollector(String name,
+            DoubleValueCollector doubleValueCollector) {
+        return new Document()
+                .append(NAME, name)
+                .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
+                .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleValueCollector))
+                .append(Stat.sum.getParam(), getStatValue(SUM, doubleValueCollector))
+                .append(Stat.count.getParam(), getStatValue(COUNT, doubleValueCollector))
+                .append(Stat.avg.getParam(), getStatValue(AVERAGE, doubleValueCollector))
+                .append(Stat.quartile.getParam(), getStatValue(QUARTILES, doubleValueCollector));
+    }
+
+    private static Document buildKeyDocument(String projectName, String subjectId, String sourceId,
+            Instant start, Instant end) {
+        return new Document().append(PROJECT_ID, projectName)
+                .append(USER_ID, subjectId)
+                .append(SOURCE_ID, sourceId)
+                .append(START, Date.from(start))
+                .append(END, Date.from(end));
+    }
+
+    /**
+     * Builds a {@link Document} from given parameter values.
+     *
+     * @param projectName of the subject
+     * @param subjectId of the subject
+     * @param sourceId of the source
+     * @param start of the measurement
+     * @param end of the measurement
+     * @param value document
+     * @return built document
+     */
+    public static Document buildDocument(String projectName, String subjectId, String sourceId,
+            Instant start, Instant end, Document value) {
+        return new Document().append(ID, buildId(projectName, subjectId, sourceId, start, end))
+                .append(KEY, buildKeyDocument(projectName, subjectId, sourceId, start, end))
+                .append(VALUE, value);
+    }
+
+    private static String buildId(String projectName, String subjectId, String sourceId,
+            Instant start, Instant end) {
+        return '{'
+                + PROJECT_ID + ':' + projectName + ','
+                + USER_ID + ':' + subjectId + ','
+                + SOURCE_ID + ':' + sourceId + ','
+                + START + ':' + (start.toEpochMilli() / 1000d) + ','
+                + END + ':' + (end.toEpochMilli() / 1000d) + '}';
+    }
+
+    /**
+     * Builds a {@link Document} from given parameter values for source_statistics.
+     *
+     * @param projectName of the subject
+     * @param subjectId of the subject
+     * @param sourceId of the source
+     * @param start of the measurement
+     * @param end of the measurement
+     * @return built document
+     */
+    public static Document getDocumentsForStatistics(String projectName, String subjectId,
+            String sourceId, Instant start, Instant end) {
+        return new Document().append(ID, buildId(projectName, subjectId, sourceId, start, end))
+                .append(KEY, buildObservationKeyDocument(projectName, subjectId, sourceId))
+                .append(VALUE, new Document()
+                        .append(START, Date.from(start))
+                        .append(END, Date.from(end)));
+    }
+
+    private static Document buildObservationKeyDocument(String projectName, String subjectId,
+            String sourceId) {
+        return new Document().append(PROJECT_ID, projectName)
+                .append(USER_ID, subjectId)
+                .append(SOURCE_ID, sourceId);
     }
 
     private List<Document> getDocumentsByArray(ExpectedValue<?> expectedValue) {
@@ -145,53 +216,40 @@ public class ExpectedDocumentFactory {
             DoubleArrayCollector doubleArrayCollector = (DoubleArrayCollector) expectedValue
                     .getSeries().get(timestamp);
 
+            List<Document> documents = new ArrayList<>();
+
+            documents.add(
+                    getDocumentFromDoubleValueCollector("x",
+                            doubleArrayCollector.getCollectors().get(0)));
+            documents.add(
+                    getDocumentFromDoubleValueCollector("y",
+                            doubleArrayCollector.getCollectors().get(1)));
+            documents.add(
+                    getDocumentFromDoubleValueCollector("z",
+                            doubleArrayCollector.getCollectors().get(2)));
+
             long end = timestamp + DURATION;
 
-            list.add(new Document(MongoHelper.ID,
-                    expectedValue.getLastKey().getUserId()
-                            + "-" + expectedValue.getLastKey().getUserId()
-                            + "-" + timestamp + "-" + end)
-                    .append(MongoHelper.USER, expectedValue.getLastKey().getUserId())
-                    .append(MongoHelper.SOURCE, expectedValue.getLastKey().getUserId())
-                    .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleArrayCollector))
-                    .append(Stat.max.getParam(), getStatValue(MAXIMUM, doubleArrayCollector))
-                    .append(Stat.sum.getParam(), getStatValue(SUM, doubleArrayCollector))
-                    .append(Stat.count.getParam(), getStatValue(COUNT, doubleArrayCollector))
-                    .append(Stat.avg.getParam(), getStatValue(AVERAGE, doubleArrayCollector))
-                    .append(Stat.quartile.getParam(),
-                            extractAccelerationQuartile((List<List<Double>>) getStatValue(
-                                    QUARTILES, doubleArrayCollector)))
-                    .append(Stat.iqr.getParam(), getStatValue(INTERQUARTILE_RANGE,
-                            doubleArrayCollector))
-                    .append(MongoHelper.START, new Date(timestamp))
-                    .append(MongoHelper.END, new Date(end)));
+            list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
+                    expectedValue.getLastKey().getUserId(),
+                    expectedValue.getLastKey().getSourceId(),
+                    Instant.ofEpochMilli(timestamp),
+                    Instant.ofEpochMilli(end),
+                    new Document().append(FIELDS, documents)));
         }
 
         return list;
     }
 
-    private Document extractAccelerationQuartile(List<List<Double>> statValue) {
-        Document quartile = new Document();
-        quartile.put(AccelerationFormat.X_LABEL, extractQuartile(statValue.get(0)));
-        quartile.put(AccelerationFormat.Y_LABEL, extractQuartile(statValue.get(1)));
-        quartile.put(AccelerationFormat.Z_LABEL, extractQuartile(statValue.get(2)));
-        return quartile;
-    }
-
-    private static List<Document> extractQuartile(List<Double> component) {
-        return Arrays.asList(
-                new Document("25", component.get(0)),
-                new Document("50", component.get(1)),
-                new Document("75", component.get(2)));
-    }
-
     /**
      * Produces {@link List} of {@link Document}s for given {@link ExpectedValue}.
+     *
      * @param expectedValue for test
      * @return {@link List} of {@link Document}s
      */
-    public List<Document> produceExpectedData(ExpectedValue expectedValue) {
-        Map series = expectedValue.getSeries();
+    public List<Document> produceExpectedDocuments(ExpectedValue<?> expectedValue, TimeWindow
+            timeWindow) {
+        Map<Long, ?> series = expectedValue.getSeries();
         if (series.isEmpty()) {
             return Collections.emptyList();
         }
@@ -199,7 +257,7 @@ public class ExpectedDocumentFactory {
         if (firstCollector instanceof DoubleArrayCollector) {
             return getDocumentsByArray(expectedValue);
         } else {
-            return getDocumentsBySingle(expectedValue);
+            return getDocumentsBySingle(expectedValue, timeWindow);
         }
     }
 }
