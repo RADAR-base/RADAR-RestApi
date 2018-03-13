@@ -1,7 +1,5 @@
 package org.radarcns.webapp.filter;
 
-import static org.radarcns.webapp.exception.UncaughtExceptionMapper.APPLICATION_JSON_UTF8;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
@@ -21,7 +19,6 @@ import org.radarcns.auth.config.YamlServerConfig;
 import org.radarcns.auth.exception.TokenValidationException;
 import org.radarcns.auth.token.RadarToken;
 import org.radarcns.config.Properties;
-import org.radarcns.webapp.exception.StatusMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +33,9 @@ import org.slf4j.LoggerFactory;
 public class AuthenticationFilter implements ContainerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
+    public static final String REALM = "realm";
+    public static final String ERROR = "error";
+    public static final String ERROR_DESCRIPTION = "error_description";
     private final TokenValidator validator;
 
     /** Constructs a filter with a fixed validator. */
@@ -64,10 +64,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                     requestContext.getUriInfo().getPath());
             requestContext.abortWith(
                     Response.status(Status.UNAUTHORIZED)
-                            .header("WWW-Authenticate", "Bearer")
-                            .header("Content-Type", APPLICATION_JSON_UTF8)
-                            .entity(new StatusMessage("token_missing",
-                                    "No bearer token provided in request."))
+                            .header("WWW-Authenticate", "Bearer "
+                                            + REALM + "=rest-api")
                             .build());
             return;
         }
@@ -79,10 +77,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             logger.warn("[401] {}: {}", requestContext.getUriInfo().getPath(), ex.getMessage());
             requestContext.abortWith(
                     Response.status(Status.UNAUTHORIZED)
-                            .header("WWW-Authenticate", "Bearer")
-                            .header("Content-Type", APPLICATION_JSON_UTF8)
-                            .entity(new StatusMessage("token_invalid",
-                                    "Token is invalid: " + ex.getMessage()))
+                            .header("WWW-Authenticate", "Bearer "
+                                    + REALM + "=rest-api" + ", "
+                                    + ERROR + "=invalid_token" + ", "
+                                    + ERROR_DESCRIPTION +"="+ ex.getMessage())
                             .build());
         }
     }
