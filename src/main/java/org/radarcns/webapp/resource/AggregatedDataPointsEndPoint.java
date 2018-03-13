@@ -13,7 +13,10 @@ import static org.radarcns.webapp.resource.Parameter.START;
 import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 import static org.radarcns.webapp.resource.Parameter.TIME_WINDOW;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.time.Instant;
@@ -40,6 +43,15 @@ import org.radarcns.webapp.validation.Alphanumeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@OpenAPIDefinition(info =
+        @Info(
+                title = "RADAR Rest-api",
+                version = "0.2.0",
+                description = "RADAR Rest-api to share downstream data from RADAR-Backend",
+                license =
+                @License(name = "Apache 2.0", url = "http://www.apache.org/licenses/LICENSE-2.0")
+        )
+)
 @Authenticated
 @Path("/" + AGGREGATE)
 public class AggregatedDataPointsEndPoint {
