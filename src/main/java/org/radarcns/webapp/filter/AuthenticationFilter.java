@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 public class AuthenticationFilter implements ContainerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
-    private static final String REALM = "realm";
-    private static final String ERROR = "error";
-    private static final String ERROR_DESCRIPTION = "error_description";
+    public static final String REALM = "realm";
+    public static final String ERROR = "error";
+    public static final String ERROR_DESCRIPTION = "error_description";
     private final TokenValidator validator;
 
     /** Constructs a filter with a fixed validator. */

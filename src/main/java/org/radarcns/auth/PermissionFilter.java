@@ -1,6 +1,8 @@
 package org.radarcns.auth;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static org.radarcns.webapp.filter.AuthenticationFilter.ERROR;
+import static org.radarcns.webapp.filter.AuthenticationFilter.ERROR_DESCRIPTION;
+import static org.radarcns.webapp.filter.AuthenticationFilter.REALM;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -9,7 +11,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.radarcns.auth.authorization.Permission;
-import org.radarcns.webapp.exception.StatusMessage;
 import org.radarcns.webapp.filter.AuthenticationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,10 +47,10 @@ public class PermissionFilter implements ContainerRequestFilter {
         logger.warn("[403] {}: {}",
                 requestContext.getUriInfo().getPath(), message);
         Response.ResponseBuilder builder = Response.status(Status.FORBIDDEN);
-        if (requestContext.getMediaType() == null
-                || requestContext.getMediaType().isCompatible(APPLICATION_JSON_TYPE)) {
-            builder.entity(new StatusMessage("forbidden", message));
-        }
+        builder.header("WWW-Authenticate", "Bearer "
+                + REALM + "=rest-api" + ", "
+                + ERROR + "=insufficient_scope" + ", "
+                + ERROR_DESCRIPTION +"="+ message);
         requestContext.abortWith(builder.build());
     }
 }
