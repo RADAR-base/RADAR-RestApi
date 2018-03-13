@@ -1,3 +1,0 @@
-[submodule "src/endToEndTest/dockerRadar"]
-	path = src/endToEndTest/dockerRadar
-	url = https://github.com/RADAR-CNS/RADAR-Docker.git

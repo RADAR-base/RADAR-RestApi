@@ -15,7 +15,7 @@ To run the application do:
   - `/usr/share/conf/radar/rest-api`
   - `/usr/local/conf/radar/rest-api`
 - run `./gradlew build`
-- Run the `radar-restapi-0.1.2-SNAPSHOT.jar` located at `build/libs/`
+- Run the `radar-restapi-0.2.0.jar` located at `build/libs/`
 
 By default, log messages are redirected to the `STDOUT`.
 
@@ -32,7 +32,8 @@ You can change the secret, scope, name, etc according to your needs. For more in
 The Rest-api is capable of reading `bins.csv` file generated while restructuring the HDFS file system. See [hdfs_restructure.sh](https://github.com/RADAR-CNS/RADAR-Docker/tree/dev/dcompose-stack/radar-cp-hadoop-stack). This file gives a summary of records being received by the Radar Platform. An example of this file is included here in the root directory. Please place it in the `/usr/local/tomcat/bin/radar/bins.csv` for it to be readable by the RestApi. This is available at the end-point `<your-server-address>:<port>/api/status/hdfs` and can be obtained as a `CSV` or `JSON` as specified by the Accept header in your request.
 
 ## Dev Environment
-Click [here](http://radar-restapi.eu-west-1.elasticbeanstalk.com/api/swagger.json) to see documentation of dev deploy instance.
+Click [here](http://radar-backend.co.uk/api/openapi.json) to see documentation of dev deploy 
+instance.
 
 ## Clients
 Swagger provides a tool to automatically generate a client in several programming language.
@@ -50,37 +51,6 @@ Before running the test, add `127.0.0.1	hotstorage` to the `hosts` file.
 To run the test:
 ```shell
   ./gradlew integrationTest
-```
-
-## End to end test
-This project contains an end to end test for the RADAR-CNS platform covering:
-- `Confluent Rest-Proxy`
-- `Kafka infrastructure`
-- `RADAR-CNS kafka streams application`
-- `RADAR-CNS MongoDb connector`
-- `RADAR-CNS Hotstorage`
-- `RADAR-CNS Rest API`
-
-Infrastructure settings are located at `src/endToEndTest/resources/pipeline.yml`.
-Test case settings are located at `src/endToEndTest/resources/pipeline.yml`. Each test case is specified as:
-```yaml
-- topic: android_empatica_e4_acceleration
-  sensor: ACCELEROMETER
-  frequency: 32.0
-  file: accelerometer.csv
-  key_schema: org.radarcns.kafka.ObservationKey
-  value_schema: org.radarcns.passive.empatica.EmpaticaE4Acceleration
-  value_fields: [x, y, z]
-  minimum: -2.0
-  maximum: 2.0
-  maximum_difference: 1e-10
-```
-The test will generate random data between `minimum` and `maximum`, and stream it to the landing topic specified by `topic` having for key `key_schema` and for value `value_schema`. Data for the sensor type `sensor` are randomly generated according to the `frequency`: number of messages generated per second. `value_fields` is the variables list which will be tested against the RESTfull service. Since we are comparing `double`s, `magnitude` represents the maximum delta between expected and actual values for which both numbers are still considered equal.
-
-To run the test:
-
-```shell
-./gradlew endToEndTest
 ```
 
 ## Contributing

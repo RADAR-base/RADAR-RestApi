@@ -43,8 +43,9 @@ after_script:
 deploy:
   provider: releases
   api_key: ${GH_TOKEN}
+  file_glob: true
   file:
-    - "build/distributions/radar-restapi-*"
+    - "build/libs/*.jar"
   skip_cleanup: true
   on:
     tags: true
