@@ -34,6 +34,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
     public static final String REALM = "realm";
+    public static final String REALM_VALUE = "api";
     public static final String ERROR = "error";
     public static final String ERROR_DESCRIPTION = "error_description";
     private final TokenValidator validator;
@@ -65,7 +66,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             requestContext.abortWith(
                     Response.status(Status.UNAUTHORIZED)
                             .header("WWW-Authenticate", "Bearer "
-                                            + REALM + "=rest-api")
+                                    + REALM + "=" + REALM_VALUE)
                             .build());
             return;
         }
@@ -78,9 +79,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             requestContext.abortWith(
                     Response.status(Status.UNAUTHORIZED)
                             .header("WWW-Authenticate", "Bearer "
-                                    + REALM + "=rest-api" + ", "
+                                    + REALM + "=" + REALM_VALUE + ", "
                                     + ERROR + "=invalid_token" + ", "
-                                    + ERROR_DESCRIPTION +"="+ ex.getMessage())
+                                    + ERROR_DESCRIPTION + "=" + ex.getMessage())
                             .build());
         }
     }

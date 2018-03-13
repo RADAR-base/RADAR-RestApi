@@ -3,6 +3,7 @@ package org.radarcns.auth;
 import static org.radarcns.webapp.filter.AuthenticationFilter.ERROR;
 import static org.radarcns.webapp.filter.AuthenticationFilter.ERROR_DESCRIPTION;
 import static org.radarcns.webapp.filter.AuthenticationFilter.REALM;
+import static org.radarcns.webapp.filter.AuthenticationFilter.REALM_VALUE;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -48,9 +49,9 @@ public class PermissionFilter implements ContainerRequestFilter {
                 requestContext.getUriInfo().getPath(), message);
         Response.ResponseBuilder builder = Response.status(Status.FORBIDDEN);
         builder.header("WWW-Authenticate", "Bearer "
-                + REALM + "=rest-api" + ", "
+                + REALM + "=" + REALM_VALUE + ", "
                 + ERROR + "=insufficient_scope" + ", "
-                + ERROR_DESCRIPTION +"="+ message);
+                + ERROR_DESCRIPTION + "=" + message);
         requestContext.abortWith(builder.build());
     }
 }
