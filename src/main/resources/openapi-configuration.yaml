@@ -1,0 +1,9 @@
+prettyPrint: true
+
+openAPI:
+  info:
+    version: 0.2.0
+    title: RADAR-CNS Downstream REST APIs
+    license:
+      name: Apache 2.0
+      url: http://www.apache.org/licenses/LICENSE-2.0.html
