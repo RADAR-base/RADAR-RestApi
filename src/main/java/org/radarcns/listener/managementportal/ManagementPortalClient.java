@@ -42,6 +42,8 @@ import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.managementportal.SubjectDTO;
 import org.radarcns.exception.TokenException;
+import org.radarcns.mongo.data.passive.DataFormat;
+import org.radarcns.mongo.data.passive.SourceDataMongoWrapper;
 import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.CachedMap;
@@ -310,7 +312,7 @@ public class ManagementPortalClient {
      *
      * @return sourceType-types retrieved from the management portal.
      */
-    public List<SourceDataDTO> retrieveSourceData() throws IOException {
+    public List<SourceDataMongoWrapper> retrieveSourceData() throws IOException {
         ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
         URL getAllSourceTypesUrl = new URL(config.getManagementPortalUrl(),
                 config.getSourceDataEndpoint() + WITH_PAGINATION_SIZE);
@@ -323,7 +325,8 @@ public class ManagementPortalClient {
             }
             List<SourceDataDTO> allSourceData = SOURCE_DATA_LIST_READER.readValue(responseBody);
             logger.info("Retrieved {} SourceData from MP", allSourceData.size());
-            return allSourceData;
+            return allSourceData.stream().map(DataFormat::getMongoSensor)
+                    .collect(Collectors.toList());
         }
     }
 

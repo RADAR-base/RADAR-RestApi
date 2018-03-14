@@ -28,6 +28,7 @@ import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.managementportal.SourceTypeIdentifier;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.mongo.data.passive.SourceDataMongoWrapper;
 import org.radarcns.util.CachedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ public class SourceCatalog {
 
     private final CachedMap<SourceTypeIdentifier, SourceTypeDTO> sourceTypes;
 
-    private final CachedMap<String, SourceDataDTO> sourceData;
+    private final CachedMap<String, SourceDataMongoWrapper> sourceData;
 
     private static final Duration CACHE_INVALIDATE_DEFAULT = Duration.ofMinutes(1);
 
@@ -59,7 +60,7 @@ public class SourceCatalog {
                 SourceTypeDTO::getSourceTypeIdentifier,
                 CACHE_INVALIDATE_DEFAULT, CACHE_RETRY_DEFAULT);
         this.sourceData = new CachedMap<>(managementPortalClient::retrieveSourceData,
-                SourceDataDTO::getSourceDataName,
+                SourceDataMongoWrapper::getSourceDataName,
                 CACHE_INVALIDATE_DEFAULT, CACHE_RETRY_DEFAULT);
     }
 
@@ -100,7 +101,7 @@ public class SourceCatalog {
      * @param sourceDataName {@link String} of the Source-Data that has to be retrieved
      * @return {@link SourceDataDTO} retrieved from the Management Portal
      */
-    public SourceDataDTO getSourceData(String sourceDataName)
+    public SourceDataMongoWrapper getSourceData(String sourceDataName)
             throws NotFoundException, IOException {
         try {
             return sourceData.get(sourceDataName);

@@ -33,13 +33,13 @@ public enum DataFormat {
     }
 
     /**
-     * Returns the {@code MongoSourceDataWrapper} associated with the given sensor.
+     * Returns the {@code SourceDataMongoWrapper} associated with the given sensor.
      *
-     * @param sourceData sensor for which the MongoSourceDataWrapper has to be instantiated
-     * @return {@code MongoSourceDataWrapper}
-     * @see MongoSourceDataWrapper
+     * @param sourceData sensor for which the SourceDataMongoWrapper has to be instantiated
+     * @return {@code SourceDataMongoWrapper}
+     * @see SourceDataMongoWrapper
      */
-    public static MongoSourceDataWrapper getMongoSensor(SourceDataDTO sourceData) {
+    public static SourceDataMongoWrapper getMongoSensor(SourceDataDTO sourceData) {
         String sourceDataType = sourceData.getSourceDataType();
         switch (sourceDataType) {
             case "ACCELEROMETER":

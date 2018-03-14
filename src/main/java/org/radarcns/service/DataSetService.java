@@ -32,10 +32,8 @@ import java.time.temporal.TemporalAmount;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -54,8 +52,7 @@ import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.mongo.data.passive.DataFormat;
-import org.radarcns.mongo.data.passive.MongoSourceDataWrapper;
+import org.radarcns.mongo.data.passive.SourceDataMongoWrapper;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.exception.BadGatewayException;
@@ -69,11 +66,6 @@ public class DataSetService {
     private static final int MAXIMUM_NUMBER_OF_WINDOWS = 1000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetService.class);
-
-    /**
-     * Map containing actual implementations of each data DAO.
-     **/
-    private final Map<String, MongoSourceDataWrapper> mongoSensorMap = new HashMap<>();
 
     private final ManagementPortalClient managementPortalClient;
 
@@ -96,13 +88,6 @@ public class DataSetService {
         this.managementPortalClient = managementPortalClient;
         this.sourceCatalog = sourceCatalog;
         this.mongoClient = mongoClient;
-        sourceCatalog.getSourceTypes().forEach(sourceType -> {
-            Set<SourceDataDTO> sourceTypeConsumer = sourceType.getSourceData();
-            sourceTypeConsumer.forEach(sourceData ->
-                    mongoSensorMap.put(sourceData.getSourceDataName(),
-                            DataFormat.getMongoSensor(sourceData))
-            );
-        });
 
         LOGGER.info("DataSetService successfully loaded.");
     }
@@ -165,7 +150,7 @@ public class DataSetService {
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeWindow, timeFrame);
 
-        MongoSourceDataWrapper sourceDataWrapper = mongoSensorMap.get(sourceDataName);
+        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog.getSourceData(sourceDataName);
 
         return sourceDataWrapper.getLatestRecord(projectName, subjectId, sourceId, header,
                 RadarConverter.getMongoStat(stat), MongoHelper.getCollection(mongoClient,
@@ -190,7 +175,7 @@ public class DataSetService {
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeWindow, null);
 
-        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
+        SourceDataMongoWrapper sensorDao = this.sourceCatalog.getSourceData(sourceDataName);
 
         return sensorDao.getAllRecords(MongoHelper.getCollection(mongoClient,
                 sensorDao.getCollectionName(timeWindow)), projectName, subjectId, sourceId, header,
@@ -220,11 +205,11 @@ public class DataSetService {
 
         TimeFrame timeFrame = new TimeFrame(start, end);
 
-        Header header = getHeader(projectName, subjectId, sourceId,
-                sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
-                source.getSourceTypeIdentifier().toString(), timeFrame);
+        SourceDataMongoWrapper sensorDao = this.sourceCatalog.getSourceData(sourceDataName);
 
-        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
+        Header header = getHeader(projectName, subjectId, sourceId,
+                sensorDao.getSourceData(), stat, timeWindow,
+                source.getSourceTypeIdentifier().toString(), timeFrame);
 
         return sensorDao.getAllRecordsInWindow(MongoHelper.getCollection(mongoClient,
                 sensorDao.getCollectionName(timeWindow)), projectName, subjectId, sourceId, header,
@@ -239,7 +224,7 @@ public class DataSetService {
         SourceDTO source = managementPortalClient.getSource(sourceId);
 
         return getHeader(projectName, subjectId, sourceId,
-                sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
+                this.sourceCatalog.getSourceData(sourceDataName).getSourceData(), stat, timeWindow,
                 source.getSourceTypeIdentifier().toString(), timeFrame);
     }
 
@@ -280,7 +265,8 @@ public class DataSetService {
         try {
             for (AggregateDataSource source : sources) {
                 for (SourceData sourceData : source.getSourceData()) {
-                    SourceDataDTO definition = sourceCatalog.getSourceData(sourceData.getName());
+                    SourceDataDTO definition = this.sourceCatalog.getSourceData(sourceData
+                            .getName()).getSourceData();
                     sourceData.setType(definition.getSourceDataType());
                 }
             }
@@ -306,7 +292,13 @@ public class DataSetService {
             TimeWindow timeWindow) {
         int count = aggregateDataSources.stream()
                 .map(aggregate -> (int) aggregate.getSourceData().stream()
-                        .map(sourceData -> mongoSensorMap.get(sourceData.getName()))
+                        .map(sourceData -> {
+                            try {
+                                return this.sourceCatalog.getSourceData(sourceData.getName());
+                            } catch (IOException exe) {
+                                throw new BadGatewayException(exe);
+                            }
+                        })
                         .filter(wrapper -> {
                             MongoCollection<Document> collection = MongoHelper.getCollection(
                                     mongoClient, wrapper.getCollectionName(timeWindow));
