@@ -308,7 +308,7 @@ public class ManagementPortalClient {
 
     /**
      * Retrieves all {@link SourceDataDTO} from Management Portal using {@link ServletContext}
-     * entity.
+     * entity and creates {@link SourceDataMongoWrapper} around it.
      *
      * @return sourceType-types retrieved from the management portal.
      */
