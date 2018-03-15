@@ -150,7 +150,7 @@ public class DataSetService {
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeWindow, timeFrame);
 
-        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog.getSourceData(sourceDataName);
+        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog.getSourceDataWrapper(sourceDataName);
 
         return sourceDataWrapper.getLatestRecord(projectName, subjectId, sourceId, header,
                 RadarConverter.getMongoStat(stat), MongoHelper.getCollection(mongoClient,
@@ -175,7 +175,7 @@ public class DataSetService {
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeWindow, null);
 
-        SourceDataMongoWrapper sensorDao = this.sourceCatalog.getSourceData(sourceDataName);
+        SourceDataMongoWrapper sensorDao = this.sourceCatalog.getSourceDataWrapper(sourceDataName);
 
         return sensorDao.getAllRecords(MongoHelper.getCollection(mongoClient,
                 sensorDao.getCollectionName(timeWindow)), projectName, subjectId, sourceId, header,
@@ -205,7 +205,7 @@ public class DataSetService {
 
         TimeFrame timeFrame = new TimeFrame(start, end);
 
-        SourceDataMongoWrapper sensorDao = this.sourceCatalog.getSourceData(sourceDataName);
+        SourceDataMongoWrapper sensorDao = this.sourceCatalog.getSourceDataWrapper(sourceDataName);
 
         Header header = getHeader(projectName, subjectId, sourceId,
                 sensorDao.getSourceData(), stat, timeWindow,
@@ -224,7 +224,7 @@ public class DataSetService {
         SourceDTO source = managementPortalClient.getSource(sourceId);
 
         return getHeader(projectName, subjectId, sourceId,
-                this.sourceCatalog.getSourceData(sourceDataName).getSourceData(), stat, timeWindow,
+                this.sourceCatalog.getSourceDataWrapper(sourceDataName).getSourceData(), stat, timeWindow,
                 source.getSourceTypeIdentifier().toString(), timeFrame);
     }
 
@@ -265,7 +265,7 @@ public class DataSetService {
         try {
             for (AggregateDataSource source : sources) {
                 for (SourceData sourceData : source.getSourceData()) {
-                    SourceDataDTO definition = this.sourceCatalog.getSourceData(sourceData
+                    SourceDataDTO definition = this.sourceCatalog.getSourceDataWrapper(sourceData
                             .getName()).getSourceData();
                     sourceData.setType(definition.getSourceDataType());
                 }
@@ -294,7 +294,7 @@ public class DataSetService {
                 .map(aggregate -> (int) aggregate.getSourceData().stream()
                         .map(sourceData -> {
                             try {
-                                return this.sourceCatalog.getSourceData(sourceData.getName());
+                                return this.sourceCatalog.getSourceDataWrapper(sourceData.getName());
                             } catch (IOException exe) {
                                 throw new BadGatewayException(exe);
                             }

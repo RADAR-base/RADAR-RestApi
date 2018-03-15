@@ -101,7 +101,7 @@ public class SourceCatalog {
      * @param sourceDataName {@link String} of the Source-Data that has to be retrieved
      * @return {@link SourceDataDTO} retrieved from the Management Portal
      */
-    public SourceDataMongoWrapper getSourceData(String sourceDataName)
+    public SourceDataMongoWrapper getSourceDataWrapper(String sourceDataName)
             throws NotFoundException, IOException {
         try {
             return sourceData.get(sourceDataName);
