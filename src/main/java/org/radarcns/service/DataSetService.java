@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
  * Generic Data Access Object database independent.
  */
 public class DataSetService {
+
     private static final int MAXIMUM_NUMBER_OF_WINDOWS = 1000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetService.class);
@@ -150,7 +151,8 @@ public class DataSetService {
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeWindow, timeFrame);
 
-        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog.getSourceDataWrapper(sourceDataName);
+        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
+                .getSourceDataWrapper(sourceDataName);
 
         return sourceDataWrapper.getLatestRecord(projectName, subjectId, sourceId, header,
                 RadarConverter.getMongoStat(stat), MongoHelper.getCollection(mongoClient,
@@ -224,8 +226,8 @@ public class DataSetService {
         SourceDTO source = managementPortalClient.getSource(sourceId);
 
         return getHeader(projectName, subjectId, sourceId,
-                this.sourceCatalog.getSourceDataWrapper(sourceDataName).getSourceData(), stat, timeWindow,
-                source.getSourceTypeIdentifier().toString(), timeFrame);
+                this.sourceCatalog.getSourceDataWrapper(sourceDataName).getSourceData(), stat,
+                timeWindow, source.getSourceTypeIdentifier().toString(), timeFrame);
     }
 
     /**
@@ -294,7 +296,8 @@ public class DataSetService {
                 .map(aggregate -> (int) aggregate.getSourceData().stream()
                         .map(sourceData -> {
                             try {
-                                return this.sourceCatalog.getSourceDataWrapper(sourceData.getName());
+                                return this.sourceCatalog
+                                        .getSourceDataWrapper(sourceData.getName());
                             } catch (IOException exe) {
                                 throw new BadGatewayException(exe);
                             }
@@ -335,6 +338,7 @@ public class DataSetService {
 
     /**
      * Get the time window that closest matches given time frame.
+     *
      * @param timeFrame time frame to compute time window for
      * @param numberOfWindows number of time windows that should ideally be returned.
      * @return closest match with given time frame.
@@ -349,8 +353,9 @@ public class DataSetService {
     }
 
     /**
-     * Checks that for a given time frame with given time window, the number of data points
-     * does not exceed a maximum.
+     * Checks that for a given time frame with given time window, the number of data points does not
+     * exceed a maximum.
+     *
      * @param timeFrame time frame to request
      * @param timeWindow time window granularity
      * @param maximumSize maximum number of data points
