@@ -33,9 +33,9 @@ public enum DataFormat {
     }
 
     /**
-     * Returns the {@code SourceDataMongoWrapper} associated with the given sensor.
+     * Returns the {@code SourceDataMongoWrapper} associated with the given SourceData.
      *
-     * @param sourceData sensor for which the SourceDataMongoWrapper has to be instantiated
+     * @param sourceData sourceData for which the SourceDataMongoWrapper has to be instantiated
      * @return {@code SourceDataMongoWrapper}
      * @see SourceDataMongoWrapper
      */

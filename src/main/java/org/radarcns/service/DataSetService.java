@@ -99,17 +99,19 @@ public class DataSetService {
      * @param projectName of project
      * @param subjectId of subject
      * @param sourceId of source
-     * @param sensor sourceDataName
+     * @param sourceDataName sourceDataName
      * @param stat statistic
      * @param interval timeWindow
      * @param timeFrame start to end
      * @return an instance of Dataset.
      */
     public static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
-            String sensor, DescriptiveStatistic stat, TimeWindow interval, TimeFrame timeFrame) {
+            String sourceDataName, DescriptiveStatistic stat, TimeWindow interval,
+            TimeFrame timeFrame) {
 
-        return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
-                null, interval, timeFrame, null),
+        return new Dataset(
+                new Header(projectName, subjectId, sourceId, "UNKNOWN", sourceDataName, stat,
+                        null, interval, timeFrame, null),
                 Collections.emptyList());
     }
 
@@ -177,11 +179,12 @@ public class DataSetService {
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeWindow, null);
 
-        SourceDataMongoWrapper sensorDao = this.sourceCatalog.getSourceDataWrapper(sourceDataName);
+        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
+                .getSourceDataWrapper(sourceDataName);
 
-        return sensorDao.getAllRecords(MongoHelper.getCollection(mongoClient,
-                sensorDao.getCollectionName(timeWindow)), projectName, subjectId, sourceId, header,
-                RadarConverter.getMongoStat(stat));
+        return sourceDataWrapper.getAllRecords(MongoHelper.getCollection(mongoClient,
+                sourceDataWrapper.getCollectionName(timeWindow)), projectName, subjectId, sourceId,
+                header, RadarConverter.getMongoStat(stat));
     }
 
     /**
@@ -207,15 +210,16 @@ public class DataSetService {
 
         TimeFrame timeFrame = new TimeFrame(start, end);
 
-        SourceDataMongoWrapper sensorDao = this.sourceCatalog.getSourceDataWrapper(sourceDataName);
+        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
+                .getSourceDataWrapper(sourceDataName);
 
         Header header = getHeader(projectName, subjectId, sourceId,
-                sensorDao.getSourceData(), stat, timeWindow,
+                sourceDataWrapper.getSourceData(), stat, timeWindow,
                 source.getSourceTypeIdentifier().toString(), timeFrame);
 
-        return sensorDao.getAllRecordsInWindow(MongoHelper.getCollection(mongoClient,
-                sensorDao.getCollectionName(timeWindow)), projectName, subjectId, sourceId, header,
-                RadarConverter.getMongoStat(stat), timeFrame
+        return sourceDataWrapper.getAllRecordsInWindow(MongoHelper.getCollection(mongoClient,
+                sourceDataWrapper.getCollectionName(timeWindow)), projectName, subjectId, sourceId,
+                header, RadarConverter.getMongoStat(stat), timeFrame
         );
     }
 
@@ -267,9 +271,9 @@ public class DataSetService {
         try {
             for (AggregateDataSource source : sources) {
                 for (SourceData sourceData : source.getSourceData()) {
-                    SourceDataDTO definition = this.sourceCatalog.getSourceDataWrapper(sourceData
+                    SourceDataDTO sourceDataDto = this.sourceCatalog.getSourceDataWrapper(sourceData
                             .getName()).getSourceData();
-                    sourceData.setType(definition.getSourceDataType());
+                    sourceData.setType(sourceDataDto.getSourceDataType());
                 }
             }
         } catch (IOException exe) {
