@@ -32,7 +32,7 @@ import org.radarcns.util.RadarConverter;
 /**
  * Data Access Object for Acceleration values.
  */
-public class AccelerationFormat extends MongoSourceDataWrapper {
+public class AccelerationFormat extends SourceDataMongoWrapper {
 
     public static final String X_LABEL = "x";
     public static final String Y_LABEL = "y";

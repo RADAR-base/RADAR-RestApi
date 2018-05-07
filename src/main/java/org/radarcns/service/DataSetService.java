@@ -32,10 +32,8 @@ import java.time.temporal.TemporalAmount;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -54,8 +52,7 @@ import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.mongo.data.passive.DataFormat;
-import org.radarcns.mongo.data.passive.MongoSourceDataWrapper;
+import org.radarcns.mongo.data.passive.SourceDataMongoWrapper;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.exception.BadGatewayException;
@@ -66,14 +63,10 @@ import org.slf4j.LoggerFactory;
  * Generic Data Access Object database independent.
  */
 public class DataSetService {
+
     private static final int MAXIMUM_NUMBER_OF_WINDOWS = 1000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetService.class);
-
-    /**
-     * Map containing actual implementations of each data DAO.
-     **/
-    private final Map<String, MongoSourceDataWrapper> mongoSensorMap = new HashMap<>();
 
     private final ManagementPortalClient managementPortalClient;
 
@@ -96,13 +89,6 @@ public class DataSetService {
         this.managementPortalClient = managementPortalClient;
         this.sourceCatalog = sourceCatalog;
         this.mongoClient = mongoClient;
-        sourceCatalog.getSourceTypes().forEach(sourceType -> {
-            Set<SourceDataDTO> sourceTypeConsumer = sourceType.getSourceData();
-            sourceTypeConsumer.forEach(sourceData ->
-                    mongoSensorMap.put(sourceData.getSourceDataName(),
-                            DataFormat.getMongoSensor(sourceData))
-            );
-        });
 
         LOGGER.info("DataSetService successfully loaded.");
     }
@@ -113,17 +99,19 @@ public class DataSetService {
      * @param projectName of project
      * @param subjectId of subject
      * @param sourceId of source
-     * @param sensor sourceDataName
+     * @param sourceDataName sourceDataName
      * @param stat statistic
      * @param interval timeWindow
      * @param timeFrame start to end
      * @return an instance of Dataset.
      */
     public static Dataset emptyDataset(String projectName, String subjectId, String sourceId,
-            String sensor, DescriptiveStatistic stat, TimeWindow interval, TimeFrame timeFrame) {
+            String sourceDataName, DescriptiveStatistic stat, TimeWindow interval,
+            TimeFrame timeFrame) {
 
-        return new Dataset(new Header(projectName, subjectId, sourceId, "UNKNOWN", sensor, stat,
-                null, interval, timeFrame, null),
+        return new Dataset(
+                new Header(projectName, subjectId, sourceId, "UNKNOWN", sourceDataName, stat,
+                        null, interval, timeFrame, null),
                 Collections.emptyList());
     }
 
@@ -165,7 +153,8 @@ public class DataSetService {
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeWindow, timeFrame);
 
-        MongoSourceDataWrapper sourceDataWrapper = mongoSensorMap.get(sourceDataName);
+        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
+                .getSourceDataWrapper(sourceDataName);
 
         return sourceDataWrapper.getLatestRecord(projectName, subjectId, sourceId, header,
                 RadarConverter.getMongoStat(stat), MongoHelper.getCollection(mongoClient,
@@ -190,11 +179,12 @@ public class DataSetService {
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeWindow, null);
 
-        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
+        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
+                .getSourceDataWrapper(sourceDataName);
 
-        return sensorDao.getAllRecords(MongoHelper.getCollection(mongoClient,
-                sensorDao.getCollectionName(timeWindow)), projectName, subjectId, sourceId, header,
-                RadarConverter.getMongoStat(stat));
+        return sourceDataWrapper.getAllRecords(MongoHelper.getCollection(mongoClient,
+                sourceDataWrapper.getCollectionName(timeWindow)), projectName, subjectId, sourceId,
+                header, RadarConverter.getMongoStat(stat));
     }
 
     /**
@@ -220,15 +210,16 @@ public class DataSetService {
 
         TimeFrame timeFrame = new TimeFrame(start, end);
 
+        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
+                .getSourceDataWrapper(sourceDataName);
+
         Header header = getHeader(projectName, subjectId, sourceId,
-                sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
+                sourceDataWrapper.getSourceData(), stat, timeWindow,
                 source.getSourceTypeIdentifier().toString(), timeFrame);
 
-        MongoSourceDataWrapper sensorDao = mongoSensorMap.get(sourceDataName);
-
-        return sensorDao.getAllRecordsInWindow(MongoHelper.getCollection(mongoClient,
-                sensorDao.getCollectionName(timeWindow)), projectName, subjectId, sourceId, header,
-                RadarConverter.getMongoStat(stat), timeFrame
+        return sourceDataWrapper.getAllRecordsInWindow(MongoHelper.getCollection(mongoClient,
+                sourceDataWrapper.getCollectionName(timeWindow)), projectName, subjectId, sourceId,
+                header, RadarConverter.getMongoStat(stat), timeFrame
         );
     }
 
@@ -239,8 +230,8 @@ public class DataSetService {
         SourceDTO source = managementPortalClient.getSource(sourceId);
 
         return getHeader(projectName, subjectId, sourceId,
-                sourceCatalog.getSourceData(sourceDataName), stat, timeWindow,
-                source.getSourceTypeIdentifier().toString(), timeFrame);
+                this.sourceCatalog.getSourceDataWrapper(sourceDataName).getSourceData(), stat,
+                timeWindow, source.getSourceTypeIdentifier().toString(), timeFrame);
     }
 
     /**
@@ -280,8 +271,9 @@ public class DataSetService {
         try {
             for (AggregateDataSource source : sources) {
                 for (SourceData sourceData : source.getSourceData()) {
-                    SourceDataDTO definition = sourceCatalog.getSourceData(sourceData.getName());
-                    sourceData.setType(definition.getSourceDataType());
+                    SourceDataDTO sourceDataDto = this.sourceCatalog.getSourceDataWrapper(sourceData
+                            .getName()).getSourceData();
+                    sourceData.setType(sourceDataDto.getSourceDataType());
                 }
             }
         } catch (IOException exe) {
@@ -306,7 +298,14 @@ public class DataSetService {
             TimeWindow timeWindow) {
         int count = aggregateDataSources.stream()
                 .map(aggregate -> (int) aggregate.getSourceData().stream()
-                        .map(sourceData -> mongoSensorMap.get(sourceData.getName()))
+                        .map(sourceData -> {
+                            try {
+                                return this.sourceCatalog
+                                        .getSourceDataWrapper(sourceData.getName());
+                            } catch (IOException exe) {
+                                throw new BadGatewayException(exe);
+                            }
+                        })
                         .filter(wrapper -> {
                             MongoCollection<Document> collection = MongoHelper.getCollection(
                                     mongoClient, wrapper.getCollectionName(timeWindow));
@@ -343,6 +342,7 @@ public class DataSetService {
 
     /**
      * Get the time window that closest matches given time frame.
+     *
      * @param timeFrame time frame to compute time window for
      * @param numberOfWindows number of time windows that should ideally be returned.
      * @return closest match with given time frame.
@@ -357,8 +357,9 @@ public class DataSetService {
     }
 
     /**
-     * Checks that for a given time frame with given time window, the number of data points
-     * does not exceed a maximum.
+     * Checks that for a given time frame with given time window, the number of data points does not
+     * exceed a maximum.
+     *
      * @param timeFrame time frame to request
      * @param timeWindow time window granularity
      * @param maximumSize maximum number of data points

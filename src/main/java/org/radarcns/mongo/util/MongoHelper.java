@@ -27,7 +27,13 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.radarcns.config.Properties;
@@ -57,6 +63,19 @@ public class MongoHelper {
     public static final int ASCENDING = 1;
     public static final int DESCENDING = -1;
 
+    private static Map<String, List<String>> indexMap = new HashMap<>();
+
+    private static final Bson indexProjectSubjectSourceTimestart = Indexes.ascending(
+            KEY + "." + PROJECT_ID,
+            KEY + "." + USER_ID,
+            KEY + "." + SOURCE_ID,
+            KEY + "." + START);
+
+    private static final Bson indexProjectSubjectSource = Indexes.ascending(
+            KEY + "." + PROJECT_ID,
+            KEY + "." + USER_ID,
+            KEY + "." + SOURCE_ID);
+
     /**
      * Finds whether document is available for given query parameters.
      * https://stackoverflow.com/a/8390458/822964 suggests find().limit(1).count(true) is the
@@ -72,6 +91,7 @@ public class MongoHelper {
     public static boolean hasDataForSource(
             MongoCollection<Document> collection, String projectName, String subjectId,
             String sourceId, TimeFrame timeFrame) {
+        createIndexIfNotAvailable(collection, indexProjectSubjectSourceTimestart);
         return collection.count(
                 filterSource(projectName, subjectId, sourceId, timeFrame),
                 new CountOptions().limit(1)) > 0;
@@ -91,9 +111,10 @@ public class MongoHelper {
     public static MongoCursor<Document> findDocumentsBySource(
             MongoCollection<Document> collection, String projectName, String subjectId,
             String sourceId, TimeFrame timeFrame) {
+        createIndexIfNotAvailable(collection, indexProjectSubjectSourceTimestart);
         return collection
                 .find(filterSource(projectName, subjectId, sourceId, timeFrame))
-                .sort(new BasicDBObject(START, ASCENDING))
+                .sort(new BasicDBObject(KEY + "." + START, ASCENDING))
                 .iterator();
     }
 
@@ -112,6 +133,9 @@ public class MongoHelper {
     public static MongoCursor<Document> findDocumentBySource(
             MongoCollection<Document> collection, String project, String subject, String source,
             String sortBy, int order, Integer limit) {
+
+        createIndexIfNotAvailable(collection, indexProjectSubjectSource);
+
         FindIterable<Document> result = collection.find(filterSource(project, subject, source));
 
         if (sortBy != null) {
@@ -149,6 +173,30 @@ public class MongoHelper {
     public static MongoCollection<Document> getCollection(MongoClient client, String collection) {
         return client.getDatabase(Properties.getApiConfig().getMongoDbName())
                 .getCollection(collection);
+    }
+
+    /**
+     * Creates given index on the collection, if it is not already created for given collection.
+     * Having indexes created in background prevents other operations being blocked.
+     * @param collection mongoCollection to index.
+     * @param index index to be created.
+     */
+    private static void createIndexIfNotAvailable(MongoCollection<Document> collection,
+            Bson index) {
+        if (indexMap.containsKey(collection.getNamespace().getCollectionName())) {
+            List<String> availableIndexes = indexMap.get(collection.getNamespace()
+                    .getCollectionName());
+            if (!availableIndexes.contains(index.toString())) {
+                collection.createIndex(index, new IndexOptions().background(true));
+                availableIndexes.add(index.toString());
+            }
+
+        } else {
+            collection.createIndex(index, new IndexOptions().background(true));
+            List<String> indexList = new ArrayList<>();
+            indexList.add(index.toString());
+            indexMap.put(collection.getNamespace().getCollectionName(), indexList);
+        }
     }
 
     /**
