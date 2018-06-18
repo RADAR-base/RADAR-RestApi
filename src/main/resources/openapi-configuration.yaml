@@ -2,7 +2,7 @@ prettyPrint: true
 
 openAPI:
   info:
-    version: 0.2.0
+    version: 0.2.1
     title: RADAR-CNS Downstream REST APIs
     license:
       name: Apache 2.0
