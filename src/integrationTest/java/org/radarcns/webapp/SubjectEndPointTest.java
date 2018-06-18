@@ -19,6 +19,7 @@ package org.radarcns.webapp;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.domain.restapi.SourceStatus.CONNECTED;
 import static org.radarcns.integration.util.ExpectedDocumentFactory.getDocumentsForStatistics;
@@ -96,6 +97,17 @@ public class SubjectEndPointTest {
         assertNotNull(apiClient.get(
                 BasePath.PROJECTS + '/' + PROJECT + '/' + SUBJECTS + "/OTHER",
                 APPLICATION_JSON, Status.NOT_FOUND));
+    }
+
+    @Test
+    public void getSubjectsByProjectName200WhenNoSourceStatisticsAvailable() throws IOException {
+        List<Subject> subjects = apiClient.getJsonList(
+                BasePath.PROJECTS + '/' + PROJECT + '/' + SUBJECTS,
+                Subject.class, Status.OK);
+        assertNotNull(subjects);
+        assertTrue(subjects.size() > 0);
+        assertEquals(PROJECT, subjects.get(0).getProject());
+        assertNull(subjects.get(0).getLastSeen());
     }
 
     private void insertMonitorStatistics(Instant startTime, Instant end) {
