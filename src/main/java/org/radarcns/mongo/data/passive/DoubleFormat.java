@@ -30,7 +30,7 @@ import org.radarcns.util.RadarConverter;
 /**
  * Data Access Object for sensors which are represented by a single double value.
  */
-public class DoubleFormat extends MongoSourceDataWrapper {
+public class DoubleFormat extends SourceDataMongoWrapper {
 
     public DoubleFormat(SourceDataDTO sourceData) {
         super(sourceData);

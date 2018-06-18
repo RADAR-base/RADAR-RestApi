@@ -73,7 +73,8 @@ public class SubjectService {
 
     private Instant getLastSeenForSubject(List<Source> sources) {
         return sources.stream()
-                .map(s -> s.getEffectiveTimeFrame().getEndDateTime())
+                .map(s -> s.getEffectiveTimeFrame() != null
+                        ? s.getEffectiveTimeFrame().getEndDateTime() : null)
                 .filter(Objects::nonNull)
                 .reduce((i1, i2) -> i1.isAfter(i2) ? i1 : i2)
                 .orElse(null);

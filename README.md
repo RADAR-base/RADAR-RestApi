@@ -15,7 +15,7 @@ To run the application do:
   - `/usr/share/conf/radar/rest-api`
   - `/usr/local/conf/radar/rest-api`
 - run `./gradlew build`
-- Run the `radar-restapi-0.2.0.jar` located at `build/libs/`
+- Run the `radar-restapi-0.2.1.jar` located at `build/libs/`
 
 By default, log messages are redirected to the `STDOUT`.
 

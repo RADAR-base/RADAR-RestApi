@@ -40,9 +40,11 @@ import org.radarcns.webapp.validation.Alphanumeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 @Authenticated
 @Path("/" + AGGREGATE)
 public class AggregatedDataPointsEndPoint {
+
     private static final int DEFAULT_NUMBER_OF_WINDOWS = 100;
 
     private static final Logger LOGGER = LoggerFactory

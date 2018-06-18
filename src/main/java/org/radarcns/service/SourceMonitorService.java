@@ -57,7 +57,7 @@ public class SourceMonitorService {
      * @param sourceId of the source
      * @param sourceType of the source
      * @return calculated {@link TimeFrame} with earliest and latest timestamps or null if no data
-     * was found.
+     *      was found.
      */
     public TimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
             String sourceId, SourceTypeDTO sourceType) {
