@@ -43,6 +43,7 @@ public class SourceTypeEndPointTest {
         assertEquals(PRODUCER, project.getProducer());
         assertEquals(MODEL, project.getModel());
         assertEquals(CATALOGUE_VERSION, project.getCatalogVersion());
+        assertTrue(project.getId() > 0);
 
     }
 

@@ -21,9 +21,10 @@ public class SourceTypeDTO implements Serializable {
     private static final String SOURCE_STATISTICS_MONITOR = "source_statistics";
 
     @NotNull
-    private String producer;
-
     private Long id;
+
+    @NotNull
+    private String producer;
 
     @NotNull
     private String model;
@@ -50,6 +51,14 @@ public class SourceTypeDTO implements Serializable {
     private String appProvider;
 
     private Set<SourceDataDTO> sourceData = new HashSet<>();
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getProducer() {
         return producer;
@@ -129,14 +138,6 @@ public class SourceTypeDTO implements Serializable {
 
     public void setSourceTypeScope(String sourceTypeScope) {
         this.sourceTypeScope = sourceTypeScope;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     @Override
