@@ -23,6 +23,8 @@ public class SourceTypeDTO implements Serializable {
     @NotNull
     private String producer;
 
+    private Long id;
+
     @NotNull
     private String model;
 
@@ -129,6 +131,14 @@ public class SourceTypeDTO implements Serializable {
         this.sourceTypeScope = sourceTypeScope;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -142,7 +152,8 @@ public class SourceTypeDTO implements Serializable {
 
         return Objects.equals(producer, sourceTypeDto.producer)
                 && Objects.equals(model, sourceTypeDto.model)
-                && Objects.equals(catalogVersion, sourceTypeDto.catalogVersion);
+                && Objects.equals(catalogVersion, sourceTypeDto.catalogVersion)
+                && Objects.equals(id, sourceTypeDto.id);
     }
 
     @Override
@@ -153,6 +164,7 @@ public class SourceTypeDTO implements Serializable {
     @Override
     public String toString() {
         return "SourceTypeDTO{"
+                + " id='" + id + "'"
                 + " producer='" + producer + "'"
                 + ", model='" + model + "'"
                 + ", catalogVersion='" + catalogVersion + "'"
