@@ -21,6 +21,9 @@ public class SourceTypeDTO implements Serializable {
     private static final String SOURCE_STATISTICS_MONITOR = "source_statistics";
 
     @NotNull
+    private Long id;
+
+    @NotNull
     private String producer;
 
     @NotNull
@@ -48,6 +51,14 @@ public class SourceTypeDTO implements Serializable {
     private String appProvider;
 
     private Set<SourceDataDTO> sourceData = new HashSet<>();
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getProducer() {
         return producer;
@@ -142,7 +153,8 @@ public class SourceTypeDTO implements Serializable {
 
         return Objects.equals(producer, sourceTypeDto.producer)
                 && Objects.equals(model, sourceTypeDto.model)
-                && Objects.equals(catalogVersion, sourceTypeDto.catalogVersion);
+                && Objects.equals(catalogVersion, sourceTypeDto.catalogVersion)
+                && Objects.equals(id, sourceTypeDto.id);
     }
 
     @Override
@@ -153,6 +165,7 @@ public class SourceTypeDTO implements Serializable {
     @Override
     public String toString() {
         return "SourceTypeDTO{"
+                + " id='" + id + "'"
                 + " producer='" + producer + "'"
                 + ", model='" + model + "'"
                 + ", catalogVersion='" + catalogVersion + "'"

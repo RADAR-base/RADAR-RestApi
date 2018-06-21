@@ -14,6 +14,9 @@ public class SourceDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
+    private Long id;
+
     private String sourceId;
 
     @NotNull
@@ -28,6 +31,15 @@ public class SourceDTO implements Serializable {
     private SourceTypeDTO sourceType;
 
     private Map<String, String> attributes;
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getSourceId() {
         return sourceId;
@@ -89,7 +101,8 @@ public class SourceDTO implements Serializable {
         SourceDTO sourceDto = (SourceDTO) o;
 
         return Objects.equals(sourceId, sourceDto.sourceId)
-                && Objects.equals(sourceName, sourceDto.sourceName);
+                && Objects.equals(sourceName, sourceDto.sourceName)
+                && Objects.equals(id, sourceDto.id);
     }
 
     @Override
@@ -100,6 +113,7 @@ public class SourceDTO implements Serializable {
     @Override
     public String toString() {
         return "SourceDTO{"
+                + ", id='" + id + '\''
                 + ", sourceId='" + sourceId + '\''
                 + ", sourceName='" + sourceName + '\''
                 + ", assigned=" + assigned
