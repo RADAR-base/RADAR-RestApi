@@ -65,6 +65,7 @@ public class SubjectEndPointTest {
         assertNotNull(subjects);
         assertTrue(subjects.size() > 0);
         assertEquals(PROJECT, subjects.get(0).getProject());
+        assertTrue(subjects.get(2).getSources().get(0).getSourceTypeId() > 0);
 
     }
 
@@ -89,6 +90,7 @@ public class SubjectEndPointTest {
                 .getEndDateTime());
         assertEquals(CONNECTED, subject.getSources().get(0).getStatus());
         assertNotNull(subject.getLastSeen());
+        assertTrue(subject.getSources().get(0).getSourceTypeId() > 0);
 
     }
 

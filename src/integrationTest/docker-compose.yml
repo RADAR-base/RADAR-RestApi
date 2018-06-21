@@ -40,7 +40,7 @@ services:
     # Management Portal                                                         #
     #---------------------------------------------------------------------------#
     managementportal-app:
-      image: radarcns/management-portal:0.3.3
+      image: radarbase/management-portal:0.3.7
       networks:
         - default
         - simplestack
