@@ -12,6 +12,9 @@ public class Source {
     private String sourceName;
 
     @JsonProperty
+    private Long sourceTypeId;
+
+    @JsonProperty
     private String sourceTypeProducer;
 
     @JsonProperty
@@ -66,6 +69,14 @@ public class Source {
         return sourceName;
     }
 
+    public Long getSourceTypeId() {
+        return sourceTypeId;
+    }
+
+    public Source sourceTypeId(Long sourceTypeId) {
+        this.sourceTypeId = sourceTypeId;
+        return this;
+    }
 
     public Source sourceTypeProducer(String sourceTypeProducer) {
         this.sourceTypeProducer = sourceTypeProducer;
