@@ -126,9 +126,11 @@ public class MongoHelper {
      * @param project is the projectName
      * @param subject is the subjectID
      * @param source is the sourceID
-     * @param sortBy It is optional. {@code 1} means ascending while {@code -1} means descending
+     * @param sortBy It is optional. Field to sort by.
+     * @param order {@code 1} means ascending while {@code -1} means descending
      * @param limit is the number of document that will be retrieved
      * @return a MongoDB cursor containing all documents from query.
+     * @throws IllegalArgumentException if sortBy does not start with a key or value object.
      */
     public static MongoCursor<Document> findDocumentBySource(
             MongoCollection<Document> collection, String project, String subject, String source,
@@ -139,6 +141,10 @@ public class MongoHelper {
         FindIterable<Document> result = collection.find(filterSource(project, subject, source));
 
         if (sortBy != null) {
+            if (!sortBy.startsWith(KEY + ".") && !sortBy.startsWith(VALUE + ".")) {
+                throw new IllegalArgumentException(
+                        "Should sort by a MongoHelper.KEY or MongoHelper.VALUE property.");
+            }
             result = result.sort(new BasicDBObject(sortBy, order));
         }
         if (limit != null) {

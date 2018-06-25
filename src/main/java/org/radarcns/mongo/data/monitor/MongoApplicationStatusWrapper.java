@@ -17,6 +17,8 @@
 package org.radarcns.mongo.data.monitor;
 
 import static org.radarcns.mongo.util.MongoHelper.ASCENDING;
+import static org.radarcns.mongo.util.MongoHelper.KEY;
+import static org.radarcns.mongo.util.MongoHelper.START;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.MongoClient;
@@ -49,7 +51,7 @@ public abstract class MongoApplicationStatusWrapper {
 
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentBySource(MongoHelper.getCollection(client, getCollectionName()),
-                        project, subject, source, null, ASCENDING,
+                        project, subject, source, KEY + "." + START, ASCENDING,
                         1);
 
         if (!cursor.hasNext()) {
