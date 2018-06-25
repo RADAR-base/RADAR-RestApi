@@ -95,7 +95,7 @@ public abstract class SourceDataMongoWrapper {
     public Dataset getLatestRecord(String projectName, String subject, String source, Header
             header, Stat stat, MongoCollection<Document> collection) {
         try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
-                collection, projectName, subject, source, END, DESCENDING, 1)) {
+                collection, projectName, subject, source, KEY + "." + END, DESCENDING, 1)) {
             return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                     cursor);
         }
@@ -116,7 +116,7 @@ public abstract class SourceDataMongoWrapper {
     public Dataset getAllRecords(MongoCollection<Document> collection, String projectName,
             String subject, String source, Header header, Stat stat) {
         try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
-                collection, projectName, subject, source, START, ASCENDING, null)) {
+                collection, projectName, subject, source, KEY + "." + START, ASCENDING, null)) {
             return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                     cursor);
         }
