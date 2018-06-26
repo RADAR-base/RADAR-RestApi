@@ -122,13 +122,16 @@ public class MongoHelper {
      * Finds all documents belonging to the given subject, source and project.
      * Close the returned iterator after use, for example with a try-with-resources construct.
      *
-     * @param collection is the MongoDB that will be queried
-     * @param project is the projectName
-     * @param subject is the subjectID
-     * @param source is the sourceID
-     * @param sortBy It is optional. Field to sort by.
+     * @param collection MongoDB collection name that will be queried
+     * @param project project name
+     * @param subject subject ID
+     * @param source source ID
+     * @param sortBy Field to sort by. If sortBy is {@code null}, the data will not be sorted.
+     *               The field should be prefixed with {@link MongoHelper#KEY} or
+     *               {@link MongoHelper#VALUE}.
      * @param order {@code 1} means ascending while {@code -1} means descending
-     * @param limit is the number of document that will be retrieved
+     * @param limit is the number of document that will be retrieved. If the limit is {@code null},
+     *              no limit is used.
      * @return a MongoDB cursor containing all documents from query.
      * @throws IllegalArgumentException if sortBy does not start with a key or value object.
      */

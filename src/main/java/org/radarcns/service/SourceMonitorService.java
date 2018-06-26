@@ -68,7 +68,7 @@ public class SourceMonitorService {
 
         // get the last document sorted by timeEnd
         try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(collection,
-                projectId, subjectId, sourceId, VALUE + "." + START, ASCENDING, 1)) {
+                projectId, subjectId, sourceId, null, ASCENDING, null)) {
 
             TimeFrame timeFrame = null;
             while (cursor.hasNext()) {
