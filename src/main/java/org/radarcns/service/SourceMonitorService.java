@@ -16,12 +16,13 @@
 
 package org.radarcns.service;
 
-import static org.radarcns.mongo.util.MongoHelper.DESCENDING;
+import static org.radarcns.mongo.util.MongoHelper.ASCENDING;
 import static org.radarcns.mongo.util.MongoHelper.END;
 import static org.radarcns.mongo.util.MongoHelper.START;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import javax.inject.Inject;
 import org.bson.Document;
@@ -62,11 +63,12 @@ public class SourceMonitorService {
     public TimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
             String sourceId, SourceTypeDTO sourceType) {
 
+        MongoCollection<Document> collection = MongoHelper.getCollection(
+                this.mongoClient, sourceType.getSourceStatisticsMonitorTopic());
+
         // get the last document sorted by timeEnd
-        try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
-                MongoHelper.getCollection(this.mongoClient,
-                        sourceType.getSourceStatisticsMonitorTopic()),
-                projectId, subjectId, sourceId, VALUE + "." + END, DESCENDING, 1)) {
+        try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(collection,
+                projectId, subjectId, sourceId, VALUE + "." + START, ASCENDING, 1)) {
 
             TimeFrame timeFrame = null;
             while (cursor.hasNext()) {

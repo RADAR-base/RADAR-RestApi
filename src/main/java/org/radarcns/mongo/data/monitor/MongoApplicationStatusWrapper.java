@@ -51,7 +51,7 @@ public abstract class MongoApplicationStatusWrapper {
 
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentBySource(MongoHelper.getCollection(client, getCollectionName()),
-                        project, subject, source, KEY + "." + START, ASCENDING,
+                        project, subject, source, VALUE + ".time", ASCENDING,
                         1);
 
         if (!cursor.hasNext()) {
