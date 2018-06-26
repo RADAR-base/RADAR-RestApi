@@ -37,7 +37,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -66,6 +67,7 @@ import org.slf4j.LoggerFactory;
 public class DataSetEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetEndPoint.class);
+    private static final int DEFAULT_NUMBER_OF_WINDOWS = 100;
 
     @Inject
     private ManagementPortalClient mpClient;
@@ -138,7 +140,13 @@ public class DataSetEndPoint {
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical results. This end-point returns the all available record "
                     + "for the stat for the given projectID, subjectID, sourceID and SourceDataName"
-                    + " Data can be queried using different time-frame resolutions.")
+                    + "Data can be queried using different time-frame resolutions.  If endTime is"
+                    + "not provided the data will be calculated from current timestamp. If the "
+                    + "startTime is not provided startTime will be calculated based on default "
+                    + "number of windows and given timeWindow. If no timeWindow is provided, a "
+                    + "best fitting timeWindow will be calculated. If none of the parameters are "
+                    + "provided, API will return data for a period of a year with ONE_WEEK of t"
+                    + "imeWindow (<54 records) from current timestamp.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Returns a dataset object containing all "
             + "available record for the given inputs")
@@ -158,19 +166,39 @@ public class DataSetEndPoint {
         // todo: 404 if given source does not exist.
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
-        mpClient.getSubject(subjectId);
+        mpClient.checkSubjectInProject(projectName, subjectId);
         Dataset dataset;
 
-        TimeWindow timeWindow = interval != null ? interval : TEN_SECOND;
-
-        if (start != null && end != null) {
-            dataset = dataSetService.getAllRecordsInWindow(projectName,
-                    subjectId, sourceId, sourceDataName, stat, timeWindow,
-                    Date.from(start.getValue()), Date.from(end.getValue()));
-        } else {
-            dataset = dataSetService.getAllDataItems(projectName, subjectId,
-                    sourceId, sourceDataName, stat, timeWindow);
+        // Don't request future data
+        Instant endTime = end.getValue();
+        if (endTime == null) {
+            endTime = Instant.now();
         }
+
+        TimeWindow timeWindow = interval;
+        Instant startTime = start.getValue();
+        TimeFrame timeFrame = new TimeFrame(startTime, endTime);
+
+        if (startTime != null && startTime.isAfter(endTime)) {
+            // don't mix up time frame order
+            timeFrame.setStartDateTime(endTime);
+        } else if (startTime == null && timeWindow == null) {
+            // default settings, 1 year with 1 week intervals
+            timeWindow = TEN_SECOND;
+            timeFrame.setStartDateTime(endTime.minus(Period.ofYears(1)));
+        } else if (startTime == null) {
+            // use a fixed number of windows.
+            timeFrame.setStartDateTime(endTime.minus(
+                    RadarConverter.getSecond(timeWindow) * DEFAULT_NUMBER_OF_WINDOWS,
+                    ChronoUnit.SECONDS));
+        } else if (timeWindow == null) {
+            // use the fixed time frame with a time frame close to the number of windows.
+            timeWindow = dataSetService.getFittingTimeWindow(timeFrame, DEFAULT_NUMBER_OF_WINDOWS);
+        }
+
+        dataset = dataSetService
+                .getAllRecordsInWindow(projectName, subjectId, sourceId, sourceDataName, stat,
+                        timeWindow, timeFrame);
 
         if (dataset.getDataset().isEmpty()) {
             LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
