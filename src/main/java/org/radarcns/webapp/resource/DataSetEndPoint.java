@@ -19,6 +19,7 @@ package org.radarcns.webapp.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
+import static org.radarcns.domain.restapi.TimeWindow.ONE_WEEK;
 import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 import static org.radarcns.service.DataSetService.emptyDataset;
 import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
@@ -40,6 +41,7 @@ import java.time.Instant;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -170,21 +172,17 @@ public class DataSetEndPoint {
         Dataset dataset;
 
         // Don't request future data
-        Instant endTime = end.getValue();
-        if (endTime == null) {
-            endTime = Instant.now();
-        }
+        Instant endTime = end != null && end.getValue() != null ? end.getValue() : Instant.now();
 
         TimeWindow timeWindow = interval;
-        Instant startTime = start.getValue();
+        Instant startTime = start != null && start.getValue() != null ? start.getValue() : null;
         TimeFrame timeFrame = new TimeFrame(startTime, endTime);
 
         if (startTime != null && startTime.isAfter(endTime)) {
-            // don't mix up time frame order
-            timeFrame.setStartDateTime(endTime);
+           throw new BadRequestException("startTime should not be after endTime");
         } else if (startTime == null && timeWindow == null) {
             // default settings, 1 year with 1 week intervals
-            timeWindow = TEN_SECOND;
+            timeWindow = ONE_WEEK;
             timeFrame.setStartDateTime(endTime.minus(Period.ofYears(1)));
         } else if (startTime == null) {
             // use a fixed number of windows.

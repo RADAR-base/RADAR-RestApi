@@ -189,8 +189,7 @@ public class DataSetService {
 
         return sourceDataWrapper.getAllRecordsInWindow(MongoHelper.getCollection(mongoClient,
                 sourceDataWrapper.getCollectionName(timeWindow)), projectName, subjectId, sourceId,
-                header, RadarConverter.getMongoStat(stat), timeFrame
-        );
+                header, RadarConverter.getMongoStat(stat), timeFrame);
     }
 
     private Header getHeader(String projectName, String subjectId, String sourceId,

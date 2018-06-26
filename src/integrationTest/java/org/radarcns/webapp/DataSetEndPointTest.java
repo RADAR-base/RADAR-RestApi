@@ -78,7 +78,7 @@ public class DataSetEndPointTest {
     public final MongoRule mongoRule = new MongoRule();
 
     @Test
-    public void getRecords() throws IOException {
+    public void getRecordsInTenSecondsWindow() throws IOException {
         MongoCollection<Document> collection = mongoRule.getCollection(
                 BATTERY_LEVEL_COLLECTION_NAME);
 
