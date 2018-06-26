@@ -66,7 +66,6 @@ public class SourceMonitorService {
         MongoCollection<Document> collection = MongoHelper.getCollection(
                 this.mongoClient, sourceType.getSourceStatisticsMonitorTopic());
 
-        // get the last document sorted by timeEnd
         try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(collection,
                 projectId, subjectId, sourceId, null, ASCENDING, null)) {
 
