@@ -19,7 +19,7 @@ package org.radarcns.webapp.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_WEEK;
+import static org.radarcns.domain.restapi.TimeWindow.ONE_DAY;
 import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 import static org.radarcns.service.DataSetService.emptyDataset;
 import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
@@ -38,7 +38,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -129,8 +128,6 @@ public class DataSetEndPoint {
 
     //--------------------------------------------------------------------------------------------//
     //                                   ALL RECORDS FUNCTIONS                                    //
-    //--------------------------------------------------------------------------------------------//
-
     /**
      * JSON function that returns all available records for the given data.
      */
@@ -147,11 +144,13 @@ public class DataSetEndPoint {
                     + "startTime is not provided startTime will be calculated based on default "
                     + "number of windows and given timeWindow. If no timeWindow is provided, a "
                     + "best fitting timeWindow will be calculated. If none of the parameters are "
-                    + "provided, API will return data for a period of a year with ONE_WEEK of t"
-                    + "imeWindow (<54 records) from current timestamp.")
+                    + "provided, API will return data for a period of 100 days with ONE_DAY of "
+                    + "timeWindow (<31 records) from current timestamp.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Returns a dataset object containing all "
             + "available record for the given inputs")
+    @ApiResponse(responseCode = "400", description = "StartTime should not be after EndTime in "
+            + "query")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")
@@ -172,25 +171,26 @@ public class DataSetEndPoint {
         Dataset dataset;
 
         // Don't request future data
-        Instant endTime = end != null && end.getValue() != null ? end.getValue() : Instant.now();
+        Instant endTime = end != null ? end.getValue() : Instant.now();
 
         TimeWindow timeWindow = interval;
-        Instant startTime = start != null && start.getValue() != null ? start.getValue() : null;
+        Instant startTime = start != null ? start.getValue() : null;
         TimeFrame timeFrame = new TimeFrame(startTime, endTime);
 
         if (startTime != null && startTime.isAfter(endTime)) {
-           throw new BadRequestException("startTime should not be after endTime");
+            throw new BadRequestException(String.format("startTime {} should not be after endTime"
+                    + " {}", startTime, endTime));
         } else if (startTime == null && timeWindow == null) {
             // default settings, 1 year with 1 week intervals
-            timeWindow = ONE_WEEK;
-            timeFrame.setStartDateTime(endTime.minus(Period.ofYears(1)));
+            timeFrame.setStartDateTime(endTime.minus(100, ChronoUnit.DAYS));
+            timeWindow = ONE_DAY;
         } else if (startTime == null) {
             // use a fixed number of windows.
             timeFrame.setStartDateTime(endTime.minus(
                     RadarConverter.getSecond(timeWindow) * DEFAULT_NUMBER_OF_WINDOWS,
                     ChronoUnit.SECONDS));
         } else if (timeWindow == null) {
-            // use the fixed time frame with a time frame close to the number of windows.
+            // use the fixed time frame with a time window close to the default number of windows.
             timeWindow = dataSetService.getFittingTimeWindow(timeFrame, DEFAULT_NUMBER_OF_WINDOWS);
         }
 
@@ -207,6 +207,8 @@ public class DataSetEndPoint {
         return dataset;
 
     }
+
+    //--------------------------------------------------------------------------------------------//
 
 
 }

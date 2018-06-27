@@ -38,13 +38,15 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.radarcns.config.Properties;
 import org.radarcns.domain.restapi.header.TimeFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generic MongoDB helper.
  */
 public class MongoHelper {
 
-    //private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
 
     public static final String ID = "_id";
     public static final String KEY = "key";
@@ -112,8 +114,11 @@ public class MongoHelper {
             MongoCollection<Document> collection, String projectName, String subjectId,
             String sourceId, TimeFrame timeFrame) {
         createIndexIfNotAvailable(collection, indexProjectSubjectSourceTimestart);
+        Bson query = filterSource(projectName, subjectId, sourceId, timeFrame);
+        logger.debug("Filtering Query " + query
+                .toBsonDocument(Document.class, collection.getCodecRegistry()));
         return collection
-                .find(filterSource(projectName, subjectId, sourceId, timeFrame))
+                .find(query)
                 .sort(new BasicDBObject(KEY + "." + START, ASCENDING))
                 .iterator();
     }

@@ -148,8 +148,8 @@ public class DataSetEndPointTest {
     @Test
     public void getAllRecordsWithQuartilesInTimeRange() throws IOException {
         Instant now = Instant.now();
-        Instant start = now.plus(RadarConverter.getSecond(TEN_SECOND), SECONDS);
-        Instant end = now.plus(7 * RadarConverter.getSecond(TEN_SECOND), SECONDS);
+        Instant end = now.minus(RadarConverter.getSecond(TEN_SECOND), SECONDS);
+        Instant start = now.minus(7 * RadarConverter.getSecond(TEN_SECOND), SECONDS);
         MongoCollection<Document> collection = mongoRule.getCollection(
                 BATTERY_LEVEL_COLLECTION_NAME);
         Map<String, Object> docs = RandomInput
@@ -179,8 +179,8 @@ public class DataSetEndPointTest {
         Instant now = Instant.now();
         TimeWindow window = TimeWindow.TEN_MIN;
 
-        Instant start = now.plus(RadarConverter.getSecond(window), SECONDS);
-        Instant end = now.plus(7 * RadarConverter.getSecond(window), SECONDS);
+        Instant end = now.minus(RadarConverter.getSecond(window), SECONDS);
+        Instant start = now.minus(7 * RadarConverter.getSecond(window), SECONDS);
         MongoCollection<Document> collection = mongoRule.getCollection(
                 BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES);
         Map<String, Object> docs = RandomInput

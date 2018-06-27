@@ -89,13 +89,10 @@ public class AggregatedDataPointsEndPoint {
         mpClient.checkSubjectInProject(projectName, subjectId);
 
         // Don't request future data
-        Instant endTime = end.getValue();
-        if (endTime == null) {
-            endTime = Instant.now();
-        }
+        Instant endTime = end != null ? end.getValue() : Instant.now();
 
         TimeWindow timeWindow = interval;
-        Instant startTime = start.getValue();
+        Instant startTime = start != null ? start.getValue() : null;
         TimeFrame timeFrame = new TimeFrame(startTime, endTime);
 
         if (startTime != null && startTime.isAfter(endTime)) {
@@ -117,7 +114,7 @@ public class AggregatedDataPointsEndPoint {
 
         AggregatedDataPoints dataSet = this.dataSetService.getDistinctData(projectName, subjectId,
                 aggregateParam.getSources(), timeWindow, timeFrame);
-        if (dataSet == null || dataSet.getDataset().isEmpty()) {
+        if (dataSet.getDataset().isEmpty()) {
             LOGGER.debug("No aggregated data available for the subject {} with source", subjectId);
             return emptyAggregatedData(projectName, subjectId, timeWindow,
                     new TimeFrame(startTime, endTime), aggregateParam.getSources());

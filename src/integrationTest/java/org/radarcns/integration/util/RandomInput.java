@@ -16,6 +16,7 @@
 
 package org.radarcns.integration.util;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.radarcns.mongo.data.monitor.ApplicationStatusRecordCounter.RECORD_COLLECTION;
 import static org.radarcns.mongo.data.monitor.ApplicationStatusServerStatus.STATUS_COLLECTION;
 import static org.radarcns.mongo.data.monitor.ApplicationStatusUpTime.UPTIME_COLLECTION;
@@ -59,10 +60,11 @@ public class RandomInput {
             new ExpectedDataSetFactory();
 
     private static ExpectedValue<DoubleValueCollector> randomDoubleValue(
-            ObservationKey key, TimeWindow timeWindow, int numberOfRecords, Instant startTime) {
+            ObservationKey key, TimeWindow timeWindow, int numberOfRecords, Instant endTime) {
         ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
-        Instant timeStamp = startTime;
+        Instant timeStamp = endTime.minus(
+                RadarConverter.getSecond(timeWindow) * numberOfRecords, SECONDS);
         ThreadLocalRandom random = ThreadLocalRandom.current();
         for (int i = 0; i < numberOfRecords; i++) {
             instance.add(key, timeStamp.toEpochMilli(), random.nextDouble());
@@ -73,11 +75,12 @@ public class RandomInput {
     }
 
     private static ExpectedValue<DoubleArrayCollector> randomArrayValue(ObservationKey key,
-            TimeWindow timeWindow, int numberOfRecords, Instant startTime) {
+            TimeWindow timeWindow, int numberOfRecords, Instant endTime) {
         ExpectedArrayValue instance = new ExpectedArrayValue();
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        Instant timeStamp = startTime;
+        Instant timeStamp = endTime.minus(
+                RadarConverter.getSecond(timeWindow) * numberOfRecords, SECONDS);
         for (int i = 0; i < numberOfRecords; i++) {
             instance.add(key, timeStamp.toEpochMilli(), random.nextDouble(), random.nextDouble(),
                     random.nextDouble());
@@ -94,7 +97,7 @@ public class RandomInput {
     @SuppressWarnings("PMD.ExcessiveParameterList")
     public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user,
             String source, String sourceType, String sourceDataName, DescriptiveStatistic stat,
-            TimeWindow timeWindow, int samples, boolean singleWindow, Instant startTime) {
+            TimeWindow timeWindow, int samples, boolean singleWindow, Instant endTime) {
         ObservationKey key = new ObservationKey(project, user, source);
 
         int numberOfRecords = samples;
@@ -104,7 +107,7 @@ public class RandomInput {
 
         if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
             return getBoth(key, sourceType, sourceDataName, stat,
-                    timeWindow, numberOfRecords, startTime);
+                    timeWindow, numberOfRecords, endTime);
         }
 
         throw new UnsupportedOperationException(sourceType + " is not"
@@ -114,14 +117,14 @@ public class RandomInput {
     @SuppressWarnings("PMD.ExcessiveParameterList")
     private static Map<String, Object> getBoth(ObservationKey key,
             String sourceType, String sourceDataName, DescriptiveStatistic stat,
-            TimeWindow timeWindow, int numberOfRecords, Instant startTime) {
+            TimeWindow timeWindow, int numberOfRecords, Instant endTime) {
         ExpectedValue<?> expectedValue;
         switch (sourceDataName) {
             case "EMPATICA_E4_v1_ACCELEROMETER":
-                expectedValue = randomArrayValue(key, timeWindow, numberOfRecords, startTime);
+                expectedValue = randomArrayValue(key, timeWindow, numberOfRecords, endTime);
                 break;
             default:
-                expectedValue = randomDoubleValue(key, timeWindow, numberOfRecords, startTime);
+                expectedValue = randomDoubleValue(key, timeWindow, numberOfRecords, endTime);
                 break;
         }
 
