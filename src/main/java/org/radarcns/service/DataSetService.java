@@ -16,12 +16,6 @@
 
 package org.radarcns.service;
 
-import static org.radarcns.domain.restapi.TimeWindow.ONE_DAY;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_HOUR;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_MIN;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_WEEK;
-import static org.radarcns.domain.restapi.TimeWindow.TEN_MIN;
-import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -29,10 +23,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.TemporalAmount;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -73,10 +65,7 @@ public class DataSetService {
 
     private final MongoClient mongoClient;
 
-    private static final List<Map.Entry<TimeWindow, Double>> TIME_WINDOW_LOG = Stream
-            .of(TEN_SECOND, ONE_MIN, TEN_MIN, ONE_HOUR, ONE_DAY, ONE_WEEK)
-            .map(w -> pair(w, Math.log(RadarConverter.getSecond(w))))
-            .collect(Collectors.toList());
+
 
     /**
      * Constructor.
@@ -310,22 +299,6 @@ public class DataSetService {
     }
 
     /**
-     * Get the time window that closest matches given time frame.
-     *
-     * @param timeFrame time frame to compute time window for
-     * @param numberOfWindows number of time windows that should ideally be returned.
-     * @return closest match with given time frame.
-     */
-    public TimeWindow getFittingTimeWindow(TimeFrame timeFrame, int numberOfWindows) {
-        double logSeconds = Math.log(timeFrame.getDuration().getSeconds() / numberOfWindows);
-        return TIME_WINDOW_LOG.stream()
-                .map(e -> pair(e.getKey(), Math.abs(logSeconds - e.getValue())))
-                .reduce((e1, e2) -> e1.getValue() < e2.getValue() ? e1 : e2)
-                .orElseThrow(() -> new AssertionError("No close time window found"))
-                .getKey();
-    }
-
-    /**
      * Checks that for a given time frame with given time window, the number of data points does not
      * exceed a maximum.
      *
@@ -342,9 +315,5 @@ public class DataSetService {
                             + requestedTimeFrames + " with time frame " + timeFrame
                             + " and time window " + timeWindow + '.');
         }
-    }
-
-    private static <K, V> Map.Entry<K, V> pair(K key, V value) {
-        return new SimpleImmutableEntry<>(key, value);
     }
 }

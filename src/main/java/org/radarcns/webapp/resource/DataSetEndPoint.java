@@ -19,7 +19,6 @@ package org.radarcns.webapp.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_DAY;
 import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 import static org.radarcns.service.DataSetService.emptyDataset;
 import static org.radarcns.webapp.resource.BasePath.AVRO_BINARY;
@@ -38,9 +37,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -53,6 +50,7 @@ import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
+import org.radarcns.util.QueryParamRefiner;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.param.InstantParam;
@@ -68,7 +66,6 @@ import org.slf4j.LoggerFactory;
 public class DataSetEndPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetEndPoint.class);
-    private static final int DEFAULT_NUMBER_OF_WINDOWS = 100;
 
     @Inject
     private ManagementPortalClient mpClient;
@@ -144,8 +141,8 @@ public class DataSetEndPoint {
                     + "startTime is not provided startTime will be calculated based on default "
                     + "number of windows and given timeWindow. If no timeWindow is provided, a "
                     + "best fitting timeWindow will be calculated. If none of the parameters are "
-                    + "provided, API will return data for a period of 100 days with ONE_DAY of "
-                    + "timeWindow (<31 records) from current timestamp.")
+                    + "provided, API will return data for a period of 1 year with ONE_WEEK of "
+                    + "timeWindow (~52 records) from current timestamp.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Returns a dataset object containing all "
             + "available record for the given inputs")
@@ -173,30 +170,13 @@ public class DataSetEndPoint {
         // Don't request future data
         Instant endTime = end != null ? end.getValue() : Instant.now();
 
-        TimeWindow timeWindow = interval;
         Instant startTime = start != null ? start.getValue() : null;
-        TimeFrame timeFrame = new TimeFrame(startTime, endTime);
 
-        if (startTime != null && startTime.isAfter(endTime)) {
-            throw new BadRequestException(String.format("startTime {} should not be after endTime"
-                    + " {}", startTime, endTime));
-        } else if (startTime == null && timeWindow == null) {
-            // default settings, 1 year with 1 week intervals
-            timeFrame.setStartDateTime(endTime.minus(100, ChronoUnit.DAYS));
-            timeWindow = ONE_DAY;
-        } else if (startTime == null) {
-            // use a fixed number of windows.
-            timeFrame.setStartDateTime(endTime.minus(
-                    RadarConverter.getSecond(timeWindow) * DEFAULT_NUMBER_OF_WINDOWS,
-                    ChronoUnit.SECONDS));
-        } else if (timeWindow == null) {
-            // use the fixed time frame with a time window close to the default number of windows.
-            timeWindow = dataSetService.getFittingTimeWindow(timeFrame, DEFAULT_NUMBER_OF_WINDOWS);
-        }
+        QueryParamRefiner refinedParams = new QueryParamRefiner(startTime, endTime, interval);
 
         dataset = dataSetService
                 .getAllRecordsInWindow(projectName, subjectId, sourceId, sourceDataName, stat,
-                        timeWindow, timeFrame);
+                        refinedParams.getTimeWindow(), refinedParams.getTimeFrame());
 
         if (dataset.getDataset().isEmpty()) {
             LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
