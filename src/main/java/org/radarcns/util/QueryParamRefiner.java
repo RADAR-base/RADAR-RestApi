@@ -7,9 +7,6 @@ import static org.radarcns.domain.restapi.TimeWindow.ONE_WEEK;
 import static org.radarcns.domain.restapi.TimeWindow.TEN_MIN;
 import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 
-import org.radarcns.domain.restapi.TimeWindow;
-import org.radarcns.domain.restapi.header.TimeFrame;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
@@ -19,6 +16,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
 
+import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.domain.restapi.header.TimeFrame;
 
 
 /**
