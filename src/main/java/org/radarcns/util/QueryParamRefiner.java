@@ -10,7 +10,6 @@ import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.TimeFrame;
 
-import javax.ws.rs.BadRequestException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
@@ -18,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.ws.rs.BadRequestException;
 
 
 
