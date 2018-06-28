@@ -16,12 +16,6 @@
 
 package org.radarcns.service;
 
-import static org.radarcns.domain.restapi.TimeWindow.ONE_DAY;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_HOUR;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_MIN;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_WEEK;
-import static org.radarcns.domain.restapi.TimeWindow.TEN_MIN;
-import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -29,11 +23,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.TemporalAmount;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -74,18 +65,14 @@ public class DataSetService {
 
     private final MongoClient mongoClient;
 
-    private static final List<Map.Entry<TimeWindow, Double>> TIME_WINDOW_LOG = Stream
-            .of(TEN_SECOND, ONE_MIN, TEN_MIN, ONE_HOUR, ONE_DAY, ONE_WEEK)
-            .map(w -> pair(w, Math.log(RadarConverter.getSecond(w))))
-            .collect(Collectors.toList());
+
 
     /**
      * Constructor.
      **/
     @Inject
     public DataSetService(SourceCatalog sourceCatalog,
-            ManagementPortalClient managementPortalClient, MongoClient mongoClient)
-            throws IOException {
+            ManagementPortalClient managementPortalClient, MongoClient mongoClient) {
         this.managementPortalClient = managementPortalClient;
         this.sourceCatalog = sourceCatalog;
         this.mongoClient = mongoClient;
@@ -162,33 +149,7 @@ public class DataSetService {
     }
 
     /**
-     * Returns a {@code Dataset} containing all available values for the couple subject sourceType.
-     *
-     * @param projectName of the subject
-     * @param subjectId of the subject
-     * @param sourceId of the source
-     * @param sourceDataName of data
-     * @param stat is the required statistical value
-     * @param timeWindow time frame resolution
-     * @return dataset for the given subject and sourceType, otherwise empty dataset
-     * @see Dataset
-     */
-    public Dataset getAllDataItems(String projectName, String subjectId, String sourceId,
-            String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
-            throws IOException {
-        Header header = getHeader(projectName, subjectId, sourceId,
-                sourceDataName, stat, timeWindow, null);
-
-        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
-                .getSourceDataWrapper(sourceDataName);
-
-        return sourceDataWrapper.getAllRecords(MongoHelper.getCollection(mongoClient,
-                sourceDataWrapper.getCollectionName(timeWindow)), projectName, subjectId, sourceId,
-                header, RadarConverter.getMongoStat(stat));
-    }
-
-    /**
-     * Returns a {@link Dataset} containing all available values for the couple subject surce.
+     * Returns a {@link Dataset} containing all available values for the couple subject source.
      *
      * @param projectName of the subject
      * @param subjectId of the subject
@@ -196,19 +157,17 @@ public class DataSetService {
      * @param sourceDataName is the required sensor type
      * @param stat is the required statistical value
      * @param timeWindow time frame resolution
-     * @param start is time window start point in millisecond
-     * @param end is time window end point in millisecond
+     * @param timeFrame time frame to look within
      * @return dataset for the given subject and source for given query.
      * @see Dataset
      */
     public Dataset getAllRecordsInWindow(String projectName, String subjectId,
             String sourceId, String sourceDataName, DescriptiveStatistic stat,
             TimeWindow timeWindow,
-            Date start, Date end) throws IOException {
+            TimeFrame timeFrame) throws IOException {
+        checkTimeFrameSize(timeFrame, timeWindow, MAXIMUM_NUMBER_OF_WINDOWS);
 
         SourceDTO source = managementPortalClient.getSource(sourceId);
-
-        TimeFrame timeFrame = new TimeFrame(start, end);
 
         SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
                 .getSourceDataWrapper(sourceDataName);
@@ -219,8 +178,7 @@ public class DataSetService {
 
         return sourceDataWrapper.getAllRecordsInWindow(MongoHelper.getCollection(mongoClient,
                 sourceDataWrapper.getCollectionName(timeWindow)), projectName, subjectId, sourceId,
-                header, RadarConverter.getMongoStat(stat), timeFrame
-        );
+                header, RadarConverter.getMongoStat(stat), timeFrame);
     }
 
     private Header getHeader(String projectName, String subjectId, String sourceId,
@@ -341,22 +299,6 @@ public class DataSetService {
     }
 
     /**
-     * Get the time window that closest matches given time frame.
-     *
-     * @param timeFrame time frame to compute time window for
-     * @param numberOfWindows number of time windows that should ideally be returned.
-     * @return closest match with given time frame.
-     */
-    public TimeWindow getFittingTimeWindow(TimeFrame timeFrame, int numberOfWindows) {
-        double logSeconds = Math.log(timeFrame.getDuration().getSeconds() / numberOfWindows);
-        return TIME_WINDOW_LOG.stream()
-                .map(e -> pair(e.getKey(), Math.abs(logSeconds - e.getValue())))
-                .reduce((e1, e2) -> e1.getValue() < e2.getValue() ? e1 : e2)
-                .orElseThrow(() -> new AssertionError("No close time window found"))
-                .getKey();
-    }
-
-    /**
      * Checks that for a given time frame with given time window, the number of data points does not
      * exceed a maximum.
      *
@@ -373,9 +315,5 @@ public class DataSetService {
                             + requestedTimeFrames + " with time frame " + timeFrame
                             + " and time window " + timeWindow + '.');
         }
-    }
-
-    private static <K, V> Map.Entry<K, V> pair(K key, V value) {
-        return new SimpleImmutableEntry<>(key, value);
     }
 }

@@ -3,7 +3,6 @@ package org.radarcns.webapp.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_WEEK;
 import static org.radarcns.service.DataSetService.emptyAggregatedData;
 import static org.radarcns.webapp.resource.BasePath.AGGREGATE;
 import static org.radarcns.webapp.resource.BasePath.DISTINCT;
@@ -17,8 +16,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.Period;
-import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -29,10 +26,9 @@ import javax.ws.rs.QueryParam;
 import org.radarcns.auth.NeedsPermissionOnSubject;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.AggregatedDataPoints;
-import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
-import org.radarcns.util.RadarConverter;
+import org.radarcns.util.QueryParamRefiner;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.param.DataAggregateParam;
 import org.radarcns.webapp.param.InstantParam;
@@ -44,8 +40,6 @@ import org.slf4j.LoggerFactory;
 @Authenticated
 @Path("/" + AGGREGATE)
 public class AggregatedDataPointsEndPoint {
-
-    private static final int DEFAULT_NUMBER_OF_WINDOWS = 100;
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AggregatedDataPointsEndPoint.class);
@@ -71,7 +65,12 @@ public class AggregatedDataPointsEndPoint {
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical results. This end-point returns the latest available record "
                     + "for the stat for the given projectID, subjectID, sourceID and SourceDataName"
-                    + " Data can be queried using different time-frame resolutions.")
+                    + " Data can be queried using different time-frame resolutions. If the "
+                    + "startTime is not provided startTime will be calculated based on default "
+                    + "number of windows and given timeWindow. If no timeWindow is provided, a "
+                    + "best fitting timeWindow will be calculated. If none of the parameters are "
+                    + "provided, API will return data for a period of 1 year with ONE_WEEK of "
+                    + "timeWindow (~52 records) from current timestamp.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Returns a dataset object containing latest "
             + "available record for the given inputs")
@@ -89,38 +88,18 @@ public class AggregatedDataPointsEndPoint {
         mpClient.checkSubjectInProject(projectName, subjectId);
 
         // Don't request future data
-        Instant endTime = end.getValue();
-        if (endTime == null) {
-            endTime = Instant.now();
-        }
+        Instant endTime = end != null ? end.getValue() : Instant.now();
+        Instant startTime = start != null ? start.getValue() : null;
 
-        TimeWindow timeWindow = interval;
-        Instant startTime = start.getValue();
-        TimeFrame timeFrame = new TimeFrame(startTime, endTime);
+        QueryParamRefiner refinedParams = new QueryParamRefiner(startTime, endTime, interval);
 
-        if (startTime != null && startTime.isAfter(endTime)) {
-            // don't mix up time frame order
-            timeFrame.setStartDateTime(endTime);
-        } else if (startTime == null && timeWindow == null) {
-            // default settings, 1 year with 1 week intervals
-            timeFrame.setStartDateTime(endTime.minus(Period.ofYears(1)));
-            timeWindow = ONE_WEEK;
-        } else if (startTime == null) {
-            // use a fixed number of windows.
-            timeFrame.setStartDateTime(endTime.minus(
-                    RadarConverter.getSecond(timeWindow) * DEFAULT_NUMBER_OF_WINDOWS,
-                    ChronoUnit.SECONDS));
-        } else if (timeWindow == null) {
-            // use the fixed time frame with a time frame close to the number of windows.
-            timeWindow = dataSetService.getFittingTimeWindow(timeFrame, DEFAULT_NUMBER_OF_WINDOWS);
-        }
-
-        AggregatedDataPoints dataSet = this.dataSetService.getDistinctData(projectName, subjectId,
-                aggregateParam.getSources(), timeWindow, timeFrame);
-        if (dataSet == null || dataSet.getDataset().isEmpty()) {
+        AggregatedDataPoints dataSet = dataSetService
+                .getDistinctData(projectName, subjectId, aggregateParam.getSources(),
+                        refinedParams.getTimeWindow(), refinedParams.getTimeFrame());
+        if (dataSet.getDataset().isEmpty()) {
             LOGGER.debug("No aggregated data available for the subject {} with source", subjectId);
-            return emptyAggregatedData(projectName, subjectId, timeWindow,
-                    new TimeFrame(startTime, endTime), aggregateParam.getSources());
+            return emptyAggregatedData(projectName, subjectId, refinedParams.getTimeWindow(),
+                    refinedParams.getTimeFrame(), aggregateParam.getSources());
         }
         return dataSet;
     }

@@ -37,7 +37,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -51,6 +50,7 @@ import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
+import org.radarcns.util.QueryParamRefiner;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.param.InstantParam;
@@ -125,8 +125,6 @@ public class DataSetEndPoint {
 
     //--------------------------------------------------------------------------------------------//
     //                                   ALL RECORDS FUNCTIONS                                    //
-    //--------------------------------------------------------------------------------------------//
-
     /**
      * JSON function that returns all available records for the given data.
      */
@@ -138,10 +136,18 @@ public class DataSetEndPoint {
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical results. This end-point returns the all available record "
                     + "for the stat for the given projectID, subjectID, sourceID and SourceDataName"
-                    + " Data can be queried using different time-frame resolutions.")
+                    + "Data can be queried using different time-frame resolutions.  If endTime is"
+                    + "not provided the data will be calculated from current timestamp. If the "
+                    + "startTime is not provided startTime will be calculated based on default "
+                    + "number of windows and given timeWindow. If no timeWindow is provided, a "
+                    + "best fitting timeWindow will be calculated. If none of the parameters are "
+                    + "provided, API will return data for a period of 1 year with ONE_WEEK of "
+                    + "timeWindow (~52 records) from current timestamp.")
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Returns a dataset object containing all "
             + "available record for the given inputs")
+    @ApiResponse(responseCode = "400", description = "StartTime should not be after EndTime in "
+            + "query")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")
@@ -158,19 +164,19 @@ public class DataSetEndPoint {
         // todo: 404 if given source does not exist.
         // Note that a source doesn't necessarily need to be linked anymore, as long as it exists
         // and historical data of it is linked to the given user.
-        mpClient.getSubject(subjectId);
+        mpClient.checkSubjectInProject(projectName, subjectId);
         Dataset dataset;
 
-        TimeWindow timeWindow = interval != null ? interval : TEN_SECOND;
+        // Don't request future data
+        Instant endTime = end != null ? end.getValue() : Instant.now();
 
-        if (start != null && end != null) {
-            dataset = dataSetService.getAllRecordsInWindow(projectName,
-                    subjectId, sourceId, sourceDataName, stat, timeWindow,
-                    Date.from(start.getValue()), Date.from(end.getValue()));
-        } else {
-            dataset = dataSetService.getAllDataItems(projectName, subjectId,
-                    sourceId, sourceDataName, stat, timeWindow);
-        }
+        Instant startTime = start != null ? start.getValue() : null;
+
+        QueryParamRefiner refinedParams = new QueryParamRefiner(startTime, endTime, interval);
+
+        dataset = dataSetService
+                .getAllRecordsInWindow(projectName, subjectId, sourceId, sourceDataName, stat,
+                        refinedParams.getTimeWindow(), refinedParams.getTimeFrame());
 
         if (dataset.getDataset().isEmpty()) {
             LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
@@ -181,6 +187,8 @@ public class DataSetEndPoint {
         return dataset;
 
     }
+
+    //--------------------------------------------------------------------------------------------//
 
 
 }
