@@ -71,6 +71,10 @@ public class QueryParamRefiner {
             this.timeFrame = new TimeFrame(startTime, endTime);
             this.timeWindow = getFittingTimeWindow(this.timeFrame, DEFAULT_NUMBER_OF_WINDOWS);
 
+        } else {
+            // all params are provided in request
+            this.timeFrame = new TimeFrame(startTime, endTime);
+            this.timeWindow = timeWindow;
         }
     }
 
