@@ -9,7 +9,6 @@ import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,10 +18,11 @@ import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.TimeFrame;
+import org.radarcns.util.RadarConverter;
 import org.radarcns.util.TimeScale;
 
 /**
- * This class refines temporal query parameters and calculate new values when necessary.
+ * Parser for temporal query parameters, calculating new values when necessary.
  * <p>
  * If the startTime is not provided startTime will be calculated based on default number of windows
  * and given timeWindow.
@@ -37,7 +37,7 @@ public class TimeScaleParser {
 
     private static final List<Map.Entry<TimeWindow, Double>> TIME_WINDOW_LOG = Stream
             .of(TEN_SECOND, ONE_MIN, TEN_MIN, ONE_HOUR, ONE_DAY, ONE_WEEK)
-            .map(w -> pair(w, Math.log(TimeScale.getSeconds(w))))
+            .map(w -> RadarConverter.pair(w, Math.log(TimeScale.getSeconds(w))))
             .collect(Collectors.toList());
 
     private final int defaultNumberOfWindows;
@@ -111,14 +111,9 @@ public class TimeScaleParser {
     private TimeWindow getFittingTimeWindow(TimeFrame timeFrame) {
         double logSeconds = Math.log(timeFrame.getDuration().getSeconds() / defaultNumberOfWindows);
         return TIME_WINDOW_LOG.stream()
-                .map(e -> pair(e.getKey(), Math.abs(logSeconds - e.getValue())))
+                .map(e -> RadarConverter.pair(e.getKey(), Math.abs(logSeconds - e.getValue())))
                 .reduce((e1, e2) -> e1.getValue() < e2.getValue() ? e1 : e2)
                 .orElseThrow(() -> new AssertionError("No close time window found"))
                 .getKey();
     }
-
-    private static <K, V> Map.Entry<K, V> pair(K key, V value) {
-        return new AbstractMap.SimpleImmutableEntry<>(key, value);
-    }
-
 }

@@ -32,8 +32,10 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.Temporal;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
@@ -239,5 +241,9 @@ public final class RadarConverter {
      */
     public static boolean isThresholdPassed(Temporal time, Duration duration) {
         return Duration.between(time, Instant.now()).compareTo(duration) > 0;
+    }
+
+    public static <K, V> Map.Entry<K, V> pair(K key, V value) {
+        return new AbstractMap.SimpleImmutableEntry<>(key, value);
     }
 }
