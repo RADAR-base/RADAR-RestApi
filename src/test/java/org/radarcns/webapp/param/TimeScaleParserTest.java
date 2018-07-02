@@ -34,7 +34,8 @@ public class TimeScaleParserTest {
     @Test
     public void testDefaultTimeFrame() {
         TimeScale scale = parser.parse(null, null, ONE_MIN);
-        assertEquals(Duration.ofMinutes(DEFAULT_NUMBER_OF_WINDOWS), scale.getTimeFrame().getDuration());
+        assertEquals(Duration.ofMinutes(DEFAULT_NUMBER_OF_WINDOWS),
+                scale.getTimeFrame().getDuration());
         assertEquals(ONE_MIN, scale.getTimeWindow());
         assertEquals(DEFAULT_NUMBER_OF_WINDOWS, scale.getNumberOfWindows());
     }
