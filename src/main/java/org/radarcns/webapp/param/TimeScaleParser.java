@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.TimeFrame;
-import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 
 /**
  * This class refines temporal query parameters and calculate new values when necessary.
@@ -37,7 +37,7 @@ public class TimeScaleParser {
 
     private static final List<Map.Entry<TimeWindow, Double>> TIME_WINDOW_LOG = Stream
             .of(TEN_SECOND, ONE_MIN, TEN_MIN, ONE_HOUR, ONE_DAY, ONE_WEEK)
-            .map(w -> pair(w, Math.log(RadarConverter.getSecond(w))))
+            .map(w -> pair(w, Math.log(TimeScale.getSeconds(w))))
             .collect(Collectors.toList());
 
     private final int defaultNumberOfWindows;
@@ -92,7 +92,7 @@ public class TimeScaleParser {
         if (startTime != null) {
             timeFrame = new TimeFrame(startTime, endTime);
         } else if (timeWindow != null) {
-            long totalSeconds = RadarConverter.getSecond(timeWindow) * defaultNumberOfWindows;
+            long totalSeconds = TimeScale.getSeconds(timeWindow) * defaultNumberOfWindows;
             timeFrame = new TimeFrame(endTime.minus(totalSeconds, ChronoUnit.SECONDS), endTime);
         } else {
             timeFrame = new TimeFrame(endTime.minus(365, ChronoUnit.DAYS), endTime);

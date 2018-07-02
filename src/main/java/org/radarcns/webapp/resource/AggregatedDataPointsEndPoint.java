@@ -31,7 +31,7 @@ import org.radarcns.service.DataSetService;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.param.DataAggregateParam;
 import org.radarcns.webapp.param.InstantParam;
-import org.radarcns.webapp.param.TimeScale;
+import org.radarcns.util.TimeScale;
 import org.radarcns.webapp.param.TimeScaleParser;
 import org.radarcns.webapp.validation.Alphanumeric;
 import org.slf4j.Logger;

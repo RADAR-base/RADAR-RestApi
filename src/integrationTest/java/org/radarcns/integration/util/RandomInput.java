@@ -43,7 +43,7 @@ import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 
 /**
  * All supported sources specifications.
@@ -64,11 +64,11 @@ public class RandomInput {
         ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
         Instant timeStamp = endTime.minus(
-                RadarConverter.getSecond(timeWindow) * numberOfRecords, SECONDS);
+                TimeScale.getSeconds(timeWindow) * numberOfRecords, SECONDS);
         ThreadLocalRandom random = ThreadLocalRandom.current();
         for (int i = 0; i < numberOfRecords; i++) {
             instance.add(key, timeStamp.toEpochMilli(), random.nextDouble());
-            timeStamp = timeStamp.plus(RadarConverter.getDuration(timeWindow));
+            timeStamp = timeStamp.plus(TimeScale.getDuration(timeWindow));
         }
 
         return instance;
@@ -80,11 +80,11 @@ public class RandomInput {
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
         Instant timeStamp = endTime.minus(
-                RadarConverter.getSecond(timeWindow) * numberOfRecords, SECONDS);
+                TimeScale.getSeconds(timeWindow) * numberOfRecords, SECONDS);
         for (int i = 0; i < numberOfRecords; i++) {
             instance.add(key, timeStamp.toEpochMilli(), random.nextDouble(), random.nextDouble(),
                     random.nextDouble());
-            timeStamp = timeStamp.plus(RadarConverter.getDuration(timeWindow));
+            timeStamp = timeStamp.plus(TimeScale.getDuration(timeWindow));
         }
 
         return instance;

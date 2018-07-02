@@ -51,10 +51,9 @@ import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
-import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.param.InstantParam;
-import org.radarcns.webapp.param.TimeScale;
+import org.radarcns.util.TimeScale;
 import org.radarcns.webapp.param.TimeScaleParser;
 import org.radarcns.webapp.validation.Alphanumeric;
 import org.slf4j.Logger;
@@ -118,7 +117,7 @@ public class DataSetEndPoint {
             LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);
             Instant now = Instant.now();
             return emptyDataset(projectName, subjectId, sourceId, sourceDataName, stat, interval,
-                    new TimeFrame(now.minus(RadarConverter.getDuration(timeWindow)), now));
+                    new TimeFrame(now.minus(TimeScale.getDuration(timeWindow)), now));
         }
 
         return dataset;

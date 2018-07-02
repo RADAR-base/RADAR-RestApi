@@ -14,6 +14,7 @@ import javax.ws.rs.BadRequestException;
 import org.junit.Before;
 import org.junit.Test;
 import org.radarcns.domain.restapi.TimeWindow;
+import org.radarcns.util.TimeScale;
 
 public class TimeScaleParserTest {
     private TimeScaleParser parser;

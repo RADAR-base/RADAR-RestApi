@@ -29,16 +29,11 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
@@ -88,39 +83,6 @@ public final class RadarConverter {
 
     private RadarConverter() {
         // utility class
-    }
-
-    /**
-     * Converts {@code long} to ISO8601 {@code String}.
-     *
-     * @param value input {@code long} that has to be converted
-     * @return a {@code String} representing a date in ISO8601 format
-     */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public static String getISO8601(long value) throws DateTimeException {
-        return Instant.ofEpochMilli(value).toString();
-    }
-
-    /**
-     * Converts {@link Date} to ISO8601 {@code String}.
-     *
-     * @param value input {@link Date} that has to be converted
-     * @return a {@code String} representing a date in ISO8601 format
-     */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public static String getISO8601(Date value) {
-        return value.toInstant().toString();
-    }
-
-    /**
-     * Converts ISO8601 {@code String} to java {@link Date}.
-     *
-     * @param value input {@code String} formatted in ISO8601
-     * @return {@link Date} object according to the given input
-     */
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public static Date getISO8601(String value) throws DateTimeParseException {
-        return Date.from(Instant.parse(value));
     }
 
     /**
@@ -241,57 +203,7 @@ public final class RadarConverter {
      * @return the number of expected messages
      */
     public static double getExpectedMessages(TimeWindow timeWindow, double frequency) {
-        return getSecond(timeWindow) * frequency;
-    }
-
-    /**
-     * Converts a time window to seconds.
-     *
-     * @param timeWindow time window that has to be converted in seconds
-     * @return a {@link Long} representing the amount of seconds
-     */
-    public static long getSecond(TimeWindow timeWindow) {
-        switch (timeWindow) {
-            case TEN_SECOND:
-                return TimeUnit.SECONDS.toSeconds(10);
-            case ONE_MIN:
-                return TimeUnit.MINUTES.toSeconds(1);
-            case TEN_MIN:
-                return TimeUnit.MINUTES.toSeconds(10);
-            case ONE_HOUR:
-                return TimeUnit.HOURS.toSeconds(1);
-            case ONE_DAY:
-                return TimeUnit.DAYS.toSeconds(1);
-            case ONE_WEEK:
-                return TimeUnit.DAYS.toSeconds(7);
-            default:
-                throw new IllegalArgumentException(timeWindow + " is not yet supported");
-        }
-    }
-
-    /**
-     * Converts a time window to seconds.
-     *
-     * @param timeWindow time window that has to be converted in seconds
-     * @return a {@link Long} representing the amount of seconds
-     */
-    public static TemporalAmount getDuration(TimeWindow timeWindow) {
-        switch (timeWindow) {
-            case TEN_SECOND:
-                return Duration.ofSeconds(10);
-            case ONE_MIN:
-                return Duration.ofMinutes(1);
-            case TEN_MIN:
-                return Duration.ofMinutes(10);
-            case ONE_HOUR:
-                return Duration.ofHours(1);
-            case ONE_DAY:
-                return Duration.ofDays(1);
-            case ONE_WEEK:
-                return Duration.ofDays(7);
-            default:
-                throw new IllegalArgumentException(timeWindow + " is not yet supported");
-        }
+        return TimeScale.getSeconds(timeWindow) * frequency;
     }
 
     /**

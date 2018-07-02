@@ -39,8 +39,8 @@ import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.param.DataAggregateParam;
+import org.radarcns.util.TimeScale;
 import org.radarcns.webapp.resource.Parameter;
 
 public class AggregatedDataPointsEndPointTest {
@@ -85,8 +85,8 @@ public class AggregatedDataPointsEndPointTest {
 
         // reduces 70 min
         Instant start = now
-                .minus(RadarConverter.getSecond(TEN_MIN) * 7, SECONDS);
-        Instant end = now.minus(RadarConverter.getDuration(TEN_MIN));
+                .minus(TimeScale.getSeconds(TEN_MIN) * 7, SECONDS);
+        Instant end = now.minus(TimeScale.getDuration(TEN_MIN));
 
         String requestPath = PROJECT + '/' + SUBJECT + '/' + DISTINCT + '?'
                 + Parameter.TIME_WINDOW + '=' + window + '&'

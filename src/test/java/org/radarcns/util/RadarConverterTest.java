@@ -31,16 +31,10 @@ import static org.radarcns.domain.restapi.header.DescriptiveStatistic.SUM;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 import org.junit.Test;
 import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.domain.restapi.TimeWindow;
@@ -51,49 +45,6 @@ public class RadarConverterTest {
     private static final String ANDROID = "ANDROID";
     private static final String BIOVOTION = "BIOVOTION";
     private static final String EMPATICA = "EMPATICA";
-
-    @Test
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public void getISO8601TestFromDate() throws ParseException {
-        Date date = new Date();
-        Calendar calExpected = Calendar.getInstance();
-        calExpected.setTime(date);
-        // we will get UTC time from RadarConverter
-        calExpected.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        String dateString = RadarConverter.getISO8601(date);
-
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        Date dateResult = format.parse(dateString);
-        Calendar calActual = Calendar.getInstance();
-        calActual.setTime(dateResult);
-
-        assertEquals(calExpected.get(Calendar.YEAR), calActual.get(Calendar.YEAR));
-        assertEquals(calExpected.get(Calendar.MONTH), calActual.get(Calendar.MONTH));
-        assertEquals(calExpected.get(Calendar.DAY_OF_MONTH), calActual.get(Calendar.DAY_OF_MONTH));
-        assertEquals(calExpected.get(Calendar.HOUR), calActual.get(Calendar.HOUR));
-        assertEquals(calExpected.get(Calendar.MINUTE), calActual.get(Calendar.MINUTE));
-        assertEquals(calExpected.get(Calendar.SECOND), calActual.get(Calendar.SECOND));
-    }
-
-    @Test
-    @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public void getISO8601TestFromString() throws DateTimeParseException {
-        Date date = RadarConverter.getISO8601("2017-03-05T22:37:59Z");
-
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        assertEquals(2017, cal.get(Calendar.YEAR));
-        assertEquals(2, cal.get(Calendar.MONTH));
-        assertEquals(5, cal.get(Calendar.DAY_OF_MONTH));
-
-        assertEquals(10, cal.get(Calendar.HOUR));
-        assertEquals(37, cal.get(Calendar.MINUTE));
-        assertEquals(59, cal.get(Calendar.SECOND));
-        assertEquals(1, cal.get(Calendar.AM_PM));
-    }
 
     @Test
     public void getDescriptiveStatisticTest() throws DateTimeParseException {
@@ -161,16 +112,6 @@ public class RadarConverterTest {
                 RadarConverter.getSourceType(EMPATICA));
         assertEquals("PEBBLE",
                 RadarConverter.getSourceType("PEBBLE"));
-    }
-
-    @Test
-    public void getSecondTest() {
-        assertEquals(10, RadarConverter.getSecond(TimeWindow.TEN_SECOND), 0);
-        assertEquals(60, RadarConverter.getSecond(TimeWindow.ONE_MIN), 0);
-        assertEquals(600, RadarConverter.getSecond(TimeWindow.TEN_MIN), 0);
-        assertEquals(3600, RadarConverter.getSecond(TimeWindow.ONE_HOUR), 0);
-        assertEquals(3600 * 24, RadarConverter.getSecond(TimeWindow.ONE_DAY), 0);
-        assertEquals(3600 * 24 * 7, RadarConverter.getSecond(TimeWindow.ONE_WEEK), 0);
     }
 
     @Test

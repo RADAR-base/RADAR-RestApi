@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import org.radarcns.domain.restapi.AggregateDataSource;
 import org.radarcns.domain.restapi.header.AggregatedDataPointsHeader;
-import org.radarcns.webapp.param.TimeScale;
+import org.radarcns.util.TimeScale;
 
 public class AggregatedDataPoints {
 

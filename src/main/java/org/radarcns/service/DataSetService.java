@@ -42,7 +42,7 @@ import org.radarcns.mongo.data.passive.SourceDataMongoWrapper;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.exception.BadGatewayException;
-import org.radarcns.webapp.param.TimeScale;
+import org.radarcns.util.TimeScale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,7 +126,7 @@ public class DataSetService {
             throws IOException {
         Instant now = Instant.now();
         TimeScale timeScale = new TimeScale(
-                new TimeFrame(now.minus(RadarConverter.getDuration(timeWindow)), now),
+                new TimeFrame(now.minus(TimeScale.getDuration(timeWindow)), now),
                 timeWindow);
 
         Header header = getHeader(projectName, subjectId, sourceId,
@@ -153,8 +153,9 @@ public class DataSetService {
      * @see Dataset
      */
     public Dataset getAllRecordsInWindow(String projectName, String subjectId,
-            String sourceId, String sourceDataName, DescriptiveStatistic stat,
-            TimeScale timeScale) throws IOException {
+            String sourceId, String sourceDataName, DescriptiveStatistic stat, TimeScale timeScale)
+            throws IOException {
+
         SourceDTO source = managementPortalClient.getSource(sourceId);
 
         SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
