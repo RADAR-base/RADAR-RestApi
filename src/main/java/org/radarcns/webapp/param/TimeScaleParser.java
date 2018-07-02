@@ -33,7 +33,7 @@ import org.radarcns.util.TimeScale;
  */
 public class TimeScaleParser {
     public static final int DEFAULT_NUMBER_OF_WINDOWS = 100;
-    public static final int MAX_NUMBER_OF_WINDOWS = 5000;
+    public static final int MAX_NUMBER_OF_WINDOWS = 1000;
 
     private static final List<Map.Entry<TimeWindow, Double>> TIME_WINDOW_LOG = Stream
             .of(TEN_SECOND, ONE_MIN, TEN_MIN, ONE_HOUR, ONE_DAY, ONE_WEEK)

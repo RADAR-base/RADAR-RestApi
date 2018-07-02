@@ -59,13 +59,13 @@ public class AggregatedDataPointsEndPoint {
     //--------------------------------------------------------------------------------------------//
 
     /**
-     * JSON function that returns aggregated volumes of source-data requested.
+     * Aggregated volumes of source-data as requested by the user.
      */
     @POST
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     @Path("/{" + PROJECT_NAME + "}/{" + SUBJECT_ID + "}/" + DISTINCT)
-    @Operation(summary = "Returns a Dataset object formatted in JSON.",
+    @Operation(summary = "Performs data aggregation on request.",
             description = "Each collected sample is aggregated to provide near real-time "
                     + "statistical results. This end-point returns the latest available record "
                     + "for the stat for the given projectID, subjectID, sourceID and SourceDataName"
