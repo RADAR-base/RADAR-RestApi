@@ -41,8 +41,8 @@ import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.mongo.data.passive.SourceDataMongoWrapper;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
-import org.radarcns.webapp.exception.BadGatewayException;
 import org.radarcns.util.TimeScale;
+import org.radarcns.webapp.exception.BadGatewayException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,12 +132,12 @@ public class DataSetService {
         Header header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeScale);
 
-        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
+        SourceDataMongoWrapper sourceData = this.sourceCatalog
                 .getSourceDataWrapper(sourceDataName);
 
-        return sourceDataWrapper.getLatestRecord(projectName, subjectId, sourceId, header,
-                RadarConverter.getMongoStat(stat), MongoHelper.getCollection(mongoClient,
-                        sourceDataWrapper.getCollectionName(timeWindow)));
+        return sourceData.getLatestRecord(projectName, subjectId, sourceId, header,
+                RadarConverter.getMongoStat(stat),
+                MongoHelper.getCollection(mongoClient, sourceData.getCollectionName(timeWindow)));
     }
 
     /**
@@ -158,16 +158,16 @@ public class DataSetService {
 
         SourceDTO source = managementPortalClient.getSource(sourceId);
 
-        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
-                .getSourceDataWrapper(sourceDataName);
+        SourceDataMongoWrapper sourceData = this.sourceCatalog.getSourceDataWrapper(sourceDataName);
 
         Header header = getHeader(projectName, subjectId, sourceId,
-                sourceDataWrapper.getSourceData(), stat, timeScale,
+                sourceData.getSourceData(), stat, timeScale,
                 source.getSourceTypeIdentifier().toString());
 
-        return sourceDataWrapper.getAllRecordsInWindow(MongoHelper.getCollection(mongoClient,
-                sourceDataWrapper.getCollectionName(timeScale.getTimeWindow())), projectName, subjectId, sourceId,
-                header, RadarConverter.getMongoStat(stat), timeScale.getTimeFrame());
+        return sourceData.getAllRecordsInWindow(
+                MongoHelper.getCollection(mongoClient, sourceData.getCollectionName(timeScale)),
+                projectName, subjectId, sourceId, header, RadarConverter.getMongoStat(stat),
+                timeScale.getTimeFrame());
     }
 
     private Header getHeader(String projectName, String subjectId, String sourceId,

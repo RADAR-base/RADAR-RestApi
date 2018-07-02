@@ -38,6 +38,7 @@ import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,6 +217,16 @@ public abstract class SourceDataMongoWrapper {
 
         throw new IllegalArgumentException("Unknown sourceType type. " + sourceData
                 + "is not yest supported.");
+    }
+
+    /**
+     * Returns the required mongoDB collection name for the given timeWindow of this source-data.
+     *
+     * @param timeScale of data-set query.
+     * @return the MongoDB Collection name for given time window.
+     */
+    public String getCollectionName(TimeScale timeScale) {
+        return getCollectionName(timeScale.getTimeWindow());
     }
 
     /**

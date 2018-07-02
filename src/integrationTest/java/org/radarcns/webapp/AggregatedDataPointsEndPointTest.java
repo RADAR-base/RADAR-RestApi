@@ -39,8 +39,8 @@ import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.webapp.param.DataAggregateParam;
 import org.radarcns.util.TimeScale;
+import org.radarcns.webapp.param.DataAggregateParam;
 import org.radarcns.webapp.resource.Parameter;
 
 public class AggregatedDataPointsEndPointTest {

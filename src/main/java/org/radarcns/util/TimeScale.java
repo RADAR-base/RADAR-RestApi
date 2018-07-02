@@ -33,6 +33,11 @@ public class TimeScale {
                 / (double) getWindowSeconds());
     }
 
+    /**
+     * All time intervals covered by this TimeScale as a stream. The time intervals are returned
+     * in order.
+     * @return stream of time frames.
+     */
     public Stream<TimeFrame> streamIntervals() {
         TemporalAmount window = getWindowDuration();
         return Stream.iterate(
