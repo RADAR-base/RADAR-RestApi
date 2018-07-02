@@ -14,13 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
-
-import javax.ws.rs.ext.Provider;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.util.RadarConverter;
-import org.radarcns.webapp.param.InstantParam;
 
 /**
  * This class refines temporal query parameters and calculate new values when necessary.
@@ -33,7 +32,7 @@ import org.radarcns.webapp.param.InstantParam;
  * </p>
  */
 public class TimeScaleParser {
-    private static final int DEFAULT_NUMBER_OF_WINDOWS = 100;
+    public static final int DEFAULT_NUMBER_OF_WINDOWS = 100;
     public static final int MAX_NUMBER_OF_WINDOWS = 5000;
 
     private static final List<Map.Entry<TimeWindow, Double>> TIME_WINDOW_LOG = Stream
@@ -76,36 +75,31 @@ public class TimeScaleParser {
                     + " should not be after endTime " + endTime);
         }
 
-        TimeFrame timeFrame;
-        TimeWindow newTimeWindow = timeWindow;
+        TimeScale timeScale = parseWithDefaults(startTime, endTime, timeWindow);
 
-        if (startTime == null && timeWindow == null) {
-            // default settings, 1 year with 1 week intervals
-            timeFrame = new TimeFrame(endTime.minus(1, ChronoUnit.YEARS), endTime);
-            newTimeWindow = ONE_WEEK;
-        } else if (startTime == null) {
-            // use a fixed number of windows.
+        if (timeScale.getNumberOfWindows() > MAX_NUMBER_OF_WINDOWS) {
+            throw new BadRequestException("Cannot request more than " + maxNumberOfWindows
+                    + " time windows using " + timeScale + ".");
+        }
+
+        return timeScale;
+    }
+
+    private TimeScale parseWithDefaults(@Nullable Instant startTime, @Nonnull Instant endTime,
+            @Nullable TimeWindow timeWindow) {
+
+        TimeFrame timeFrame;
+        if (startTime != null) {
+            timeFrame = new TimeFrame(startTime, endTime);
+        } else if (timeWindow != null) {
             long totalSeconds = RadarConverter.getSecond(timeWindow) * defaultNumberOfWindows;
             timeFrame = new TimeFrame(endTime.minus(totalSeconds, ChronoUnit.SECONDS), endTime);
-        } else if (timeWindow == null) {
-            // use the fixed time frame with a time window close to the default number of windows.
-            timeFrame = new TimeFrame(startTime, endTime);
-            newTimeWindow = getFittingTimeWindow(timeFrame);
         } else {
-            // all params are provided in request
-            timeFrame = new TimeFrame(startTime, endTime);
+            timeFrame = new TimeFrame(endTime.minus(365, ChronoUnit.DAYS), endTime);
         }
 
-        long numberOfWindowsRequested = (long) Math.floor(timeFrame.getDuration().getSeconds()
-                / (double) RadarConverter.getSecond(newTimeWindow));
-
-        if (numberOfWindowsRequested > MAX_NUMBER_OF_WINDOWS) {
-            throw new BadRequestException("Cannot request more than " + maxNumberOfWindows
-                    + " time windows using time frame " + timeFrame + " and time window "
-                    + newTimeWindow + ". Queried " + numberOfWindowsRequested + " instead.");
-        }
-
-        return new TimeScale(timeFrame, newTimeWindow);
+        return new TimeScale(timeFrame,
+                timeWindow != null ? timeWindow : getFittingTimeWindow(timeFrame));
     }
 
     /**
@@ -127,6 +121,9 @@ public class TimeScaleParser {
         return new AbstractMap.SimpleImmutableEntry<>(key, value);
     }
 
+    /**
+     * TimeScale containing temporal extent and resolution.
+     */
     public static class TimeScale {
         private final TimeFrame timeFrame;
         private final TimeWindow timeWindow;
@@ -142,6 +139,19 @@ public class TimeScaleParser {
 
         public TimeWindow getTimeWindow() {
             return timeWindow;
+        }
+
+        public long getNumberOfWindows() {
+            return (long) Math.floor(timeFrame.getDuration().getSeconds()
+                            / (double) RadarConverter.getSecond(timeWindow));
+        }
+
+        @Override
+        public String toString() {
+            return "TimeScale{" + "timeFrame=" + timeFrame
+                    + ", timeWindow=" + timeWindow
+                    + ", numberOfWindows=" + getNumberOfWindows()
+                    + '}';
         }
     }
 }

@@ -17,7 +17,6 @@ import org.radarcns.service.SubjectService;
 import org.radarcns.webapp.filter.AuthenticationFilter;
 import org.radarcns.webapp.filter.AuthorizationFeature;
 import org.radarcns.webapp.param.TimeScaleParser;
-import org.radarcns.webapp.param.TimeScaleParser.TimeScale;
 
 /**
  * Radar application configuration.
