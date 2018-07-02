@@ -4,6 +4,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.radarcns.auth.authorization.Permission.Entity.MEASUREMENT;
 import static org.radarcns.auth.authorization.Permission.Operation.READ;
 import static org.radarcns.service.DataSetService.emptyAggregatedData;
+import static org.radarcns.webapp.param.TimeScaleParser.MAX_NUMBER_OF_WINDOWS;
 import static org.radarcns.webapp.resource.BasePath.AGGREGATE;
 import static org.radarcns.webapp.resource.BasePath.DISTINCT;
 import static org.radarcns.webapp.resource.Parameter.END;
@@ -15,7 +16,6 @@ import static org.radarcns.webapp.resource.Parameter.TIME_WINDOW;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
-import java.time.Instant;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -28,10 +28,11 @@ import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.AggregatedDataPoints;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
-import org.radarcns.util.QueryParamRefiner;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.param.DataAggregateParam;
 import org.radarcns.webapp.param.InstantParam;
+import org.radarcns.webapp.param.TimeScaleParser;
+import org.radarcns.webapp.param.TimeScaleParser.TimeScale;
 import org.radarcns.webapp.validation.Alphanumeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,9 @@ public class AggregatedDataPointsEndPoint {
 
     @Inject
     private DataSetService dataSetService;
+
+    @Inject
+    private TimeScaleParser timeScaleParser;
 
     //--------------------------------------------------------------------------------------------//
     //                                    Aggregated Data Points API functions                    //
@@ -74,6 +78,9 @@ public class AggregatedDataPointsEndPoint {
     @ApiResponse(responseCode = "500", description = "An error occurs while executing")
     @ApiResponse(responseCode = "200", description = "Returns a dataset object containing latest "
             + "available record for the given inputs")
+    @ApiResponse(responseCode = "400", description = "startTime should not be after endTime in "
+            + "query and the maximum number of time windows should not exceed "
+            + MAX_NUMBER_OF_WINDOWS + ".")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")
@@ -87,19 +94,15 @@ public class AggregatedDataPointsEndPoint {
 
         mpClient.checkSubjectInProject(projectName, subjectId);
 
-        // Don't request future data
-        Instant endTime = end != null ? end.getValue() : Instant.now();
-        Instant startTime = start != null ? start.getValue() : null;
-
-        QueryParamRefiner refinedParams = new QueryParamRefiner(startTime, endTime, interval);
+        TimeScale timeScale = timeScaleParser.parse(start, end, interval);
 
         AggregatedDataPoints dataSet = dataSetService
                 .getDistinctData(projectName, subjectId, aggregateParam.getSources(),
-                        refinedParams.getTimeWindow(), refinedParams.getTimeFrame());
+                        timeScale.getTimeWindow(), timeScale.getTimeFrame());
         if (dataSet.getDataset().isEmpty()) {
             LOGGER.debug("No aggregated data available for the subject {} with source", subjectId);
-            return emptyAggregatedData(projectName, subjectId, refinedParams.getTimeWindow(),
-                    refinedParams.getTimeFrame(), aggregateParam.getSources());
+            return emptyAggregatedData(projectName, subjectId, timeScale.getTimeWindow(),
+                    timeScale.getTimeFrame(), aggregateParam.getSources());
         }
         return dataSet;
     }

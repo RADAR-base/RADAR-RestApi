@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.radarcns.config.Properties;
@@ -114,12 +115,18 @@ public class MongoHelper {
             MongoCollection<Document> collection, String projectName, String subjectId,
             String sourceId, TimeFrame timeFrame) {
         createIndexIfNotAvailable(collection, indexProjectSubjectSourceTimestart);
-        Bson query = filterSource(projectName, subjectId, sourceId, timeFrame);
-        logger.debug("Filtering Query " + query
-                .toBsonDocument(Document.class, collection.getCodecRegistry()));
+        Bson querySource = filterSource(projectName, subjectId, sourceId, timeFrame);
+        BasicDBObject sortStartTime = new BasicDBObject(KEY + "." + START, ASCENDING);
+
+        if (logger.isDebugEnabled()) {
+            BsonDocument findQueryDocument = querySource.toBsonDocument(
+                    Document.class, collection.getCodecRegistry());
+            logger.debug("Filtering query {} and sorting by {}", findQueryDocument, sortStartTime);
+        }
+
         return collection
-                .find(query)
-                .sort(new BasicDBObject(KEY + "." + START, ASCENDING))
+                .find(querySource)
+                .sort(sortStartTime)
                 .iterator();
     }
 
