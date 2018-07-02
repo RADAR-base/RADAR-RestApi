@@ -152,7 +152,6 @@ public class DataSetEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
-    @Inject
     public Dataset getSamplesJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
