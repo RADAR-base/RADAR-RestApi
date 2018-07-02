@@ -61,7 +61,7 @@ import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 import org.radarcns.webapp.resource.Parameter;
 
 public class DataSetEndPointTest {
@@ -148,8 +148,8 @@ public class DataSetEndPointTest {
     @Test
     public void getAllRecordsWithQuartilesInTimeRange() throws IOException {
         Instant now = Instant.now();
-        Instant end = now.minus(RadarConverter.getSecond(TEN_SECOND), SECONDS);
-        Instant start = now.minus(7 * RadarConverter.getSecond(TEN_SECOND), SECONDS);
+        Instant end = now.minus(TimeScale.getSeconds(TEN_SECOND), SECONDS);
+        Instant start = now.minus(7 * TimeScale.getSeconds(TEN_SECOND), SECONDS);
         MongoCollection<Document> collection = mongoRule.getCollection(
                 BATTERY_LEVEL_COLLECTION_NAME);
         Map<String, Object> docs = RandomInput
@@ -179,8 +179,8 @@ public class DataSetEndPointTest {
         Instant now = Instant.now();
         TimeWindow window = TimeWindow.TEN_MIN;
 
-        Instant end = now.minus(RadarConverter.getSecond(window), SECONDS);
-        Instant start = now.minus(7 * RadarConverter.getSecond(window), SECONDS);
+        Instant end = now.minus(TimeScale.getSeconds(window), SECONDS);
+        Instant start = now.minus(7 * TimeScale.getSeconds(window), SECONDS);
         MongoCollection<Document> collection = mongoRule.getCollection(
                 BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES);
         Map<String, Object> docs = RandomInput

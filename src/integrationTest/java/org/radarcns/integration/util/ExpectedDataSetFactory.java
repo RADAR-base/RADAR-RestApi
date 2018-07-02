@@ -33,7 +33,7 @@ import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 
 /**
  * Produces {@link Dataset} and {@link org.bson.Document} for {@link ExpectedValue}.
@@ -97,7 +97,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         return new TimeFrame(
                 Instant.ofEpochMilli(windows.get(0)),
                 Instant.ofEpochMilli(windows.get(windows.size() - 1))
-                        .plus(RadarConverter.getDuration(timeWindow)));
+                        .plus(TimeScale.getDuration(timeWindow)));
     }
 
 

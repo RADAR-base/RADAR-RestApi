@@ -5,9 +5,8 @@ import static org.radarcns.domain.restapi.header.DescriptiveStatistic.DISTINCT;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import org.radarcns.domain.restapi.AggregateDataSource;
-import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.AggregatedDataPointsHeader;
-import org.radarcns.domain.restapi.header.TimeFrame;
+import org.radarcns.util.TimeScale;
 
 public class AggregatedDataPoints {
 
@@ -27,18 +26,17 @@ public class AggregatedDataPoints {
      * @param projectName of project
      * @param subjectId of subject
      * @param maximumCount of records
-     * @param timeFrame start to end
-     * @param timeWindow interval window
+     * @param timeScale time scale
      * @param sources to request availability
      * @param dataset computed data.
      */
     public AggregatedDataPoints(String projectName, String subjectId, Integer maximumCount,
-            TimeFrame timeFrame, TimeWindow timeWindow, List<AggregateDataSource> sources,
+            TimeScale timeScale, List<AggregateDataSource> sources,
             List<DataItem> dataset) {
 
         this.dataset = dataset;
         this.header = new AggregatedDataPointsHeader(projectName, subjectId, maximumCount,
-                timeFrame, timeWindow, DISTINCT, sources);
+                timeScale.getTimeFrame(), timeScale.getTimeWindow(), DISTINCT, sources);
 
     }
 

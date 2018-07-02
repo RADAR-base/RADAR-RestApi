@@ -16,19 +16,14 @@
 
 package org.radarcns.service;
 
-
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 import org.bson.Document;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceDTO;
@@ -46,6 +41,7 @@ import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.mongo.data.passive.SourceDataMongoWrapper;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 import org.radarcns.webapp.exception.BadGatewayException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +50,6 @@ import org.slf4j.LoggerFactory;
  * Generic Data Access Object database independent.
  */
 public class DataSetService {
-
-    private static final int MAXIMUM_NUMBER_OF_WINDOWS = 1000;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetService.class);
 
     private final ManagementPortalClient managementPortalClient;
@@ -64,8 +57,6 @@ public class DataSetService {
     private final SourceCatalog sourceCatalog;
 
     private final MongoClient mongoClient;
-
-
 
     /**
      * Constructor.
@@ -107,16 +98,15 @@ public class DataSetService {
      *
      * @param projectName of project
      * @param subjectId of subject
-     * @param interval timeWindow
-     * @param timeFrame startToEnd
+     * @param timeScale time scale
      * @param sources requested
      * @return an instance of AggregatedDataPoints
      */
     public static AggregatedDataPoints emptyAggregatedData(String projectName, String subjectId,
-            TimeWindow interval, TimeFrame timeFrame, List<AggregateDataSource> sources) {
+            TimeScale timeScale, List<AggregateDataSource> sources) {
 
-        return new AggregatedDataPoints(projectName, subjectId, 0, timeFrame, interval, sources,
-                Collections.emptyList());
+        return new AggregatedDataPoints(projectName, subjectId, 0,
+                timeScale, sources, Collections.emptyList());
     }
 
     /**
@@ -135,17 +125,19 @@ public class DataSetService {
             String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow)
             throws IOException {
         Instant now = Instant.now();
-        TimeFrame timeFrame = new TimeFrame(now.minus(RadarConverter.getDuration(timeWindow)), now);
+        TimeScale timeScale = new TimeScale(
+                new TimeFrame(now.minus(TimeScale.getDuration(timeWindow)), now),
+                timeWindow);
 
         Header header = getHeader(projectName, subjectId, sourceId,
-                sourceDataName, stat, timeWindow, timeFrame);
+                sourceDataName, stat, timeScale);
 
-        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
+        SourceDataMongoWrapper sourceData = this.sourceCatalog
                 .getSourceDataWrapper(sourceDataName);
 
-        return sourceDataWrapper.getLatestRecord(projectName, subjectId, sourceId, header,
-                RadarConverter.getMongoStat(stat), MongoHelper.getCollection(mongoClient,
-                        sourceDataWrapper.getCollectionName(timeWindow)));
+        return sourceData.getLatestRecord(projectName, subjectId, sourceId, header,
+                RadarConverter.getMongoStat(stat),
+                MongoHelper.getCollection(mongoClient, sourceData.getCollectionName(timeWindow)));
     }
 
     /**
@@ -156,40 +148,36 @@ public class DataSetService {
      * @param sourceId is the sourceID
      * @param sourceDataName is the required sensor type
      * @param stat is the required statistical value
-     * @param timeWindow time frame resolution
-     * @param timeFrame time frame to look within
+     * @param timeScale time frame resolution
      * @return dataset for the given subject and source for given query.
      * @see Dataset
      */
     public Dataset getAllRecordsInWindow(String projectName, String subjectId,
-            String sourceId, String sourceDataName, DescriptiveStatistic stat,
-            TimeWindow timeWindow,
-            TimeFrame timeFrame) throws IOException {
-        checkTimeFrameSize(timeFrame, timeWindow, MAXIMUM_NUMBER_OF_WINDOWS);
+            String sourceId, String sourceDataName, DescriptiveStatistic stat, TimeScale timeScale)
+            throws IOException {
 
         SourceDTO source = managementPortalClient.getSource(sourceId);
 
-        SourceDataMongoWrapper sourceDataWrapper = this.sourceCatalog
-                .getSourceDataWrapper(sourceDataName);
+        SourceDataMongoWrapper sourceData = this.sourceCatalog.getSourceDataWrapper(sourceDataName);
 
         Header header = getHeader(projectName, subjectId, sourceId,
-                sourceDataWrapper.getSourceData(), stat, timeWindow,
-                source.getSourceTypeIdentifier().toString(), timeFrame);
+                sourceData.getSourceData(), stat, timeScale,
+                source.getSourceTypeIdentifier().toString());
 
-        return sourceDataWrapper.getAllRecordsInWindow(MongoHelper.getCollection(mongoClient,
-                sourceDataWrapper.getCollectionName(timeWindow)), projectName, subjectId, sourceId,
-                header, RadarConverter.getMongoStat(stat), timeFrame);
+        return sourceData.getAllRecordsInWindow(
+                MongoHelper.getCollection(mongoClient, sourceData.getCollectionName(timeScale)),
+                projectName, subjectId, sourceId, header, RadarConverter.getMongoStat(stat),
+                timeScale.getTimeFrame());
     }
 
     private Header getHeader(String projectName, String subjectId, String sourceId,
-            String sourceDataName, DescriptiveStatistic stat, TimeWindow timeWindow,
-            TimeFrame timeFrame)
+            String sourceDataName, DescriptiveStatistic stat, TimeScale timeScale)
             throws IOException {
         SourceDTO source = managementPortalClient.getSource(sourceId);
 
         return getHeader(projectName, subjectId, sourceId,
                 this.sourceCatalog.getSourceDataWrapper(sourceDataName).getSourceData(), stat,
-                timeWindow, source.getSourceTypeIdentifier().toString(), timeFrame);
+                timeScale, source.getSourceTypeIdentifier().toString());
     }
 
     /**
@@ -199,15 +187,15 @@ public class DataSetService {
      * @param source is the sourceID
      * @param sourceData is sourceData involved in the operation
      * @param stat {@link DescriptiveStatistic} stating the required statistical value
-     * @param timeWindow time window is the time interval between two consecutive samples
      * @return {@link Header} related to the given inputs
      * @see Dataset
      */
     private Header getHeader(String project, String subject, String source,
-            SourceDataDTO sourceData, DescriptiveStatistic stat, TimeWindow timeWindow,
-            String sourceType, TimeFrame timeFrame) {
+            SourceDataDTO sourceData, DescriptiveStatistic stat, TimeScale timeScale,
+            String sourceType) {
         return new Header(project, subject, source, sourceType, sourceData.getSourceDataType(),
-                stat, sourceData.getUnit(), timeWindow, timeFrame, null);
+                stat, sourceData.getUnit(), timeScale.getTimeWindow(), timeScale.getTimeFrame(),
+                null);
     }
 
     /**
@@ -217,14 +205,11 @@ public class DataSetService {
      * @param projectName of project
      * @param subjectId of subject
      * @param sources requested
-     * @param timeWindow interval size
-     * @param timeFrame time frame to look withing
+     * @param timeScale time scale
      * @return calculated data.
      */
     public AggregatedDataPoints getDistinctData(String projectName, String subjectId,
-            List<AggregateDataSource> sources, TimeWindow timeWindow, TimeFrame timeFrame) {
-        checkTimeFrameSize(timeFrame, timeWindow, MAXIMUM_NUMBER_OF_WINDOWS);
-
+            List<AggregateDataSource> sources, TimeScale timeScale) {
         // fill up sourceData.type field
         try {
             for (AggregateDataSource source : sources) {
@@ -238,8 +223,9 @@ public class DataSetService {
             throw new BadGatewayException(exe);
         }
 
-        List<DataItem> dataItems = calculateIntervals(timeFrame, timeWindow)
-                .map(t -> collectDistinctSources(projectName, subjectId, sources, t, timeWindow))
+        List<DataItem> dataItems = timeScale.streamIntervals()
+                .map(t -> collectDistinctSources(projectName, subjectId, sources, t,
+                        timeScale.getTimeWindow()))
                 .collect(Collectors.toList());
 
         Integer maximumValue = dataItems.stream()
@@ -248,7 +234,7 @@ public class DataSetService {
                 .orElse(null);
 
         return new AggregatedDataPoints(projectName, subjectId,
-                maximumValue, timeFrame, timeWindow, sources, dataItems);
+                maximumValue, timeScale, sources, dataItems);
     }
 
     private DataItem collectDistinctSources(String projectName, String subjectId,
@@ -275,45 +261,5 @@ public class DataSetService {
                 .reduce(0, Integer::sum);
 
         return new DataItem(count, timeFrame.getStartDateTime());
-    }
-
-    private Stream<TimeFrame> calculateIntervals(TimeFrame timeFrame, TimeWindow timeWindow) {
-        TemporalAmount window = RadarConverter.getDuration(timeWindow);
-        return Stream.iterate(
-                windowTimeFrame(timeFrame.getStartDateTime(), window),
-                t -> windowTimeFrame(t.getEndDateTime(), window))
-                .limit(windowsInTimeFrame(timeFrame, timeWindow));
-    }
-
-    private static TimeFrame windowTimeFrame(Instant start, TemporalAmount duration) {
-        return new TimeFrame(start, start.plus(duration));
-    }
-
-    private static long windowsInTimeFrame(TimeFrame timeFrame, TimeWindow timeWindow) {
-        Duration duration = timeFrame.getDuration();
-        if (duration == null) {
-            throw new IllegalStateException("Start or end time of time frame unknown.");
-        }
-        return (long) Math.floor(duration.getSeconds()
-                / (double) RadarConverter.getSecond(timeWindow));
-    }
-
-    /**
-     * Checks that for a given time frame with given time window, the number of data points does not
-     * exceed a maximum.
-     *
-     * @param timeFrame time frame to request
-     * @param timeWindow time window granularity
-     * @param maximumSize maximum number of data points
-     * @throws BadRequestException if the number of data points would exceed maximum size.
-     */
-    public void checkTimeFrameSize(TimeFrame timeFrame, TimeWindow timeWindow, int maximumSize) {
-        long requestedTimeFrames = windowsInTimeFrame(timeFrame, timeWindow);
-        if (requestedTimeFrames > maximumSize) {
-            throw new BadRequestException(
-                    "Cannot request more than " + maximumSize + " time windows. Requested "
-                            + requestedTimeFrames + " with time frame " + timeFrame
-                            + " and time window " + timeWindow + '.');
-        }
     }
 }

@@ -38,6 +38,7 @@ import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,6 +220,16 @@ public abstract class SourceDataMongoWrapper {
     }
 
     /**
+     * Returns the required mongoDB collection name for the given timeWindow of this source-data.
+     *
+     * @param timeScale of data-set query.
+     * @return the MongoDB Collection name for given time window.
+     */
+    public String getCollectionName(TimeScale timeScale) {
+        return getCollectionName(timeScale.getTimeWindow());
+    }
+
+    /**
      * Convert a {@link Document} to the corresponding SpecificRecord. This function must be
      * override by the subclass
      *
@@ -242,10 +253,9 @@ public abstract class SourceDataMongoWrapper {
      */
     protected abstract int extractCount(Document doc);
 
-
     public Double getExpectedRecordCount(TimeWindow timeWindow) {
-        return RadarConverter.getSecond(timeWindow) * Double
-                .valueOf(this.sourceData.getFrequency());
+        return RadarConverter.getExpectedMessages(timeWindow,
+                Double.valueOf(this.sourceData.getFrequency()));
     }
 
     /**
