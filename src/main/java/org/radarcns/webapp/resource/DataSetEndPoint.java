@@ -169,9 +169,8 @@ public class DataSetEndPoint {
 
         TimeScale timeScale = timeScaleParser.parse(start, end, interval);
 
-        dataset = dataSetService
-                .getAllRecordsInWindow(projectName, subjectId, sourceId, sourceDataName, stat,
-                        timeScale.getTimeWindow(), timeScale.getTimeFrame());
+        dataset = dataSetService.getAllRecordsInWindow(projectName, subjectId, sourceId,
+                sourceDataName, stat, timeScale);
 
         if (dataset.getDataset().isEmpty()) {
             LOGGER.debug("No data for the subject {} with source {}", subjectId, sourceId);

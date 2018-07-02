@@ -96,13 +96,13 @@ public class AggregatedDataPointsEndPoint {
 
         TimeScale timeScale = timeScaleParser.parse(start, end, interval);
 
-        AggregatedDataPoints dataSet = dataSetService
-                .getDistinctData(projectName, subjectId, aggregateParam.getSources(),
-                        timeScale.getTimeWindow(), timeScale.getTimeFrame());
+        AggregatedDataPoints dataSet = dataSetService.getDistinctData(
+                projectName, subjectId, aggregateParam.getSources(), timeScale);
+
         if (dataSet.getDataset().isEmpty()) {
             LOGGER.debug("No aggregated data available for the subject {} with source", subjectId);
-            return emptyAggregatedData(projectName, subjectId, timeScale.getTimeWindow(),
-                    timeScale.getTimeFrame(), aggregateParam.getSources());
+            return emptyAggregatedData(projectName, subjectId, timeScale,
+                    aggregateParam.getSources());
         }
         return dataSet;
     }
