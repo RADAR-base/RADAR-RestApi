@@ -24,7 +24,7 @@ import org.radarcns.util.RadarConverter;
 /**
  * This class refines temporal query parameters and calculate new values when necessary.
  * <p>
- * If the tartTime is not provided startTime will be calculated based on default number of windows
+ * If the startTime is not provided startTime will be calculated based on default number of windows
  * and given timeWindow.
  * If no timeWindow is provided, a best fitting timeWindow will be calculated.
  * If none of the parameters are provided, API will return data for a period of 1 year with
@@ -121,37 +121,4 @@ public class TimeScaleParser {
         return new AbstractMap.SimpleImmutableEntry<>(key, value);
     }
 
-    /**
-     * TimeScale containing temporal extent and resolution.
-     */
-    public static class TimeScale {
-        private final TimeFrame timeFrame;
-        private final TimeWindow timeWindow;
-
-        private TimeScale(TimeFrame timeFrame, TimeWindow timeWindow) {
-            this.timeFrame = timeFrame;
-            this.timeWindow = timeWindow;
-        }
-
-        public TimeFrame getTimeFrame() {
-            return timeFrame;
-        }
-
-        public TimeWindow getTimeWindow() {
-            return timeWindow;
-        }
-
-        public long getNumberOfWindows() {
-            return (long) Math.floor(timeFrame.getDuration().getSeconds()
-                            / (double) RadarConverter.getSecond(timeWindow));
-        }
-
-        @Override
-        public String toString() {
-            return "TimeScale{" + "timeFrame=" + timeFrame
-                    + ", timeWindow=" + timeWindow
-                    + ", numberOfWindows=" + getNumberOfWindows()
-                    + '}';
-        }
-    }
 }

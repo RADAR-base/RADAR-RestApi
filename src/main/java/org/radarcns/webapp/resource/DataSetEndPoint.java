@@ -55,7 +55,7 @@ import org.radarcns.util.RadarConverter;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.param.InstantParam;
 import org.radarcns.webapp.param.TimeScaleParser;
-import org.radarcns.webapp.param.TimeScaleParser.TimeScale;
+import org.radarcns.webapp.param.TimeScale;
 import org.radarcns.webapp.validation.Alphanumeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
