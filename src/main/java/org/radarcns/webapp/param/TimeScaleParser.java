@@ -77,7 +77,7 @@ public class TimeScaleParser {
 
         TimeScale timeScale = parseWithDefaults(startTime, endTime, timeWindow);
 
-        if (timeScale.getNumberOfWindows() > MAX_NUMBER_OF_WINDOWS) {
+        if (timeScale.getNumberOfWindows() > maxNumberOfWindows) {
             throw new BadRequestException("Cannot request more than " + maxNumberOfWindows
                     + " time windows using " + timeScale + ".");
         }
