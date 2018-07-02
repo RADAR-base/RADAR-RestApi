@@ -38,7 +38,6 @@ import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
-import org.radarcns.util.TimeScale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -245,7 +244,7 @@ public abstract class SourceDataMongoWrapper {
 
     public Double getExpectedRecordCount(TimeWindow timeWindow) {
         return RadarConverter.getExpectedMessages(timeWindow,
-                Double.valueOf(this.sourceData.getFrequency());
+                Double.valueOf(this.sourceData.getFrequency()));
     }
 
     /**

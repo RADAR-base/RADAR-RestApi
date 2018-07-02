@@ -37,7 +37,6 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 import org.junit.Test;
 import org.radarcns.domain.restapi.ServerStatus;
-import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 
 public class RadarConverterTest {
