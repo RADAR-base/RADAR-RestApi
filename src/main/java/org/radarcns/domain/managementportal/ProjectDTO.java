@@ -20,6 +20,7 @@ public class ProjectDTO implements Serializable {
     @NotNull
     private String projectName;
 
+    private String humanReadableProjectName;
     @NotNull
     private String description;
 
@@ -126,6 +127,14 @@ public class ProjectDTO implements Serializable {
 
     public void setAttributes(Set<AttributeMapDTO> attributes) {
         this.attributes = attributes;
+    }
+
+    public String getHumanReadableProjectName() {
+        return humanReadableProjectName;
+    }
+
+    public void setHumanReadableProjectName(String humanReadableProjectName) {
+        this.humanReadableProjectName = humanReadableProjectName;
     }
 
     @Override
