@@ -4,6 +4,7 @@ package org.radarcns.domain.managementportal;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
@@ -39,7 +40,7 @@ public class ProjectDTO implements Serializable {
 
     private Set<SourceTypeDTO> sourceTypes = new HashSet<>();
 
-    private Set<AttributeMapDTO> attributes = new HashSet<>();
+    private Map<String, String> attributes;
 
     public Long getId() {
         return id;
@@ -121,11 +122,11 @@ public class ProjectDTO implements Serializable {
         this.sourceTypes = sourceTypes;
     }
 
-    public Set<AttributeMapDTO> getAttributes() {
+    public Map<String, String> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Set<AttributeMapDTO> attributes) {
+    public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
     }
 
