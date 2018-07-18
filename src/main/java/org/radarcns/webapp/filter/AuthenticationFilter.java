@@ -2,6 +2,7 @@ package org.radarcns.webapp.filter;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.Locale;
 import javax.annotation.Priority;
 import javax.inject.Singleton;
@@ -48,7 +49,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             try {
                 YamlServerConfig cfg = new YamlServerConfig();
                 cfg.setResourceName("res_RestApi");
-                cfg.setPublicKeyEndpoint(new URI(mpUrlString + "oauth/token_key"));
+                cfg.setPublicKeyEndpoints(Collections.singletonList(new URI(mpUrlString
+                        + "oauth/token_key")));
                 config = cfg;
             } catch (URISyntaxException exc) {
                 logger.error("Failed to load Management Portal URL " + mpUrlString, exc);
