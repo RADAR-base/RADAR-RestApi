@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.monitor;
+package org.radarcns.mongo.data.monitor.application;
 
 import org.bson.Document;
 import org.radarcns.domain.restapi.Application;

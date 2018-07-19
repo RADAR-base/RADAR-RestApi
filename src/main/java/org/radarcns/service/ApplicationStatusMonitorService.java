@@ -21,10 +21,10 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.inject.Inject;
 import org.radarcns.domain.restapi.Application;
-import org.radarcns.mongo.data.monitor.ApplicationStatusRecordCounter;
-import org.radarcns.mongo.data.monitor.ApplicationStatusServerStatus;
-import org.radarcns.mongo.data.monitor.ApplicationStatusUpTime;
-import org.radarcns.mongo.data.monitor.MongoApplicationStatusWrapper;
+import org.radarcns.mongo.data.monitor.application.ApplicationStatusRecordCounter;
+import org.radarcns.mongo.data.monitor.application.ApplicationStatusServerStatus;
+import org.radarcns.mongo.data.monitor.application.ApplicationStatusUpTime;
+import org.radarcns.mongo.data.monitor.application.MongoApplicationStatusWrapper;
 
 /**
  * Data Access Object for Android App Status values.
