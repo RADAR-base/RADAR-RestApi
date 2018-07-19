@@ -24,9 +24,6 @@ import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.resource.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 
-import com.mongodb.MongoClient;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -34,9 +31,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import com.mongodb.MongoClient;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.radarcns.auth.NeedsPermissionOnSubject;
-import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.ServerStatus;
+import org.radarcns.domain.restapi.monitor.ApplicationStatus;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.ApplicationStatusMonitorService;
 import org.radarcns.service.SubjectService;
@@ -80,20 +81,20 @@ public class AppStatusEndPoint {
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")
     @NeedsPermissionOnSubject(entity = SOURCE, operation = READ)
-    public Application getLastReceivedAppStatusJson(
+    public ApplicationStatus getLastReceivedAppStatusJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
             @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
         mpClient.checkSubjectInProject(projectName, subjectId);
-        Application application = null;
+        ApplicationStatus applicationStatus = null;
         if (subjectService.checkSourceAssignedToSubject(subjectId, sourceId)) {
-            application = applicationStatusMonitorService.getStatus(projectName,
+            applicationStatus = applicationStatusMonitorService.getStatus(projectName,
                     subjectId, sourceId, mongoClient);
         }
-        if (application == null) {
-            return new Application(null, 0d, ServerStatus.UNKNOWN, -1, -1, -1);
+        if (applicationStatus == null) {
+            return new ApplicationStatus(null, 0d, ServerStatus.UNKNOWN, -1, -1, -1);
 
         }
-        return application;
+        return applicationStatus;
     }
 }

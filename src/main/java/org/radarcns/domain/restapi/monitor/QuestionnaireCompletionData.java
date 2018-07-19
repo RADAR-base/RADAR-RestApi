@@ -1,23 +1,39 @@
-package org.radarcns.domain.restapi;
+package org.radarcns.domain.restapi.monitor;
 
 import java.time.Instant;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.radarcns.domain.restapi.header.MonitorHeader;
 
 public class QuestionnaireCompletionData {
 
+    @JsonProperty
     private MonitorHeader header;
 
+    @JsonProperty
     private Instant timeRecorded;
 
+    @JsonProperty
     private String questionnaireName;
 
+    @JsonProperty
     private Double completionPercentage;
 
+    /**
+     * Default constructor.
+     */
     public QuestionnaireCompletionData() {
         // default constructor
     }
+
+    /**
+     * Constructor.
+     * @param header contains the monitor meta-data.
+     * @param timeRecorded recorded time of the status.
+     * @param questionnaireName name of the questionnaire.
+     * @param completionPercentage percentage of completion.
+     */
     public QuestionnaireCompletionData(MonitorHeader header, Instant timeRecorded,
             String questionnaireName, Double completionPercentage) {
         this.header = header;
@@ -47,7 +63,7 @@ public class QuestionnaireCompletionData {
     }
 
     public void setQuestionnaireName(String questionnaireName) {
-        this.questionnaireName= questionnaireName;
+        this.questionnaireName = questionnaireName;
     }
 
     public Double getCompletionPercentage() {

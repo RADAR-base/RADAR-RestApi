@@ -20,7 +20,7 @@ import com.mongodb.MongoClient;
 import java.util.LinkedList;
 import java.util.List;
 import javax.inject.Inject;
-import org.radarcns.domain.restapi.Application;
+import org.radarcns.domain.restapi.monitor.ApplicationStatus;
 import org.radarcns.mongo.data.monitor.application.ApplicationStatusRecordCounter;
 import org.radarcns.mongo.data.monitor.application.ApplicationStatusServerStatus;
 import org.radarcns.mongo.data.monitor.application.ApplicationStatusUpTime;
@@ -35,7 +35,7 @@ public class ApplicationStatusMonitorService {
     private final List<MongoApplicationStatusWrapper> dataAccessObjects;
 
     /**
-     * Default constructor. Initiates all the delegate classes to compute Application Status.
+     * Default constructor. Initiates all the delegate classes to compute ApplicationStatus Status.
      */
     @Inject
     public ApplicationStatusMonitorService() {
@@ -53,11 +53,11 @@ public class ApplicationStatusMonitorService {
      * @param subject identifier
      * @param source identifier
      * @param client is the MongoDb client
-     * @return {@code Application} representing the status of the related Android App
+     * @return {@code ApplicationStatus} representing the status of the related Android App
      */
-    public Application getStatus(String project, String subject, String source, MongoClient
+    public ApplicationStatus getStatus(String project, String subject, String source, MongoClient
             client) {
-        Application app = null;
+        ApplicationStatus app = null;
 
         for (MongoApplicationStatusWrapper dataAccessObject : dataAccessObjects) {
             app = dataAccessObject

@@ -22,7 +22,7 @@ import static org.radarcns.mongo.util.MongoHelper.VALUE;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
-import org.radarcns.domain.restapi.Application;
+import org.radarcns.domain.restapi.monitor.ApplicationStatus;
 import org.radarcns.mongo.util.MongoHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +36,15 @@ public abstract class MongoApplicationStatusWrapper {
             .getLogger(MongoApplicationStatusWrapper.class);
 
     /**
-     * Returns an {@code Application} initialised with the extracted value.
+     * Returns an {@code ApplicationStatus} initialised with the extracted value.
      *
      * @param subject is the subjectID
      * @param source is the sourceID
      * @param client is the mongoDb client instance
      * @return the last seen status update for the given subject and sourceType, otherwise null
      */
-    public Application valueByProjectSubjectSource(String project, String subject, String source,
-            Application app,
-            MongoClient client) {
+    public ApplicationStatus valueByProjectSubjectSource(String project, String subject,
+            String source, ApplicationStatus app, MongoClient client) {
 
         MongoCursor<Document> cursor = MongoHelper
                 .findDocumentBySource(MongoHelper.getCollection(client, getCollectionName()),
@@ -62,14 +61,14 @@ public abstract class MongoApplicationStatusWrapper {
         cursor.close();
 
         if (app == null) {
-            return getApplication((Document) doc.get(VALUE), new Application());
+            return getApplication((Document) doc.get(VALUE), new ApplicationStatus());
         }
 
         return getApplication((Document) doc.get(VALUE), app);
 
     }
 
-    protected abstract Application getApplication(Document doc, Application app);
+    protected abstract ApplicationStatus getApplication(Document doc, ApplicationStatus app);
 
     public abstract String getCollectionName();
 

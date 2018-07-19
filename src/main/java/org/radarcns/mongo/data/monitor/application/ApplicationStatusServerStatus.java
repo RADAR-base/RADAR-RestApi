@@ -17,7 +17,7 @@
 package org.radarcns.mongo.data.monitor.application;
 
 import org.bson.Document;
-import org.radarcns.domain.restapi.Application;
+import org.radarcns.domain.restapi.monitor.ApplicationStatus;
 import org.radarcns.util.RadarConverter;
 
 public class ApplicationStatusServerStatus extends MongoApplicationStatusWrapper {
@@ -26,7 +26,7 @@ public class ApplicationStatusServerStatus extends MongoApplicationStatusWrapper
 
     //TODO take field names from RADAR MongoDb Connector
     @Override
-    protected Application getApplication(Document doc, Application app) {
+    protected ApplicationStatus getApplication(Document doc, ApplicationStatus app) {
         app.setIpAddress(doc.getString("clientIP"));
         app.setServerStatus(RadarConverter.getServerStatus(doc.getString("serverStatus")));
 

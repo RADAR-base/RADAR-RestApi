@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MonitorHeader {
 
-    public enum MONITOR_CATEGORY {
+    public enum MonitorCategory {
         PASSIVE, QUESTIONNAIRE
     }
 
@@ -20,18 +20,28 @@ public class MonitorHeader {
     private String sourceId;
 
     @JsonProperty
-    private MONITOR_CATEGORY monitor_category;
+    private MonitorCategory monitorCategory;
 
+    /**
+     * Default constructor.
+     */
     public MonitorHeader() {
         // default constructor.
     }
 
+    /**
+     * Contains meta-data of the monitored source.
+     * @param projectId project Id.
+     * @param subjectId subject id.
+     * @param sourceId source id.
+     * @param monitorCategory category of the monitor. Type of {@link MonitorCategory}
+     */
     public MonitorHeader(String projectId, String subjectId, String sourceId,
-            MONITOR_CATEGORY monitor_category) {
+            MonitorCategory monitorCategory) {
         this.projectId = projectId;
         this.subjectId = subjectId;
         this.sourceId = sourceId;
-        this.monitor_category = monitor_category;
+        this.monitorCategory = monitorCategory;
     }
 
     public String getProjectId() {
@@ -40,6 +50,30 @@ public class MonitorHeader {
 
     public void setProjectId(String projectId) {
         this.projectId = projectId;
+    }
+
+    public String getSubjectId() {
+        return subjectId;
+    }
+
+    public void setSubjectId(String subjectId) {
+        this.subjectId = subjectId;
+    }
+
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public MonitorCategory getMonitorCategory() {
+        return monitorCategory;
+    }
+
+    public void setMonitorCategory(MonitorCategory monitorCategory) {
+        this.monitorCategory = monitorCategory;
     }
 
     @Override
@@ -53,19 +87,19 @@ public class MonitorHeader {
         MonitorHeader that = (MonitorHeader) o;
         return Objects.equals(projectId, that.projectId) && Objects
                 .equals(subjectId, that.subjectId) && Objects.equals(sourceId, that.sourceId)
-                && monitor_category == that.monitor_category;
+                && monitorCategory == that.monitorCategory;
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(projectId, subjectId, sourceId, monitor_category);
+        return Objects.hash(projectId, subjectId, sourceId, monitorCategory);
     }
 
     @Override
     public String toString() {
         return "MonitorHeader{" + "projectId='" + projectId + '\'' + ", subjectId='" + subjectId
-                + '\'' + ", sourceId='" + sourceId + '\'' + ", monitor_category=" + monitor_category
+                + '\'' + ", sourceId='" + sourceId + '\'' + ", monitorCategory=" + monitorCategory
                 + '}';
     }
 }

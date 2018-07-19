@@ -26,11 +26,12 @@ import static org.radarcns.webapp.resource.BasePath.APPLICATION_STATUS;
 import java.io.IOException;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
+
 import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.ServerStatus;
+import org.radarcns.domain.restapi.monitor.ApplicationStatus;
 import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
@@ -52,7 +53,8 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest200Unknown() throws IOException {
-        Application actual = apiClient.getJson(SOURCE_PATH, Application.class, Status.OK);
+        ApplicationStatus actual =
+                apiClient.getJson(SOURCE_PATH, ApplicationStatus.class, Status.OK);
         assertSame(ServerStatus.UNKNOWN, actual.getServerStatus());
     }
 
@@ -63,8 +65,9 @@ public class AppStatusEndPointTest {
 
         map.forEach((k, v) -> mongoRule.getCollection(k).insertOne(v));
 
-        Application expected = Utility.convertDocToApplication(map);
-        Application actual = apiClient.getJson(SOURCE_PATH, Application.class, Status.OK);
+        ApplicationStatus expected = Utility.convertDocToApplication(map);
+        ApplicationStatus actual =
+                apiClient.getJson(SOURCE_PATH, ApplicationStatus.class, Status.OK);
 
         assertEquals(expected.getServerStatus(), actual.getServerStatus());
         assertEquals(expected.getIpAddress(), actual.getIpAddress());

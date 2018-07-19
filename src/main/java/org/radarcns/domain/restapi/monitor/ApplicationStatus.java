@@ -1,9 +1,11 @@
-package org.radarcns.domain.restapi;
+package org.radarcns.domain.restapi.monitor;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
-public class Application {
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.radarcns.domain.restapi.ServerStatus;
+
+public class ApplicationStatus {
 
     /**
      * Hardware identifier of client application.
@@ -39,7 +41,7 @@ public class Application {
     /**
      * Default constructor.
      */
-    public Application() {
+    public ApplicationStatus() {
     }
 
     /**
@@ -52,7 +54,7 @@ public class Application {
      * @param recordsSent Number of records sent since application start.
      * @param recordsUnsent Number of unsent records.
      */
-    public Application(java.lang.String ipAddress, java.lang.Double uptime,
+    public ApplicationStatus(java.lang.String ipAddress, java.lang.Double uptime,
             ServerStatus serverStatus,
             java.lang.Integer recordsCached, java.lang.Integer recordsSent,
             java.lang.Integer recordsUnsent) {
@@ -120,14 +122,14 @@ public class Application {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Application application = (Application) o;
+        ApplicationStatus applicationStatus = (ApplicationStatus) o;
 
-        return Objects.equals(ipAddress, application.ipAddress)
-                && Objects.equals(uptime, application.uptime)
-                && Objects.equals(serverStatus, application.serverStatus)
-                && Objects.equals(recordsCached, application.recordsCached)
-                && Objects.equals(recordsSent, application.recordsSent)
-                && Objects.equals(recordsUnsent, application.recordsUnsent);
+        return Objects.equals(ipAddress, applicationStatus.ipAddress)
+                && Objects.equals(uptime, applicationStatus.uptime)
+                && Objects.equals(serverStatus, applicationStatus.serverStatus)
+                && Objects.equals(recordsCached, applicationStatus.recordsCached)
+                && Objects.equals(recordsSent, applicationStatus.recordsSent)
+                && Objects.equals(recordsUnsent, applicationStatus.recordsUnsent);
     }
 
     @Override
