@@ -4,12 +4,8 @@ import java.time.Instant;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.radarcns.domain.restapi.header.MonitorHeader;
 
-public class QuestionnaireCompletionData {
-
-    @JsonProperty
-    private MonitorHeader header;
+public class QuestionnaireCompletionStatus {
 
     @JsonProperty
     private Instant timeRecorded;
@@ -18,36 +14,26 @@ public class QuestionnaireCompletionData {
     private String questionnaireName;
 
     @JsonProperty
-    private Double completionPercentage;
+    private Double completionPercentage = 0d;
 
     /**
      * Default constructor.
      */
-    public QuestionnaireCompletionData() {
+    public QuestionnaireCompletionStatus() {
         // default constructor
     }
 
     /**
      * Constructor.
-     * @param header contains the monitor meta-data.
      * @param timeRecorded recorded time of the status.
      * @param questionnaireName name of the questionnaire.
      * @param completionPercentage percentage of completion.
      */
-    public QuestionnaireCompletionData(MonitorHeader header, Instant timeRecorded,
+    public QuestionnaireCompletionStatus(Instant timeRecorded,
             String questionnaireName, Double completionPercentage) {
-        this.header = header;
         this.timeRecorded = timeRecorded;
         this.questionnaireName = questionnaireName;
         this.completionPercentage = completionPercentage;
-    }
-
-    public MonitorHeader getHeader() {
-        return header;
-    }
-
-    public void setHeader(MonitorHeader header) {
-        this.header = header;
     }
 
     public Instant getTimeRecorded() {
@@ -82,9 +68,8 @@ public class QuestionnaireCompletionData {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        QuestionnaireCompletionData that = (QuestionnaireCompletionData) o;
-        return Objects.equals(header, that.header) && Objects
-                .equals(timeRecorded, that.timeRecorded) && Objects
+        QuestionnaireCompletionStatus that = (QuestionnaireCompletionStatus) o;
+        return  Objects.equals(timeRecorded, that.timeRecorded) && Objects
                 .equals(questionnaireName, that.questionnaireName) && Objects
                 .equals(completionPercentage, that.completionPercentage);
     }
@@ -92,12 +77,12 @@ public class QuestionnaireCompletionData {
     @Override
     public int hashCode() {
 
-        return Objects.hash(header, timeRecorded, questionnaireName, completionPercentage);
+        return Objects.hash(timeRecorded, questionnaireName, completionPercentage);
     }
 
     @Override
     public String toString() {
-        return "QuestionnaireCompletionData{" + "header=" + header + ", timeRecorded="
+        return "QuestionnaireCompletionStatus{" + ", timeRecorded="
                 + timeRecorded + ", questionnaireName='" + questionnaireName + '\''
                 + ", completionPercentage=" + completionPercentage + '}';
     }

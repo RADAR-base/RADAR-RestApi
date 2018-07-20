@@ -10,7 +10,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.radarcns.domain.restapi.header.MonitorHeader;
-import org.radarcns.domain.restapi.monitor.QuestionnaireCompletionData;
+import org.radarcns.domain.restapi.monitor.MonitorData;
+import org.radarcns.domain.restapi.monitor.QuestionnaireCompletionStatus;
 import org.radarcns.mongo.data.monitor.application.MongoApplicationStatusWrapper;
 import org.radarcns.mongo.util.MongoHelper;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class QuestionnaireCompletionLogWrapper {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(MongoApplicationStatusWrapper.class);
 
-    public static final String QUESTIONNAIRE_COMPLETION_LOG_COLLECTION = "application_uptime";
+    private static final String QUESTIONNAIRE_COMPLETION_LOG_COLLECTION = "application_uptime";
 
 
     /**
@@ -31,7 +32,7 @@ public class QuestionnaireCompletionLogWrapper {
      * @param client  is the mongoDb client instance
      * @return the last seen status update for the given subject and sourceType, otherwise null
      */
-    public QuestionnaireCompletionData valueByProjectSubjectSource(String project, String subject,
+    public MonitorData valueByProjectSubjectSource(String project, String subject,
             String source, MongoClient client) {
 
         MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
@@ -47,13 +48,13 @@ public class QuestionnaireCompletionLogWrapper {
         Document doc = cursor.next();
         cursor.close();
 
-        QuestionnaireCompletionData data = new QuestionnaireCompletionData();
+        QuestionnaireCompletionStatus data = new QuestionnaireCompletionStatus();
         data.setTimeRecorded(Instant.ofEpochSecond(doc.getLong("time")));
         data.setQuestionnaireName(doc.getString("name"));
         data.setCompletionPercentage(doc.getDouble("completionPercentage"));
-        data.setHeader(new MonitorHeader(project, subject, source, QUESTIONNAIRE));
 
-        return data;
-
+        return new MonitorData()
+                .header(new MonitorHeader(project, subject, source, QUESTIONNAIRE))
+                .data(data);
     }
 }
