@@ -10,6 +10,15 @@ public class MonitorData {
 
     private Object data;
 
+    public MonitorData() {
+
+    }
+
+    public MonitorData(MonitorHeader monitorHeader, Object data) {
+        this.header = monitorHeader;
+        this.data = data;
+    }
+
     public MonitorHeader getHeader() {
         return header;
     }

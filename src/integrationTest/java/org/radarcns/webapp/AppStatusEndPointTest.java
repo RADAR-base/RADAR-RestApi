@@ -18,6 +18,8 @@ package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.radarcns.domain.restapi.ServerStatus.UNKNOWN;
 import static org.radarcns.webapp.SampleDataHandler.PROJECT;
 import static org.radarcns.webapp.SampleDataHandler.SOURCE;
 import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
@@ -30,8 +32,8 @@ import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
-import org.radarcns.domain.restapi.ServerStatus;
 import org.radarcns.domain.restapi.monitor.ApplicationStatus;
+import org.radarcns.domain.restapi.monitor.MonitorData;
 import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
@@ -53,9 +55,11 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest200Unknown() throws IOException {
-        ApplicationStatus actual =
-                apiClient.getJson(SOURCE_PATH, ApplicationStatus.class, Status.OK);
-        assertSame(ServerStatus.UNKNOWN, actual.getServerStatus());
+        MonitorData actual =
+                apiClient.getJson(SOURCE_PATH, MonitorData.class, Status.OK);
+        assertTrue(actual.getData() instanceof ApplicationStatus);
+        ApplicationStatus status = (ApplicationStatus) actual.getData();
+        assertSame(status.getServerStatus(), UNKNOWN);
     }
 
     @Test
@@ -66,10 +70,12 @@ public class AppStatusEndPointTest {
         map.forEach((k, v) -> mongoRule.getCollection(k).insertOne(v));
 
         ApplicationStatus expected = Utility.convertDocToApplication(map);
-        ApplicationStatus actual =
-                apiClient.getJson(SOURCE_PATH, ApplicationStatus.class, Status.OK);
+        MonitorData actual =
+                apiClient.getJson(SOURCE_PATH, MonitorData.class, Status.OK);
 
-        assertEquals(expected.getServerStatus(), actual.getServerStatus());
-        assertEquals(expected.getIpAddress(), actual.getIpAddress());
+        assertTrue(actual.getData() instanceof ApplicationStatus);
+        ApplicationStatus actualStatus = (ApplicationStatus) actual.getData();
+        assertEquals(expected.getServerStatus(), actualStatus.getServerStatus());
+        assertEquals(expected.getIpAddress(), actualStatus.getIpAddress());
     }
 }

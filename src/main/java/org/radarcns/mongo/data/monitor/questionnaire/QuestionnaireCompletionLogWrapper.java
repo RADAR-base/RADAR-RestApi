@@ -4,10 +4,11 @@ import static org.radarcns.domain.restapi.header.MonitorHeader.MonitorCategory.Q
 import static org.radarcns.mongo.util.MongoHelper.ASCENDING;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
-import java.time.Instant;
-
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
+
+import java.time.Instant;
+
 import org.bson.Document;
 import org.radarcns.domain.restapi.header.MonitorHeader;
 import org.radarcns.domain.restapi.monitor.MonitorData;

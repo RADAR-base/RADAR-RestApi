@@ -1,8 +1,9 @@
 package org.radarcns.domain.restapi.monitor;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.radarcns.domain.restapi.ServerStatus;
 
 public class ApplicationStatus {

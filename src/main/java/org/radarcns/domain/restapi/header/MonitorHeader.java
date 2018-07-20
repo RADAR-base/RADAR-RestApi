@@ -1,8 +1,9 @@
 package org.radarcns.domain.restapi.header;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MonitorHeader {
 

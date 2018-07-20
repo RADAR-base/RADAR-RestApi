@@ -16,11 +16,16 @@
 
 package org.radarcns.service;
 
+import static org.radarcns.domain.restapi.header.MonitorHeader.MonitorCategory.PASSIVE;
+
 import com.mongodb.MongoClient;
 import java.util.LinkedList;
 import java.util.List;
 import javax.inject.Inject;
+
+import org.radarcns.domain.restapi.header.MonitorHeader;
 import org.radarcns.domain.restapi.monitor.ApplicationStatus;
+import org.radarcns.domain.restapi.monitor.MonitorData;
 import org.radarcns.mongo.data.monitor.application.ApplicationStatusRecordCounter;
 import org.radarcns.mongo.data.monitor.application.ApplicationStatusServerStatus;
 import org.radarcns.mongo.data.monitor.application.ApplicationStatusUpTime;
@@ -55,7 +60,7 @@ public class ApplicationStatusMonitorService {
      * @param client is the MongoDb client
      * @return {@code ApplicationStatus} representing the status of the related Android App
      */
-    public ApplicationStatus getStatus(String project, String subject, String source, MongoClient
+    public MonitorData getStatus(String project, String subject, String source, MongoClient
             client) {
         ApplicationStatus app = null;
 
@@ -64,6 +69,8 @@ public class ApplicationStatusMonitorService {
                     .valueByProjectSubjectSource(project, subject, source, app, client);
         }
 
-        return app;
+        return new MonitorData()
+                .header(new MonitorHeader(project, subject, source, PASSIVE))
+                .data(app);
     }
 }
