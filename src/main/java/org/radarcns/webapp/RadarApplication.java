@@ -1,7 +1,9 @@
 package org.radarcns.webapp;
 
 import com.mongodb.MongoClient;
+
 import javax.inject.Singleton;
+
 import okhttp3.OkHttpClient;
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -9,10 +11,10 @@ import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.listener.HttpClientFactory;
 import org.radarcns.listener.MongoFactory;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.service.ApplicationStatusMonitorService;
 import org.radarcns.service.DataSetService;
 import org.radarcns.service.SourceMonitorService;
 import org.radarcns.service.SourceService;
+import org.radarcns.service.SourceStatusMonitorService;
 import org.radarcns.service.SubjectService;
 import org.radarcns.webapp.filter.AuthenticationFilter;
 import org.radarcns.webapp.filter.AuthorizationFeature;
@@ -76,8 +78,8 @@ public class RadarApplication extends ResourceConfig {
                         .to(DataSetService.class)
                         .in(Singleton.class);
 
-                bind(ApplicationStatusMonitorService.class)
-                        .to(ApplicationStatusMonitorService.class)
+                bind(SourceStatusMonitorService.class)
+                        .to(SourceStatusMonitorService.class)
                         .in(Singleton.class);
             }
         });

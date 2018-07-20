@@ -37,10 +37,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.radarcns.auth.NeedsPermissionOnSubject;
-import org.radarcns.domain.restapi.header.MonitorHeader;
 import org.radarcns.domain.restapi.monitor.MonitorData;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.service.ApplicationStatusMonitorService;
+import org.radarcns.service.SourceStatusMonitorService;
 import org.radarcns.service.SubjectService;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
@@ -62,7 +61,7 @@ public class AppStatusEndPoint {
     private SubjectService subjectService;
 
     @Inject
-    private ApplicationStatusMonitorService applicationStatusMonitorService;
+    private SourceStatusMonitorService sourceStatusMonitorService;
     //--------------------------------------------------------------------------------------------//
     //                                    APPLICATION_STATUS FUNCTIONS                            //
     //--------------------------------------------------------------------------------------------//
@@ -89,12 +88,9 @@ public class AppStatusEndPoint {
         mpClient.checkSubjectInProject(projectName, subjectId);
         MonitorData result = null;
         if (subjectService.checkSourceAssignedToSubject(subjectId, sourceId)) {
-            result = applicationStatusMonitorService.getStatus(projectName,
-                    subjectId, sourceId, mongoClient);
-        }
-        if (result == null) {
-            return new MonitorData(new MonitorHeader(projectName, subjectId, sourceId,
-                    MonitorHeader.MonitorCategory.PASSIVE), null);
+            result = sourceStatusMonitorService.getStatus(projectName, subjectId, sourceId,
+                    mongoClient);
+
         }
         return result;
     }

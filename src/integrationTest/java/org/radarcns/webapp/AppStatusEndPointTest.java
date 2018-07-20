@@ -17,11 +17,10 @@
 package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.domain.restapi.ServerStatus.UNKNOWN;
+import static org.radarcns.domain.restapi.header.MonitorHeader.MonitorCategory.PASSIVE;
 import static org.radarcns.webapp.SampleDataHandler.PROJECT;
-import static org.radarcns.webapp.SampleDataHandler.SOURCE;
-import static org.radarcns.webapp.SampleDataHandler.SUBJECT;
 import static org.radarcns.webapp.resource.BasePath.APPLICATION_STATUS;
 
 import java.io.IOException;
@@ -31,6 +30,7 @@ import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
+import org.radarcns.domain.restapi.header.MonitorHeader;
 import org.radarcns.domain.restapi.monitor.ApplicationStatus;
 import org.radarcns.domain.restapi.monitor.MonitorData;
 import org.radarcns.integration.MongoRule;
@@ -42,8 +42,6 @@ import org.radarcns.integration.util.Utility;
 
 public class AppStatusEndPointTest {
 
-    private static final String SOURCE_PATH =
-            APPLICATION_STATUS + '/' + PROJECT + '/' + SUBJECT + '/' + SOURCE;
 
     @Rule
     public final ApiClient apiClient = new ApiClient(
@@ -54,27 +52,45 @@ public class AppStatusEndPointTest {
 
     @Test
     public void getStatusTest200Unknown() throws IOException {
-        MonitorData actual =
-                apiClient.getJson(SOURCE_PATH, MonitorData.class, Status.OK);
-        Map<String, String> status = (Map<String, String>) actual.getData();
+        String sourceId = "c4064d12-b963-47ae-b560-067131e321ea";
+        String subjectId = "sub-2";
 
-        assertEquals(status.get("serverStatus"), UNKNOWN.toString());
+        MonitorHeader monitorHeader = new MonitorHeader(PROJECT, subjectId, sourceId, null);
+        assertRequestsMatch(subjectId, sourceId, monitorHeader);
     }
 
     @Test
     public void getStatusTest200() throws IOException {
+        String sourceId = "c4064d12-b963-47ae-b560-067131e321ea";
+        String subjectId = "sub-2";
+
         Map<String, Document> map = RandomInput.getRandomApplicationStatus(
-                PROJECT, SUBJECT, SOURCE);
+                PROJECT, subjectId, sourceId);
 
         map.forEach((k, v) -> mongoRule.getCollection(k).insertOne(v));
 
         ApplicationStatus expected = Utility.convertDocToApplication(map);
-        MonitorData actual =
-                apiClient.getJson(SOURCE_PATH, MonitorData.class, Status.OK);
+        MonitorHeader monitorHeader = new MonitorHeader(PROJECT, subjectId, sourceId, PASSIVE);
+        MonitorData actual = assertRequestsMatch(subjectId, sourceId, monitorHeader);
 
         assertTrue(actual.getData() instanceof Map);
         Map<String, String> status = (Map<String, String>) actual.getData();
 
         assertEquals(expected.getServerStatus().toString(), status.get("serverStatus"));
+    }
+
+    private MonitorData assertRequestsMatch(String subjectId, String sourceId, MonitorHeader
+            expectedHeader)
+            throws IOException {
+        String relativeUrl =
+                APPLICATION_STATUS + '/' + PROJECT + '/' + subjectId + '/' + sourceId;
+
+        MonitorData actual = apiClient.getJson(relativeUrl, MonitorData.class, Status.OK);
+        assertNotNull(actual);
+        MonitorHeader actualHeader = actual.getHeader();
+        assertEquals(expectedHeader.getProjectId(), actualHeader.getProjectId());
+        assertEquals(expectedHeader.getSubjectId(), actualHeader.getSubjectId());
+        assertEquals(expectedHeader.getSourceId(), actualHeader.getSourceId());
+        return actual;
     }
 }
