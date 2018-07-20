@@ -71,6 +71,6 @@ public class ApplicationStatusMonitorService {
 
         return new MonitorData()
                 .header(new MonitorHeader(project, subject, source, PASSIVE))
-                .data(app);
+                .data(app != null ? app : new ApplicationStatus());
     }
 }

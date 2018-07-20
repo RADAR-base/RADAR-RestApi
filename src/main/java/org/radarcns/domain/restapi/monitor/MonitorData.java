@@ -1,13 +1,17 @@
 package org.radarcns.domain.restapi.monitor;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 import org.radarcns.domain.restapi.header.MonitorHeader;
 
 public class MonitorData {
 
+    @JsonProperty
     private MonitorHeader header;
 
+    @JsonProperty
     private Object data;
 
     public MonitorData() {

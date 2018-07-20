@@ -17,7 +17,6 @@
 package org.radarcns.webapp;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.domain.restapi.ServerStatus.UNKNOWN;
 import static org.radarcns.webapp.SampleDataHandler.PROJECT;
@@ -57,9 +56,9 @@ public class AppStatusEndPointTest {
     public void getStatusTest200Unknown() throws IOException {
         MonitorData actual =
                 apiClient.getJson(SOURCE_PATH, MonitorData.class, Status.OK);
-        assertTrue(actual.getData() instanceof ApplicationStatus);
-        ApplicationStatus status = (ApplicationStatus) actual.getData();
-        assertSame(status.getServerStatus(), UNKNOWN);
+        Map<String, String> status = (Map<String, String>) actual.getData();
+
+        assertEquals(status.get("serverStatus"), UNKNOWN.toString());
     }
 
     @Test
@@ -73,9 +72,9 @@ public class AppStatusEndPointTest {
         MonitorData actual =
                 apiClient.getJson(SOURCE_PATH, MonitorData.class, Status.OK);
 
-        assertTrue(actual.getData() instanceof ApplicationStatus);
-        ApplicationStatus actualStatus = (ApplicationStatus) actual.getData();
-        assertEquals(expected.getServerStatus(), actualStatus.getServerStatus());
-        assertEquals(expected.getIpAddress(), actualStatus.getIpAddress());
+        assertTrue(actual.getData() instanceof Map);
+        Map<String, String> status = (Map<String, String>) actual.getData();
+
+        assertEquals(expected.getServerStatus().toString(), status.get("serverStatus"));
     }
 }
