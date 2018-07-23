@@ -2,14 +2,13 @@ package org.radarcns.domain.restapi.monitor;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.Instant;
 import java.util.Objects;
 
 
 public class QuestionnaireCompletionStatus {
 
     @JsonProperty
-    private Instant timeRecorded;
+    private Double timeRecorded;
 
     @JsonProperty
     private String questionnaireName;
@@ -30,18 +29,18 @@ public class QuestionnaireCompletionStatus {
      * @param questionnaireName name of the questionnaire.
      * @param completionPercentage percentage of completion.
      */
-    public QuestionnaireCompletionStatus(Instant timeRecorded,
+    public QuestionnaireCompletionStatus(Double timeRecorded,
             String questionnaireName, Double completionPercentage) {
         this.timeRecorded = timeRecorded;
         this.questionnaireName = questionnaireName;
         this.completionPercentage = completionPercentage;
     }
 
-    public Instant getTimeRecorded() {
+    public Double getTimeRecorded() {
         return timeRecorded;
     }
 
-    public void setTimeRecorded(Instant timeRecorded) {
+    public void setTimeRecorded(Double timeRecorded) {
         this.timeRecorded = timeRecorded;
     }
 

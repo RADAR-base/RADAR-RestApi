@@ -6,8 +6,6 @@ import static org.radarcns.mongo.util.MongoHelper.VALUE;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 
-import java.time.Instant;
-
 import org.bson.Document;
 import org.radarcns.domain.restapi.monitor.QuestionnaireCompletionStatus;
 import org.radarcns.mongo.data.monitor.application.MongoApplicationStatusWrapper;
@@ -19,7 +17,7 @@ public class QuestionnaireCompletionLogWrapper {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(MongoApplicationStatusWrapper.class);
 
-    private static final String QUESTIONNAIRE_COMPLETION_LOG_COLLECTION =
+    public static final String QUESTIONNAIRE_COMPLETION_LOG_COLLECTION =
             "questionnaire-completion-log";
 
 
@@ -46,11 +44,12 @@ public class QuestionnaireCompletionLogWrapper {
 
         Document doc = cursor.next();
         cursor.close();
+        Document value = (Document) doc.get(VALUE);
 
         QuestionnaireCompletionStatus data = new QuestionnaireCompletionStatus();
-        data.setTimeRecorded(Instant.ofEpochSecond(doc.getLong("time")));
-        data.setQuestionnaireName(doc.getString("name"));
-        data.setCompletionPercentage(doc.getDouble("completionPercentage"));
+        data.setTimeRecorded(value.getDouble("time"));
+        data.setQuestionnaireName(value.getString("name"));
+        data.setCompletionPercentage(value.getDouble("completionPercentage"));
 
         return data;
     }

@@ -90,7 +90,6 @@ public class AppStatusEndPoint {
         if (subjectService.checkSourceAssignedToSubject(subjectId, sourceId)) {
             result = sourceStatusMonitorService.getStatus(projectName, subjectId, sourceId,
                     mongoClient);
-
         }
         return result;
     }

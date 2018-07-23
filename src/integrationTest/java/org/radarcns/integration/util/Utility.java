@@ -32,18 +32,34 @@ import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.domain.restapi.monitor.ApplicationStatus;
+import org.radarcns.domain.restapi.monitor.QuestionnaireCompletionStatus;
 import org.radarcns.util.RadarConverter;
 
 public class Utility {
     /**
-     * Converts Bson Document into an ApplicationConfig.
+     * Converts Bson Document into an QuestionnaireCompletionStatus.
      *
-     * @param documents map containing variables to create the ApplicationConfig class
+     * @param document Document data to create the QuestionnaireCompletionStatus class
      * @return an ApplicationConfig class
      * @see ApplicationStatus
      */
     //TODO take field names from RADAR Mongo Connector
-    public static ApplicationStatus convertDocToApplication(Map<String, Document> documents) {
+    public static QuestionnaireCompletionStatus convertDocToQuestionnaireCompletionStatus(Document
+            document) {
+        return new QuestionnaireCompletionStatus(
+                ((Document)document.get(VALUE)).getDouble("time"),
+                ((Document)document.get(VALUE)).getString("name"),
+                ((Document)document.get(VALUE)).getDouble("completionPercentage"));
+    }
+
+    /**
+     * Converts Bson Document into an ApplicationStatus.
+     *
+     * @param documents map containing variables to create the ApplicationStatus class
+     * @return an ApplicationStatus class
+     * @see ApplicationStatus
+     */
+    public static ApplicationStatus convertDocToApplicationStatus(Map<String, Document> documents) {
         return new ApplicationStatus(
                 ((Document) documents.get(STATUS_COLLECTION).get(VALUE)).getString("clientIP"),
                 ((Document) documents.get(UPTIME_COLLECTION).get(VALUE)).getDouble("uptime"),

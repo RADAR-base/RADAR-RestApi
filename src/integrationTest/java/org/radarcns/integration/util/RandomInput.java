@@ -140,6 +140,28 @@ public class RandomInput {
     }
 
     /**
+     * Generates and returns a randomly generated
+     * {@link org.radarcns.domain.restapi.monitor.QuestionnaireCompletionStatus} mock data
+     * sent by RADAR-CNS aRMT.
+     **/
+    public static Document getRandomQuestionnaireCompletionLog(String project,
+            String user, String source) {
+
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+
+        double timestamp = random.nextDouble();
+        double completionPercentage = random.nextDouble(0d,100d);
+        String name = "PHQ8";
+        Document completionDoc = new Document()
+                .append("time", timestamp)
+                .append("name", name)
+                .append("completionPercentage", completionPercentage);
+
+        return buildDocumentWithObservationKey(project, user, source, completionDoc);
+
+    }
+
+    /**
      * Generates and returns a randomly generated {@code ApplicationStatus} mocking data sent by
      * RADAR-CNS pRMT.
      **/
@@ -184,9 +206,12 @@ public class RandomInput {
                 .append("recordsUnsent", recordsUnsent);
 
         Map<String, Document> documents = new HashMap<>();
-        documents.put(STATUS_COLLECTION, buildAppStatusDocument(project, user, source, statusDoc));
-        documents.put(RECORD_COLLECTION, buildAppStatusDocument(project, user, source, recordsDoc));
-        documents.put(UPTIME_COLLECTION, buildAppStatusDocument(project, user, source, uptimeDoc));
+        documents.put(STATUS_COLLECTION,
+                buildDocumentWithObservationKey(project, user, source, statusDoc));
+        documents.put(RECORD_COLLECTION,
+                buildDocumentWithObservationKey(project, user, source, recordsDoc));
+        documents.put(UPTIME_COLLECTION,
+                buildDocumentWithObservationKey(project, user, source, uptimeDoc));
         return documents;
     }
 
@@ -197,7 +222,7 @@ public class RandomInput {
                 .append(SOURCE_ID, sourceId);
     }
 
-    private static Document buildAppStatusDocument(String projectName, String subjectId,
+    private static Document buildDocumentWithObservationKey(String projectName, String subjectId,
             String sourceId,
             Document value) {
         return new Document().append(ID, "{"
