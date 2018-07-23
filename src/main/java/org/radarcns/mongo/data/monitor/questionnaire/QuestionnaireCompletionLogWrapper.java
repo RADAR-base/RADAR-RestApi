@@ -22,12 +22,13 @@ public class QuestionnaireCompletionLogWrapper {
 
 
     /**
-     * Returns an {@code ApplicationStatus} initialised with the extracted value.
+     * Returns an {@code QuestionnaireCompletionStatus} initialised with the extracted value.
      *
+     * @param project is the projectName
      * @param subject is the subjectID
      * @param source  is the sourceID
      * @param client  is the mongoDb client instance
-     * @return the last seen status update for the given subject and sourceType, otherwise null
+     * @return the last recorded value of questionnaire-completion-log, otherwise null
      */
     public QuestionnaireCompletionStatus valueByProjectSubjectSource(String project, String subject,
             String source, MongoClient client) {
