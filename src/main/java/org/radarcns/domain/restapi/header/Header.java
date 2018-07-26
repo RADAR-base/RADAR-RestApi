@@ -184,18 +184,18 @@ public class Header {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Header effectiveTimeFrame = (Header) o;
+        Header that = (Header) o;
 
-        return Objects.equals(subjectId, effectiveTimeFrame.subjectId)
-                && Objects.equals(projectId, effectiveTimeFrame.projectId)
-                && Objects.equals(sourceId, effectiveTimeFrame.sourceId)
-                && Objects.equals(sourceType, effectiveTimeFrame.sourceType)
-                && Objects.equals(sourceDataType, effectiveTimeFrame.sourceDataType)
-                && Objects.equals(descriptiveStatistic, effectiveTimeFrame.descriptiveStatistic)
-                && Objects.equals(unit, effectiveTimeFrame.unit)
-                && Objects.equals(timeWindow, effectiveTimeFrame.timeWindow)
-                && Objects.equals(timeFrame, effectiveTimeFrame.timeFrame)
-                && Objects.equals(effectiveTimeFrame, effectiveTimeFrame.effectiveTimeFrame);
+        return Objects.equals(subjectId, that.subjectId)
+                && Objects.equals(projectId, that.projectId)
+                && Objects.equals(sourceId, that.sourceId)
+                && Objects.equals(sourceType, that.sourceType)
+                && Objects.equals(sourceDataType, that.sourceDataType)
+                && Objects.equals(descriptiveStatistic, that.descriptiveStatistic)
+                && Objects.equals(unit, that.unit)
+                && Objects.equals(timeWindow, that.timeWindow)
+                && Objects.equals(timeFrame, that.timeFrame)
+                && Objects.equals(effectiveTimeFrame, that.effectiveTimeFrame);
     }
 
     @Override
