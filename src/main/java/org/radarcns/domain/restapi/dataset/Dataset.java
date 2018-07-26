@@ -3,12 +3,13 @@ package org.radarcns.domain.restapi.dataset;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import org.radarcns.domain.restapi.header.Header;
+
+import org.radarcns.domain.restapi.header.DataSetHeader;
 
 public class Dataset {
 
     @JsonProperty
-    public Header header;
+    public DataSetHeader header;
 
     @JsonProperty
     public List<DataItem> dataset;
@@ -21,17 +22,17 @@ public class Dataset {
      */
     @JsonCreator
     public Dataset(
-            @JsonProperty("header") Header header,
+            @JsonProperty("header") DataSetHeader header,
             @JsonProperty("dataset") List<DataItem> dataset) {
         this.header = header;
         this.dataset = dataset;
     }
 
-    public Header getHeader() {
+    public DataSetHeader getHeader() {
         return header;
     }
 
-    public void setHeader(Header header) {
+    public void setHeader(DataSetHeader header) {
         this.header = header;
     }
 

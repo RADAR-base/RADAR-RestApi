@@ -4,30 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 
-public class MonitorHeader {
+public class MonitorHeader extends Header{
 
     public enum MonitorCategory {
         PASSIVE, QUESTIONNAIRE
     }
-
-    @JsonProperty
-    private String projectId;
-
-    @JsonProperty
-    private String subjectId;
-
-    @JsonProperty
-    private String sourceId;
-
     @JsonProperty
     private MonitorCategory monitorCategory;
-
-    /**
-     * Default constructor.
-     */
-    public MonitorHeader() {
-        // default constructor.
-    }
 
     /**
      * Contains meta-data of the monitored source.

@@ -29,7 +29,7 @@ import org.bson.Document;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
-import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.domain.restapi.header.DataSetHeader;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.domain.restapi.monitor.ApplicationStatus;
 import org.radarcns.domain.restapi.monitor.QuestionnaireCompletionStatus;
@@ -80,13 +80,14 @@ public class Utility {
      * @return {@link Dataset} cloned from {@code input}
      */
     public static Dataset cloneDataset(Dataset input) {
-        Header inputHeader = input.getHeader();
+        DataSetHeader inputHeader = input.getHeader();
         TimeFrame cloneEffectiveTimeFrame =
                 new TimeFrame(inputHeader.getEffectiveTimeFrame().getStartDateTime(),
                         inputHeader.getEffectiveTimeFrame().getEndDateTime());
         TimeFrame cloneTimeFrame = new TimeFrame(inputHeader.getTimeFrame().getStartDateTime(),
                 inputHeader.getTimeFrame().getEndDateTime());
-        Header cloneHeader = new Header(inputHeader.getProjectId(), inputHeader.getSubjectId(),
+        DataSetHeader cloneHeader = new DataSetHeader(inputHeader.getProjectId(),
+                inputHeader.getSubjectId(),
                 inputHeader.getSourceId(), inputHeader.getSourceType(),
                 inputHeader.getSourceDataType(), inputHeader.getDescriptiveStatistic(),
                 inputHeader.getUnit(), inputHeader.getTimeWindow(), cloneTimeFrame,

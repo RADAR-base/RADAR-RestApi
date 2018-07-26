@@ -27,6 +27,7 @@ import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.format.Quartiles;
+import org.radarcns.domain.restapi.header.DataSetHeader;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
@@ -57,8 +58,8 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
             String sourceId, String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeWindow) {
 
-        Header header = getHeader(expectedValue, projectName, subjectId, sourceId, sourceType,
-                sensorType, statistic, timeWindow);
+        DataSetHeader header = getHeader(expectedValue, projectName, subjectId, sourceId,
+                sourceType, sensorType, statistic, timeWindow);
 
         return new Dataset(header, getItem(expectedValue, header));
     }
@@ -75,11 +76,11 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @param timeWindow time interval between two consecutive samples
      * @return {@link Header} for a {@link Dataset}
      */
-    public Header getHeader(ExpectedValue expectedValue, String projectName, String subjectId,
-            String sourceId, String sourceType, String sensorType, DescriptiveStatistic statistic,
-            TimeWindow timeWindow) {
-        return new Header(projectName, subjectId, sourceId, sourceType, sensorType, statistic,
-                null, timeWindow, null,
+    public DataSetHeader getHeader(ExpectedValue expectedValue, String projectName,
+            String subjectId, String sourceId, String sourceType, String sensorType,
+            DescriptiveStatistic statistic, TimeWindow timeWindow) {
+        return new DataSetHeader(projectName, subjectId, sourceId, sourceType, sensorType,
+                statistic, null, timeWindow, null,
                 getEffectiveTimeFrame(expectedValue, timeWindow));
     }
 
@@ -108,7 +109,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @return {@code List<Item>} for a {@link Dataset}
      * @see DataItem
      **/
-    public List<DataItem> getItem(ExpectedValue<?> expectedValue, Header header) {
+    public List<DataItem> getItem(ExpectedValue<?> expectedValue, DataSetHeader header) {
 
         if (expectedValue.getSeries().isEmpty()) {
             return Collections.emptyList();

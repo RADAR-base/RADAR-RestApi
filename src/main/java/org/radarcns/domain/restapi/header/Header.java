@@ -26,18 +26,6 @@ public class Header {
      */
     @JsonProperty
     public String sourceType;
-
-    /**
-     * Report the source data name or specific type of assessment.
-     */
-    @JsonProperty
-    public String sourceDataType;
-
-    /**
-     * Statical value expressed by samples.
-     */
-    @JsonProperty
-    public DescriptiveStatistic descriptiveStatistic;
     /**
      * Unit used by the sourceType.
      */
@@ -69,24 +57,19 @@ public class Header {
      * @param subjectId Subject identifier.
      * @param sourceId Source identifier.
      * @param sourceType Sourcetype information, it can be a device or assessment name.
-     * @param sourceDataType Source data information, it can be a device or assessment name.
-     * @param descriptiveStatistic Statical value expressed by samples.
      * @param unit Unit used by the sourceType.
      * @param timeWindow Time interval between two consecutive samples.
      * @param timeFrame Timestamps of request.
      * @param effectiveTimeFrame Timestamps of the first and the last samples in the data-set.
      */
     @SuppressWarnings("PMD.ExcessiveParameterList")
-    public Header(String projectId, String subjectId, String sourceId, String sourceType, String
-            sourceDataType,
-            DescriptiveStatistic descriptiveStatistic, String unit, TimeWindow timeWindow,
-            TimeFrame timeFrame, TimeFrame effectiveTimeFrame) {
+    public Header(String projectId, String subjectId, String sourceId, String sourceType,
+            String unit, TimeWindow timeWindow, TimeFrame timeFrame,
+            TimeFrame effectiveTimeFrame) {
         this.projectId = projectId;
         this.subjectId = subjectId;
         this.sourceId = sourceId;
         this.sourceType = sourceType;
-        this.sourceDataType = sourceDataType;
-        this.descriptiveStatistic = descriptiveStatistic;
         this.unit = unit;
         this.timeWindow = timeWindow;
         this.timeFrame = timeFrame;
@@ -123,23 +106,6 @@ public class Header {
 
     public void setSourceType(String sourceType) {
         this.sourceType = sourceType;
-    }
-
-    public String getSourceDataType() {
-        return sourceDataType;
-    }
-
-    public void setSourceDataType(String sourceDataType) {
-        this.sourceDataType = sourceDataType;
-    }
-
-    public DescriptiveStatistic getDescriptiveStatistic() {
-        return descriptiveStatistic;
-    }
-
-    public void setDescriptiveStatistic(
-            DescriptiveStatistic descriptiveStatistic) {
-        this.descriptiveStatistic = descriptiveStatistic;
     }
 
     public String getUnit() {
@@ -190,8 +156,6 @@ public class Header {
                 && Objects.equals(projectId, that.projectId)
                 && Objects.equals(sourceId, that.sourceId)
                 && Objects.equals(sourceType, that.sourceType)
-                && Objects.equals(sourceDataType, that.sourceDataType)
-                && Objects.equals(descriptiveStatistic, that.descriptiveStatistic)
                 && Objects.equals(unit, that.unit)
                 && Objects.equals(timeWindow, that.timeWindow)
                 && Objects.equals(timeFrame, that.timeFrame)
@@ -200,7 +164,7 @@ public class Header {
 
     @Override
     public int hashCode() {
-        return Objects.hash(subjectId, projectId, sourceId, sourceType, sourceDataType,
-                descriptiveStatistic, unit, timeWindow, timeFrame, effectiveTimeFrame);
+        return Objects.hash(subjectId, projectId, sourceId, sourceType, unit, timeWindow, timeFrame,
+                effectiveTimeFrame);
     }
 }
