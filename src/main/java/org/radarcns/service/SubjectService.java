@@ -1,7 +1,10 @@
 package org.radarcns.service;
 
+import static org.radarcns.util.ThrowingFunction.tryOrRethrow;
+
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -11,6 +14,7 @@ import javax.ws.rs.NotFoundException;
 import org.radarcns.domain.managementportal.SubjectDTO;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.Subject;
+import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.webapp.exception.BadGatewayException;
 import org.slf4j.Logger;
@@ -48,8 +52,9 @@ public class SubjectService {
     public boolean checkSourceAssignedToSubject(String subjectId, String sourceId)
             throws IOException {
         SubjectDTO subject = managementPortalClient.getSubject(subjectId);
-        if (subject.getSources().stream().filter(p -> p.getSourceId().toString().equals(sourceId))
-                .collect(Collectors.toList()).isEmpty()) {
+        if (subject.getSources().stream()
+                .map(s -> s.getSourceId().toString())
+                .noneMatch(sourceId::equals)) {
             LOGGER.error("Cannot find source-id " + sourceId + "for subject" + subject.getId());
             throw new BadRequestException(
                     "Source-id " + sourceId + " is not available for subject "
@@ -73,10 +78,11 @@ public class SubjectService {
 
     private Instant getLastSeenForSubject(List<Source> sources) {
         return sources.stream()
-                .map(s -> s.getEffectiveTimeFrame() != null
-                        ? s.getEffectiveTimeFrame().getEndDateTime() : null)
+                .map(Source::getEffectiveTimeFrame)
                 .filter(Objects::nonNull)
-                .reduce((i1, i2) -> i1.isAfter(i2) ? i1 : i2)
+                .map(TimeFrame::getEndDateTime)
+                .filter(Objects::nonNull)
+                .max(Comparator.naturalOrder())
                 .orElse(null);
     }
 
@@ -93,13 +99,8 @@ public class SubjectService {
         // returns NotFound if a project is not available
         this.managementPortalClient.getProject(projectName);
         return this.managementPortalClient.getAllSubjectsFromProject(projectName).stream()
-                .map(s -> {
-                    try {
-                        return buildSubject(s);
-                    } catch (IOException exe) {
-                        throw new BadGatewayException(exe);
-                    }
-                }).collect(Collectors.toList());
+                .map(tryOrRethrow(this::buildSubject, BadGatewayException::new))
+                .collect(Collectors.toList());
     }
 
     public Subject getSubjectBySubjectId(String projectName, String subjectId)

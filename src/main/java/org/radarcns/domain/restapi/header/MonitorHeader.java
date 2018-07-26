@@ -1,7 +1,6 @@
 package org.radarcns.domain.restapi.header;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Objects;
 
 

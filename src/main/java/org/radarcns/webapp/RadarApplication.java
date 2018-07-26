@@ -1,9 +1,7 @@
 package org.radarcns.webapp;
 
 import com.mongodb.MongoClient;
-
 import javax.inject.Singleton;
-
 import okhttp3.OkHttpClient;
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;

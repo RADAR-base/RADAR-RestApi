@@ -5,7 +5,6 @@ import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
-
 import org.bson.Document;
 import org.radarcns.domain.restapi.monitor.QuestionnaireCompletionStatus;
 import org.radarcns.mongo.data.monitor.application.MongoApplicationStatusWrapper;

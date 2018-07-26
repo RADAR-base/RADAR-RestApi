@@ -16,6 +16,8 @@
 
 package org.radarcns.service;
 
+import static org.radarcns.util.ThrowingFunction.tryOrRethrow;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
@@ -228,10 +230,10 @@ public class DataSetService {
                         timeScale.getTimeWindow()))
                 .collect(Collectors.toList());
 
-        Integer maximumValue = dataItems.stream()
-                .map(p -> ((Number) p.getValue()).intValue())
-                .reduce(Integer::max)
-                .orElse(null);
+        Integer maximumValue = dataItems.isEmpty() ? null : dataItems.stream()
+                .mapToInt(p -> ((Number)p.getValue()).intValue())
+                .max()
+                .orElseThrow(() -> new IllegalStateException("Data items are empty"));
 
         return new AggregatedDataPoints(projectName, subjectId,
                 maximumValue, timeScale, sources, dataItems);
@@ -241,15 +243,9 @@ public class DataSetService {
             List<AggregateDataSource> aggregateDataSources, TimeFrame timeFrame,
             TimeWindow timeWindow) {
         int count = aggregateDataSources.stream()
-                .map(aggregate -> (int) aggregate.getSourceData().stream()
-                        .map(sourceData -> {
-                            try {
-                                return this.sourceCatalog
-                                        .getSourceDataWrapper(sourceData.getName());
-                            } catch (IOException exe) {
-                                throw new BadGatewayException(exe);
-                            }
-                        })
+                .mapToInt(aggregate -> (int) aggregate.getSourceData().stream()
+                        .map(tryOrRethrow(s -> this.sourceCatalog.getSourceDataWrapper(s.getName()),
+                                BadGatewayException::new))
                         .filter(wrapper -> {
                             MongoCollection<Document> collection = MongoHelper.getCollection(
                                     mongoClient, wrapper.getCollectionName(timeWindow));
@@ -258,7 +254,7 @@ public class DataSetService {
                                     aggregate.getSourceId(), timeFrame);
                         })
                         .count())
-                .reduce(0, Integer::sum);
+                .sum();
 
         return new DataItem(count, timeFrame.getStartDateTime());
     }

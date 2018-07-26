@@ -9,8 +9,10 @@ import static org.radarcns.domain.restapi.TimeWindow.TEN_SECOND;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
@@ -112,7 +114,7 @@ public class TimeScaleParser {
         double logSeconds = Math.log(timeFrame.getDuration().getSeconds() / defaultNumberOfWindows);
         return TIME_WINDOW_LOG.stream()
                 .map(e -> RadarConverter.pair(e.getKey(), Math.abs(logSeconds - e.getValue())))
-                .reduce((e1, e2) -> e1.getValue() < e2.getValue() ? e1 : e2)
+                .min(Comparator.comparing(Entry::getValue))
                 .orElseThrow(() -> new AssertionError("No close time window found"))
                 .getKey();
     }

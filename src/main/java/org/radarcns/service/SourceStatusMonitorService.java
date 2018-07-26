@@ -20,12 +20,10 @@ import static org.radarcns.domain.restapi.header.MonitorHeader.MonitorCategory.P
 import static org.radarcns.domain.restapi.header.MonitorHeader.MonitorCategory.QUESTIONNAIRE;
 
 import com.mongodb.MongoClient;
-
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.inject.Inject;
-
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.restapi.header.MonitorHeader;
 import org.radarcns.domain.restapi.monitor.ApplicationStatus;
