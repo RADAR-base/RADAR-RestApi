@@ -16,6 +16,8 @@
 
 package org.radarcns.service;
 
+import static org.radarcns.util.ThrowingFunction.tryOrRethrow;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
@@ -34,6 +36,7 @@ import org.radarcns.domain.restapi.dataset.AggregatedDataPoints;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.SourceData;
+import org.radarcns.domain.restapi.header.DataSetHeader;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
@@ -88,8 +91,8 @@ public class DataSetService {
             TimeFrame timeFrame) {
 
         return new Dataset(
-                new Header(projectName, subjectId, sourceId, "UNKNOWN", sourceDataName, stat,
-                        null, interval, timeFrame, null),
+                new DataSetHeader(projectName, subjectId, sourceId, "UNKNOWN",
+                        sourceDataName, stat, null, interval, timeFrame, null),
                 Collections.emptyList());
     }
 
@@ -129,7 +132,7 @@ public class DataSetService {
                 new TimeFrame(now.minus(TimeScale.getDuration(timeWindow)), now),
                 timeWindow);
 
-        Header header = getHeader(projectName, subjectId, sourceId,
+        DataSetHeader header = getHeader(projectName, subjectId, sourceId,
                 sourceDataName, stat, timeScale);
 
         SourceDataMongoWrapper sourceData = this.sourceCatalog
@@ -160,7 +163,7 @@ public class DataSetService {
 
         SourceDataMongoWrapper sourceData = this.sourceCatalog.getSourceDataWrapper(sourceDataName);
 
-        Header header = getHeader(projectName, subjectId, sourceId,
+        DataSetHeader header = getHeader(projectName, subjectId, sourceId,
                 sourceData.getSourceData(), stat, timeScale,
                 source.getSourceTypeIdentifier().toString());
 
@@ -170,7 +173,7 @@ public class DataSetService {
                 timeScale.getTimeFrame());
     }
 
-    private Header getHeader(String projectName, String subjectId, String sourceId,
+    private DataSetHeader getHeader(String projectName, String subjectId, String sourceId,
             String sourceDataName, DescriptiveStatistic stat, TimeScale timeScale)
             throws IOException {
         SourceDTO source = managementPortalClient.getSource(sourceId);
@@ -190,11 +193,12 @@ public class DataSetService {
      * @return {@link Header} related to the given inputs
      * @see Dataset
      */
-    private Header getHeader(String project, String subject, String source,
+    private DataSetHeader getHeader(String project, String subject, String source,
             SourceDataDTO sourceData, DescriptiveStatistic stat, TimeScale timeScale,
             String sourceType) {
-        return new Header(project, subject, source, sourceType, sourceData.getSourceDataType(),
-                stat, sourceData.getUnit(), timeScale.getTimeWindow(), timeScale.getTimeFrame(),
+        return new DataSetHeader(project, subject, source, sourceType,
+                sourceData.getSourceDataType(), stat, sourceData.getUnit(),
+                timeScale.getTimeWindow(), timeScale.getTimeFrame(),
                 null);
     }
 
@@ -228,10 +232,10 @@ public class DataSetService {
                         timeScale.getTimeWindow()))
                 .collect(Collectors.toList());
 
-        Integer maximumValue = dataItems.stream()
-                .map(p -> ((Number) p.getValue()).intValue())
-                .reduce(Integer::max)
-                .orElse(null);
+        Integer maximumValue = dataItems.isEmpty() ? null : dataItems.stream()
+                .mapToInt(p -> ((Number)p.getValue()).intValue())
+                .max()
+                .orElseThrow(() -> new IllegalStateException("Data items are empty"));
 
         return new AggregatedDataPoints(projectName, subjectId,
                 maximumValue, timeScale, sources, dataItems);
@@ -241,15 +245,9 @@ public class DataSetService {
             List<AggregateDataSource> aggregateDataSources, TimeFrame timeFrame,
             TimeWindow timeWindow) {
         int count = aggregateDataSources.stream()
-                .map(aggregate -> (int) aggregate.getSourceData().stream()
-                        .map(sourceData -> {
-                            try {
-                                return this.sourceCatalog
-                                        .getSourceDataWrapper(sourceData.getName());
-                            } catch (IOException exe) {
-                                throw new BadGatewayException(exe);
-                            }
-                        })
+                .mapToInt(aggregate -> (int) aggregate.getSourceData().stream()
+                        .map(tryOrRethrow(s -> this.sourceCatalog.getSourceDataWrapper(s.getName()),
+                                BadGatewayException::new))
                         .filter(wrapper -> {
                             MongoCollection<Document> collection = MongoHelper.getCollection(
                                     mongoClient, wrapper.getCollectionName(timeWindow));
@@ -258,7 +256,7 @@ public class DataSetService {
                                     aggregate.getSourceId(), timeFrame);
                         })
                         .count())
-                .reduce(0, Integer::sum);
+                .sum();
 
         return new DataItem(count, timeFrame.getStartDateTime());
     }

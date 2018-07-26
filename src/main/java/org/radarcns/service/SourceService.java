@@ -57,8 +57,9 @@ public class SourceService {
      */
     private List<Source> buildSourcesFromMinimal(String projectId,
             String subjectId, Collection<MinimalSourceDetailsDTO> sources) {
-        return sources.stream().map(p -> buildSource(projectId, subjectId, p)).collect(Collectors
-                .toList());
+        return sources.stream()
+                .map(p -> buildSource(projectId, subjectId, p))
+                .collect(Collectors.toList());
     }
 
     /**

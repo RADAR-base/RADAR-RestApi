@@ -325,7 +325,8 @@ public class ManagementPortalClient {
             }
             List<SourceDataDTO> allSourceData = SOURCE_DATA_LIST_READER.readValue(responseBody);
             logger.info("Retrieved {} SourceData from MP", allSourceData.size());
-            return allSourceData.stream().map(DataFormat::getMongoSensor)
+            return allSourceData.stream()
+                    .map(DataFormat::getMongoSensor)
                     .collect(Collectors.toList());
         }
     }
