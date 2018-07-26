@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import org.radarcns.domain.managementportal.SubjectDTO;
 import org.radarcns.domain.restapi.Source;
@@ -46,21 +45,19 @@ public class SubjectService {
      *
      * @param subjectId of subject
      * @param sourceId of source
-     * @return {@code true} if available.
      * @throws IOException when unable to process the request.
      */
-    public boolean checkSourceAssignedToSubject(String subjectId, String sourceId)
+    public void checkSourceAssignedToSubject(String subjectId, String sourceId)
             throws IOException {
         SubjectDTO subject = managementPortalClient.getSubject(subjectId);
         if (subject.getSources().stream()
                 .map(s -> s.getSourceId().toString())
                 .noneMatch(sourceId::equals)) {
             LOGGER.error("Cannot find source-id " + sourceId + "for subject" + subject.getId());
-            throw new BadRequestException(
-                    "Source-id " + sourceId + " is not available for subject "
+            throw new NotFoundException(
+                    "Source-id " + sourceId + " is not found for subject "
                             + subject.getId());
         }
-        return true;
     }
 
     private Subject buildSubject(SubjectDTO subject)

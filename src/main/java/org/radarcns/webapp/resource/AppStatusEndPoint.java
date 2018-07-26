@@ -77,18 +77,15 @@ public class AppStatusEndPoint {
             "Return a application object containing last received status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Subject not found.")
+    @ApiResponse(responseCode = "404", description = "project, subject or source not found.")
     @NeedsPermissionOnSubject(entity = SOURCE, operation = READ)
     public MonitorData getLastReceivedAppStatusJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
             @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
         mpClient.checkSubjectInProject(projectName, subjectId);
-        MonitorData result = null;
-        if (subjectService.checkSourceAssignedToSubject(subjectId, sourceId)) {
-            result = sourceStatusMonitorService.getStatus(projectName, subjectId, sourceId,
-                    mongoClient);
-        }
-        return result;
+        subjectService.checkSourceAssignedToSubject(subjectId, sourceId);
+
+        return sourceStatusMonitorService.getStatus(projectName, subjectId, sourceId, mongoClient);
     }
 }
