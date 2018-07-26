@@ -258,10 +258,10 @@ public class EndToEndTest {
 
             Dataset dataset = Utility.cloneDataset(expectedCount.get(config));
 
-            DataSetHeader updatedHeader = dataset.getHeader();
-            updatedHeader.setDescriptiveStatistic(DescriptiveStatistic.RECEIVED_MESSAGES);
-            updatedHeader.setUnit("PERCENTAGE");
-            dataset.setHeader(updatedHeader);
+            DataSetHeader updatedHeader = (DataSetHeader) dataset.getHeader()
+                    .descriptiveStatistic(DescriptiveStatistic.RECEIVED_MESSAGES)
+                    .unit("PERCENTAGE");
+            dataset.header(updatedHeader);
 
             for (DataItem item : dataset.getDataset()) {
                 if (item.getValue() instanceof Double) {

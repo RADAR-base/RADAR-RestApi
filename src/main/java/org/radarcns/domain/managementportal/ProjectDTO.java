@@ -1,6 +1,5 @@
 package org.radarcns.domain.managementportal;
 
-
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashSet;

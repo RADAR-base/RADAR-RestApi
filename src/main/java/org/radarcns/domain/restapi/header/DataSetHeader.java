@@ -1,12 +1,12 @@
 package org.radarcns.domain.restapi.header;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.radarcns.domain.restapi.TimeWindow;
 
 public class DataSetHeader extends Header {
-
 
     /**
      * Report the source data name or specific type of assessment.
@@ -20,6 +20,12 @@ public class DataSetHeader extends Header {
     @JsonProperty
     public DescriptiveStatistic descriptiveStatistic;
 
+    /**
+     * Default constructor.
+     */
+    public DataSetHeader() {
+        // default constructor
+    }
 
     /**
      * All-args constructor.
@@ -35,36 +41,31 @@ public class DataSetHeader extends Header {
      * @param effectiveTimeFrame Timestamps of the first and the last samples in the data-set.
      */
     @SuppressWarnings("PMD.ExcessiveParameterList")
-    public DataSetHeader(String projectId, String subjectId, String sourceId, String sourceType, String
-            sourceDataType,
-            DescriptiveStatistic descriptiveStatistic, String unit, TimeWindow timeWindow,
-            TimeFrame timeFrame, TimeFrame effectiveTimeFrame) {
-        this.projectId = projectId;
-        this.subjectId = subjectId;
-        this.sourceId = sourceId;
-        this.sourceType = sourceType;
+    public DataSetHeader(String projectId, String subjectId, String sourceId, String sourceType,
+            String sourceDataType, DescriptiveStatistic descriptiveStatistic, String unit,
+            TimeWindow timeWindow, TimeFrame timeFrame, TimeFrame effectiveTimeFrame) {
+        super(projectId, subjectId, sourceId, sourceType, unit, timeWindow, timeFrame,
+                effectiveTimeFrame);
         this.sourceDataType = sourceDataType;
         this.descriptiveStatistic = descriptiveStatistic;
-        this.unit = unit;
-        this.timeWindow = timeWindow;
-        this.timeFrame = timeFrame;
-        this.effectiveTimeFrame = effectiveTimeFrame;
     }
 
     public String getSourceDataType() {
         return sourceDataType;
     }
 
-    public void setSourceDataType(String sourceDataType) {
+    public DataSetHeader sourceDataType(String sourceDataType) {
         this.sourceDataType = sourceDataType;
+        return this;
     }
 
     public DescriptiveStatistic getDescriptiveStatistic() {
         return descriptiveStatistic;
     }
 
-    public void setDescriptiveStatistic(DescriptiveStatistic descriptiveStatistic) {
+    public DataSetHeader descriptiveStatistic(DescriptiveStatistic descriptiveStatistic) {
         this.descriptiveStatistic = descriptiveStatistic;
+        return this;
     }
 
     @Override

@@ -181,7 +181,7 @@ public abstract class SourceDataMongoWrapper {
                     currentFrame.getStartDateTime()));
         }
 
-        header.setEffectiveTimeFrame(timeFrame);
+        header.effectiveTimeFrame(timeFrame);
 
         LOGGER.debug("Found {} value(s)", list.size());
 

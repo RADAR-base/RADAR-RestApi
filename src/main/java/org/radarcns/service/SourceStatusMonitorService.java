@@ -73,9 +73,13 @@ public class SourceStatusMonitorService {
     public MonitorData getStatus(String projectName, String subjectId, String sourceId,
             MongoClient client) throws IOException {
 
-        MonitorHeader header = new MonitorHeader(projectName, subjectId, sourceId, null);
+        MonitorHeader header = (MonitorHeader) new MonitorHeader()
+                .projectId(projectName)
+                .subjectId(subjectId)
+                .sourceId(sourceId);
         SourceDTO source = managementPortalClient.getSource(sourceId);
         if (source.getSourceType() != null) {
+            header.sourceType(source.getSourceType().getSourceTypeIdentifier().toString());
             if (source.getSourceType().getModel().contains("pRMT") || source.getSourceType()
                     .getSourceTypeScope().equals("MONITOR")) {
                 ApplicationStatus app = new ApplicationStatus();
@@ -84,12 +88,12 @@ public class SourceStatusMonitorService {
                             .valueByProjectSubjectSource(projectName, subjectId, sourceId, app,
                                     client);
                 }
-                header.setMonitorCategory(PASSIVE);
+                header.monitorCategory(PASSIVE);
                 return new MonitorData().header(header).data(app);
             }
 
             if (source.getSourceType().getModel().contains("aRMT-App")) {
-                header.setMonitorCategory(QUESTIONNAIRE);
+                header.monitorCategory(QUESTIONNAIRE);
                 return new MonitorData().header(header).data(questionnaireCompletionLogWrapper
                         .valueByProjectSubjectSource(projectName, subjectId, sourceId, client));
             }

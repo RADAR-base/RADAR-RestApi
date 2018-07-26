@@ -1,6 +1,5 @@
 package org.radarcns.domain.managementportal;
 
-
 import java.io.Serializable;
 import java.util.Objects;
 import javax.validation.constraints.NotNull;

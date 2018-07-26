@@ -32,15 +32,17 @@ public class Dataset {
         return header;
     }
 
-    public void setHeader(DataSetHeader header) {
+    public Dataset header(DataSetHeader header) {
         this.header = header;
+        return this;
     }
 
     public List<DataItem> getDataset() {
         return dataset;
     }
 
-    public void setDataset(List<DataItem> dataset) {
+    public Dataset setDataset(List<DataItem> dataset) {
         this.dataset = dataset;
+        return this;
     }
 }

@@ -1,62 +1,70 @@
 package org.radarcns.domain.restapi.header;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
+import org.radarcns.domain.restapi.TimeWindow;
 
-public class MonitorHeader extends Header{
+public class MonitorHeader extends Header {
 
     public enum MonitorCategory {
         PASSIVE, QUESTIONNAIRE
     }
+
     @JsonProperty
     private MonitorCategory monitorCategory;
 
     /**
+     * Default constructor.
+     */
+    public MonitorHeader() {
+
+    }
+
+    /**
      * Contains meta-data of the monitored source.
-     * @param projectId project Id.
-     * @param subjectId subject id.
-     * @param sourceId source id.
-     * @param monitorCategory category of the monitor. Type of {@link MonitorCategory}
+     * @param projectId project name
+     * @param subjectId subject identifier.
+     * @param sourceId source identifier.
+     * @param monitorCategory monitor category.
      */
     public MonitorHeader(String projectId, String subjectId, String sourceId,
             MonitorCategory monitorCategory) {
-        this.projectId = projectId;
-        this.subjectId = subjectId;
-        this.sourceId = sourceId;
+        super(projectId, subjectId, sourceId, null, null, null, null, null);
         this.monitorCategory = monitorCategory;
     }
 
-    public String getProjectId() {
-        return projectId;
+
+    /**
+     * Contains meta-data of the monitored source.
+     * @param projectId project name
+     * @param subjectId subject identifier.
+     * @param sourceId source identifier.
+     * @param sourceType source-type of source.
+     * @param unit unit of measurement
+     * @param timeWindow timewindow between records.
+     * @param timeFrame requested time frame.
+     * @param effectiveTimeFrame effective time frame.
+     * @param monitorCategory monitor category.
+     */
+    public MonitorHeader(String projectId, String subjectId, String sourceId, String sourceType,
+            String unit, TimeWindow timeWindow, TimeFrame timeFrame, TimeFrame effectiveTimeFrame,
+            MonitorCategory monitorCategory) {
+        super(projectId, subjectId, sourceId, sourceType, unit, timeWindow, timeFrame,
+                effectiveTimeFrame);
+        this.monitorCategory = monitorCategory;
     }
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
 
-    public String getSubjectId() {
-        return subjectId;
-    }
-
-    public void setSubjectId(String subjectId) {
-        this.subjectId = subjectId;
-    }
-
-    public String getSourceId() {
-        return sourceId;
-    }
-
-    public void setSourceId(String sourceId) {
-        this.sourceId = sourceId;
-    }
 
     public MonitorCategory getMonitorCategory() {
         return monitorCategory;
     }
 
-    public void setMonitorCategory(MonitorCategory monitorCategory) {
+    public MonitorHeader monitorCategory(MonitorCategory monitorCategory) {
         this.monitorCategory = monitorCategory;
+        return this;
     }
 
     @Override

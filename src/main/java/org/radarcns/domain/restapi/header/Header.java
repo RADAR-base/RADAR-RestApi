@@ -76,69 +76,77 @@ public class Header {
         this.effectiveTimeFrame = effectiveTimeFrame;
     }
 
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public Header projectId(String projectId) {
+        this.projectId = projectId;
+        return this;
+    }
+
     public String getSubjectId() {
         return subjectId;
     }
 
-    public void setSubjectId(String subjectId) {
+    public Header subjectId(String subjectId) {
         this.subjectId = subjectId;
+        return this;
     }
 
     public String getSourceId() {
         return sourceId;
     }
 
-    public void setSourceId(String sourceId) {
+    public Header sourceId(String sourceId) {
         this.sourceId = sourceId;
-    }
-
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+        return this;
     }
 
     public String getSourceType() {
         return sourceType;
     }
 
-    public void setSourceType(String sourceType) {
+    public Header sourceType(String sourceType) {
         this.sourceType = sourceType;
+        return this;
     }
 
     public String getUnit() {
         return unit;
     }
 
-    public void setUnit(String unit) {
+    public Header unit(String unit) {
         this.unit = unit;
+        return this;
     }
 
     public TimeWindow getTimeWindow() {
         return timeWindow;
     }
 
-    public void setTimeWindow(TimeWindow timeWindow) {
+    public Header timeWindow(TimeWindow timeWindow) {
         this.timeWindow = timeWindow;
+        return this;
     }
 
     public TimeFrame getEffectiveTimeFrame() {
         return effectiveTimeFrame;
     }
 
-    public void setEffectiveTimeFrame(
+    public Header effectiveTimeFrame(
             TimeFrame effectiveTimeFrame) {
         this.effectiveTimeFrame = effectiveTimeFrame;
+        return this;
     }
 
     public TimeFrame getTimeFrame() {
         return timeFrame;
     }
 
-    public void setTimeFrame(TimeFrame timeFrame) {
+    public Header timeFrame(TimeFrame timeFrame) {
         this.timeFrame = timeFrame;
+        return this;
     }
 
 
