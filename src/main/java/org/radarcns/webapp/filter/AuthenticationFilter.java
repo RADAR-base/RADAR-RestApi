@@ -13,9 +13,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
+
 import org.radarcns.auth.RadarSecurityContext;
 import org.radarcns.auth.authentication.TokenValidator;
-import org.radarcns.auth.config.ServerConfig;
 import org.radarcns.auth.config.YamlServerConfig;
 import org.radarcns.auth.exception.TokenValidationException;
 import org.radarcns.auth.token.RadarToken;
@@ -38,25 +38,30 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     public static final String REALM_VALUE = "api";
     public static final String ERROR = "error";
     public static final String ERROR_DESCRIPTION = "error_description";
-    private final TokenValidator validator;
+    private TokenValidator validator;
 
     /** Constructs a filter with a fixed validator. */
     public AuthenticationFilter() {
-        ServerConfig config = null;
-        String mpUrlString = Properties.getApiConfig().getManagementPortalConfig()
-                .getManagementPortalUrl().toString();
-        if (mpUrlString != null) {
-            try {
-                YamlServerConfig cfg = new YamlServerConfig();
-                cfg.setResourceName("res_RestApi");
-                cfg.setPublicKeyEndpoints(Collections.singletonList(new URI(mpUrlString
-                        + "oauth/token_key")));
-                config = cfg;
-            } catch (URISyntaxException exc) {
-                logger.error("Failed to load Management Portal URL " + mpUrlString, exc);
+
+        try {
+            validator = new TokenValidator();
+            logger.debug("Failed to create default TokenValidator");
+        } catch (RuntimeException ex) {
+            String mpUrlString =
+                    Properties.getApiConfig().getManagementPortalConfig().getManagementPortalUrl()
+                            .toString();
+            if (mpUrlString != null) {
+                try {
+                    YamlServerConfig cfg = new YamlServerConfig();
+                    cfg.setResourceName("res_RestApi");
+                    cfg.setPublicKeyEndpoints(
+                            Collections.singletonList(new URI(mpUrlString + "oauth/token_key")));
+                    validator = new TokenValidator(cfg);
+                } catch (URISyntaxException exc) {
+                    logger.error("Failed to load Management Portal URL " + mpUrlString, exc);
+                }
             }
         }
-        validator = config == null ? new TokenValidator() : new TokenValidator(config);
     }
 
     @Override
