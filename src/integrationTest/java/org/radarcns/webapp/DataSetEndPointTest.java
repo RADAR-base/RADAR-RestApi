@@ -61,7 +61,7 @@ import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 import org.radarcns.webapp.resource.Parameter;
 
 public class DataSetEndPointTest {
@@ -78,7 +78,7 @@ public class DataSetEndPointTest {
     public final MongoRule mongoRule = new MongoRule();
 
     @Test
-    public void getRecords() throws IOException {
+    public void getRecordsInTenSecondsWindow() throws IOException {
         MongoCollection<Document> collection = mongoRule.getCollection(
                 BATTERY_LEVEL_COLLECTION_NAME);
 
@@ -148,8 +148,8 @@ public class DataSetEndPointTest {
     @Test
     public void getAllRecordsWithQuartilesInTimeRange() throws IOException {
         Instant now = Instant.now();
-        Instant start = now.plus(RadarConverter.getSecond(TEN_SECOND), SECONDS);
-        Instant end = now.plus(7 * RadarConverter.getSecond(TEN_SECOND), SECONDS);
+        Instant end = now.minus(TimeScale.getSeconds(TEN_SECOND), SECONDS);
+        Instant start = now.minus(7 * TimeScale.getSeconds(TEN_SECOND), SECONDS);
         MongoCollection<Document> collection = mongoRule.getCollection(
                 BATTERY_LEVEL_COLLECTION_NAME);
         Map<String, Object> docs = RandomInput
@@ -179,8 +179,8 @@ public class DataSetEndPointTest {
         Instant now = Instant.now();
         TimeWindow window = TimeWindow.TEN_MIN;
 
-        Instant start = now.plus(RadarConverter.getSecond(window), SECONDS);
-        Instant end = now.plus(7 * RadarConverter.getSecond(window), SECONDS);
+        Instant end = now.minus(TimeScale.getSeconds(window), SECONDS);
+        Instant start = now.minus(7 * TimeScale.getSeconds(window), SECONDS);
         MongoCollection<Document> collection = mongoRule.getCollection(
                 BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES);
         Map<String, Object> docs = RandomInput

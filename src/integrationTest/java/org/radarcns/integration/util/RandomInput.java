@@ -16,9 +16,10 @@
 
 package org.radarcns.integration.util;
 
-import static org.radarcns.mongo.data.monitor.ApplicationStatusRecordCounter.RECORD_COLLECTION;
-import static org.radarcns.mongo.data.monitor.ApplicationStatusServerStatus.STATUS_COLLECTION;
-import static org.radarcns.mongo.data.monitor.ApplicationStatusUpTime.UPTIME_COLLECTION;
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static org.radarcns.mongo.data.monitor.application.ApplicationStatusRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.mongo.data.monitor.application.ApplicationStatusServerStatus.STATUS_COLLECTION;
+import static org.radarcns.mongo.data.monitor.application.ApplicationStatusUpTime.UPTIME_COLLECTION;
 import static org.radarcns.mongo.util.MongoHelper.ID;
 import static org.radarcns.mongo.util.MongoHelper.KEY;
 import static org.radarcns.mongo.util.MongoHelper.PROJECT_ID;
@@ -42,7 +43,7 @@ import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.monitor.application.ServerStatus;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 
 /**
  * All supported sources specifications.
@@ -59,29 +60,31 @@ public class RandomInput {
             new ExpectedDataSetFactory();
 
     private static ExpectedValue<DoubleValueCollector> randomDoubleValue(
-            ObservationKey key, TimeWindow timeWindow, int numberOfRecords, Instant startTime) {
+            ObservationKey key, TimeWindow timeWindow, int numberOfRecords, Instant endTime) {
         ExpectedDoubleValue instance = new ExpectedDoubleValue();
 
-        Instant timeStamp = startTime;
+        Instant timeStamp = endTime.minus(
+                TimeScale.getSeconds(timeWindow) * numberOfRecords, SECONDS);
         ThreadLocalRandom random = ThreadLocalRandom.current();
         for (int i = 0; i < numberOfRecords; i++) {
             instance.add(key, timeStamp.toEpochMilli(), random.nextDouble());
-            timeStamp = timeStamp.plus(RadarConverter.getDuration(timeWindow));
+            timeStamp = timeStamp.plus(TimeScale.getDuration(timeWindow));
         }
 
         return instance;
     }
 
     private static ExpectedValue<DoubleArrayCollector> randomArrayValue(ObservationKey key,
-            TimeWindow timeWindow, int numberOfRecords, Instant startTime) {
+            TimeWindow timeWindow, int numberOfRecords, Instant endTime) {
         ExpectedArrayValue instance = new ExpectedArrayValue();
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        Instant timeStamp = startTime;
+        Instant timeStamp = endTime.minus(
+                TimeScale.getSeconds(timeWindow) * numberOfRecords, SECONDS);
         for (int i = 0; i < numberOfRecords; i++) {
             instance.add(key, timeStamp.toEpochMilli(), random.nextDouble(), random.nextDouble(),
                     random.nextDouble());
-            timeStamp = timeStamp.plus(RadarConverter.getDuration(timeWindow));
+            timeStamp = timeStamp.plus(TimeScale.getDuration(timeWindow));
         }
 
         return instance;
@@ -94,7 +97,7 @@ public class RandomInput {
     @SuppressWarnings("PMD.ExcessiveParameterList")
     public static Map<String, Object> getDatasetAndDocumentsRandom(String project, String user,
             String source, String sourceType, String sourceDataName, DescriptiveStatistic stat,
-            TimeWindow timeWindow, int samples, boolean singleWindow, Instant startTime) {
+            TimeWindow timeWindow, int samples, boolean singleWindow, Instant endTime) {
         ObservationKey key = new ObservationKey(project, user, source);
 
         int numberOfRecords = samples;
@@ -104,7 +107,7 @@ public class RandomInput {
 
         if (SUPPORTED_SOURCE_TYPE.equals(sourceType)) {
             return getBoth(key, sourceType, sourceDataName, stat,
-                    timeWindow, numberOfRecords, startTime);
+                    timeWindow, numberOfRecords, endTime);
         }
 
         throw new UnsupportedOperationException(sourceType + " is not"
@@ -114,14 +117,14 @@ public class RandomInput {
     @SuppressWarnings("PMD.ExcessiveParameterList")
     private static Map<String, Object> getBoth(ObservationKey key,
             String sourceType, String sourceDataName, DescriptiveStatistic stat,
-            TimeWindow timeWindow, int numberOfRecords, Instant startTime) {
+            TimeWindow timeWindow, int numberOfRecords, Instant endTime) {
         ExpectedValue<?> expectedValue;
         switch (sourceDataName) {
             case "EMPATICA_E4_v1_ACCELEROMETER":
-                expectedValue = randomArrayValue(key, timeWindow, numberOfRecords, startTime);
+                expectedValue = randomArrayValue(key, timeWindow, numberOfRecords, endTime);
                 break;
             default:
-                expectedValue = randomDoubleValue(key, timeWindow, numberOfRecords, startTime);
+                expectedValue = randomDoubleValue(key, timeWindow, numberOfRecords, endTime);
                 break;
         }
 
@@ -134,6 +137,28 @@ public class RandomInput {
         map.put(DATASET, dataset);
         map.put(DOCUMENTS, documents);
         return map;
+    }
+
+    /**
+     * Generates and returns a randomly generated
+     * {@link org.radarcns.domain.restapi.monitor.QuestionnaireCompletionStatus} mock data
+     * sent by RADAR-CNS aRMT.
+     **/
+    public static Document getRandomQuestionnaireCompletionLog(String project,
+            String user, String source) {
+
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+
+        double timestamp = random.nextDouble();
+        double completionPercentage = random.nextDouble(0d,100d);
+        String name = "PHQ8";
+        Document completionDoc = new Document()
+                .append("time", timestamp)
+                .append("name", name)
+                .append("completionPercentage", completionPercentage);
+
+        return buildDocumentWithObservationKey(project, user, source, completionDoc);
+
     }
 
     /**
@@ -181,9 +206,12 @@ public class RandomInput {
                 .append("recordsUnsent", recordsUnsent);
 
         Map<String, Document> documents = new HashMap<>();
-        documents.put(STATUS_COLLECTION, buildAppStatusDocument(project, user, source, statusDoc));
-        documents.put(RECORD_COLLECTION, buildAppStatusDocument(project, user, source, recordsDoc));
-        documents.put(UPTIME_COLLECTION, buildAppStatusDocument(project, user, source, uptimeDoc));
+        documents.put(STATUS_COLLECTION,
+                buildDocumentWithObservationKey(project, user, source, statusDoc));
+        documents.put(RECORD_COLLECTION,
+                buildDocumentWithObservationKey(project, user, source, recordsDoc));
+        documents.put(UPTIME_COLLECTION,
+                buildDocumentWithObservationKey(project, user, source, uptimeDoc));
         return documents;
     }
 
@@ -194,7 +222,7 @@ public class RandomInput {
                 .append(SOURCE_ID, sourceId);
     }
 
-    private static Document buildAppStatusDocument(String projectName, String subjectId,
+    private static Document buildDocumentWithObservationKey(String projectName, String subjectId,
             String sourceId,
             Document value) {
         return new Document().append(ID, "{"

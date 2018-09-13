@@ -47,7 +47,7 @@ import org.radarcns.mock.model.ExpectedValue;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 
 /**
  * It computes the expected Documents for a test case i.e. {@link ExpectedValue}.
@@ -120,7 +120,7 @@ public class ExpectedDocumentFactory {
             DoubleValueCollector doubleValueCollector = (DoubleValueCollector) expectedValue
                     .getSeries().get(timestamp);
             Instant start = Instant.ofEpochMilli(timestamp);
-            Instant end = start.plus(RadarConverter.getDuration(timeWindow));
+            Instant end = start.plus(TimeScale.getDuration(timeWindow));
             list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
                     expectedValue.getLastKey().getUserId(),
                     expectedValue.getLastKey().getSourceId(), start, end,

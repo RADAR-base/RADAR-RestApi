@@ -32,12 +32,14 @@ import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
+import org.radarcns.domain.restapi.header.DataSetHeader;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
 import org.radarcns.mongo.util.MongoHelper.Stat;
 import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,10 +94,10 @@ public abstract class SourceDataMongoWrapper {
      * @see Dataset
      */
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
-    public Dataset getLatestRecord(String projectName, String subject, String source, Header
+    public Dataset getLatestRecord(String projectName, String subject, String source, DataSetHeader
             header, Stat stat, MongoCollection<Document> collection) {
         try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
-                collection, projectName, subject, source, END, DESCENDING, 1)) {
+                collection, projectName, subject, source, KEY + "." + END, DESCENDING, 1)) {
             return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                     cursor);
         }
@@ -114,9 +116,9 @@ public abstract class SourceDataMongoWrapper {
      * @see Dataset
      */
     public Dataset getAllRecords(MongoCollection<Document> collection, String projectName,
-            String subject, String source, Header header, Stat stat) {
+            String subject, String source, DataSetHeader header, Stat stat) {
         try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
-                collection, projectName, subject, source, START, ASCENDING, null)) {
+                collection, projectName, subject, source, KEY + "." + START, ASCENDING, null)) {
             return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
                     cursor);
         }
@@ -136,7 +138,7 @@ public abstract class SourceDataMongoWrapper {
      * @see Dataset
      */
     public Dataset getAllRecordsInWindow(MongoCollection<Document> collection, String projectName,
-            String subject, String source, Header header, Stat stat, TimeFrame timeFrame) {
+            String subject, String source, DataSetHeader header, Stat stat, TimeFrame timeFrame) {
         try (MongoCursor<Document> cursor = MongoHelper.findDocumentsBySource(
                 collection, projectName, subject, source, timeFrame)) {
             return getDataSet(stat.getParam(), RadarConverter.getDescriptiveStatistic(stat), header,
@@ -155,7 +157,7 @@ public abstract class SourceDataMongoWrapper {
      * @return data dataset for the given input, otherwise empty dataset
      * @see Dataset
      */
-    private Dataset getDataSet(String field, DescriptiveStatistic stat, Header header,
+    private Dataset getDataSet(String field, DescriptiveStatistic stat, DataSetHeader header,
             MongoCursor<Document> cursor) {
 
         TimeFrame timeFrame = null;
@@ -179,7 +181,7 @@ public abstract class SourceDataMongoWrapper {
                     currentFrame.getStartDateTime()));
         }
 
-        header.setEffectiveTimeFrame(timeFrame);
+        header.effectiveTimeFrame(timeFrame);
 
         LOGGER.debug("Found {} value(s)", list.size());
 
@@ -219,6 +221,16 @@ public abstract class SourceDataMongoWrapper {
     }
 
     /**
+     * Returns the required mongoDB collection name for the given timeWindow of this source-data.
+     *
+     * @param timeScale of data-set query.
+     * @return the MongoDB Collection name for given time window.
+     */
+    public String getCollectionName(TimeScale timeScale) {
+        return getCollectionName(timeScale.getTimeWindow());
+    }
+
+    /**
      * Convert a {@link Document} to the corresponding SpecificRecord. This function must be
      * override by the subclass
      *
@@ -242,10 +254,9 @@ public abstract class SourceDataMongoWrapper {
      */
     protected abstract int extractCount(Document doc);
 
-
     public Double getExpectedRecordCount(TimeWindow timeWindow) {
-        return RadarConverter.getSecond(timeWindow) * Double
-                .valueOf(this.sourceData.getFrequency());
+        return RadarConverter.getExpectedMessages(timeWindow,
+                Double.valueOf(this.sourceData.getFrequency()));
     }
 
     /**

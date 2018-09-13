@@ -1,0 +1,5 @@
+"ID";"PRODUCER";"MODEL";"catalog_version";"SOURCE_TYPE_SCOPE";"dynamic_registration";"created_by"
+"1";"Empatica";"E4";"v1";"PASSIVE";"FALSE";"system"
+"2";"THINC-IT App";"App";"v1";"ACTIVE";"true";"system"
+"3";"RADAR";"pRMT";"1.0.0";"MONITOR";"false";"system"
+"4";"RADAR";"aRMT-App";"1.2.0";"ACTIVE";"true";"system"

@@ -1,0 +1,22 @@
+resourceName: res_RestApi
+publicKeys:
+  - |-
+    -----BEGIN EC PUBLIC KEY-----
+    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEMs5Dr4DNVKRtXcgjoYdwvvNi8wj3
+    YO/REE0WhOLlcWSY9B94ouRF+01d8zaksqOfThT4kb6r2U7Kk4XtV6Alww==
+    -----END EC PUBLIC KEY-----
+  - |-
+    -----BEGIN PUBLIC KEY-----
+    MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAsz4umuU7hrXF6cFcBLdI
+    KzoVSbU22N3AbBPCtx4sBNKOgb0cI7dLAf+lCtiuezatbk7KsbUoNJ8nNaAjBrld
+    RjUZkFC1sMpiTsK8SG4C9A6OMz/4AHPziY4iZWWAel7ZjFoCbXG/gnS1i7ZYZ83C
+    QabJ5jr0hZzqz9aOO5X2592lhtf6mLHl6QFNhsPwmVxnkrjQVy1hIqPrGxYqDILW
+    QBM9RRrgXr0tFzMMIxLZvPiGCLxUpFD8ma/YxCoKfvWGSJ1oiePF1T9+K9RTzdwG
+    iPqY5CGMIo0vjpFf1tyCBWxTWy6HNFQWkEpLoya7SumAFOK0sPOd4wfQA8Uvp5JU
+    D8LyPnZQlQ/KUozp0bUmotw65tj0NEdUOjJ0NGFaHJ8oi7aff07OsV/phzBhZ0iB
+    CWjJdtCf1Y7jqqOyFRAHMz8F+EqBZ40htPx7ejQyjfqLtCetxULlp2WSaXWWCYen
+    36e+lO7+eDKEBrAc5Npd9EjYjnyYFzhhT+f3JDy3+fEbzkItm02OnKENnxq3IU2q
+    sGFqG2tBnRjnViWmzA271Yi9FqTdM/AVzsqGsw85oPebmAzzVbgIYEipClHS2JjF
+    J55li+nztyqGU1VIg6LstDabuBax2M7hX6CCisguS+RlDZ3e3caVF9x1KcXeR5no
+    XERYv/iwTBI1F1Gp5waemi8CAwEAAQ==
+    -----END PUBLIC KEY-----

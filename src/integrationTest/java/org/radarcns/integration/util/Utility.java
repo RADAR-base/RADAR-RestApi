@@ -16,34 +16,51 @@
 
 package org.radarcns.integration.util;
 
-import static org.radarcns.mongo.data.monitor.ApplicationStatusRecordCounter.RECORD_COLLECTION;
-import static org.radarcns.mongo.data.monitor.ApplicationStatusServerStatus.STATUS_COLLECTION;
-import static org.radarcns.mongo.data.monitor.ApplicationStatusUpTime.UPTIME_COLLECTION;
+import static org.radarcns.mongo.data.monitor.application.ApplicationStatusRecordCounter.RECORD_COLLECTION;
+import static org.radarcns.mongo.data.monitor.application.ApplicationStatusServerStatus.STATUS_COLLECTION;
+import static org.radarcns.mongo.data.monitor.application.ApplicationStatusUpTime.UPTIME_COLLECTION;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.bson.Document;
-import org.radarcns.domain.restapi.Application;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
-import org.radarcns.domain.restapi.header.Header;
+import org.radarcns.domain.restapi.header.DataSetHeader;
 import org.radarcns.domain.restapi.header.TimeFrame;
+import org.radarcns.domain.restapi.monitor.ApplicationStatus;
+import org.radarcns.domain.restapi.monitor.QuestionnaireCompletionStatus;
 import org.radarcns.util.RadarConverter;
 
 public class Utility {
     /**
-     * Converts Bson Document into an ApplicationConfig.
+     * Converts Bson Document into an QuestionnaireCompletionStatus.
      *
-     * @param documents map containing variables to create the ApplicationConfig class
+     * @param document Document data to create the QuestionnaireCompletionStatus class
      * @return an ApplicationConfig class
-     * @see Application
+     * @see ApplicationStatus
      */
     //TODO take field names from RADAR Mongo Connector
-    public static Application convertDocToApplication(Map<String, Document> documents) {
-        return new Application(
+    public static QuestionnaireCompletionStatus convertDocToQuestionnaireCompletionStatus(Document
+            document) {
+        return new QuestionnaireCompletionStatus(
+                ((Document)document.get(VALUE)).getDouble("time"),
+                ((Document)document.get(VALUE)).getString("name"),
+                ((Document)document.get(VALUE)).getDouble("completionPercentage"));
+    }
+
+    /**
+     * Converts Bson Document into an ApplicationStatus.
+     *
+     * @param documents map containing variables to create the ApplicationStatus class
+     * @return an ApplicationStatus class
+     * @see ApplicationStatus
+     */
+    public static ApplicationStatus convertDocToApplicationStatus(Map<String, Document> documents) {
+        return new ApplicationStatus(
                 ((Document) documents.get(STATUS_COLLECTION).get(VALUE)).getString("clientIP"),
                 ((Document) documents.get(UPTIME_COLLECTION).get(VALUE)).getDouble("uptime"),
                 RadarConverter.getServerStatus(
@@ -52,8 +69,8 @@ public class Utility {
                 ((Document) documents.get(RECORD_COLLECTION).get(VALUE))
                         .getInteger("recordsCached"),
                 ((Document) documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsSent"),
-                ((Document) documents.get(RECORD_COLLECTION).get(VALUE)).getInteger("recordsUnsent")
-        );
+                ((Document) documents.get(RECORD_COLLECTION).get(VALUE))
+                        .getInteger("recordsUnsent"));
     }
 
     /**
@@ -63,18 +80,18 @@ public class Utility {
      * @return {@link Dataset} cloned from {@code input}
      */
     public static Dataset cloneDataset(Dataset input) {
-        Header inputHeader = input.getHeader();
-        TimeFrame cloneEffectiveTimeFrame = new TimeFrame(
-                inputHeader.getEffectiveTimeFrame().getStartDateTime(),
-                inputHeader.getEffectiveTimeFrame().getEndDateTime());
-        TimeFrame cloneTimeFrame = new TimeFrame(
-                inputHeader.getTimeFrame().getStartDateTime(),
+        DataSetHeader inputHeader = input.getHeader();
+        TimeFrame cloneEffectiveTimeFrame =
+                new TimeFrame(inputHeader.getEffectiveTimeFrame().getStartDateTime(),
+                        inputHeader.getEffectiveTimeFrame().getEndDateTime());
+        TimeFrame cloneTimeFrame = new TimeFrame(inputHeader.getTimeFrame().getStartDateTime(),
                 inputHeader.getTimeFrame().getEndDateTime());
-        Header cloneHeader = new Header(inputHeader.getProjectId(), inputHeader.getSubjectId(),
+        DataSetHeader cloneHeader = new DataSetHeader(inputHeader.getProjectId(),
+                inputHeader.getSubjectId(),
                 inputHeader.getSourceId(), inputHeader.getSourceType(),
-                inputHeader.getSourceDataType(),
-                inputHeader.getDescriptiveStatistic(), inputHeader.getUnit(),
-                inputHeader.getTimeWindow(), cloneTimeFrame, cloneEffectiveTimeFrame);
+                inputHeader.getSourceDataType(), inputHeader.getDescriptiveStatistic(),
+                inputHeader.getUnit(), inputHeader.getTimeWindow(), cloneTimeFrame,
+                cloneEffectiveTimeFrame);
 
         List<DataItem> cloneItem = new ArrayList<>();
         Object value;
@@ -86,8 +103,8 @@ public class Utility {
                 Acceleration temp = (Acceleration) item.getValue();
                 value = new Acceleration(temp.getX(), temp.getY(), temp.getZ());
             } else {
-                throw new IllegalArgumentException(item.getValue().getClass().getCanonicalName()
-                        + " is not supported yet");
+                throw new IllegalArgumentException(
+                        item.getValue().getClass().getCanonicalName() + " is not supported yet");
             }
 
             cloneItem.add(new DataItem(value, item.getStartDateTime()));

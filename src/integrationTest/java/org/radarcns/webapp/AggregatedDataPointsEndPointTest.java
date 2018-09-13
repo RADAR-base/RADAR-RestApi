@@ -1,9 +1,9 @@
 package org.radarcns.webapp;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.domain.restapi.TimeWindow.ONE_HOUR;
 import static org.radarcns.domain.restapi.TimeWindow.TEN_MIN;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.AVERAGE;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
@@ -39,7 +39,7 @@ import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
-import org.radarcns.util.RadarConverter;
+import org.radarcns.util.TimeScale;
 import org.radarcns.webapp.param.DataAggregateParam;
 import org.radarcns.webapp.resource.Parameter;
 
@@ -57,7 +57,7 @@ public class AggregatedDataPointsEndPointTest {
         Instant now = Instant.now();
         TimeWindow window = TEN_MIN;
 
-        // injects 10 records for 10 min
+        // injects 10 records for last 100 min
         MongoCollection<Document> collection = mongoRule.getCollection(
                 BATTERY_LEVEL_COLLECTION_FOR_TEN_MINUTES);
 
@@ -69,10 +69,10 @@ public class AggregatedDataPointsEndPointTest {
         MongoCollection<Document> accelerationCollection = mongoRule.getCollection(
                 ACCELERATION_COLLECTION_FOR_TEN_MINITES);
 
-        // injects 5 records for acceleration
+        // injects 5 records for acceleration, for last 50 minutes
         Map<String, Object> accDocs = RandomInput.getDatasetAndDocumentsRandom(
                 PROJECT, SUBJECT, SOURCE, SOURCE_TYPE, ACCELEROMETER_SOURCE_DATA_NAME, AVERAGE,
-                TEN_MIN,5, false, Instant.now());
+                TEN_MIN,5, false, now);
 
         accelerationCollection.insertMany((List<Document>) accDocs.get(DOCUMENTS));
 
@@ -83,8 +83,10 @@ public class AggregatedDataPointsEndPointTest {
         DataAggregateParam aggregateParam = new DataAggregateParam(
                 Collections.singletonList(aggregateDataSource));
 
-        Instant start = now.plus(RadarConverter.getDuration(TEN_MIN));
-        Instant end = start.plus(RadarConverter.getDuration(ONE_HOUR));
+        // reduces 70 min
+        Instant start = now
+                .minus(TimeScale.getSeconds(TEN_MIN) * 7, SECONDS);
+        Instant end = now.minus(TimeScale.getDuration(TEN_MIN));
 
         String requestPath = PROJECT + '/' + SUBJECT + '/' + DISTINCT + '?'
                 + Parameter.TIME_WINDOW + '=' + window + '&'
@@ -95,7 +97,7 @@ public class AggregatedDataPointsEndPointTest {
         assertNotNull(dataset);
         assertTrue(dataset.getDataset().size() <= 6);
         List<DataItem> dataItems = dataset.getDataset();
-        assertEquals(2, dataItems.get(0).getValue());
-        assertEquals(1, dataItems.get(4).getValue());
+        assertEquals(1, dataItems.get(0).getValue());
+        assertEquals(2, dataItems.get(4).getValue());
     }
 }

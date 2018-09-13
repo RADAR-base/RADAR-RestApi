@@ -57,8 +57,9 @@ public class SourceService {
      */
     private List<Source> buildSourcesFromMinimal(String projectId,
             String subjectId, Collection<MinimalSourceDetailsDTO> sources) {
-        return sources.stream().map(p -> buildSource(projectId, subjectId, p)).collect(Collectors
-                .toList());
+        return sources.stream()
+                .map(p -> buildSource(projectId, subjectId, p))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -92,6 +93,7 @@ public class SourceService {
                 .sourceId(source.getSourceId().toString())
                 .assigned(source.isAssigned())
                 .sourceName(source.getSourceName())
+                .sourceTypeId(source.getSourceTypeId())
                 .sourceTypeCatalogVersion(source.getSourceTypeCatalogVersion())
                 .sourceTypeProducer(source.getSourceTypeProducer())
                 .sourceTypeModel(source.getSourceTypeModel())
@@ -131,6 +133,7 @@ public class SourceService {
                 .sourceId(source.getSourceId())
                 .assigned(source.getAssigned())
                 .sourceName(source.getSourceName())
+                .sourceTypeId(sourceType.getId())
                 .sourceTypeCatalogVersion(sourceType.getCatalogVersion())
                 .sourceTypeProducer(sourceType.getProducer())
                 .sourceTypeModel(sourceType.getModel())

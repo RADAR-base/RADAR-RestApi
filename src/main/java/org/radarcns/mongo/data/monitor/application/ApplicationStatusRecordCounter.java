@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.monitor;
+package org.radarcns.mongo.data.monitor.application;
 
 import org.bson.Document;
-import org.radarcns.domain.restapi.Application;
+import org.radarcns.domain.restapi.monitor.ApplicationStatus;
 
 public class ApplicationStatusRecordCounter extends MongoApplicationStatusWrapper {
 
@@ -25,7 +25,7 @@ public class ApplicationStatusRecordCounter extends MongoApplicationStatusWrappe
 
     //TODO take field names from RADAR MongoDb Connector
     @Override
-    protected Application getApplication(Document doc, Application app) {
+    protected ApplicationStatus getApplication(Document doc, ApplicationStatus app) {
         app.setRecordsCached(doc.getInteger("recordsCached"));
         app.setRecordsSent(doc.getInteger("recordsSent"));
         app.setRecordsUnsent(doc.getInteger("recordsUnsent"));

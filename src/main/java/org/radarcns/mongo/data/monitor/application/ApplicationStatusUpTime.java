@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.radarcns.mongo.data.monitor;
+package org.radarcns.mongo.data.monitor.application;
 
 import org.bson.Document;
-import org.radarcns.domain.restapi.Application;
+import org.radarcns.domain.restapi.monitor.ApplicationStatus;
 
 public class ApplicationStatusUpTime extends MongoApplicationStatusWrapper {
 
@@ -25,7 +25,7 @@ public class ApplicationStatusUpTime extends MongoApplicationStatusWrapper {
 
     //TODO take field names from RADAR MongoDb Connector
     @Override
-    protected Application getApplication(Document doc, Application app) {
+    protected ApplicationStatus getApplication(Document doc, ApplicationStatus app) {
         app.setUptime(doc.getDouble("uptime"));
 
         return app;

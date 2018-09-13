@@ -53,8 +53,8 @@ import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
 import org.radarcns.domain.restapi.format.Quartiles;
+import org.radarcns.domain.restapi.header.DataSetHeader;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
 import org.radarcns.integration.util.Utility;
@@ -258,10 +258,10 @@ public class EndToEndTest {
 
             Dataset dataset = Utility.cloneDataset(expectedCount.get(config));
 
-            Header updatedHeader = dataset.getHeader();
-            updatedHeader.setDescriptiveStatistic(DescriptiveStatistic.RECEIVED_MESSAGES);
-            updatedHeader.setUnit("PERCENTAGE");
-            dataset.setHeader(updatedHeader);
+            DataSetHeader updatedHeader = (DataSetHeader) dataset.getHeader()
+                    .descriptiveStatistic(DescriptiveStatistic.RECEIVED_MESSAGES)
+                    .unit("PERCENTAGE");
+            dataset.header(updatedHeader);
 
             for (DataItem item : dataset.getDataset()) {
                 if (item.getValue() instanceof Double) {

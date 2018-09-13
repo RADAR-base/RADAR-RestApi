@@ -34,17 +34,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.radarcns.config.Properties;
 import org.radarcns.domain.restapi.header.TimeFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generic MongoDB helper.
  */
 public class MongoHelper {
 
-    //private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
 
     public static final String ID = "_id";
     public static final String KEY = "key";
@@ -112,9 +115,18 @@ public class MongoHelper {
             MongoCollection<Document> collection, String projectName, String subjectId,
             String sourceId, TimeFrame timeFrame) {
         createIndexIfNotAvailable(collection, indexProjectSubjectSourceTimestart);
+        Bson querySource = filterSource(projectName, subjectId, sourceId, timeFrame);
+        BasicDBObject sortStartTime = new BasicDBObject(KEY + "." + START, ASCENDING);
+
+        if (logger.isDebugEnabled()) {
+            BsonDocument findQueryDocument = querySource.toBsonDocument(
+                    Document.class, collection.getCodecRegistry());
+            logger.debug("Filtering query {} and sorting by {}", findQueryDocument, sortStartTime);
+        }
+
         return collection
-                .find(filterSource(projectName, subjectId, sourceId, timeFrame))
-                .sort(new BasicDBObject(KEY + "." + START, ASCENDING))
+                .find(querySource)
+                .sort(sortStartTime)
                 .iterator();
     }
 
@@ -122,13 +134,18 @@ public class MongoHelper {
      * Finds all documents belonging to the given subject, source and project.
      * Close the returned iterator after use, for example with a try-with-resources construct.
      *
-     * @param collection is the MongoDB that will be queried
-     * @param project is the projectName
-     * @param subject is the subjectID
-     * @param source is the sourceID
-     * @param sortBy It is optional. {@code 1} means ascending while {@code -1} means descending
-     * @param limit is the number of document that will be retrieved
+     * @param collection MongoDB collection name that will be queried
+     * @param project project name
+     * @param subject subject ID
+     * @param source source ID
+     * @param sortBy Field to sort by. If sortBy is {@code null}, the data will not be sorted.
+     *               The field should be prefixed with {@link MongoHelper#KEY} or
+     *               {@link MongoHelper#VALUE}.
+     * @param order {@code 1} means ascending while {@code -1} means descending
+     * @param limit is the number of document that will be retrieved. If the limit is {@code null},
+     *              no limit is used.
      * @return a MongoDB cursor containing all documents from query.
+     * @throws IllegalArgumentException if sortBy does not start with a key or value object.
      */
     public static MongoCursor<Document> findDocumentBySource(
             MongoCollection<Document> collection, String project, String subject, String source,
@@ -139,6 +156,10 @@ public class MongoHelper {
         FindIterable<Document> result = collection.find(filterSource(project, subject, source));
 
         if (sortBy != null) {
+            if (!sortBy.startsWith(KEY + ".") && !sortBy.startsWith(VALUE + ".")) {
+                throw new IllegalArgumentException(
+                        "Should sort by a MongoHelper.KEY or MongoHelper.VALUE property.");
+            }
             result = result.sort(new BasicDBObject(sortBy, order));
         }
         if (limit != null) {

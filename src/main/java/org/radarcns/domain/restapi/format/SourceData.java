@@ -19,7 +19,7 @@ public class SourceData {
 
     public SourceData(String name, String type) {
         this.name = name;
-        this.name = type;
+        this.type = type;
     }
 
     public String getName() {

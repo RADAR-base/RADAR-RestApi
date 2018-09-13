@@ -35,10 +35,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.radarcns.auth.NeedsPermissionOnSubject;
-import org.radarcns.domain.restapi.Application;
-import org.radarcns.domain.restapi.ServerStatus;
+import org.radarcns.domain.restapi.monitor.MonitorData;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.service.ApplicationStatusMonitorService;
+import org.radarcns.service.SourceStatusMonitorService;
 import org.radarcns.service.SubjectService;
 import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
@@ -60,7 +59,7 @@ public class AppStatusEndPoint {
     private SubjectService subjectService;
 
     @Inject
-    private ApplicationStatusMonitorService applicationStatusMonitorService;
+    private SourceStatusMonitorService sourceStatusMonitorService;
     //--------------------------------------------------------------------------------------------//
     //                                    APPLICATION_STATUS FUNCTIONS                            //
     //--------------------------------------------------------------------------------------------//
@@ -78,22 +77,15 @@ public class AppStatusEndPoint {
             "Return a application object containing last received status")
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
-    @ApiResponse(responseCode = "404", description = "Subject not found.")
+    @ApiResponse(responseCode = "404", description = "project, subject or source not found.")
     @NeedsPermissionOnSubject(entity = SOURCE, operation = READ)
-    public Application getLastReceivedAppStatusJson(
+    public MonitorData getLastReceivedAppStatusJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
             @Alphanumeric @PathParam(SOURCE_ID) String sourceId) throws IOException {
         mpClient.checkSubjectInProject(projectName, subjectId);
-        Application application = null;
-        if (subjectService.checkSourceAssignedToSubject(subjectId, sourceId)) {
-            application = applicationStatusMonitorService.getStatus(projectName,
-                    subjectId, sourceId, mongoClient);
-        }
-        if (application == null) {
-            return new Application(null, 0d, ServerStatus.UNKNOWN, -1, -1, -1);
+        subjectService.checkSourceAssignedToSubject(subjectId, sourceId);
 
-        }
-        return application;
+        return sourceStatusMonitorService.getStatus(projectName, subjectId, sourceId, mongoClient);
     }
 }

@@ -1,6 +1,5 @@
 package org.radarcns.domain.managementportal;
 
-
 import java.io.Serializable;
 import java.util.Objects;
 import javax.validation.constraints.NotNull;
@@ -12,6 +11,8 @@ public class SourceDataDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotNull
+    private Long id;
     //Source data type.
     @NotNull
     private String sourceDataType;
@@ -40,6 +41,14 @@ public class SourceDataDTO implements Serializable {
     private String provider;
 
     private boolean enabled = true;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getFrequency() {
         return frequency;
@@ -141,7 +150,8 @@ public class SourceDataDTO implements Serializable {
         if (sourceDataDto.sourceDataName == null || sourceDataName == null) {
             return false;
         }
-        return Objects.equals(sourceDataName, sourceDataDto.sourceDataName);
+        return Objects.equals(sourceDataName, sourceDataDto.sourceDataName)
+                && Objects.equals(id, sourceDataDto.id);
     }
 
     @Override
@@ -152,6 +162,7 @@ public class SourceDataDTO implements Serializable {
     @Override
     public String toString() {
         return "SourceDataDTO{"
+                + ", id='" + id + '\''
                 + ", sourceDataType='" + sourceDataType + '\''
                 + ", sourceDataName='" + sourceDataName + '\''
                 + ", frequency='" + frequency + '\''
