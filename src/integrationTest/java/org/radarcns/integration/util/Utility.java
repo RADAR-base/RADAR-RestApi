@@ -25,7 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Objects;
 import org.bson.Document;
+import org.glassfish.jersey.jaxb.internal.XmlJaxbElementProvider.App;
+import org.radarbase.jersey.config.ConfigLoader;
+import org.radarcns.config.ApplicationConfig;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.format.Acceleration;
@@ -36,6 +40,16 @@ import org.radarcns.domain.restapi.monitor.QuestionnaireCompletionStatus;
 import org.radarcns.util.RadarConverter;
 
 public class Utility {
+    private static ApplicationConfig config;
+
+    public static ApplicationConfig getConfig() {
+        if (config == null) {
+            String file = Objects.requireNonNull(RestApiDetails.class.getClassLoader().getResource("radar.yml")).getFile();
+            config = ConfigLoader.INSTANCE.loadConfig(file, new String[0], ApplicationConfig.class);
+        }
+        return config;
+    }
+
     /**
      * Converts Bson Document into an QuestionnaireCompletionStatus.
      *

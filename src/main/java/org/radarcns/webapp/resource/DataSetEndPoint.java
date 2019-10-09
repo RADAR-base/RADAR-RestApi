@@ -44,7 +44,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import org.radarcns.auth.NeedsPermissionOnSubject;
+import org.radarbase.jersey.auth.Authenticated;
+import org.radarbase.jersey.auth.NeedsPermission;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
@@ -52,7 +53,6 @@ import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.DataSetService;
 import org.radarcns.util.TimeScale;
-import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.param.InstantParam;
 import org.radarcns.webapp.param.TimeScaleParser;
 import org.radarcns.webapp.validation.Alphanumeric;
@@ -95,7 +95,8 @@ public class DataSetEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")
-    @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
+    @NeedsPermission(entity = MEASUREMENT, operation = READ,
+        projectPathParam = PROJECT_NAME, userPathParam = SUBJECT_ID)
     public Dataset getLastReceivedSampleJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,
@@ -150,7 +151,8 @@ public class DataSetEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject not found.")
-    @NeedsPermissionOnSubject(entity = MEASUREMENT, operation = READ)
+    @NeedsPermission(entity = MEASUREMENT, operation = READ,
+        projectPathParam = PROJECT_NAME, userPathParam = SUBJECT_ID)
     public Dataset getSamplesJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,

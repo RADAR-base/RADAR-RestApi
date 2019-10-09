@@ -4,24 +4,26 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import java.util.Collection;
 import org.bson.Document;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.junit.rules.ExternalResource;
-import org.radarcns.config.Properties;
-import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.config.ApplicationConfig;
+import org.radarcns.mongo.util.MongoWrapper;
 
 /**
  * Rule to get a MongoClient. After use, all collections that were accessed are dropped again.
  */
 public class MongoRule extends ExternalResource {
-    private MongoClient client;
+    private final ApplicationConfig config;
+    private MongoWrapper client;
+    private MongoWrapper originalClient;
     private ConcurrentHashSet<String> queriedCollections;
-    private MongoClient originalClient;
+
+    public MongoRule(ApplicationConfig config) {
+        this.config = config;
+    }
 
     @Override
     public void before() {
@@ -31,52 +33,36 @@ public class MongoRule extends ExternalResource {
     }
 
     /** Get a MongoClient that keeps track of the collections that are queried. */
-    public MongoClient getClient() {
+    public MongoWrapper getClient() {
         if (client == null) {
-            final MongoClient originalClient = getOriginalClient();
+            final MongoWrapper originalClient = getOriginalClient();
             client = spy(originalClient);
             // test that only the wanted queriedCollections are queried.
             doAnswer(invocation -> {
-                String dbName = invocation.getArgument(0);
-                final MongoDatabase originalDatabase = originalClient.getDatabase(dbName);
-                MongoDatabase spiedDatabase = spy(originalDatabase);
-                doAnswer(invocation1 -> {
-                    String collectionName = invocation1.getArgument(0);
-                    queriedCollections.add(collectionName);
-                    return originalDatabase.getCollection(collectionName);
-                }).when(spiedDatabase).getCollection(anyString());
-                return spiedDatabase;
-            }).when(client).getDatabase(anyString());
+                String collectionName = invocation.getArgument(0);
+                queriedCollections.add(collectionName);
+                return originalClient.getCollection(collectionName);
+            }).when(client).getCollection(anyString());
         }
         return client;
     }
 
+    public MongoCollection<Document> getCollection(String name) {
+        return getClient().getCollection(name);
+    }
+
     /** Get the unmodified MongoClient. */
-    private MongoClient getOriginalClient() {
+    private MongoWrapper getOriginalClient() {
         if (originalClient == null) {
-            MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();
-            originalClient = new MongoClient(
-                    Properties.getApiConfig().getMongoDbHosts(),
-                    credentials, MongoClientOptions.builder().build());
+            originalClient = new MongoWrapper(config);
         }
         return originalClient;
-    }
-
-    /** Get a MongoDB collection. */
-    public MongoCollection<Document> getCollection(String collection) {
-        queriedCollections.add(collection);
-        return MongoHelper.getCollection(getOriginalClient(), collection);
-    }
-
-    /** The list of collections that have been queried so far. */
-    public ConcurrentHashSet<String> getQueriedCollections() {
-        return queriedCollections;
     }
 
     @Override
     public void after() {
         if (originalClient != null) {
-            queriedCollections.forEach(c -> MongoHelper.getCollection(originalClient, c).drop());
+            queriedCollections.forEach(c -> originalClient.getCollection(c).drop());
             originalClient.close();
         }
     }

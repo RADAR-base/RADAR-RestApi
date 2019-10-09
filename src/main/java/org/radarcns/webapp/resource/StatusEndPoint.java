@@ -11,11 +11,12 @@ import java.nio.file.Paths;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import org.radarcns.auth.NeedsPermission;
-import org.radarcns.config.Properties;
+import org.radarbase.jersey.auth.Authenticated;
+import org.radarbase.jersey.auth.NeedsPermission;
+import org.radarcns.config.ApplicationConfig;
 import org.radarcns.status.hdfs.HdfsBinsData;
-import org.radarcns.webapp.filter.Authenticated;
 
 @Authenticated
 @Path("/status")
@@ -38,8 +39,8 @@ public class StatusEndPoint {
             @ApiResponse(responseCode = "401", description = "Access denied error occurred"),
             @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")})
     @NeedsPermission(entity = MEASUREMENT, operation = READ)
-    public HdfsBinsData getJsonData() throws IOException {
-        String hdfsPath = Properties.getApiConfig().getHdfsOutputDir();
+    public HdfsBinsData getJsonData(@Context ApplicationConfig config) throws IOException {
+        String hdfsPath = config.getHdfsOutputDir();
         if (hdfsPath == null) {
             throw new IllegalStateException("The HDFS output directory was not configured.");
         }

@@ -11,23 +11,24 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response.Status;
 import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.hamcrest.CoreMatchers;
 import org.junit.rules.ExternalResource;
-import org.radarcns.config.ServerConfig;
+import org.radarbase.config.ServerConfig;
 import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.oauth.OAuth2Client.Builder;
-import org.radarcns.producer.rest.ManagedConnectionPool;
-import org.radarcns.producer.rest.RestClient;
+import org.radarbase.producer.rest.RestClient;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +95,10 @@ public class ApiClient extends ExternalResource {
 
     @Override
     protected void before() {
-        this.client = new RestClient(config, 120, new ManagedConnectionPool());
+        this.client = new RestClient.Builder(new OkHttpClient())
+            .server(config)
+            .timeout(120, TimeUnit.SECONDS)
+            .build();
     }
 
     /**
@@ -241,10 +245,5 @@ public class ApiClient extends ExternalResource {
             Status... expectedResponse) throws IOException {
         return getJson(relativePath,
                 RadarConverter.readerForCollection(List.class, jsonClass), expectedResponse);
-    }
-
-    @Override
-    protected void after() {
-        this.client.close();
     }
 }

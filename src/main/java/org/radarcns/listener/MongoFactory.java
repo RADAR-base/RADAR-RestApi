@@ -16,28 +16,30 @@
 
 package org.radarcns.listener;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
-import java.util.List;
+import javax.inject.Inject;
 import org.glassfish.jersey.internal.inject.DisposableSupplier;
-import org.radarcns.config.Properties;
+import org.radarcns.config.ApplicationConfig;
+import org.radarcns.mongo.util.MongoWrapper;
 
 /**
  * Factory to creates a singleton MongoClient with the correct credentials.
  */
-public class MongoFactory implements DisposableSupplier<MongoClient> {
-    @Override
-    public MongoClient get() {
-        MongoCredential credentials = Properties.getApiConfig().getMongoDbCredentials();
-        List<ServerAddress> hosts = Properties.getApiConfig().getMongoDbHosts();
+public class MongoFactory implements DisposableSupplier<MongoWrapper> {
 
-        return new MongoClient(hosts, credentials, MongoClientOptions.builder().build());
+    private final ApplicationConfig config;
+
+    @Inject
+    public MongoFactory(ApplicationConfig config) {
+        this.config = config;
     }
 
     @Override
-    public void dispose(MongoClient client) {
+    public MongoWrapper get() {
+        return new MongoWrapper(config);
+    }
+
+    @Override
+    public void dispose(MongoWrapper client) {
         if (client != null) {
             client.close();
         }

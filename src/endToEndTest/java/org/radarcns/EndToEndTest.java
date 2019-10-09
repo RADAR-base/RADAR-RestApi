@@ -27,10 +27,11 @@ import static org.radarcns.webapp.resource.Parameter.STAT;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,12 +43,20 @@ import javax.ws.rs.core.Response.Status;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.apache.avro.SchemaValidationException;
 import org.apache.avro.specific.SpecificRecord;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.radarbase.config.YamlConfigLoader;
+import org.radarbase.mock.MockProducer;
+import org.radarbase.mock.config.MockDataConfig;
+import org.radarbase.mock.data.CsvGenerator;
+import org.radarbase.mock.data.MockRecordValidator;
+import org.radarbase.mock.model.ExpectedValue;
+import org.radarbase.mock.model.MockAggregator;
+import org.radarbase.producer.rest.RestClient;
 import org.radarcns.config.PipelineConfig;
-import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
@@ -58,13 +67,7 @@ import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.ExpectedDataSetFactory;
 import org.radarcns.integration.util.Utility;
-import org.radarcns.mock.MockProducer;
-import org.radarcns.mock.config.MockDataConfig;
-import org.radarcns.mock.data.CsvGenerator;
-import org.radarcns.mock.data.MockRecordValidator;
-import org.radarcns.mock.model.ExpectedValue;
-import org.radarcns.mock.model.MockAggregator;
-import org.radarcns.producer.rest.RestClient;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.wiremock.ManagementPortalWireMock;
 import org.slf4j.Logger;
@@ -77,6 +80,9 @@ public class EndToEndTest {
     private static final String PROJECT_NAME_MOCK = "radar";
     private static final String USER_ID_MOCK = "sub-1";
     private static final String SOURCE_ID_MOCK = "SourceID_0";
+
+    private static final ObservationKey MOCK_KEY = new ObservationKey(
+        PROJECT_NAME_MOCK, USER_ID_MOCK, SOURCE_ID_MOCK);
 
     private Map<DescriptiveStatistic, Map<MockDataConfig, Dataset>> expectedDataset;
 
@@ -108,7 +114,7 @@ public class EndToEndTest {
     // Latency expressed in second
     private static final long LATENCY = 180;
 
-    private static File dataRoot;
+    private static Path dataRoot;
     private static PipelineConfig pipelineConfig;
 
     @Rule
@@ -130,13 +136,13 @@ public class EndToEndTest {
     public static void setUpClass() throws Exception {
         URL configResource = EndToEndTest.class.getClassLoader().getResource(PIPELINE_CONFIG);
         assertNotNull(configResource);
-        File configFile = new File(configResource.getFile());
+        Path configFile = Paths.get(configResource.getFile());
         try {
             pipelineConfig = new YamlConfigLoader().load(configFile, PipelineConfig.class);
         } catch (IOException e) {
             throw new AssertionError("Cannot load pipeline", e);
         }
-        dataRoot = configFile.getAbsoluteFile().getParentFile();
+        dataRoot = configFile.toAbsolutePath().getParent();
 
         waitForInfrastructure();
     }
@@ -145,8 +151,8 @@ public class EndToEndTest {
     public void endToEnd() throws Exception {
         produceInputFile();
 
-        Map<MockDataConfig, ExpectedValue> expectedValue = MockAggregator.getSimulations(
-                pipelineConfig.getData(), dataRoot);
+        Map<MockDataConfig, ExpectedValue> expectedValue = new MockAggregator(pipelineConfig.getData(), dataRoot)
+                .simulate();
 
         produceExpectedDataset(expectedValue);
 
@@ -165,25 +171,25 @@ public class EndToEndTest {
         int retry = 60;
         long sleep = 1000;
 
-        try (RestClient client = new RestClient(pipelineConfig.getRestProxy())) {
-            Request request = client.requestBuilder("topics").build();
-            for (int i = 0; i < retry; i++) {
-                Response response = client.request(request);
-                ResponseBody body = response.body();
-                if (response.isSuccessful() && body != null) {
-                    String topics = body.string();
-                    String[] topicArray = topics.substring(1, topics.length() - 1).replace(
-                            "\"", "").split(",");
+        RestClient client = RestClient.global().server(pipelineConfig.getRestProxy()).build();
 
-                    expectedTopics.removeAll(Arrays.asList(topicArray));
+        Request request = client.requestBuilder("topics").build();
+        for (int i = 0; i < retry; i++) {
+            Response response = client.request(request);
+            ResponseBody body = response.body();
+            if (response.isSuccessful() && body != null) {
+                String topics = body.string();
+                String[] topicArray = topics.substring(1, topics.length() - 1).replace(
+                    "\"", "").split(",");
 
-                    if (expectedTopics.isEmpty()) {
-                        break;
-                    }
+                expectedTopics.removeAll(Arrays.asList(topicArray));
+
+                if (expectedTopics.isEmpty()) {
+                    break;
                 }
-
-                Thread.sleep(sleep * (i + 1));
             }
+
+            Thread.sleep(sleep * (i + 1));
         }
 
         assertEquals("missing " + expectedTopics, 0, expectedTopics.size());
@@ -254,7 +260,7 @@ public class EndToEndTest {
         for (MockDataConfig config : expectedCount.keySet()) {
             MockDataConfig updatedConfig = new MockDataConfig();
             updatedConfig.setSensor(config.getSensor());
-            updatedConfig.setMaximumDifference(Double.valueOf("1e-2"));
+            updatedConfig.setMaximumDifference(Double.parseDouble("1e-2"));
 
             Dataset dataset = Utility.cloneDataset(expectedCount.get(config));
 
@@ -314,7 +320,7 @@ public class EndToEndTest {
 
         for (MockDataConfig config : expectedValue.keySet()) {
             map.put(config, expectedDataSetFactory.getDataset(
-                    expectedValue.get(config), PROJECT_NAME_MOCK, USER_ID_MOCK, SOURCE_ID_MOCK,
+                    expectedValue.get(config), MOCK_KEY,
                     "EMPATICA",
                     getSensorType(config), stat, TIME_WINDOW));
         }
@@ -325,7 +331,7 @@ public class EndToEndTest {
     /**
      * Streams data stored in CSV files into Kafka.
      */
-    private void streamToKafka() throws IOException, InterruptedException {
+    private void streamToKafka() throws IOException, InterruptedException, SchemaValidationException {
         LOGGER.info("Streaming data into Kafka ...");
         MockProducer producer = new MockProducer(pipelineConfig, dataRoot);
         producer.start();

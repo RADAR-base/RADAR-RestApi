@@ -7,9 +7,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 import net.minidev.json.annotate.JsonIgnore;
-import org.radarcns.config.Properties;
-import org.radarcns.config.ServerConfig;
-import org.radarcns.config.YamlConfigLoader;
+import org.radarbase.config.ServerConfig;
+import org.radarbase.config.YamlConfigLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,11 +74,11 @@ public class RestApiDetails {
     public static RestApiDetails getRestApiClientDetails() {
         if (instance == null) {
             String path = Objects
-                    .requireNonNull(Properties.class.getClassLoader().getResource(CONFIG_FILE_NAME))
+                    .requireNonNull(RestApiDetails.class.getClassLoader().getResource(CONFIG_FILE_NAME))
                     .getFile();
             LOGGER.info("Loading RestAPI client Config file located at : {}", path);
             try {
-                instance = new YamlConfigLoader().load(new File(path), RestApiDetails.class);
+                instance = new YamlConfigLoader().load(new File(path).toPath(), RestApiDetails.class);
             } catch (IOException e) {
                 LOGGER.error("Cannot load rest-api client details, returning default configs");
                 RestApiDetails restApiDetails = new RestApiDetails();

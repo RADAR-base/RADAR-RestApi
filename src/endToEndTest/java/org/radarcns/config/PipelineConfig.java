@@ -17,7 +17,8 @@
 package org.radarcns.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.radarcns.mock.config.BasicMockConfig;
+import org.radarbase.config.ServerConfig;
+import org.radarbase.mock.config.BasicMockConfig;
 
 public class PipelineConfig extends BasicMockConfig {
 

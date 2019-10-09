@@ -33,12 +33,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import org.radarcns.auth.NeedsPermissionOnProject;
-import org.radarcns.auth.NeedsPermissionOnSubject;
+import org.radarbase.jersey.auth.Authenticated;
+import org.radarbase.jersey.auth.NeedsPermission;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.domain.restapi.Subject;
 import org.radarcns.service.SubjectService;
-import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
@@ -64,7 +63,7 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Project not found")
-    @NeedsPermissionOnProject(entity = Entity.SUBJECT, operation = READ)
+    @NeedsPermission(entity = Entity.SUBJECT, operation = READ, projectPathParam = PROJECT_NAME)
     public List<Subject> getAllSubjectsJsonFromStudy(
             @PathParam(PROJECT_NAME) String projectName) throws IOException {
         return subjectService.getAllSubjectsFromProject(projectName);
@@ -87,7 +86,8 @@ public class SubjectEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Subject cannot be found")
-    @NeedsPermissionOnSubject(entity = Entity.SUBJECT, operation = READ)
+    @NeedsPermission(entity = Entity.SUBJECT, operation = READ,
+            projectPathParam = PROJECT_NAME, userPathParam = SUBJECT_ID)
     public Subject getSubjectJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {

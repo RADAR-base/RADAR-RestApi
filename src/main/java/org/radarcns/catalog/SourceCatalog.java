@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import javax.inject.Inject;
-import javax.servlet.ServletContext;
 import javax.ws.rs.NotFoundException;
 import org.radarcns.domain.managementportal.SourceDataDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
@@ -65,7 +64,7 @@ public class SourceCatalog {
     }
 
     /**
-     * Retrieves all {@link SourceTypeDTO} from Management Portal using {@link ServletContext}
+     * Retrieves all {@link SourceTypeDTO} from Management Portal
      * entity.
      *
      * @return {@link ArrayList} of {@link SourceTypeDTO} retrieved from the Management Portal
@@ -75,7 +74,7 @@ public class SourceCatalog {
     }
 
     /**
-     * Retrieves a {@link SourceTypeDTO} from the Management Portal using {@link ServletContext}
+     * Retrieves a {@link SourceTypeDTO} from the Management Portal
      * entity.
      *
      * @param producer {@link String} of the Source-type that has to be retrieved
@@ -95,7 +94,7 @@ public class SourceCatalog {
 
 
     /**
-     * Retrieves a {@link SourceDataDTO} from the Management Portal using {@link ServletContext}
+     * Retrieves a {@link SourceDataDTO} from the Management Portal
      * entity.
      *
      * @param sourceDataName {@link String} of the Source-Data that has to be retrieved

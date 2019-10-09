@@ -6,19 +6,17 @@ plugins {
 group 'org.radarcns'
 version '0.2.2-SNAPSHOT'
 
-targetCompatibility = '1.8'
-sourceCompatibility = '1.8'
+targetCompatibility = '11'
+sourceCompatibility = '11'
 
-ext.grizzly = '2.4.3'
-ext.jersey = '2.27'
+ext.radarAuthVersion = '0.2.1-SNAPSHOT'
+ext.radarMpVersion = '0.5.7'
 ext.junitVersion = '4.12'
 ext.hamcrestVersion = '1.3'
 ext.logback = '1.2.2'
 ext.mongodb = '3.6.0'
-ext.radarCommons = '0.7'
+ext.radarCommons = '0.12.2'
 ext.swagger = '2.0.0-rc4'
-ext.tomcat = '8.0.47'
-ext.radarAuthVersion = '0.4.0'
 ext.wireMockVersion = '2.5.1'
 ext.jacksonVersion = '2.9.3'
 ext.mockitoVersion = '2.2.29'
@@ -35,34 +33,30 @@ repositories {
     jcenter()
     // Non-jcenter radar releases
     maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
+    // Non-jcenter radar releases
+    maven { url 'https://dl.bintray.com/radar-base/org.radarbase' }
     // For working with dev-branches
     maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
     // Github code
     maven { url 'https://jitpack.io' }
+    maven { url "https://repo.thehyve.nl/content/repositories/snapshots" }
 }
 
 dependencies {
     // TODO: Reduce dependencies to the minimum
-    compile group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: grizzly
+    compile group: 'org.radarbase', name: 'radar-jersey', version: radarAuthVersion
 
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: jersey
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-servlet', version: jersey
-    compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jersey
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodb
 
     // TODO: Add back swagger support
     compile group: 'io.swagger.core.v3', name: 'swagger-jaxrs2', version: swagger
 
-    compile group: 'org.radarcns', name: 'radar-commons', version: radarCommons
+    compile group: 'org.radarbase', name: 'radar-commons', version: radarCommons
+    compile group: 'org.radarcns', name: 'oauth-client-util', version: radarMpVersion
 
-    compile group: 'org.radarcns', name: 'oauth-client-util', version: radarAuthVersion
-    compile group: 'org.radarcns', name: 'radar-auth', version: radarAuthVersion
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
-    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version:
-            jacksonVersion
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
-
-    runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jersey
 
     runtimeOnly group: 'ch.qos.logback', name:'logback-core', version: logback
     runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logback

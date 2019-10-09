@@ -22,7 +22,7 @@ import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MAXIMUM;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.MINIMUM;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.QUARTILES;
 import static org.radarcns.domain.restapi.header.DescriptiveStatistic.SUM;
-import static org.radarcns.mock.model.ExpectedValue.DURATION;
+import static org.radarbase.mock.model.ExpectedValue.DURATION;
 import static org.radarcns.mongo.util.MongoHelper.END;
 import static org.radarcns.mongo.util.MongoHelper.FIELDS;
 import static org.radarcns.mongo.util.MongoHelper.ID;
@@ -43,10 +43,11 @@ import java.util.Map;
 import org.bson.Document;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
-import org.radarcns.mock.model.ExpectedValue;
+import org.radarbase.mock.model.ExpectedValue;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.mongo.util.MongoHelper.Stat;
-import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarbase.stream.collector.AggregateListCollector;
+import org.radarbase.stream.collector.NumericAggregateCollector;
 import org.radarcns.util.TimeScale;
 
 /**
@@ -54,22 +55,20 @@ import org.radarcns.util.TimeScale;
  */
 public class ExpectedDocumentFactory {
 
-    //private static final Logger LOGGER = LoggerFactory.getLogger(ExpectedDocumentFactory.class);
-
     /**
      * It return the value of the given statistical function.
      *
      * @param statistic function that has to be returned
      * @param collectors array of aggregated data
      * @return the set of values that has to be stored within a {@code Dataset} {@code Item}
-     * @see DoubleValueCollector
+     * @see NumericAggregateCollector
      **/
     public List<?> getStatValue(DescriptiveStatistic statistic,
-            DoubleArrayCollector collectors) {
+            AggregateListCollector collectors) {
 
-        List<DoubleValueCollector> subCollectors = collectors.getCollectors();
+        List<NumericAggregateCollector> subCollectors = collectors.getCollectors();
         List<Object> subList = new ArrayList<>(subCollectors.size());
-        for (DoubleValueCollector collector : subCollectors) {
+        for (NumericAggregateCollector collector : subCollectors) {
             subList.add(getStatValue(statistic, collector));
         }
         return subList;
@@ -81,16 +80,16 @@ public class ExpectedDocumentFactory {
      * @param statistic function that has to be returned
      * @param collector data aggregator
      * @return the value that has to be stored within a {@code Dataset} {@code Item}
-     * @see DoubleValueCollector
+     * @see NumericAggregateCollector
      **/
-    public Object getStatValue(DescriptiveStatistic statistic, DoubleValueCollector collector) {
+    public Object getStatValue(DescriptiveStatistic statistic, NumericAggregateCollector collector) {
         switch (statistic) {
             case AVERAGE:
-                return collector.getAvg();
+                return collector.getMean();
             case COUNT:
                 return collector.getCount();
             case INTERQUARTILE_RANGE:
-                return collector.getIqr();
+                return collector.getInterQuartileRange();
             case MAXIMUM:
                 return collector.getMax();
             case MEDIAN:
@@ -103,13 +102,14 @@ public class ExpectedDocumentFactory {
                 return collector.getSum();
             default:
                 throw new IllegalArgumentException(
-                        statistic.toString() + " is not supported by DoubleValueCollector");
+                        statistic.toString() + " is not supported by NumericAggregateCollector");
         }
     }
 
 
-    private List<Document> getDocumentsBySingle(ExpectedValue<?> expectedValue,
-            TimeWindow timeWindow) {
+    private List<Document> getDocumentsBySingle(ObservationKey key,
+        ExpectedValue<?> expectedValue,
+        TimeWindow timeWindow) {
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
@@ -117,21 +117,19 @@ public class ExpectedDocumentFactory {
         List<Document> list = new ArrayList<>(windows.size());
 
         for (Long timestamp : windows) {
-            DoubleValueCollector doubleValueCollector = (DoubleValueCollector) expectedValue
+            NumericAggregateCollector doubleValueCollector = (NumericAggregateCollector) expectedValue
                     .getSeries().get(timestamp);
             Instant start = Instant.ofEpochMilli(timestamp);
             Instant end = start.plus(TimeScale.getDuration(timeWindow));
-            list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
-                    expectedValue.getLastKey().getUserId(),
-                    expectedValue.getLastKey().getSourceId(), start, end,
-                    getDocumentFromDoubleValueCollector("batteryLevel", doubleValueCollector)));
+            list.add(buildDocument(key, start, end,
+                    getDocumentFromNumericAggregateCollector("batteryLevel", doubleValueCollector)));
         }
 
         return list;
     }
 
-    private Document getDocumentFromDoubleValueCollector(String name,
-            DoubleValueCollector doubleValueCollector) {
+    private Document getDocumentFromNumericAggregateCollector(String name,
+            NumericAggregateCollector doubleValueCollector) {
         return new Document()
                 .append(NAME, name)
                 .append(Stat.min.getParam(), getStatValue(MINIMUM, doubleValueCollector))
@@ -142,11 +140,10 @@ public class ExpectedDocumentFactory {
                 .append(Stat.quartile.getParam(), getStatValue(QUARTILES, doubleValueCollector));
     }
 
-    private static Document buildKeyDocument(String projectName, String subjectId, String sourceId,
-            Instant start, Instant end) {
-        return new Document().append(PROJECT_ID, projectName)
-                .append(USER_ID, subjectId)
-                .append(SOURCE_ID, sourceId)
+    private static Document buildKeyDocument(ObservationKey key, Instant start, Instant end) {
+        return new Document().append(PROJECT_ID, key.getProjectId())
+                .append(USER_ID, key.getUserId())
+                .append(SOURCE_ID, key.getSourceId())
                 .append(START, Date.from(start))
                 .append(END, Date.from(end));
     }
@@ -154,27 +151,25 @@ public class ExpectedDocumentFactory {
     /**
      * Builds a {@link Document} from given parameter values.
      *
-     * @param projectName of the subject
-     * @param subjectId of the subject
-     * @param sourceId of the source
+     * @param key record key
      * @param start of the measurement
      * @param end of the measurement
      * @param value document
      * @return built document
      */
-    public static Document buildDocument(String projectName, String subjectId, String sourceId,
+    public static Document buildDocument(ObservationKey key,
             Instant start, Instant end, Document value) {
-        return new Document().append(ID, buildId(projectName, subjectId, sourceId, start, end))
-                .append(KEY, buildKeyDocument(projectName, subjectId, sourceId, start, end))
+        return new Document().append(ID, buildId(key, start, end))
+                .append(KEY, buildKeyDocument(key, start, end))
                 .append(VALUE, value);
     }
 
-    private static String buildId(String projectName, String subjectId, String sourceId,
+    private static String buildId(ObservationKey key,
             Instant start, Instant end) {
         return '{'
-                + PROJECT_ID + ':' + projectName + ','
-                + USER_ID + ':' + subjectId + ','
-                + SOURCE_ID + ':' + sourceId + ','
+                + PROJECT_ID + ':' + key.getProjectId() + ','
+                + USER_ID + ':' + key.getUserId() + ','
+                + SOURCE_ID + ':' + key.getSourceId() + ','
                 + START + ':' + (start.toEpochMilli() / 1000d) + ','
                 + END + ':' + (end.toEpochMilli() / 1000d) + '}';
     }
@@ -191,7 +186,8 @@ public class ExpectedDocumentFactory {
      */
     public static Document getDocumentsForStatistics(String projectName, String subjectId,
             String sourceId, Instant start, Instant end) {
-        return new Document().append(ID, buildId(projectName, subjectId, sourceId, start, end))
+        ObservationKey key = new ObservationKey(projectName, subjectId, sourceId);
+        return new Document().append(ID, buildId(key, start, end))
                 .append(KEY, buildObservationKeyDocument(projectName, subjectId, sourceId))
                 .append(VALUE, new Document()
                         .append(START, Date.from(start))
@@ -205,7 +201,8 @@ public class ExpectedDocumentFactory {
                 .append(SOURCE_ID, sourceId);
     }
 
-    private List<Document> getDocumentsByArray(ExpectedValue<?> expectedValue) {
+    private List<Document> getDocumentsByArray(ObservationKey key,
+        ExpectedValue<?> expectedValue) {
 
         List<Long> windows = new ArrayList<>(expectedValue.getSeries().keySet());
         Collections.sort(windows);
@@ -213,26 +210,24 @@ public class ExpectedDocumentFactory {
         List<Document> list = new ArrayList<>(windows.size());
 
         for (Long timestamp : windows) {
-            DoubleArrayCollector doubleArrayCollector = (DoubleArrayCollector) expectedValue
+            AggregateListCollector doubleArrayCollector = (AggregateListCollector) expectedValue
                     .getSeries().get(timestamp);
 
             List<Document> documents = new ArrayList<>();
 
             documents.add(
-                    getDocumentFromDoubleValueCollector("x",
+                    getDocumentFromNumericAggregateCollector("x",
                             doubleArrayCollector.getCollectors().get(0)));
             documents.add(
-                    getDocumentFromDoubleValueCollector("y",
+                    getDocumentFromNumericAggregateCollector("y",
                             doubleArrayCollector.getCollectors().get(1)));
             documents.add(
-                    getDocumentFromDoubleValueCollector("z",
+                    getDocumentFromNumericAggregateCollector("z",
                             doubleArrayCollector.getCollectors().get(2)));
 
             long end = timestamp + DURATION;
 
-            list.add(buildDocument(expectedValue.getLastKey().getProjectId(),
-                    expectedValue.getLastKey().getUserId(),
-                    expectedValue.getLastKey().getSourceId(),
+            list.add(buildDocument(key,
                     Instant.ofEpochMilli(timestamp),
                     Instant.ofEpochMilli(end),
                     new Document().append(FIELDS, documents)));
@@ -244,20 +239,23 @@ public class ExpectedDocumentFactory {
     /**
      * Produces {@link List} of {@link Document}s for given {@link ExpectedValue}.
      *
+     *
+     * @param key
      * @param expectedValue for test
      * @return {@link List} of {@link Document}s
      */
-    public List<Document> produceExpectedDocuments(ExpectedValue<?> expectedValue, TimeWindow
-            timeWindow) {
+    public List<Document> produceExpectedDocuments(ObservationKey key,
+        ExpectedValue<?> expectedValue, TimeWindow
+        timeWindow) {
         Map<Long, ?> series = expectedValue.getSeries();
         if (series.isEmpty()) {
             return Collections.emptyList();
         }
         Object firstCollector = series.values().iterator().next();
-        if (firstCollector instanceof DoubleArrayCollector) {
-            return getDocumentsByArray(expectedValue);
+        if (firstCollector instanceof AggregateListCollector) {
+            return getDocumentsByArray(key, expectedValue);
         } else {
-            return getDocumentsBySingle(expectedValue, timeWindow);
+            return getDocumentsBySingle(key, expectedValue, timeWindow);
         }
     }
 }

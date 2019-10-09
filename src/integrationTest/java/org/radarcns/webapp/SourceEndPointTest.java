@@ -45,11 +45,12 @@ import org.radarcns.domain.restapi.Source;
 import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
+import org.radarcns.integration.util.Utility;
 
 public class SourceEndPointTest {
 
     @Rule
-    public final MongoRule mongoRule = new MongoRule();
+    public final MongoRule mongoRule = new MongoRule(Utility.getConfig());
 
     @Rule
     public final ApiClient apiClient = new ApiClient(

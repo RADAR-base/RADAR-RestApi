@@ -39,6 +39,7 @@ import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
+import org.radarcns.integration.util.Utility;
 import org.radarcns.util.TimeScale;
 import org.radarcns.webapp.param.DataAggregateParam;
 import org.radarcns.webapp.resource.Parameter;
@@ -50,7 +51,7 @@ public class AggregatedDataPointsEndPointTest {
                     + AGGREGATE + '/');
 
     @Rule
-    public final MongoRule mongoRule = new MongoRule();
+    public final MongoRule mongoRule = new MongoRule(Utility.getConfig());
 
     @Test
     public void getAllRecordsWithAggregatedDataPointsInTimeRange() throws IOException {

@@ -39,7 +39,8 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 
     integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: wireMockVersion
-    integrationTestImplementation group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommons
+    integrationTestImplementation group: 'org.radarbase', name: 'radar-commons-testing', version: radarCommons
+    endToEndTestImplementation group: 'org.radarbase', name: 'radar-commons-testing', version: radarCommons
     integrationTestRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
 }
 

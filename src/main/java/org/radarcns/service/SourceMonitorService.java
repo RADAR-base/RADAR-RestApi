@@ -21,7 +21,6 @@ import static org.radarcns.mongo.util.MongoHelper.END;
 import static org.radarcns.mongo.util.MongoHelper.START;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import javax.inject.Inject;
@@ -29,6 +28,7 @@ import org.bson.Document;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.mongo.util.MongoWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,13 +39,15 @@ public class SourceMonitorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceMonitorService.class);
 
-    private final MongoClient mongoClient;
+    private final MongoWrapper mongoClient;
 
     /**
      * Constructor.
      **/
     @Inject
-    public SourceMonitorService(MongoClient mongoClient) {
+    public SourceMonitorService(
+        MongoWrapper mongoClient
+    ) {
         this.mongoClient = mongoClient;
     }
 
@@ -63,8 +65,8 @@ public class SourceMonitorService {
     public TimeFrame getEffectiveTimeFrame(String projectId, String subjectId,
             String sourceId, SourceTypeDTO sourceType) {
 
-        MongoCollection<Document> collection = MongoHelper.getCollection(
-                this.mongoClient, sourceType.getSourceStatisticsMonitorTopic());
+        MongoCollection<Document> collection = mongoClient.getCollection(
+                sourceType.getSourceStatisticsMonitorTopic());
 
         try (MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(collection,
                 projectId, subjectId, sourceId, null, ASCENDING, null)) {

@@ -5,10 +5,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import org.radarcns.catalog.SourceCatalog;
+import org.radarcns.config.ApplicationConfig;
 import org.radarcns.domain.managementportal.MinimalSourceDetailsDTO;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
@@ -30,6 +32,7 @@ public class SourceService {
     private final ManagementPortalClient managementPortalClient;
 
     private static final Duration DEFAULT_SOURCE_CONNECTION_TIMEOUT = Duration.ofHours(6);
+    private final Map<String, String> timeouts;
 
     /**
      * Default constructor. Injects all dependencies for the class.
@@ -40,7 +43,8 @@ public class SourceService {
      */
     @Inject
     public SourceService(SourceMonitorService sourceMonitorService, SourceCatalog sourceCatalog,
-            ManagementPortalClient managementPortalClient) {
+            ManagementPortalClient managementPortalClient, ApplicationConfig config) {
+        this.timeouts = config.getSourceTypeConnectionTimeout();
         this.sourceMonitorService = sourceMonitorService;
         this.sourceCatalog = sourceCatalog;
         this.managementPortalClient = managementPortalClient;
@@ -158,11 +162,9 @@ public class SourceService {
             // convert to lower case to produce key
             String sourceTypeKey = (producer + "_" + model).toLowerCase();
             Duration timeout = DEFAULT_SOURCE_CONNECTION_TIMEOUT;
-            if (org.radarcns.config.Properties.getApiConfig().getSourceTypeConnectionTimeout()
-                    .containsKey(sourceTypeKey)) {
+            if (timeouts.containsKey(sourceTypeKey)) {
                 // use configured timeout if specified
-                timeout = Duration.parse(org.radarcns.config.Properties.getApiConfig()
-                        .getSourceTypeConnectionTimeout().get(sourceTypeKey));
+                timeout = Duration.parse(timeouts.get(sourceTypeKey));
             }
             return (Instant.now().minus(timeout).isBefore(effectiveTimeFrame.getEndDateTime()))
                     ? SourceStatus.CONNECTED : SourceStatus.DISCONNECTED;

@@ -19,11 +19,11 @@ package org.radarcns.service;
 import static org.radarcns.domain.restapi.header.MonitorHeader.MonitorCategory.PASSIVE;
 import static org.radarcns.domain.restapi.header.MonitorHeader.MonitorCategory.QUESTIONNAIRE;
 
-import com.mongodb.MongoClient;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.inject.Inject;
+import org.radarcns.config.ApplicationConfig;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.restapi.header.MonitorHeader;
 import org.radarcns.domain.restapi.monitor.ApplicationStatus;
@@ -34,6 +34,7 @@ import org.radarcns.mongo.data.monitor.application.ApplicationStatusServerStatus
 import org.radarcns.mongo.data.monitor.application.ApplicationStatusUpTime;
 import org.radarcns.mongo.data.monitor.application.MongoApplicationStatusWrapper;
 import org.radarcns.mongo.data.monitor.questionnaire.QuestionnaireCompletionLogWrapper;
+import org.radarcns.mongo.util.MongoWrapper;
 
 /**
  * Data Access Object for Source Status values.
@@ -51,7 +52,10 @@ public class SourceStatusMonitorService {
      * Default constructor. Initiates all the delegate classes to compute Source Status.
      */
     @Inject
-    public SourceStatusMonitorService(ManagementPortalClient managementPortalClient) {
+    public SourceStatusMonitorService(
+            ManagementPortalClient managementPortalClient,
+            ApplicationConfig config
+    ) {
         this.managementPortalClient = managementPortalClient;
         dataAccessObjects = new LinkedList<>();
         dataAccessObjects.add(new ApplicationStatusUpTime());
@@ -71,7 +75,7 @@ public class SourceStatusMonitorService {
      * @return {@code MonitorData} representing the status of the related source
      */
     public MonitorData getStatus(String projectName, String subjectId, String sourceId,
-            MongoClient client) throws IOException {
+            MongoWrapper client) throws IOException {
 
         MonitorHeader header = (MonitorHeader) new MonitorHeader()
                 .projectId(projectName)

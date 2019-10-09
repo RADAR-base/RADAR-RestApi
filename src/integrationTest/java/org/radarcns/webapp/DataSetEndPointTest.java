@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
+import jdk.jshell.execution.Util;
 import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
@@ -61,6 +62,7 @@ import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RandomInput;
 import org.radarcns.integration.util.RestApiDetails;
+import org.radarcns.integration.util.Utility;
 import org.radarcns.util.TimeScale;
 import org.radarcns.webapp.resource.Parameter;
 
@@ -75,7 +77,7 @@ public class DataSetEndPointTest {
                     + DATA + '/');
 
     @Rule
-    public final MongoRule mongoRule = new MongoRule();
+    public final MongoRule mongoRule = new MongoRule(Utility.getConfig());
 
     @Test
     public void getRecordsInTenSecondsWindow() throws IOException {

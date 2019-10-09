@@ -18,7 +18,6 @@ package org.radarcns.service;
 
 import static org.radarcns.util.ThrowingFunction.tryOrRethrow;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import java.io.IOException;
 import java.time.Instant;
@@ -27,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.bson.Document;
+import org.radarbase.jersey.exception.HttpBadGatewayException;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.managementportal.SourceDataDTO;
@@ -42,10 +42,9 @@ import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.mongo.data.passive.SourceDataMongoWrapper;
-import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.mongo.util.MongoWrapper;
 import org.radarcns.util.RadarConverter;
 import org.radarcns.util.TimeScale;
-import org.radarcns.webapp.exception.BadGatewayException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,14 +58,14 @@ public class DataSetService {
 
     private final SourceCatalog sourceCatalog;
 
-    private final MongoClient mongoClient;
+    private final MongoWrapper mongoClient;
 
     /**
      * Constructor.
      **/
     @Inject
     public DataSetService(SourceCatalog sourceCatalog,
-            ManagementPortalClient managementPortalClient, MongoClient mongoClient) {
+            ManagementPortalClient managementPortalClient, MongoWrapper mongoClient) {
         this.managementPortalClient = managementPortalClient;
         this.sourceCatalog = sourceCatalog;
         this.mongoClient = mongoClient;
@@ -140,7 +139,7 @@ public class DataSetService {
 
         return sourceData.getLatestRecord(projectName, subjectId, sourceId, header,
                 RadarConverter.getMongoStat(stat),
-                MongoHelper.getCollection(mongoClient, sourceData.getCollectionName(timeWindow)));
+                mongoClient.getCollection(sourceData.getCollectionName(timeWindow)));
     }
 
     /**
@@ -168,7 +167,7 @@ public class DataSetService {
                 source.getSourceTypeIdentifier().toString());
 
         return sourceData.getAllRecordsInWindow(
-                MongoHelper.getCollection(mongoClient, sourceData.getCollectionName(timeScale)),
+                mongoClient.getCollection(sourceData.getCollectionName(timeScale)),
                 projectName, subjectId, sourceId, header, RadarConverter.getMongoStat(stat),
                 timeScale.getTimeFrame());
     }
@@ -224,7 +223,7 @@ public class DataSetService {
                 }
             }
         } catch (IOException exe) {
-            throw new BadGatewayException(exe);
+            throw new HttpBadGatewayException(exe.toString());
         }
 
         List<DataItem> dataItems = timeScale.streamIntervals()
@@ -247,10 +246,10 @@ public class DataSetService {
         int count = aggregateDataSources.stream()
                 .mapToInt(aggregate -> (int) aggregate.getSourceData().stream()
                         .map(tryOrRethrow(s -> this.sourceCatalog.getSourceDataWrapper(s.getName()),
-                                BadGatewayException::new))
+                                ex -> new HttpBadGatewayException(ex.toString())))
                         .filter(wrapper -> {
-                            MongoCollection<Document> collection = MongoHelper.getCollection(
-                                    mongoClient, wrapper.getCollectionName(timeWindow));
+                            MongoCollection<Document> collection = mongoClient.getCollection(
+                                    wrapper.getCollectionName(timeWindow));
 
                             return wrapper.anyRecordsExist(collection, projectName, subjectId,
                                     aggregate.getSourceId(), timeFrame);

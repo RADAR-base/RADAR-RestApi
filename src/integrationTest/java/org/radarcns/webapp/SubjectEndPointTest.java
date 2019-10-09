@@ -43,6 +43,7 @@ import org.radarcns.domain.restapi.Subject;
 import org.radarcns.integration.MongoRule;
 import org.radarcns.integration.util.ApiClient;
 import org.radarcns.integration.util.RestApiDetails;
+import org.radarcns.integration.util.Utility;
 import org.radarcns.webapp.resource.BasePath;
 
 public class SubjectEndPointTest {
@@ -52,7 +53,7 @@ public class SubjectEndPointTest {
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
     @Rule
-    public final MongoRule mongoRule = new MongoRule();
+    public final MongoRule mongoRule = new MongoRule(Utility.getConfig());
 
     @Test
     public void getSubjectsByProjectName200() throws IOException {

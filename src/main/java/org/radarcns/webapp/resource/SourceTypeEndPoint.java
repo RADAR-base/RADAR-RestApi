@@ -17,10 +17,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import org.radarcns.auth.NeedsPermission;
+import org.radarbase.jersey.auth.Authenticated;
+import org.radarbase.jersey.auth.NeedsPermission;
 import org.radarcns.catalog.SourceCatalog;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
-import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 @Authenticated

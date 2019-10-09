@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Map;
 import javax.ws.rs.core.Response.Status;
 
+import jdk.jshell.execution.Util;
 import org.bson.Document;
 import org.junit.Rule;
 import org.junit.Test;
@@ -51,7 +52,7 @@ public class AppStatusEndPointTest {
             RestApiDetails.getRestApiClientDetails().getApplicationConfig().getUrlString());
 
     @Rule
-    public final MongoRule mongoRule = new MongoRule();
+    public final MongoRule mongoRule = new MongoRule(Utility.getConfig());
 
     @Test
     public void getStatusTest200Unknown() throws IOException {

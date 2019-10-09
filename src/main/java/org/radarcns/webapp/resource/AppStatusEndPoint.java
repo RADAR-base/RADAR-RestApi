@@ -24,7 +24,6 @@ import static org.radarcns.webapp.resource.Parameter.PROJECT_NAME;
 import static org.radarcns.webapp.resource.Parameter.SOURCE_ID;
 import static org.radarcns.webapp.resource.Parameter.SUBJECT_ID;
 
-import com.mongodb.MongoClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
@@ -34,12 +33,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.radarcns.auth.NeedsPermissionOnSubject;
+import org.radarbase.jersey.auth.Authenticated;
+import org.radarbase.jersey.auth.NeedsPermission;
 import org.radarcns.domain.restapi.monitor.MonitorData;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
+import org.radarcns.mongo.util.MongoWrapper;
 import org.radarcns.service.SourceStatusMonitorService;
 import org.radarcns.service.SubjectService;
-import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
@@ -50,7 +50,7 @@ import org.radarcns.webapp.validation.Alphanumeric;
 public class AppStatusEndPoint {
 
     @Inject
-    private MongoClient mongoClient;
+    private MongoWrapper mongoClient;
 
     @Inject
     private ManagementPortalClient mpClient;
@@ -78,7 +78,8 @@ public class AppStatusEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "project, subject or source not found.")
-    @NeedsPermissionOnSubject(entity = SOURCE, operation = READ)
+    @NeedsPermission(entity = SOURCE, operation = READ,
+        projectPathParam = PROJECT_NAME, userPathParam = SUBJECT_ID)
     public MonitorData getLastReceivedAppStatusJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,

@@ -10,12 +10,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
+import org.radarbase.jersey.exception.HttpBadGatewayException;
 import org.radarcns.domain.managementportal.SubjectDTO;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.domain.restapi.Subject;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.webapp.exception.BadGatewayException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +96,7 @@ public class SubjectService {
         // returns NotFound if a project is not available
         this.managementPortalClient.getProject(projectName);
         return this.managementPortalClient.getAllSubjectsFromProject(projectName).stream()
-                .map(tryOrRethrow(this::buildSubject, BadGatewayException::new))
+                .map(tryOrRethrow(this::buildSubject, ex -> new HttpBadGatewayException(ex.toString())))
                 .collect(Collectors.toList());
     }
 

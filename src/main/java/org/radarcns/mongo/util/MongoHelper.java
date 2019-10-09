@@ -22,7 +22,6 @@ import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lt;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -37,7 +36,6 @@ import java.util.Map;
 import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.radarcns.config.Properties;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,18 +180,6 @@ public class MongoHelper {
                 eq(KEY + "." + SOURCE_ID, sourceId),
                 gte(KEY + "." + START, Date.from(timeFrame.getStartDateTime())),
                 lt(KEY + "." + START, Date.from(timeFrame.getEndDateTime())));
-    }
-
-    /**
-     * Returns the needed MongoDB collection.
-     *
-     * @param client the MongoDB client
-     * @param collection is the name of the returned connection
-     * @return the MongoDB collection named collection.
-     */
-    public static MongoCollection<Document> getCollection(MongoClient client, String collection) {
-        return client.getDatabase(Properties.getApiConfig().getMongoDbName())
-                .getCollection(collection);
     }
 
     /**

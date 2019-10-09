@@ -3,12 +3,12 @@ package org.radarcns.mongo.data.monitor.questionnaire;
 import static org.radarcns.mongo.util.MongoHelper.ASCENDING;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.radarcns.domain.restapi.monitor.QuestionnaireCompletionStatus;
 import org.radarcns.mongo.data.monitor.application.MongoApplicationStatusWrapper;
 import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.mongo.util.MongoWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,6 @@ public class QuestionnaireCompletionLogWrapper {
 
     public static final String QUESTIONNAIRE_COMPLETION_LOG_COLLECTION =
             "questionnaire-completion-log";
-
 
     /**
      * Returns an {@code QuestionnaireCompletionStatus} initialised with the extracted value.
@@ -30,10 +29,11 @@ public class QuestionnaireCompletionLogWrapper {
      * @return the last recorded value of questionnaire-completion-log, otherwise null
      */
     public QuestionnaireCompletionStatus valueByProjectSubjectSource(String project, String subject,
-            String source, MongoClient client) {
+            String source, MongoWrapper client) {
 
         MongoCursor<Document> cursor = MongoHelper.findDocumentBySource(
-                MongoHelper.getCollection(client, QUESTIONNAIRE_COMPLETION_LOG_COLLECTION), project,
+                client.getCollection(QUESTIONNAIRE_COMPLETION_LOG_COLLECTION),
+                project,
                 subject, source, VALUE + ".time", ASCENDING, 1);
 
         if (!cursor.hasNext()) {

@@ -32,6 +32,8 @@ import org.junit.Test;
 import org.radarcns.domain.managementportal.SourceTypeDTO;
 import org.radarcns.domain.restapi.header.TimeFrame;
 import org.radarcns.integration.MongoRule;
+import org.radarcns.integration.util.Utility;
+import org.radarcns.mongo.util.MongoWrapper;
 import org.radarcns.service.SourceMonitorService;
 
 public class SourceMonitorServiceDbTest {
@@ -43,13 +45,13 @@ public class SourceMonitorServiceDbTest {
 
     private static final int WINDOWS = 2;
 
-
     @Rule
-    public final MongoRule mongoRule = new MongoRule();
+    public final MongoRule mongoRule = new MongoRule(Utility.getConfig());
 
-    private static SourceTypeDTO sourceType;
+    private SourceTypeDTO sourceType;
 
-    private static SourceMonitorService monitor;
+    private SourceMonitorService monitor;
+    private MongoWrapper client;
 
     /**
      * Initializes common objects required for the test.
@@ -63,7 +65,8 @@ public class SourceMonitorServiceDbTest {
         sourceType.setCatalogVersion(SOURCETYPE_CATALOGUE_VERSION);
         sourceType.setSourceStatisticsMonitorTopic(MONITOR_STATISTICS_TOPIC);
         sourceType.setSourceTypeScope("PASSIVE");
-        monitor = new SourceMonitorService(mongoRule.getClient());
+        client = mongoRule.getClient();
+        monitor = new SourceMonitorService(client);
     }
 
     @Test
@@ -71,7 +74,7 @@ public class SourceMonitorServiceDbTest {
         Instant start = Instant.now();
         Instant end = start.plusSeconds(60 / (WINDOWS + 1));
         Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, end);
-        MongoCollection<Document> collection = mongoRule.getCollection(
+        MongoCollection<Document> collection = client.getCollection(
                 sourceType.getSourceStatisticsMonitorTopic());
         collection.insertOne(doc);
 
@@ -89,7 +92,7 @@ public class SourceMonitorServiceDbTest {
         Instant later = end.plusSeconds(5);
         Document doc = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, start, end);
         Document second = getDocumentsForStatistics(PROJECT, SUBJECT, SOURCE, earlier, later);
-        MongoCollection<Document> collection = mongoRule.getCollection(
+        MongoCollection<Document> collection = client.getCollection(
                 sourceType.getSourceStatisticsMonitorTopic());
         collection.insertMany(Arrays.asList(doc, second));
 

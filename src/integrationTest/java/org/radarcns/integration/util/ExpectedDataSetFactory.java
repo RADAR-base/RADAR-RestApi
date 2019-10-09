@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.radarbase.mock.model.ExpectedValue;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.DataItem;
 import org.radarcns.domain.restapi.dataset.Dataset;
@@ -31,9 +32,10 @@ import org.radarcns.domain.restapi.header.DataSetHeader;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.domain.restapi.header.Header;
 import org.radarcns.domain.restapi.header.TimeFrame;
-import org.radarcns.mock.model.ExpectedValue;
-import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarbase.mock.model.ExpectedValue;
+import org.radarbase.stream.collector.AggregateListCollector;
+import org.radarbase.stream.collector.NumericAggregateCollector;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.util.TimeScale;
 
 /**
@@ -45,8 +47,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * It computes the {@code Dataset} resulted from the mock data.
      *
      * @param expectedValue mock data used to test
-     * @param subjectId subject identifier
-     * @param sourceId source identifier
+     * @param key record key
      * @param sourceType sourceType that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
@@ -54,11 +55,11 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * @return {@code Dataset} resulted by the simulation
      * @see Dataset
      */
-    public Dataset getDataset(ExpectedValue expectedValue, String projectName, String subjectId,
-            String sourceId, String sourceType, String sensorType, DescriptiveStatistic statistic,
+    public Dataset getDataset(ExpectedValue<?> expectedValue, ObservationKey key,
+            String sourceType, String sensorType, DescriptiveStatistic statistic,
             TimeWindow timeWindow) {
 
-        DataSetHeader header = getHeader(expectedValue, projectName, subjectId, sourceId,
+        DataSetHeader header = getHeader(expectedValue, key,
                 sourceType, sensorType, statistic, timeWindow);
 
         return new Dataset(header, getItem(expectedValue, header));
@@ -68,18 +69,18 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
      * It generates the {@code Header} for the resulting {@code Dataset}.
      *
      * @param expectedValue mock data used to test
-     * @param subjectId subject identifier
-     * @param sourceId source identifier
+     * @param key record key
      * @param sourceType sourceType that has to be simulated
      * @param sensorType sensor that has to be simulated
      * @param statistic function that has to be simulated
      * @param timeWindow time interval between two consecutive samples
      * @return {@link Header} for a {@link Dataset}
      */
-    public DataSetHeader getHeader(ExpectedValue expectedValue, String projectName,
-            String subjectId, String sourceId, String sourceType, String sensorType,
+    public DataSetHeader getHeader(ExpectedValue expectedValue, ObservationKey key,
+            String sourceType, String sensorType,
             DescriptiveStatistic statistic, TimeWindow timeWindow) {
-        return new DataSetHeader(projectName, subjectId, sourceId, sourceType, sensorType,
+        return new DataSetHeader(key.getProjectId(), key.getUserId(), key.getSourceId(),
+                sourceType, sensorType,
                 statistic, null, timeWindow, null,
                 getEffectiveTimeFrame(expectedValue, timeWindow));
     }
@@ -118,10 +119,10 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         Collections.sort(keys);
         Object singleExpectedValue = expectedValue.getSeries().get(keys.get(0));
 
-        if (singleExpectedValue instanceof DoubleArrayCollector) {
+        if (singleExpectedValue instanceof AggregateListCollector) {
             return getArrayItems(expectedValue, keys, header.getDescriptiveStatistic(),
                     header.getSourceDataType());
-        } else if (singleExpectedValue instanceof DoubleValueCollector) {
+        } else if (singleExpectedValue instanceof NumericAggregateCollector) {
             return getSingletonItems(expectedValue, keys, header.getDescriptiveStatistic());
         } else {
             throw new IllegalArgumentException(header.getSourceDataType() + " not supported yet");
@@ -141,7 +142,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         List<DataItem> items = new LinkedList<>();
 
         for (Long key : keys) {
-            DoubleArrayCollector dac = (DoubleArrayCollector) expectedValue.getSeries().get(key);
+            AggregateListCollector dac = (AggregateListCollector) expectedValue.getSeries().get(key);
 
             switch (sensor) {
                 case "EMPATICA_E4_v1_ACCELEROMETER":
@@ -190,7 +191,7 @@ public class ExpectedDataSetFactory extends ExpectedDocumentFactory {
         List<DataItem> items = new LinkedList<>();
 
         for (Long key : keys) {
-            DoubleValueCollector dac = (DoubleValueCollector) expectedValue.getSeries().get(key);
+            NumericAggregateCollector dac = (NumericAggregateCollector) expectedValue.getSeries().get(key);
 
             Object content = getContent(getStatValue(statistic, dac), statistic);
 

@@ -15,10 +15,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.radarcns.auth.NeedsPermission;
+import org.radarbase.jersey.auth.Authenticated;
+import org.radarbase.jersey.auth.NeedsPermission;
 import org.radarcns.domain.managementportal.ProjectDTO;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
-import org.radarcns.webapp.filter.Authenticated;
 
 @Authenticated
 @Path('/' + PROJECTS)

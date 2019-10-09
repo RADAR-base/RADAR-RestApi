@@ -19,11 +19,12 @@ package org.radarcns.mongo.data.monitor.application;
 import static org.radarcns.mongo.util.MongoHelper.ASCENDING;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
+import java.util.Objects;
 import org.bson.Document;
 import org.radarcns.domain.restapi.monitor.ApplicationStatus;
 import org.radarcns.mongo.util.MongoHelper;
+import org.radarcns.mongo.util.MongoWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,14 +41,13 @@ public abstract class MongoApplicationStatusWrapper {
      *
      * @param subject is the subjectID
      * @param source is the sourceID
-     * @param client is the mongoDb client instance
      * @return the last seen status update for the given subject and sourceType, otherwise null
      */
     public ApplicationStatus valueByProjectSubjectSource(String project, String subject,
-            String source, ApplicationStatus app, MongoClient client) {
+            String source, ApplicationStatus app, MongoWrapper wrapper) {
 
         MongoCursor<Document> cursor = MongoHelper
-                .findDocumentBySource(MongoHelper.getCollection(client, getCollectionName()),
+                .findDocumentBySource(wrapper.getCollection(getCollectionName()),
                         project, subject, source, VALUE + ".time", ASCENDING,
                         1);
 
@@ -60,12 +60,8 @@ public abstract class MongoApplicationStatusWrapper {
         Document doc = cursor.next();
         cursor.close();
 
-        if (app == null) {
-            return getApplication((Document) doc.get(VALUE), new ApplicationStatus());
-        }
-
-        return getApplication((Document) doc.get(VALUE), app);
-
+        return getApplication((Document) doc.get(VALUE),
+            Objects.requireNonNullElseGet(app, ApplicationStatus::new));
     }
 
     protected abstract ApplicationStatus getApplication(Document doc, ApplicationStatus app);

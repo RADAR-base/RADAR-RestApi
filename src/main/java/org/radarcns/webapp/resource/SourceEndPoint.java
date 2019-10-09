@@ -35,12 +35,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import org.radarcns.auth.NeedsPermissionOnSubject;
+import org.radarbase.jersey.auth.Authenticated;
+import org.radarbase.jersey.auth.NeedsPermission;
 import org.radarcns.auth.authorization.Permission.Entity;
 import org.radarcns.domain.restapi.Source;
 import org.radarcns.listener.managementportal.ManagementPortalClient;
 import org.radarcns.service.SourceService;
-import org.radarcns.webapp.filter.Authenticated;
 import org.radarcns.webapp.validation.Alphanumeric;
 
 /**
@@ -73,7 +73,8 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Project or Subject cannot be found")
-    @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
+    @NeedsPermission(entity = Entity.SOURCE, operation = READ,
+            projectPathParam = PROJECT_NAME, userPathParam = SUBJECT_ID)
     public List<Source> getAllSourcesJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId) throws IOException {
@@ -99,7 +100,8 @@ public class SourceEndPoint {
     @ApiResponse(responseCode = "401", description = "Access denied error occurred")
     @ApiResponse(responseCode = "403", description = "Not Authorised error occurred")
     @ApiResponse(responseCode = "404", description = "Project, Subject or Source cannot be found")
-    @NeedsPermissionOnSubject(entity = Entity.SOURCE, operation = READ)
+    @NeedsPermission(entity = Entity.SOURCE, operation = READ,
+        projectPathParam = PROJECT_NAME, userPathParam = SUBJECT_ID)
     public Source getLastComputedSourceStatusJson(
             @Alphanumeric @PathParam(PROJECT_NAME) String projectName,
             @Alphanumeric @PathParam(SUBJECT_ID) String subjectId,

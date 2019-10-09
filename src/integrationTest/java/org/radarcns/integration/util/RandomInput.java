@@ -28,21 +28,26 @@ import static org.radarcns.mongo.util.MongoHelper.USER_ID;
 import static org.radarcns.mongo.util.MongoHelper.VALUE;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import org.bson.Document;
+import org.radarbase.data.Record;
 import org.radarcns.domain.restapi.TimeWindow;
 import org.radarcns.domain.restapi.dataset.Dataset;
 import org.radarcns.domain.restapi.header.DescriptiveStatistic;
 import org.radarcns.kafka.ObservationKey;
-import org.radarcns.mock.model.ExpectedArrayValue;
-import org.radarcns.mock.model.ExpectedDoubleValue;
-import org.radarcns.mock.model.ExpectedValue;
+import org.radarbase.mock.model.ExpectedArrayValue;
+import org.radarbase.mock.model.ExpectedDoubleValue;
+import org.radarbase.mock.model.ExpectedValue;
 import org.radarcns.monitor.application.ServerStatus;
-import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarbase.stream.collector.AggregateListCollector;
+import org.radarbase.stream.collector.NumericAggregateCollector;
+import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
+import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
 import org.radarcns.util.TimeScale;
 
 /**
@@ -59,31 +64,40 @@ public class RandomInput {
     private static final ExpectedDataSetFactory expectedDataSetFactory =
             new ExpectedDataSetFactory();
 
-    private static ExpectedValue<DoubleValueCollector> randomDoubleValue(
+    private static ExpectedValue<NumericAggregateCollector> randomDoubleValue(
             ObservationKey key, TimeWindow timeWindow, int numberOfRecords, Instant endTime) {
-        ExpectedDoubleValue instance = new ExpectedDoubleValue();
+        ExpectedDoubleValue instance = new ExpectedDoubleValue(
+            EmpaticaE4BatteryLevel.getClassSchema(),
+            Collections.singletonList("batteryLevel"));
 
         Instant timeStamp = endTime.minus(
                 TimeScale.getSeconds(timeWindow) * numberOfRecords, SECONDS);
         ThreadLocalRandom random = ThreadLocalRandom.current();
         for (int i = 0; i < numberOfRecords; i++) {
-            instance.add(key, timeStamp.toEpochMilli(), random.nextDouble());
+            instance.add(new Record<>(key, new EmpaticaE4BatteryLevel(
+                timeStamp.toEpochMilli() / 1000d,
+                timeStamp.toEpochMilli() / 1000d,
+                random.nextFloat())));
             timeStamp = timeStamp.plus(TimeScale.getDuration(timeWindow));
         }
 
         return instance;
     }
 
-    private static ExpectedValue<DoubleArrayCollector> randomArrayValue(ObservationKey key,
+    private static ExpectedValue<AggregateListCollector> randomArrayValue(ObservationKey key,
             TimeWindow timeWindow, int numberOfRecords, Instant endTime) {
-        ExpectedArrayValue instance = new ExpectedArrayValue();
+        ExpectedArrayValue instance = new ExpectedArrayValue(
+            EmpaticaE4Acceleration.getClassSchema(),
+            Arrays.asList("x", "y", "z"));
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
         Instant timeStamp = endTime.minus(
                 TimeScale.getSeconds(timeWindow) * numberOfRecords, SECONDS);
         for (int i = 0; i < numberOfRecords; i++) {
-            instance.add(key, timeStamp.toEpochMilli(), random.nextDouble(), random.nextDouble(),
-                    random.nextDouble());
+            instance.add(new Record<>(key, new EmpaticaE4Acceleration(
+                    timeStamp.toEpochMilli() / 1000d,
+                    timeStamp.toEpochMilli() / 1000d,
+                    random.nextFloat(), random.nextFloat(), random.nextFloat())));
             timeStamp = timeStamp.plus(TimeScale.getDuration(timeWindow));
         }
 
@@ -128,10 +142,10 @@ public class RandomInput {
                 break;
         }
 
-        Dataset dataset = expectedDataSetFactory.getDataset(expectedValue, key.getProjectId(),
-                key.getUserId(), key.getSourceId(), sourceType, sourceDataName, stat, timeWindow);
+        Dataset dataset = expectedDataSetFactory.getDataset(expectedValue, key,
+                sourceType, sourceDataName, stat, timeWindow);
         List<Document> documents = expectedDocumentFactory.produceExpectedDocuments(
-                expectedValue, timeWindow);
+                key, expectedValue, timeWindow);
 
         Map<String, Object> map = new HashMap<>();
         map.put(DATASET, dataset);

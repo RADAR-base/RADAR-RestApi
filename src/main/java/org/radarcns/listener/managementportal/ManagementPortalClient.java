@@ -29,13 +29,14 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.servlet.ServletContext;
 import javax.ws.rs.NotFoundException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.radarbase.jersey.exception.HttpNotFoundException;
+import org.radarbase.producer.rest.RestClient;
+import org.radarcns.config.ApplicationConfig;
 import org.radarcns.config.ManagementPortalConfig;
-import org.radarcns.config.Properties;
 import org.radarcns.domain.managementportal.ProjectDTO;
 import org.radarcns.domain.managementportal.SourceDTO;
 import org.radarcns.domain.managementportal.SourceDataDTO;
@@ -45,7 +46,6 @@ import org.radarcns.exception.TokenException;
 import org.radarcns.mongo.data.passive.DataFormat;
 import org.radarcns.mongo.data.passive.SourceDataMongoWrapper;
 import org.radarcns.oauth.OAuth2Client;
-import org.radarcns.producer.rest.RestClient;
 import org.radarcns.util.CachedMap;
 import org.radarcns.util.RadarConverter;
 import org.slf4j.Logger;
@@ -80,6 +80,7 @@ public class ManagementPortalClient {
     private final CachedMap<String, SubjectDTO> subjects;
     private final CachedMap<String, ProjectDTO> projects;
     private final CachedMap<String, SourceDTO> sources;
+    private final ManagementPortalConfig mpConfig;
 
 
     /**
@@ -89,12 +90,12 @@ public class ManagementPortalClient {
      * @throws IllegalStateException in case the object cannot be created
      */
     @Inject
-    public ManagementPortalClient(OkHttpClient okHttpClient) {
+    public ManagementPortalClient(ApplicationConfig config, OkHttpClient okHttpClient) {
         this.client = okHttpClient;
 
         Duration invalidate = CACHE_INVALIDATE_DEFAULT;
         Duration retry = CACHE_RETRY_DEFAULT;
-        ManagementPortalConfig mpConfig = Properties.getApiConfig().getManagementPortalConfig();
+        mpConfig = config.getManagementPortalConfig();
 
         if (mpConfig == null) {
             throw new IllegalStateException("ManagementPortal configuration not set");
@@ -154,14 +155,13 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link SubjectDTO} from Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link SubjectDTO} from Management Portal.
      *
      * @return SubjectDTOs retrieved from the Management Portal
      */
     private List<SubjectDTO> retrieveSubjects() throws IOException {
-        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL url = new URL(config.getManagementPortalUrl(),
-                config.getSubjectEndpoint() + WITH_PAGINATION_SIZE);
+        URL url = new URL(mpConfig.getManagementPortalUrl(),
+                mpConfig.getSubjectEndpoint() + WITH_PAGINATION_SIZE);
         Request getAllSubjectsRequest = this.buildGetRequest(url);
         try (Response response = this.client.newCall(getAllSubjectsRequest).execute()) {
             String responseBody = RestClient.responseBody(response);
@@ -204,7 +204,7 @@ public class ManagementPortalClient {
             throws IOException, NotFoundException {
         SubjectDTO subject = getSubject(subjectLogin);
         if (!projectName.equals(subject.getProject().getProjectName())) {
-            throw new NotFoundException(
+            throw new HttpNotFoundException("user_not_found",
                     "Subject " + subjectLogin + " is not part of project " + projectName
                             + ".");
         }
@@ -212,8 +212,7 @@ public class ManagementPortalClient {
 
 
     /**
-     * Retrieves all {@link SubjectDTO} from a study (or project) in the Management Portal using
-     * {@link ServletContext} entity.
+     * Retrieves all {@link SubjectDTO} from a study (or project) in the Management Portal.
      *
      * @param projectName {@link String} the study from which SubjectDTOs to be retrieved
      * @return {@link List} of {@link SubjectDTO} retrieved from the Management Portal
@@ -237,7 +236,7 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link ProjectDTO} from Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link ProjectDTO} from Management Portal.
      *
      * @return {@link ArrayList} of {@link ProjectDTO} retrieved from the Management Portal
      * @throws IOException if the list of projects cannot be retrieved.
@@ -247,14 +246,13 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link ProjectDTO} from Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link ProjectDTO} from Management Portal.
      *
      * @return projects retrieved from the management portal.
      */
     private List<ProjectDTO> retrieveProjects() throws IOException {
-        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL getAllProjectsUrl = new URL(config.getManagementPortalUrl(),
-                config.getProjectEndpoint() + WITH_PAGINATION_SIZE);
+        URL getAllProjectsUrl = new URL(mpConfig.getManagementPortalUrl(),
+                mpConfig.getProjectEndpoint() + WITH_PAGINATION_SIZE);
         Request getAllProjects = this.buildGetRequest(getAllProjectsUrl);
         try (Response response = this.client.newCall(getAllProjects).execute()) {
             String responseBody = RestClient.responseBody(response);
@@ -268,7 +266,7 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves a {@link ProjectDTO} from the Management Portal using {@link ServletContext}
+     * Retrieves a {@link ProjectDTO} from the Management Portal
      * entity.
      *
      * @param projectName {@link String} of the ProjectDTO that has to be retrieved
@@ -285,15 +283,14 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link SourceTypeDTO} from Management Portal using {@link ServletContext}
+     * Retrieves all {@link SourceTypeDTO} from Management Portal
      * entity.
      *
      * @return source-types retrieved from the management portal.
      */
     public List<SourceTypeDTO> retrieveSourceTypes() throws IOException {
-        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL getAllSourceTypesUrl = new URL(config.getManagementPortalUrl(),
-                config.getSourceTypeEndpoint() + WITH_PAGINATION_SIZE);
+        URL getAllSourceTypesUrl = new URL(mpConfig.getManagementPortalUrl(),
+                mpConfig.getSourceTypeEndpoint() + WITH_PAGINATION_SIZE);
         Request getAllSourceTypes = this.buildGetRequest(getAllSourceTypesUrl);
         try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
             String responseBody = RestClient.responseBody(response);
@@ -307,15 +304,14 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link SourceDataDTO} from Management Portal using {@link ServletContext}
+     * Retrieves all {@link SourceDataDTO} from Management Portal
      * entity and creates {@link SourceDataMongoWrapper} around it.
      *
      * @return sourceType-types retrieved from the management portal.
      */
     public List<SourceDataMongoWrapper> retrieveSourceData() throws IOException {
-        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL getAllSourceTypesUrl = new URL(config.getManagementPortalUrl(),
-                config.getSourceDataEndpoint() + WITH_PAGINATION_SIZE);
+        URL getAllSourceTypesUrl = new URL(mpConfig.getManagementPortalUrl(),
+                mpConfig.getSourceDataEndpoint() + WITH_PAGINATION_SIZE);
 
         Request getAllSourceTypes = this.buildGetRequest(getAllSourceTypesUrl);
         try (Response response = this.client.newCall(getAllSourceTypes).execute()) {
@@ -342,14 +338,13 @@ public class ManagementPortalClient {
     }
 
     /**
-     * Retrieves all {@link SourceDTO} from Management Portal using {@link ServletContext} entity.
+     * Retrieves all {@link SourceDTO} from Management Portal.
      *
      * @return SourceDTO retrieved from the Management Portal
      */
     private List<SourceDTO> retrieveSources() throws IOException {
-        ManagementPortalConfig config = Properties.getApiConfig().getManagementPortalConfig();
-        URL url = new URL(config.getManagementPortalUrl(),
-                config.getSourceEndpoint() + WITH_PAGINATION_SIZE);
+        URL url = new URL(mpConfig.getManagementPortalUrl(),
+                mpConfig.getSourceEndpoint() + WITH_PAGINATION_SIZE);
         Request getAllSourcesRequest = this.buildGetRequest(url);
         try (Response response = this.client.newCall(getAllSourcesRequest).execute()) {
             String responseBody = RestClient.responseBody(response);
